@@ -490,6 +490,7 @@ body.light-mode .nav-link:hover {
     justify-content: center;
     align-items: center;
     animation: fadeIn var(--transition-normal);
+    touch-action: none;
 }
 
 .setup-card {
