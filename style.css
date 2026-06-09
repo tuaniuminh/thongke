@@ -942,11 +942,20 @@ body.light-mode .data-table tbody tr:hover {
     
     .main-content {
         margin-left: 0;
-        padding: 1.5rem;
+        padding: 1.25rem 1rem;
     }
     
     .top-header {
         margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .page-title h1 {
+        font-size: 1.6rem;
     }
     
     .table-controls {
@@ -960,10 +969,89 @@ body.light-mode .data-table tbody tr:hover {
     
     .filter-group {
         justify-content: space-between;
+        width: 100%;
     }
     
     .filter-select {
         flex-grow: 1;
+        width: 48%;
+        min-width: 0;
+    }
+
+    /* Modal padding optimizations for mobile */
+    .modal-container {
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+
+    .setup-card {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Table Mobile Card Layout */
+    .table-responsive {
+        border: none;
+    }
+
+    .data-table, 
+    .data-table thead, 
+    .data-table tbody, 
+    .data-table th, 
+    .data-table td, 
+    .data-table tr { 
+        display: block; 
+    }
+    
+    .data-table thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .data-table tr { 
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+        margin-bottom: 1rem;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .data-table td { 
+        border: none;
+        border-bottom: 1px solid var(--border-color); 
+        position: relative;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        white-space: normal;
+        text-align: right;
+    }
+    
+    .data-table td:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+        margin-top: 8px;
+        justify-content: flex-end;
+    }
+    
+    .data-table td::before { 
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-align: left;
+    }
+
+    /* Forms optimizations */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 }
 
@@ -983,6 +1071,7 @@ body.light-mode .data-table tbody tr:hover {
         justify-content: center;
         cursor: pointer;
         color: var(--text-primary);
+        margin-right: 8px;
     }
 }
 

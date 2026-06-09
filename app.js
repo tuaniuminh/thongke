@@ -520,13 +520,13 @@ function renderRecentActivity(received, sent) {
         }
         
         row.innerHTML = `
-            <td>${flowBadge}</td>
-            <td style="font-weight: 500;">${escapeHTML(act.name)}</td>
-            <td><span class="badge badge-relationship">${act.relationship}</span></td>
-            <td>${amountText}</td>
-            <td>${eventBadge}</td>
-            <td>${formatDate(act.date)}</td>
-            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(act.notes || '')}">
+            <td data-label="Chiều">${flowBadge}</td>
+            <td data-label="Họ & Tên" style="font-weight: 500;">${escapeHTML(act.name)}</td>
+            <td data-label="Mối quan hệ"><span class="badge badge-relationship">${act.relationship}</span></td>
+            <td data-label="Số tiền">${amountText}</td>
+            <td data-label="Loại sự kiện">${eventBadge}</td>
+            <td data-label="Ngày">${formatDate(act.date)}</td>
+            <td data-label="Ghi chú" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(act.notes || '')}">
                 ${escapeHTML(act.notes || '-')}
             </td>
         `;
@@ -657,21 +657,21 @@ function renderReceivedTable() {
         const statusClass = g.status === 'returned' ? 'badge-status-returned' : 'badge-status-pending';
         
         row.innerHTML = `
-            <td style="font-weight: 600;">${escapeHTML(g.name)}</td>
-            <td><span class="badge badge-relationship">${g.relationship}</span></td>
-            <td style="color: var(--accent-emerald); font-weight:600;">+${formatVND(g.amount)}</td>
-            <td>${formatDate(g.date)}</td>
-            <td>
+            <td data-label="Họ & Tên" style="font-weight: 600;">${escapeHTML(g.name)}</td>
+            <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
+            <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">+${formatVND(g.amount)}</td>
+            <td data-label="Ngày nhận">${formatDate(g.date)}</td>
+            <td data-label="Đã trả lễ?">
                 <label class="status-switch">
                     <input type="checkbox" class="status-checkbox" ${isChecked} onchange="toggleReceivedReturnStatus('${g.id}')">
                     <span class="status-slider"></span>
                     <span class="badge ${statusClass}">${statusText}</span>
                 </label>
             </td>
-            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
+            <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
                 ${escapeHTML(g.notes || '-')}
             </td>
-            <td>
+            <td data-label="Thao tác">
                 <div style="display: flex; gap: 8px;">
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editReceivedRecord('${g.id}')">
                         <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
@@ -789,15 +789,15 @@ function renderSentTable() {
         if (g.event_type === 'Tân gia') evClass = 'badge-event-housewarming';
         
         row.innerHTML = `
-            <td style="font-weight: 600;">${escapeHTML(g.name)}</td>
-            <td><span class="badge ${evClass}">${g.event_type}</span></td>
-            <td><span class="badge badge-relationship">${g.relationship}</span></td>
-            <td style="color: var(--text-primary); font-weight:600;">-${formatVND(g.amount)}</td>
-            <td>${formatDate(g.date)}</td>
-            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
+            <td data-label="Họ & Tên" style="font-weight: 600;">${escapeHTML(g.name)}</td>
+            <td data-label="Loại sự kiện"><span class="badge ${evClass}">${g.event_type}</span></td>
+            <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
+            <td data-label="Số tiền chi" style="color: var(--text-primary); font-weight:600;">-${formatVND(g.amount)}</td>
+            <td data-label="Ngày chi">${formatDate(g.date)}</td>
+            <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
                 ${escapeHTML(g.notes || '-')}
             </td>
-            <td>
+            <td data-label="Thao tác">
                 <div style="display: flex; gap: 8px;">
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editSentRecord('${g.id}')">
                         <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
