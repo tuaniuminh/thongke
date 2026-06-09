@@ -41,6 +41,17 @@ function formatVND(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
+// Parse amount input (handling thousand separators and shorthand x1000)
+function parseAmountInput(valStr) {
+    if (!valStr) return 0;
+    const clean = valStr.replace(/\D/g, '');
+    let num = Number(clean) || 0;
+    if (num > 0 && num < 10000) {
+        num = num * 1000;
+    }
+    return num;
+}
+
 // Show Toast Notifications
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
@@ -554,7 +565,7 @@ window.editReceivedRecord = function(id) {
     document.getElementById('receivedId').value = record.id;
     document.getElementById('recName').value = record.name;
     document.getElementById('recRelationship').value = record.relationship;
-    document.getElementById('recAmount').value = record.amount;
+    document.getElementById('recAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount);
     document.getElementById('recDate').value = record.date;
     
     const isReturned = record.status === 'returned';
@@ -690,7 +701,7 @@ window.editSentRecord = function(id) {
     document.getElementById('sentName').value = record.name;
     document.getElementById('sentType').value = record.event_type;
     document.getElementById('sentRelationship').value = record.relationship;
-    document.getElementById('sentAmount').value = record.amount;
+    document.getElementById('sentAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount);
     document.getElementById('sentDate').value = record.date;
     document.getElementById('sentNotes').value = record.notes || '';
     
@@ -1217,9 +1228,49 @@ function setupModalListeners() {
         });
     }
     
+    // Setup input formatting
+    setupAmountFormatting(document.getElementById('recAmount'));
+    setupAmountFormatting(document.getElementById('sentAmount'));
+
     // Handle forms submit
     document.getElementById('receivedForm').addEventListener('submit', handleReceivedSubmit);
     document.getElementById('sentForm').addEventListener('submit', handleSentSubmit);
+}
+
+// Setup formatting for amount inputs
+function setupAmountFormatting(inputElement) {
+    if (!inputElement) return;
+    
+    inputElement.addEventListener('input', (e) => {
+        let cursorPosition = e.target.selectionStart;
+        let originalLength = e.target.value.length;
+        
+        let clean = e.target.value.replace(/\D/g, '');
+        if (!clean) {
+            e.target.value = '';
+            return;
+        }
+        
+        let formatted = new Intl.NumberFormat('vi-VN').format(clean);
+        e.target.value = formatted;
+        
+        // Adjust cursor position
+        let newLength = formatted.length;
+        cursorPosition = cursorPosition + (newLength - originalLength);
+        e.target.setSelectionRange(cursorPosition, cursorPosition);
+    });
+    
+    inputElement.addEventListener('blur', (e) => {
+        let clean = e.target.value.replace(/\D/g, '');
+        if (!clean) return;
+        
+        let num = Number(clean);
+        if (num > 0 && num < 10000) {
+            num = num * 1000;
+        }
+        
+        e.target.value = new Intl.NumberFormat('vi-VN').format(num);
+    });
 }
 
 async function handleReceivedSubmit(e) {
@@ -1227,7 +1278,7 @@ async function handleReceivedSubmit(e) {
     const id = document.getElementById('receivedId').value;
     const name = document.getElementById('recName').value.trim();
     const relationship = document.getElementById('recRelationship').value;
-    const amount = Number(document.getElementById('recAmount').value);
+    const amount = parseAmountInput(document.getElementById('recAmount').value);
     const date = document.getElementById('recDate').value;
     const status = document.getElementById('recStatus').checked ? 'returned' : 'pending';
     const notes = document.getElementById('recNotes').value.trim();
@@ -1270,7 +1321,7 @@ async function handleSentSubmit(e) {
     const name = document.getElementById('sentName').value.trim();
     const event_type = document.getElementById('sentType').value;
     const relationship = document.getElementById('sentRelationship').value;
-    const amount = Number(document.getElementById('sentAmount').value);
+    const amount = parseAmountInput(document.getElementById('sentAmount').value);
     const date = document.getElementById('sentDate').value;
     const notes = document.getElementById('sentNotes').value.trim();
     
