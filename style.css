@@ -653,29 +653,79 @@ body.light-mode .data-table tbody tr:hover {
     border: 1px solid var(--border-color);
 }
 
+.badge-event-wedding,
+.badge-event-funeral,
+.badge-event-sick,
+.badge-event-housewarming,
+.badge-event-other {
+    padding-left: 8px;
+    padding-right: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.badge-event-wedding::before,
+.badge-event-funeral::before,
+.badge-event-sick::before,
+.badge-event-housewarming::before,
+.badge-event-other::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
 .badge-event-wedding {
-    background-color: rgba(244, 63, 94, 0.1);
+    background-color: rgba(244, 63, 94, 0.08);
     color: var(--accent-rose);
+    border: 1px solid rgba(244, 63, 94, 0.25);
+}
+.badge-event-wedding::before {
+    background-color: var(--accent-rose);
+    box-shadow: 0 0 6px var(--accent-rose);
 }
 
 .badge-event-funeral {
-    background-color: rgba(100, 116, 139, 0.1);
+    background-color: rgba(148, 163, 184, 0.08);
     color: var(--text-secondary);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+.badge-event-funeral::before {
+    background-color: var(--text-secondary);
+    box-shadow: 0 0 6px var(--text-secondary);
 }
 
 .badge-event-sick {
-    background-color: rgba(245, 158, 11, 0.1);
+    background-color: rgba(245, 158, 11, 0.08);
     color: var(--accent-amber);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.badge-event-sick::before {
+    background-color: var(--accent-amber);
+    box-shadow: 0 0 6px var(--accent-amber);
 }
 
 .badge-event-housewarming {
-    background-color: rgba(14, 165, 233, 0.1);
+    background-color: rgba(14, 165, 233, 0.08);
     color: var(--accent-blue);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+}
+.badge-event-housewarming::before {
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 6px var(--accent-blue);
 }
 
 .badge-event-other {
-    background-color: rgba(99, 102, 241, 0.1);
+    background-color: rgba(99, 102, 241, 0.08);
     color: var(--primary-color);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+}
+.badge-event-other::before {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 6px var(--primary-color);
 }
 
 .badge-status-returned {
