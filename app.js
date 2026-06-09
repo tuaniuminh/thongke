@@ -403,11 +403,21 @@ function renderRelationshipChart(received, sent) {
                 },
                 y: {
                     grid: { color: gridColor },
+                    min: 0,
+                    suggestedMax: 1000000,
                     ticks: { 
                         color: textColor,
                         font: { family: 'Inter' },
+                        precision: 0,
                         callback: function(value) {
-                            return (value / 1000000) + ' M';
+                            if (value === 0) return '0';
+                            if (value >= 1000000) {
+                                return (value / 1000000) + ' Tr';
+                            }
+                            if (value >= 1000) {
+                                return (value / 1000) + ' K';
+                            }
+                            return value;
                         }
                     }
                 }
