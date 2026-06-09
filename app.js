@@ -1415,9 +1415,10 @@ function setupModalListeners() {
     document.getElementById('chooseImportNotesBtn').addEventListener('click', () => {
         closeModal('quickAddModal');
         document.getElementById('importNotesForm').reset();
+        const flow = document.getElementById('importNotesFlow').value;
         const eventTypeGroup = document.getElementById('importNotesEventTypeGroup');
         if (eventTypeGroup) {
-            eventTypeGroup.style.display = 'none';
+            eventTypeGroup.style.display = (flow === 'sent') ? 'block' : 'none';
         }
         document.getElementById('importNotesPreviewContainer').style.display = 'none';
         document.getElementById('importNotesModal').classList.add('active');
