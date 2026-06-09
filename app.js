@@ -1239,9 +1239,149 @@ function setupModalListeners() {
     setupAmountFormatting(document.getElementById('recAmount'));
     setupAmountFormatting(document.getElementById('sentAmount'));
 
+    // Choose import from notes button listener
+    document.getElementById('chooseImportNotesBtn').addEventListener('click', () => {
+        closeModal('quickAddModal');
+        document.getElementById('importNotesForm').reset();
+        document.getElementById('importNotesPreviewContainer').style.display = 'none';
+        document.getElementById('importNotesModal').classList.add('active');
+    });
+
+    document.getElementById('btnPreviewImportNotes').addEventListener('click', handleNotesPreview);
+
     // Handle forms submit
     document.getElementById('receivedForm').addEventListener('submit', handleReceivedSubmit);
     document.getElementById('sentForm').addEventListener('submit', handleSentSubmit);
+    document.getElementById('importNotesForm').addEventListener('submit', handleNotesImportSubmit);
+}
+
+// Parse Notes text area dynamically
+function parseNotesText(text, isReceivedFlow) {
+    const lines = text.split('\n');
+    const results = [];
+    
+    const defaultEventType = isReceivedFlow ? 'Mừng cưới tôi' : 'Đám cưới';
+    const defaultRelationship = 'Khác';
+    const defaultDate = new Date().toISOString().slice(0, 10);
+    
+    lines.forEach(line => {
+        let trimmed = line.trim();
+        if (!trimmed) return;
+        
+        let name = '';
+        let amount = 0;
+        
+        // Match numbers, k, tr, triệu patterns at the end of the line
+        const regex = /(?:[\d.,]+)\s*(?:k|tr|triệu|trieu|đ|d)?\s*$/i;
+        const match = trimmed.match(regex);
+        
+        if (match) {
+            const rawAmountStr = match[0].trim().toLowerCase();
+            name = trimmed.substring(0, match.index).trim();
+            
+            // Clean name punctuation
+            name = name.replace(/[-:,]+$/, '').trim();
+            
+            // Extract numeric value
+            let cleanNumStr = rawAmountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
+            let val = parseFloat(cleanNumStr.replace(/\./g, ''));
+            
+            // Check for floating decimal like 1.5
+            if (cleanNumStr.includes('.') && cleanNumStr.split('.').length === 2 && cleanNumStr.replace(/\D/g, '').length < 5) {
+                val = parseFloat(cleanNumStr);
+            }
+            
+            if (rawAmountStr.includes('k')) {
+                amount = val * 1000;
+            } else if (rawAmountStr.includes('tr') || rawAmountStr.includes('triệu') || rawAmountStr.includes('trieu')) {
+                amount = val * 1000000;
+            } else {
+                if (val > 0 && val < 10000) {
+                    amount = val * 1000;
+                } else {
+                    amount = val;
+                }
+            }
+        } else {
+            name = trimmed;
+            amount = 0;
+        }
+        
+        if (name) {
+            results.push({
+                id: generateId(),
+                name,
+                amount,
+                relationship: defaultRelationship,
+                date: defaultDate,
+                notes: 'Nhập nhanh từ Ghi chú',
+                status: 'pending',
+                event_type: defaultEventType,
+                updated_at: new Date().toISOString()
+            });
+        }
+    });
+    
+    return results;
+}
+
+// Show preview in table
+let tempParsedNotes = [];
+function handleNotesPreview() {
+    const text = document.getElementById('importNotesText').value.trim();
+    if (!text) {
+        showToast("Vui lòng nhập nội dung ghi chú!", "warning");
+        return;
+    }
+    
+    const flow = document.getElementById('importNotesFlow').value;
+    const isReceived = flow === 'received';
+    
+    tempParsedNotes = parseNotesText(text, isReceived);
+    
+    const tbody = document.getElementById('importNotesPreviewBody');
+    tbody.innerHTML = '';
+    
+    tempParsedNotes.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td data-label="Họ & Tên" style="font-weight:600;">${escapeHTML(item.name)}</td>
+            <td data-label="Số tiền" style="color:${isReceived ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight:600;">
+                ${isReceived ? '+' : '-'}${formatVND(item.amount)}
+            </td>
+            <td data-label="Ghi chú">${escapeHTML(item.notes)}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    document.getElementById('importNotesCount').innerText = tempParsedNotes.length;
+    document.getElementById('importNotesPreviewContainer').style.display = 'block';
+    showToast("Phân tích ghi chú hoàn tất! Hãy kiểm tra bảng xem trước.");
+}
+
+// Submit and insert all parsed notes
+async function handleNotesImportSubmit(e) {
+    e.preventDefault();
+    if (tempParsedNotes.length === 0) {
+        showToast("Không có bản ghi nào để nhập!", "warning");
+        return;
+    }
+    
+    const flow = document.getElementById('importNotesFlow').value;
+    
+    if (flow === 'received') {
+        state.receivedGifts.push(...tempParsedNotes);
+    } else {
+        state.sentGifts.push(...tempParsedNotes);
+    }
+    
+    await saveLocalState();
+    closeModal('importNotesModal');
+    renderAll();
+    showToast(`Đã lưu thành công ${tempParsedNotes.length} ghi chép từ Ghi chú!`);
+    
+    // Auto sync
+    performSync(true);
 }
 
 // Setup formatting for amount inputs
