@@ -1518,7 +1518,7 @@ function handleNotesFileUpload(file) {
 }
 
 // Parse Notes text area dynamically
-function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', selectedEventType = 'Đám cưới') {
+function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', selectedEventType = 'Đám cưới', defaultNotes = 'Nhập nhanh từ Ghi chú') {
     const lines = text.split('\n');
     const results = [];
     
@@ -1654,7 +1654,7 @@ function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', se
                 gold_type,
                 relationship: currentRelationshipContext,
                 date: defaultDate,
-                notes: currentNotesContext || 'Nhập nhanh từ Ghi chú',
+                notes: currentNotesContext || defaultNotes,
                 status: 'pending',
                 updated_at: new Date().toISOString()
             };
@@ -1682,8 +1682,9 @@ function handleNotesPreview() {
     
     const selectedRelationship = document.getElementById('importNotesRelationship').value;
     const selectedEventType = document.getElementById('importNotesEventType').value;
+    const defaultNotes = document.getElementById('importNotesDefaultNotes').value.trim() || 'Nhập nhanh từ Ghi chú';
     
-    tempParsedNotes = parseNotesText(text, isReceived, selectedRelationship, selectedEventType);
+    tempParsedNotes = parseNotesText(text, isReceived, selectedRelationship, selectedEventType, defaultNotes);
     
     const tbody = document.getElementById('importNotesPreviewBody');
     tbody.innerHTML = '';
