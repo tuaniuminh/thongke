@@ -49,6 +49,27 @@ function parseAmountInput(valStr) {
     return num * 1000; // Always multiply by 1000
 }
 
+// Compare records by date (descending) and updated_at (descending)
+function compareRecordsByRecent(a, b) {
+    const timeA = a.date ? new Date(a.date).getTime() : 0;
+    const timeB = b.date ? new Date(b.date).getTime() : 0;
+    
+    const validA = isNaN(timeA) ? 0 : timeA;
+    const validB = isNaN(timeB) ? 0 : timeB;
+    
+    if (validB !== validA) {
+        return validB - validA;
+    }
+    
+    const updateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+    const updateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+    
+    const validUpdateA = isNaN(updateA) ? 0 : updateA;
+    const validUpdateB = isNaN(updateB) ? 0 : updateB;
+    
+    return validUpdateB - validUpdateA;
+}
+
 // Show Toast Notifications
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
@@ -496,13 +517,8 @@ function renderRecentActivity(received, sent) {
         ...sent.map(g => ({ ...g, flow: 'out' }))
     ];
     
-    // Sort descending by date, then by updated_at
-    allActivities.sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        if (dateB !== dateA) return dateB - dateA;
-        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-    });
+    // Sort descending by date, then by updated_at using helper
+    allActivities.sort(compareRecordsByRecent);
     
     const recent = allActivities.slice(0, 5);
     
@@ -685,12 +701,8 @@ function renderReceivedTable() {
         filtered = filtered.filter(g => g.status === state.receivedFilterStatus);
     }
     
-    // Sort by date desc, then by updated_at desc (most recent first)
-    filtered.sort((a, b) => {
-        const dateDiff = new Date(b.date) - new Date(a.date);
-        if (dateDiff !== 0) return dateDiff;
-        return new Date(b.updated_at) - new Date(a.updated_at);
-    });
+    // Sort by date desc, then by updated_at desc (most recent first) using helper
+    filtered.sort(compareRecordsByRecent);
     
     // Pagination
     const totalRecords = filtered.length;
@@ -836,12 +848,8 @@ function renderSentTable() {
         filtered = filtered.filter(g => g.relationship === state.sentFilterRelation);
     }
     
-    // Sort by date desc, then by updated_at desc (most recent first)
-    filtered.sort((a, b) => {
-        const dateDiff = new Date(b.date) - new Date(a.date);
-        if (dateDiff !== 0) return dateDiff;
-        return new Date(b.updated_at) - new Date(a.updated_at);
-    });
+    // Sort by date desc, then by updated_at desc (most recent first) using helper
+    filtered.sort(compareRecordsByRecent);
     
     const totalRecords = filtered.length;
     const totalPages = Math.ceil(totalRecords / state.sentLimit) || 1;
