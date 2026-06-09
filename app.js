@@ -2195,6 +2195,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hasDb) {
         document.getElementById('setupWizardOverlay').style.display = 'none';
         document.getElementById('unlockOverlay').style.display = 'flex';
+        
+        // Auto select mode based on device type (desktop vs mobile)
+        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        const pinModeView = document.getElementById('unlockPinModeView');
+        const keyboardModeView = document.getElementById('unlockKeyboardModeView');
+        if (pinModeView && keyboardModeView) {
+            if (!isMobile) {
+                // Show keyboard mode by default on desktop
+                pinModeView.style.display = 'none';
+                keyboardModeView.style.display = 'block';
+                setTimeout(() => {
+                    const unlockPasswordInput = document.getElementById('unlockPassword');
+                    if (unlockPasswordInput) unlockPasswordInput.focus();
+                }, 100);
+            } else {
+                // Show PIN mode by default on mobile
+                pinModeView.style.display = 'block';
+                keyboardModeView.style.display = 'none';
+            }
+        }
     } else {
         document.getElementById('setupWizardOverlay').style.display = 'flex';
         document.getElementById('unlockOverlay').style.display = 'none';
