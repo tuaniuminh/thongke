@@ -1415,9 +1415,28 @@ function setupModalListeners() {
     document.getElementById('chooseImportNotesBtn').addEventListener('click', () => {
         closeModal('quickAddModal');
         document.getElementById('importNotesForm').reset();
+        const eventTypeGroup = document.getElementById('importNotesEventTypeGroup');
+        if (eventTypeGroup) {
+            eventTypeGroup.style.display = 'none';
+        }
         document.getElementById('importNotesPreviewContainer').style.display = 'none';
         document.getElementById('importNotesModal').classList.add('active');
     });
+
+    // Toggle event type select visibility based on flow selection
+    const importNotesFlow = document.getElementById('importNotesFlow');
+    if (importNotesFlow) {
+        importNotesFlow.addEventListener('change', () => {
+            const eventTypeGroup = document.getElementById('importNotesEventTypeGroup');
+            if (eventTypeGroup) {
+                if (importNotesFlow.value === 'sent') {
+                    eventTypeGroup.style.display = 'block';
+                } else {
+                    eventTypeGroup.style.display = 'none';
+                }
+            }
+        });
+    }
 
     document.getElementById('btnPreviewImportNotes').addEventListener('click', handleNotesPreview);
 
@@ -1498,27 +1517,87 @@ function handleNotesFileUpload(file) {
 }
 
 // Parse Notes text area dynamically
-function parseNotesText(text, isReceivedFlow) {
+function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', selectedEventType = 'Đám cưới') {
     const lines = text.split('\n');
     const results = [];
     
-    const defaultEventType = isReceivedFlow ? 'Mừng cưới tôi' : 'Đám cưới';
-    const defaultRelationship = 'Khác';
+    let currentRelationshipContext = selectedRelationship;
+    let currentEventTypeContext = isReceivedFlow ? 'Mừng cưới tôi' : selectedEventType;
+    let currentNotesContext = '';
+    
     const defaultDate = new Date().toISOString().slice(0, 10);
     
     lines.forEach(line => {
         let trimmed = line.trim();
         if (!trimmed) return;
         
+        // Strip leading bullets/lists characters like *, -, +, •, 1., 2. etc.
+        trimmed = trimmed.replace(/^[\s*•\-+]+/, '').trim();
+        // Also strip numbers with dot at the start (e.g. "1. Nguyễn Văn A 500k" -> "Nguyễn Văn A 500k")
+        trimmed = trimmed.replace(/^\d+[\s.)-]+\s*/, '').trim();
+        
+        if (!trimmed) return;
+        
+        // Check if the line is a section header or metadata
+        // e.g. "Ghi chú: Hỗ trợ tư pháp Sóc Sơn", "Loại sự kiện: đám cưới", "Mối quan hệ: Họ hàng"
+        const cleanLine = trimmed;
+        
+        // 1. Check relationship headers
+        const relMatch = cleanLine.match(/^(Họ hàng|Bạn học|Đồng nghiệp|Hàng xóm|Bạn xã hội|Bạn bè|Khác)\s*:/i);
+        if (relMatch) {
+            let rel = relMatch[1].trim();
+            if (rel.toLowerCase() === 'bạn bè') {
+                currentRelationshipContext = 'Bạn xã hội';
+            } else {
+                currentRelationshipContext = rel.charAt(0).toUpperCase() + rel.slice(1);
+            }
+            return;
+        }
+        
+        // 2. Check notes headers
+        const notesMatch = cleanLine.match(/^(Ghi chú|Ghi chu)\s*:\s*(.*)/i);
+        if (notesMatch) {
+            currentNotesContext = notesMatch[2].trim().replace(/:$/, '').trim();
+            return;
+        }
+        
+        // 3. Check event type headers
+        const eventMatch = cleanLine.match(/^(Loại sự kiện|Sự kiện|Loai su kien|Su kien)\s*:\s*(.*)/i);
+        if (eventMatch) {
+            let ev = eventMatch[2].trim().replace(/:$/, '').trim();
+            if (ev.toLowerCase().includes('cưới') || ev.toLowerCase().includes('cuoi')) {
+                currentEventTypeContext = 'Đám cưới';
+            } else if (ev.toLowerCase().includes('hiếu') || ev.toLowerCase().includes('hieu')) {
+                currentEventTypeContext = 'Đám hiếu';
+            } else if (ev.toLowerCase().includes('ốm') || ev.toLowerCase().includes('om')) {
+                currentEventTypeContext = 'Thăm ốm';
+            } else if (ev.toLowerCase().includes('gia')) {
+                currentEventTypeContext = 'Tân gia';
+            } else {
+                currentEventTypeContext = 'Khác';
+            }
+            return;
+        }
+        
+        // Check for gold patterns first to avoid overlap with money patterns
+        const goldRegex = /(?:[\d.,]+)\s*(?:chỉ vàng|chỉ|chi vang|chi|lượng|cây)\s*$/i;
+        const goldMatch = trimmed.match(goldRegex);
+        
+        // Check for standard money patterns
+        const moneyRegex = /(?:[\d.,]+)\s*(?:k|tr|triệu|trieu|đ|d)?\s*$/i;
+        const moneyMatch = trimmed.match(moneyRegex);
+        
+        // 4. Check if it's a section header ending with colon (and no money/gold pattern)
+        if (trimmed.endsWith(':') && !goldMatch && !moneyMatch) {
+            currentNotesContext = trimmed.replace(/:$/, '').trim();
+            return;
+        }
+        
         let name = '';
         let amount = 0;
         let gift_type = 'money';
         let gold_amount = 0;
         let gold_type = '';
-        
-        // 1. Check for gold patterns (e.g. 1 chỉ vàng, 0.5 chỉ, 2 lượng)
-        const goldRegex = /(?:[\d.,]+)\s*(?:chỉ vàng|chỉ|chi vang|chi|lượng|cây)\s*$/i;
-        const goldMatch = trimmed.match(goldRegex);
         
         if (goldMatch) {
             gift_type = 'gold';
@@ -1529,62 +1608,59 @@ function parseNotesText(text, isReceivedFlow) {
             let cleanNumStr = rawGoldStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
             gold_amount = parseFloat(cleanNumStr) || 0;
             gold_type = rawGoldStr.includes('lượng') || rawGoldStr.includes('cây') ? 'Lượng vàng' : 'Chỉ vàng';
-        } else {
-            // 2. Check for standard money pattern
-            const regex = /(?:[\d.,]+)\s*(?:k|tr|triệu|trieu|đ|d)?\s*$/i;
-            const match = trimmed.match(regex);
+        } else if (moneyMatch) {
+            gift_type = 'money';
+            const rawAmountStr = moneyMatch[0].trim().toLowerCase();
+            name = trimmed.substring(0, moneyMatch.index).trim();
+            name = name.replace(/[-:,]+$/, '').trim();
             
-            if (match) {
-                gift_type = 'money';
-                const rawAmountStr = match[0].trim().toLowerCase();
-                name = trimmed.substring(0, match.index).trim();
-                name = name.replace(/[-:,]+$/, '').trim();
-                
-                // Extract numeric value
-                let cleanNumStr = rawAmountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
-                let val = parseFloat(cleanNumStr.replace(/\./g, ''));
-                
-                // Check for floating decimal like 1.5 (if it has less than 3 digits after the dot)
-                if (cleanNumStr.includes('.')) {
-                    const parts = cleanNumStr.split('.');
-                    if (parts.length === 2 && parts[1].length < 3) {
-                        val = parseFloat(cleanNumStr);
-                    }
+            // Extract numeric value
+            let cleanNumStr = rawAmountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
+            let val = parseFloat(cleanNumStr.replace(/\./g, ''));
+            
+            // Check for floating decimal like 1.5 (if it has less than 3 digits after the dot)
+            if (cleanNumStr.includes('.')) {
+                const parts = cleanNumStr.split('.');
+                if (parts.length === 2 && parts[1].length < 3) {
+                    val = parseFloat(cleanNumStr);
                 }
-                
-                if (rawAmountStr.includes('k')) {
-                    amount = val * 1000;
-                } else if (rawAmountStr.includes('tr') || rawAmountStr.includes('triệu') || rawAmountStr.includes('trieu')) {
-                    amount = val * 1000000;
-                } else {
-                    if (val > 0 && val < 10000) {
-                        amount = val * 1000;
-                    } else {
-                        amount = val;
-                    }
-                }
-            } else {
-                gift_type = 'money';
-                name = trimmed;
-                amount = 0;
             }
+            
+            if (rawAmountStr.includes('k')) {
+                amount = val * 1000;
+            } else if (rawAmountStr.includes('tr') || rawAmountStr.includes('triệu') || rawAmountStr.includes('trieu')) {
+                amount = val * 1000000;
+            } else {
+                if (val > 0 && val < 10000) {
+                    amount = val * 1000;
+                } else {
+                    amount = val;
+                }
+            }
+        } else {
+            gift_type = 'money';
+            name = trimmed;
+            amount = 0;
         }
         
         if (name) {
-            results.push({
+            const newRecord = {
                 id: generateId(),
                 name,
                 gift_type,
                 amount,
                 gold_amount,
                 gold_type,
-                relationship: defaultRelationship,
+                relationship: currentRelationshipContext,
                 date: defaultDate,
-                notes: 'Nhập nhanh từ Ghi chú',
+                notes: currentNotesContext || 'Nhập nhanh từ Ghi chú',
                 status: 'pending',
-                event_type: defaultEventType,
                 updated_at: new Date().toISOString()
-            });
+            };
+            if (!isReceivedFlow) {
+                newRecord.event_type = currentEventTypeContext;
+            }
+            results.push(newRecord);
         }
     });
     
@@ -1603,7 +1679,10 @@ function handleNotesPreview() {
     const flow = document.getElementById('importNotesFlow').value;
     const isReceived = flow === 'received';
     
-    tempParsedNotes = parseNotesText(text, isReceived);
+    const selectedRelationship = document.getElementById('importNotesRelationship').value;
+    const selectedEventType = document.getElementById('importNotesEventType').value;
+    
+    tempParsedNotes = parseNotesText(text, isReceived, selectedRelationship, selectedEventType);
     
     const tbody = document.getElementById('importNotesPreviewBody');
     tbody.innerHTML = '';
@@ -1614,8 +1693,23 @@ function handleNotesPreview() {
             ? `${item.gold_amount} chỉ (${item.gold_type})` 
             : formatVND(item.amount);
             
+        // Event type badge styling
+        let evClass = 'badge-event-other';
+        let eventName = item.event_type;
+        if (isReceived) {
+            evClass = 'badge-event-wedding';
+            eventName = 'Mừng cưới tôi';
+        } else {
+            if (item.event_type === 'Đám cưới') evClass = 'badge-event-wedding';
+            else if (item.event_type === 'Đám hiếu') evClass = 'badge-event-funeral';
+            else if (item.event_type === 'Thăm ốm') evClass = 'badge-event-sick';
+            else if (item.event_type === 'Tân gia') evClass = 'badge-event-housewarming';
+        }
+            
         row.innerHTML = `
             <td data-label="Họ & Tên" style="font-weight:600;">${escapeHTML(item.name)}</td>
+            <td data-label="Mối quan hệ"><span class="badge badge-relationship">${escapeHTML(item.relationship)}</span></td>
+            <td data-label="Sự kiện"><span class="badge ${evClass}">${escapeHTML(eventName)}</span></td>
             <td data-label="Số tiền" style="color:${isReceived ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight:600;">
                 ${isReceived ? '+' : '-'}${displayVal}
             </td>
