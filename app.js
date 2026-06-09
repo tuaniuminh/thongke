@@ -1291,12 +1291,21 @@ async function handleSyncSignOut() {
 
 // --- Data Import/Export (Excel/CSV and JSON Encrypted Backup) ---
 
-async function handleExportEncrypted() {
+async function handleExportEncrypted(type = 'all') {
     if (!state.masterPassword) return;
     
+    let received = state.receivedGifts;
+    let sent = state.sentGifts;
+    
+    if (type === 'received') {
+        sent = [];
+    } else if (type === 'sent') {
+        received = [];
+    }
+    
     const payload = JSON.stringify({
-        receivedGifts: state.receivedGifts,
-        sentGifts: state.sentGifts
+        receivedGifts: received,
+        sentGifts: sent
     });
     
     try {
@@ -1304,12 +1313,20 @@ async function handleExportEncrypted() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
             encrypted_payload: encrypted,
             app_id: "hieu_hy_gift_ledger",
+            backup_type: type,
             exported_at: new Date().toISOString()
         }));
         
+        let filename = `hieu_hy_backup_tat_ca_${new Date().toISOString().slice(0, 10)}.json`;
+        if (type === 'received') {
+            filename = `hieu_hy_backup_tien_nhan_${new Date().toISOString().slice(0, 10)}.json`;
+        } else if (type === 'sent') {
+            filename = `hieu_hy_backup_tien_mung_${new Date().toISOString().slice(0, 10)}.json`;
+        }
+        
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `hieu_hy_backup_${new Date().toISOString().slice(0, 10)}.json`);
+        downloadAnchor.setAttribute("download", filename);
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
@@ -1318,36 +1335,47 @@ async function handleExportEncrypted() {
         showToast("Mã hóa để xuất file thất bại!", "error");
     }
 }
+window.handleExportEncrypted = handleExportEncrypted;
 
-function handleExportCsv() {
-    // Generate CSV for Received
-    const activeReceived = state.receivedGifts.filter(g => !g.deleted_at);
+function handleExportCsv(type = 'all') {
     let csvContent = "\uFEFF"; // UTF-8 BOM for Excel display
     csvContent += "CHIỀU NHẬN/CHI,HỌ TÊN,MỐI QUAN HỆ,SỐ TIỀN,LOẠI SỰ KIỆN,NGÀY,TRẠNG THÁI TRẢ LỄ,GHI CHÚ\n";
     
-    activeReceived.forEach(g => {
-        const statusText = g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại';
-        const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
-        csvContent += `TIỀN TÔI NHẬN,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","Tiền tôi nhận",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
-    });
+    if (type === 'all' || type === 'received') {
+        const activeReceived = state.receivedGifts.filter(g => !g.deleted_at);
+        activeReceived.forEach(g => {
+            const statusText = g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại';
+            const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
+            csvContent += `TIỀN TÔI NHẬN,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","Tiền tôi nhận",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
+        });
+    }
     
-    // Generate CSV for Sent
-    const activeSent = state.sentGifts.filter(g => !g.deleted_at);
-    activeSent.forEach(g => {
-        const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
-        csvContent += `TIỀN TÔI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
-    });
+    if (type === 'all' || type === 'sent') {
+        const activeSent = state.sentGifts.filter(g => !g.deleted_at);
+        activeSent.forEach(g => {
+            const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
+            csvContent += `TIỀN TÔI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
+        });
+    }
+    
+    let filename = `danh_sach_tong_hop_${new Date().toISOString().slice(0, 10)}.csv`;
+    if (type === 'received') {
+        filename = `danh_sach_tien_nhan_${new Date().toISOString().slice(0, 10)}.csv`;
+    } else if (type === 'sent') {
+        filename = `danh_sach_tien_mung_${new Date().toISOString().slice(0, 10)}.csv`;
+    }
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `danh_sach_hieu_hy_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    showToast("Đã xuất danh sách CSV tải về!");
+    link.remove();
+    showToast("Đã xuất danh sách Excel/CSV!");
 }
+window.handleExportCsv = handleExportCsv;
 
 function escapeCsvField(str) {
     return str.replace(/"/g, '""');
@@ -1370,14 +1398,28 @@ function handleImportFile(e) {
             const decrypted = await decrypt(data.encrypted_payload, state.masterPassword);
             const parsed = JSON.parse(decrypted);
             
-            if (confirm("Giải mã thành công! Bạn có muốn gộp (Merge) dữ liệu từ file này vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để ghi đè hoàn toàn)")) {
-                // Merge
-                state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
-                state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
+            const backupType = data.backup_type || 'all';
+            
+            if (backupType === 'received') {
+                if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi nhận'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi nhận' và giữ nguyên 'Tiền tôi mừng')")) {
+                    state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
+                } else {
+                    state.receivedGifts = parsed.receivedGifts || [];
+                }
+            } else if (backupType === 'sent') {
+                if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi mừng'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi mừng' và giữ nguyên 'Tiền tôi nhận')")) {
+                    state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
+                } else {
+                    state.sentGifts = parsed.sentGifts || [];
+                }
             } else {
-                // Overwrite
-                state.receivedGifts = parsed.receivedGifts || [];
-                state.sentGifts = parsed.sentGifts || [];
+                if (confirm("Giải mã thành công! Bạn có muốn gộp (Merge) dữ liệu từ file này vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để ghi đè hoàn toàn)")) {
+                    state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
+                    state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
+                } else {
+                    state.receivedGifts = parsed.receivedGifts || [];
+                    state.sentGifts = parsed.sentGifts || [];
+                }
             }
             
             await saveLocalState();
@@ -2401,8 +2443,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModalListeners();
     
     // Bind import/export settings
-    document.getElementById('exportEncryptedBtn').addEventListener('click', handleExportEncrypted);
-    document.getElementById('exportCsvBtn').addEventListener('click', handleExportCsv);
+    document.getElementById('exportEncryptedAllBtn').addEventListener('click', () => handleExportEncrypted('all'));
+    document.getElementById('exportEncryptedReceivedBtn').addEventListener('click', () => handleExportEncrypted('received'));
+    document.getElementById('exportEncryptedSentBtn').addEventListener('click', () => handleExportEncrypted('sent'));
+    document.getElementById('exportCsvAllBtn').addEventListener('click', () => handleExportCsv('all'));
+    document.getElementById('exportCsvReceivedBtn').addEventListener('click', () => handleExportCsv('received'));
+    document.getElementById('exportCsvSentBtn').addEventListener('click', () => handleExportCsv('sent'));
     document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFileInput').click());
     document.getElementById('importFileInput').addEventListener('change', handleImportFile);
     

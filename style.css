@@ -891,6 +891,20 @@ body.light-mode .data-table tbody tr:hover {
     line-height: 1.45;
 }
 
+.backup-button-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+@media (max-width: 576px) {
+    .backup-button-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+
 .sync-status-indicator {
     padding: 12px;
     border-radius: 8px;
