@@ -1142,3 +1142,54 @@ body.light-mode .file-upload-zone:hover {
     color: var(--text-muted);
 }
 
+/* Sync Banner on Dashboard */
+.sync-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    gap: 16px;
+    animation: fadeIn 0.4s ease;
+}
+
+.sync-banner-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.sync-banner-content .sync-time {
+    font-weight: 600;
+    color: var(--accent-emerald);
+}
+
+.sync-banner-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    gap: 6px !important;
+}
+
+.sync-banner-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+/* Spin animation for sync button */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.spin-anim {
+    animation: spin 1s linear infinite;
+}
+
+

@@ -2,6 +2,37 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
+// --- Supabase Config via GitHub Build (Secrets Injection) ---
+const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
+const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
+
+// Helper to check and retrieve Supabase connection credentials
+function getSupabaseConfig() {
+    if (localStorage.getItem('supabase_disabled') === 'true') {
+        return { url: null, key: null, source: 'none' };
+    }
+    
+    const localUrl = localStorage.getItem('supabase_url');
+    const localKey = localStorage.getItem('supabase_key');
+    
+    // If user manually configured settings locally, prioritize them
+    if (localUrl && localKey) {
+        return { url: localUrl, key: localKey, source: 'local' };
+    }
+    
+    // Otherwise, check if build placeholders were replaced during deployment
+    const buildUrlVal = BUILD_SUPABASE_URL;
+    const buildKeyVal = BUILD_SUPABASE_ANON_KEY;
+    
+    if (buildUrlVal && !buildUrlVal.includes('PLACEHOLDER') && 
+        buildKeyVal && !buildKeyVal.includes('PLACEHOLDER')) {
+        return { url: buildUrlVal, key: buildKeyVal, source: 'build' };
+    }
+    
+    return { url: null, key: null, source: 'none' };
+}
+
+
 // --- State Variables ---
 let state = {
     masterPassword: '',
@@ -215,9 +246,11 @@ async function performSync(silent = false) {
         await sync.saveSyncData(encrypted);
         
         // 6. Refresh UI
+        localStorage.setItem('last_sync_time', new Date().toISOString());
         renderAll();
         updateSyncIndicator('synced');
         showToast("Đồng bộ dữ liệu thành công!");
+
     } catch (e) {
         console.error("Sync error:", e);
         updateSyncIndicator('error');
@@ -229,22 +262,26 @@ async function performSync(silent = false) {
 function updateSyncIndicator(status) {
     const dot = document.getElementById('syncStatusDot');
     const text = document.getElementById('syncStatusText');
-    if (!dot || !text) return;
-    
-    if (status === 'synced') {
-        dot.className = 'status-dot green';
-        text.innerText = 'Đã đồng bộ hóa với Supabase Cloud';
-    } else if (status === 'error') {
-        dot.className = 'status-dot red';
-        text.innerText = 'Lỗi đồng bộ hóa (Nhấp để thử lại)';
-    } else if (status === 'unsynced') {
-        dot.className = 'status-dot yellow';
-        text.innerText = 'Dữ liệu cục bộ chưa được đồng bộ';
-    } else {
-        dot.className = 'status-dot red';
-        text.innerText = 'Không có kết nối Supabase / Chưa đăng nhập';
+    if (dot && text) {
+        if (status === 'synced') {
+            dot.className = 'status-dot green';
+            text.innerText = 'Đã đồng bộ hóa với Supabase Cloud';
+        } else if (status === 'error') {
+            dot.className = 'status-dot red';
+            text.innerText = 'Lỗi đồng bộ hóa (Nhấp để thử lại)';
+        } else if (status === 'unsynced') {
+            dot.className = 'status-dot yellow';
+            text.innerText = 'Dữ liệu cục bộ chưa được đồng bộ';
+        } else {
+            dot.className = 'status-dot red';
+            text.innerText = 'Không có kết nối Supabase / Chưa đăng nhập';
+        }
     }
+    
+    // Also update the dashboard banner
+    renderDashboardSyncBanner();
 }
+
 
 // --- Render Layout and Components ---
 
@@ -374,7 +411,9 @@ function renderDashboard() {
     renderRelationshipChart(activeReceived, activeSent);
     renderEventTypeChart(activeSent);
     renderRecentActivity(activeReceived, activeSent);
+    renderDashboardSyncBanner();
 }
+
 
 function renderRelationshipChart(received, sent) {
     const relationships = ['Họ hàng', 'Bạn học', 'Đồng nghiệp', 'Hàng xóm', 'Bạn xã hội', 'Khác'];
@@ -920,13 +959,15 @@ function renderSettings() {
     const syncView = document.getElementById('supabaseConfigView');
     
     // Check if Supabase configured
-    const savedUrl = localStorage.getItem('supabase_url') || '';
-    const savedKey = localStorage.getItem('supabase_key') || '';
+    const config = getSupabaseConfig();
+    const savedUrl = config.url || '';
+    const savedKey = config.key || '';
     
-    if (!sync.isConfigured() && savedUrl && savedKey) {
+    if (!sync.isConfigured() && config.url && config.key) {
         // Auto initialize client on settings render
-        sync.initSupabase(savedUrl, savedKey);
+        sync.initSupabase(config.url, config.key);
     }
+
     
     if (!sync.isConfigured()) {
         syncView.innerHTML = `
@@ -949,12 +990,13 @@ function renderSettings() {
     } else {
         // Show Auth state or Sync trigger
         const isUserLoggedIn = state.user !== null;
+        const sourceText = config.source === 'build' ? ' (Tự động từ GitHub)' : '';
         
         if (!isUserLoggedIn) {
             syncView.innerHTML = `
                 <div class="sync-status-indicator" style="margin-bottom:1.25rem;">
                     <span class="status-dot yellow"></span>
-                    <span>Đã kết nối Supabase, cần Đăng nhập/Đăng ký tài khoản</span>
+                    <span>Đã kết nối Supabase${sourceText}, cần Đăng nhập/Đăng ký tài khoản</span>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <form id="syncLoginForm">
@@ -987,11 +1029,12 @@ function renderSettings() {
             syncView.innerHTML = `
                 <div class="sync-status-indicator">
                     <span id="syncStatusDot" class="status-dot green"></span>
-                    <span id="syncStatusText">Sẵn sàng đồng bộ hóa</span>
+                    <span id="syncStatusText">Sẵn sàng đồng bộ hóa${sourceText}</span>
                 </div>
                 <div style="margin: 1.25rem 0; font-size:0.85rem; color:var(--text-secondary);">
                     <div>Tài khoản: <b style="color:var(--text-primary);">${state.user.email}</b></div>
                     <div style="margin-top:4px;">Cơ sở dữ liệu đám mây hoạt động.</div>
+
                 </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <button class="btn btn-primary w-full" id="manualSyncBtn">
@@ -1087,6 +1130,7 @@ function handleSaveSupabaseConfig(e) {
     
     localStorage.setItem('supabase_url', url);
     localStorage.setItem('supabase_key', key);
+    localStorage.removeItem('supabase_disabled');
     
     const client = sync.initSupabase(url, key);
     if (client) {
@@ -1104,12 +1148,14 @@ function disconnectSupabase() {
     
     localStorage.removeItem('supabase_url');
     localStorage.removeItem('supabase_key');
+    localStorage.setItem('supabase_disabled', 'true');
     sync.initSupabase(null, null); // Wipe client
     state.user = null;
     updateUserBadge();
     showToast("Đã ngắt kết nối với Supabase Cloud.");
     renderSettings();
 }
+
 
 // Handle login submission
 async function handleSyncLogin(e) {
@@ -1813,12 +1859,12 @@ async function handleUnlockSubmit(e) {
             renderAll();
             
             // Connect to Supabase if configured and run sync
-            const savedUrl = localStorage.getItem('supabase_url');
-            const savedKey = localStorage.getItem('supabase_key');
-            if (savedUrl && savedKey) {
-                sync.initSupabase(savedUrl, savedKey);
+            const config = getSupabaseConfig();
+            if (config.url && config.key) {
+                sync.initSupabase(config.url, config.key);
                 checkLoginStatus();
             }
+
         } else {
             showToast("Sai Master Password! Không thể giải mã dữ liệu.", "error");
             unlockBtn.innerText = 'Mở khóa ứng dụng';
@@ -2053,3 +2099,81 @@ function formatDate(dateStr) {
         return dateStr;
     }
 }
+
+// Expose switchTab globally so dynamically generated onclick handlers can use it
+window.switchTab = switchTab;
+
+function renderDashboardSyncBanner() {
+    const banner = document.getElementById('dashboardSyncBanner');
+    if (!banner) return;
+    
+    const config = getSupabaseConfig();
+    const isConfigured = sync.isConfigured();
+    const isLoggedIn = state.user !== null;
+    
+    banner.style.display = 'flex';
+    
+    if (!isConfigured) {
+        banner.className = 'sync-banner local-only';
+        banner.innerHTML = `
+            <div class="sync-banner-content">
+                <span class="status-dot yellow"></span>
+                <span>Dữ liệu hiện lưu cục bộ. Hãy cấu hình kết nối <b>Supabase</b> để tự động đồng bộ hóa đám mây và bảo vệ dữ liệu.</span>
+            </div>
+            <button class="btn btn-secondary sync-banner-btn" onclick="switchTab('settings')">
+                <i data-lucide="settings"></i>
+                <span>Cấu hình ngay</span>
+            </button>
+        `;
+    } else if (!isLoggedIn) {
+        const sourceText = config.source === 'build' ? ' (Tự động từ GitHub)' : '';
+        banner.className = 'sync-banner not-logged-in';
+        banner.innerHTML = `
+            <div class="sync-banner-content">
+                <span class="status-dot yellow"></span>
+                <span>Đã kết nối Supabase${sourceText}. Bạn chưa đăng nhập tài khoản đồng bộ đám mây.</span>
+            </div>
+            <button class="btn btn-secondary sync-banner-btn" onclick="switchTab('settings')">
+                <i data-lucide="log-in"></i>
+                <span>Đăng nhập ngay</span>
+            </button>
+        `;
+    } else {
+        const lastSyncStr = localStorage.getItem('last_sync_time') || 'Chưa đồng bộ';
+        let displayTime = lastSyncStr;
+        if (lastSyncStr !== 'Chưa đồng bộ') {
+            try {
+                const date = new Date(lastSyncStr);
+                displayTime = date.toLocaleTimeString('vi-VN') + ' ' + date.toLocaleDateString('vi-VN');
+            } catch (e) {}
+        }
+        
+        banner.className = 'sync-banner synced';
+        banner.innerHTML = `
+            <div class="sync-banner-content">
+                <span class="status-dot green"></span>
+                <span>Đã đồng bộ đám mây với tài khoản <b>${state.user.email}</b>. Lần cuối: <span class="sync-time">${displayTime}</span></span>
+            </div>
+            <button class="btn btn-secondary sync-banner-btn" id="bannerSyncBtn">
+                <i data-lucide="refresh-cw"></i>
+                <span>Đồng bộ ngay</span>
+            </button>
+        `;
+        
+        const syncBtn = document.getElementById('bannerSyncBtn');
+        if (syncBtn) {
+            syncBtn.addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.add('spin-anim');
+                btn.disabled = true;
+                await performSync(false);
+                btn.disabled = false;
+                if (icon) icon.classList.remove('spin-anim');
+            });
+        }
+    }
+    
+    lucide.createIcons();
+}
+

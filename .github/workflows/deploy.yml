@@ -1,0 +1,59 @@
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Single deploy job since we're just deploying; no build step needed
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject Supabase Secrets
+        run: |
+          URL_VAL="${{ secrets.VITE_SUPABASE_URL }}"
+          if [ -z "$URL_VAL" ]; then
+            URL_VAL="${{ vars.VITE_SUPABASE_URL }}"
+          fi
+
+          KEY_VAL="${{ secrets.VITE_SUPABASE_ANON_KEY }}"
+          if [ -z "$KEY_VAL" ]; then
+            KEY_VAL="${{ vars.VITE_SUPABASE_ANON_KEY }}"
+          fi
+
+          # Replace VITE_SUPABASE_URL_PLACEHOLDER and VITE_SUPABASE_ANON_KEY_PLACEHOLDER in app.js
+          sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" app.js
+          sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" app.js
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
