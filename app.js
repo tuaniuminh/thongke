@@ -6,6 +6,10 @@ import * as sync from './sync.js';
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
 
+// Default fallback (uses your pc_flex project credentials)
+const DEFAULT_SUPABASE_URL = 'https://rwmhivfwjusezxedjtgw.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_sOm6SWd3dIIerce97LHXNw_OVCroPTr';
+
 // Helper to check and retrieve Supabase connection credentials
 function getSupabaseConfig() {
     if (localStorage.getItem('supabase_disabled') === 'true') {
@@ -29,8 +33,10 @@ function getSupabaseConfig() {
         return { url: buildUrlVal, key: buildKeyVal, source: 'build' };
     }
     
-    return { url: null, key: null, source: 'none' };
+    // Fall back to default pc_flex Supabase credentials
+    return { url: DEFAULT_SUPABASE_URL, key: DEFAULT_SUPABASE_ANON_KEY, source: 'default' };
 }
+
 
 
 // --- State Variables ---
@@ -988,9 +994,11 @@ function renderSettings() {
             </form>
         `;
     } else {
-        // Show Auth state or Sync trigger
         const isUserLoggedIn = state.user !== null;
-        const sourceText = config.source === 'build' ? ' (Tự động từ GitHub)' : '';
+        let sourceText = '';
+        if (config.source === 'build') sourceText = ' (Tự động từ GitHub)';
+        else if (config.source === 'default') sourceText = ' (Dùng chung với pc_flex)';
+
         
         if (!isUserLoggedIn) {
             syncView.innerHTML = `
@@ -2126,7 +2134,10 @@ function renderDashboardSyncBanner() {
             </button>
         `;
     } else if (!isLoggedIn) {
-        const sourceText = config.source === 'build' ? ' (Tự động từ GitHub)' : '';
+        let sourceText = '';
+        if (config.source === 'build') sourceText = ' (Tự động từ GitHub)';
+        else if (config.source === 'default') sourceText = ' (Dùng chung với pc_flex)';
+        
         banner.className = 'sync-banner not-logged-in';
         banner.innerHTML = `
             <div class="sync-banner-content">
@@ -2138,6 +2149,7 @@ function renderDashboardSyncBanner() {
                 <span>Đăng nhập ngay</span>
             </button>
         `;
+
     } else {
         const lastSyncStr = localStorage.getItem('last_sync_time') || 'Chưa đồng bộ';
         let displayTime = lastSyncStr;
