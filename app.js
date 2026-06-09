@@ -46,10 +46,7 @@ function parseAmountInput(valStr) {
     if (!valStr) return 0;
     const clean = valStr.replace(/\D/g, '');
     let num = Number(clean) || 0;
-    if (num > 0 && num < 10000) {
-        num = num * 1000;
-    }
-    return num;
+    return num * 1000; // Always multiply by 1000
 }
 
 // Show Toast Notifications
@@ -565,7 +562,7 @@ window.editReceivedRecord = function(id) {
     document.getElementById('receivedId').value = record.id;
     document.getElementById('recName').value = record.name;
     document.getElementById('recRelationship').value = record.relationship;
-    document.getElementById('recAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount);
+    document.getElementById('recAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount / 1000);
     document.getElementById('recDate').value = record.date;
     
     const isReturned = record.status === 'returned';
@@ -701,7 +698,7 @@ window.editSentRecord = function(id) {
     document.getElementById('sentName').value = record.name;
     document.getElementById('sentType').value = record.event_type;
     document.getElementById('sentRelationship').value = record.relationship;
-    document.getElementById('sentAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount);
+    document.getElementById('sentAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount / 1000);
     document.getElementById('sentDate').value = record.date;
     document.getElementById('sentNotes').value = record.notes || '';
     
@@ -1265,10 +1262,6 @@ function setupAmountFormatting(inputElement) {
         if (!clean) return;
         
         let num = Number(clean);
-        if (num > 0 && num < 10000) {
-            num = num * 1000;
-        }
-        
         e.target.value = new Intl.NumberFormat('vi-VN').format(num);
     });
 }
