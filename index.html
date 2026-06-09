@@ -77,7 +77,7 @@
                             <i data-lucide="menu"></i>
                         </button>
                         <h1 id="currentTabTitle" style="margin: 0;">Tổng quan</h1>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-top: 4px;">v1.5.0</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-top: 4px;">v1.7.0</span>
                     </div>
                     <p id="currentTabSubtitle">Thống kê hoạt động hiếu hỷ gần đây</p>
                 </div>
@@ -363,7 +363,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Thiết lập Mật khẩu chính</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.5.0</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.7.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px; line-height: 1.4;">
                         Để bảo vệ các khoản tiền mừng và danh sách bạn bè riêng tư, toàn bộ dữ liệu sẽ được mã hóa an toàn trên thiết bị của bạn trước khi đồng bộ.
@@ -400,7 +400,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <span>Giải mã Sổ ghi chép</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.5.0</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.7.0</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                     Nhập Master Password để truy cập cơ sở dữ liệu hiếu hỷ của bạn.
@@ -429,11 +429,11 @@
             </div>
             <form id="receivedForm">
                 <input type="hidden" id="receivedId">
-                <div class="form-group">
-                    <label class="form-label" for="recName">Họ và Tên người mừng</label>
-                    <input type="text" class="form-control" id="recName" required placeholder="Ví dụ: Nguyễn Văn A">
-                </div>
                 <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="recName">Họ và Tên người mừng</label>
+                        <input type="text" class="form-control" id="recName" required placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
                     <div class="form-group">
                         <label class="form-label" for="recRelationship">Mối quan hệ</label>
                         <select class="form-control" id="recRelationship" required>
@@ -445,14 +445,43 @@
                             <option value="Khác" selected>Khác</option>
                         </select>
                     </div>
+                </div>
+                
+                <div class="form-row">
                     <div class="form-group">
+                        <label class="form-label">Hình thức mừng</label>
+                        <div style="display: flex; gap: 24px; margin-top: 8px;">
+                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                                <input type="radio" name="recGiftType" value="money" checked style="width:16px; height:16px; accent-color: var(--primary-color);">
+                                <span>Tiền mặt</span>
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                                <input type="radio" name="recGiftType" value="gold" style="width:16px; height:16px; accent-color: var(--primary-color);">
+                                <span>Nhận Vàng (Chỉ)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="recMoneyGroup">
                         <label class="form-label" for="recAmount">Số tiền mừng (nghìn đồng)</label>
                         <div style="position: relative; display: flex; align-items: center;">
-                            <input type="text" class="form-control" id="recAmount" required placeholder="Ví dụ: 500" style="padding-right: 65px;">
+                            <input type="text" class="form-control" id="recAmount" placeholder="Ví dụ: 500" style="padding-right: 65px;">
                             <span style="position: absolute; right: 16px; color: var(--text-muted); font-weight: 600; pointer-events: none;">.000 đ</span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Gold Fields (Hidden by default) -->
+                <div class="form-row" id="recGoldGroup" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="recGoldAmount">Số lượng vàng (chỉ)</label>
+                        <input type="number" step="0.01" class="form-control" id="recGoldAmount" placeholder="Ví dụ: 1 hoặc 0.5" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="recGoldType">Loại vàng / Kiểu dáng</label>
+                        <input type="text" class="form-control" id="recGoldType" placeholder="Nhẫn tròn 9999, Miếng SJC...">
+                    </div>
+                </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label" for="recDate">Ngày nhận</label>
@@ -490,20 +519,10 @@
             </div>
             <form id="sentForm">
                 <input type="hidden" id="sentId">
-                <div class="form-group">
-                    <label class="form-label" for="sentName">Họ và Tên người nhận</label>
-                    <input type="text" class="form-control" id="sentName" required placeholder="Ví dụ: Trần Thị B">
-                </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="sentType">Loại sự kiện</label>
-                        <select class="form-control" id="sentType" required>
-                            <option value="Đám cưới">Đám cưới</option>
-                            <option value="Đám hiếu">Đám hiếu</option>
-                            <option value="Thăm ốm">Thăm ốm</option>
-                            <option value="Tân gia">Tân gia</option>
-                            <option value="Khác" selected>Khác</option>
-                        </select>
+                        <label class="form-label" for="sentName">Họ và Tên người nhận</label>
+                        <input type="text" class="form-control" id="sentName" required placeholder="Ví dụ: Trần Thị B">
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="sentRelationship">Mối quan hệ</label>
@@ -517,17 +536,56 @@
                         </select>
                     </div>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="sentAmount">Số tiền mừng (nghìn đồng)</label>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <input type="text" class="form-control" id="sentAmount" required placeholder="Ví dụ: 500" style="padding-right: 65px;">
-                            <span style="position: absolute; right: 16px; color: var(--text-muted); font-weight: 600; pointer-events: none;">.000 đ</span>
-                        </div>
+                        <label class="form-label" for="sentType">Loại sự kiện</label>
+                        <select class="form-control" id="sentType" required>
+                            <option value="Đám cưới">Đám cưới</option>
+                            <option value="Đám hiếu">Đám hiếu</option>
+                            <option value="Thăm ốm">Thăm ốm</option>
+                            <option value="Tân gia">Tân gia</option>
+                            <option value="Khác" selected>Khác</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="sentDate">Ngày đi</label>
                         <input type="date" class="form-control" id="sentDate" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Hình thức mừng</label>
+                        <div style="display: flex; gap: 24px; margin-top: 8px;">
+                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                                <input type="radio" name="sentGiftType" value="money" checked style="width:16px; height:16px; accent-color: var(--primary-color);">
+                                <span>Tiền mặt</span>
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                                <input type="radio" name="sentGiftType" value="gold" style="width:16px; height:16px; accent-color: var(--primary-color);">
+                                <span>Mừng Vàng (Chỉ)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="sentMoneyGroup">
+                        <label class="form-label" for="sentAmount">Số tiền mừng (nghìn đồng)</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="text" class="form-control" id="sentAmount" placeholder="Ví dụ: 500" style="padding-right: 65px;">
+                            <span style="position: absolute; right: 16px; color: var(--text-muted); font-weight: 600; pointer-events: none;">.000 đ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gold Fields (Hidden by default) -->
+                <div class="form-row" id="sentGoldGroup" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="sentGoldAmount">Số lượng vàng (chỉ)</label>
+                        <input type="number" step="0.01" class="form-control" id="sentGoldAmount" placeholder="Ví dụ: 1 hoặc 0.5" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sentGoldType">Loại vàng / Kiểu dáng</label>
+                        <input type="text" class="form-control" id="sentGoldType" placeholder="Nhẫn tròn 9999, Miếng SJC...">
                     </div>
                 </div>
                 <div class="form-group">
@@ -570,7 +628,7 @@
     <div class="modal-overlay" id="importNotesModal">
         <div class="modal-container" style="width: 600px; max-width: 95%;">
             <div class="modal-header">
-                <h2>Nhập nhanh từ Ghi chú (v1.5.0)</h2>
+                <h2>Nhập nhanh từ Ghi chú (v1.7.0)</h2>
                 <button class="close-btn" onclick="closeModal('importNotesModal')">&times;</button>
             </div>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
@@ -586,9 +644,18 @@
                         </select>
                     </div>
                 </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="form-label">Tải lên file ghi chú (.txt, .html từ iPhone...)</label>
+                    <div class="file-upload-zone" id="notesDragDropZone">
+                        <i data-lucide="upload-cloud"></i>
+                        <span class="main-text">Kéo thả file ghi chú vào đây hoặc bấm để chọn</span>
+                        <span class="sub-text">Hỗ trợ file văn bản (.txt) hoặc file trang web (.html, .htm)</span>
+                        <input type="file" id="notesFileInput" accept=".txt,.html,.htm" style="display: none;">
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label class="form-label" for="importNotesText">Nội dung danh sách ghi chú</label>
-                    <textarea class="form-control" id="importNotesText" rows="8" required placeholder="Nguyễn Văn A - 500k&#10;Trần Thị B 1 triệu&#10;Anh Tuấn bạn học 200..."></textarea>
+                    <label class="form-label" for="importNotesText">Hoặc dán trực tiếp danh sách vào đây</label>
+                    <textarea class="form-control" id="importNotesText" rows="6" required placeholder="Nguyễn Văn A - 500k&#10;Trần Thị B 1 triệu&#10;Anh Tuấn bạn học 200..."></textarea>
                 </div>
                 <button type="button" class="btn btn-secondary w-full" id="btnPreviewImportNotes" style="margin-bottom: 15px;">
                     <i data-lucide="scan-line"></i>

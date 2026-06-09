@@ -319,14 +319,19 @@ function renderDashboard() {
     const totalSentVal = activeSent.reduce((sum, g) => sum + Number(g.amount || 0), 0);
     const balanceVal = totalReceivedVal - totalSentVal;
     
+    // Gold calculations
+    const totalGoldReceivedVal = activeReceived.filter(g => g.gift_type === 'gold').reduce((sum, g) => sum + Number(g.gold_amount || 0), 0);
+    const totalGoldSentVal = activeSent.filter(g => g.gift_type === 'gold').reduce((sum, g) => sum + Number(g.gold_amount || 0), 0);
+    const goldBalanceVal = totalGoldReceivedVal - totalGoldSentVal;
+    
     const pendingReturnCount = activeReceived.filter(g => g.status === 'pending').length;
     
     // 2. Set Text values
     document.getElementById('statReceived').innerText = formatVND(totalReceivedVal);
-    document.getElementById('statReceivedCount').innerText = `${activeReceived.length} người`;
+    document.getElementById('statReceivedCount').innerText = `${activeReceived.length} người${totalGoldReceivedVal > 0 ? ` • ${totalGoldReceivedVal} chỉ` : ''}`;
     
     document.getElementById('statSent').innerText = formatVND(totalSentVal);
-    document.getElementById('statSentCount').innerText = `${activeSent.length} sự kiện`;
+    document.getElementById('statSentCount').innerText = `${activeSent.length} sự kiện${totalGoldSentVal > 0 ? ` • ${totalGoldSentVal} chỉ` : ''}`;
     
     const balanceEl = document.getElementById('statBalance');
     balanceEl.innerText = formatVND(balanceVal);
@@ -334,6 +339,11 @@ function renderDashboard() {
         balanceEl.style.color = 'var(--accent-emerald)';
     } else {
         balanceEl.style.color = 'var(--accent-rose)';
+    }
+    
+    const balanceSubEl = balanceEl.nextElementSibling;
+    if (balanceSubEl) {
+        balanceSubEl.innerText = `Nhận cưới - Tôi đi mừng${(totalGoldReceivedVal > 0 || totalGoldSentVal > 0) ? ` • Chênh lệch: ${goldBalanceVal >= 0 ? '+' : ''}${goldBalanceVal} chỉ` : ''}`;
     }
     
     document.getElementById('statPendingReturn').innerText = `${pendingReturnCount} người`;
@@ -515,10 +525,14 @@ function renderRecentActivity(received, sent) {
         if (act.flow === 'in') {
             flowBadge = '<span class="badge badge-status-returned"><i data-lucide="arrow-down-left" style="width:12px;height:12px;margin-right:4px;"></i>Thu</span>';
             eventBadge = '<span class="badge badge-event-wedding">Mừng đám cưới tôi</span>';
-            amountText = `<span style="color:var(--accent-emerald); font-weight:600;">+${formatVND(act.amount)}</span>`;
+            amountText = act.gift_type === 'gold'
+                ? `<span style="color:var(--accent-emerald); font-weight:600;">+${act.gold_amount} chỉ (${escapeHTML(act.gold_type || 'Vàng')})</span>`
+                : `<span style="color:var(--accent-emerald); font-weight:600;">+${formatVND(act.amount)}</span>`;
         } else {
             flowBadge = '<span class="badge badge-status-pending"><i data-lucide="arrow-up-right" style="width:12px;height:12px;margin-right:4px;"></i>Chi</span>';
-            amountText = `<span style="color:var(--text-primary); font-weight:600;">-${formatVND(act.amount)}</span>`;
+            amountText = act.gift_type === 'gold'
+                ? `<span style="color:var(--text-primary); font-weight:600;">-${act.gold_amount} chỉ (${escapeHTML(act.gold_type || 'Vàng')})</span>`
+                : `<span style="color:var(--text-primary); font-weight:600;">-${formatVND(act.amount)}</span>`;
             
             let evClass = 'badge-event-other';
             if (act.event_type === 'Đám cưới') evClass = 'badge-event-wedding';
@@ -565,6 +579,34 @@ window.toggleReceivedReturnStatus = async function(id) {
     performSync(true);
 };
 
+// Toggle Received Form Inputs (Money vs Gold)
+function toggleRecGiftType(type) {
+    const moneyGroup = document.getElementById('recMoneyGroup');
+    const goldGroup = document.getElementById('recGoldGroup');
+    
+    if (type === 'gold') {
+        moneyGroup.style.display = 'none';
+        goldGroup.style.display = 'flex';
+    } else {
+        moneyGroup.style.display = 'flex';
+        goldGroup.style.display = 'none';
+    }
+}
+
+// Toggle Sent Form Inputs (Money vs Gold)
+function toggleSentGiftType(type) {
+    const moneyGroup = document.getElementById('sentMoneyGroup');
+    const goldGroup = document.getElementById('sentGoldGroup');
+    
+    if (type === 'gold') {
+        moneyGroup.style.display = 'none';
+        goldGroup.style.display = 'flex';
+    } else {
+        moneyGroup.style.display = 'flex';
+        goldGroup.style.display = 'none';
+    }
+}
+
 window.editReceivedRecord = function(id) {
     const record = state.receivedGifts.find(g => g.id === id);
     if (!record) return;
@@ -572,14 +614,27 @@ window.editReceivedRecord = function(id) {
     document.getElementById('receivedId').value = record.id;
     document.getElementById('recName').value = record.name;
     document.getElementById('recRelationship').value = record.relationship;
-    document.getElementById('recAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount / 1000);
     document.getElementById('recDate').value = record.date;
     
     const isReturned = record.status === 'returned';
     document.getElementById('recStatus').checked = isReturned;
     document.getElementById('recStatusLabel').innerText = isReturned ? 'Đã đi mừng cưới lại họ' : 'Chưa đi mừng cưới lại họ';
-    
     document.getElementById('recNotes').value = record.notes || '';
+    
+    const giftType = record.gift_type || 'money';
+    const radioEl = document.querySelector(`input[name="recGiftType"][value="${giftType}"]`);
+    if (radioEl) radioEl.checked = true;
+    toggleRecGiftType(giftType);
+    
+    if (giftType === 'gold') {
+        document.getElementById('recGoldAmount').value = record.gold_amount || '';
+        document.getElementById('recGoldType').value = record.gold_type || '';
+        document.getElementById('recAmount').value = '';
+    } else {
+        document.getElementById('recAmount').value = new Intl.NumberFormat('vi-VN').format((record.amount || 0) / 1000);
+        document.getElementById('recGoldAmount').value = '';
+        document.getElementById('recGoldType').value = '';
+    }
     
     document.getElementById('receivedModalTitle').innerText = 'Chỉnh sửa khoản nhận mừng cưới';
     document.getElementById('receivedModal').classList.add('active');
@@ -669,7 +724,9 @@ function renderReceivedTable() {
         row.innerHTML = `
             <td data-label="Họ & Tên" style="font-weight: 600;">${escapeHTML(g.name)}</td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
-            <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">+${formatVND(g.amount)}</td>
+            <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">
+                ${g.gift_type === 'gold' ? `+${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `+${formatVND(g.amount)}`}
+            </td>
             <td data-label="Ngày nhận">${formatDate(g.date)}</td>
             <td data-label="Đã trả lễ?">
                 <label class="status-switch">
@@ -708,9 +765,23 @@ window.editSentRecord = function(id) {
     document.getElementById('sentName').value = record.name;
     document.getElementById('sentType').value = record.event_type;
     document.getElementById('sentRelationship').value = record.relationship;
-    document.getElementById('sentAmount').value = new Intl.NumberFormat('vi-VN').format(record.amount / 1000);
     document.getElementById('sentDate').value = record.date;
     document.getElementById('sentNotes').value = record.notes || '';
+    
+    const giftType = record.gift_type || 'money';
+    const radioEl = document.querySelector(`input[name="sentGiftType"][value="${giftType}"]`);
+    if (radioEl) radioEl.checked = true;
+    toggleSentGiftType(giftType);
+    
+    if (giftType === 'gold') {
+        document.getElementById('sentGoldAmount').value = record.gold_amount || '';
+        document.getElementById('sentGoldType').value = record.gold_type || '';
+        document.getElementById('sentAmount').value = '';
+    } else {
+        document.getElementById('sentAmount').value = new Intl.NumberFormat('vi-VN').format((record.amount || 0) / 1000);
+        document.getElementById('sentGoldAmount').value = '';
+        document.getElementById('sentGoldType').value = '';
+    }
     
     document.getElementById('sentModalTitle').innerText = 'Chỉnh sửa khoản đi mừng';
     document.getElementById('sentModal').classList.add('active');
@@ -802,7 +873,9 @@ function renderSentTable() {
             <td data-label="Họ & Tên" style="font-weight: 600;">${escapeHTML(g.name)}</td>
             <td data-label="Loại sự kiện"><span class="badge ${evClass}">${g.event_type}</span></td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
-            <td data-label="Số tiền chi" style="color: var(--text-primary); font-weight:600;">-${formatVND(g.amount)}</td>
+            <td data-label="Số tiền chi" style="color: var(--text-primary); font-weight:600;">
+                ${g.gift_type === 'gold' ? `-${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `-${formatVND(g.amount)}`}
+            </td>
             <td data-label="Ngày chi">${formatDate(g.date)}</td>
             <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
                 ${escapeHTML(g.notes || '-')}
@@ -1126,13 +1199,15 @@ function handleExportCsv() {
     
     activeReceived.forEach(g => {
         const statusText = g.status === 'returned' ? 'Đã đi mừng cưới lại họ' : 'Chưa đi lại';
-        csvContent += `NHẬN MỪNG CƯỚI,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}",${g.amount},"Mừng cưới tôi",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
+        const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
+        csvContent += `NHẬN MỪNG CƯỚI,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","Mừng cưới tôi",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
     });
     
     // Generate CSV for Sent
     const activeSent = state.sentGifts.filter(g => !g.deleted_at);
     activeSent.forEach(g => {
-        csvContent += `TÔI ĐI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}",${g.amount},"${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
+        const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
+        csvContent += `TÔI ĐI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
     });
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1211,6 +1286,12 @@ function setupModalListeners() {
         document.getElementById('recDate').value = new Date().toISOString().slice(0, 10);
         document.getElementById('recStatus').checked = false;
         document.getElementById('recStatusLabel').innerText = 'Chưa đi mừng cưới lại họ';
+        
+        // Reset gold fields
+        const radioEl = document.querySelector('input[name="recGiftType"][value="money"]');
+        if (radioEl) radioEl.checked = true;
+        toggleRecGiftType('money');
+        
         document.getElementById('receivedModalTitle').innerText = 'Thêm khoản nhận mừng cưới';
         document.getElementById('receivedModal').classList.add('active');
     });
@@ -1221,6 +1302,12 @@ function setupModalListeners() {
         document.getElementById('sentForm').reset();
         document.getElementById('sentId').value = '';
         document.getElementById('sentDate').value = new Date().toISOString().slice(0, 10);
+        
+        // Reset gold fields
+        const radioEl = document.querySelector('input[name="sentGiftType"][value="money"]');
+        if (radioEl) radioEl.checked = true;
+        toggleSentGiftType('money');
+        
         document.getElementById('sentModalTitle').innerText = 'Thêm khoản đi mừng';
         document.getElementById('sentModal').classList.add('active');
     });
@@ -1239,6 +1326,19 @@ function setupModalListeners() {
     setupAmountFormatting(document.getElementById('recAmount'));
     setupAmountFormatting(document.getElementById('sentAmount'));
 
+    // Bind Gift Type Toggles
+    document.querySelectorAll('input[name="recGiftType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            toggleRecGiftType(e.target.value);
+        });
+    });
+    
+    document.querySelectorAll('input[name="sentGiftType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            toggleSentGiftType(e.target.value);
+        });
+    });
+
     // Choose import from notes button listener
     document.getElementById('chooseImportNotesBtn').addEventListener('click', () => {
         closeModal('quickAddModal');
@@ -1249,10 +1349,80 @@ function setupModalListeners() {
 
     document.getElementById('btnPreviewImportNotes').addEventListener('click', handleNotesPreview);
 
+    // Bind iPhone Notes file drag-and-drop / upload
+    const notesDragDropZone = document.getElementById('notesDragDropZone');
+    const notesFileInput = document.getElementById('notesFileInput');
+    
+    if (notesDragDropZone && notesFileInput) {
+        notesDragDropZone.addEventListener('click', () => {
+            notesFileInput.click();
+        });
+        
+        notesDragDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            notesDragDropZone.style.borderColor = 'var(--primary-color)';
+            notesDragDropZone.style.background = 'rgba(99, 102, 241, 0.04)';
+        });
+        
+        notesDragDropZone.addEventListener('dragleave', () => {
+            notesDragDropZone.style.borderColor = 'var(--border-color)';
+            notesDragDropZone.style.background = 'var(--bg-secondary)';
+        });
+        
+        notesDragDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            notesDragDropZone.style.borderColor = 'var(--border-color)';
+            notesDragDropZone.style.background = 'var(--bg-secondary)';
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleNotesFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        notesFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                handleNotesFileUpload(e.target.files[0]);
+            }
+        });
+    }
+
     // Handle forms submit
     document.getElementById('receivedForm').addEventListener('submit', handleReceivedSubmit);
     document.getElementById('sentForm').addEventListener('submit', handleSentSubmit);
     document.getElementById('importNotesForm').addEventListener('submit', handleNotesImportSubmit);
+}
+
+function handleNotesFileUpload(file) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        let content = evt.target.result;
+        
+        if (file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, 'text/html');
+            
+            let textLines = [];
+            const paragraphs = doc.querySelectorAll('p, div, li, tr');
+            if (paragraphs.length > 0) {
+                paragraphs.forEach(p => {
+                    const txt = p.innerText || p.textContent;
+                    if (txt && txt.trim()) {
+                        textLines.push(txt.trim());
+                    }
+                });
+                content = textLines.join('\n');
+            } else {
+                content = doc.body.innerText || doc.body.textContent || "";
+            }
+        }
+        
+        document.getElementById('importNotesText').value = content;
+        showToast(`Đã tải file ghi chú: ${file.name}`);
+        
+        // Auto trigger preview
+        handleNotesPreview();
+    };
+    reader.readAsText(file, 'UTF-8');
 }
 
 // Parse Notes text area dynamically
@@ -1270,51 +1440,72 @@ function parseNotesText(text, isReceivedFlow) {
         
         let name = '';
         let amount = 0;
+        let gift_type = 'money';
+        let gold_amount = 0;
+        let gold_type = '';
         
-        // Match numbers, k, tr, triệu patterns at the end of the line
-        const regex = /(?:[\d.,]+)\s*(?:k|tr|triệu|trieu|đ|d)?\s*$/i;
-        const match = trimmed.match(regex);
+        // 1. Check for gold patterns (e.g. 1 chỉ vàng, 0.5 chỉ, 2 lượng)
+        const goldRegex = /(?:[\d.,]+)\s*(?:chỉ vàng|chỉ|chi vang|chi|lượng|cây)\s*$/i;
+        const goldMatch = trimmed.match(goldRegex);
         
-        if (match) {
-            const rawAmountStr = match[0].trim().toLowerCase();
-            name = trimmed.substring(0, match.index).trim();
-            
-            // Clean name punctuation
+        if (goldMatch) {
+            gift_type = 'gold';
+            const rawGoldStr = goldMatch[0].trim().toLowerCase();
+            name = trimmed.substring(0, goldMatch.index).trim();
             name = name.replace(/[-:,]+$/, '').trim();
             
-            // Extract numeric value
-            let cleanNumStr = rawAmountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
-            let val = parseFloat(cleanNumStr.replace(/\./g, ''));
-            
-            // Check for floating decimal like 1.5 (if it has less than 3 digits after the dot)
-            if (cleanNumStr.includes('.')) {
-                const parts = cleanNumStr.split('.');
-                if (parts.length === 2 && parts[1].length < 3) {
-                    val = parseFloat(cleanNumStr);
-                }
-            }
-            
-            if (rawAmountStr.includes('k')) {
-                amount = val * 1000;
-            } else if (rawAmountStr.includes('tr') || rawAmountStr.includes('triệu') || rawAmountStr.includes('trieu')) {
-                amount = val * 1000000;
-            } else {
-                if (val > 0 && val < 10000) {
-                    amount = val * 1000;
-                } else {
-                    amount = val;
-                }
-            }
+            let cleanNumStr = rawGoldStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
+            gold_amount = parseFloat(cleanNumStr) || 0;
+            gold_type = rawGoldStr.includes('lượng') || rawGoldStr.includes('cây') ? 'Lượng vàng' : 'Chỉ vàng';
         } else {
-            name = trimmed;
-            amount = 0;
+            // 2. Check for standard money pattern
+            const regex = /(?:[\d.,]+)\s*(?:k|tr|triệu|trieu|đ|d)?\s*$/i;
+            const match = trimmed.match(regex);
+            
+            if (match) {
+                gift_type = 'money';
+                const rawAmountStr = match[0].trim().toLowerCase();
+                name = trimmed.substring(0, match.index).trim();
+                name = name.replace(/[-:,]+$/, '').trim();
+                
+                // Extract numeric value
+                let cleanNumStr = rawAmountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
+                let val = parseFloat(cleanNumStr.replace(/\./g, ''));
+                
+                // Check for floating decimal like 1.5 (if it has less than 3 digits after the dot)
+                if (cleanNumStr.includes('.')) {
+                    const parts = cleanNumStr.split('.');
+                    if (parts.length === 2 && parts[1].length < 3) {
+                        val = parseFloat(cleanNumStr);
+                    }
+                }
+                
+                if (rawAmountStr.includes('k')) {
+                    amount = val * 1000;
+                } else if (rawAmountStr.includes('tr') || rawAmountStr.includes('triệu') || rawAmountStr.includes('trieu')) {
+                    amount = val * 1000000;
+                } else {
+                    if (val > 0 && val < 10000) {
+                        amount = val * 1000;
+                    } else {
+                        amount = val;
+                    }
+                }
+            } else {
+                gift_type = 'money';
+                name = trimmed;
+                amount = 0;
+            }
         }
         
         if (name) {
             results.push({
                 id: generateId(),
                 name,
+                gift_type,
                 amount,
+                gold_amount,
+                gold_type,
                 relationship: defaultRelationship,
                 date: defaultDate,
                 notes: 'Nhập nhanh từ Ghi chú',
@@ -1347,10 +1538,14 @@ function handleNotesPreview() {
     
     tempParsedNotes.forEach(item => {
         const row = document.createElement('tr');
+        const displayVal = item.gift_type === 'gold' 
+            ? `${item.gold_amount} chỉ (${item.gold_type})` 
+            : formatVND(item.amount);
+            
         row.innerHTML = `
             <td data-label="Họ & Tên" style="font-weight:600;">${escapeHTML(item.name)}</td>
             <td data-label="Số tiền" style="color:${isReceived ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight:600;">
-                ${isReceived ? '+' : '-'}${formatVND(item.amount)}
+                ${isReceived ? '+' : '-'}${displayVal}
             </td>
             <td data-label="Ghi chú">${escapeHTML(item.notes)}</td>
         `;
@@ -1424,16 +1619,30 @@ async function handleReceivedSubmit(e) {
     const id = document.getElementById('receivedId').value;
     const name = document.getElementById('recName').value.trim();
     const relationship = document.getElementById('recRelationship').value;
-    const amount = parseAmountInput(document.getElementById('recAmount').value);
     const date = document.getElementById('recDate').value;
     const status = document.getElementById('recStatus').checked ? 'returned' : 'pending';
     const notes = document.getElementById('recNotes').value.trim();
+    
+    const giftType = document.querySelector('input[name="recGiftType"]:checked').value;
+    let amount = 0;
+    let gold_amount = 0;
+    let gold_type = '';
+    
+    if (giftType === 'gold') {
+        gold_amount = parseFloat(document.getElementById('recGoldAmount').value) || 0;
+        gold_type = document.getElementById('recGoldType').value.trim();
+    } else {
+        amount = parseAmountInput(document.getElementById('recAmount').value);
+    }
     
     const record = {
         id: id || generateId(),
         name,
         relationship,
+        gift_type: giftType,
         amount,
+        gold_amount,
+        gold_type,
         date,
         status,
         notes,
@@ -1467,16 +1676,30 @@ async function handleSentSubmit(e) {
     const name = document.getElementById('sentName').value.trim();
     const event_type = document.getElementById('sentType').value;
     const relationship = document.getElementById('sentRelationship').value;
-    const amount = parseAmountInput(document.getElementById('sentAmount').value);
     const date = document.getElementById('sentDate').value;
     const notes = document.getElementById('sentNotes').value.trim();
+    
+    const giftType = document.querySelector('input[name="sentGiftType"]:checked').value;
+    let amount = 0;
+    let gold_amount = 0;
+    let gold_type = '';
+    
+    if (giftType === 'gold') {
+        gold_amount = parseFloat(document.getElementById('sentGoldAmount').value) || 0;
+        gold_type = document.getElementById('sentGoldType').value.trim();
+    } else {
+        amount = parseAmountInput(document.getElementById('sentAmount').value);
+    }
     
     const record = {
         id: id || generateId(),
         name,
         event_type,
         relationship,
+        gift_type: giftType,
         amount,
+        gold_amount,
+        gold_type,
         date,
         notes,
         updated_at: new Date().toISOString()
