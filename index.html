@@ -358,71 +358,143 @@
 
     <!-- Initialization / Master Password Wizard Overlay -->
     <div class="setup-overlay" id="setupWizardOverlay">
-        <div class="setup-card" id="setupWizardCard">
-            <!-- Step 1: Create Master Password (Required) -->
-            <div id="wizardStep1">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <div class="logo-icon" style="margin: 0 auto 1rem; width: 56px; height: 56px;">
-                        <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
-                    </div>
-                    <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span>Thiết lập Mật khẩu chính</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.0</span>
-                    </h2>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px; line-height: 1.4;">
-                        Để bảo vệ các khoản tiền mừng và danh sách bạn bè riêng tư, toàn bộ dữ liệu sẽ được mã hóa an toàn trên thiết bị của bạn trước khi đồng bộ.
-                    </p>
+        <div class="setup-card pin-card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <div class="logo-icon" style="margin: 0 auto 0.75rem; width: 48px; height: 48px;">
+                    <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
                 </div>
-
-                <form id="masterPasswordForm">
-                    <div class="form-group">
-                        <label class="form-label" for="setupMasterPassword">Nhập mật khẩu chính của bạn</label>
-                        <input type="password" class="form-control" id="setupMasterPassword" required placeholder="Tối thiểu 6 ký tự...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="setupMasterPasswordConfirm">Xác nhận mật khẩu chính</label>
-                        <input type="password" class="form-control" id="setupMasterPasswordConfirm" required placeholder="Nhập lại mật khẩu trên...">
-                    </div>
-                    
-                    <div style="margin-top: 2rem;">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <span>Tiếp tục & Khởi tạo ứng dụng</span>
-                            <i data-lucide="arrow-right"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Unlock Overlay (if Password already set in localStorage) -->
-    <div class="setup-overlay" id="unlockOverlay" style="display: none;">
-        <div class="setup-card">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="logo-icon" style="margin: 0 auto 1rem; width: 56px; height: 56px;">
-                    <i data-lucide="lock" style="width: 28px; height: 28px;"></i>
-                </div>
-                <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <span>Giải mã Sổ ghi chép</span>
+                <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
+                    <span>Thiết lập Mã PIN</span>
                     <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.0</span>
                 </h2>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
-                    Nhập Master Password để truy cập cơ sở dữ liệu hiếu hỷ của bạn.
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
+                    Nhập 8 chữ số để đặt làm mã PIN bảo vệ sổ
                 </p>
             </div>
 
-            <form id="unlockForm">
-                <div class="form-group">
-                    <label class="form-label" for="unlockPassword">Mật khẩu chính (Master Password)</label>
-                    <input type="password" class="form-control" id="unlockPassword" required placeholder="Nhập mật khẩu...">
+            <!-- Passcode Dots -->
+            <div class="passcode-dots-container">
+                <div class="passcode-dots" id="wizardPasscodeDots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
                 </div>
-                <button type="submit" class="btn btn-primary w-full" style="margin-top: 1.5rem;">
-                    <i data-lucide="key"></i>
-                    <span>Mở khóa ứng dụng</span>
-                </button>
-            </form>
+            </div>
+
+            <!-- Keypad -->
+            <div class="pin-keypad" id="wizardKeypad">
+                <button type="button" class="keypad-btn" data-val="1">1</button>
+                <button type="button" class="keypad-btn" data-val="2">2</button>
+                <button type="button" class="keypad-btn" data-val="3">3</button>
+                
+                <button type="button" class="keypad-btn" data-val="4">4</button>
+                <button type="button" class="keypad-btn" data-val="5">5</button>
+                <button type="button" class="keypad-btn" data-val="6">6</button>
+                
+                <button type="button" class="keypad-btn" data-val="7">7</button>
+                <button type="button" class="keypad-btn" data-val="8">8</button>
+                <button type="button" class="keypad-btn" data-val="9">9</button>
+                
+                <button type="button" class="keypad-btn utility-btn" id="btnWizardClear">C</button>
+                <button type="button" class="keypad-btn" data-val="0">0</button>
+                <button type="button" class="keypad-btn utility-btn" id="btnWizardDelete"><i data-lucide="delete"></i></button>
+            </div>
         </div>
     </div>
+
+    <!-- Unlock Overlay -->
+    <div class="setup-overlay" id="unlockOverlay" style="display: none;">
+        <div class="setup-card pin-card" id="unlockCard">
+            <!-- 1. PIN Mode View -->
+            <div id="unlockPinModeView">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <div class="logo-icon" style="margin: 0 auto 0.75rem; width: 48px; height: 48px;">
+                        <i data-lucide="lock" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>Giải mã Sổ ghi chép</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.0</span>
+                    </h2>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
+                        Nhập 8 chữ số mã PIN để mở khóa
+                    </p>
+                </div>
+
+                <!-- Passcode Dots -->
+                <div class="passcode-dots-container">
+                    <div class="passcode-dots" id="unlockPasscodeDots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+
+                <!-- Keypad -->
+                <div class="pin-keypad" id="unlockKeypad">
+                    <button type="button" class="keypad-btn" data-val="1">1</button>
+                    <button type="button" class="keypad-btn" data-val="2">2</button>
+                    <button type="button" class="keypad-btn" data-val="3">3</button>
+                    
+                    <button type="button" class="keypad-btn" data-val="4">4</button>
+                    <button type="button" class="keypad-btn" data-val="5">5</button>
+                    <button type="button" class="keypad-btn" data-val="6">6</button>
+                    
+                    <button type="button" class="keypad-btn" data-val="7">7</button>
+                    <button type="button" class="keypad-btn" data-val="8">8</button>
+                    <button type="button" class="keypad-btn" data-val="9">9</button>
+                    
+                    <button type="button" class="keypad-btn utility-btn" id="btnUnlockClear">C</button>
+                    <button type="button" class="keypad-btn" data-val="0">0</button>
+                    <button type="button" class="keypad-btn utility-btn" id="btnUnlockDelete"><i data-lucide="delete"></i></button>
+                </div>
+
+                <button type="button" class="btn-text-mode" id="btnUnlockSwitchToKeyboard" style="display: block; margin: 15px auto 0; font-size: 0.8rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; width: 100%;">
+                    Nhập bằng mật khẩu chữ
+                </button>
+            </div>
+
+            <!-- 2. Keyboard Mode View (Hidden by default, fallback) -->
+            <div id="unlockKeyboardModeView" style="display: none;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div class="logo-icon" style="margin: 0 auto 1rem; width: 56px; height: 56px;">
+                        <i data-lucide="lock" style="width: 28px; height: 28px;"></i>
+                    </div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;">
+                        Giải mã Sổ ghi chép
+                    </h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
+                        Nhập Master Password để truy cập sổ.
+                    </p>
+                </div>
+
+                <form id="unlockForm">
+                    <div class="form-group">
+                        <label class="form-label" for="unlockPassword">Mật khẩu chính (Master Password)</label>
+                        <input type="password" class="form-control" id="unlockPassword" required placeholder="Nhập mật khẩu...">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full" style="margin-top: 1.5rem;">
+                        <i data-lucide="key"></i>
+                        <span>Mở khóa ứng dụng</span>
+                    </button>
+                </form>
+
+                <button type="button" class="btn-text-mode" id="btnUnlockSwitchToPin" style="display: block; margin: 15px auto 0; font-size: 0.8rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; width: 100%;">
+                    Quay lại bàn phím số PIN
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Add/Edit Received Gift Modal -->
     <div class="modal-overlay" id="receivedModal">

@@ -62,6 +62,12 @@ let state = {
 let relationshipChart = null;
 let eventTypeChart = null;
 
+// PIN Code state buffers
+let wizardPinBuffer = "";
+let wizardFirstPin = "";
+let unlockPinBuffer = "";
+
+
 // --- Helper Functions ---
 
 // Generate UUID for records
@@ -1878,7 +1884,7 @@ async function handleUnlockSubmit(e) {
 
 // Change Master Password flow
 window.handleChangePassword = async function() {
-    const oldPassword = prompt("Nhập Master Password hiện tại:");
+    const oldPassword = prompt("Nhập Master Password (hoặc mã PIN) hiện tại:");
     if (!oldPassword) return;
     
     // Verify old password by decrypting local storage
@@ -1892,20 +1898,21 @@ window.handleChangePassword = async function() {
         return;
     }
     
-    const newPassword = prompt("Nhập Master Password mới (tối thiểu 6 ký tự):");
+    const newPassword = prompt("Nhập mã PIN mới (yêu cầu đúng 8 chữ số):");
     if (!newPassword) return;
-    if (newPassword.length < 6) {
-        showToast("Mật khẩu mới quá ngắn!", "error");
+    if (!/^\d{8}$/.test(newPassword)) {
+        showToast("Mã PIN mới phải đúng 8 chữ số!", "error");
         return;
     }
     
-    const confirmNew = prompt("Xác nhận mật khẩu mới:");
+    const confirmNew = prompt("Xác nhận mã PIN mới:");
     if (newPassword !== confirmNew) {
-        showToast("Xác nhận mật khẩu không trùng khớp!", "error");
+        showToast("Xác nhận mã PIN không trùng khớp!", "error");
         return;
     }
     
     // Encrypt current lists with new password and save
+
     state.masterPassword = newPassword;
     await saveLocalState();
     
@@ -1928,7 +1935,138 @@ window.handleChangePassword = async function() {
     }
 };
 
+
+// --- T9 PIN Pad Helpers & Logics ---
+
+function updatePasscodeDots(dotsContainerId, pinLength) {
+    const container = document.getElementById(dotsContainerId);
+    if (!container) return;
+    const dots = container.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        if (index < pinLength) {
+            dot.classList.add('filled');
+        } else {
+            dot.classList.remove('filled');
+        }
+    });
+}
+
+function shakeCard(cardId) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    card.classList.add('shake-anim');
+    setTimeout(() => {
+        card.classList.remove('shake-anim');
+    }, 450);
+}
+
+async function handleWizardKeypadPress(val) {
+    if (wizardPinBuffer.length >= 8) return;
+    wizardPinBuffer += val;
+    updatePasscodeDots('wizardPasscodeDots', wizardPinBuffer.length);
+    
+    if (wizardPinBuffer.length === 8) {
+        if (!wizardFirstPin) {
+            wizardFirstPin = wizardPinBuffer;
+            wizardPinBuffer = "";
+            setTimeout(() => {
+                const title = document.getElementById('wizardTitle');
+                const subtext = document.getElementById('wizardSubtext');
+                if (title) title.innerText = "Xác nhận Mã PIN";
+                if (subtext) subtext.innerText = "Nhập lại 8 chữ số vừa đặt để xác nhận";
+                updatePasscodeDots('wizardPasscodeDots', 0);
+            }, 300);
+        } else {
+            if (wizardPinBuffer === wizardFirstPin) {
+                state.masterPassword = wizardPinBuffer;
+                await saveLocalState();
+                
+                document.getElementById('setupWizardOverlay').style.display = 'none';
+                document.getElementById('appLayout').style.display = 'flex';
+                showToast("Đã thiết lập Mã PIN và khởi tạo sổ!");
+                renderAll();
+                
+                wizardPinBuffer = "";
+                wizardFirstPin = "";
+            } else {
+                shakeCard('setupWizardOverlay');
+                showToast("Mã PIN xác nhận không khớp! Vui lòng làm lại.", "error");
+                
+                wizardPinBuffer = "";
+                wizardFirstPin = "";
+                
+                setTimeout(() => {
+                    const title = document.getElementById('wizardTitle');
+                    const subtext = document.getElementById('wizardSubtext');
+                    if (title) title.innerText = "Thiết lập Mã PIN";
+                    if (subtext) subtext.innerText = "Nhập 8 chữ số để đặt làm mã PIN bảo vệ sổ";
+                    updatePasscodeDots('wizardPasscodeDots', 0);
+                }, 300);
+            }
+        }
+    }
+}
+
+async function handleUnlockKeypadPress(val) {
+    if (unlockPinBuffer.length >= 8) return;
+    unlockPinBuffer += val;
+    updatePasscodeDots('unlockPasscodeDots', unlockPinBuffer.length);
+    
+    if (unlockPinBuffer.length === 8) {
+        const pin = unlockPinBuffer;
+        
+        setTimeout(async () => {
+            const success = await loadLocalState(pin);
+            if (success) {
+                state.masterPassword = pin;
+                document.getElementById('unlockOverlay').style.display = 'none';
+                document.getElementById('appLayout').style.display = 'flex';
+                showToast("Mở khóa thành công! Chào mừng trở lại.");
+                renderAll();
+                
+                const config = getSupabaseConfig();
+                if (config.url && config.key) {
+                    sync.initSupabase(config.url, config.key);
+                    checkLoginStatus();
+                }
+                
+                unlockPinBuffer = "";
+                updatePasscodeDots('unlockPasscodeDots', 0);
+            } else {
+                shakeCard('unlockCard');
+                showToast("Sai mã PIN! Vui lòng thử lại.", "error");
+                
+                unlockPinBuffer = "";
+                updatePasscodeDots('unlockPasscodeDots', 0);
+            }
+        }, 150);
+    }
+}
+
+function handleWizardDelete() {
+    if (wizardPinBuffer.length === 0) return;
+    wizardPinBuffer = wizardPinBuffer.slice(0, -1);
+    updatePasscodeDots('wizardPasscodeDots', wizardPinBuffer.length);
+}
+
+function handleWizardClear() {
+    wizardPinBuffer = "";
+    updatePasscodeDots('wizardPasscodeDots', 0);
+}
+
+function handleUnlockDelete() {
+    if (unlockPinBuffer.length === 0) return;
+    unlockPinBuffer = unlockPinBuffer.slice(0, -1);
+    updatePasscodeDots('unlockPasscodeDots', unlockPinBuffer.length);
+}
+
+function handleUnlockClear() {
+    unlockPinBuffer = "";
+    updatePasscodeDots('unlockPasscodeDots', 0);
+}
+
 // --- DOM Init Bindings ---
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Theme initialization
@@ -1949,9 +2087,57 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('unlockOverlay').style.display = 'none';
     }
     
+    // Bind Wizard Keypad Buttons
+    const wizardKeypad = document.getElementById('wizardKeypad');
+    if (wizardKeypad) {
+        wizardKeypad.querySelectorAll('.keypad-btn[data-val]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                handleWizardKeypadPress(btn.getAttribute('data-val'));
+            });
+        });
+        document.getElementById('btnWizardClear').addEventListener('click', handleWizardClear);
+        document.getElementById('btnWizardDelete').addEventListener('click', handleWizardDelete);
+    }
+
+    // Bind Unlock Keypad Buttons
+    const unlockKeypad = document.getElementById('unlockKeypad');
+    if (unlockKeypad) {
+        unlockKeypad.querySelectorAll('.keypad-btn[data-val]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                handleUnlockKeypadPress(btn.getAttribute('data-val'));
+            });
+        });
+        document.getElementById('btnUnlockClear').addEventListener('click', handleUnlockClear);
+        document.getElementById('btnUnlockDelete').addEventListener('click', handleUnlockDelete);
+    }
+
+    // Toggle between Keyboard mode and PIN mode on Unlock Overlay
+    const btnSwitchToKeyboard = document.getElementById('btnUnlockSwitchToKeyboard');
+    const btnSwitchToPin = document.getElementById('btnUnlockSwitchToPin');
+    const pinModeView = document.getElementById('unlockPinModeView');
+    const keyboardModeView = document.getElementById('unlockKeyboardModeView');
+    
+    if (btnSwitchToKeyboard && btnSwitchToPin && pinModeView && keyboardModeView) {
+        btnSwitchToKeyboard.addEventListener('click', () => {
+            pinModeView.style.display = 'none';
+            keyboardModeView.style.display = 'block';
+            unlockPinBuffer = "";
+            updatePasscodeDots('unlockPasscodeDots', 0);
+        });
+        btnSwitchToPin.addEventListener('click', () => {
+            pinModeView.style.display = 'block';
+            keyboardModeView.style.display = 'none';
+            document.getElementById('unlockPassword').value = "";
+        });
+    }
+
     // Bind main layout components
-    document.getElementById('masterPasswordForm').addEventListener('submit', handleWizardSubmit);
+    const wizardForm = document.getElementById('masterPasswordForm');
+    if (wizardForm) {
+        wizardForm.addEventListener('submit', handleWizardSubmit);
+    }
     document.getElementById('unlockForm').addEventListener('submit', handleUnlockSubmit);
+
     
     // Bind change password button
     document.getElementById('changePasswordBtn').addEventListener('click', handleChangePassword);

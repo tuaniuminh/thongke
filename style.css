@@ -1192,4 +1192,114 @@ body.light-mode .file-upload-zone:hover {
     animation: spin 1s linear infinite;
 }
 
+/* PIN Pad Styles */
+.pin-card {
+    max-width: 380px !important;
+    padding: 2rem !important;
+}
+
+.passcode-dots-container {
+    margin: 1.5rem 0;
+}
+
+.passcode-dots {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.passcode-dots .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    background: transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.passcode-dots .dot.filled {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-glow);
+    transform: scale(1.15);
+}
+
+.pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    justify-items: center;
+    max-width: 280px;
+    margin: 1rem auto 0;
+}
+
+.keypad-btn {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    font-weight: 500;
+    font-family: var(--font-heading);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.keypad-btn:hover {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    box-shadow: 0 0 12px var(--primary-glow);
+    transform: translateY(-2px);
+}
+
+.keypad-btn:active {
+    transform: scale(0.92) translateY(0);
+}
+
+.keypad-btn.utility-btn {
+    font-size: 1.15rem;
+    background: transparent;
+    border-color: transparent;
+}
+
+.keypad-btn.utility-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+.keypad-btn.utility-btn:active {
+    transform: scale(0.95);
+}
+
+.keypad-btn i {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+}
+
+.keypad-btn:hover i {
+    color: var(--text-primary);
+}
+
+/* Shake animation for incorrect PIN */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake-anim {
+    animation: shake 0.4s ease;
+}
+
+
 
