@@ -51,23 +51,24 @@ function parseAmountInput(valStr) {
 
 // Compare records by date (descending) and updated_at (descending)
 function compareRecordsByRecent(a, b) {
-    const timeA = a.date ? new Date(a.date).getTime() : 0;
-    const timeB = b.date ? new Date(b.date).getTime() : 0;
-    
-    const validA = isNaN(timeA) ? 0 : timeA;
-    const validB = isNaN(timeB) ? 0 : timeB;
-    
-    if (validB !== validA) {
-        return validB - validA;
-    }
-    
     const updateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
     const updateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
     
     const validUpdateA = isNaN(updateA) ? 0 : updateA;
     const validUpdateB = isNaN(updateB) ? 0 : updateB;
     
-    return validUpdateB - validUpdateA;
+    if (validUpdateB !== validUpdateA) {
+        return validUpdateB - validUpdateA;
+    }
+    
+    // Fallback to date comparison if updated_at is identical
+    const timeA = a.date ? new Date(a.date).getTime() : 0;
+    const timeB = b.date ? new Date(b.date).getTime() : 0;
+    
+    const validA = isNaN(timeA) ? 0 : timeA;
+    const validB = isNaN(timeB) ? 0 : timeB;
+    
+    return validB - validA;
 }
 
 // Show Toast Notifications
