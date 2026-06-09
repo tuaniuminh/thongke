@@ -1286,9 +1286,12 @@ function parseNotesText(text, isReceivedFlow) {
             let cleanNumStr = rawAmountStr.replace(/[^\d.,]/g, '').replace(/,/g, '.');
             let val = parseFloat(cleanNumStr.replace(/\./g, ''));
             
-            // Check for floating decimal like 1.5
-            if (cleanNumStr.includes('.') && cleanNumStr.split('.').length === 2 && cleanNumStr.replace(/\D/g, '').length < 5) {
-                val = parseFloat(cleanNumStr);
+            // Check for floating decimal like 1.5 (if it has less than 3 digits after the dot)
+            if (cleanNumStr.includes('.')) {
+                const parts = cleanNumStr.split('.');
+                if (parts.length === 2 && parts[1].length < 3) {
+                    val = parseFloat(cleanNumStr);
+                }
             }
             
             if (rawAmountStr.includes('k')) {
