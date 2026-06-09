@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sổ tay Thống kê Hiếu Hỷ & Sự kiện</title>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- App Layout -->
+    <div class="app-container" id="appLayout" style="display: none;">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="heart-handshake"></i>
+                </div>
+                <div class="logo-text">Sổ Nhận & Đi Tiền</div>
+            </div>
+            
+            <nav class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" data-tab="dashboard">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Tổng quan</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tab="received">
+                        <i data-lucide="arrow-down-left"></i>
+                        <span>Mừng cưới tôi</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tab="sent">
+                        <i data-lucide="arrow-up-right"></i>
+                        <span>Tôi đi mừng</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tab="settings">
+                        <i data-lucide="settings"></i>
+                        <span>Cài đặt & Đồng bộ</span>
+                    </a>
+                </li>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-outline" id="themeToggle">
+                    <i data-lucide="sun" id="themeIcon"></i>
+                    <span id="themeText">Giao diện sáng</span>
+                </button>
+                <div class="user-badge" id="userBadge" style="display: none;">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-info">
+                        <div class="user-email" id="userEmail">user@example.com</div>
+                        <div class="user-status">Đã đăng nhập Sync</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="page-title">
+                    <button class="mobile-nav-toggle" id="sidebarToggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 id="currentTabTitle">Tổng quan</h1>
+                    <p id="currentTabSubtitle">Thống kê hoạt động hiếu hỷ gần đây</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="quickAddBtn">
+                        <i data-lucide="plus"></i>
+                        <span>Thêm ghi chép</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Tab -->
+            <section class="tab-panel active" id="tab-dashboard">
+                <!-- Summary Cards Grid -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-icon received">
+                            <i data-lucide="download"></i>
+                        </div>
+                        <div class="summary-data">
+                            <h3>Mừng cưới tôi</h3>
+                            <div class="value" id="statReceived">0 đ</div>
+                            <div class="sub-value" id="statReceivedCount">0 người</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon sent">
+                            <i data-lucide="upload"></i>
+                        </div>
+                        <div class="summary-data">
+                            <h3>Tôi đi mừng</h3>
+                            <div class="value" id="statSent">0 đ</div>
+                            <div class="sub-value" id="statSentCount">0 sự kiện</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon balance">
+                            <i data-lucide="calculator"></i>
+                        </div>
+                        <div class="summary-data">
+                            <h3>Chênh lệch thu chi</h3>
+                            <div class="value" id="statBalance">0 đ</div>
+                            <div class="sub-value">Nhận cưới - Tôi đi mừng</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon total">
+                            <i data-lucide="gift"></i>
+                        </div>
+                        <div class="summary-data">
+                            <h3>Cần trả lễ</h3>
+                            <div class="value" id="statPendingReturn">0 người</div>
+                            <div class="sub-value">Chưa đi mừng lại đám cưới họ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <div class="card-panel">
+                        <div class="chart-title">
+                            <span>Phân tích Thu Chi theo mối quan hệ</span>
+                            <i data-lucide="trending-up"></i>
+                        </div>
+                        <div class="chart-canvas-container">
+                            <canvas id="relationshipChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card-panel">
+                        <div class="chart-title">
+                            <span>Tỉ lệ Loại sự kiện đi mừng</span>
+                            <i data-lucide="pie-chart"></i>
+                        </div>
+                        <div class="chart-canvas-container">
+                            <canvas id="eventTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card-panel">
+                    <div class="chart-title">Ghi chép mới thêm gần đây</div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Chiều</th>
+                                    <th>Họ & Tên</th>
+                                    <th>Mối quan hệ</th>
+                                    <th>Số tiền</th>
+                                    <th>Loại sự kiện</th>
+                                    <th>Ngày</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivityTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Received Gifts Tab -->
+            <section class="tab-panel" id="tab-received" style="display: none;">
+                <div class="card-panel">
+                    <div class="table-controls">
+                        <div class="search-input-wrapper">
+                            <i data-lucide="search"></i>
+                            <input type="text" class="form-control" id="searchReceived" placeholder="Tìm tên người mừng...">
+                        </div>
+                        <div class="filter-group">
+                            <select class="form-control filter-select" id="filterReceivedRelation">
+                                <option value="">Tất cả mối quan hệ</option>
+                                <option value="Họ hàng">Họ hàng</option>
+                                <option value="Bạn học">Bạn học</option>
+                                <option value="Đồng nghiệp">Đồng nghiệp</option>
+                                <option value="Hàng xóm">Hàng xóm</option>
+                                <option value="Bạn xã hội">Bạn xã hội</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <select class="form-control filter-select" id="filterReceivedStatus">
+                                <option value="">Tất cả trạng thái trả lễ</option>
+                                <option value="pending">Chưa trả lễ</option>
+                                <option value="returned">Đã trả lễ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="receivedTable">
+                            <thead>
+                                <tr>
+                                    <th>Họ & Tên</th>
+                                    <th>Mối quan hệ</th>
+                                    <th>Số tiền nhận</th>
+                                    <th>Ngày nhận</th>
+                                    <th>Đã mừng cưới lại họ?</th>
+                                    <th>Ghi chú</th>
+                                    <th style="width: 100px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receivedTableBody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <div id="receivedPaginationText">Hiển thị 0-0 trên 0 bản ghi</div>
+                        <div class="pagination-btn-group">
+                            <button class="btn btn-secondary" id="btnReceivedPrev" disabled>Trước</button>
+                            <button class="btn btn-secondary" id="btnReceivedNext" disabled>Sau</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sent Gifts Tab -->
+            <section class="tab-panel" id="tab-sent" style="display: none;">
+                <div class="card-panel">
+                    <div class="table-controls">
+                        <div class="search-input-wrapper">
+                            <i data-lucide="search"></i>
+                            <input type="text" class="form-control" id="searchSent" placeholder="Tìm tên người nhận...">
+                        </div>
+                        <div class="filter-group">
+                            <select class="form-control filter-select" id="filterSentType">
+                                <option value="">Tất cả sự kiện</option>
+                                <option value="Đám cưới">Đám cưới</option>
+                                <option value="Đám hiếu">Đám hiếu</option>
+                                <option value="Thăm ốm">Thăm ốm</option>
+                                <option value="Tân gia">Tân gia</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <select class="form-control filter-select" id="filterSentRelation">
+                                <option value="">Tất cả mối quan hệ</option>
+                                <option value="Họ hàng">Họ hàng</option>
+                                <option value="Bạn học">Bạn học</option>
+                                <option value="Đồng nghiệp">Đồng nghiệp</option>
+                                <option value="Hàng xóm">Hàng xóm</option>
+                                <option value="Bạn xã hội">Bạn xã hội</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="sentTable">
+                            <thead>
+                                <tr>
+                                    <th>Họ & Tên</th>
+                                    <th>Loại sự kiện</th>
+                                    <th>Mối quan hệ</th>
+                                    <th>Số tiền chi</th>
+                                    <th>Ngày chi</th>
+                                    <th>Ghi chú</th>
+                                    <th style="width: 100px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sentTableBody">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <div id="sentPaginationText">Hiển thị 0-0 trên 0 bản ghi</div>
+                        <div class="pagination-btn-group">
+                            <button class="btn btn-secondary" id="btnSentPrev" disabled>Trước</button>
+                            <button class="btn btn-secondary" id="btnSentNext" disabled>Sau</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section class="tab-panel" id="tab-settings" style="display: none;">
+                <div class="settings-grid">
+                    <!-- Security / Master Password Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="key-round"></i>
+                            <span>Mật khẩu chính (Master Password)</span>
+                        </h2>
+                        <p class="settings-info">
+                            Dùng để mã hóa dữ liệu cục bộ trong trình duyệt của bạn trước khi đưa lên máy chủ. Bạn phải lưu trữ mật khẩu này thật kỹ. Nếu mất, dữ liệu của bạn sẽ không bao giờ được phục hồi.
+                        </p>
+                        <button class="btn btn-primary w-full" id="changePasswordBtn">
+                            <i data-lucide="refresh-cw"></i>
+                            <span>Đổi Master Password</span>
+                        </button>
+                    </div>
+
+                    <!-- Supabase Sync Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="cloud-lightning"></i>
+                            <span>Cấu hình Đồng bộ Supabase</span>
+                        </h2>
+                        <div id="supabaseConfigView">
+                            <!-- Dynamically showing details -->
+                        </div>
+                    </div>
+
+                    <!-- Import/Export Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="database"></i>
+                            <span>Xuất & Nhập dữ liệu</span>
+                        </h2>
+                        <p class="settings-info">
+                            Bạn có thể sao lưu dữ liệu dưới dạng tệp đã được mã hóa để cất trữ thủ công, hoặc xuất định dạng CSV để xem bằng Excel.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn btn-secondary" id="exportEncryptedBtn">
+                                <i data-lucide="download-cloud"></i>
+                                <span>Xuất file Backup đã mã hóa (.json)</span>
+                            </button>
+                            <button class="btn btn-secondary" id="exportCsvBtn">
+                                <i data-lucide="file-spreadsheet"></i>
+                                <span>Xuất file Excel/CSV xem thường (.csv)</span>
+                            </button>
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px;">
+                                <label class="form-label">Nhập dữ liệu từ file Backup (.json)</label>
+                                <input type="file" id="importFileInput" accept=".json" style="display:none">
+                                <button class="btn btn-outline w-full" id="importBtn">
+                                    <i data-lucide="upload-cloud"></i>
+                                    <span>Chọn file Backup để phục hồi</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Initialization / Master Password Wizard Overlay -->
+    <div class="setup-overlay" id="setupWizardOverlay">
+        <div class="setup-card" id="setupWizardCard">
+            <!-- Step 1: Create Master Password (Required) -->
+            <div id="wizardStep1">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div class="logo-icon" style="margin: 0 auto 1rem; width: 56px; height: 56px;">
+                        <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
+                    </div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;">Thiết lập Mật khẩu chính</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px; line-height: 1.4;">
+                        Để bảo vệ các khoản tiền mừng và danh sách bạn bè riêng tư, toàn bộ dữ liệu sẽ được mã hóa an toàn trên thiết bị của bạn trước khi đồng bộ.
+                    </p>
+                </div>
+
+                <form id="masterPasswordForm">
+                    <div class="form-group">
+                        <label class="form-label" for="setupMasterPassword">Nhập mật khẩu chính của bạn</label>
+                        <input type="password" class="form-control" id="setupMasterPassword" required placeholder="Tối thiểu 6 ký tự...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="setupMasterPasswordConfirm">Xác nhận mật khẩu chính</label>
+                        <input type="password" class="form-control" id="setupMasterPasswordConfirm" required placeholder="Nhập lại mật khẩu trên...">
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <span>Tiếp tục & Khởi tạo ứng dụng</span>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlock Overlay (if Password already set in localStorage) -->
+    <div class="setup-overlay" id="unlockOverlay" style="display: none;">
+        <div class="setup-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="logo-icon" style="margin: 0 auto 1rem; width: 56px; height: 56px;">
+                    <i data-lucide="lock" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h2 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;">Giải mã Sổ ghi chép</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
+                    Nhập Master Password để truy cập cơ sở dữ liệu hiếu hỷ của bạn.
+                </p>
+            </div>
+
+            <form id="unlockForm">
+                <div class="form-group">
+                    <label class="form-label" for="unlockPassword">Mật khẩu chính (Master Password)</label>
+                    <input type="password" class="form-control" id="unlockPassword" required placeholder="Nhập mật khẩu...">
+                </div>
+                <button type="submit" class="btn btn-primary w-full" style="margin-top: 1.5rem;">
+                    <i data-lucide="key"></i>
+                    <span>Mở khóa ứng dụng</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Received Gift Modal -->
+    <div class="modal-overlay" id="receivedModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="receivedModalTitle">Thêm khoản nhận mừng cưới</h2>
+                <button class="close-btn" onclick="closeModal('receivedModal')">&times;</button>
+            </div>
+            <form id="receivedForm">
+                <input type="hidden" id="receivedId">
+                <div class="form-group">
+                    <label class="form-label" for="recName">Họ và Tên người mừng</label>
+                    <input type="text" class="form-control" id="recName" required placeholder="Ví dụ: Nguyễn Văn A">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="recRelationship">Mối quan hệ</label>
+                        <select class="form-control" id="recRelationship" required>
+                            <option value="Họ hàng">Họ hàng</option>
+                            <option value="Bạn học">Bạn học</option>
+                            <option value="Đồng nghiệp">Đồng nghiệp</option>
+                            <option value="Hàng xóm">Hàng xóm</option>
+                            <option value="Bạn xã hội">Bạn xã hội</option>
+                            <option value="Khác" selected>Khác</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="recAmount">Số tiền mừng (VND)</label>
+                        <input type="number" class="form-control" id="recAmount" required placeholder="Ví dụ: 500000" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="recDate">Ngày nhận</label>
+                        <input type="date" class="form-control" id="recDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái trả lễ</label>
+                        <div style="margin-top: 8px;">
+                            <label class="status-switch">
+                                <input type="checkbox" class="status-checkbox" id="recStatus">
+                                <span class="status-slider"></span>
+                                <span id="recStatusLabel" style="font-size: 0.9rem; font-weight: 500;">Chưa đi mừng cưới lại họ</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="recNotes">Ghi chú</label>
+                    <textarea class="form-control" id="recNotes" rows="3" placeholder="Ghi chú thêm thông tin (Ví dụ: Mừng đi kèm 1 bức tranh, đi 2 người...)"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('receivedModal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="recSaveBtn">Lưu lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Sent Gift Modal -->
+    <div class="modal-overlay" id="sentModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="sentModalTitle">Thêm khoản đi mừng</h2>
+                <button class="close-btn" onclick="closeModal('sentModal')">&times;</button>
+            </div>
+            <form id="sentForm">
+                <input type="hidden" id="sentId">
+                <div class="form-group">
+                    <label class="form-label" for="sentName">Họ và Tên người nhận</label>
+                    <input type="text" class="form-control" id="sentName" required placeholder="Ví dụ: Trần Thị B">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="sentType">Loại sự kiện</label>
+                        <select class="form-control" id="sentType" required>
+                            <option value="Đám cưới">Đám cưới</option>
+                            <option value="Đám hiếu">Đám hiếu</option>
+                            <option value="Thăm ốm">Thăm ốm</option>
+                            <option value="Tân gia">Tân gia</option>
+                            <option value="Khác" selected>Khác</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sentRelationship">Mối quan hệ</label>
+                        <select class="form-control" id="sentRelationship" required>
+                            <option value="Họ hàng">Họ hàng</option>
+                            <option value="Bạn học">Bạn học</option>
+                            <option value="Đồng nghiệp">Đồng nghiệp</option>
+                            <option value="Hàng xóm">Hàng xóm</option>
+                            <option value="Bạn xã hội">Bạn xã hội</option>
+                            <option value="Khác" selected>Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="sentAmount">Số tiền mừng (VND)</label>
+                        <input type="number" class="form-control" id="sentAmount" required placeholder="Ví dụ: 500000" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sentDate">Ngày đi</label>
+                        <input type="date" class="form-control" id="sentDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="sentNotes">Ghi chú</label>
+                    <textarea class="form-control" id="sentNotes" rows="3" placeholder="Thông tin chi tiết (Ví dụ: Thăm ốm ở bệnh viện, Đi cùng cơ quan...)"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('sentModal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="sentSaveBtn">Lưu lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Add Chooser Modal -->
+    <div class="modal-overlay" id="quickAddModal">
+        <div class="modal-container" style="width: 360px;">
+            <div class="modal-header">
+                <h2>Thêm ghi chép mới</h2>
+                <button class="close-btn" onclick="closeModal('quickAddModal')">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
+                <button class="btn btn-primary w-full" id="chooseAddReceivedBtn" style="padding: 14px;">
+                    <i data-lucide="arrow-down-left"></i>
+                    <span>Mừng cưới tôi (Khoản Nhận)</span>
+                </button>
+                <button class="btn btn-secondary w-full" id="chooseAddSentBtn" style="padding: 14px;">
+                    <i data-lucide="arrow-up-right"></i>
+                    <span>Tôi đi mừng (Khoản Chi)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- JS Application Logic -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
