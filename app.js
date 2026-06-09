@@ -330,8 +330,10 @@ function updateThemeUI() {
 const tabHashMapping = {
     'tongquan': 'dashboard',
     'dashboard': 'dashboard',
+    'tientoinhan': 'received',
     'mungcuoitoi': 'received',
     'received': 'received',
+    'tientoimung': 'sent',
     'toimungcuoi': 'sent',
     'sent': 'sent',
     'caidat': 'settings',
@@ -340,8 +342,8 @@ const tabHashMapping = {
 
 const tabIdToHash = {
     'dashboard': 'tongquan',
-    'received': 'mungcuoitoi',
-    'sent': 'toimungcuoi',
+    'received': 'tientoinhan',
+    'sent': 'tientoimung',
     'settings': 'caidat'
 };
 
@@ -394,12 +396,12 @@ function switchTab(tabId, updateHash = true) {
         subtitle.innerText = 'Thống kê hoạt động hiếu hỷ của bạn';
         renderDashboard(); // Re-render charts to fit size if changed
     } else if (tabId === 'received') {
-        title.innerText = 'Người mừng cưới tôi';
-        subtitle.innerText = 'Quản lý danh sách khách mừng cưới và trạng thái trả lễ';
+        title.innerText = 'Tiền tôi nhận';
+        subtitle.innerText = 'Quản lý danh sách tiền nhận hiếu hỷ, sự kiện và trạng thái trả lễ';
         renderReceivedTable();
     } else if (tabId === 'sent') {
-        title.innerText = 'Tôi đi mừng';
-        subtitle.innerText = 'Quản lý danh sách mừng cưới, đám hiếu, thăm ốm... của tôi';
+        title.innerText = 'Tiền tôi mừng';
+        subtitle.innerText = 'Quản lý danh sách tiền đi mừng hiếu hỷ, thăm ốm... của tôi';
         renderSentTable();
     } else if (tabId === 'settings') {
         title.innerText = 'Cài đặt';
@@ -452,7 +454,7 @@ function renderDashboard() {
     
     const balanceSubEl = balanceEl.nextElementSibling;
     if (balanceSubEl) {
-        balanceSubEl.innerText = `Nhận cưới - Tôi đi mừng${(totalGoldReceivedVal > 0 || totalGoldSentVal > 0) ? ` • Chênh lệch: ${goldBalanceVal >= 0 ? '+' : ''}${goldBalanceVal} chỉ` : ''}`;
+        balanceSubEl.innerText = `Tiền tôi nhận - Tiền tôi mừng${(totalGoldReceivedVal > 0 || totalGoldSentVal > 0) ? ` • Chênh lệch: ${goldBalanceVal >= 0 ? '+' : ''}${goldBalanceVal} chỉ` : ''}`;
     }
     
     document.getElementById('statPendingReturn').innerText = `${pendingReturnCount} người`;
@@ -492,7 +494,7 @@ function renderRelationshipChart(received, sent) {
             labels: relationships,
             datasets: [
                 {
-                    label: 'Mừng cưới tôi',
+                    label: 'Tiền tôi nhận',
                     data: receivedData,
                     backgroundColor: 'rgba(16, 185, 129, 0.75)',
                     borderColor: '#10b981',
@@ -500,7 +502,7 @@ function renderRelationshipChart(received, sent) {
                     borderRadius: 4
                 },
                 {
-                    label: 'Tôi đi mừng',
+                    label: 'Tiền tôi mừng',
                     data: sentData,
                     backgroundColor: 'rgba(14, 165, 233, 0.75)',
                     borderColor: '#0ea5e9',
@@ -630,7 +632,7 @@ function renderRecentActivity(received, sent) {
         
         if (act.flow === 'in') {
             flowBadge = '<span class="badge badge-status-returned"><i data-lucide="arrow-down-left" style="width:12px;height:12px;margin-right:4px;"></i>Thu</span>';
-            eventBadge = '<span class="badge badge-event-wedding">Mừng đám cưới tôi</span>';
+            eventBadge = '<span class="badge badge-event-wedding">Tiền tôi nhận</span>';
             amountText = act.gift_type === 'gold'
                 ? `<span style="color:var(--accent-emerald); font-weight:600;">+${act.gold_amount} chỉ (${escapeHTML(act.gold_type || 'Vàng')})</span>`
                 : `<span style="color:var(--accent-emerald); font-weight:600;">+${formatVND(act.amount)}</span>`;
@@ -1064,7 +1066,7 @@ function renderSettings() {
                             <button type="button" class="btn btn-secondary" id="btnSyncRegister">Đăng ký mới</button>
                         </div>
                     </form>
-                    <button class="btn btn-outline" id="disconnectSupabaseBtn" style="margin-top:8px;">
+                    <button class="btn btn-outline w-full" id="disconnectSupabaseBtn" style="margin-top:8px;">
                         <i data-lucide="link-2-off"></i>
                         <span>Hủy liên kết Supabase</span>
                     </button>
@@ -1324,16 +1326,16 @@ function handleExportCsv() {
     csvContent += "CHIỀU NHẬN/CHI,HỌ TÊN,MỐI QUAN HỆ,SỐ TIỀN,LOẠI SỰ KIỆN,NGÀY,TRẠNG THÁI TRẢ LỄ,GHI CHÚ\n";
     
     activeReceived.forEach(g => {
-        const statusText = g.status === 'returned' ? 'Đã đi mừng cưới lại họ' : 'Chưa đi lại';
+        const statusText = g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại';
         const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
-        csvContent += `NHẬN MỪNG CƯỚI,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","Mừng cưới tôi",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
+        csvContent += `TIỀN TÔI NHẬN,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","Tiền tôi nhận",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
     });
     
     // Generate CSV for Sent
     const activeSent = state.sentGifts.filter(g => !g.deleted_at);
     activeSent.forEach(g => {
         const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
-        csvContent += `TÔI ĐI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
+        csvContent += `TIỀN TÔI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
     });
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1577,7 +1579,7 @@ function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', se
     const results = [];
     
     let currentRelationshipContext = selectedRelationship;
-    let currentEventTypeContext = isReceivedFlow ? 'Mừng cưới tôi' : selectedEventType;
+    let currentEventTypeContext = isReceivedFlow ? 'Tiền tôi nhận' : selectedEventType;
     let currentNotesContext = '';
     
     const defaultDate = new Date().toISOString().slice(0, 10);
@@ -1754,7 +1756,7 @@ function handleNotesPreview() {
         let eventName = item.event_type;
         if (isReceived) {
             evClass = 'badge-event-wedding';
-            eventName = 'Mừng cưới tôi';
+            eventName = 'Tiền tôi nhận';
         } else {
             if (item.event_type === 'Đám cưới') evClass = 'badge-event-wedding';
             else if (item.event_type === 'Đám hiếu') evClass = 'badge-event-funeral';

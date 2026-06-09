@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sổ tay Thống kê Hiếu Hỷ & Sự kiện</title>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=1.8.6">
+    <link rel="stylesheet" href="style.css?v=1.8.7">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,13 +35,13 @@
                 <li class="nav-item">
                     <a class="nav-link" data-tab="received">
                         <i data-lucide="arrow-down-left"></i>
-                        <span>Mừng cưới tôi</span>
+                        <span>Tiền tôi nhận</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-tab="sent">
                         <i data-lucide="arrow-up-right"></i>
-                        <span>Tôi đi mừng</span>
+                        <span>Tiền tôi mừng</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -77,7 +77,7 @@
                             <i data-lucide="menu"></i>
                         </button>
                         <h1 id="currentTabTitle" style="margin: 0;">Tổng quan</h1>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-top: 4px;">v1.8.6</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-top: 4px;">v1.8.7</span>
                     </div>
                     <p id="currentTabSubtitle">Thống kê hoạt động hiếu hỷ gần đây</p>
                 </div>
@@ -102,7 +102,7 @@
                             <i data-lucide="download"></i>
                         </div>
                         <div class="summary-data">
-                            <h3>Mừng cưới tôi</h3>
+                            <h3>Tiền tôi nhận</h3>
                             <div class="value" id="statReceived">0 đ</div>
                             <div class="sub-value" id="statReceivedCount">0 người</div>
                         </div>
@@ -112,7 +112,7 @@
                             <i data-lucide="upload"></i>
                         </div>
                         <div class="summary-data">
-                            <h3>Tôi đi mừng</h3>
+                            <h3>Tiền tôi mừng</h3>
                             <div class="value" id="statSent">0 đ</div>
                             <div class="sub-value" id="statSentCount">0 sự kiện</div>
                         </div>
@@ -124,7 +124,7 @@
                         <div class="summary-data">
                             <h3>Chênh lệch thu chi</h3>
                             <div class="value" id="statBalance">0 đ</div>
-                            <div class="sub-value">Nhận cưới - Tôi đi mừng</div>
+                            <div class="sub-value">Tiền tôi nhận - Tiền tôi mừng</div>
                         </div>
                     </div>
                     <div class="summary-card">
@@ -218,7 +218,7 @@
                                     <th>Mối quan hệ</th>
                                     <th>Số tiền nhận</th>
                                     <th>Ngày nhận</th>
-                                    <th>Đã mừng cưới lại họ?</th>
+                                    <th>Đã trả lễ lại họ?</th>
                                     <th>Ghi chú</th>
                                     <th style="width: 100px;">Thao tác</th>
                                 </tr>
@@ -333,11 +333,11 @@
                             Bạn có thể sao lưu dữ liệu dưới dạng tệp đã được mã hóa để cất trữ thủ công, hoặc xuất định dạng CSV để xem bằng Excel.
                         </p>
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <button class="btn btn-secondary" id="exportEncryptedBtn">
+                            <button class="btn btn-secondary w-full" id="exportEncryptedBtn">
                                 <i data-lucide="download-cloud"></i>
                                 <span>Xuất file Backup đã mã hóa (.json)</span>
                             </button>
-                            <button class="btn btn-secondary" id="exportCsvBtn">
+                            <button class="btn btn-secondary w-full" id="exportCsvBtn">
                                 <i data-lucide="file-spreadsheet"></i>
                                 <span>Xuất file Excel/CSV xem thường (.csv)</span>
                             </button>
@@ -365,7 +365,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.6</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.7</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -416,7 +416,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.6</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.7</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -467,7 +467,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.6</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v1.8.7</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -497,7 +497,7 @@
     <div class="modal-overlay" id="receivedModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2 id="receivedModalTitle">Thêm khoản nhận mừng cưới</h2>
+                <h2 id="receivedModalTitle">Thêm khoản tiền tôi nhận</h2>
                 <button class="close-btn" onclick="closeModal('receivedModal')">&times;</button>
             </div>
             <form id="receivedForm">
@@ -566,7 +566,7 @@
                             <label class="status-switch">
                                 <input type="checkbox" class="status-checkbox" id="recStatus">
                                 <span class="status-slider"></span>
-                                <span id="recStatusLabel" style="font-size: 0.9rem; font-weight: 500;">Chưa đi mừng cưới lại họ</span>
+                                <span id="recStatusLabel" style="font-size: 0.9rem; font-weight: 500;">Chưa trả lễ lại họ</span>
                             </label>
                         </div>
                     </div>
@@ -587,7 +587,7 @@
     <div class="modal-overlay" id="sentModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2 id="sentModalTitle">Thêm khoản đi mừng</h2>
+                <h2 id="sentModalTitle">Thêm khoản tiền tôi mừng</h2>
                 <button class="close-btn" onclick="closeModal('sentModal')">&times;</button>
             </div>
             <form id="sentForm">
@@ -683,11 +683,11 @@
             <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
                 <button class="btn btn-primary w-full" id="chooseAddReceivedBtn" style="padding: 14px;">
                     <i data-lucide="arrow-down-left"></i>
-                    <span>Mừng cưới tôi (Khoản Nhận)</span>
+                    <span>Tiền tôi nhận (Khoản Nhận)</span>
                 </button>
                 <button class="btn btn-secondary w-full" id="chooseAddSentBtn" style="padding: 14px;">
                     <i data-lucide="arrow-up-right"></i>
-                    <span>Tôi đi mừng (Khoản Chi)</span>
+                    <span>Tiền tôi mừng (Khoản Chi)</span>
                 </button>
                 <button class="btn btn-outline w-full" id="chooseImportNotesBtn" style="padding: 14px; color: var(--text-primary); border-color: var(--border-color);">
                     <i data-lucide="file-text"></i>
@@ -701,7 +701,7 @@
     <div class="modal-overlay" id="importNotesModal">
         <div class="modal-container" style="width: 600px; max-width: 95%;">
             <div class="modal-header">
-                <h2>Nhập nhanh từ Ghi chú (v1.8.6)</h2>
+                <h2>Nhập nhanh từ Ghi chú (v1.8.7)</h2>
                 <button class="close-btn" onclick="closeModal('importNotesModal')">&times;</button>
             </div>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
@@ -712,8 +712,8 @@
                     <div class="form-group" style="margin-bottom: 0;">
                         <label class="form-label" for="importNotesFlow">Phân loại ghi chép</label>
                         <select class="form-control" id="importNotesFlow" required>
-                            <option value="sent" selected>Tôi đi mừng (Khoản Chi)</option>
-                            <option value="received">Mừng cưới tôi (Khoản Nhận)</option>
+                            <option value="sent" selected>Tiền tôi mừng (Khoản Chi)</option>
+                            <option value="received">Tiền tôi nhận (Khoản Nhận)</option>
                         </select>
                     </div>
                     <div class="form-group" style="margin-bottom: 0;" id="importNotesRelationshipGroup">
@@ -792,6 +792,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=1.8.6"></script>
+    <script type="module" src="app.js?v=1.8.7"></script>
 </body>
 </html>

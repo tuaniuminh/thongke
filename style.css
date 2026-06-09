@@ -899,7 +899,7 @@ body.light-mode .data-table tbody tr:hover {
     font-size: 0.85rem;
     margin-top: 1rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
 }
 
@@ -909,6 +909,8 @@ body.light-mode .data-table tbody tr:hover {
     border-radius: 50%;
     display: inline-block;
     position: relative;
+    flex-shrink: 0;
+    margin-top: 5px;
 }
 
 .status-dot.green {
