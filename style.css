@@ -1250,17 +1250,23 @@ body.light-mode .file-upload-zone:hover {
     transition: all 0.15s ease;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
-.keypad-btn:hover {
-    background: var(--primary-gradient);
-    border-color: transparent;
-    box-shadow: 0 0 12px var(--primary-glow);
-    transform: translateY(-2px);
+@media (hover: hover) {
+    .keypad-btn:hover {
+        background: var(--primary-gradient);
+        border-color: transparent;
+        box-shadow: 0 0 12px var(--primary-glow);
+        transform: translateY(-2px);
+    }
 }
 
 .keypad-btn:active {
     transform: scale(0.92) translateY(0);
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: #fff;
 }
 
 .keypad-btn.utility-btn {
@@ -1269,25 +1275,31 @@ body.light-mode .file-upload-zone:hover {
     border-color: transparent;
 }
 
-.keypad-btn.utility-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: transparent;
-    box-shadow: none;
-    transform: none;
+@media (hover: hover) {
+    .keypad-btn.utility-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: transparent;
+        box-shadow: none;
+        transform: none;
+    }
 }
 
 .keypad-btn.utility-btn:active {
     transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .keypad-btn i {
     width: 20px;
     height: 20px;
     color: var(--text-secondary);
+    transition: color 0.15s ease;
 }
 
-.keypad-btn:hover i {
-    color: var(--text-primary);
+@media (hover: hover) {
+    .keypad-btn:hover i {
+        color: var(--text-primary);
+    }
 }
 
 /* Shake animation for incorrect PIN */

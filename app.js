@@ -2032,6 +2032,24 @@ window.handleChangePassword = async function() {
 
 // --- T9 PIN Pad Helpers & Logics ---
 
+function bindKeypadButton(btn, callback) {
+    let touched = false;
+    btn.addEventListener('touchstart', (e) => {
+        touched = true;
+        e.preventDefault();
+        callback();
+    }, { passive: false });
+    btn.addEventListener('mousedown', (e) => {
+        if (touched) {
+            touched = false;
+            e.preventDefault();
+            return;
+        }
+        e.preventDefault();
+        callback();
+    });
+}
+
 function updatePasscodeDots(dotsContainerId, pinLength) {
     const container = document.getElementById(dotsContainerId);
     if (!container) return;
@@ -2185,24 +2203,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const wizardKeypad = document.getElementById('wizardKeypad');
     if (wizardKeypad) {
         wizardKeypad.querySelectorAll('.keypad-btn[data-val]').forEach(btn => {
-            btn.addEventListener('click', () => {
+            bindKeypadButton(btn, () => {
                 handleWizardKeypadPress(btn.getAttribute('data-val'));
             });
         });
-        document.getElementById('btnWizardClear').addEventListener('click', handleWizardClear);
-        document.getElementById('btnWizardDelete').addEventListener('click', handleWizardDelete);
+        const btnClear = document.getElementById('btnWizardClear');
+        if (btnClear) bindKeypadButton(btnClear, handleWizardClear);
+        const btnDelete = document.getElementById('btnWizardDelete');
+        if (btnDelete) bindKeypadButton(btnDelete, handleWizardDelete);
     }
 
     // Bind Unlock Keypad Buttons
     const unlockKeypad = document.getElementById('unlockKeypad');
     if (unlockKeypad) {
         unlockKeypad.querySelectorAll('.keypad-btn[data-val]').forEach(btn => {
-            btn.addEventListener('click', () => {
+            bindKeypadButton(btn, () => {
                 handleUnlockKeypadPress(btn.getAttribute('data-val'));
             });
         });
-        document.getElementById('btnUnlockClear').addEventListener('click', handleUnlockClear);
-        document.getElementById('btnUnlockDelete').addEventListener('click', handleUnlockDelete);
+        const btnClear = document.getElementById('btnUnlockClear');
+        if (btnClear) bindKeypadButton(btnClear, handleUnlockClear);
+        const btnDelete = document.getElementById('btnUnlockDelete');
+        if (btnDelete) bindKeypadButton(btnDelete, handleUnlockDelete);
     }
 
     // Toggle between Keyboard mode and PIN mode on Unlock Overlay
@@ -2217,11 +2239,40 @@ document.addEventListener('DOMContentLoaded', () => {
             keyboardModeView.style.display = 'block';
             unlockPinBuffer = "";
             updatePasscodeDots('unlockPasscodeDots', 0);
+            setTimeout(() => {
+                const unlockPasswordInput = document.getElementById('unlockPassword');
+                if (unlockPasswordInput) unlockPasswordInput.focus();
+            }, 100);
         });
         btnSwitchToPin.addEventListener('click', () => {
             pinModeView.style.display = 'block';
             keyboardModeView.style.display = 'none';
             document.getElementById('unlockPassword').value = "";
+        });
+    }
+
+    // Auto-unlock on keyboard input if it reaches 6 characters and is correct
+    const unlockPasswordInput = document.getElementById('unlockPassword');
+    if (unlockPasswordInput) {
+        unlockPasswordInput.addEventListener('input', async () => {
+            const val = unlockPasswordInput.value;
+            if (val.length === 6) {
+                const success = await loadLocalState(val);
+                if (success) {
+                    state.masterPassword = val;
+                    document.getElementById('unlockOverlay').style.display = 'none';
+                    document.getElementById('appLayout').style.display = 'flex';
+                    showToast("Giải mã thành công! Chào mừng trở lại.");
+                    renderAll();
+                    
+                    const config = getSupabaseConfig();
+                    if (config.url && config.key) {
+                        sync.initSupabase(config.url, config.key);
+                        checkLoginStatus();
+                    }
+                    unlockPasswordInput.value = "";
+                }
+            }
         });
     }
 
