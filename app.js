@@ -685,8 +685,12 @@ function renderReceivedTable() {
         filtered = filtered.filter(g => g.status === state.receivedFilterStatus);
     }
     
-    // Sort by date desc
-    filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+    // Sort by date desc, then by updated_at desc (most recent first)
+    filtered.sort((a, b) => {
+        const dateDiff = new Date(b.date) - new Date(a.date);
+        if (dateDiff !== 0) return dateDiff;
+        return new Date(b.updated_at) - new Date(a.updated_at);
+    });
     
     // Pagination
     const totalRecords = filtered.length;
@@ -832,8 +836,12 @@ function renderSentTable() {
         filtered = filtered.filter(g => g.relationship === state.sentFilterRelation);
     }
     
-    // Sort date desc
-    filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+    // Sort by date desc, then by updated_at desc (most recent first)
+    filtered.sort((a, b) => {
+        const dateDiff = new Date(b.date) - new Date(a.date);
+        if (dateDiff !== 0) return dateDiff;
+        return new Date(b.updated_at) - new Date(a.updated_at);
+    });
     
     const totalRecords = filtered.length;
     const totalPages = Math.ceil(totalRecords / state.sentLimit) || 1;
