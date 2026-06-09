@@ -1992,10 +1992,10 @@ window.handleChangePassword = async function() {
         return;
     }
     
-    const newPassword = prompt("Nhập mã PIN mới (yêu cầu đúng 8 chữ số):");
+    const newPassword = prompt("Nhập mã PIN mới (yêu cầu đúng 6 chữ số):");
     if (!newPassword) return;
-    if (!/^\d{8}$/.test(newPassword)) {
-        showToast("Mã PIN mới phải đúng 8 chữ số!", "error");
+    if (!/^\d{6}$/.test(newPassword)) {
+        showToast("Mã PIN mới phải đúng 6 chữ số!", "error");
         return;
     }
     
@@ -2055,11 +2055,11 @@ function shakeCard(cardId) {
 }
 
 async function handleWizardKeypadPress(val) {
-    if (wizardPinBuffer.length >= 8) return;
+    if (wizardPinBuffer.length >= 6) return;
     wizardPinBuffer += val;
     updatePasscodeDots('wizardPasscodeDots', wizardPinBuffer.length);
     
-    if (wizardPinBuffer.length === 8) {
+    if (wizardPinBuffer.length === 6) {
         if (!wizardFirstPin) {
             wizardFirstPin = wizardPinBuffer;
             wizardPinBuffer = "";
@@ -2067,7 +2067,7 @@ async function handleWizardKeypadPress(val) {
                 const title = document.getElementById('wizardTitle');
                 const subtext = document.getElementById('wizardSubtext');
                 if (title) title.innerText = "Xác nhận Mã PIN";
-                if (subtext) subtext.innerText = "Nhập lại 8 chữ số vừa đặt để xác nhận";
+                if (subtext) subtext.innerText = "Nhập lại 6 chữ số vừa đặt để xác nhận";
                 updatePasscodeDots('wizardPasscodeDots', 0);
             }, 300);
         } else {
@@ -2093,7 +2093,7 @@ async function handleWizardKeypadPress(val) {
                     const title = document.getElementById('wizardTitle');
                     const subtext = document.getElementById('wizardSubtext');
                     if (title) title.innerText = "Thiết lập Mã PIN";
-                    if (subtext) subtext.innerText = "Nhập 8 chữ số để đặt làm mã PIN bảo vệ sổ";
+                    if (subtext) subtext.innerText = "Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ";
                     updatePasscodeDots('wizardPasscodeDots', 0);
                 }, 300);
             }
@@ -2102,11 +2102,11 @@ async function handleWizardKeypadPress(val) {
 }
 
 async function handleUnlockKeypadPress(val) {
-    if (unlockPinBuffer.length >= 8) return;
+    if (unlockPinBuffer.length >= 6) return;
     unlockPinBuffer += val;
     updatePasscodeDots('unlockPasscodeDots', unlockPinBuffer.length);
     
-    if (unlockPinBuffer.length === 8) {
+    if (unlockPinBuffer.length === 6) {
         const pin = unlockPinBuffer;
         
         setTimeout(async () => {
