@@ -299,6 +299,7 @@ function renderAll() {
     renderSentTable();
     renderSettings();
     updateThemeUI();
+    handleHashRoute();
     lucide.createIcons();
 }
 
@@ -326,8 +327,44 @@ function updateThemeUI() {
     lucide.createIcons();
 }
 
+const tabHashMapping = {
+    'tongquan': 'dashboard',
+    'dashboard': 'dashboard',
+    'mungcuoitoi': 'received',
+    'received': 'received',
+    'toimungcuoi': 'sent',
+    'sent': 'sent',
+    'caidat': 'settings',
+    'settings': 'settings'
+};
+
+const tabIdToHash = {
+    'dashboard': 'tongquan',
+    'received': 'mungcuoitoi',
+    'sent': 'toimungcuoi',
+    'settings': 'caidat'
+};
+
+function handleHashRoute() {
+    const appLayout = document.getElementById('appLayout');
+    if (!appLayout || appLayout.style.display === 'none') return;
+    
+    const hash = window.location.hash.replace('#', '').replace('/', '').trim();
+    if (hash && tabHashMapping[hash]) {
+        const tabId = tabHashMapping[hash];
+        if (state.activeTab !== tabId) {
+            switchTab(tabId, false);
+        }
+    } else {
+        const defaultHash = tabIdToHash[state.activeTab || 'dashboard'];
+        if (window.location.hash !== '#' + defaultHash) {
+            window.location.hash = defaultHash;
+        }
+    }
+}
+
 // Switch main navigation tabs
-function switchTab(tabId) {
+function switchTab(tabId, updateHash = true) {
     state.activeTab = tabId;
     
     // Update active class on nav links
@@ -368,6 +405,11 @@ function switchTab(tabId) {
         title.innerText = 'Cài đặt';
         subtitle.innerText = 'Cấu hình bảo mật, đồng bộ dữ liệu và sao lưu';
         renderSettings();
+    }
+    
+    if (updateHash) {
+        const hash = tabIdToHash[tabId] || tabId;
+        window.location.hash = hash;
     }
     
     // Close mobile menu if open
@@ -2326,9 +2368,12 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const tabId = link.getAttribute('data-tab');
-            switchTab(tabId);
+            const hash = tabIdToHash[tabId] || tabId;
+            window.location.hash = hash;
         });
     });
+    
+    window.addEventListener('hashchange', handleHashRoute);
     
     // Theme toggle click
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
