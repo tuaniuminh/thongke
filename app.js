@@ -1129,6 +1129,9 @@ window.copySqlCode = function() {
 // Handle Saving Supabase Configuration Credentials
 function handleSaveSupabaseConfig(e) {
     e.preventDefault();
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
     const url = document.getElementById('syncUrl').value.trim();
     const key = document.getElementById('syncKey').value.trim();
     
@@ -1169,6 +1172,9 @@ function disconnectSupabase() {
 // Handle login submission
 async function handleSyncLogin(e) {
     e.preventDefault();
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
     const email = document.getElementById('syncEmail').value.trim();
     const password = document.getElementById('syncPassword').value;
     
@@ -1194,6 +1200,9 @@ async function handleSyncLogin(e) {
 
 // Handle register trigger
 async function handleSyncRegister() {
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
     const email = document.getElementById('syncEmail').value.trim();
     const password = document.getElementById('syncPassword').value;
     
@@ -1221,6 +1230,9 @@ async function handleSyncRegister() {
 
 // Sign out from Supabase Sync
 async function handleSyncSignOut() {
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
     try {
         await sync.signOut();
         state.user = null;
