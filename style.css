@@ -334,6 +334,18 @@ body.light-mode .nav-link:hover {
     background-color: #e11d48;
 }
 
+.btn-outline-danger {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btn-outline-danger:hover {
+    color: var(--accent-rose);
+    border-color: var(--accent-rose);
+    background-color: rgba(244, 63, 94, 0.06);
+}
+
 .btn-icon {
     width: 40px;
     height: 40px;

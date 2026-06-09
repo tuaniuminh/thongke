@@ -743,7 +743,7 @@ function renderReceivedTable() {
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editReceivedRecord('${g.id}')">
                         <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
                     </button>
-                    <button class="btn btn-outline btn-danger" style="padding: 6px 10px; color: var(--accent-rose);" onclick="deleteReceivedRecord('${g.id}')">
+                    <button class="btn btn-outline-danger" style="padding: 6px 10px;" onclick="deleteReceivedRecord('${g.id}')">
                         <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                     </button>
                 </div>
@@ -885,7 +885,7 @@ function renderSentTable() {
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editSentRecord('${g.id}')">
                         <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
                     </button>
-                    <button class="btn btn-outline btn-danger" style="padding: 6px 10px; color: var(--accent-rose);" onclick="deleteSentRecord('${g.id}')">
+                    <button class="btn btn-outline-danger" style="padding: 6px 10px;" onclick="deleteSentRecord('${g.id}')">
                         <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                     </button>
                 </div>
