@@ -1061,14 +1061,14 @@ function renderSettings() {
                             <label class="form-label" for="syncPassword">Mật khẩu tài khoản</label>
                             <input type="password" class="form-control" id="syncPassword" required placeholder="Tối thiểu 6 ký tự...">
                         </div>
-                        <div class="form-row">
-                            <button type="submit" class="btn btn-primary" id="btnSyncLogin">Đăng nhập</button>
-                            <button type="button" class="btn btn-secondary" id="btnSyncRegister">Đăng ký mới</button>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button type="submit" class="btn btn-primary" id="btnSyncLogin" style="width: 100%;">Đăng nhập</button>
+                            <button type="button" class="btn btn-secondary" id="btnSyncRegister" style="width: 100%;">Đăng ký mới</button>
                         </div>
                     </form>
                     <button class="btn btn-outline w-full" id="disconnectSupabaseBtn" style="margin-top:8px;">
                         <i data-lucide="link-2-off"></i>
-                        <span>Hủy liên kết Supabase</span>
+                        <span>Hủy liên kết</span>
                     </button>
                 </div>
             `;
@@ -1087,25 +1087,28 @@ function renderSettings() {
                 <div style="margin: 1.25rem 0; font-size:0.85rem; color:var(--text-secondary);">
                     <div>Tài khoản: <b style="color:var(--text-primary);">${state.user.email}</b></div>
                     <div style="margin-top:4px;">Cơ sở dữ liệu đám mây hoạt động.</div>
-
                 </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <button class="btn btn-primary w-full" id="manualSyncBtn">
                         <i data-lucide="refresh-cw"></i>
                         <span>Đồng bộ ngay bây giờ</span>
                     </button>
-                    <button class="btn btn-outline w-full" id="syncSignOutBtn">
-                        <i data-lucide="log-out"></i>
-                        <span>Đăng xuất tài khoản Sync</span>
-                    </button>
-                    <button class="btn btn-outline btn-danger w-full" id="disconnectSupabaseBtn">
-                        <i data-lucide="link-2-off"></i>
-                        <span>Hủy liên kết Supabase hoàn toàn</span>
-                    </button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="btn btn-outline w-full" id="syncSignOutBtn" style="font-size: 0.85rem; padding: 10px 6px;">
+                            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                        <button class="btn btn-outline btn-danger w-full" id="disconnectSupabaseBtn" style="font-size: 0.85rem; padding: 10px 6px;">
+                            <i data-lucide="link-2-off" style="width: 14px; height: 14px;"></i>
+                            <span>Hủy liên kết</span>
+                        </button>
+                    </div>
                 </div>
                 
-                <div style="margin-top: 20px; border-top:1px solid var(--border-color); padding-top:15px;">
-                    <label class="form-label">Hướng dẫn Supabase SQL (Cho lần đầu setup)</label>
+                <details style="margin-top: 20px; border-top:1px solid var(--border-color); padding-top:15px; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 8px;">
+                        Hướng dẫn Supabase SQL (Cho lần lập đầu)
+                    </summary>
                     <p class="settings-info" style="font-size:0.75rem;">Copy lệnh sau chạy trong SQL Editor của Supabase để tạo bảng và phân quyền bảo mật RLS:</p>
                     <div class="sql-copy-block">
                         <button class="btn-copy" onclick="copySqlCode()">Copy</button>
@@ -1126,7 +1129,7 @@ create policy "Users can update their own sync data" on gift_sync for update usi
 drop policy if exists "Users can select their own sync data" on gift_sync;
 create policy "Users can select their own sync data" on gift_sync for select using (auth.uid() = user_id);</pre>
                     </div>
-                </div>
+                </details>
             `;
             
             document.getElementById('manualSyncBtn').addEventListener('click', () => performSync(false));
@@ -2825,30 +2828,40 @@ function renderDashboardSyncBanner() {
     if (!isConfigured) {
         banner.className = 'sync-banner local-only';
         banner.innerHTML = `
-            <div class="sync-banner-content">
-                <span class="status-dot yellow"></span>
-                <span>Dữ liệu hiện lưu cục bộ. Hãy cấu hình kết nối <b>Supabase</b> để tự động đồng bộ hóa đám mây và bảo vệ dữ liệu.</span>
+            <div class="sync-banner-summary-row" onclick="if(!event.target.closest('.sync-banner-btn')) this.parentElement.classList.toggle('expanded')">
+                <div class="sync-banner-status">
+                    <span class="status-dot yellow"></span>
+                    <span class="sync-banner-text">Dữ liệu hiện lưu cục bộ</span>
+                    <i data-lucide="chevron-down" class="sync-chevron-icon"></i>
+                </div>
+                <button class="btn btn-secondary sync-banner-btn" onclick="switchTab('settings')">
+                    <i data-lucide="settings"></i>
+                    <span>Cấu hình</span>
+                </button>
             </div>
-            <button class="btn btn-secondary sync-banner-btn" onclick="switchTab('settings')">
-                <i data-lucide="settings"></i>
-                <span>Cấu hình ngay</span>
-            </button>
+            <div class="sync-banner-details">
+                <p class="sync-detail-text">Dữ liệu hiện tại chỉ lưu cục bộ trên trình duyệt của thiết bị này. Hãy cấu hình kết nối Supabase để lưu trữ đám mây, tự động đồng bộ hóa và bảo vệ dữ liệu tránh bị mất mát khi xóa cache.</p>
+            </div>
         `;
     } else if (!isLoggedIn) {
         const sourceText = config.source === 'build' ? ' (Tự động từ GitHub)' : '';
         banner.className = 'sync-banner not-logged-in';
         banner.innerHTML = `
-            <div class="sync-banner-content">
-                <span class="status-dot yellow"></span>
-                <span>Đã kết nối Supabase${sourceText}. Bạn chưa đăng nhập tài khoản đồng bộ đám mây.</span>
+            <div class="sync-banner-summary-row" onclick="if(!event.target.closest('.sync-banner-btn')) this.parentElement.classList.toggle('expanded')">
+                <div class="sync-banner-status">
+                    <span class="status-dot yellow"></span>
+                    <span class="sync-banner-text">Chưa đăng nhập đồng bộ</span>
+                    <i data-lucide="chevron-down" class="sync-chevron-icon"></i>
+                </div>
+                <button class="btn btn-secondary sync-banner-btn" onclick="switchTab('settings')">
+                    <i data-lucide="log-in"></i>
+                    <span>Đăng nhập</span>
+                </button>
             </div>
-            <button class="btn btn-secondary sync-banner-btn" onclick="switchTab('settings')">
-                <i data-lucide="log-in"></i>
-                <span>Đăng nhập ngay</span>
-            </button>
+            <div class="sync-banner-details">
+                <p class="sync-detail-text">Đã thiết lập kết nối tới cơ sở dữ liệu Supabase${sourceText}. Vui lòng đăng nhập hoặc đăng ký tài khoản để bắt đầu tự động đồng bộ đám mây.</p>
+            </div>
         `;
-
-
     } else {
         const lastSyncStr = localStorage.getItem('last_sync_time') || 'Chưa đồng bộ';
         let displayTime = lastSyncStr;
@@ -2861,14 +2874,31 @@ function renderDashboardSyncBanner() {
         
         banner.className = 'sync-banner synced';
         banner.innerHTML = `
-            <div class="sync-banner-content">
-                <span class="status-dot green"></span>
-                <span>Đã đồng bộ đám mây với tài khoản <b>${state.user.email}</b>. Lần cuối: <span class="sync-time">${displayTime}</span></span>
+            <div class="sync-banner-summary-row" onclick="if(!event.target.closest('.sync-banner-btn')) this.parentElement.classList.toggle('expanded')">
+                <div class="sync-banner-status">
+                    <span class="status-dot green"></span>
+                    <span class="sync-banner-text">Đã đồng bộ đám mây</span>
+                    <i data-lucide="chevron-down" class="sync-chevron-icon"></i>
+                </div>
+                <button class="btn btn-secondary sync-banner-btn" id="bannerSyncBtn">
+                    <i data-lucide="refresh-cw"></i>
+                    <span>Đồng bộ</span>
+                </button>
             </div>
-            <button class="btn btn-secondary sync-banner-btn" id="bannerSyncBtn">
-                <i data-lucide="refresh-cw"></i>
-                <span>Đồng bộ ngay</span>
-            </button>
+            <div class="sync-banner-details">
+                <div class="sync-detail-row">
+                    <span class="sync-detail-label">Tài khoản:</span>
+                    <span class="sync-detail-value">${state.user.email}</span>
+                </div>
+                <div class="sync-detail-row">
+                    <span class="sync-detail-label">Lần cuối:</span>
+                    <span class="sync-detail-value">${displayTime}</span>
+                </div>
+                <div class="sync-detail-row">
+                    <span class="sync-detail-label">Bảo mật:</span>
+                    <span class="sync-detail-value" style="color: var(--accent-emerald);">Mã hóa đầu cuối (E2EE)</span>
+                </div>
+            </div>
         `;
         
         const syncBtn = document.getElementById('bannerSyncBtn');

@@ -1203,21 +1203,39 @@ body.light-mode .data-table tbody tr:hover {
         font-size: 0.85rem;
     }
 
-    /* Sync banner mobile layout */
-    .sync-banner {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 16px;
-        gap: 14px;
+    /* Mobile Header & Settings Tweak */
+    #currentTabSubtitle {
+        display: none;
     }
     
-    .sync-banner-content {
-        align-items: flex-start;
-    }
-    
-    .sync-banner-btn {
-        width: 100%;
+    #quickAddBtn {
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
         justify-content: center;
+        min-width: 40px;
+        box-shadow: 0 4px 12px var(--primary-glow);
+    }
+    
+    #quickAddBtn .btn-text {
+        display: none;
+    }
+
+    .settings-grid {
+        gap: 12px;
+    }
+    
+    .user-email {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
     }
 }
 
@@ -1297,15 +1315,16 @@ body.light-mode .file-upload-zone:hover {
 }
 
 /* Sync Banner on Dashboard */
+/* Sync Banner on Dashboard */
 .sync-banner {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 18px;
     border-radius: var(--card-radius);
     margin-bottom: 24px;
     font-size: 0.85rem;
-    gap: 16px;
+    gap: 0;
     animation: fadeIn 0.4s ease;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1348,39 +1367,104 @@ body.light-mode .sync-banner.synced {
     box-shadow: 0 4px 20px rgba(16, 185, 129, 0.02);
 }
 
-.sync-banner-content {
-    display: inline-flex;
+.sync-banner-summary-row {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    color: var(--text-primary);
-    line-height: 1.5;
+    width: 100%;
+    cursor: pointer;
+    user-select: none;
 }
 
-.sync-banner-content span {
+.sync-banner-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.sync-banner-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sync-chevron-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.sync-banner.expanded .sync-chevron-icon {
+    transform: rotate(180deg);
+}
+
+.sync-banner-details {
+    display: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeIn var(--transition-fast) forwards;
+}
+
+body.light-mode .sync-banner-details {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.sync-banner.expanded .sync-banner-details {
+    display: flex;
+}
+
+.sync-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    padding-bottom: 4px;
+}
+
+body.light-mode .sync-detail-row {
+    border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+
+.sync-detail-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.sync-detail-label {
     font-weight: 500;
 }
 
-.sync-banner-content b {
-    color: var(--primary-color);
+.sync-detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
-body.light-mode .sync-banner-content b {
-    color: var(--primary-hover);
-}
-
-.sync-banner-content .sync-time {
-    font-weight: 700;
-    color: var(--accent-emerald);
+.sync-detail-text {
+    line-height: 1.4;
+    color: var(--text-secondary);
 }
 
 .sync-banner-btn {
-    padding: 8px 16px;
+    padding: 8px 14px;
     font-size: 0.8rem;
-    border-radius: 10px;
+    border-radius: 8px;
     font-weight: 600;
     white-space: nowrap;
-    gap: 8px !important;
+    gap: 6px !important;
     transition: all var(--transition-fast);
+    flex-shrink: 0;
 }
 
 .sync-banner-btn i {
@@ -1389,9 +1473,9 @@ body.light-mode .sync-banner-content b {
 }
 
 .sync-banner.local-only .sync-banner-btn {
-    background-color: rgba(245, 158, 11, 0.15);
+    background-color: rgba(245, 158, 11, 0.12);
     color: var(--accent-amber);
-    border: 1px solid rgba(245, 158, 11, 0.25);
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 .sync-banner.local-only .sync-banner-btn:hover {
     background-color: var(--accent-amber);
@@ -1401,9 +1485,9 @@ body.light-mode .sync-banner-content b {
 }
 
 .sync-banner.not-logged-in .sync-banner-btn {
-    background-color: rgba(99, 102, 241, 0.15);
+    background-color: rgba(99, 102, 241, 0.12);
     color: var(--primary-color);
-    border: 1px solid rgba(99, 102, 241, 0.25);
+    border: 1px solid rgba(99, 102, 241, 0.2);
 }
 .sync-banner.not-logged-in .sync-banner-btn:hover {
     background-color: var(--primary-color);
@@ -1413,9 +1497,9 @@ body.light-mode .sync-banner-content b {
 }
 
 .sync-banner.synced .sync-banner-btn {
-    background-color: rgba(16, 185, 129, 0.15);
+    background-color: rgba(16, 185, 129, 0.12);
     color: var(--accent-emerald);
-    border: 1px solid rgba(16, 185, 129, 0.25);
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 .sync-banner.synced .sync-banner-btn:hover {
     background-color: var(--accent-emerald);
