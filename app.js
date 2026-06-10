@@ -1375,6 +1375,16 @@ function handleExportExcel(type = 'all') {
         ];
         wsReceived['!cols'] = colWidths;
         
+        // Format column D (Số tiền / Quà tặng) as number with thousand separators
+        for (let key in wsReceived) {
+            if (/^D\d+$/.test(key)) {
+                const cell = wsReceived[key];
+                if (cell && cell.t === 'n') {
+                    cell.z = '#,##0';
+                }
+            }
+        }
+        
         XLSX.utils.book_append_sheet(wb, wsReceived, "Tiền tôi nhận");
     }
     
@@ -1405,6 +1415,16 @@ function handleExportExcel(type = 'all') {
             { wch: 25 }  // Ghi chú
         ];
         wsSent['!cols'] = colWidths;
+        
+        // Format column D (Số tiền / Quà tặng) as number with thousand separators
+        for (let key in wsSent) {
+            if (/^D\d+$/.test(key)) {
+                const cell = wsSent[key];
+                if (cell && cell.t === 'n') {
+                    cell.z = '#,##0';
+                }
+            }
+        }
         
         XLSX.utils.book_append_sheet(wb, wsSent, "Tiền tôi mừng");
     }
