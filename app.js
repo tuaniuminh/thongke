@@ -2285,6 +2285,7 @@ async function handleWizardSubmit(e) {
     await saveLocalState();
     
     // Hide overlay
+    if (document.activeElement) document.activeElement.blur();
     document.getElementById('setupWizardOverlay').style.display = 'none';
     document.getElementById('appLayout').style.display = 'flex';
     
@@ -2307,6 +2308,7 @@ async function handleUnlockSubmit(e) {
         
         if (success) {
             state.masterPassword = password;
+            if (document.activeElement) document.activeElement.blur();
             document.getElementById('unlockOverlay').style.display = 'none';
             document.getElementById('appLayout').style.display = 'flex';
             showToast("Giải mã thành công! Chào mừng trở lại.");
@@ -2631,6 +2633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const success = await loadLocalState(val);
                 if (success) {
                     state.masterPassword = val;
+                    if (document.activeElement) document.activeElement.blur();
                     document.getElementById('unlockOverlay').style.display = 'none';
                     document.getElementById('appLayout').style.display = 'flex';
                     showToast("Giải mã thành công! Chào mừng trở lại.");
