@@ -2289,6 +2289,7 @@ async function handleWizardSubmit(e) {
     setTimeout(() => {
         document.getElementById('setupWizardOverlay').style.display = 'none';
         document.getElementById('appLayout').style.display = 'flex';
+        resetViewportZoom();
         showToast("Đã thiết lập Master Password và khởi tạo bộ nhớ!");
         renderAll();
     }, 150);
@@ -2313,6 +2314,7 @@ async function handleUnlockSubmit(e) {
             setTimeout(() => {
                 document.getElementById('unlockOverlay').style.display = 'none';
                 document.getElementById('appLayout').style.display = 'flex';
+                resetViewportZoom();
                 showToast("Giải mã thành công! Chào mừng trở lại.");
                 renderAll();
                 
@@ -2453,6 +2455,7 @@ async function handleWizardKeypadPress(val) {
                 setTimeout(() => {
                     document.getElementById('setupWizardOverlay').style.display = 'none';
                     document.getElementById('appLayout').style.display = 'flex';
+                    resetViewportZoom();
                     showToast("Đã thiết lập Mã PIN và khởi tạo sổ!");
                     renderAll();
                     
@@ -2493,6 +2496,7 @@ async function handleUnlockKeypadPress(val) {
                 if (document.activeElement) document.activeElement.blur();
                 document.getElementById('unlockOverlay').style.display = 'none';
                 document.getElementById('appLayout').style.display = 'flex';
+                resetViewportZoom();
                 showToast("Mở khóa thành công! Chào mừng trở lại.");
                 renderAll();
                 
@@ -2645,6 +2649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         document.getElementById('unlockOverlay').style.display = 'none';
                         document.getElementById('appLayout').style.display = 'flex';
+                        resetViewportZoom();
                         showToast("Giải mã thành công! Chào mừng trở lại.");
                         renderAll();
                         
@@ -2795,6 +2800,16 @@ function setupTableSearchAndFilters() {
 }
 
 // --- Utilities ---
+
+function resetViewportZoom() {
+    const el = document.querySelector('meta[name="viewport"]');
+    if (el) {
+        el.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        setTimeout(() => {
+            el.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }, 100);
+    }
+}
 
 function escapeHTML(str) {
     if (!str) return '';
