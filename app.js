@@ -1337,103 +1337,284 @@ async function handleExportEncrypted(type = 'all') {
 }
 window.handleExportEncrypted = handleExportEncrypted;
 
-function handleExportCsv(type = 'all') {
-    let csvContent = "\uFEFF"; // UTF-8 BOM for Excel display
-    csvContent += "CHIỀU NHẬN/CHI,HỌ TÊN,MỐI QUAN HỆ,SỐ TIỀN,LOẠI SỰ KIỆN,NGÀY,TRẠNG THÁI TRẢ LỄ,GHI CHÚ\n";
+function handleExportExcel(type = 'all') {
+    const wb = XLSX.utils.book_new();
+    
+    let filename = `danh_sach_tong_hop_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    if (type === 'received') {
+        filename = `danh_sach_tien_nhan_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    } else if (type === 'sent') {
+        filename = `danh_sach_tien_mung_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    }
     
     if (type === 'all' || type === 'received') {
         const activeReceived = state.receivedGifts.filter(g => !g.deleted_at);
-        activeReceived.forEach(g => {
-            const statusText = g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại';
+        const dataReceived = activeReceived.map((g, idx) => {
             const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
-            csvContent += `TIỀN TÔI NHẬN,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","Tiền tôi nhận",${g.date},"${statusText}","${escapeCsvField(g.notes || '')}"\n`;
+            return {
+                "STT": idx + 1,
+                "Họ tên": g.name,
+                "Mối quan hệ": g.relationship,
+                "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
+                "Ngày nhận": g.date,
+                "Trạng thái trả lễ": g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại',
+                "Ghi chú": g.notes || ''
+            };
         });
+        const wsReceived = XLSX.utils.json_to_sheet(dataReceived);
+        
+        // Auto column widths
+        const colWidths = [
+            { wch: 6 },  // STT
+            { wch: 22 }, // Họ tên
+            { wch: 15 }, // Mối quan hệ
+            { wch: 20 }, // Số tiền / Quà tặng
+            { wch: 14 }, // Ngày nhận
+            { wch: 18 }, // Trạng thái trả lễ
+            { wch: 25 }  // Ghi chú
+        ];
+        wsReceived['!cols'] = colWidths;
+        
+        XLSX.utils.book_append_sheet(wb, wsReceived, "Tiền tôi nhận");
     }
     
     if (type === 'all' || type === 'sent') {
         const activeSent = state.sentGifts.filter(g => !g.deleted_at);
-        activeSent.forEach(g => {
+        const dataSent = activeSent.map((g, idx) => {
             const amountStr = g.gift_type === 'gold' ? `${g.gold_amount} chỉ vàng (${g.gold_type || 'Vàng'})` : g.amount;
-            csvContent += `TIỀN TÔI MỪNG,"${escapeCsvField(g.name)}","${escapeCsvField(g.relationship)}","${amountStr}","${escapeCsvField(g.event_type)}",${g.date},"N/A","${escapeCsvField(g.notes || '')}"\n`;
+            return {
+                "STT": idx + 1,
+                "Họ tên": g.name,
+                "Mối quan hệ": g.relationship,
+                "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
+                "Loại sự kiện": g.event_type || 'Khác',
+                "Ngày mừng": g.date,
+                "Ghi chú": g.notes || ''
+            };
         });
+        const wsSent = XLSX.utils.json_to_sheet(dataSent);
+        
+        // Auto column widths
+        const colWidths = [
+            { wch: 6 },  // STT
+            { wch: 22 }, // Họ tên
+            { wch: 15 }, // Mối quan hệ
+            { wch: 20 }, // Số tiền / Quà tặng
+            { wch: 15 }, // Loại sự kiện
+            { wch: 14 }, // Ngày mừng
+            { wch: 25 }  // Ghi chú
+        ];
+        wsSent['!cols'] = colWidths;
+        
+        XLSX.utils.book_append_sheet(wb, wsSent, "Tiền tôi mừng");
     }
     
-    let filename = `danh_sach_tong_hop_${new Date().toISOString().slice(0, 10)}.csv`;
-    if (type === 'received') {
-        filename = `danh_sach_tien_nhan_${new Date().toISOString().slice(0, 10)}.csv`;
-    } else if (type === 'sent') {
-        filename = `danh_sach_tien_mung_${new Date().toISOString().slice(0, 10)}.csv`;
+    try {
+        XLSX.writeFile(wb, filename);
+        showToast("Đã xuất file Excel (.xlsx) thành công!");
+    } catch (err) {
+        console.error(err);
+        showToast("Xuất file Excel thất bại!", "error");
     }
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    showToast("Đã xuất danh sách Excel/CSV!");
 }
-window.handleExportCsv = handleExportCsv;
-
-function escapeCsvField(str) {
-    return str.replace(/"/g, '""');
-}
+window.handleExportExcel = handleExportExcel;
 
 function handleImportFile(e) {
     const file = e.target.files[0];
     if (!file) return;
     
+    const isExcel = file.name.endsWith('.xlsx');
     const reader = new FileReader();
+    
     reader.onload = async function(evt) {
         try {
-            const data = JSON.parse(evt.target.result);
-            if (data.app_id !== "hieu_hy_gift_ledger" || !data.encrypted_payload) {
-                showToast("File backup không đúng định dạng!", "error");
-                return;
-            }
-            
-            // Attempt to decrypt with current Master Password
-            const decrypted = await decrypt(data.encrypted_payload, state.masterPassword);
-            const parsed = JSON.parse(decrypted);
-            
-            const backupType = data.backup_type || 'all';
-            
-            if (backupType === 'received') {
-                if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi nhận'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi nhận' và giữ nguyên 'Tiền tôi mừng')")) {
-                    state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
-                } else {
-                    state.receivedGifts = parsed.receivedGifts || [];
+            if (isExcel) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                let importedReceived = [];
+                let importedSent = [];
+                
+                // Parse "Tiền tôi nhận" sheet
+                if (workbook.SheetNames.includes("Tiền tôi nhận")) {
+                    const ws = workbook.Sheets["Tiền tôi nhận"];
+                    const rows = XLSX.utils.sheet_to_json(ws);
+                    importedReceived = rows.map(r => {
+                        const rowName = r["Họ tên"] || "";
+                        if (!rowName) return null;
+                        
+                        let giftType = 'money';
+                        let amount = 0;
+                        let goldAmount = 0;
+                        let goldType = '';
+                        
+                        const rawAmount = r["Số tiền / Quà tặng"];
+                        if (rawAmount !== undefined && rawAmount !== null) {
+                            const rawAmountStr = String(rawAmount).trim();
+                            if (rawAmountStr.includes("chỉ vàng")) {
+                                giftType = 'gold';
+                                const match = rawAmountStr.match(/([\d\.]+)\s*chỉ vàng\s*(?:\((.*)\))?/);
+                                if (match) {
+                                    goldAmount = Number(match[1]) || 0;
+                                    goldType = match[2] || 'Vàng';
+                                }
+                            } else {
+                                amount = Number(rawAmountStr.replace(/[^\d\.]/g, '')) || 0;
+                            }
+                        }
+                        
+                        const dateVal = r["Ngày nhận"] || new Date().toISOString().slice(0, 10);
+                        const statusVal = r["Trạng thái trả lễ"] === 'Đã trả lễ lại họ' ? 'returned' : 'unreturned';
+                        
+                        return {
+                            id: generateId(),
+                            name: rowName,
+                            relationship: r["Mối quan hệ"] || 'Khác',
+                            gift_type: giftType,
+                            amount: amount,
+                            gold_amount: goldAmount,
+                            gold_type: goldType,
+                            date: String(dateVal).trim(),
+                            status: statusVal,
+                            notes: r["Ghi chú"] || '',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
+                    }).filter(Boolean);
                 }
-            } else if (backupType === 'sent') {
-                if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi mừng'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi mừng' và giữ nguyên 'Tiền tôi nhận')")) {
-                    state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
-                } else {
-                    state.sentGifts = parsed.sentGifts || [];
+                
+                // Parse "Tiền tôi mừng" sheet
+                if (workbook.SheetNames.includes("Tiền tôi mừng")) {
+                    const ws = workbook.Sheets["Tiền tôi mừng"];
+                    const rows = XLSX.utils.sheet_to_json(ws);
+                    importedSent = rows.map(r => {
+                        const rowName = r["Họ tên"] || "";
+                        if (!rowName) return null;
+                        
+                        let giftType = 'money';
+                        let amount = 0;
+                        let goldAmount = 0;
+                        let goldType = '';
+                        
+                        const rawAmount = r["Số tiền / Quà tặng"];
+                        if (rawAmount !== undefined && rawAmount !== null) {
+                            const rawAmountStr = String(rawAmount).trim();
+                            if (rawAmountStr.includes("chỉ vàng")) {
+                                giftType = 'gold';
+                                const match = rawAmountStr.match(/([\d\.]+)\s*chỉ vàng\s*(?:\((.*)\))?/);
+                                if (match) {
+                                    goldAmount = Number(match[1]) || 0;
+                                    goldType = match[2] || 'Vàng';
+                                }
+                            } else {
+                                amount = Number(rawAmountStr.replace(/[^\d\.]/g, '')) || 0;
+                            }
+                        }
+                        
+                        const dateVal = r["Ngày mừng"] || new Date().toISOString().slice(0, 10);
+                        
+                        return {
+                            id: generateId(),
+                            name: rowName,
+                            relationship: r["Mối quan hệ"] || 'Khác',
+                            gift_type: giftType,
+                            amount: amount,
+                            gold_amount: goldAmount,
+                            gold_type: goldType,
+                            event_type: r["Loại sự kiện"] || 'Khác',
+                            date: String(dateVal).trim(),
+                            notes: r["Ghi chú"] || '',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
+                    }).filter(Boolean);
                 }
+                
+                if (importedReceived.length === 0 && importedSent.length === 0) {
+                    showToast("Không tìm thấy dữ liệu hợp lệ trong file Excel!", "error");
+                    return;
+                }
+                
+                let msg = "Đã giải mã thành công file Excel!";
+                if (importedReceived.length > 0) msg += `\n- ${importedReceived.length} dòng Tiền tôi nhận`;
+                if (importedSent.length > 0) msg += `\n- ${importedSent.length} dòng Tiền tôi mừng`;
+                msg += "\n\nBạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ dữ liệu của các phần tương ứng)";
+                
+                if (confirm(msg)) {
+                    if (importedReceived.length > 0) {
+                        state.receivedGifts = mergeLists(state.receivedGifts, importedReceived);
+                    }
+                    if (importedSent.length > 0) {
+                        state.sentGifts = mergeLists(state.sentGifts, importedSent);
+                    }
+                } else {
+                    if (importedReceived.length > 0) {
+                        state.receivedGifts = importedReceived;
+                    }
+                    if (importedSent.length > 0) {
+                        state.sentGifts = importedSent;
+                    }
+                }
+                
+                await saveLocalState();
+                renderAll();
+                showToast("Đã nhập dữ liệu từ Excel thành công!");
+                performSync(true);
             } else {
-                if (confirm("Giải mã thành công! Bạn có muốn gộp (Merge) dữ liệu từ file này vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để ghi đè hoàn toàn)")) {
-                    state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
-                    state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
-                } else {
-                    state.receivedGifts = parsed.receivedGifts || [];
-                    state.sentGifts = parsed.sentGifts || [];
+                // Read JSON backup
+                const data = JSON.parse(evt.target.result);
+                if (data.app_id !== "hieu_hy_gift_ledger" || !data.encrypted_payload) {
+                    showToast("File backup không đúng định dạng!", "error");
+                    return;
                 }
+                
+                const decrypted = await decrypt(data.encrypted_payload, state.masterPassword);
+                const parsed = JSON.parse(decrypted);
+                
+                const backupType = data.backup_type || 'all';
+                
+                if (backupType === 'received') {
+                    if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi nhận'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi nhận' và giữ nguyên 'Tiền tôi mừng')")) {
+                        state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
+                    } else {
+                        state.receivedGifts = parsed.receivedGifts || [];
+                    }
+                } else if (backupType === 'sent') {
+                    if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi mừng'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi mừng' và giữ nguyên 'Tiền tôi nhận')")) {
+                        state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
+                    } else {
+                        state.sentGifts = parsed.sentGifts || [];
+                    }
+                } else {
+                    if (confirm("Giải mã thành công! Bạn có muốn gộp (Merge) dữ liệu từ file này vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để ghi đè hoàn toàn)")) {
+                        state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
+                        state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
+                    } else {
+                        state.receivedGifts = parsed.receivedGifts || [];
+                        state.sentGifts = parsed.sentGifts || [];
+                    }
+                }
+                
+                await saveLocalState();
+                renderAll();
+                showToast("Đã nhập dữ liệu từ backup thành công!");
+                performSync(true);
             }
-            
-            await saveLocalState();
-            renderAll();
-            showToast("Đã nhập dữ liệu từ backup thành công!");
-            
-            // Auto-sync after import
-            performSync(true);
         } catch (err) {
             console.error(err);
-            showToast("Giải mã file thất bại. Mật khẩu chính hiện tại có thể khác với mật khẩu lúc tạo file backup!", "error");
+            if (isExcel) {
+                showToast("Đọc file Excel thất bại!", "error");
+            } else {
+                showToast("Giải mã file thất bại. Mật khẩu chính hiện tại có thể khác với mật khẩu lúc tạo file backup!", "error");
+            }
         }
     };
-    reader.readAsText(file);
+    
+    if (isExcel) {
+        reader.readAsArrayBuffer(file);
+    } else {
+        reader.readAsText(file);
+    }
 }
 
 // --- Modals Control & Record Submission ---
@@ -2446,9 +2627,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportEncryptedAllBtn').addEventListener('click', () => handleExportEncrypted('all'));
     document.getElementById('exportEncryptedReceivedBtn').addEventListener('click', () => handleExportEncrypted('received'));
     document.getElementById('exportEncryptedSentBtn').addEventListener('click', () => handleExportEncrypted('sent'));
-    document.getElementById('exportCsvAllBtn').addEventListener('click', () => handleExportCsv('all'));
-    document.getElementById('exportCsvReceivedBtn').addEventListener('click', () => handleExportCsv('received'));
-    document.getElementById('exportCsvSentBtn').addEventListener('click', () => handleExportCsv('sent'));
+    document.getElementById('exportExcelAllBtn').addEventListener('click', () => handleExportExcel('all'));
+    document.getElementById('exportExcelReceivedBtn').addEventListener('click', () => handleExportExcel('received'));
+    document.getElementById('exportExcelSentBtn').addEventListener('click', () => handleExportExcel('sent'));
     document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFileInput').click());
     document.getElementById('importFileInput').addEventListener('change', handleImportFile);
     
