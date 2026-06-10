@@ -2292,7 +2292,7 @@ async function handleWizardSubmit(e) {
         resetViewportZoom();
         showToast("Đã thiết lập Master Password và khởi tạo bộ nhớ!");
         renderAll();
-    }, 150);
+    }, 350);
 }
 
 // Handle Unlock form submit
@@ -2324,7 +2324,7 @@ async function handleUnlockSubmit(e) {
                     sync.initSupabase(config.url, config.key);
                     checkLoginStatus();
                 }
-            }, 150);
+            }, 350);
 
         } else {
             showToast("Sai Master Password! Không thể giải mã dữ liệu.", "error");
@@ -2461,7 +2461,7 @@ async function handleWizardKeypadPress(val) {
                     
                     wizardPinBuffer = "";
                     wizardFirstPin = "";
-                }, 150);
+                }, 350);
             } else {
                 shakeCard('setupWizardOverlay');
                 showToast("Mã PIN xác nhận không khớp! Vui lòng làm lại.", "error");
@@ -2515,7 +2515,7 @@ async function handleUnlockKeypadPress(val) {
                 unlockPinBuffer = "";
                 updatePasscodeDots('unlockPasscodeDots', 0);
             }
-        }, 150);
+        }, 350);
     }
 }
 
@@ -2659,7 +2659,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             checkLoginStatus();
                         }
                         unlockPasswordInput.value = "";
-                    }, 150);
+                    }, 350);
                 }
             }
         });
