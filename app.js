@@ -1337,6 +1337,67 @@ async function handleExportEncrypted(type = 'all') {
 }
 window.handleExportEncrypted = handleExportEncrypted;
 
+function applyExcelStyles(ws) {
+    if (!ws || !ws['!ref']) return;
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    
+    // Header Row Styling
+    for (let c = range.s.c; c <= range.e.c; c++) {
+        const cellRef = XLSX.utils.encode_cell({ r: range.s.r, c: c });
+        const cell = ws[cellRef];
+        if (cell) {
+            cell.s = {
+                font: { bold: true, name: 'Arial', sz: 11, color: { rgb: "333333" } },
+                alignment: { horizontal: 'center', vertical: 'center' },
+                fill: { fgColor: { rgb: "F2F2F2" } },
+                border: {
+                    top: { style: 'thin', color: { rgb: "D3D3D3" } },
+                    bottom: { style: 'medium', color: { rgb: "000000" } },
+                    left: { style: 'thin', color: { rgb: "D3D3D3" } },
+                    right: { style: 'thin', color: { rgb: "D3D3D3" } }
+                }
+            };
+        }
+    }
+    
+    // Data Rows Styling
+    for (let r = range.s.r + 1; r <= range.e.r; r++) {
+        for (let c = range.s.c; c <= range.e.c; c++) {
+            const cellRef = XLSX.utils.encode_cell({ r: r, c: c });
+            const cell = ws[cellRef];
+            if (cell) {
+                // Column 0: STT -> Center
+                // Column 1: Họ tên -> Left
+                // Column 2: Mối quan hệ -> Center
+                // Column 3: Số tiền / Quà tặng -> Center (requested by user: "tự căn chỉnh giữa")
+                // Column 4: Ngày nhận / Loại sự kiện -> Center
+                // Column 5: Trạng thái / Ngày mừng -> Center
+                // Column 6: Ghi chú -> Left
+                let align = 'center';
+                if (c === 1 || c === 6) {
+                    align = 'left';
+                }
+                
+                cell.s = {
+                    font: { name: 'Arial', sz: 10, color: { rgb: "333333" } },
+                    alignment: { horizontal: align, vertical: 'center' },
+                    border: {
+                        top: { style: 'thin', color: { rgb: "E0E0E0" } },
+                        bottom: { style: 'thin', color: { rgb: "E0E0E0" } },
+                        left: { style: 'thin', color: { rgb: "E0E0E0" } },
+                        right: { style: 'thin', color: { rgb: "E0E0E0" } }
+                    }
+                };
+                
+                // Set thousand separator format for numeric values in Column 3 (Số tiền / Quà tặng)
+                if (c === 3 && cell.t === 'n') {
+                    cell.z = '#,##0';
+                }
+            }
+        }
+    }
+}
+
 function handleExportExcel(type = 'all') {
     const wb = XLSX.utils.book_new();
     
@@ -1375,15 +1436,8 @@ function handleExportExcel(type = 'all') {
         ];
         wsReceived['!cols'] = colWidths;
         
-        // Format column D (Số tiền / Quà tặng) as number with thousand separators
-        for (let key in wsReceived) {
-            if (/^D\d+$/.test(key)) {
-                const cell = wsReceived[key];
-                if (cell && cell.t === 'n') {
-                    cell.z = '#,##0';
-                }
-            }
-        }
+        // Apply styling
+        applyExcelStyles(wsReceived);
         
         XLSX.utils.book_append_sheet(wb, wsReceived, "Tiền tôi nhận");
     }
@@ -1416,15 +1470,8 @@ function handleExportExcel(type = 'all') {
         ];
         wsSent['!cols'] = colWidths;
         
-        // Format column D (Số tiền / Quà tặng) as number with thousand separators
-        for (let key in wsSent) {
-            if (/^D\d+$/.test(key)) {
-                const cell = wsSent[key];
-                if (cell && cell.t === 'n') {
-                    cell.z = '#,##0';
-                }
-            }
-        }
+        // Apply styling
+        applyExcelStyles(wsSent);
         
         XLSX.utils.book_append_sheet(wb, wsSent, "Tiền tôi mừng");
     }
