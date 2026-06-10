@@ -2802,6 +2802,9 @@ function setupTableSearchAndFilters() {
 // --- Utilities ---
 
 function resetViewportZoom() {
+    // Force blur on all inputs to dismiss keyboard on mobile
+    document.querySelectorAll('input, select, textarea').forEach(el => el.blur());
+    window.scrollTo(0, 0);
     const el = document.querySelector('meta[name="viewport"]');
     if (el) {
         el.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no');
