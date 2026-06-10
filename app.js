@@ -2286,11 +2286,12 @@ async function handleWizardSubmit(e) {
     
     // Hide overlay
     if (document.activeElement) document.activeElement.blur();
-    document.getElementById('setupWizardOverlay').style.display = 'none';
-    document.getElementById('appLayout').style.display = 'flex';
-    
-    showToast("Đã thiết lập Master Password và khởi tạo bộ nhớ!");
-    renderAll();
+    setTimeout(() => {
+        document.getElementById('setupWizardOverlay').style.display = 'none';
+        document.getElementById('appLayout').style.display = 'flex';
+        showToast("Đã thiết lập Master Password và khởi tạo bộ nhớ!");
+        renderAll();
+    }, 150);
 }
 
 // Handle Unlock form submit
@@ -2309,17 +2310,19 @@ async function handleUnlockSubmit(e) {
         if (success) {
             state.masterPassword = password;
             if (document.activeElement) document.activeElement.blur();
-            document.getElementById('unlockOverlay').style.display = 'none';
-            document.getElementById('appLayout').style.display = 'flex';
-            showToast("Giải mã thành công! Chào mừng trở lại.");
-            renderAll();
-            
-            // Connect to Supabase if configured and run sync
-            const config = getSupabaseConfig();
-            if (config.url && config.key) {
-                sync.initSupabase(config.url, config.key);
-                checkLoginStatus();
-            }
+            setTimeout(() => {
+                document.getElementById('unlockOverlay').style.display = 'none';
+                document.getElementById('appLayout').style.display = 'flex';
+                showToast("Giải mã thành công! Chào mừng trở lại.");
+                renderAll();
+                
+                // Connect to Supabase if configured and run sync
+                const config = getSupabaseConfig();
+                if (config.url && config.key) {
+                    sync.initSupabase(config.url, config.key);
+                    checkLoginStatus();
+                }
+            }, 150);
 
         } else {
             showToast("Sai Master Password! Không thể giải mã dữ liệu.", "error");
@@ -2446,13 +2449,16 @@ async function handleWizardKeypadPress(val) {
                 state.masterPassword = wizardPinBuffer;
                 await saveLocalState();
                 
-                document.getElementById('setupWizardOverlay').style.display = 'none';
-                document.getElementById('appLayout').style.display = 'flex';
-                showToast("Đã thiết lập Mã PIN và khởi tạo sổ!");
-                renderAll();
-                
-                wizardPinBuffer = "";
-                wizardFirstPin = "";
+                if (document.activeElement) document.activeElement.blur();
+                setTimeout(() => {
+                    document.getElementById('setupWizardOverlay').style.display = 'none';
+                    document.getElementById('appLayout').style.display = 'flex';
+                    showToast("Đã thiết lập Mã PIN và khởi tạo sổ!");
+                    renderAll();
+                    
+                    wizardPinBuffer = "";
+                    wizardFirstPin = "";
+                }, 150);
             } else {
                 shakeCard('setupWizardOverlay');
                 showToast("Mã PIN xác nhận không khớp! Vui lòng làm lại.", "error");
@@ -2484,6 +2490,7 @@ async function handleUnlockKeypadPress(val) {
             const success = await loadLocalState(pin);
             if (success) {
                 state.masterPassword = pin;
+                if (document.activeElement) document.activeElement.blur();
                 document.getElementById('unlockOverlay').style.display = 'none';
                 document.getElementById('appLayout').style.display = 'flex';
                 showToast("Mở khóa thành công! Chào mừng trở lại.");
@@ -2618,6 +2625,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 100);
         });
         btnSwitchToPin.addEventListener('click', () => {
+            if (document.activeElement) document.activeElement.blur();
             pinModeView.style.display = 'block';
             keyboardModeView.style.display = 'none';
             document.getElementById('unlockPassword').value = "";
@@ -2634,17 +2642,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (success) {
                     state.masterPassword = val;
                     if (document.activeElement) document.activeElement.blur();
-                    document.getElementById('unlockOverlay').style.display = 'none';
-                    document.getElementById('appLayout').style.display = 'flex';
-                    showToast("Giải mã thành công! Chào mừng trở lại.");
-                    renderAll();
-                    
-                    const config = getSupabaseConfig();
-                    if (config.url && config.key) {
-                        sync.initSupabase(config.url, config.key);
-                        checkLoginStatus();
-                    }
-                    unlockPasswordInput.value = "";
+                    setTimeout(() => {
+                        document.getElementById('unlockOverlay').style.display = 'none';
+                        document.getElementById('appLayout').style.display = 'flex';
+                        showToast("Giải mã thành công! Chào mừng trở lại.");
+                        renderAll();
+                        
+                        const config = getSupabaseConfig();
+                        if (config.url && config.key) {
+                            sync.initSupabase(config.url, config.key);
+                            checkLoginStatus();
+                        }
+                        unlockPasswordInput.value = "";
+                    }, 150);
                 }
             }
         });
