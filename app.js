@@ -45,6 +45,7 @@ let state = {
     showImportNotesOptionUpdated: '',
     activeTab: 'dashboard',
     theme: 'dark',
+    mobileViewMode: 'cards',
     user: null,
     
     // Pagination & Search state
@@ -385,6 +386,41 @@ function updateThemeUI() {
         if (text) text.innerText = 'Giao diện sáng';
     }
     lucide.createIcons();
+}
+
+// Mobile View Mode handling
+function toggleMobileView() {
+    state.mobileViewMode = state.mobileViewMode === 'table' ? 'cards' : 'table';
+    localStorage.setItem('gift_ledger_mobile_view', state.mobileViewMode);
+    updateMobileViewUI();
+}
+
+function updateMobileViewUI() {
+    if (state.mobileViewMode === 'table') {
+        document.body.classList.add('mobile-view-table');
+    } else {
+        document.body.classList.remove('mobile-view-table');
+    }
+    
+    // Update settings checkbox
+    const checkbox = document.getElementById('toggleMobileTableView');
+    if (checkbox) {
+        checkbox.checked = (state.mobileViewMode === 'table');
+    }
+    
+    // Update layout buttons
+    const buttons = document.querySelectorAll('.btnToggleMobileView');
+    buttons.forEach(btn => {
+        if (state.mobileViewMode === 'table') {
+            btn.innerHTML = `<i data-lucide="layout-grid"></i><span>Xem dạng thẻ</span>`;
+        } else {
+            btn.innerHTML = `<i data-lucide="table"></i><span>Xem dạng bảng</span>`;
+        }
+    });
+    
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+    }
 }
 
 const tabHashMapping = {
@@ -3093,6 +3129,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     updateThemeUI();
 
+    // Mobile View Mode initialization
+    const savedMobileView = localStorage.getItem('gift_ledger_mobile_view');
+    if (savedMobileView) {
+        state.mobileViewMode = savedMobileView;
+    } else {
+        state.mobileViewMode = 'cards';
+    }
+    updateMobileViewUI();
+
     // Check if database already exists in LocalStorage
     const hasDb = localStorage.getItem('gift_ledger_db') !== null;
     
@@ -3490,6 +3535,20 @@ function setupTableSearchAndFilters() {
         btnToggleEditSnt.addEventListener('click', () => {
             state.sentEditMode = !state.sentEditMode;
             renderSentTable();
+        });
+    }
+
+    // --- Mobile View Mode Toggles ---
+    document.querySelectorAll('.btnToggleMobileView').forEach(btn => {
+        btn.addEventListener('click', toggleMobileView);
+    });
+
+    const toggleMobileTableViewCheck = document.getElementById('toggleMobileTableView');
+    if (toggleMobileTableViewCheck) {
+        toggleMobileTableViewCheck.addEventListener('change', (e) => {
+            state.mobileViewMode = e.target.checked ? 'table' : 'cards';
+            localStorage.setItem('gift_ledger_mobile_view', state.mobileViewMode);
+            updateMobileViewUI();
         });
     }
 }

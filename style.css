@@ -1230,26 +1230,26 @@ body.light-mode .data-table tbody tr:hover {
     }
 
     /* Table Mobile Card Layout */
-    .table-responsive {
+    body:not(.mobile-view-table) .table-responsive {
         border: none;
     }
 
-    .data-table, 
-    .data-table thead, 
-    .data-table tbody, 
-    .data-table th, 
-    .data-table td, 
-    .data-table tr { 
+    body:not(.mobile-view-table) .data-table, 
+    body:not(.mobile-view-table) .data-table thead, 
+    body:not(.mobile-view-table) .data-table tbody, 
+    body:not(.mobile-view-table) .data-table th, 
+    body:not(.mobile-view-table) .data-table td, 
+    body:not(.mobile-view-table) .data-table tr { 
         display: block; 
     }
     
-    .data-table thead tr { 
+    body:not(.mobile-view-table) .data-table thead tr { 
         position: absolute;
         top: -9999px;
         left: -9999px;
     }
     
-    .data-table tr { 
+    body:not(.mobile-view-table) .data-table tr { 
         border: 1px solid var(--border-color);
         border-radius: 12px;
         background-color: var(--bg-secondary);
@@ -1258,7 +1258,7 @@ body.light-mode .data-table tbody tr:hover {
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
-    .data-table td { 
+    body:not(.mobile-view-table) .data-table td { 
         border: none;
         border-bottom: 1px solid var(--border-color); 
         position: relative;
@@ -1270,14 +1270,14 @@ body.light-mode .data-table tbody tr:hover {
         text-align: right;
     }
     
-    .data-table td:last-child {
+    body:not(.mobile-view-table) .data-table td:last-child {
         border-bottom: 0;
         padding-bottom: 0;
         margin-top: 8px;
         justify-content: flex-end;
     }
     
-    .data-table td::before { 
+    body:not(.mobile-view-table) .data-table td::before { 
         content: attr(data-label);
         font-weight: 700;
         color: var(--text-primary);
@@ -1820,20 +1820,129 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
 }
 
 /* Mobile responsive adjustments */
+.btn-toggle-mobile-view {
+    display: none;
+}
+
 @media (max-width: 768px) {
-    .name-address-container {
+    .btn-toggle-mobile-view {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    body:not(.mobile-view-table) .name-address-container {
         align-items: flex-end;
         text-align: right;
         width: 100%;
     }
     
-    .notes-cell {
+    body:not(.mobile-view-table) .notes-cell {
         max-width: 100% !important;
         white-space: normal !important;
         word-break: break-word;
         text-align: right;
         color: var(--text-secondary);
         font-size: 0.92rem;
+    }
+
+    /* Mobile Table View Layout (Horizontal scroll + sticky columns) */
+    body.mobile-view-table .table-responsive {
+        border: 1px solid var(--border-color) !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        background-color: var(--bg-secondary);
+    }
+    
+    body.mobile-view-table .data-table {
+        display: table !important;
+        width: auto !important;
+        min-width: 780px !important; /* Force a width so it overflows and scrollable */
+        border-collapse: collapse !important;
+    }
+    
+    body.mobile-view-table .data-table thead {
+        display: table-header-group !important;
+    }
+    
+    body.mobile-view-table .data-table tbody {
+        display: table-row-group !important;
+    }
+    
+    body.mobile-view-table .data-table tr {
+        display: table-row !important;
+        border: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    body.mobile-view-table .data-table th,
+    body.mobile-view-table .data-table td {
+        display: table-cell !important;
+        padding: 12px 14px !important;
+        white-space: nowrap !important;
+        text-align: left !important; /* Keep standard left alignment for desktop style */
+        border-bottom: 1px solid var(--border-color) !important;
+        vertical-align: middle !important;
+    }
+
+    body.mobile-view-table .data-table th {
+        font-weight: 700 !important;
+        background-color: var(--bg-secondary) !important;
+        color: var(--primary-color) !important;
+    }
+    
+    /* Sticky columns for Họ & Tên in receivedTable & sentTable */
+    body.mobile-view-table #receivedTable th:nth-child(1),
+    body.mobile-view-table #receivedTable td:nth-child(1),
+    body.mobile-view-table #sentTable th:nth-child(1),
+    body.mobile-view-table #sentTable td:nth-child(1) {
+        position: sticky !important;
+        left: 0 !important;
+        z-index: 10 !important;
+        background-color: var(--bg-secondary) !important;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Sticky columns for dashboard table (Column 1: Chiều, Column 2: Họ & Tên) */
+    body.mobile-view-table .data-table:not(#receivedTable):not(#sentTable) th:nth-child(1),
+    body.mobile-view-table .data-table:not(#receivedTable):not(#sentTable) td:nth-child(1) {
+        position: sticky !important;
+        left: 0 !important;
+        z-index: 10 !important;
+        background-color: var(--bg-secondary) !important;
+    }
+    
+    body.mobile-view-table .data-table:not(#receivedTable):not(#sentTable) th:nth-child(2),
+    body.mobile-view-table .data-table:not(#receivedTable):not(#sentTable) td:nth-child(2) {
+        position: sticky !important;
+        left: 55px !important; /* Width of the first column (Chiều badge) */
+        z-index: 10 !important;
+        background-color: var(--bg-secondary) !important;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Sticky column for actions (.col-actions) when editing is active */
+    body.mobile-view-table .edit-mode-active td.col-actions,
+    body.mobile-view-table .edit-mode-active th.col-actions {
+        display: table-cell !important;
+        position: sticky !important;
+        right: 0 !important;
+        z-index: 10 !important;
+        background-color: var(--bg-secondary) !important;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Ensure sticky cells have the correct background on hover */
+    body.mobile-view-table .data-table tbody tr:hover td {
+        background-color: var(--bg-tertiary) !important;
     }
 }
 
