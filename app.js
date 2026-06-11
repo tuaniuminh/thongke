@@ -40,6 +40,7 @@ let state = {
     masterPassword: '',
     receivedGifts: [],
     sentGifts: [],
+    lastResetTime: '',
     activeTab: 'dashboard',
     theme: 'dark',
     user: null,
@@ -144,7 +145,8 @@ async function saveLocalState() {
     
     const payload = JSON.stringify({
         receivedGifts: state.receivedGifts,
-        sentGifts: state.sentGifts
+        sentGifts: state.sentGifts,
+        lastResetTime: state.lastResetTime || ''
     });
     
     try {
@@ -162,6 +164,7 @@ async function loadLocalState(password) {
     if (!encrypted) {
         state.receivedGifts = [];
         state.sentGifts = [];
+        state.lastResetTime = '';
         return true;
     }
     
@@ -170,6 +173,7 @@ async function loadLocalState(password) {
         const data = JSON.parse(decrypted);
         state.receivedGifts = data.receivedGifts || [];
         state.sentGifts = data.sentGifts || [];
+        state.lastResetTime = data.lastResetTime || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -224,6 +228,7 @@ async function performSync(silent = false) {
         
         let mergedReceived = [...state.receivedGifts];
         let mergedSent = [...state.sentGifts];
+        let localReset = state.lastResetTime || '';
         
         if (remoteRecord && remoteRecord.encrypted_data) {
             try {
@@ -231,8 +236,25 @@ async function performSync(silent = false) {
                 const remoteDecrypted = await decrypt(remoteRecord.encrypted_data, state.masterPassword);
                 const remoteData = JSON.parse(remoteDecrypted);
                 
-                const remoteReceived = remoteData.receivedGifts || [];
-                const remoteSent = remoteData.sentGifts || [];
+                const remoteReset = remoteData.lastResetTime || '';
+                let remoteReceived = remoteData.receivedGifts || [];
+                let remoteSent = remoteData.sentGifts || [];
+                
+                // Compare reset times
+                const localResetTime = localReset ? new Date(localReset).getTime() : 0;
+                const remoteResetTime = remoteReset ? new Date(remoteReset).getTime() : 0;
+                
+                if (remoteResetTime > localResetTime) {
+                    // Remote has a newer reset/overwrite. Discard local data.
+                    state.receivedGifts = [];
+                    state.sentGifts = [];
+                    state.lastResetTime = remoteReset;
+                    localReset = remoteReset;
+                } else if (localResetTime > remoteResetTime) {
+                    // Local has a newer reset/overwrite. Discard remote data.
+                    remoteReceived = [];
+                    remoteSent = [];
+                }
                 
                 // 3. Merge
                 mergedReceived = mergeLists(state.receivedGifts, remoteReceived);
@@ -246,12 +268,14 @@ async function performSync(silent = false) {
         // 4. Update local state
         state.receivedGifts = mergedReceived;
         state.sentGifts = mergedSent;
+        state.lastResetTime = localReset;
         await saveLocalState();
         
         // 5. Encrypt and upload merged state to server
         const payload = JSON.stringify({
             receivedGifts: state.receivedGifts,
-            sentGifts: state.sentGifts
+            sentGifts: state.sentGifts,
+            lastResetTime: state.lastResetTime || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
@@ -1988,12 +2012,9 @@ function handleImportFile(e) {
                         state.sentGifts = mergeExcelList(state.sentGifts, importedSent);
                     }
                 } else if (action === 'overwrite') {
-                    if (importedReceived.length > 0) {
-                        state.receivedGifts = importedReceived;
-                    }
-                    if (importedSent.length > 0) {
-                        state.sentGifts = importedSent;
-                    }
+                    state.receivedGifts = importedReceived;
+                    state.sentGifts = importedSent;
+                    state.lastResetTime = new Date().toISOString();
                 }
                 
                 await saveLocalState();
@@ -2039,6 +2060,7 @@ function handleImportFile(e) {
                         state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
                     } else {
                         state.receivedGifts = parsed.receivedGifts || [];
+                        state.lastResetTime = new Date().toISOString();
                     }
                 } else if (backupType === 'sent') {
                     const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP phần 'Tiền tôi mừng'.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
@@ -2056,6 +2078,7 @@ function handleImportFile(e) {
                         state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
                     } else {
                         state.sentGifts = parsed.sentGifts || [];
+                        state.lastResetTime = new Date().toISOString();
                     }
                 } else {
                     const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP cả hai phần.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
@@ -2075,6 +2098,7 @@ function handleImportFile(e) {
                     } else {
                         state.receivedGifts = parsed.receivedGifts || [];
                         state.sentGifts = parsed.sentGifts || [];
+                        state.lastResetTime = new Date().toISOString();
                     }
                 }
                 
@@ -3255,6 +3279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 state.receivedGifts = [];
                 state.sentGifts = [];
+                state.lastResetTime = new Date().toISOString();
                 
                 await saveLocalState();
                 renderAll();
@@ -3262,20 +3287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Sync with Supabase to clear remote database by overwriting it
                 if (sync.isConfigured() && await sync.getCurrentUser()) {
-                    try {
-                        const payload = JSON.stringify({
-                            receivedGifts: [],
-                            sentGifts: []
-                        });
-                        const encrypted = await encrypt(payload, state.masterPassword);
-                        await sync.saveSyncData(encrypted);
-                        localStorage.setItem('last_sync_time', new Date().toISOString());
-                        updateSyncIndicator('synced');
-                    } catch (syncErr) {
-                        console.error("Failed to clear remote data:", syncErr);
-                        showToast("Đã xóa trên máy nhưng đồng bộ xóa đám mây thất bại. Vui lòng bấm Đồng bộ lại để cập nhật.", "warning");
-                        updateSyncIndicator('error');
-                    }
+                    await performSync(true);
                 }
                 
                 // Redirect to dashboard
