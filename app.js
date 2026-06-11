@@ -1832,11 +1832,31 @@ function handleImportFile(e) {
                 }
                 
                 if (action === 'merge') {
+                    // Helper to merge Excel items avoiding duplicates by comparing key fields
+                    const mergeExcelList = (existingList, excelList) => {
+                        const merged = [...existingList];
+                        excelList.forEach(excelItem => {
+                            const isDuplicate = existingList.some(existItem => {
+                                const matchName = existItem.name.trim().toLowerCase() === excelItem.name.trim().toLowerCase();
+                                const matchAmount = existItem.amount === excelItem.amount;
+                                const matchGiftType = existItem.gift_type === excelItem.gift_type;
+                                const matchGoldAmount = existItem.gold_amount === excelItem.gold_amount;
+                                // Compare only date part YYYY-MM-DD
+                                const matchDate = (existItem.date || '').slice(0, 10) === (excelItem.date || '').slice(0, 10);
+                                return matchName && matchAmount && matchGiftType && matchGoldAmount && matchDate;
+                            });
+                            if (!isDuplicate) {
+                                merged.push(excelItem);
+                            }
+                        });
+                        return merged;
+                    };
+
                     if (importedReceived.length > 0) {
-                        state.receivedGifts = mergeLists(state.receivedGifts, importedReceived);
+                        state.receivedGifts = mergeExcelList(state.receivedGifts, importedReceived);
                     }
                     if (importedSent.length > 0) {
-                        state.sentGifts = mergeLists(state.sentGifts, importedSent);
+                        state.sentGifts = mergeExcelList(state.sentGifts, importedSent);
                     }
                 } else if (action === 'overwrite') {
                     if (importedReceived.length > 0) {
