@@ -727,14 +727,16 @@ function renderRecentActivity(received, sent) {
         row.innerHTML = `
             <td data-label="Chiều">${flowBadge}</td>
             <td data-label="Họ & Tên">
-                <div style="font-weight: 500;">${escapeHTML(act.name)}</div>
-                ${act.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(act.address)}</div>` : ''}
+                <div class="name-address-container">
+                    <div style="font-weight: 500; white-space: normal; word-break: break-word;">${escapeHTML(act.name)}</div>
+                    ${act.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(act.address)}</div>` : ''}
+                </div>
             </td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${act.relationship}</span></td>
             <td data-label="Số tiền">${amountText}</td>
             <td data-label="Loại sự kiện">${eventBadge}</td>
             <td data-label="Ngày">${formatDate(act.date)}</td>
-            <td data-label="Ghi chú" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(act.notes || '')}">
+            <td data-label="Ghi chú" class="notes-cell" title="${escapeHTML(act.notes || '')}">
                 ${escapeHTML(act.notes || '-')}
             </td>
         `;
@@ -991,15 +993,17 @@ function renderReceivedTable() {
         
         row.innerHTML = `
             <td data-label="Họ & Tên">
-                <div style="font-weight: 600;">${escapeHTML(g.name)}</div>
-                ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
+                <div class="name-address-container">
+                    <div style="font-weight: 600; white-space: normal; word-break: break-word;">${escapeHTML(g.name)}</div>
+                    ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
+                </div>
             </td>
             <td data-label="Loại sự kiện"><span class="badge ${evClass}">${escapeHTML(eventType)}</span></td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
             <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">
                 ${g.gift_type === 'gold' ? `+${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `+${formatVND(g.amount)}`}
             </td>
-            <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
+            <td data-label="Ghi chú" class="notes-cell" title="${escapeHTML(g.notes || '')}">
                 ${escapeHTML(g.notes || '-')}
             </td>
             <td data-label="Ngày nhận">${formatDate(g.date)}</td>
@@ -1172,15 +1176,17 @@ function renderSentTable() {
         
         row.innerHTML = `
             <td data-label="Họ & Tên">
-                <div style="font-weight: 600;">${escapeHTML(g.name)}</div>
-                ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
+                <div class="name-address-container">
+                    <div style="font-weight: 600; white-space: normal; word-break: break-word;">${escapeHTML(g.name)}</div>
+                    ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
+                </div>
             </td>
             <td data-label="Loại sự kiện"><span class="badge ${evClass}">${g.event_type}</span></td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
             <td data-label="Số tiền chi" style="color: var(--text-primary); font-weight:600;">
                 ${g.gift_type === 'gold' ? `-${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `-${formatVND(g.amount)}`}
             </td>
-            <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
+            <td data-label="Ghi chú" class="notes-cell" title="${escapeHTML(g.notes || '')}">
                 ${escapeHTML(g.notes || '-')}
             </td>
             <td data-label="Ngày chi">${formatDate(g.date)}</td>
@@ -2555,13 +2561,17 @@ function handleNotesPreview() {
         else if (eventName === 'Tân gia') evClass = 'badge-event-housewarming';
             
         row.innerHTML = `
-            <td data-label="Họ & Tên" style="font-weight:600;">${escapeHTML(item.name)}</td>
+            <td data-label="Họ & Tên">
+                <div class="name-address-container">
+                    <div style="font-weight: 600; white-space: normal; word-break: break-word;">${escapeHTML(item.name)}</div>
+                </div>
+            </td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${escapeHTML(item.relationship)}</span></td>
             <td data-label="Sự kiện"><span class="badge ${evClass}">${escapeHTML(eventName)}</span></td>
             <td data-label="Số tiền" style="color:${isReceived ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight:600;">
                 ${isReceived ? '+' : '-'}${displayVal}
             </td>
-            <td data-label="Ghi chú">${escapeHTML(item.notes)}</td>
+            <td data-label="Ghi chú" class="notes-cell">${escapeHTML(item.notes || '-')}</td>
         `;
         tbody.appendChild(row);
     });
