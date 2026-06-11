@@ -3097,8 +3097,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderAll();
                 showToast("Đã xóa sạch toàn bộ dữ liệu thành công!", "success");
                 
-                // Sync with Supabase to clear remote database as well
-                performSync(true);
+                // Sync with Supabase to clear remote database by overwriting it
+                if (sync.isConfigured() && await sync.getCurrentUser()) {
+                    try {
+                        const payload = JSON.stringify({
+                            receivedGifts: [],
+                            sentGifts: []
+                        });
+                        const encrypted = await encrypt(payload, state.masterPassword);
+                        await sync.saveSyncData(encrypted);
+                        localStorage.setItem('last_sync_time', new Date().toISOString());
+                        updateSyncIndicator('synced');
+                    } catch (syncErr) {
+                        console.error("Failed to clear remote data:", syncErr);
+                        showToast("Đã xóa trên máy nhưng đồng bộ xóa đám mây thất bại. Vui lòng bấm Đồng bộ lại để cập nhật.", "warning");
+                        updateSyncIndicator('error');
+                    }
+                }
                 
                 // Redirect to dashboard
                 window.location.hash = "#tongquan";
