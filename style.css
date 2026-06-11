@@ -649,8 +649,8 @@ select.form-control {
     background-color: var(--bg-secondary);
     padding: 14px 18px;
     font-weight: 700;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--border-color);
     white-space: nowrap;
 }
 
