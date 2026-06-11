@@ -1506,7 +1506,7 @@ function handleExportExcel(type = 'all') {
                 "Địa chỉ": g.address || '',
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
                 "Loại sự kiện": g.event_type || 'Khác',
-                "Ngày nhận": g.date,
+                "Ngày nhận": formatDate(g.date),
                 "Trạng thái trả lễ": g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại',
                 "Ghi chú": g.notes || ''
             };
@@ -1545,7 +1545,7 @@ function handleExportExcel(type = 'all') {
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
                 "Loại sự kiện": g.event_type || 'Khác',
                 "Ghi chú": g.notes || '',
-                "Ngày mừng": g.date
+                "Ngày mừng": formatDate(g.date)
             };
         });
         const wsSent = XLSX.utils.json_to_sheet(dataSent);
