@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thu Chi Đối Ngoại</title>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=2.8.4">
+    <link rel="stylesheet" href="style.css?v=2.8.5">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -26,7 +26,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v2.8.4</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v2.8.5</span>
                 </div>
             </div>
             
@@ -333,6 +333,26 @@
                         </button>
                     </div>
 
+                    <!-- Feature Customization Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="sliders"></i>
+                            <span>Tùy chỉnh chức năng</span>
+                        </h2>
+                        <p class="settings-info">
+                            Bật hoặc tắt các tính năng bổ sung theo nhu cầu sử dụng của bạn.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị nút "Nhập nhanh từ Ghi chú"</span>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="checkbox" id="toggleImportNotesOption" class="status-checkbox">
+                                    <span class="status-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Supabase Sync Card -->
                     <div class="settings-card">
                         <h2>
@@ -410,7 +430,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v2.8.4
+                        Phiên bản ứng dụng: v2.8.5
                     </div>
                 </div>
             </section>
@@ -426,7 +446,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.8.4</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.8.5</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -477,7 +497,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.8.4</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.8.5</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -528,7 +548,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.8.4</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.8.5</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -890,6 +910,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=2.8.4"></script>
+    <script type="module" src="app.js?v=2.8.5"></script>
 </body>
 </html>

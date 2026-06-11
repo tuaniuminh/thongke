@@ -41,6 +41,7 @@ let state = {
     receivedGifts: [],
     sentGifts: [],
     lastResetTime: '',
+    showImportNotesOption: false,
     activeTab: 'dashboard',
     theme: 'dark',
     user: null,
@@ -146,7 +147,8 @@ async function saveLocalState() {
     const payload = JSON.stringify({
         receivedGifts: state.receivedGifts,
         sentGifts: state.sentGifts,
-        lastResetTime: state.lastResetTime || ''
+        lastResetTime: state.lastResetTime || '',
+        showImportNotesOption: !!state.showImportNotesOption
     });
     
     try {
@@ -165,6 +167,7 @@ async function loadLocalState(password) {
         state.receivedGifts = [];
         state.sentGifts = [];
         state.lastResetTime = '';
+        state.showImportNotesOption = false;
         return true;
     }
     
@@ -174,6 +177,7 @@ async function loadLocalState(password) {
         state.receivedGifts = data.receivedGifts || [];
         state.sentGifts = data.sentGifts || [];
         state.lastResetTime = data.lastResetTime || '';
+        state.showImportNotesOption = !!data.showImportNotesOption;
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -250,10 +254,15 @@ async function performSync(silent = false) {
                     state.sentGifts = [];
                     state.lastResetTime = remoteReset;
                     localReset = remoteReset;
+                    state.showImportNotesOption = !!remoteData.showImportNotesOption;
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
                     remoteSent = [];
+                } else {
+                    if (remoteData.showImportNotesOption !== undefined) {
+                        state.showImportNotesOption = !!remoteData.showImportNotesOption;
+                    }
                 }
                 
                 // 3. Merge
@@ -275,7 +284,8 @@ async function performSync(silent = false) {
         const payload = JSON.stringify({
             receivedGifts: state.receivedGifts,
             sentGifts: state.sentGifts,
-            lastResetTime: state.lastResetTime || ''
+            lastResetTime: state.lastResetTime || '',
+            showImportNotesOption: !!state.showImportNotesOption
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
@@ -326,8 +336,20 @@ function renderAll() {
     renderSentTable();
     renderSettings();
     updateThemeUI();
+    updateImportNotesOptionUI();
     handleHashRoute();
     lucide.createIcons();
+}
+
+function updateImportNotesOptionUI() {
+    const btn = document.getElementById('chooseImportNotesBtn');
+    const toggle = document.getElementById('toggleImportNotesOption');
+    if (btn) {
+        btn.style.display = state.showImportNotesOption ? 'flex' : 'none';
+    }
+    if (toggle) {
+        toggle.checked = !!state.showImportNotesOption;
+    }
 }
 
 // Theme handling
@@ -3263,6 +3285,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('exportExcelSentBtn').addEventListener('click', () => handleExportExcel('sent'));
     document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFileInput').click());
     document.getElementById('importFileInput').addEventListener('change', handleImportFile);
+    
+    // Bind toggle for import notes option
+    const toggleImportNotesOption = document.getElementById('toggleImportNotesOption');
+    if (toggleImportNotesOption) {
+        toggleImportNotesOption.addEventListener('change', async (e) => {
+            state.showImportNotesOption = e.target.checked;
+            await saveLocalState();
+            updateImportNotesOptionUI();
+            
+            // Sync setting to other devices if configured
+            if (sync.isConfigured() && await sync.getCurrentUser()) {
+                performSync(true);
+            }
+        });
+    }
     
     // Bind Clear All Data button
     const clearAllDataBtn = document.getElementById('clearAllDataBtn');
