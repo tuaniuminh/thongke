@@ -1526,121 +1526,282 @@ function handleImportFile(e) {
                 let importedReceived = [];
                 let importedSent = [];
                 
-                // Parse "Tiền tôi nhận" sheet
-                if (workbook.SheetNames.includes("Tiền tôi nhận")) {
-                    const ws = workbook.Sheets["Tiền tôi nhận"];
-                    const rows = XLSX.utils.sheet_to_json(ws);
-                    importedReceived = rows.map(r => {
-                        const rowName = r["Họ tên"] || "";
-                        if (!rowName) return null;
-                        
-                        let giftType = 'money';
-                        let amount = 0;
-                        let goldAmount = 0;
-                        let goldType = '';
-                        
-                        const rawAmount = r["Số tiền / Quà tặng"];
-                        if (rawAmount !== undefined && rawAmount !== null) {
-                            const rawAmountStr = String(rawAmount).trim();
-                            if (rawAmountStr.includes("chỉ vàng")) {
-                                giftType = 'gold';
-                                const match = rawAmountStr.match(/([\d\.]+)\s*chỉ vàng\s*(?:\((.*)\))?/);
-                                if (match) {
-                                    goldAmount = Number(match[1]) || 0;
-                                    goldType = match[2] || 'Vàng';
-                                }
-                            } else {
-                                amount = Number(rawAmountStr.replace(/[^\d\.]/g, '')) || 0;
-                            }
+                // Helper to get row value using synonyms and case insensitivity
+                function getRowValue(row, possibleKeys) {
+                    for (const key of possibleKeys) {
+                        if (row[key] !== undefined && row[key] !== null) {
+                            return row[key];
                         }
-                        
-                        const dateVal = r["Ngày nhận"] || new Date().toISOString().slice(0, 10);
-                        const statusVal = r["Trạng thái trả lễ"] === 'Đã trả lễ lại họ' ? 'returned' : 'unreturned';
-                        
-                        return {
-                            id: generateId(),
-                            name: rowName,
-                            relationship: r["Mối quan hệ"] || 'Khác',
-                            gift_type: giftType,
-                            amount: amount,
-                            gold_amount: goldAmount,
-                            gold_type: goldType,
-                            date: String(dateVal).trim(),
-                            status: statusVal,
-                            notes: r["Ghi chú"] || '',
-                            address: r["Địa chỉ"] || '',
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        };
-                    }).filter(Boolean);
+                    }
+                    const lowerKeys = possibleKeys.map(k => k.toLowerCase());
+                    for (const actualKey in row) {
+                        const cleanKey = actualKey.trim().toLowerCase();
+                        if (lowerKeys.includes(cleanKey)) {
+                            return row[actualKey];
+                        }
+                    }
+                    return undefined;
                 }
-                
-                // Parse "Tiền tôi mừng" sheet
-                if (workbook.SheetNames.includes("Tiền tôi mừng")) {
-                    const ws = workbook.Sheets["Tiền tôi mừng"];
-                    const rows = XLSX.utils.sheet_to_json(ws);
-                    importedSent = rows.map(r => {
-                        const rowName = r["Họ tên"] || "";
-                        if (!rowName) return null;
-                        
-                        let giftType = 'money';
-                        let amount = 0;
-                        let goldAmount = 0;
-                        let goldType = '';
-                        
-                        const rawAmount = r["Số tiền / Quà tặng"];
-                        if (rawAmount !== undefined && rawAmount !== null) {
-                            const rawAmountStr = String(rawAmount).trim();
-                            if (rawAmountStr.includes("chỉ vàng")) {
-                                giftType = 'gold';
-                                const match = rawAmountStr.match(/([\d\.]+)\s*chỉ vàng\s*(?:\((.*)\))?/);
-                                if (match) {
-                                    goldAmount = Number(match[1]) || 0;
-                                    goldType = match[2] || 'Vàng';
+
+                // Helper to format Excel/normal dates safely
+                function formatExcelDate(dateVal) {
+                    if (!dateVal) return new Date().toISOString().slice(0, 10);
+                    if (typeof dateVal === 'number' || (!isNaN(dateVal) && !isNaN(parseFloat(dateVal)))) {
+                        try {
+                            const date = new Date(Math.round((Number(dateVal) - 25569) * 86400 * 1000));
+                            if (!isNaN(date.getTime())) {
+                                return date.toISOString().slice(0, 10);
+                            }
+                        } catch (e) {
+                            console.error("Lỗi định dạng ngày số Excel:", e);
+                        }
+                    }
+                    const dateStr = String(dateVal).trim();
+                    if (dateStr) {
+                        const dmyMatch = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+                        if (dmyMatch) {
+                            const day = dmyMatch[1].padStart(2, '0');
+                            const month = dmyMatch[2].padStart(2, '0');
+                            const year = dmyMatch[3];
+                            return `${year}-${month}-${day}`;
+                        }
+                        const ymdMatch = dateStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+                        if (ymdMatch) {
+                            const year = ymdMatch[1];
+                            const month = ymdMatch[2].padStart(2, '0');
+                            const day = ymdMatch[3].padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        }
+                        const parsedDate = new Date(dateStr);
+                        if (!isNaN(parsedDate.getTime())) {
+                            return parsedDate.toISOString().slice(0, 10);
+                        }
+                    }
+                    return new Date().toISOString().slice(0, 10);
+                }
+
+                // Helper to find header row index and headers
+                function findHeaderRow(ws) {
+                    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+                    const nameKeywords = ['họ tên', 'họ và tên', 'họ & tên', 'tên', 'tên khách', 'người nhận', 'người gửi', 'người mừng'];
+                    const otherKeywords = [
+                        'stt', 'số thứ tự',
+                        'số tiền', 'quà tặng', 'số tiền / quà tặng', 'tiền',
+                        'địa chỉ', 'quê quán', 'địa chỉ / quê quán', 'nơi ở',
+                        'ghi chú', 'note', 'ghi chú thêm',
+                        'mối quan hệ', 'quan hệ',
+                        'sự kiện', 'ngày', 'trạng thái'
+                    ];
+                    
+                    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+                        const row = rows[i];
+                        if (Array.isArray(row)) {
+                            const cellStrings = row.map(h => h !== null && h !== undefined ? String(h).trim().toLowerCase() : '');
+                            const hasNameHeader = cellStrings.some(h => nameKeywords.includes(h));
+                            if (hasNameHeader) {
+                                const hasOtherHeader = cellStrings.some(h => otherKeywords.some(ok => h.includes(ok)));
+                                if (hasOtherHeader || cellStrings.filter(Boolean).length >= 2) {
+                                    return { index: i, headers: cellStrings };
                                 }
-                            } else {
-                                amount = Number(rawAmountStr.replace(/[^\d\.]/g, '')) || 0;
                             }
                         }
+                    }
+                    return null;
+                }
+
+                // Detect sheets to parse
+                let sheetsToParse = [];
+                for (const name of workbook.SheetNames) {
+                    const ws = workbook.Sheets[name];
+                    const headerInfo = findHeaderRow(ws);
+                    if (headerInfo) {
+                        const headers = headerInfo.headers;
+                        let type = "received"; // Default
                         
-                        const dateVal = r["Ngày mừng"] || new Date().toISOString().slice(0, 10);
-                        
-                        return {
-                            id: generateId(),
-                            name: rowName,
-                            relationship: r["Mối quan hệ"] || 'Khác',
-                            gift_type: giftType,
-                            amount: amount,
-                            gold_amount: goldAmount,
-                            gold_type: goldType,
-                            event_type: r["Loại sự kiện"] || 'Khác',
-                            date: String(dateVal).trim(),
-                            notes: r["Ghi chú"] || '',
-                            address: r["Địa chỉ"] || '',
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        };
-                    }).filter(Boolean);
+                        if (name === "Tiền tôi nhận") {
+                            type = "received";
+                        } else if (name === "Tiền tôi mừng") {
+                            type = "sent";
+                        } else {
+                            const isReceived = headers.some(h => ['trạng thái trả lễ', 'ngày nhận', 'trạng thái'].includes(h));
+                            const isSent = headers.some(h => ['loại sự kiện', 'ngày mừng', 'ngày chi', 'sự kiện'].includes(h));
+                            if (isReceived) {
+                                type = "received";
+                            } else if (isSent) {
+                                type = "sent";
+                            } else {
+                                const lowerName = name.toLowerCase();
+                                if (lowerName.includes("chi") || lowerName.includes("mừng") || lowerName.includes("sent")) {
+                                    type = "sent";
+                                } else {
+                                    type = "received";
+                                }
+                            }
+                        }
+                        sheetsToParse.push({ sheetName: name, type: type, headerIndex: headerInfo.index });
+                    }
+                }
+
+                // Process detected sheets
+                for (const item of sheetsToParse) {
+                    const ws = workbook.Sheets[item.sheetName];
+                    const rows = XLSX.utils.sheet_to_json(ws, { range: item.headerIndex });
+                    
+                    if (item.type === "received") {
+                        importedReceived = rows.map(r => {
+                            const rowName = getRowValue(r, ['Họ tên', 'Họ và Tên', 'Họ & Tên', 'Tên', 'Họ và tên', 'Họ tên người nhận', 'Họ và tên người nhận', 'Tên khách', 'Khách hàng', 'Người nhận']) || "";
+                            if (!rowName) return null;
+                            const nameStr = String(rowName).trim();
+                            if (!nameStr) return null;
+                            
+                            let giftType = 'money';
+                            let amount = 0;
+                            let goldAmount = 0;
+                            let goldType = '';
+                            
+                            const rawAmount = getRowValue(r, ['Số tiền / Quà tặng', 'Số tiền', 'Số tiền mừng', 'Tiền', 'Quà tặng', 'Tiền nhận', 'Tiền mừng', 'Tiền chi', 'Số tiền chi']);
+                            if (rawAmount !== undefined && rawAmount !== null) {
+                                if (typeof rawAmount === 'number') {
+                                    amount = rawAmount;
+                                } else {
+                                    const rawAmountStr = String(rawAmount).trim();
+                                    const lowerAmountStr = rawAmountStr.toLowerCase();
+                                    if (lowerAmountStr.includes("chỉ") || lowerAmountStr.includes("chi") || lowerAmountStr.includes("vàng") || lowerAmountStr.includes("vang")) {
+                                        giftType = 'gold';
+                                        const match = rawAmountStr.match(/([\d\.,]+)\s*(?:chỉ|chi|vàng|vang)\s*(?:\((.*)\))?/i);
+                                        if (match) {
+                                            const valStr = match[1].replace(',', '.');
+                                            goldAmount = Number(valStr) || 0;
+                                            goldType = match[2] || 'Vàng';
+                                        } else {
+                                            const valStr = rawAmountStr.replace(/[^\d\.,]/g, '').replace(',', '.');
+                                            goldAmount = Number(valStr) || 0;
+                                            goldType = 'Vàng';
+                                        }
+                                    } else {
+                                        amount = Number(rawAmountStr.replace(/[^\d]/g, '')) || 0;
+                                    }
+                                }
+                            }
+                            
+                            const dateVal = getRowValue(r, ['Ngày nhận', 'Ngày', 'Ngày chi', 'Ngày nhận lễ']);
+                            const dateStr = formatExcelDate(dateVal);
+                            
+                            const rawStatus = getRowValue(r, ['Trạng thái trả lễ', 'Trạng thái', 'Trả lễ', 'Đã trả lễ', 'Đã trả']);
+                            const statusVal = (rawStatus && (String(rawStatus).toLowerCase().includes('đã') || String(rawStatus).toLowerCase().includes('returned') || String(rawStatus).toLowerCase().trim() === 'x' || String(rawStatus).toLowerCase().trim() === 'y' || String(rawStatus).toLowerCase().trim() === 'yes')) ? 'returned' : 'unreturned';
+                            
+                            return {
+                                id: generateId(),
+                                name: nameStr,
+                                relationship: getRowValue(r, ['Mối quan hệ', 'Quan hệ', 'Quan hệ gia đình', 'Quan hệ bạn bè', 'Phân loại']) || 'Khác',
+                                gift_type: giftType,
+                                amount: amount,
+                                gold_amount: goldAmount,
+                                gold_type: goldType,
+                                date: dateStr,
+                                status: statusVal,
+                                notes: getRowValue(r, ['Ghi chú', 'Ghi chú thêm', 'Note', 'Chi tiết']) || '',
+                                address: getRowValue(r, ['Địa chỉ', 'Quê quán', 'Địa chỉ / Quê quán', 'Nơi ở', 'Thành phố', 'Tỉnh']) || '',
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            };
+                        }).filter(Boolean);
+                    } else if (item.type === "sent") {
+                        importedSent = rows.map(r => {
+                            const rowName = getRowValue(r, ['Họ tên', 'Họ và Tên', 'Họ & Tên', 'Tên', 'Họ và tên', 'Họ tên người mừng', 'Họ và tên người mừng', 'Tên khách', 'Khách hàng', 'Người mừng', 'Người gửi']) || "";
+                            if (!rowName) return null;
+                            const nameStr = String(rowName).trim();
+                            if (!nameStr) return null;
+                            
+                            let giftType = 'money';
+                            let amount = 0;
+                            let goldAmount = 0;
+                            let goldType = '';
+                            
+                            const rawAmount = getRowValue(r, ['Số tiền / Quà tặng', 'Số tiền', 'Số tiền mừng', 'Tiền', 'Quà tặng', 'Tiền mừng', 'Tiền chi', 'Số tiền chi']);
+                            if (rawAmount !== undefined && rawAmount !== null) {
+                                if (typeof rawAmount === 'number') {
+                                    amount = rawAmount;
+                                } else {
+                                    const rawAmountStr = String(rawAmount).trim();
+                                    const lowerAmountStr = rawAmountStr.toLowerCase();
+                                    if (lowerAmountStr.includes("chỉ") || lowerAmountStr.includes("chi") || lowerAmountStr.includes("vàng") || lowerAmountStr.includes("vang")) {
+                                        giftType = 'gold';
+                                        const match = rawAmountStr.match(/([\d\.,]+)\s*(?:chỉ|chi|vàng|vang)\s*(?:\((.*)\))?/i);
+                                        if (match) {
+                                            const valStr = match[1].replace(',', '.');
+                                            goldAmount = Number(valStr) || 0;
+                                            goldType = match[2] || 'Vàng';
+                                        } else {
+                                            const valStr = rawAmountStr.replace(/[^\d\.,]/g, '').replace(',', '.');
+                                            goldAmount = Number(valStr) || 0;
+                                            goldType = 'Vàng';
+                                        }
+                                    } else {
+                                        amount = Number(rawAmountStr.replace(/[^\d]/g, '')) || 0;
+                                    }
+                                }
+                            }
+                            
+                            const dateVal = getRowValue(r, ['Ngày mừng', 'Ngày', 'Ngày chi', 'Ngày đi']);
+                            const dateStr = formatExcelDate(dateVal);
+                            
+                            return {
+                                id: generateId(),
+                                name: nameStr,
+                                relationship: getRowValue(r, ['Mối quan hệ', 'Quan hệ', 'Quan hệ gia đình', 'Quan hệ bạn bè', 'Phân loại']) || 'Khác',
+                                gift_type: giftType,
+                                amount: amount,
+                                gold_amount: goldAmount,
+                                gold_type: goldType,
+                                event_type: getRowValue(r, ['Loại sự kiện', 'Sự kiện', 'Tên sự kiện', 'Dịp']) || 'Khác',
+                                date: dateStr,
+                                notes: getRowValue(r, ['Ghi chú', 'Ghi chú thêm', 'Note', 'Chi tiết']) || '',
+                                address: getRowValue(r, ['Địa chỉ', 'Quê quán', 'Nơi diễn ra sự kiện', 'Địa chỉ / Nơi diễn ra sự kiện', 'Địa chỉ / Quê quán', 'Nơi ở', 'Thành phố', 'Tỉnh']) || '',
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            };
+                        }).filter(Boolean);
+                    }
                 }
                 
                 if (importedReceived.length === 0 && importedSent.length === 0) {
                     showToast("Không tìm thấy dữ liệu hợp lệ trong file Excel!", "error");
+                    document.getElementById('importFileInput').value = '';
                     return;
                 }
                 
                 let msg = "Đã giải mã thành công file Excel!";
                 if (importedReceived.length > 0) msg += `\n- ${importedReceived.length} dòng Tiền tôi nhận`;
                 if (importedSent.length > 0) msg += `\n- ${importedSent.length} dòng Tiền tôi mừng`;
-                msg += "\n\nBạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ dữ liệu của các phần tương ứng)";
+                msg += "\n\nBạn có chắc chắn muốn nhập dữ liệu này vào ứng dụng không?";
                 
-                if (confirm(msg)) {
+                if (!confirm(msg)) {
+                    document.getElementById('importFileInput').value = '';
+                    return;
+                }
+                
+                const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu từ file Excel vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP (giữ nguyên dữ liệu cũ, chỉ thêm dữ liệu mới).\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                
+                let action = 'merge';
+                if (!merge) {
+                    const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có chắc chắn muốn GHI ĐÈ (thay thế hoàn toàn) dữ liệu hiện tại bằng dữ liệu mới không?\n\n- Chọn 'OK' để GHI ĐÈ (Dữ liệu cũ trên thiết bị sẽ bị XÓA HOÀN TOÀN).\n- Chọn 'Cancel' để HỦY BỎ (Không thực hiện nhập dữ liệu nữa, giữ nguyên dữ liệu hiện tại).");
+                    if (overwrite) {
+                        action = 'overwrite';
+                    } else {
+                        document.getElementById('importFileInput').value = '';
+                        return;
+                    }
+                }
+                
+                if (action === 'merge') {
                     if (importedReceived.length > 0) {
                         state.receivedGifts = mergeLists(state.receivedGifts, importedReceived);
                     }
                     if (importedSent.length > 0) {
                         state.sentGifts = mergeLists(state.sentGifts, importedSent);
                     }
-                } else {
+                } else if (action === 'overwrite') {
                     if (importedReceived.length > 0) {
                         state.receivedGifts = importedReceived;
                     }
@@ -1666,20 +1827,63 @@ function handleImportFile(e) {
                 
                 const backupType = data.backup_type || 'all';
                 
+                let msgJson = "Giải mã file backup thành công!";
+                if (backupType === 'received') msgJson += ` (Chỉ chứa dữ liệu 'Tiền tôi nhận')`;
+                else if (backupType === 'sent') msgJson += ` (Chỉ chứa dữ liệu 'Tiền tôi mừng')`;
+                msgJson += "\n\nBạn có chắc chắn muốn nhập dữ liệu này vào ứng dụng không?";
+                
+                if (!confirm(msgJson)) {
+                    document.getElementById('importFileInput').value = '';
+                    return;
+                }
+                
                 if (backupType === 'received') {
-                    if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi nhận'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi nhận' và giữ nguyên 'Tiền tôi mừng')")) {
+                    const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP phần 'Tiền tôi nhận'.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                    let action = 'merge';
+                    if (!merge) {
+                        const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ phần 'Tiền tôi nhận' bằng dữ liệu mới không (giữ nguyên phần 'Tiền tôi mừng')?\n\n- Chọn 'OK' để GHI ĐÈ (Dữ liệu 'Tiền tôi nhận' cũ sẽ bị XÓA).\n- Chọn 'Cancel' để HỦY BỎ.");
+                        if (overwrite) {
+                            action = 'overwrite';
+                        } else {
+                            document.getElementById('importFileInput').value = '';
+                            return;
+                        }
+                    }
+                    if (action === 'merge') {
                         state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
                     } else {
                         state.receivedGifts = parsed.receivedGifts || [];
                     }
                 } else if (backupType === 'sent') {
-                    if (confirm("File backup này chỉ chứa dữ liệu 'Tiền tôi mừng'. Bạn có muốn GỘP (Merge) vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để GHI ĐÈ chỉ phần 'Tiền tôi mừng' và giữ nguyên 'Tiền tôi nhận')")) {
+                    const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP phần 'Tiền tôi mừng'.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                    let action = 'merge';
+                    if (!merge) {
+                        const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ phần 'Tiền tôi mừng' bằng dữ liệu mới không (giữ nguyên phần 'Tiền tôi nhận')?\n\n- Chọn 'OK' để GHI ĐÈ (Dữ liệu 'Tiền tôi mừng' cũ sẽ bị XÓA).\n- Chọn 'Cancel' để HỦY BỎ.");
+                        if (overwrite) {
+                            action = 'overwrite';
+                        } else {
+                            document.getElementById('importFileInput').value = '';
+                            return;
+                        }
+                    }
+                    if (action === 'merge') {
                         state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
                     } else {
                         state.sentGifts = parsed.sentGifts || [];
                     }
                 } else {
-                    if (confirm("Giải mã thành công! Bạn có muốn gộp (Merge) dữ liệu từ file này vào dữ liệu hiện tại không? (Nhấp 'OK' để gộp, nhấp 'Cancel' để ghi đè hoàn toàn)")) {
+                    const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP cả hai phần.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                    let action = 'merge';
+                    if (!merge) {
+                        const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ hoàn toàn tất cả dữ liệu hiện tại bằng dữ liệu mới không?\n\n- Chọn 'OK' để GHI ĐÈ (Toàn bộ dữ liệu cũ sẽ bị XÓA).\n- Chọn 'Cancel' để HỦY BỎ.");
+                        if (overwrite) {
+                            action = 'overwrite';
+                        } else {
+                            document.getElementById('importFileInput').value = '';
+                            return;
+                        }
+                    }
+                    if (action === 'merge') {
                         state.receivedGifts = mergeLists(state.receivedGifts, parsed.receivedGifts || []);
                         state.sentGifts = mergeLists(state.sentGifts, parsed.sentGifts || []);
                     } else {
