@@ -1678,6 +1678,12 @@ function handleImportFile(e) {
                                             goldAmount = Number(valStr) || 0;
                                             goldType = 'Vàng';
                                         }
+                                    } else if (lowerAmountStr.includes("tr") || lowerAmountStr.includes("triệu") || lowerAmountStr.includes("trieu") || lowerAmountStr.includes("m")) {
+                                        const valStr = lowerAmountStr.replace(/[^\d\.,]/g, '').replace(',', '.');
+                                        amount = (parseFloat(valStr) || 0) * 1000000;
+                                    } else if (lowerAmountStr.includes("k") || lowerAmountStr.includes("nghìn") || lowerAmountStr.includes("ngàn") || lowerAmountStr.includes("ng")) {
+                                        const valStr = lowerAmountStr.replace(/[^\d\.,]/g, '').replace(',', '.');
+                                        amount = (parseFloat(valStr) || 0) * 1000;
                                     } else {
                                         amount = Number(rawAmountStr.replace(/[^\d]/g, '')) || 0;
                                     }
@@ -1737,6 +1743,12 @@ function handleImportFile(e) {
                                             goldAmount = Number(valStr) || 0;
                                             goldType = 'Vàng';
                                         }
+                                    } else if (lowerAmountStr.includes("tr") || lowerAmountStr.includes("triệu") || lowerAmountStr.includes("trieu") || lowerAmountStr.includes("m")) {
+                                        const valStr = lowerAmountStr.replace(/[^\d\.,]/g, '').replace(',', '.');
+                                        amount = (parseFloat(valStr) || 0) * 1000000;
+                                    } else if (lowerAmountStr.includes("k") || lowerAmountStr.includes("nghìn") || lowerAmountStr.includes("ngàn") || lowerAmountStr.includes("ng")) {
+                                        const valStr = lowerAmountStr.replace(/[^\d\.,]/g, '').replace(',', '.');
+                                        amount = (parseFloat(valStr) || 0) * 1000;
                                     } else {
                                         amount = Number(rawAmountStr.replace(/[^\d]/g, '')) || 0;
                                     }
@@ -1762,6 +1774,31 @@ function handleImportFile(e) {
                                 updated_at: new Date().toISOString()
                             };
                         }).filter(Boolean);
+                    }
+                }
+                
+                // Auto-scale amounts if the sheet is written in "thousands of VND" unit
+                const nonZeroRec = importedReceived.filter(r => r.gift_type === 'money' && r.amount > 0);
+                if (nonZeroRec.length > 0) {
+                    const under20kCount = nonZeroRec.filter(r => r.amount < 20000).length;
+                    if (under20kCount / nonZeroRec.length > 0.7) {
+                        importedReceived.forEach(r => {
+                            if (r.gift_type === 'money') {
+                                r.amount *= 1000;
+                            }
+                        });
+                    }
+                }
+                
+                const nonZeroSent = importedSent.filter(r => r.gift_type === 'money' && r.amount > 0);
+                if (nonZeroSent.length > 0) {
+                    const under20kCount = nonZeroSent.filter(r => r.amount < 20000).length;
+                    if (under20kCount / nonZeroSent.length > 0.7) {
+                        importedSent.forEach(r => {
+                            if (r.gift_type === 'money') {
+                                r.amount *= 1000;
+                            }
+                        });
                     }
                 }
                 
