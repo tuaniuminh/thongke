@@ -604,12 +604,16 @@ select.form-control {
     max-width: 400px;
 }
 
-.search-input-wrapper i {
+.search-input-wrapper i,
+.search-input-wrapper svg {
     position: absolute;
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
 }
 
 .search-input-wrapper .form-control {
@@ -1391,7 +1395,8 @@ body.light-mode .file-upload-zone:hover {
     background: rgba(99, 102, 241, 0.02);
 }
 
-.file-upload-zone i {
+.file-upload-zone i,
+.file-upload-zone svg {
     width: 36px;
     height: 36px;
     color: var(--primary-color);
@@ -1562,7 +1567,8 @@ body.light-mode .sync-detail-row {
     flex-shrink: 0;
 }
 
-.sync-banner-btn i {
+.sync-banner-btn i,
+.sync-banner-btn svg {
     width: 14px;
     height: 14px;
 }
@@ -1709,7 +1715,8 @@ body.light-mode .sync-detail-row {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.keypad-btn i {
+.keypad-btn i,
+.keypad-btn svg {
     width: 20px;
     height: 20px;
     color: var(--text-secondary);
@@ -1717,7 +1724,8 @@ body.light-mode .sync-detail-row {
 }
 
 @media (hover: hover) {
-    .keypad-btn:hover i {
+    .keypad-btn:hover i,
+    .keypad-btn:hover svg {
         color: var(--text-primary);
     }
 }
