@@ -42,6 +42,7 @@ let state = {
     sentGifts: [],
     lastResetTime: '',
     showImportNotesOption: false,
+    showImportNotesOptionUpdated: '',
     activeTab: 'dashboard',
     theme: 'dark',
     user: null,
@@ -148,7 +149,8 @@ async function saveLocalState() {
         receivedGifts: state.receivedGifts,
         sentGifts: state.sentGifts,
         lastResetTime: state.lastResetTime || '',
-        showImportNotesOption: !!state.showImportNotesOption
+        showImportNotesOption: !!state.showImportNotesOption,
+        showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || ''
     });
     
     try {
@@ -168,6 +170,7 @@ async function loadLocalState(password) {
         state.sentGifts = [];
         state.lastResetTime = '';
         state.showImportNotesOption = false;
+        state.showImportNotesOptionUpdated = '';
         return true;
     }
     
@@ -178,6 +181,7 @@ async function loadLocalState(password) {
         state.sentGifts = data.sentGifts || [];
         state.lastResetTime = data.lastResetTime || '';
         state.showImportNotesOption = !!data.showImportNotesOption;
+        state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -255,13 +259,19 @@ async function performSync(silent = false) {
                     state.lastResetTime = remoteReset;
                     localReset = remoteReset;
                     state.showImportNotesOption = !!remoteData.showImportNotesOption;
+                    state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
                     remoteSent = [];
                 } else {
-                    if (remoteData.showImportNotesOption !== undefined) {
+                    // Merge showImportNotesOption using LWW (Last Write Wins)
+                    const localOptTime = state.showImportNotesOptionUpdated ? new Date(state.showImportNotesOptionUpdated).getTime() : 0;
+                    const remoteOptTime = remoteData.showImportNotesOptionUpdated ? new Date(remoteData.showImportNotesOptionUpdated).getTime() : 0;
+                    
+                    if (remoteOptTime > localOptTime) {
                         state.showImportNotesOption = !!remoteData.showImportNotesOption;
+                        state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
                     }
                 }
                 
@@ -285,7 +295,8 @@ async function performSync(silent = false) {
             receivedGifts: state.receivedGifts,
             sentGifts: state.sentGifts,
             lastResetTime: state.lastResetTime || '',
-            showImportNotesOption: !!state.showImportNotesOption
+            showImportNotesOption: !!state.showImportNotesOption,
+            showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
