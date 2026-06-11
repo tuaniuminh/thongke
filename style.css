@@ -647,7 +647,7 @@ select.form-control {
     min-width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.98rem;
+    font-size: 1.06rem;
 }
 
 .data-table th {
@@ -1281,7 +1281,7 @@ body.light-mode .data-table tbody tr:hover {
         content: attr(data-label);
         font-weight: 700;
         color: var(--text-primary);
-        font-size: 0.9rem;
+        font-size: 0.96rem;
         text-align: left;
     }
 
@@ -1804,6 +1804,14 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
     text-align: left;
 }
 
+.name-address-container > div:first-child {
+    font-size: 1.15rem;
+}
+
+.name-address-container > div:nth-child(2) {
+    font-size: 0.82rem !important;
+}
+
 .notes-cell {
     max-width: 250px;
     overflow: hidden;
@@ -1825,7 +1833,7 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
         word-break: break-word;
         text-align: right;
         color: var(--text-secondary);
-        font-size: 0.85rem;
+        font-size: 0.92rem;
     }
 }
 
