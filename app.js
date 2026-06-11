@@ -3078,32 +3078,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('importFileInput').addEventListener('change', handleImportFile);
     
     // Bind Clear All Data button
-    document.getElementById('clearAllDataBtn').addEventListener('click', async () => {
-        const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu ghi chép thu chi đối ngoại trên thiết bị này!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
-        if (confirmPin === null) {
-            return; // Cancelled
-        }
-        
-        if (confirmPin === state.masterPassword) {
-            const doubleConfirm = confirm("XÁC NHẬN CUỐI CÙNG: Bạn có thực sự chắc chắn muốn xóa toàn bộ dữ liệu ghi chép?\n(Dữ liệu trên Supabase Cloud cũng sẽ bị xóa sạch sau khi đồng bộ)");
-            if (!doubleConfirm) return;
+    const clearAllDataBtn = document.getElementById('clearAllDataBtn');
+    if (clearAllDataBtn) {
+        clearAllDataBtn.addEventListener('click', async () => {
+            const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu ghi chép thu chi đối ngoại trên thiết bị này!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
+            if (confirmPin === null) {
+                return; // Cancelled
+            }
             
-            state.receivedGifts = [];
-            state.sentGifts = [];
-            
-            await saveLocalState();
-            renderAll();
-            showToast("Đã xóa sạch toàn bộ dữ liệu thành công!", "success");
-            
-            // Sync with Supabase to clear remote database as well
-            performSync(true);
-            
-            // Redirect to dashboard
-            window.location.hash = "#tongquan";
-        } else {
-            showToast("Mã PIN xác nhận không đúng. Đã hủy bỏ xóa dữ liệu!", "error");
-        }
-    });
+            if (confirmPin === state.masterPassword) {
+                const doubleConfirm = confirm("XÁC NHẬN CUỐI CÙNG: Bạn có thực sự chắc chắn muốn xóa toàn bộ dữ liệu ghi chép?\n(Dữ liệu trên Supabase Cloud cũng sẽ bị xóa sạch sau khi đồng bộ)");
+                if (!doubleConfirm) return;
+                
+                state.receivedGifts = [];
+                state.sentGifts = [];
+                
+                await saveLocalState();
+                renderAll();
+                showToast("Đã xóa sạch toàn bộ dữ liệu thành công!", "success");
+                
+                // Sync with Supabase to clear remote database as well
+                performSync(true);
+                
+                // Redirect to dashboard
+                window.location.hash = "#tongquan";
+            } else {
+                showToast("Mã PIN xác nhận không đúng. Đã hủy bỏ xóa dữ liệu!", "error");
+            }
+        });
+    }
     
     // Bind Table filters and searches
     setupTableSearchAndFilters();
