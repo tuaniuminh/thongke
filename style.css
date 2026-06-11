@@ -642,14 +642,14 @@ select.form-control {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.98rem;
 }
 
 .data-table th {
     background-color: var(--bg-secondary);
     padding: 14px 18px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: 700;
+    color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
 }
@@ -1274,9 +1274,9 @@ body.light-mode .data-table tbody tr:hover {
     
     .data-table td::before { 
         content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 0.9rem;
         text-align: left;
     }
 
