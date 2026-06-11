@@ -892,6 +892,9 @@ function renderReceivedTable() {
             <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">
                 ${g.gift_type === 'gold' ? `+${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `+${formatVND(g.amount)}`}
             </td>
+            <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
+                ${escapeHTML(g.notes || '-')}
+            </td>
             <td data-label="Ngày nhận">${formatDate(g.date)}</td>
             <td data-label="Đã trả lễ?">
                 <label class="status-switch">
@@ -899,9 +902,6 @@ function renderReceivedTable() {
                     <span class="status-slider"></span>
                     <span class="badge ${statusClass}">${statusText}</span>
                 </label>
-            </td>
-            <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
-                ${escapeHTML(g.notes || '-')}
             </td>
             <td data-label="Thao tác">
                 <div style="display: flex; gap: 8px;">
@@ -1506,9 +1506,9 @@ function handleExportExcel(type = 'all') {
                 "Địa chỉ": g.address || '',
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
                 "Loại sự kiện": g.event_type || 'Khác',
+                "Ghi chú": g.notes || '',
                 "Ngày nhận": formatDate(g.date),
-                "Trạng thái trả lễ": g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại',
-                "Ghi chú": g.notes || ''
+                "Trạng thái trả lễ": g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại'
             };
         });
         const wsReceived = XLSX.utils.json_to_sheet(dataReceived);
@@ -1521,9 +1521,9 @@ function handleExportExcel(type = 'all') {
             { wch: 24 }, // Địa chỉ
             { wch: 24 }, // Số tiền / Quà tặng
             { wch: 18 }, // Loại sự kiện
+            { wch: 30 }, // Ghi chú
             { wch: 16 }, // Ngày nhận
-            { wch: 22 }, // Trạng thái trả lễ
-            { wch: 30 }  // Ghi chú
+            { wch: 22 }  // Trạng thái trả lễ
         ];
         wsReceived['!cols'] = colWidths;
         
