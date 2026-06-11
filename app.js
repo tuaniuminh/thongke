@@ -984,10 +984,10 @@ function renderSentTable() {
             <td data-label="Số tiền chi" style="color: var(--text-primary); font-weight:600;">
                 ${g.gift_type === 'gold' ? `-${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `-${formatVND(g.amount)}`}
             </td>
-            <td data-label="Ngày chi">${formatDate(g.date)}</td>
             <td data-label="Ghi chú" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(g.notes || '')}">
                 ${escapeHTML(g.notes || '-')}
             </td>
+            <td data-label="Ngày chi">${formatDate(g.date)}</td>
             <td data-label="Thao tác">
                 <div style="display: flex; gap: 8px;">
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editSentRecord('${g.id}')">
@@ -1377,7 +1377,9 @@ function applyExcelStyles(ws) {
                 // Column 5: Trạng thái / Ngày mừng -> Center
                 // Column 6: Ghi chú -> Left
                 let align = 'center';
-                if (c === 1 || c === 6) {
+                const headerRef = XLSX.utils.encode_cell({ r: range.s.r, c: c });
+                const headerVal = ws[headerRef] ? String(ws[headerRef].v) : '';
+                if (headerVal === 'Họ tên' || headerVal === 'Ghi chú') {
                     align = 'left';
                 }
                 
@@ -1455,8 +1457,8 @@ function handleExportExcel(type = 'all') {
                 "Mối quan hệ": g.relationship,
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
                 "Loại sự kiện": g.event_type || 'Khác',
-                "Ngày mừng": g.date,
-                "Ghi chú": g.notes || ''
+                "Ghi chú": g.notes || '',
+                "Ngày mừng": g.date
             };
         });
         const wsSent = XLSX.utils.json_to_sheet(dataSent);
@@ -1468,8 +1470,8 @@ function handleExportExcel(type = 'all') {
             { wch: 18 }, // Mối quan hệ
             { wch: 24 }, // Số tiền / Quà tặng
             { wch: 18 }, // Loại sự kiện
-            { wch: 16 }, // Ngày mừng
-            { wch: 30 }  // Ghi chú
+            { wch: 30 }, // Ghi chú
+            { wch: 16 }  // Ngày mừng
         ];
         wsSent['!cols'] = colWidths;
         
