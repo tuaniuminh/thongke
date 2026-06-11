@@ -26,7 +26,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v2.6.1</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v2.7.0</span>
                 </div>
             </div>
             
@@ -198,6 +198,14 @@
                             <input type="text" class="form-control" id="searchReceived" placeholder="Tìm tên người mừng...">
                         </div>
                         <div class="filter-group">
+                            <select class="form-control filter-select" id="filterReceivedEvent">
+                                <option value="">Tất cả sự kiện nhận</option>
+                                <option value="Đám cưới">Đám cưới</option>
+                                <option value="Đám hiếu">Đám hiếu</option>
+                                <option value="Thăm ốm">Thăm ốm</option>
+                                <option value="Tân gia">Tân gia</option>
+                                <option value="Khác">Khác (Tự nhập)</option>
+                            </select>
                             <select class="form-control filter-select" id="filterReceivedRelation">
                                 <option value="">Tất cả mối quan hệ</option>
                                 <option value="Họ hàng">Họ hàng</option>
@@ -219,6 +227,7 @@
                             <thead>
                                 <tr>
                                     <th>Họ & Tên</th>
+                                    <th>Loại sự kiện</th>
                                     <th>Mối quan hệ</th>
                                     <th>Số tiền nhận</th>
                                     <th>Ngày nhận</th>
@@ -393,7 +402,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v2.6.1
+                        Phiên bản ứng dụng: v2.7.0
                     </div>
                 </div>
             </section>
@@ -409,7 +418,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.6.1</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.7.0</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -460,7 +469,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.6.1</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.7.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -511,7 +520,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.6.1</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v2.7.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -612,18 +621,34 @@
                 
                 <div class="form-row">
                     <div class="form-group">
+                        <label class="form-label" for="recType">Loại sự kiện</label>
+                        <select class="form-control" id="recType" required>
+                            <option value="Đám cưới">Đám cưới</option>
+                            <option value="Đám hiếu">Đám hiếu</option>
+                            <option value="Thăm ốm">Thăm ốm</option>
+                            <option value="Tân gia">Tân gia</option>
+                            <option value="Khác" selected>Khác</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label" for="recDate">Ngày nhận</label>
                         <input type="date" class="form-control" id="recDate" required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Trạng thái trả lễ</label>
-                        <div style="margin-top: 8px;">
-                            <label class="status-switch">
-                                <input type="checkbox" class="status-checkbox" id="recStatus">
-                                <span class="status-slider"></span>
-                                <span id="recStatusLabel" style="font-size: 0.9rem; font-weight: 500;">Chưa trả lễ lại họ</span>
-                            </label>
-                        </div>
+                </div>
+                
+                <div class="form-group" id="recTypeCustomGroup" style="display: none; margin-bottom: 1.25rem;">
+                    <label class="form-label" for="recTypeCustom">Tên sự kiện khác</label>
+                    <input type="text" class="form-control" id="recTypeCustom" placeholder="Ví dụ: Sinh nhật, Thượng thọ, Khai trương, Mừng thọ...">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label">Trạng thái trả lễ</label>
+                    <div style="margin-top: 8px;">
+                        <label class="status-switch">
+                            <input type="checkbox" class="status-checkbox" id="recStatus">
+                            <span class="status-slider"></span>
+                            <span id="recStatusLabel" style="font-size: 0.9rem; font-weight: 500;">Chưa trả lễ lại họ</span>
+                        </label>
                     </div>
                 </div>
                 <div class="form-group">
@@ -685,6 +710,11 @@
                         <label class="form-label" for="sentDate">Ngày đi</label>
                         <input type="date" class="form-control" id="sentDate" required>
                     </div>
+                </div>
+                
+                <div class="form-group" id="sentTypeCustomGroup" style="display: none; margin-bottom: 1.25rem;">
+                    <label class="form-label" for="sentTypeCustom">Tên sự kiện khác</label>
+                    <input type="text" class="form-control" id="sentTypeCustom" placeholder="Ví dụ: Sinh nhật, Thượng thọ, Khai trương, Mừng thọ...">
                 </div>
 
                 <div class="form-row">
@@ -761,7 +791,7 @@
     <div class="modal-overlay" id="importNotesModal">
         <div class="modal-container" style="width: 600px; max-width: 95%;">
             <div class="modal-header">
-                <h2>Nhập nhanh từ Ghi chú (v2.6.1)</h2>
+                <h2>Nhập nhanh từ Ghi chú (v2.7.0)</h2>
                 <button class="close-btn" onclick="closeModal('importNotesModal')">&times;</button>
             </div>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
@@ -852,6 +882,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=2.6.1"></script>
+    <script type="module" src="app.js?v=2.7.0"></script>
 </body>
 </html>

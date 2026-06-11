@@ -48,6 +48,7 @@ let state = {
     receivedSearch: '',
     receivedFilterRelation: '',
     receivedFilterStatus: '',
+    receivedFilterEvent: '',
     receivedPage: 1,
     receivedLimit: 10,
 
@@ -551,10 +552,15 @@ function renderRelationshipChart(received, sent) {
 
 function renderEventTypeChart(sent) {
     const eventTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia', 'Khác'];
+    const standardTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
     
-    const typeCounts = eventTypes.map(type => 
-        sent.filter(g => g.event_type === type).length
-    );
+    const typeCounts = eventTypes.map(type => {
+        if (type === 'Khác') {
+            return sent.filter(g => !standardTypes.includes(g.event_type) || g.event_type === 'Khác').length;
+        } else {
+            return sent.filter(g => g.event_type === type).length;
+        }
+    });
     
     const ctx = document.getElementById('eventTypeChart').getContext('2d');
     
@@ -632,7 +638,15 @@ function renderRecentActivity(received, sent) {
         
         if (act.flow === 'in') {
             flowBadge = '<span class="badge badge-status-returned"><i data-lucide="arrow-down-left" style="width:12px;height:12px;margin-right:4px;"></i>Thu</span>';
-            eventBadge = '<span class="badge badge-event-wedding">Tiền tôi nhận</span>';
+            
+            let evClass = 'badge-event-other';
+            const eventType = act.event_type || 'Khác';
+            if (eventType === 'Đám cưới') evClass = 'badge-event-wedding';
+            if (eventType === 'Đám hiếu') evClass = 'badge-event-funeral';
+            if (eventType === 'Thăm ốm') evClass = 'badge-event-sick';
+            if (eventType === 'Tân gia') evClass = 'badge-event-housewarming';
+            
+            eventBadge = `<span class="badge ${evClass}">${escapeHTML(eventType)}</span>`;
             amountText = act.gift_type === 'gold'
                 ? `<span style="color:var(--accent-emerald); font-weight:600;">+${act.gold_amount} chỉ (${escapeHTML(act.gold_type || 'Vàng')})</span>`
                 : `<span style="color:var(--accent-emerald); font-weight:600;">+${formatVND(act.amount)}</span>`;
@@ -727,6 +741,17 @@ window.editReceivedRecord = function(id) {
     document.getElementById('recRelationship').value = record.relationship;
     document.getElementById('recDate').value = record.date;
     
+    const standardRecTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+    const recEventType = record.event_type || '';
+    if (standardRecTypes.includes(recEventType)) {
+        document.getElementById('recType').value = recEventType;
+        document.getElementById('recTypeCustom').value = '';
+    } else {
+        document.getElementById('recType').value = 'Khác';
+        document.getElementById('recTypeCustom').value = recEventType;
+    }
+    updateRecTypeCustomVisibility();
+    
     const isReturned = record.status === 'returned';
     document.getElementById('recStatus').checked = isReturned;
     document.getElementById('recStatusLabel').innerText = isReturned ? 'Đã đi mừng cưới lại họ' : 'Chưa đi mừng cưới lại họ';
@@ -786,7 +811,22 @@ function renderReceivedTable() {
     // Search filter
     if (state.receivedSearch) {
         const query = state.receivedSearch.toLowerCase();
-        filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || (g.notes && g.notes.toLowerCase().includes(query)) || (g.address && g.address.toLowerCase().includes(query)));
+        filtered = filtered.filter(g => 
+            g.name.toLowerCase().includes(query) || 
+            (g.notes && g.notes.toLowerCase().includes(query)) || 
+            (g.address && g.address.toLowerCase().includes(query)) ||
+            (g.event_type && g.event_type.toLowerCase().includes(query))
+        );
+    }
+    
+    // Event filter
+    if (state.receivedFilterEvent) {
+        if (state.receivedFilterEvent === 'Khác') {
+            const standardTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+            filtered = filtered.filter(g => !g.event_type || !standardTypes.includes(g.event_type) || g.event_type === 'Khác');
+        } else {
+            filtered = filtered.filter(g => g.event_type === state.receivedFilterEvent);
+        }
     }
     
     // Relation filter
@@ -823,7 +863,7 @@ function renderReceivedTable() {
     if (paginated.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">Không có bản ghi nào trùng khớp với bộ lọc.</td>
+                <td colspan="8" class="empty-state">Không có bản ghi nào trùng khớp với bộ lọc.</td>
             </tr>
         `;
         return;
@@ -835,11 +875,19 @@ function renderReceivedTable() {
         const statusText = g.status === 'returned' ? 'Đã đi lại' : 'Chưa đi lại';
         const statusClass = g.status === 'returned' ? 'badge-status-returned' : 'badge-status-pending';
         
+        let evClass = 'badge-event-other';
+        const eventType = g.event_type || 'Khác';
+        if (eventType === 'Đám cưới') evClass = 'badge-event-wedding';
+        if (eventType === 'Đám hiếu') evClass = 'badge-event-funeral';
+        if (eventType === 'Thăm ốm') evClass = 'badge-event-sick';
+        if (eventType === 'Tân gia') evClass = 'badge-event-housewarming';
+        
         row.innerHTML = `
             <td data-label="Họ & Tên">
                 <div style="font-weight: 600;">${escapeHTML(g.name)}</div>
                 ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
             </td>
+            <td data-label="Loại sự kiện"><span class="badge ${evClass}">${escapeHTML(eventType)}</span></td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
             <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">
                 ${g.gift_type === 'gold' ? `+${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `+${formatVND(g.amount)}`}
@@ -880,7 +928,16 @@ window.editSentRecord = function(id) {
     
     document.getElementById('sentId').value = record.id;
     document.getElementById('sentName').value = record.name;
-    document.getElementById('sentType').value = record.event_type;
+    const standardSentTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+    const sentEventType = record.event_type || '';
+    if (standardSentTypes.includes(sentEventType)) {
+        document.getElementById('sentType').value = sentEventType;
+        document.getElementById('sentTypeCustom').value = '';
+    } else {
+        document.getElementById('sentType').value = 'Khác';
+        document.getElementById('sentTypeCustom').value = sentEventType;
+    }
+    updateSentTypeCustomVisibility();
     document.getElementById('sentRelationship').value = record.relationship;
     document.getElementById('sentDate').value = record.date;
     document.getElementById('sentNotes').value = record.notes || '';
@@ -939,12 +996,22 @@ function renderSentTable() {
     // Search
     if (state.sentSearch) {
         const query = state.sentSearch.toLowerCase();
-        filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || (g.notes && g.notes.toLowerCase().includes(query)) || (g.address && g.address.toLowerCase().includes(query)));
+        filtered = filtered.filter(g => 
+            g.name.toLowerCase().includes(query) || 
+            (g.notes && g.notes.toLowerCase().includes(query)) || 
+            (g.address && g.address.toLowerCase().includes(query)) ||
+            (g.event_type && g.event_type.toLowerCase().includes(query))
+        );
     }
     
     // Event Type
     if (state.sentFilterType) {
-        filtered = filtered.filter(g => g.event_type === state.sentFilterType);
+        if (state.sentFilterType === 'Khác') {
+            const standardTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+            filtered = filtered.filter(g => !standardTypes.includes(g.event_type) || g.event_type === 'Khác');
+        } else {
+            filtered = filtered.filter(g => g.event_type === state.sentFilterType);
+        }
     }
     
     // Relation
@@ -1438,6 +1505,7 @@ function handleExportExcel(type = 'all') {
                 "Mối quan hệ": g.relationship,
                 "Địa chỉ": g.address || '',
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
+                "Loại sự kiện": g.event_type || 'Khác',
                 "Ngày nhận": g.date,
                 "Trạng thái trả lễ": g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại',
                 "Ghi chú": g.notes || ''
@@ -1452,6 +1520,7 @@ function handleExportExcel(type = 'all') {
             { wch: 18 }, // Mối quan hệ
             { wch: 24 }, // Địa chỉ
             { wch: 24 }, // Số tiền / Quà tặng
+            { wch: 18 }, // Loại sự kiện
             { wch: 16 }, // Ngày nhận
             { wch: 22 }, // Trạng thái trả lễ
             { wch: 30 }  // Ghi chú
@@ -1704,6 +1773,7 @@ function handleImportFile(e) {
                                 amount: amount,
                                 gold_amount: goldAmount,
                                 gold_type: goldType,
+                                event_type: getRowValue(r, ['Loại sự kiện', 'Sự kiện', 'Tên sự kiện', 'Dịp']) || 'Khác',
                                 date: dateStr,
                                 status: statusVal,
                                 notes: getRowValue(r, ['Ghi chú', 'Ghi chú thêm', 'Note', 'Chi tiết']) || '',
@@ -1843,7 +1913,8 @@ function handleImportFile(e) {
                                 const matchGoldAmount = existItem.gold_amount === excelItem.gold_amount;
                                 // Compare only date part YYYY-MM-DD
                                 const matchDate = (existItem.date || '').slice(0, 10) === (excelItem.date || '').slice(0, 10);
-                                return matchName && matchAmount && matchGiftType && matchGoldAmount && matchDate;
+                                const matchEventType = (existItem.event_type || 'Khác').trim().toLowerCase() === (excelItem.event_type || 'Khác').trim().toLowerCase();
+                                return matchName && matchAmount && matchGiftType && matchGoldAmount && matchDate && matchEventType;
                             });
                             if (!isDuplicate) {
                                 merged.push(excelItem);
@@ -1973,6 +2044,34 @@ function handleImportFile(e) {
 
 // --- Modals Control & Record Submission ---
 
+function updateRecTypeCustomVisibility() {
+    const recType = document.getElementById('recType').value;
+    const customGroup = document.getElementById('recTypeCustomGroup');
+    const customInput = document.getElementById('recTypeCustom');
+    if (recType === 'Khác') {
+        customGroup.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customGroup.style.display = 'none';
+        customInput.required = false;
+        customInput.value = '';
+    }
+}
+
+function updateSentTypeCustomVisibility() {
+    const sentType = document.getElementById('sentType').value;
+    const customGroup = document.getElementById('sentTypeCustomGroup');
+    const customInput = document.getElementById('sentTypeCustom');
+    if (sentType === 'Khác') {
+        customGroup.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customGroup.style.display = 'none';
+        customInput.required = false;
+        customInput.value = '';
+    }
+}
+
 window.closeModal = function(modalId) {
     document.getElementById(modalId).classList.remove('active');
 };
@@ -1991,6 +2090,7 @@ function setupModalListeners() {
         document.getElementById('recDate').value = new Date().toISOString().slice(0, 10);
         document.getElementById('recStatus').checked = false;
         document.getElementById('recStatusLabel').innerText = 'Chưa đi mừng cưới lại họ';
+        updateRecTypeCustomVisibility();
         
         // Reset gold fields
         const radioEl = document.querySelector('input[name="recGiftType"][value="money"]');
@@ -2007,6 +2107,7 @@ function setupModalListeners() {
         document.getElementById('sentForm').reset();
         document.getElementById('sentId').value = '';
         document.getElementById('sentDate').value = new Date().toISOString().slice(0, 10);
+        updateSentTypeCustomVisibility();
         
         // Reset gold fields
         const radioEl = document.querySelector('input[name="sentGiftType"][value="money"]');
@@ -2044,14 +2145,22 @@ function setupModalListeners() {
         });
     });
 
+    const recTypeSelect = document.getElementById('recType');
+    if (recTypeSelect) {
+        recTypeSelect.addEventListener('change', updateRecTypeCustomVisibility);
+    }
+    const sentTypeSelect = document.getElementById('sentType');
+    if (sentTypeSelect) {
+        sentTypeSelect.addEventListener('change', updateSentTypeCustomVisibility);
+    }
+
     // Choose import from notes button listener
     document.getElementById('chooseImportNotesBtn').addEventListener('click', () => {
         closeModal('quickAddModal');
         document.getElementById('importNotesForm').reset();
-        const flow = document.getElementById('importNotesFlow').value;
         const eventTypeGroup = document.getElementById('importNotesEventTypeGroup');
         if (eventTypeGroup) {
-            eventTypeGroup.style.display = (flow === 'sent') ? 'block' : 'none';
+            eventTypeGroup.style.display = 'block';
         }
         document.getElementById('importNotesPreviewContainer').style.display = 'none';
         document.getElementById('importNotesModal').classList.add('active');
@@ -2063,11 +2172,7 @@ function setupModalListeners() {
         importNotesFlow.addEventListener('change', () => {
             const eventTypeGroup = document.getElementById('importNotesEventTypeGroup');
             if (eventTypeGroup) {
-                if (importNotesFlow.value === 'sent') {
-                    eventTypeGroup.style.display = 'block';
-                } else {
-                    eventTypeGroup.style.display = 'none';
-                }
+                eventTypeGroup.style.display = 'block';
             }
         });
     }
@@ -2156,7 +2261,7 @@ function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', se
     const results = [];
     
     let currentRelationshipContext = selectedRelationship;
-    let currentEventTypeContext = isReceivedFlow ? 'Tiền tôi nhận' : selectedEventType;
+    let currentEventTypeContext = selectedEventType;
     let currentNotesContext = '';
     
     const defaultDate = new Date().toISOString().slice(0, 10);
@@ -2291,9 +2396,7 @@ function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', se
                 status: 'pending',
                 updated_at: new Date().toISOString()
             };
-            if (!isReceivedFlow) {
-                newRecord.event_type = currentEventTypeContext;
-            }
+            newRecord.event_type = currentEventTypeContext;
             results.push(newRecord);
         }
     });
@@ -2330,16 +2433,11 @@ function handleNotesPreview() {
             
         // Event type badge styling
         let evClass = 'badge-event-other';
-        let eventName = item.event_type;
-        if (isReceived) {
-            evClass = 'badge-event-wedding';
-            eventName = 'Tiền tôi nhận';
-        } else {
-            if (item.event_type === 'Đám cưới') evClass = 'badge-event-wedding';
-            else if (item.event_type === 'Đám hiếu') evClass = 'badge-event-funeral';
-            else if (item.event_type === 'Thăm ốm') evClass = 'badge-event-sick';
-            else if (item.event_type === 'Tân gia') evClass = 'badge-event-housewarming';
-        }
+        const eventName = item.event_type || 'Khác';
+        if (eventName === 'Đám cưới') evClass = 'badge-event-wedding';
+        else if (eventName === 'Đám hiếu') evClass = 'badge-event-funeral';
+        else if (eventName === 'Thăm ốm') evClass = 'badge-event-sick';
+        else if (eventName === 'Tân gia') evClass = 'badge-event-housewarming';
             
         row.innerHTML = `
             <td data-label="Họ & Tên" style="font-weight:600;">${escapeHTML(item.name)}</td>
@@ -2425,6 +2523,10 @@ async function handleReceivedSubmit(e) {
     const notes = document.getElementById('recNotes').value.trim();
     const address = document.getElementById('recAddress') ? document.getElementById('recAddress').value.trim() : '';
     
+    const recType = document.getElementById('recType').value;
+    const recTypeCustom = document.getElementById('recTypeCustom').value.trim();
+    const event_type = recType === 'Khác' ? (recTypeCustom || 'Khác') : recType;
+    
     const giftType = document.querySelector('input[name="recGiftType"]:checked').value;
     let amount = 0;
     let gold_amount = 0;
@@ -2445,6 +2547,7 @@ async function handleReceivedSubmit(e) {
         amount,
         gold_amount,
         gold_type,
+        event_type,
         date,
         status,
         notes,
@@ -2477,7 +2580,9 @@ async function handleSentSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('sentId').value;
     const name = document.getElementById('sentName').value.trim();
-    const event_type = document.getElementById('sentType').value;
+    const sentType = document.getElementById('sentType').value;
+    const sentTypeCustom = document.getElementById('sentTypeCustom').value.trim();
+    const event_type = sentType === 'Khác' ? (sentTypeCustom || 'Khác') : sentType;
     const relationship = document.getElementById('sentRelationship').value;
     const date = document.getElementById('sentDate').value;
     const notes = document.getElementById('sentNotes').value.trim();
@@ -3187,6 +3292,15 @@ function setupTableSearchAndFilters() {
         state.receivedPage = 1;
         renderReceivedTable();
     });
+    
+    const filterRecEvent = document.getElementById('filterReceivedEvent');
+    if (filterRecEvent) {
+        filterRecEvent.addEventListener('change', (e) => {
+            state.receivedFilterEvent = e.target.value;
+            state.receivedPage = 1;
+            renderReceivedTable();
+        });
+    }
     
     document.getElementById('btnReceivedPrev').addEventListener('click', () => {
         if (state.receivedPage > 1) {
