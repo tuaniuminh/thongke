@@ -2724,6 +2724,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bind Table filters and searches
     setupTableSearchAndFilters();
     
+    // Bind physical keyboard input for T9 PIN keypad
+    document.addEventListener('keydown', (e) => {
+        const unlockOverlay = document.getElementById('unlockOverlay');
+        const pinModeView = document.getElementById('unlockPinModeView');
+        const setupWizardOverlay = document.getElementById('setupWizardOverlay');
+        
+        // 1. If we are on the Unlock screen in PIN (T9) mode
+        if (unlockOverlay && unlockOverlay.style.display !== 'none' && pinModeView && pinModeView.style.display !== 'none') {
+            if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault();
+                handleUnlockKeypadPress(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                handleUnlockDelete();
+            } else if (e.key === 'Escape' || e.key === 'Delete') {
+                e.preventDefault();
+                handleUnlockClear();
+            }
+        }
+        // 2. If we are on the Setup Wizard PIN screen
+        else if (setupWizardOverlay && setupWizardOverlay.style.display !== 'none') {
+            if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault();
+                handleWizardKeypadPress(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                handleWizardDelete();
+            } else if (e.key === 'Escape' || e.key === 'Delete') {
+                e.preventDefault();
+                handleWizardClear();
+            }
+        }
+    });
+
     // Initialize Lucide Icons
     lucide.createIcons();
 });
