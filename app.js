@@ -51,12 +51,14 @@ let state = {
     receivedFilterEvent: '',
     receivedPage: 1,
     receivedLimit: 10,
+    receivedEditMode: false,
 
     sentSearch: '',
     sentFilterType: '',
     sentFilterRelation: '',
     sentPage: 1,
-    sentLimit: 10
+    sentLimit: 10,
+    sentEditMode: false
 };
 
 // Chart.js instances
@@ -801,9 +803,43 @@ window.deleteReceivedRecord = async function(id) {
     performSync(true);
 };
 
+function updateEditButtonUI(tab) {
+    if (tab === 'received') {
+        const btn = document.getElementById('btnToggleEditReceived');
+        if (!btn) return;
+        if (state.receivedEditMode) {
+            btn.className = 'btn btn-success';
+            btn.innerHTML = `<i data-lucide="check"></i><span>Hoàn tất</span>`;
+        } else {
+            btn.className = 'btn btn-outline';
+            btn.innerHTML = `<i data-lucide="edit-3"></i><span>Chỉnh sửa</span>`;
+        }
+    } else if (tab === 'sent') {
+        const btn = document.getElementById('btnToggleEditSent');
+        if (!btn) return;
+        if (state.sentEditMode) {
+            btn.className = 'btn btn-success';
+            btn.innerHTML = `<i data-lucide="check"></i><span>Hoàn tất</span>`;
+        } else {
+            btn.className = 'btn btn-outline';
+            btn.innerHTML = `<i data-lucide="edit-3"></i><span>Chỉnh sửa</span>`;
+        }
+    }
+    lucide.createIcons();
+}
+
 function renderReceivedTable() {
     const tbody = document.getElementById('receivedTableBody');
     tbody.innerHTML = '';
+    
+    const table = document.getElementById('receivedTable');
+    if (table) {
+        if (state.receivedEditMode) {
+            table.classList.add('edit-mode-active');
+        } else {
+            table.classList.remove('edit-mode-active');
+        }
+    }
     
     // Filter active (not soft-deleted)
     let filtered = state.receivedGifts.filter(g => !g.deleted_at);
@@ -866,6 +902,7 @@ function renderReceivedTable() {
                 <td colspan="8" class="empty-state">Không có bản ghi nào trùng khớp với bộ lọc.</td>
             </tr>
         `;
+        updateEditButtonUI('received');
         return;
     }
     
@@ -882,6 +919,19 @@ function renderReceivedTable() {
         if (eventType === 'Thăm ốm') evClass = 'badge-event-sick';
         if (eventType === 'Tân gia') evClass = 'badge-event-housewarming';
         
+        let statusHtml = '';
+        if (state.receivedEditMode) {
+            statusHtml = `
+                <label class="status-switch">
+                    <input type="checkbox" class="status-checkbox" ${isChecked} onchange="toggleReceivedReturnStatus('${g.id}')">
+                    <span class="status-slider"></span>
+                    <span class="badge ${statusClass}">${statusText}</span>
+                </label>
+            `;
+        } else {
+            statusHtml = `<span class="badge ${statusClass}">${statusText}</span>`;
+        }
+        
         row.innerHTML = `
             <td data-label="Họ & Tên">
                 <div style="font-weight: 600;">${escapeHTML(g.name)}</div>
@@ -896,14 +946,10 @@ function renderReceivedTable() {
                 ${escapeHTML(g.notes || '-')}
             </td>
             <td data-label="Ngày nhận">${formatDate(g.date)}</td>
-            <td data-label="Đã trả lễ?">
-                <label class="status-switch">
-                    <input type="checkbox" class="status-checkbox" ${isChecked} onchange="toggleReceivedReturnStatus('${g.id}')">
-                    <span class="status-slider"></span>
-                    <span class="badge ${statusClass}">${statusText}</span>
-                </label>
+            <td data-label="Đã trả lễ lại họ?">
+                ${statusHtml}
             </td>
-            <td data-label="Thao tác">
+            <td class="col-actions" data-label="Thao tác">
                 <div style="display: flex; gap: 8px;">
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editReceivedRecord('${g.id}')">
                         <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
@@ -917,6 +963,7 @@ function renderReceivedTable() {
         tbody.appendChild(row);
     });
     
+    updateEditButtonUI('received');
     lucide.createIcons();
 }
 
@@ -990,6 +1037,15 @@ function renderSentTable() {
     const tbody = document.getElementById('sentTableBody');
     tbody.innerHTML = '';
     
+    const table = document.getElementById('sentTable');
+    if (table) {
+        if (state.sentEditMode) {
+            table.classList.add('edit-mode-active');
+        } else {
+            table.classList.remove('edit-mode-active');
+        }
+    }
+    
     // Filter active
     let filtered = state.sentGifts.filter(g => !g.deleted_at);
     
@@ -1044,6 +1100,7 @@ function renderSentTable() {
                 <td colspan="7" class="empty-state">Không có bản ghi nào trùng khớp với bộ lọc.</td>
             </tr>
         `;
+        updateEditButtonUI('sent');
         return;
     }
     
@@ -1070,7 +1127,7 @@ function renderSentTable() {
                 ${escapeHTML(g.notes || '-')}
             </td>
             <td data-label="Ngày chi">${formatDate(g.date)}</td>
-            <td data-label="Thao tác">
+            <td class="col-actions" data-label="Thao tác">
                 <div style="display: flex; gap: 8px;">
                     <button class="btn btn-outline" style="padding: 6px 10px;" onclick="editSentRecord('${g.id}')">
                         <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
@@ -1084,6 +1141,7 @@ function renderSentTable() {
         tbody.appendChild(row);
     });
     
+    updateEditButtonUI('sent');
     lucide.createIcons();
 }
 
@@ -3347,6 +3405,23 @@ function setupTableSearchAndFilters() {
         state.sentPage++;
         renderSentTable();
     });
+
+    // --- Edit Mode Toggles ---
+    const btnToggleEditRec = document.getElementById('btnToggleEditReceived');
+    if (btnToggleEditRec) {
+        btnToggleEditRec.addEventListener('click', () => {
+            state.receivedEditMode = !state.receivedEditMode;
+            renderReceivedTable();
+        });
+    }
+
+    const btnToggleEditSnt = document.getElementById('btnToggleEditSent');
+    if (btnToggleEditSnt) {
+        btnToggleEditSnt.addEventListener('click', () => {
+            state.sentEditMode = !state.sentEditMode;
+            renderSentTable();
+        });
+    }
 }
 
 // --- Utilities ---

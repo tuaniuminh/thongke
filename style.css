@@ -1741,5 +1741,35 @@ body.light-mode .sync-detail-row {
     animation: shake 0.4s ease;
 }
 
+/* --- Edit Mode Styles (v2.8.0) --- */
+.btn-success {
+    background-color: var(--accent-emerald);
+    color: white;
+}
+.btn-success:hover {
+    background-color: #059669;
+}
+
+.col-actions {
+    display: none !important;
+}
+
+.edit-mode-active .col-actions {
+    display: table-cell !important;
+}
+
+@media (max-width: 768px) {
+    .edit-mode-active .col-actions {
+        display: flex !important;
+    }
+    
+    #btnToggleEditReceived,
+    #btnToggleEditSent {
+        flex-grow: 1;
+        min-width: 120px;
+    }
+}
+
+
 
 
