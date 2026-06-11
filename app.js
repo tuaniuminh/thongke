@@ -1350,7 +1350,7 @@ function applyExcelStyles(ws) {
         const cell = ws[cellRef];
         if (cell) {
             cell.s = {
-                font: { bold: true, name: 'Arial', sz: 11, color: { rgb: "333333" } },
+                font: { bold: true, name: 'Times New Roman', sz: 14, color: { rgb: "333333" } },
                 alignment: { horizontal: 'center', vertical: 'center' },
                 fill: { fgColor: { rgb: "F2F2F2" } },
                 border: {
@@ -1382,7 +1382,7 @@ function applyExcelStyles(ws) {
                 }
                 
                 cell.s = {
-                    font: { name: 'Arial', sz: 10, color: { rgb: "333333" } },
+                    font: { name: 'Times New Roman', sz: 14, color: { rgb: "333333" } },
                     alignment: { horizontal: align, vertical: 'center' },
                     border: {
                         top: { style: 'thin', color: { rgb: "E0E0E0" } },
@@ -1429,13 +1429,13 @@ function handleExportExcel(type = 'all') {
         
         // Auto column widths
         const colWidths = [
-            { wch: 6 },  // STT
-            { wch: 22 }, // Họ tên
-            { wch: 15 }, // Mối quan hệ
-            { wch: 20 }, // Số tiền / Quà tặng
-            { wch: 14 }, // Ngày nhận
-            { wch: 18 }, // Trạng thái trả lễ
-            { wch: 25 }  // Ghi chú
+            { wch: 8 },  // STT
+            { wch: 26 }, // Họ tên
+            { wch: 18 }, // Mối quan hệ
+            { wch: 24 }, // Số tiền / Quà tặng
+            { wch: 16 }, // Ngày nhận
+            { wch: 22 }, // Trạng thái trả lễ
+            { wch: 30 }  // Ghi chú
         ];
         wsReceived['!cols'] = colWidths;
         
@@ -1463,13 +1463,13 @@ function handleExportExcel(type = 'all') {
         
         // Auto column widths
         const colWidths = [
-            { wch: 6 },  // STT
-            { wch: 22 }, // Họ tên
-            { wch: 15 }, // Mối quan hệ
-            { wch: 20 }, // Số tiền / Quà tặng
-            { wch: 15 }, // Loại sự kiện
-            { wch: 14 }, // Ngày mừng
-            { wch: 25 }  // Ghi chú
+            { wch: 8 },  // STT
+            { wch: 26 }, // Họ tên
+            { wch: 18 }, // Mối quan hệ
+            { wch: 24 }, // Số tiền / Quà tặng
+            { wch: 18 }, // Loại sự kiện
+            { wch: 16 }, // Ngày mừng
+            { wch: 30 }  // Ghi chú
         ];
         wsSent['!cols'] = colWidths;
         
