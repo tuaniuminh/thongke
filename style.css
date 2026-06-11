@@ -1756,11 +1756,36 @@ body.light-mode .sync-detail-row {
 
 .edit-mode-active .col-actions {
     display: table-cell !important;
+    position: sticky;
+    right: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 5;
+    box-shadow: -6px 0 10px -4px rgba(0, 0, 0, 0.15);
+}
+
+.edit-mode-active th.col-actions {
+    background-color: var(--bg-secondary) !important;
+    z-index: 6;
+    box-shadow: -6px 0 10px -4px rgba(0, 0, 0, 0.15);
+}
+
+.data-table tbody tr:hover td.col-actions {
+    background: rgba(30, 41, 59, 0.9);
+}
+
+body.light-mode .data-table tbody tr:hover td.col-actions {
+    background: rgba(243, 244, 246, 0.95);
 }
 
 @media (max-width: 768px) {
     .edit-mode-active .col-actions {
         display: flex !important;
+        position: static !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
     }
     
     #btnToggleEditReceived,
