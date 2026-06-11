@@ -653,7 +653,10 @@ function renderRecentActivity(received, sent) {
         
         row.innerHTML = `
             <td data-label="Chiều">${flowBadge}</td>
-            <td data-label="Họ & Tên" style="font-weight: 500;">${escapeHTML(act.name)}</td>
+            <td data-label="Họ & Tên">
+                <div style="font-weight: 500;">${escapeHTML(act.name)}</div>
+                ${act.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(act.address)}</div>` : ''}
+            </td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${act.relationship}</span></td>
             <td data-label="Số tiền">${amountText}</td>
             <td data-label="Loại sự kiện">${eventBadge}</td>
@@ -728,6 +731,9 @@ window.editReceivedRecord = function(id) {
     document.getElementById('recStatus').checked = isReturned;
     document.getElementById('recStatusLabel').innerText = isReturned ? 'Đã đi mừng cưới lại họ' : 'Chưa đi mừng cưới lại họ';
     document.getElementById('recNotes').value = record.notes || '';
+    if (document.getElementById('recAddress')) {
+        document.getElementById('recAddress').value = record.address || '';
+    }
     
     const giftType = record.gift_type || 'money';
     const radioEl = document.querySelector(`input[name="recGiftType"][value="${giftType}"]`);
@@ -780,7 +786,7 @@ function renderReceivedTable() {
     // Search filter
     if (state.receivedSearch) {
         const query = state.receivedSearch.toLowerCase();
-        filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || (g.notes && g.notes.toLowerCase().includes(query)));
+        filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || (g.notes && g.notes.toLowerCase().includes(query)) || (g.address && g.address.toLowerCase().includes(query)));
     }
     
     // Relation filter
@@ -830,7 +836,10 @@ function renderReceivedTable() {
         const statusClass = g.status === 'returned' ? 'badge-status-returned' : 'badge-status-pending';
         
         row.innerHTML = `
-            <td data-label="Họ & Tên" style="font-weight: 600;">${escapeHTML(g.name)}</td>
+            <td data-label="Họ & Tên">
+                <div style="font-weight: 600;">${escapeHTML(g.name)}</div>
+                ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
+            </td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
             <td data-label="Số tiền nhận" style="color: var(--accent-emerald); font-weight:600;">
                 ${g.gift_type === 'gold' ? `+${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `+${formatVND(g.amount)}`}
@@ -875,6 +884,9 @@ window.editSentRecord = function(id) {
     document.getElementById('sentRelationship').value = record.relationship;
     document.getElementById('sentDate').value = record.date;
     document.getElementById('sentNotes').value = record.notes || '';
+    if (document.getElementById('sentAddress')) {
+        document.getElementById('sentAddress').value = record.address || '';
+    }
     
     const giftType = record.gift_type || 'money';
     const radioEl = document.querySelector(`input[name="sentGiftType"][value="${giftType}"]`);
@@ -927,7 +939,7 @@ function renderSentTable() {
     // Search
     if (state.sentSearch) {
         const query = state.sentSearch.toLowerCase();
-        filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || (g.notes && g.notes.toLowerCase().includes(query)));
+        filtered = filtered.filter(g => g.name.toLowerCase().includes(query) || (g.notes && g.notes.toLowerCase().includes(query)) || (g.address && g.address.toLowerCase().includes(query)));
     }
     
     // Event Type
@@ -978,7 +990,10 @@ function renderSentTable() {
         if (g.event_type === 'Tân gia') evClass = 'badge-event-housewarming';
         
         row.innerHTML = `
-            <td data-label="Họ & Tên" style="font-weight: 600;">${escapeHTML(g.name)}</td>
+            <td data-label="Họ & Tên">
+                <div style="font-weight: 600;">${escapeHTML(g.name)}</div>
+                ${g.address ? `<div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400; margin-top: 2px; white-space: normal;"><i data-lucide="map-pin" style="width:10px;height:10px;display:inline-block;margin-right:2px;vertical-align:middle;"></i>${escapeHTML(g.address)}</div>` : ''}
+            </td>
             <td data-label="Loại sự kiện"><span class="badge ${evClass}">${g.event_type}</span></td>
             <td data-label="Mối quan hệ"><span class="badge badge-relationship">${g.relationship}</span></td>
             <td data-label="Số tiền chi" style="color: var(--text-primary); font-weight:600;">
@@ -1379,7 +1394,7 @@ function applyExcelStyles(ws) {
                 let align = 'center';
                 const headerRef = XLSX.utils.encode_cell({ r: range.s.r, c: c });
                 const headerVal = ws[headerRef] ? String(ws[headerRef].v) : '';
-                if (headerVal === 'Họ tên' || headerVal === 'Ghi chú') {
+                if (headerVal === 'Họ tên' || headerVal === 'Ghi chú' || headerVal === 'Địa chỉ') {
                     align = 'left';
                 }
                 
@@ -1394,8 +1409,8 @@ function applyExcelStyles(ws) {
                     }
                 };
                 
-                // Set thousand separator format for numeric values in Column 3 (Số tiền / Quà tặng)
-                if (c === 3 && cell.t === 'n') {
+                // Set thousand separator format for numeric values in Column (Số tiền / Quà tặng)
+                if (headerVal === 'Số tiền / Quà tặng' && cell.t === 'n') {
                     cell.z = '#,##0';
                 }
             }
@@ -1421,6 +1436,7 @@ function handleExportExcel(type = 'all') {
                 "STT": idx + 1,
                 "Họ tên": g.name,
                 "Mối quan hệ": g.relationship,
+                "Địa chỉ": g.address || '',
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
                 "Ngày nhận": g.date,
                 "Trạng thái trả lễ": g.status === 'returned' ? 'Đã trả lễ lại họ' : 'Chưa đi lại',
@@ -1434,6 +1450,7 @@ function handleExportExcel(type = 'all') {
             { wch: 8 },  // STT
             { wch: 26 }, // Họ tên
             { wch: 18 }, // Mối quan hệ
+            { wch: 24 }, // Địa chỉ
             { wch: 24 }, // Số tiền / Quà tặng
             { wch: 16 }, // Ngày nhận
             { wch: 22 }, // Trạng thái trả lễ
@@ -1455,6 +1472,7 @@ function handleExportExcel(type = 'all') {
                 "STT": idx + 1,
                 "Họ tên": g.name,
                 "Mối quan hệ": g.relationship,
+                "Địa chỉ": g.address || '',
                 "Số tiền / Quà tặng": g.gift_type === 'gold' ? amountStr : Number(g.amount) || g.amount,
                 "Loại sự kiện": g.event_type || 'Khác',
                 "Ghi chú": g.notes || '',
@@ -1468,6 +1486,7 @@ function handleExportExcel(type = 'all') {
             { wch: 8 },  // STT
             { wch: 26 }, // Họ tên
             { wch: 18 }, // Mối quan hệ
+            { wch: 24 }, // Địa chỉ
             { wch: 24 }, // Số tiền / Quà tặng
             { wch: 18 }, // Loại sự kiện
             { wch: 30 }, // Ghi chú
@@ -1549,6 +1568,7 @@ function handleImportFile(e) {
                             date: String(dateVal).trim(),
                             status: statusVal,
                             notes: r["Ghi chú"] || '',
+                            address: r["Địa chỉ"] || '',
                             created_at: new Date().toISOString(),
                             updated_at: new Date().toISOString()
                         };
@@ -1596,6 +1616,7 @@ function handleImportFile(e) {
                             event_type: r["Loại sự kiện"] || 'Khác',
                             date: String(dateVal).trim(),
                             notes: r["Ghi chú"] || '',
+                            address: r["Địa chỉ"] || '',
                             created_at: new Date().toISOString(),
                             updated_at: new Date().toISOString()
                         };
@@ -2141,6 +2162,7 @@ async function handleReceivedSubmit(e) {
     const date = document.getElementById('recDate').value;
     const status = document.getElementById('recStatus').checked ? 'returned' : 'pending';
     const notes = document.getElementById('recNotes').value.trim();
+    const address = document.getElementById('recAddress') ? document.getElementById('recAddress').value.trim() : '';
     
     const giftType = document.querySelector('input[name="recGiftType"]:checked').value;
     let amount = 0;
@@ -2165,6 +2187,7 @@ async function handleReceivedSubmit(e) {
         date,
         status,
         notes,
+        address,
         updated_at: new Date().toISOString()
     };
     
@@ -2197,6 +2220,7 @@ async function handleSentSubmit(e) {
     const relationship = document.getElementById('sentRelationship').value;
     const date = document.getElementById('sentDate').value;
     const notes = document.getElementById('sentNotes').value.trim();
+    const address = document.getElementById('sentAddress') ? document.getElementById('sentAddress').value.trim() : '';
     
     const giftType = document.querySelector('input[name="sentGiftType"]:checked').value;
     let amount = 0;
@@ -2221,6 +2245,7 @@ async function handleSentSubmit(e) {
         gold_type,
         date,
         notes,
+        address,
         updated_at: new Date().toISOString()
     };
     
@@ -2312,6 +2337,15 @@ async function handleUnlockSubmit(e) {
         
         if (success) {
             state.masterPassword = password;
+            
+            // Ghi nhớ mở khóa
+            const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
+            if (rememberCheckbox && rememberCheckbox.checked) {
+                localStorage.setItem('gift_ledger_remembered_pin', password);
+            } else {
+                localStorage.removeItem('gift_ledger_remembered_pin');
+            }
+            
             if (document.activeElement) document.activeElement.blur();
             setTimeout(() => {
                 document.getElementById('unlockOverlay').style.display = 'none';
@@ -2369,6 +2403,11 @@ window.handleChangePassword = async function() {
 
     state.masterPassword = newPassword;
     await saveLocalState();
+    
+    // Cập nhật mã PIN đã ghi nhớ nếu tính năng này đang hoạt động
+    if (localStorage.getItem('gift_ledger_remembered_pin') !== null) {
+        localStorage.setItem('gift_ledger_remembered_pin', newPassword);
+    }
     
     // If Supabase synced, upload the new encrypted state to Supabase
     if (sync.isConfigured() && state.user) {
@@ -2495,6 +2534,15 @@ async function handleUnlockKeypadPress(val) {
             const success = await loadLocalState(pin);
             if (success) {
                 state.masterPassword = pin;
+                
+                // Ghi nhớ mở khóa
+                const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
+                if (rememberCheckbox && rememberCheckbox.checked) {
+                    localStorage.setItem('gift_ledger_remembered_pin', pin);
+                } else {
+                    localStorage.removeItem('gift_ledger_remembered_pin');
+                }
+                
                 if (document.activeElement) document.activeElement.blur();
                 document.getElementById('unlockOverlay').style.display = 'none';
                 document.getElementById('appLayout').style.display = 'flex';
@@ -2546,7 +2594,7 @@ function handleUnlockClear() {
 // --- DOM Init Bindings ---
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Theme initialization
     const savedTheme = localStorage.getItem('gift_ledger_theme');
     if (savedTheme) {
@@ -2558,26 +2606,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasDb = localStorage.getItem('gift_ledger_db') !== null;
     
     if (hasDb) {
-        document.getElementById('setupWizardOverlay').style.display = 'none';
-        document.getElementById('unlockOverlay').style.display = 'flex';
+        // Check if auto-unlock pin exists
+        const rememberedPin = localStorage.getItem('gift_ledger_remembered_pin');
+        let autoUnlocked = false;
         
-        // Auto select mode based on device type (desktop vs mobile)
-        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-        const pinModeView = document.getElementById('unlockPinModeView');
-        const keyboardModeView = document.getElementById('unlockKeyboardModeView');
-        if (pinModeView && keyboardModeView) {
-            if (!isMobile) {
-                // Show keyboard mode by default on desktop
-                pinModeView.style.display = 'none';
-                keyboardModeView.style.display = 'block';
-                setTimeout(() => {
-                    const unlockPasswordInput = document.getElementById('unlockPassword');
-                    if (unlockPasswordInput) unlockPasswordInput.focus();
-                }, 100);
+        if (rememberedPin) {
+            const success = await loadLocalState(rememberedPin);
+            if (success) {
+                state.masterPassword = rememberedPin;
+                autoUnlocked = true;
+                
+                document.getElementById('setupWizardOverlay').style.display = 'none';
+                document.getElementById('unlockOverlay').style.display = 'none';
+                document.getElementById('appLayout').style.display = 'flex';
+                resetViewportZoom();
+                showToast("Tự động mở khóa thành công!");
+                
+                const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
+                if (rememberCheckbox) rememberCheckbox.checked = true;
+                
+                renderAll();
+                
+                const config = getSupabaseConfig();
+                if (config.url && config.key) {
+                    sync.initSupabase(config.url, config.key);
+                    checkLoginStatus();
+                }
             } else {
-                // Show PIN mode by default on mobile
-                pinModeView.style.display = 'block';
-                keyboardModeView.style.display = 'none';
+                localStorage.removeItem('gift_ledger_remembered_pin');
+            }
+        }
+        
+        if (!autoUnlocked) {
+            document.getElementById('setupWizardOverlay').style.display = 'none';
+            document.getElementById('unlockOverlay').style.display = 'flex';
+            
+            const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
+            if (rememberCheckbox) rememberCheckbox.checked = false;
+            
+            // Auto select mode based on device type (desktop vs mobile)
+            const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+            const pinModeView = document.getElementById('unlockPinModeView');
+            const keyboardModeView = document.getElementById('unlockKeyboardModeView');
+            if (pinModeView && keyboardModeView) {
+                if (!isMobile) {
+                    // Show keyboard mode by default on desktop
+                    pinModeView.style.display = 'none';
+                    keyboardModeView.style.display = 'block';
+                    setTimeout(() => {
+                        const unlockPasswordInput = document.getElementById('unlockPassword');
+                        if (unlockPasswordInput) unlockPasswordInput.focus();
+                    }, 100);
+                } else {
+                    // Show PIN mode by default on mobile
+                    pinModeView.style.display = 'block';
+                    keyboardModeView.style.display = 'none';
+                }
             }
         }
     } else {
@@ -2647,6 +2731,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const success = await loadLocalState(val);
                 if (success) {
                     state.masterPassword = val;
+                    
+                    // Ghi nhớ mở khóa
+                    const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
+                    if (rememberCheckbox && rememberCheckbox.checked) {
+                        localStorage.setItem('gift_ledger_remembered_pin', val);
+                    } else {
+                        localStorage.removeItem('gift_ledger_remembered_pin');
+                    }
+                    
                     if (document.activeElement) document.activeElement.blur();
                     setTimeout(() => {
                         document.getElementById('unlockOverlay').style.display = 'none';
