@@ -1814,7 +1814,7 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
 
 .notes-cell {
     max-width: 250px;
-    white-space: normal;
+    white-space: normal !important;
     word-break: break-word;
 }
 
