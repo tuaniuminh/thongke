@@ -564,7 +564,7 @@ function renderDashboard() {
 
 
 function renderRelationshipChart(received, sent) {
-    const relationships = ['Họ hàng', 'Bạn học', 'Đồng nghiệp', 'Hàng xóm', 'Bạn xã hội', 'Khác'];
+    const relationships = ['Họ hàng', 'Bạn học', 'Đồng nghiệp', 'Hàng xóm', 'Bạn xã hội', 'Chính quyền', 'Khác'];
     
     const receivedData = relationships.map(rel => 
         received.filter(g => g.relationship === rel).reduce((sum, g) => sum + Number(g.amount), 0)
@@ -2439,11 +2439,14 @@ function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', se
         const cleanLine = trimmed;
         
         // 1. Check relationship headers
-        const relMatch = cleanLine.match(/^(Họ hàng|Bạn học|Đồng nghiệp|Hàng xóm|Bạn xã hội|Bạn bè|Khác)\s*:/i);
+        const relMatch = cleanLine.match(/^(Họ hàng|Bạn học|Đồng nghiệp|Hàng xóm|Bạn xã hội|Bạn bè|Chính quyền|Chính quyên|Chinh quyen|Khác)\s*:/i);
         if (relMatch) {
             let rel = relMatch[1].trim();
-            if (rel.toLowerCase() === 'bạn bè') {
+            const relLower = rel.toLowerCase();
+            if (relLower === 'bạn bè') {
                 currentRelationshipContext = 'Bạn xã hội';
+            } else if (relLower === 'chính quyền' || relLower === 'chính quyên' || relLower === 'chinh quyen') {
+                currentRelationshipContext = 'Chính quyền';
             } else {
                 currentRelationshipContext = rel.charAt(0).toUpperCase() + rel.slice(1);
             }
