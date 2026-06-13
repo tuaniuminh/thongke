@@ -528,6 +528,10 @@ function renderCustomEventsSettingsList() {
         
         listEl.appendChild(badge);
     });
+    
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+    }
 }
 
 async function addCustomEventType(name) {
