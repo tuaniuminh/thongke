@@ -2738,6 +2738,11 @@ async function handleReceivedSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('receivedId').value;
     const name = document.getElementById('recName').value.trim();
+    if (!name) {
+        showToast("Vui lòng nhập Họ và Tên!", "warning");
+        return;
+    }
+    
     const relationship = document.getElementById('recRelationship').value;
     const date = document.getElementById('recDate').value;
     const status = document.getElementById('recStatus').checked ? 'returned' : 'pending';
@@ -2756,8 +2761,16 @@ async function handleReceivedSubmit(e) {
     if (giftType === 'gold') {
         gold_amount = parseFloat(document.getElementById('recGoldAmount').value) || 0;
         gold_type = document.getElementById('recGoldType').value.trim();
+        if (gold_amount <= 0) {
+            showToast("Vui lòng nhập số lượng vàng hợp lệ!", "warning");
+            return;
+        }
     } else {
         amount = parseAmountInput(document.getElementById('recAmount').value);
+        if (amount <= 0) {
+            showToast("Vui lòng nhập số tiền hợp lệ!", "warning");
+            return;
+        }
     }
     
     const record = {
@@ -2801,6 +2814,10 @@ async function handleSentSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('sentId').value;
     const name = document.getElementById('sentName').value.trim();
+    if (!name) {
+        showToast("Vui lòng nhập Họ và Tên!", "warning");
+        return;
+    }
     const sentType = document.getElementById('sentType').value;
     const sentTypeCustom = document.getElementById('sentTypeCustom').value.trim();
     const event_type = sentType === 'Khác' ? (sentTypeCustom || 'Khác') : sentType;
@@ -2817,8 +2834,16 @@ async function handleSentSubmit(e) {
     if (giftType === 'gold') {
         gold_amount = parseFloat(document.getElementById('sentGoldAmount').value) || 0;
         gold_type = document.getElementById('sentGoldType').value.trim();
+        if (gold_amount <= 0) {
+            showToast("Vui lòng nhập số lượng vàng hợp lệ!", "warning");
+            return;
+        }
     } else {
         amount = parseAmountInput(document.getElementById('sentAmount').value);
+        if (amount <= 0) {
+            showToast("Vui lòng nhập số tiền hợp lệ!", "warning");
+            return;
+        }
     }
     
     const record = {
