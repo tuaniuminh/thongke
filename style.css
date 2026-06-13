@@ -1283,6 +1283,8 @@ body.light-mode .data-table tbody tr:hover {
         color: var(--text-primary);
         font-size: 0.96rem;
         text-align: left;
+        flex-shrink: 0;
+        margin-right: 12px;
     }
 
     /* Forms optimizations */
@@ -1842,10 +1844,16 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
     body:not(.mobile-view-table) .notes-cell {
         max-width: 100% !important;
         white-space: normal !important;
-        word-break: break-word;
-        text-align: right;
-        color: var(--text-secondary);
         font-size: 0.92rem;
+    }
+    
+    body:not(.mobile-view-table) .notes-cell .notes-content {
+        word-break: break-word;
+        overflow-wrap: break-word;
+        text-align: right;
+        max-width: 70%;
+        flex-shrink: 1;
+        color: var(--text-secondary);
     }
 
     /* Mobile Table View Layout (Horizontal scroll + sticky columns) */
@@ -1890,6 +1898,16 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
         text-align: left !important; /* Keep standard left alignment for desktop style */
         border-bottom: 1px solid var(--border-color) !important;
         vertical-align: middle !important;
+    }
+    
+    body.mobile-view-table .data-table td.notes-cell {
+        white-space: normal !important;
+    }
+    
+    body.mobile-view-table .data-table td.notes-cell .notes-content {
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     body.mobile-view-table .data-table th {

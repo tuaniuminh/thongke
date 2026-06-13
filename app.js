@@ -773,7 +773,7 @@ function renderRecentActivity(received, sent) {
             <td data-label="Loại sự kiện">${eventBadge}</td>
             <td data-label="Ngày">${formatDate(act.date)}</td>
             <td data-label="Ghi chú" class="notes-cell" title="${escapeHTML(act.notes || '')}">
-                ${escapeHTML(act.notes || '-')}
+                <span class="notes-content">${escapeHTML(act.notes || '-')}</span>
             </td>
         `;
         tbody.appendChild(row);
@@ -1040,7 +1040,7 @@ function renderReceivedTable() {
                 ${g.gift_type === 'gold' ? `+${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `+${formatVND(g.amount)}`}
             </td>
             <td data-label="Ghi chú" class="notes-cell" title="${escapeHTML(g.notes || '')}">
-                ${escapeHTML(g.notes || '-')}
+                <span class="notes-content">${escapeHTML(g.notes || '-')}</span>
             </td>
             <td data-label="Ngày nhận">${formatDate(g.date)}</td>
             <td data-label="Đã trả lễ lại họ?">
@@ -1223,7 +1223,7 @@ function renderSentTable() {
                 ${g.gift_type === 'gold' ? `-${g.gold_amount} chỉ (${escapeHTML(g.gold_type || 'Vàng')})` : `-${formatVND(g.amount)}`}
             </td>
             <td data-label="Ghi chú" class="notes-cell" title="${escapeHTML(g.notes || '')}">
-                ${escapeHTML(g.notes || '-')}
+                <span class="notes-content">${escapeHTML(g.notes || '-')}</span>
             </td>
             <td data-label="Ngày chi">${formatDate(g.date)}</td>
             <td class="col-actions" data-label="Thao tác">
@@ -2607,7 +2607,7 @@ function handleNotesPreview() {
             <td data-label="Số tiền" style="color:${isReceived ? 'var(--accent-emerald)' : 'var(--text-primary)'}; font-weight:600;">
                 ${isReceived ? '+' : '-'}${displayVal}
             </td>
-            <td data-label="Ghi chú" class="notes-cell">${escapeHTML(item.notes || '-')}</td>
+            <td data-label="Ghi chú" class="notes-cell"><span class="notes-content">${escapeHTML(item.notes || '-')}</span></td>
         `;
         tbody.appendChild(row);
     });
