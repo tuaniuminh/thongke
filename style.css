@@ -1845,12 +1845,14 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
         max-width: 100% !important;
         white-space: normal !important;
         font-size: 0.92rem;
+        text-align: left !important;
     }
     
     body:not(.mobile-view-table) .notes-cell .notes-content {
+        display: block;
         word-break: break-word;
         overflow-wrap: break-word;
-        text-align: left;
+        text-align: left !important;
         max-width: 70%;
         flex-shrink: 1;
         color: var(--text-secondary);
