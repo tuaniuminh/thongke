@@ -1815,15 +1815,9 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
 }
 
 .notes-cell {
-    max-width: 450px;
+    max-width: 250px;
     white-space: normal !important;
     word-break: break-word;
-}
-
-@media (min-width: 769px) {
-    .notes-cell {
-        width: 99%;
-    }
 }
 
 /* Mobile responsive adjustments */
