@@ -1846,6 +1846,7 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
         white-space: normal !important;
         font-size: 0.92rem;
         text-align: left !important;
+        justify-content: space-between !important;
     }
     
     body:not(.mobile-view-table) .notes-cell .notes-content {
