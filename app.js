@@ -74,6 +74,8 @@ let wizardPinBuffer = "";
 let wizardFirstPin = "";
 let unlockPinBuffer = "";
 
+let lastDeletedRecord = null;
+
 
 // --- Helper Functions ---
 
@@ -882,6 +884,13 @@ window.deleteReceivedRecord = async function(id) {
     const index = state.receivedGifts.findIndex(g => g.id === id);
     if (index === -1) return;
     
+    // Save to undo history before soft-deletion
+    lastDeletedRecord = {
+        type: 'received',
+        id: id,
+        originalRecord: { ...state.receivedGifts[index] }
+    };
+    
     // Soft-delete to support synchronization
     state.receivedGifts[index] = {
         ...state.receivedGifts[index],
@@ -892,7 +901,7 @@ window.deleteReceivedRecord = async function(id) {
     await saveLocalState();
     renderReceivedTable();
     renderDashboard();
-    showToast("Đã xóa ghi chép");
+    showToast(`Đã xóa ghi chép. <a href="#" onclick="undoDelete(event)" style="color: var(--accent-emerald); font-weight: 600; text-decoration: underline; margin-left: 8px;">Hoàn tác</a>`);
     
     // Auto-sync
     performSync(true);
@@ -1114,6 +1123,13 @@ window.deleteSentRecord = async function(id) {
     const index = state.sentGifts.findIndex(g => g.id === id);
     if (index === -1) return;
     
+    // Save to undo history before soft-deletion
+    lastDeletedRecord = {
+        type: 'sent',
+        id: id,
+        originalRecord: { ...state.sentGifts[index] }
+    };
+    
     // Soft-delete
     state.sentGifts[index] = {
         ...state.sentGifts[index],
@@ -1124,10 +1140,51 @@ window.deleteSentRecord = async function(id) {
     await saveLocalState();
     renderSentTable();
     renderDashboard();
-    showToast("Đã xóa ghi chép");
+    showToast(`Đã xóa ghi chép. <a href="#" onclick="undoDelete(event)" style="color: var(--accent-emerald); font-weight: 600; text-decoration: underline; margin-left: 8px;">Hoàn tác</a>`);
     
     // Auto-sync
     performSync(true);
+};
+
+window.undoDelete = async function(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    if (!lastDeletedRecord) return;
+    
+    const { type, id, originalRecord } = lastDeletedRecord;
+    
+    if (type === 'received') {
+        const index = state.receivedGifts.findIndex(g => g.id === id);
+        if (index !== -1) {
+            state.receivedGifts[index] = {
+                ...originalRecord,
+                deleted_at: null,
+                updated_at: new Date().toISOString()
+            };
+            await saveLocalState();
+            renderReceivedTable();
+            renderDashboard();
+            showToast("Đã hoàn tác xóa ghi chép!");
+            performSync(true);
+        }
+    } else if (type === 'sent') {
+        const index = state.sentGifts.findIndex(g => g.id === id);
+        if (index !== -1) {
+            state.sentGifts[index] = {
+                ...originalRecord,
+                deleted_at: null,
+                updated_at: new Date().toISOString()
+            };
+            await saveLocalState();
+            renderSentTable();
+            renderDashboard();
+            showToast("Đã hoàn tác xóa ghi chép!");
+            performSync(true);
+        }
+    }
+    
+    lastDeletedRecord = null;
 };
 
 function renderSentTable() {
