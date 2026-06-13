@@ -1903,6 +1903,10 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
         vertical-align: middle !important;
     }
     
+    body.mobile-view-table .data-table .col-actions {
+        display: none !important;
+    }
+    
     body.mobile-view-table .data-table td.notes-cell {
         white-space: normal !important;
     }
