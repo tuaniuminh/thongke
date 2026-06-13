@@ -77,6 +77,7 @@ let wizardFirstPin = "";
 let unlockPinBuffer = "";
 
 let lastDeletedRecord = null;
+let customEventsEditMode = false;
 
 
 // --- Helper Functions ---
@@ -465,13 +466,21 @@ function renderCustomEventsSettingsList() {
     const listEl = document.getElementById('customEventsList');
     if (!listEl) return;
     
+    const toggleBtn = document.getElementById('toggleEditCustomEventsBtn');
+    if (toggleBtn) {
+        toggleBtn.innerText = customEventsEditMode ? 'Hoàn tất' : 'Chỉnh sửa';
+    }
+    
     listEl.innerHTML = '';
     const customTypes = state.customEventTypes || [];
     
     if (customTypes.length === 0) {
         listEl.innerHTML = '<span style="font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">Chưa có loại sự kiện tùy chỉnh nào.</span>';
+        if (toggleBtn) toggleBtn.style.display = 'none';
         return;
     }
+    
+    if (toggleBtn) toggleBtn.style.display = 'inline-block';
     
     customTypes.forEach(evt => {
         const badge = document.createElement('span');
@@ -489,31 +498,34 @@ function renderCustomEventsSettingsList() {
         text.textContent = evt;
         badge.appendChild(text);
         
-        const deleteBtn = document.createElement('button');
-        deleteBtn.style.background = 'none';
-        deleteBtn.style.border = 'none';
-        deleteBtn.style.padding = '0';
-        deleteBtn.style.cursor = 'pointer';
-        deleteBtn.style.display = 'inline-flex';
-        deleteBtn.style.color = 'var(--text-secondary)';
-        deleteBtn.style.alignItems = 'center';
-        deleteBtn.style.justifyContent = 'center';
-        deleteBtn.style.transition = 'color 0.2s';
-        deleteBtn.innerHTML = '<i data-lucide="x" style="width: 14px; height: 14px;"></i>';
-        
-        deleteBtn.addEventListener('mouseenter', () => {
-            deleteBtn.style.color = 'var(--accent-rose)';
-        });
-        deleteBtn.addEventListener('mouseleave', () => {
+        if (customEventsEditMode) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.style.background = 'none';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.padding = '0';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.display = 'inline-flex';
             deleteBtn.style.color = 'var(--text-secondary)';
-        });
+            deleteBtn.style.alignItems = 'center';
+            deleteBtn.style.justifyContent = 'center';
+            deleteBtn.style.transition = 'color 0.2s';
+            deleteBtn.innerHTML = '<i data-lucide="x" style="width: 14px; height: 14px;"></i>';
+            
+            deleteBtn.addEventListener('mouseenter', () => {
+                deleteBtn.style.color = 'var(--accent-rose)';
+            });
+            deleteBtn.addEventListener('mouseleave', () => {
+                deleteBtn.style.color = 'var(--text-secondary)';
+            });
+            
+            deleteBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await deleteCustomEventType(evt);
+            });
+            
+            badge.appendChild(deleteBtn);
+        }
         
-        deleteBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            await deleteCustomEventType(evt);
-        });
-        
-        badge.appendChild(deleteBtn);
         listEl.appendChild(badge);
     });
 }
@@ -3695,6 +3707,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 addCustomEventType(customEventInput.value);
             }
+        });
+    }
+
+    // Bind Custom Event Type edit toggle
+    const toggleEditCustomEventsBtn = document.getElementById('toggleEditCustomEventsBtn');
+    if (toggleEditCustomEventsBtn) {
+        toggleEditCustomEventsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            customEventsEditMode = !customEventsEditMode;
+            renderCustomEventsSettingsList();
         });
     }
     
