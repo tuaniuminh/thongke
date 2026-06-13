@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thu Chi Đối Ngoại</title>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.0.2">
+    <link rel="stylesheet" href="style.css?v=3.1.0">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -26,7 +26,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.0.2</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.1.0</span>
                 </div>
             </div>
             
@@ -206,11 +206,6 @@
                         <div class="filter-group">
                             <select class="form-control filter-select" id="filterReceivedEvent">
                                 <option value="">Tất cả sự kiện nhận</option>
-                                <option value="Đám cưới">Đám cưới</option>
-                                <option value="Đám hiếu">Đám hiếu</option>
-                                <option value="Thăm ốm">Thăm ốm</option>
-                                <option value="Tân gia">Tân gia</option>
-                                <option value="Khác">Khác (Tự nhập)</option>
                             </select>
                             <select class="form-control filter-select" id="filterReceivedRelation">
                                 <option value="">Tất cả mối quan hệ</option>
@@ -277,11 +272,6 @@
                         <div class="filter-group">
                             <select class="form-control filter-select" id="filterSentType">
                                 <option value="">Tất cả sự kiện</option>
-                                <option value="Đám cưới">Đám cưới</option>
-                                <option value="Đám hiếu">Đám hiếu</option>
-                                <option value="Thăm ốm">Thăm ốm</option>
-                                <option value="Tân gia">Tân gia</option>
-                                <option value="Khác">Khác</option>
                             </select>
                             <select class="form-control filter-select" id="filterSentRelation">
                                 <option value="">Tất cả mối quan hệ</option>
@@ -374,6 +364,24 @@
                                 </div>
                             </label>
                         </div>
+                        <div style="border-top: 1px solid var(--border-color); margin-top: 16px; padding-top: 16px;">
+                            <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-family: var(--font-heading);">
+                                <i data-lucide="tag" style="width: 16px; height: 16px; color: var(--accent-rose);"></i>
+                                <span>Quản lý loại sự kiện tùy chỉnh</span>
+                            </h3>
+                            <p class="settings-info" style="margin-bottom: 12px;">
+                                Thêm các loại sự kiện khác của riêng bạn (ví dụ: Mừng thọ, Sinh nhật, Đầy tháng...) để hiển thị trong bộ lọc và biểu mẫu.
+                            </p>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                <input type="text" id="customEventInput" class="form-control" placeholder="Tên sự kiện mới..." style="flex: 1;">
+                                <button class="btn btn-primary" id="addCustomEventBtn" style="padding: 0 16px;" title="Thêm sự kiện">
+                                    <i data-lucide="plus"></i>
+                                </button>
+                            </div>
+                            <div id="customEventsList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <!-- Dynamic custom events will be rendered here -->
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Supabase Sync Card -->
@@ -453,7 +461,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v3.0.2
+                        Phiên bản ứng dụng: v3.1.0
                     </div>
                 </div>
             </section>
@@ -469,7 +477,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.0.2</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.1.0</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -520,7 +528,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.0.2</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.1.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -571,7 +579,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.0.2</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.1.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -675,11 +683,6 @@
                     <div class="form-group">
                         <label class="form-label" for="recType">Loại sự kiện</label>
                         <select class="form-control" id="recType" required>
-                            <option value="Đám cưới">Đám cưới</option>
-                            <option value="Đám hiếu">Đám hiếu</option>
-                            <option value="Thăm ốm">Thăm ốm</option>
-                            <option value="Tân gia">Tân gia</option>
-                            <option value="Khác" selected>Khác</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -752,11 +755,6 @@
                     <div class="form-group">
                         <label class="form-label" for="sentType">Loại sự kiện</label>
                         <select class="form-control" id="sentType" required>
-                            <option value="Đám cưới">Đám cưới</option>
-                            <option value="Đám hiếu">Đám hiếu</option>
-                            <option value="Thăm ốm">Thăm ốm</option>
-                            <option value="Tân gia">Tân gia</option>
-                            <option value="Khác" selected>Khác</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -874,11 +872,6 @@
                     <div class="form-group" style="margin-bottom: 0;" id="importNotesEventTypeGroup">
                         <label class="form-label" for="importNotesEventType">Loại sự kiện mặc định</label>
                         <select class="form-control" id="importNotesEventType" required>
-                            <option value="Đám cưới" selected>Đám cưới</option>
-                            <option value="Đám hiếu">Đám hiếu</option>
-                            <option value="Thăm ốm">Thăm ốm</option>
-                            <option value="Tân gia">Tân gia</option>
-                            <option value="Khác">Khác</option>
                         </select>
                     </div>
                 </div>
@@ -936,6 +929,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.0.2"></script>
+    <script type="module" src="app.js?v=3.1.0"></script>
 </body>
 </html>

@@ -43,6 +43,8 @@ let state = {
     lastResetTime: '',
     showImportNotesOption: false,
     showImportNotesOptionUpdated: '',
+    customEventTypes: [],
+    customEventTypesUpdated: '',
     activeTab: 'dashboard',
     theme: 'dark',
     mobileViewMode: 'cards',
@@ -153,7 +155,9 @@ async function saveLocalState() {
         sentGifts: state.sentGifts,
         lastResetTime: state.lastResetTime || '',
         showImportNotesOption: !!state.showImportNotesOption,
-        showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || ''
+        showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
+        customEventTypes: state.customEventTypes || [],
+        customEventTypesUpdated: state.customEventTypesUpdated || ''
     });
     
     try {
@@ -174,6 +178,8 @@ async function loadLocalState(password) {
         state.lastResetTime = '';
         state.showImportNotesOption = false;
         state.showImportNotesOptionUpdated = '';
+        state.customEventTypes = [];
+        state.customEventTypesUpdated = '';
         return true;
     }
     
@@ -185,6 +191,8 @@ async function loadLocalState(password) {
         state.lastResetTime = data.lastResetTime || '';
         state.showImportNotesOption = !!data.showImportNotesOption;
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
+        state.customEventTypes = data.customEventTypes || [];
+        state.customEventTypesUpdated = data.customEventTypesUpdated || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -263,6 +271,8 @@ async function performSync(silent = false) {
                     localReset = remoteReset;
                     state.showImportNotesOption = !!remoteData.showImportNotesOption;
                     state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
+                    state.customEventTypes = remoteData.customEventTypes || [];
+                    state.customEventTypesUpdated = remoteData.customEventTypesUpdated || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -275,6 +285,15 @@ async function performSync(silent = false) {
                     if (remoteOptTime > localOptTime) {
                         state.showImportNotesOption = !!remoteData.showImportNotesOption;
                         state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
+                    }
+
+                    // Merge customEventTypes using LWW (Last Write Wins)
+                    const localCustomTime = state.customEventTypesUpdated ? new Date(state.customEventTypesUpdated).getTime() : 0;
+                    const remoteCustomTime = remoteData.customEventTypesUpdated ? new Date(remoteData.customEventTypesUpdated).getTime() : 0;
+                    
+                    if (remoteCustomTime > localCustomTime) {
+                        state.customEventTypes = remoteData.customEventTypes || [];
+                        state.customEventTypesUpdated = remoteData.customEventTypesUpdated || '';
                     }
                 }
                 
@@ -299,7 +318,9 @@ async function performSync(silent = false) {
             sentGifts: state.sentGifts,
             lastResetTime: state.lastResetTime || '',
             showImportNotesOption: !!state.showImportNotesOption,
-            showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || ''
+            showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
+            customEventTypes: state.customEventTypes || [],
+            customEventTypesUpdated: state.customEventTypesUpdated || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
@@ -345,6 +366,8 @@ function updateSyncIndicator(status) {
 // --- Render Layout and Components ---
 
 function renderAll() {
+    renderEventDropdowns();
+    renderCustomEventsSettingsList();
     renderDashboard();
     renderReceivedTable();
     renderSentTable();
@@ -353,6 +376,206 @@ function renderAll() {
     updateImportNotesOptionUI();
     handleHashRoute();
     lucide.createIcons();
+}
+
+function renderEventDropdowns() {
+    const standardEvents = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+    const customEvents = state.customEventTypes || [];
+    const allEvents = [...standardEvents, ...customEvents];
+    
+    const configs = [
+        {
+            id: 'filterReceivedEvent',
+            defaultText: 'Tất cả sự kiện nhận',
+            defaultValue: '',
+            hasOther: true,
+            otherText: 'Khác (Tự nhập)',
+            otherValue: 'Khác'
+        },
+        {
+            id: 'filterSentType',
+            defaultText: 'Tất cả sự kiện',
+            defaultValue: '',
+            hasOther: true,
+            otherText: 'Khác',
+            otherValue: 'Khác'
+        },
+        {
+            id: 'recType',
+            defaultText: null,
+            hasOther: true,
+            otherText: 'Khác',
+            otherValue: 'Khác'
+        },
+        {
+            id: 'sentType',
+            defaultText: null,
+            hasOther: true,
+            otherText: 'Khác',
+            otherValue: 'Khác'
+        },
+        {
+            id: 'importNotesEventType',
+            defaultText: null,
+            hasOther: true,
+            otherText: 'Khác',
+            otherValue: 'Khác'
+        }
+    ];
+    
+    configs.forEach(config => {
+        const el = document.getElementById(config.id);
+        if (!el) return;
+        
+        const currentValue = el.value;
+        let html = '';
+        
+        if (config.defaultText !== null) {
+            html += `<option value="${config.defaultValue}">${config.defaultText}</option>`;
+        }
+        
+        allEvents.forEach(evt => {
+            html += `<option value="${evt}">${evt}</option>`;
+        });
+        
+        if (config.hasOther) {
+            html += `<option value="${config.otherValue}">${config.otherText}</option>`;
+        }
+        
+        el.innerHTML = html;
+        
+        // Restore value if it exists in the new options list
+        const optionExists = Array.from(el.options).some(opt => opt.value === currentValue);
+        if (optionExists) {
+            el.value = currentValue;
+        } else {
+            // Defaults on initialization or if previous selection vanished
+            if (config.id === 'recType' || config.id === 'sentType') {
+                el.value = 'Khác';
+            } else if (config.id === 'importNotesEventType') {
+                el.value = 'Đám cưới';
+            } else {
+                el.value = config.defaultValue || '';
+            }
+        }
+    });
+}
+
+function renderCustomEventsSettingsList() {
+    const listEl = document.getElementById('customEventsList');
+    if (!listEl) return;
+    
+    listEl.innerHTML = '';
+    const customTypes = state.customEventTypes || [];
+    
+    if (customTypes.length === 0) {
+        listEl.innerHTML = '<span style="font-size: 0.85rem; color: var(--text-secondary); font-style: italic;">Chưa có loại sự kiện tùy chỉnh nào.</span>';
+        return;
+    }
+    
+    customTypes.forEach(evt => {
+        const badge = document.createElement('span');
+        badge.className = 'badge badge-relationship';
+        badge.style.display = 'inline-flex';
+        badge.style.alignItems = 'center';
+        badge.style.gap = '6px';
+        badge.style.padding = '6px 12px';
+        badge.style.fontSize = '0.8rem';
+        badge.style.borderRadius = '20px';
+        badge.style.background = 'var(--bg-tertiary)';
+        badge.style.border = '1px solid var(--border-color)';
+        
+        const text = document.createElement('span');
+        text.textContent = evt;
+        badge.appendChild(text);
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.padding = '0';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.style.display = 'inline-flex';
+        deleteBtn.style.color = 'var(--text-secondary)';
+        deleteBtn.style.alignItems = 'center';
+        deleteBtn.style.justifyContent = 'center';
+        deleteBtn.style.transition = 'color 0.2s';
+        deleteBtn.innerHTML = '<i data-lucide="x" style="width: 14px; height: 14px;"></i>';
+        
+        deleteBtn.addEventListener('mouseenter', () => {
+            deleteBtn.style.color = 'var(--accent-rose)';
+        });
+        deleteBtn.addEventListener('mouseleave', () => {
+            deleteBtn.style.color = 'var(--text-secondary)';
+        });
+        
+        deleteBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await deleteCustomEventType(evt);
+        });
+        
+        badge.appendChild(deleteBtn);
+        listEl.appendChild(badge);
+    });
+}
+
+async function addCustomEventType(name) {
+    const trimmed = name.trim();
+    if (!trimmed) {
+        showToast("Tên sự kiện không được để trống!", "warning");
+        return;
+    }
+    
+    const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+    
+    const standardEvents = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia', 'Khác'];
+    if (standardEvents.some(evt => evt.toLowerCase() === formatted.toLowerCase())) {
+        showToast(`"${formatted}" là sự kiện mặc định của hệ thống!`, "warning");
+        return;
+    }
+    
+    if (!state.customEventTypes) {
+        state.customEventTypes = [];
+    }
+    
+    if (state.customEventTypes.some(evt => evt.toLowerCase() === formatted.toLowerCase())) {
+        showToast(`Loại sự kiện "${formatted}" đã tồn tại!`, "warning");
+        return;
+    }
+    
+    state.customEventTypes.push(formatted);
+    state.customEventTypesUpdated = new Date().toISOString();
+    
+    await saveLocalState();
+    renderEventDropdowns();
+    renderCustomEventsSettingsList();
+    
+    const input = document.getElementById('customEventInput');
+    if (input) input.value = '';
+    
+    showToast(`Đã thêm sự kiện "${formatted}"!`, "success");
+    
+    if (sync.isConfigured() && await sync.getCurrentUser()) {
+        performSync(true);
+    }
+}
+
+async function deleteCustomEventType(name) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa loại sự kiện "${name}" khỏi danh sách?`)) {
+        return;
+    }
+    
+    state.customEventTypes = (state.customEventTypes || []).filter(evt => evt !== name);
+    state.customEventTypesUpdated = new Date().toISOString();
+    
+    await saveLocalState();
+    renderEventDropdowns();
+    renderCustomEventsSettingsList();
+    
+    showToast(`Đã xóa sự kiện "${name}"!`, "success");
+    
+    if (sync.isConfigured() && await sync.getCurrentUser()) {
+        performSync(true);
+    }
 }
 
 function updateImportNotesOptionUI() {
@@ -841,8 +1064,9 @@ window.editReceivedRecord = function(id) {
     document.getElementById('recDate').value = record.date;
     
     const standardRecTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+    const allowedRecTypes = [...standardRecTypes, ...(state.customEventTypes || [])];
     const recEventType = record.event_type || '';
-    if (standardRecTypes.includes(recEventType)) {
+    if (allowedRecTypes.includes(recEventType)) {
         document.getElementById('recType').value = recEventType;
         document.getElementById('recTypeCustom').value = '';
     } else {
@@ -1082,8 +1306,9 @@ window.editSentRecord = function(id) {
     document.getElementById('sentId').value = record.id;
     document.getElementById('sentName').value = record.name;
     const standardSentTypes = ['Đám cưới', 'Đám hiếu', 'Thăm ốm', 'Tân gia'];
+    const allowedSentTypes = [...standardSentTypes, ...(state.customEventTypes || [])];
     const sentEventType = record.event_type || '';
-    if (standardSentTypes.includes(sentEventType)) {
+    if (allowedSentTypes.includes(sentEventType)) {
         document.getElementById('sentType').value = sentEventType;
         document.getElementById('sentTypeCustom').value = '';
     } else {
@@ -2521,13 +2746,18 @@ function parseNotesText(text, isReceivedFlow, selectedRelationship = 'Khác', se
         const eventMatch = cleanLine.match(/^(Loại sự kiện|Sự kiện|Loai su kien|Su kien)\s*:\s*(.*)/i);
         if (eventMatch) {
             let ev = eventMatch[2].trim().replace(/:$/, '').trim();
-            if (ev.toLowerCase().includes('cưới') || ev.toLowerCase().includes('cuoi')) {
+            const evLower = ev.toLowerCase();
+            const foundCustom = (state.customEventTypes || []).find(c => c.toLowerCase() === evLower);
+            
+            if (foundCustom) {
+                currentEventTypeContext = foundCustom;
+            } else if (evLower.includes('cưới') || evLower.includes('cuoi')) {
                 currentEventTypeContext = 'Đám cưới';
-            } else if (ev.toLowerCase().includes('hiếu') || ev.toLowerCase().includes('hieu')) {
+            } else if (evLower.includes('hiếu') || evLower.includes('hieu')) {
                 currentEventTypeContext = 'Đám hiếu';
-            } else if (ev.toLowerCase().includes('ốm') || ev.toLowerCase().includes('om')) {
+            } else if (evLower.includes('ốm') || evLower.includes('om')) {
                 currentEventTypeContext = 'Thăm ốm';
-            } else if (ev.toLowerCase().includes('gia')) {
+            } else if (evLower.includes('gia')) {
                 currentEventTypeContext = 'Tân gia';
             } else {
                 currentEventTypeContext = 'Khác';
@@ -3451,6 +3681,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // Bind Custom Event Type additions
+    const addCustomEventBtn = document.getElementById('addCustomEventBtn');
+    const customEventInput = document.getElementById('customEventInput');
+    if (addCustomEventBtn && customEventInput) {
+        addCustomEventBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            addCustomEventType(customEventInput.value);
+        });
+        customEventInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addCustomEventType(customEventInput.value);
+            }
+        });
+    }
     
     // Bind Clear All Data button
     const clearAllDataBtn = document.getElementById('clearAllDataBtn');
@@ -3467,6 +3713,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 state.receivedGifts = [];
                 state.sentGifts = [];
+                state.customEventTypes = [];
+                state.customEventTypesUpdated = new Date().toISOString();
                 state.lastResetTime = new Date().toISOString();
                 
                 await saveLocalState();
