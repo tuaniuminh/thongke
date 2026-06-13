@@ -1814,9 +1814,8 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
 
 .notes-cell {
     max-width: 250px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
 }
 
 /* Mobile responsive adjustments */
