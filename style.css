@@ -1850,7 +1850,7 @@ body.light-mode .data-table tbody tr:hover td.col-actions {
     body:not(.mobile-view-table) .notes-cell .notes-content {
         word-break: break-word;
         overflow-wrap: break-word;
-        text-align: right;
+        text-align: left;
         max-width: 70%;
         flex-shrink: 1;
         color: var(--text-secondary);
