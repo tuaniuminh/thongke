@@ -851,6 +851,7 @@ body.light-mode .data-table tbody tr:hover {
 }
 
 .modal-container {
+    position: relative;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--card-radius);
@@ -865,9 +866,10 @@ body.light-mode .data-table tbody tr:hover {
 
 .modal-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 1.5rem;
+    padding-right: 30px;
 }
 
 .modal-header h2 {
@@ -877,6 +879,10 @@ body.light-mode .data-table tbody tr:hover {
 }
 
 .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 50;
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -2447,13 +2453,6 @@ body.light-mode {
     background: linear-gradient(135deg, rgba(15, 118, 110, 0.15) 0%, rgba(13, 148, 136, 0.05) 100%) !important;
     border-bottom: 1px solid var(--border-color) !important;
     padding: 16px 20px !important;
-    position: relative !important;
-}
-
-.health-modal-header .close-btn {
-    position: absolute !important;
-    top: 10px !important;
-    right: 12px !important;
 }
 
 .health-modal-title {
