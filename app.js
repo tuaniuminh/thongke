@@ -4087,7 +4087,11 @@ function escapeHTML(str) {
 function formatDate(dateStr) {
     if (!dateStr) return '-';
     try {
-        const parts = dateStr.split('-');
+        let cleanDate = dateStr;
+        if (dateStr.includes('T')) {
+            cleanDate = dateStr.split('T')[0];
+        }
+        const parts = cleanDate.split('-');
         if (parts.length === 3) {
             // YYYY-MM-DD to DD/MM/YYYY
             return `${parts[2]}/${parts[1]}/${parts[0]}`;
