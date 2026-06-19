@@ -2795,6 +2795,12 @@ body.light-mode {
     }
 }
 
+@media (min-width: 769px) {
+    .sidebar.non-sticky-on-desktop {
+        position: relative !important;
+    }
+}
+
 
 
 

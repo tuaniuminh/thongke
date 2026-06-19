@@ -819,6 +819,16 @@ function switchTab(tabId, updateHash = true) {
         }
     });
     
+    // Toggle sticky class on sidebar for desktop when in health tab
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        if (tabId === 'health') {
+            sidebar.classList.add('non-sticky-on-desktop');
+        } else {
+            sidebar.classList.remove('non-sticky-on-desktop');
+        }
+    }
+    
     // Header text update
     const title = document.getElementById('currentTabTitle');
     const subtitle = document.getElementById('currentTabSubtitle');
