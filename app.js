@@ -50,6 +50,7 @@ let state = {
     familyProfiles: [],
     familyProfilesUpdated: '',
     selectedHealthProfileId: 'all',
+    familyProfilesEditMode: false,
     lastResetTime: '',
     showImportNotesOption: false,
     showImportNotesOptionUpdated: '',
@@ -4238,7 +4239,25 @@ function openHealthProfilesModal() {
     modal.style.display = 'flex';
     const input = document.getElementById('newProfileNameInput');
     if (input) input.value = '';
+    state.familyProfilesEditMode = false;
+    updateProfilesEditModeButtonUI();
     renderFamilyProfilesList();
+}
+
+function updateProfilesEditModeButtonUI() {
+    const btn = document.getElementById('toggleProfilesEditModeBtn');
+    if (!btn) return;
+    const isEditMode = state.familyProfilesEditMode;
+    if (isEditMode) {
+        btn.innerHTML = `<i data-lucide="check" style="width: 12px; height: 12px;"></i><span>Hoàn tất</span>`;
+        btn.classList.remove('health-btn-secondary');
+        btn.classList.add('health-btn-primary');
+    } else {
+        btn.innerHTML = `<i data-lucide="edit-3" style="width: 12px; height: 12px;"></i><span>Sửa</span>`;
+        btn.classList.remove('health-btn-primary');
+        btn.classList.add('health-btn-secondary');
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function renderFamilyProfilesList() {
@@ -4246,28 +4265,31 @@ function renderFamilyProfilesList() {
     if (!container) return;
 
     const profiles = state.familyProfiles || [{ id: 'p-self', name: 'Bản thân' }];
+    const isEditMode = state.familyProfilesEditMode;
     
     container.innerHTML = profiles.map(p => {
         const isDefault = p.id === 'p-self';
         return `
             <div class="health-profile-item" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 6px;">
                 <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
-                <div style="display: flex; gap: 4px;">
-                    <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)">
-                        <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-                    </button>
-                    <button type="button" class="profile-action-btn import" onclick="triggerImportMemberBackup('${p.id}')" title="Nhập sao lưu hồ sơ (.json)">
-                        <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
-                    </button>
-                    ${!isDefault ? `
-                        <button type="button" class="profile-action-btn edit" onclick="editFamilyProfile('${p.id}')" title="Sửa tên">
-                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                ${isEditMode ? `
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)">
+                            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                         </button>
-                        <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        <button type="button" class="profile-action-btn import" onclick="triggerImportMemberBackup('${p.id}')" title="Nhập sao lưu hồ sơ (.json)">
+                            <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
                         </button>
-                    ` : ''}
-                </div>
+                        ${!isDefault ? `
+                            <button type="button" class="profile-action-btn edit" onclick="editFamilyProfile('${p.id}')" title="Sửa tên">
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                            <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                ` : ''}
             </div>
         `;
     }).join('');
@@ -4597,6 +4619,12 @@ function initHealthBindings() {
     document.getElementById('addProfileForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         addFamilyProfile();
+    });
+
+    document.getElementById('toggleProfilesEditModeBtn')?.addEventListener('click', () => {
+        state.familyProfilesEditMode = !state.familyProfilesEditMode;
+        updateProfilesEditModeButtonUI();
+        renderFamilyProfilesList();
     });
 
     // Toggle Gemini API popover menu

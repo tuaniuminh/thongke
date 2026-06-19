@@ -2424,12 +2424,20 @@ body.light-mode {
     background: linear-gradient(135deg, rgba(15, 118, 110, 0.15) 0%, rgba(13, 148, 136, 0.05) 100%) !important;
     border-bottom: 1px solid var(--border-color) !important;
     padding: 16px 20px !important;
+    position: relative !important;
+}
+
+.health-modal-header .close-btn {
+    position: absolute !important;
+    top: 10px !important;
+    right: 12px !important;
 }
 
 .health-modal-title {
     font-size: 1.15rem !important;
     color: var(--text-primary) !important;
     font-weight: 700 !important;
+    padding-right: 40px !important;
 }
 
 .health-modal-title i,
@@ -2939,6 +2947,22 @@ body.light-mode {
     .health-chart-card-title .health-chart-controls-container {
         width: 100% !important;
         align-items: flex-end !important;
+    }
+    
+    #addProfileForm {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        text-align: left !important;
+    }
+    
+    #addProfileForm .form-group {
+        width: 100% !important;
+        text-align: left !important;
+    }
+    
+    #addProfileForm button {
+        width: 100% !important;
     }
 }
 
