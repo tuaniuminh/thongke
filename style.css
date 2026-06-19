@@ -2394,6 +2394,20 @@ body.light-mode {
     overflow: hidden;
 }
 
+.health-modal-container form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.health-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
 .health-modal-header {
     background: linear-gradient(135deg, rgba(15, 118, 110, 0.15) 0%, rgba(13, 148, 136, 0.05) 100%) !important;
     border-bottom: 1px solid var(--border-color) !important;
@@ -2594,6 +2608,10 @@ body.light-mode {
         flex: 1 !important;
         font-size: 0.78rem !important;
         padding: 8px 10px !important;
+    }
+    .health-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
     }
 }
 
