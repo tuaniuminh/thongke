@@ -6280,4 +6280,20 @@ function updateIndicatorProgress() {
     }
 }
 
+// Prevent double-tap zoom globally on mobile for non-interactive elements (like text, divs, spans)
+(function() {
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            // Check if the tapped element or any of its parents is interactive
+            const isInteractive = e.target.closest('button, input, select, textarea, a, [role="button"]');
+            if (!isInteractive) {
+                e.preventDefault();
+            }
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+})();
+
 
