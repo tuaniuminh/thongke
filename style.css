@@ -2557,6 +2557,24 @@ body.light-mode {
 }
 
 @media (max-width: 576px) {
+    .main-content {
+        padding: 1rem 0.4rem !important;
+    }
+    .health-theme-container {
+        padding: 8px !important;
+        gap: 16px !important;
+    }
+    .health-card {
+        padding: 14px 10px !important;
+    }
+    .modal-container, .health-modal-container {
+        max-width: 96% !important;
+        width: 96% !important;
+    }
+    .setup-card {
+        max-width: 95% !important;
+        padding: 1.75rem 1rem !important;
+    }
     .health-indicators-edit-header {
         display: none !important;
     }
