@@ -2,6 +2,8 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
+const APP_VERSION = '3.6.8';
+
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
@@ -157,6 +159,54 @@ function showToast(message, type = 'success') {
         toast.style.transform = 'translateY(10px)';
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+// Show Update Notification (Persistent Toast with Action)
+function showUpdateNotification(newVersion) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    // Check if an update toast is already present
+    if (document.getElementById('updateToast')) return;
+    
+    const toast = document.createElement('div');
+    toast.id = 'updateToast';
+    toast.className = 'toast warning';
+    toast.style.cursor = 'pointer';
+    toast.style.pointerEvents = 'auto';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '12px';
+    
+    toast.innerHTML = `
+        <i data-lucide="refresh-cw" class="spin-anim" style="color: var(--accent-amber); flex-shrink: 0;"></i>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; text-align: left;">
+            <span style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">Đã có bản cập nhật mới (v${newVersion})</span>
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">Bấm vào đây để tải lại ngay.</span>
+        </div>
+    `;
+    
+    // Add click handler to reload
+    toast.addEventListener('click', () => {
+        window.location.reload(true);
+    });
+    
+    container.appendChild(toast);
+    lucide.createIcons();
+}
+
+// Check for App Version Updates from version.json
+async function checkAppVersion() {
+    try {
+        const response = await fetch(`version.json?t=${Date.now()}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data && data.version && data.version !== APP_VERSION) {
+            showUpdateNotification(data.version);
+        }
+    } catch (e) {
+        console.error("Error checking app version:", e);
+    }
 }
 
 // Save database state locally (encrypted)
@@ -3943,6 +3993,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Lucide Icons
     lucide.createIcons();
+
+    // Check app version updates on load
+    checkAppVersion();
+
+    // Periodically check for updates every 5 minutes
+    setInterval(checkAppVersion, 5 * 60 * 1000);
+
+    // Check version when returning to the app
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            checkAppVersion();
+        }
+    });
 });
 
 // Setup lists filtering, search, and pagination triggers
