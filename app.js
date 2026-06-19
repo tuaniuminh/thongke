@@ -4700,7 +4700,7 @@ async function handleHealthFile(file) {
 
 async function callGeminiAPI(base64Data, mimeType) {
     const apiKey = state.geminiApiKey;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     
     const promptText = `Hãy đóng vai trò là một chuyên gia y tế và kỹ thuật viên xét nghiệm. Hãy phân tích hình ảnh kết quả xét nghiệm y khoa được cung cấp và trích xuất thông tin sang định dạng JSON chính xác.
 
@@ -5086,7 +5086,7 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
 *Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
         const apiKey = state.geminiApiKey;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
         
         const requestBody = {
             contents: [
