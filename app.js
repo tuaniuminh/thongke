@@ -4598,6 +4598,8 @@ window.deleteFamilyProfile = deleteFamilyProfile;
 window.exportMemberBackup = exportMemberBackup;
 window.triggerImportMemberBackup = triggerImportMemberBackup;
 window.handleMemberBackupImportFile = handleMemberBackupImportFile;
+window.openHealthAiMemberSelectorModal = openHealthAiMemberSelectorModal;
+window.selectMemberForAiAnalysis = selectMemberForAiAnalysis;
 
 let activeMedicalRecordId = null;
 
@@ -4739,6 +4741,14 @@ function initHealthBindings() {
 
     document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
         document.getElementById('healthAiAnalysisModal').style.display = 'none';
+    });
+
+    document.getElementById('closeHealthAiMemberSelectorModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthAiMemberSelectorModal').style.display = 'none';
+    });
+
+    document.getElementById('closeHealthAiMemberSelectorModalBtn2')?.addEventListener('click', () => {
+        document.getElementById('healthAiMemberSelectorModal').style.display = 'none';
     });
 
     document.getElementById('refreshHealthAiAnalysisBtn')?.addEventListener('click', () => {
@@ -5574,10 +5584,56 @@ function openHealthDetail(id) {
     modal.style.display = 'flex';
 }
 
+function openHealthAiMemberSelectorModal() {
+    const modal = document.getElementById('healthAiMemberSelectorModal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    const listContainer = document.getElementById('healthAiMemberSelectorList');
+    if (!listContainer) return;
+    
+    const profiles = state.familyProfiles && state.familyProfiles.length > 0 
+        ? state.familyProfiles 
+        : [{ id: 'p-self', name: 'Bản thân' }];
+    
+    listContainer.innerHTML = profiles.map(p => {
+        const isDefault = p.id === 'p-self';
+        return `
+            <div class="health-profile-item" style="cursor: pointer; padding: 12px 16px; margin-bottom: 2px;" onclick="selectMemberForAiAnalysis('${p.id}')">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="user" style="color: var(--health-accent); width: 18px; height: 18px;"></i>
+                    <span class="profile-item-name" style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)}</span>
+                    ${isDefault ? '<span style="font-size: 0.72rem; color: var(--text-muted); padding: 1px 6px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; border: 1px solid var(--border-color);">Mặc định</span>' : ''}
+                </div>
+                <i data-lucide="chevron-right" style="color: var(--text-muted); width: 16px; height: 16px;"></i>
+            </div>
+        `;
+    }).join('');
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function selectMemberForAiAnalysis(profileId) {
+    const modal = document.getElementById('healthAiMemberSelectorModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    
+    state.selectedHealthProfileId = profileId;
+    const mainSelect = document.getElementById('healthProfileSelect');
+    if (mainSelect) {
+        mainSelect.value = profileId;
+    }
+    renderHealthDashboard();
+    
+    openHealthAiAnalysisModal();
+}
+
 function openHealthAiAnalysisModal() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     if (selectedProfileId === 'all') {
-        showToast("Vui lòng chọn một thành viên cụ thể (không chọn 'Tất cả') để phân tích sức khỏe bằng AI!", "warning");
+        openHealthAiMemberSelectorModal();
         return;
     }
 

@@ -1329,7 +1329,7 @@
                     </div>
                 </div>
 
-                <div class="health-ai-report-container" id="healthAiReportContent" style="max-height: 400px; overflow-y: auto; padding: 16px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.9rem; line-height: 1.6; color: var(--text-primary);">
+                <div class="health-ai-report-container" id="healthAiReportContent" style="padding: 16px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.9rem; line-height: 1.6; color: var(--text-primary);">
                     <!-- AI content rendered as HTML here -->
                     <div class="health-empty-state" style="padding: 24px 0;">
                         <i data-lucide="sparkles" style="animation: pulse 2s infinite;"></i>
@@ -1354,6 +1354,32 @@
         </div>
     </div>
 
+    <!-- AI Member Selector Modal -->
+    <div class="modal-overlay health-theme-overlay" id="healthAiMemberSelectorModal" style="display: none; z-index: 2000;">
+        <div class="modal-container health-modal-container" style="width: 450px; max-width: 90%;">
+            <div class="modal-header health-modal-header">
+                <h3 class="health-modal-title">
+                    <i data-lucide="users"></i>
+                    <span>Chọn Thành viên để Phân tích</span>
+                </h3>
+                <button type="button" class="close-btn" id="closeHealthAiMemberSelectorModalBtn">&times;</button>
+            </div>
+            <div class="health-modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+                    Vui lòng chọn một thành viên cụ thể trong gia đình để thực hiện phân tích sức khỏe bằng AI (Gemini):
+                </p>
+                <div id="healthAiMemberSelectorList" style="display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Populated dynamically -->
+                </div>
+                <div class="health-modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                    <button type="button" id="closeHealthAiMemberSelectorModalBtn2" class="health-btn health-btn-outline" style="min-width: 100px;">
+                        Hủy bỏ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Health Scanner Loading Overlay -->
     <div class="modal-overlay health-theme-overlay" id="healthScannerLoadingOverlay" style="display: none; z-index: 9999;">
         <div style="text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
@@ -1366,6 +1392,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.5.0"></script>
+    <script type="module" src="app.js?v=3.5.1"></script>
 </body>
 </html>
