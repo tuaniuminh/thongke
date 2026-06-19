@@ -2789,6 +2789,14 @@ body.light-mode {
     transition: background-color 0.2s, color 0.2s;
 }
 
+.profile-action-btn.export {
+    color: var(--health-low);
+}
+
+.profile-action-btn.import {
+    color: var(--health-primary-hover);
+}
+
 .profile-action-btn.edit {
     color: var(--health-accent);
 }

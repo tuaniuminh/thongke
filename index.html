@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thu Chi Đối Ngoại</title>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.4.5">
+    <link rel="stylesheet" href="style.css?v=3.4.6">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -28,7 +28,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.4.5</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.4.6</span>
                 </div>
             </div>
             
@@ -474,7 +474,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v3.4.5
+                        Phiên bản ứng dụng: v3.4.6
                     </div>
                 </div>
             </section>
@@ -660,7 +660,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.4.5</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.4.6</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -711,7 +711,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.4.5</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.4.6</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -762,7 +762,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.4.5</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.4.6</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -1289,6 +1289,7 @@
                 <div class="health-profiles-list" id="healthProfilesListContainer" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; flex: 1; padding-right: 4px;">
                     <!-- Populated dynamically -->
                 </div>
+                <input type="file" id="memberBackupFileInput" accept=".json" style="display: none;">
 
                 <div class="health-modal-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; flex-shrink: 0;">
                     <button type="button" id="closeHealthProfilesModalBtn2" class="health-btn health-btn-outline" style="min-width: 120px;">
@@ -1359,6 +1360,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.4.5"></script>
+    <script type="module" src="app.js?v=3.4.6"></script>
 </body>
 </html>

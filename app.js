@@ -4250,9 +4250,15 @@ function renderFamilyProfilesList() {
     container.innerHTML = profiles.map(p => {
         const isDefault = p.id === 'p-self';
         return `
-            <div class="health-profile-item" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm);">
+            <div class="health-profile-item" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 6px;">
                 <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
                 <div style="display: flex; gap: 4px;">
+                    <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)">
+                        <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button type="button" class="profile-action-btn import" onclick="triggerImportMemberBackup('${p.id}')" title="Nhập sao lưu hồ sơ (.json)">
+                        <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
+                    </button>
                     ${!isDefault ? `
                         <button type="button" class="profile-action-btn edit" onclick="editFamilyProfile('${p.id}')" title="Sửa tên">
                             <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
@@ -4382,8 +4388,190 @@ async function deleteFamilyProfile(id) {
     performSync(true);
 }
 
+async function exportMemberBackup(profileId) {
+    const profile = (state.familyProfiles || []).find(p => p.id === profileId);
+    if (!profile) {
+        showToast("Không tìm thấy thành viên!", "error");
+        return;
+    }
+
+    const name = profile.name;
+    const records = (state.medicalRecords || []).filter(r => r.profileId === profileId);
+
+    // Ask user if they want to encrypt the backup file
+    const password = prompt(`Bạn có muốn đặt mật khẩu bảo mật cho tệp sao lưu của "${name}" không?\n(Để trống nếu muốn xuất tệp dạng văn bản thường không mã hóa)`);
+    if (password === null) return; // User cancelled
+
+    const payloadObj = {
+        profile: {
+            name: profile.name,
+            lastAiAnalysis: profile.lastAiAnalysis || '',
+            lastAiAnalysisDate: profile.lastAiAnalysisDate || '',
+            lastAiAnalysisUpdated: profile.lastAiAnalysisUpdated || ''
+        },
+        medicalRecords: records.map(r => ({
+            title: r.title || 'Hồ sơ sức khỏe',
+            type: r.type || 'general',
+            date: r.date || '',
+            facility: r.facility || '',
+            notes: r.notes || '',
+            indicators: r.indicators || {},
+            created_at: r.created_at || new Date().toISOString(),
+            updated_at: r.updated_at || new Date().toISOString()
+        }))
+    };
+
+    try {
+        let finalPayload;
+        let isEncrypted = false;
+
+        if (password.trim().length > 0) {
+            finalPayload = await encrypt(payloadObj ? JSON.stringify(payloadObj) : '', password);
+            isEncrypted = true;
+        } else {
+            finalPayload = payloadObj;
+        }
+
+        const backupData = {
+            app_id: "hieu_hy_member_health_backup",
+            profile_name: name,
+            is_encrypted: isEncrypted,
+            exported_at: new Date().toISOString(),
+            payload: finalPayload
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
+        const filename = `sao_luu_suc_khoe_${name.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.json`;
+
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", filename);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        showToast(`Đã xuất file sao lưu hồ sơ cho "${name}" thành công!`, "success");
+    } catch (e) {
+        console.error(e);
+        showToast("Lỗi khi xuất sao lưu hồ sơ!", "error");
+    }
+}
+
+window.currentImportProfileId = null;
+
+function triggerImportMemberBackup(profileId) {
+    window.currentImportProfileId = profileId;
+    const fileInput = document.getElementById('memberBackupFileInput');
+    if (fileInput) {
+        fileInput.value = ''; // Reset
+        fileInput.click();
+    }
+}
+
+async function handleMemberBackupImportFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const targetProfileId = window.currentImportProfileId;
+    if (!targetProfileId) {
+        showToast("Không xác định được hồ sơ thành viên đích!", "error");
+        return;
+    }
+
+    const profile = (state.familyProfiles || []).find(p => p.id === targetProfileId);
+    if (!profile) {
+        showToast("Hồ sơ thành viên đích không tồn tại!", "error");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+        try {
+            const data = JSON.parse(evt.target.result);
+            if (data.app_id !== "hieu_hy_member_health_backup") {
+                showToast("Định dạng tệp tin sao lưu thành viên không đúng!", "error");
+                return;
+            }
+
+            let decryptedPayload;
+            if (data.is_encrypted) {
+                const password = prompt("Tệp sao lưu này đã được mã hóa. Vui lòng nhập mật khẩu giải mã:");
+                if (password === null) return;
+                try {
+                    const decryptedStr = await decrypt(data.payload, password);
+                    decryptedPayload = JSON.parse(decryptedStr);
+                } catch (err) {
+                    showToast("Mật khẩu giải mã không chính xác hoặc dữ liệu bị hỏng!", "error");
+                    return;
+                }
+            } else {
+                decryptedPayload = data.payload;
+            }
+
+            if (!decryptedPayload || !decryptedPayload.profile || !Array.isArray(decryptedPayload.medicalRecords)) {
+                showToast("Dữ liệu sao lưu không đúng cấu trúc!", "error");
+                return;
+            }
+
+            const importedRecords = decryptedPayload.medicalRecords;
+            const confirmMsg = `Bạn có chắc chắn muốn nhập ${importedRecords.length} kết quả xét nghiệm vào hồ sơ của "${profile.name}"?\n(Dữ liệu sức khỏe cũ của thành viên này vẫn được giữ nguyên)`;
+            if (!confirm(confirmMsg)) return;
+
+            // Import medical records
+            if (!state.medicalRecords) {
+                state.medicalRecords = [];
+            }
+
+            const nowIso = new Date().toISOString();
+            importedRecords.forEach((r, idx) => {
+                const newRecord = {
+                    id: 'med-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + idx,
+                    title: r.title || 'Hồ sơ nhập khẩu',
+                    type: r.type || 'general',
+                    profileId: targetProfileId,
+                    date: r.date || nowIso.slice(0, 10),
+                    facility: r.facility || '',
+                    notes: r.notes || '',
+                    indicators: r.indicators || {},
+                    created_at: r.created_at || nowIso,
+                    updated_at: nowIso
+                };
+                state.medicalRecords.push(newRecord);
+            });
+
+            state.medicalRecordsUpdated = nowIso;
+
+            // Optionally import AI analysis report
+            const importedProfile = decryptedPayload.profile;
+            if (importedProfile.lastAiAnalysis) {
+                const overwriteAi = confirm(`Tệp sao lưu có chứa báo cáo phân tích sức khỏe bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
+                if (overwriteAi) {
+                    profile.lastAiAnalysis = importedProfile.lastAiAnalysis;
+                    profile.lastAiAnalysisDate = importedProfile.lastAiAnalysisDate || nowIso;
+                    profile.lastAiAnalysisUpdated = nowIso;
+                    state.familyProfilesUpdated = nowIso;
+                }
+            }
+
+            await saveLocalState();
+            renderFamilyProfilesList();
+            renderHealthDashboard();
+            showToast(`Nhập dữ liệu thành công cho thành viên "${profile.name}"!`, "success");
+
+            performSync(true);
+        } catch (err) {
+            console.error(err);
+            showToast("Lỗi phân tích hoặc nhập tệp sao lưu!", "error");
+        }
+    };
+    reader.readAsText(file);
+}
+
 window.editFamilyProfile = editFamilyProfile;
 window.deleteFamilyProfile = deleteFamilyProfile;
+window.exportMemberBackup = exportMemberBackup;
+window.triggerImportMemberBackup = triggerImportMemberBackup;
+window.handleMemberBackupImportFile = handleMemberBackupImportFile;
 
 let activeMedicalRecordId = null;
 
@@ -4568,6 +4756,8 @@ function initHealthBindings() {
             }
         }
     });
+
+    document.getElementById('memberBackupFileInput')?.addEventListener('change', handleMemberBackupImportFile);
 }
 
 function updateApiConfigCardState() {
