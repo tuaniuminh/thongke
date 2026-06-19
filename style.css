@@ -869,7 +869,8 @@ body.light-mode .data-table tbody tr:hover {
     justify-content: flex-start;
     align-items: center;
     margin-bottom: 1.5rem;
-    padding-right: 30px;
+    padding-top: 8px;
+    padding-right: 40px;
 }
 
 .modal-header h2 {
@@ -880,8 +881,8 @@ body.light-mode .data-table tbody tr:hover {
 
 .close-btn {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 8px;
+    right: 8px;
     z-index: 50;
     background: none;
     border: none;
@@ -1229,6 +1230,19 @@ body.light-mode .data-table tbody tr:hover {
     .modal-container {
         padding: 1.25rem;
         border-radius: 12px;
+    }
+
+    .modal-header {
+        padding-top: 12px !important;
+        padding-right: 32px !important;
+    }
+
+    .close-btn {
+        top: 6px !important;
+        right: 6px !important;
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 1.5rem !important;
     }
 
     .setup-card {
