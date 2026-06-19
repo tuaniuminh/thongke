@@ -3036,6 +3036,201 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
     cursor: not-allowed !important;
 }
 
+/* Home Layout Styles */
+.home-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--bg-primary);
+    background-image: radial-gradient(circle at top right, rgba(13, 148, 136, 0.05), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.03), transparent 40%);
+    padding: 2rem 1rem;
+    overflow-y: auto;
+}
+
+.home-container {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.home-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.home-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-title {
+    font-size: 2.5rem;
+    font-weight: 850;
+    font-family: var(--font-heading);
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #fff 30%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.home-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    max-width: 420px;
+    line-height: 1.5;
+}
+
+.home-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.home-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    gap: 1.25rem;
+}
+
+.home-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    border-color: var(--primary-color);
+}
+
+.home-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    transition: transform var(--transition-fast);
+}
+
+.home-card:hover .home-card-icon {
+    transform: scale(1.1);
+}
+
+/* Custom icon themes */
+.card-settings .home-card-icon {
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+}
+.card-settings:hover {
+    border-color: #818cf8;
+}
+
+.card-finance .home-card-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+}
+.card-finance:hover {
+    border-color: #fbbf24;
+}
+
+.card-health .home-card-icon {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--primary-color);
+}
+.card-health:hover {
+    border-color: var(--primary-color);
+}
+
+.home-card-content {
+    flex-grow: 1;
+}
+
+.home-card-content h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-heading);
+}
+
+.home-card-content p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.home-card-arrow {
+    color: var(--text-muted);
+    transition: transform var(--transition-fast), color var(--transition-fast);
+    display: flex;
+    align-items: center;
+}
+
+.home-card:hover .home-card-arrow {
+    color: var(--text-primary);
+    transform: translateX(4px);
+}
+
+.home-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 1rem;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 576px) {
+    .home-title {
+        font-size: 2rem;
+    }
+    
+    .home-card {
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+    
+    .home-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+    
+    .home-card-content h3 {
+        font-size: 1.05rem;
+    }
+}
+
 
 
 

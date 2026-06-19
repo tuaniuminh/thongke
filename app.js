@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.7.1';
+const APP_VERSION = '3.7.2';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -821,6 +821,8 @@ function updateMobileViewUI() {
 }
 
 const tabHashMapping = {
+    'trangchu': 'home',
+    'home': 'home',
     'tongquan': 'dashboard',
     'dashboard': 'dashboard',
     'tientoinhan': 'received',
@@ -836,6 +838,7 @@ const tabHashMapping = {
 };
 
 const tabIdToHash = {
+    'home': 'trangchu',
     'dashboard': 'tongquan',
     'received': 'tientoinhan',
     'sent': 'tientoimung',
@@ -843,18 +846,66 @@ const tabIdToHash = {
     'health': 'hosoyte'
 };
 
+// Central helper to enter the application layout or home landing view
+function enterApp() {
+    const wizardOverlay = document.getElementById('setupWizardOverlay');
+    if (wizardOverlay) wizardOverlay.style.display = 'none';
+    const unlockOverlay = document.getElementById('unlockOverlay');
+    if (unlockOverlay) unlockOverlay.style.display = 'none';
+    
+    const currentHash = window.location.hash.replace('#', '').replace('/', '').trim();
+    const appLayout = document.getElementById('appLayout');
+    const homeLayout = document.getElementById('homeLayout');
+    
+    if (currentHash && tabHashMapping[currentHash] && currentHash !== 'trangchu') {
+        if (appLayout) appLayout.style.display = 'flex';
+        if (homeLayout) homeLayout.style.display = 'none';
+        handleHashRoute();
+    } else {
+        if (appLayout) appLayout.style.display = 'none';
+        if (homeLayout) homeLayout.style.display = 'flex';
+        if (window.location.hash !== '#trangchu') {
+            window.location.hash = 'trangchu';
+        } else {
+            handleHashRoute(); // Force execution if hash is already trangchu
+        }
+    }
+    
+    resetViewportZoom();
+    renderAll();
+}
+
 function handleHashRoute() {
     const appLayout = document.getElementById('appLayout');
-    if (!appLayout || appLayout.style.display === 'none') return;
+    const homeLayout = document.getElementById('homeLayout');
+    if (!appLayout || (appLayout.style.display === 'none' && (!homeLayout || homeLayout.style.display === 'none'))) return;
     
     const hash = window.location.hash.replace('#', '').replace('/', '').trim();
+    if (hash === 'trangchu') {
+        if (appLayout) appLayout.style.display = 'none';
+        if (homeLayout) homeLayout.style.display = 'flex';
+        state.activeTab = 'home';
+        
+        // Update active class on nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('data-tab') === 'home') {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        return;
+    }
+    
     if (hash && tabHashMapping[hash]) {
+        if (homeLayout) homeLayout.style.display = 'none';
+        if (appLayout) appLayout.style.display = 'flex';
         const tabId = tabHashMapping[hash];
         if (state.activeTab !== tabId) {
             switchTab(tabId, false);
         }
     } else {
-        const defaultHash = tabIdToHash[state.activeTab || 'dashboard'];
+        const defaultHash = tabIdToHash[state.activeTab || 'home'] || 'trangchu';
         if (window.location.hash !== '#' + defaultHash) {
             window.location.hash = defaultHash;
         }
@@ -3369,11 +3420,8 @@ async function handleWizardSubmit(e) {
     // Hide overlay
     if (document.activeElement) document.activeElement.blur();
     setTimeout(() => {
-        document.getElementById('setupWizardOverlay').style.display = 'none';
-        document.getElementById('appLayout').style.display = 'flex';
-        resetViewportZoom();
+        enterApp();
         showToast("Đã thiết lập Master Password và khởi tạo bộ nhớ!");
-        renderAll();
     }, 350);
 }
 
@@ -3403,11 +3451,8 @@ async function handleUnlockSubmit(e) {
             
             if (document.activeElement) document.activeElement.blur();
             setTimeout(() => {
-                document.getElementById('unlockOverlay').style.display = 'none';
-                document.getElementById('appLayout').style.display = 'flex';
-                resetViewportZoom();
+                enterApp();
                 showToast("Giải mã thành công! Chào mừng trở lại.");
-                renderAll();
                 
                 // Connect to Supabase if configured and run sync
                 const config = getSupabaseConfig();
@@ -3549,11 +3594,8 @@ async function handleWizardKeypadPress(val) {
                 
                 if (document.activeElement) document.activeElement.blur();
                 setTimeout(() => {
-                    document.getElementById('setupWizardOverlay').style.display = 'none';
-                    document.getElementById('appLayout').style.display = 'flex';
-                    resetViewportZoom();
+                    enterApp();
                     showToast("Đã thiết lập Mã PIN và khởi tạo sổ!");
-                    renderAll();
                     
                     wizardPinBuffer = "";
                     wizardFirstPin = "";
@@ -3599,11 +3641,8 @@ async function handleUnlockKeypadPress(val) {
                 }
                 
                 if (document.activeElement) document.activeElement.blur();
-                document.getElementById('unlockOverlay').style.display = 'none';
-                document.getElementById('appLayout').style.display = 'flex';
-                resetViewportZoom();
+                enterApp();
                 showToast("Mở khóa thành công! Chào mừng trở lại.");
-                renderAll();
                 
                 const config = getSupabaseConfig();
                 if (config.url && config.key) {
@@ -3680,16 +3719,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 state.masterPassword = rememberedPin;
                 autoUnlocked = true;
                 
-                document.getElementById('setupWizardOverlay').style.display = 'none';
-                document.getElementById('unlockOverlay').style.display = 'none';
-                document.getElementById('appLayout').style.display = 'flex';
-                resetViewportZoom();
+                enterApp();
                 showToast("Tự động mở khóa thành công!");
                 
                 const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
                 if (rememberCheckbox) rememberCheckbox.checked = true;
-                
-                renderAll();
                 
                 const config = getSupabaseConfig();
                 if (config.url && config.key) {
@@ -3806,11 +3840,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     if (document.activeElement) document.activeElement.blur();
                     setTimeout(() => {
-                        document.getElementById('unlockOverlay').style.display = 'none';
-                        document.getElementById('appLayout').style.display = 'flex';
-                        resetViewportZoom();
+                        enterApp();
                         showToast("Giải mã thành công! Chào mừng trở lại.");
-                        renderAll();
                         
                         const config = getSupabaseConfig();
                         if (config.url && config.key) {

@@ -8,10 +8,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FamiLife">
-    <link rel="apple-touch-icon" href="icon.png?v=3.7.1">
-    <link rel="manifest" href="manifest.json?v=3.7.1">
+    <link rel="apple-touch-icon" href="icon.png?v=3.7.2">
+    <link rel="manifest" href="manifest.json?v=3.7.2">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.7.1">
+    <link rel="stylesheet" href="style.css?v=3.7.2">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,7 +35,7 @@
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">FamiLife</div>
                     <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                        <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;" id="sidebarVersion">Phiên bản v3.7.1</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;" id="sidebarVersion">Phiên bản v3.7.2</span>
                         <button class="manual-check-update-btn" title="Kiểm tra cập nhật" style="background: none; border: none; padding: 2px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; transition: color var(--transition-fast);">
                             <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
                         </button>
@@ -44,6 +44,12 @@
             </div>
             
             <nav class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link" data-tab="home">
+                        <i data-lucide="home"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link active" data-tab="dashboard">
                         <i data-lucide="layout-dashboard"></i>
@@ -485,7 +491,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <span id="settingsVersion">Phiên bản ứng dụng: v3.7.1</span>
+                        <span id="settingsVersion">Phiên bản ứng dụng: v3.7.2</span>
                         <button class="manual-check-update-btn" title="Kiểm tra cập nhật" style="background: none; border: none; padding: 2px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; transition: color var(--transition-fast);">
                             <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
                         </button>
@@ -665,6 +671,71 @@
         </main>
     </div>
 
+    <!-- Home Landing Page Layout -->
+    <div class="home-layout" id="homeLayout" style="display: none;">
+        <div class="home-container">
+            <header class="home-header">
+                <div class="home-logo">
+                    <img src="icon.png?v=3.7.2" alt="FamiLife Logo" class="home-logo-img">
+                </div>
+                <h1 class="home-title">FamiLife</h1>
+                <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
+            </header>
+            
+            <div class="home-grid">
+                <!-- Card 1: Cấu hình dữ liệu -->
+                <a href="#caidat" class="home-card card-settings">
+                    <div class="home-card-icon">
+                        <i data-lucide="database"></i>
+                    </div>
+                    <div class="home-card-content">
+                        <h3>Đồng bộ & Cấu hình</h3>
+                        <p>Cấu hình dữ liệu cục bộ, liên kết tài khoản Cloud Supabase và quản lý bảo mật</p>
+                    </div>
+                    <div class="home-card-arrow">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Card 2: Thu chi đối ngoại -->
+                <a href="#tongquan" class="home-card card-finance">
+                    <div class="home-card-icon">
+                        <i data-lucide="hand-coins"></i>
+                    </div>
+                    <div class="home-card-content">
+                        <h3>Thu chi đối ngoại</h3>
+                        <p>Quản lý tiền đi mừng hiếu hỷ, thăm hỏi, quà cáp và thống kê quan hệ gia đình</p>
+                    </div>
+                    <div class="home-card-arrow">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Card 3: Hồ sơ y tế -->
+                <a href="#hosoyte" class="home-card card-health">
+                    <div class="home-card-icon">
+                        <i data-lucide="activity"></i>
+                    </div>
+                    <div class="home-card-content">
+                        <h3>Hồ sơ y tế</h3>
+                        <p>Theo dõi chỉ số sức khỏe, lịch sử y khoa của thành viên và phân tích bằng trợ lý AI</p>
+                    </div>
+                    <div class="home-card-arrow">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </a>
+            </div>
+            
+            <footer class="home-footer">
+                <span>Phiên bản v3.7.2</span>
+                <span>&bull;</span>
+                <button class="manual-check-update-btn" title="Kiểm tra cập nhật" style="background: none; border: none; padding: 2px; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; transition: color var(--transition-fast);">
+                    <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
+                </button>
+            </footer>
+        </div>
+    </div>
+
     <!-- Initialization / Master Password Wizard Overlay -->
     <div class="setup-overlay" id="setupWizardOverlay">
         <div class="setup-card pin-card">
@@ -674,7 +745,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.1</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.2</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -725,7 +796,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.1</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.2</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -776,7 +847,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.1</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.2</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -1406,6 +1477,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.7.1"></script>
+    <script type="module" src="app.js?v=3.7.2"></script>
 </body>
 </html>
