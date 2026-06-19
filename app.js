@@ -47,6 +47,9 @@ let state = {
     lastAiAnalysis: '',
     lastAiAnalysisDate: '',
     lastAiAnalysisUpdated: '',
+    familyProfiles: [],
+    familyProfilesUpdated: '',
+    selectedHealthProfileId: 'all',
     lastResetTime: '',
     showImportNotesOption: false,
     showImportNotesOptionUpdated: '',
@@ -169,6 +172,8 @@ async function saveLocalState() {
         lastAiAnalysis: state.lastAiAnalysis || '',
         lastAiAnalysisDate: state.lastAiAnalysisDate || '',
         lastAiAnalysisUpdated: state.lastAiAnalysisUpdated || '',
+        familyProfiles: state.familyProfiles || [],
+        familyProfilesUpdated: state.familyProfilesUpdated || '',
         lastResetTime: state.lastResetTime || '',
         showImportNotesOption: !!state.showImportNotesOption,
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -198,6 +203,9 @@ async function loadLocalState(password) {
         state.lastAiAnalysis = '';
         state.lastAiAnalysisDate = '';
         state.lastAiAnalysisUpdated = '';
+        state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
+        state.familyProfilesUpdated = '';
+        state.selectedHealthProfileId = 'all';
         state.lastResetTime = '';
         state.showImportNotesOption = false;
         state.showImportNotesOptionUpdated = '';
@@ -218,6 +226,9 @@ async function loadLocalState(password) {
         state.lastAiAnalysis = data.lastAiAnalysis || '';
         state.lastAiAnalysisDate = data.lastAiAnalysisDate || '';
         state.lastAiAnalysisUpdated = data.lastAiAnalysisUpdated || '';
+        state.familyProfiles = data.familyProfiles && data.familyProfiles.length > 0 ? data.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
+        state.familyProfilesUpdated = data.familyProfilesUpdated || '';
+        state.selectedHealthProfileId = 'all';
         state.lastResetTime = data.lastResetTime || '';
         state.showImportNotesOption = !!data.showImportNotesOption;
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
@@ -312,6 +323,8 @@ async function performSync(silent = false) {
                     state.lastAiAnalysis = remoteData.lastAiAnalysis || '';
                     state.lastAiAnalysisDate = remoteData.lastAiAnalysisDate || '';
                     state.lastAiAnalysisUpdated = remoteData.lastAiAnalysisUpdated || '';
+                    state.familyProfiles = remoteData.familyProfiles && remoteData.familyProfiles.length > 0 ? remoteData.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
+                    state.familyProfilesUpdated = remoteData.familyProfilesUpdated || '';
                     remoteReceived = remoteData.receivedGifts || [];
                     remoteSent = remoteData.sentGifts || [];
                     remoteMedical = remoteData.medicalRecords || [];
@@ -355,6 +368,14 @@ async function performSync(silent = false) {
                         state.lastAiAnalysisDate = remoteData.lastAiAnalysisDate || '';
                         state.lastAiAnalysisUpdated = remoteData.lastAiAnalysisUpdated || '';
                     }
+
+                    // Merge familyProfiles using LWW
+                    const localProfilesTime = state.familyProfilesUpdated ? new Date(state.familyProfilesUpdated).getTime() : 0;
+                    const remoteProfilesTime = remoteData.familyProfilesUpdated ? new Date(remoteData.familyProfilesUpdated).getTime() : 0;
+                    if (remoteProfilesTime > localProfilesTime) {
+                        state.familyProfiles = remoteData.familyProfiles && remoteData.familyProfiles.length > 0 ? remoteData.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
+                        state.familyProfilesUpdated = remoteData.familyProfilesUpdated || '';
+                    }
                 }
                 
                 // 3. Merge lists
@@ -389,7 +410,9 @@ async function performSync(silent = false) {
             showImportNotesOption: !!state.showImportNotesOption,
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
             customEventTypes: state.customEventTypes || [],
-            customEventTypesUpdated: state.customEventTypesUpdated || ''
+            customEventTypesUpdated: state.customEventTypesUpdated || '',
+            familyProfiles: state.familyProfiles || [],
+            familyProfilesUpdated: state.familyProfilesUpdated || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
@@ -3845,6 +3868,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 state.medicalRecordsUpdated = new Date().toISOString();
                 state.geminiApiKey = '';
                 state.geminiApiKeyUpdated = new Date().toISOString();
+                state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
+                state.familyProfilesUpdated = new Date().toISOString();
+                state.selectedHealthProfileId = 'all';
                 state.lastResetTime = new Date().toISOString();
                 
                 await saveLocalState();
@@ -4173,9 +4199,208 @@ function renderDashboardSyncBanner() {
 // HEALTH TAB (HỒ SƠ Y TẾ) LOGIC
 // ==========================================================================
 
+// --- Family Profiles Helpers ---
+function getProfileName(profileId) {
+    const defaultId = profileId || 'p-self';
+    const profile = (state.familyProfiles || []).find(p => p.id === defaultId);
+    return profile ? profile.name : 'Bản thân';
+}
+
+function updateProfileDropdowns() {
+    const mainSelect = document.getElementById('healthProfileSelect');
+    if (mainSelect) {
+        const currentSel = state.selectedHealthProfileId || 'all';
+        mainSelect.innerHTML = `
+            <option value="all">Tất cả thành viên</option>
+            ${(state.familyProfiles || []).map(p => `
+                <option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>
+            `).join('')}
+        `;
+        const exists = (state.familyProfiles || []).some(p => p.id === currentSel) || currentSel === 'all';
+        mainSelect.value = exists ? currentSel : 'all';
+        state.selectedHealthProfileId = mainSelect.value;
+    }
+}
+
+function openHealthProfilesModal() {
+    const modal = document.getElementById('healthProfilesModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    const input = document.getElementById('newProfileNameInput');
+    if (input) input.value = '';
+    renderFamilyProfilesList();
+}
+
+function renderFamilyProfilesList() {
+    const container = document.getElementById('healthProfilesListContainer');
+    if (!container) return;
+
+    const profiles = state.familyProfiles || [{ id: 'p-self', name: 'Bản thân' }];
+    
+    container.innerHTML = profiles.map(p => {
+        const isDefault = p.id === 'p-self';
+        return `
+            <div class="health-profile-item" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm);">
+                <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
+                <div style="display: flex; gap: 4px;">
+                    ${!isDefault ? `
+                        <button type="button" class="profile-action-btn edit" onclick="editFamilyProfile('${p.id}')" title="Sửa tên">
+                            <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function addFamilyProfile() {
+    const input = document.getElementById('newProfileNameInput');
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) return;
+
+    const normalized = name.toLowerCase();
+    const duplicate = (state.familyProfiles || []).some(p => p.name.toLowerCase() === normalized);
+    if (duplicate) {
+        showToast("Thành viên này đã tồn tại!", "warning");
+        return;
+    }
+
+    const newId = 'p-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+    const newProfile = {
+        id: newId,
+        name: name
+    };
+
+    if (!state.familyProfiles) {
+        state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
+    }
+    state.familyProfiles.push(newProfile);
+    state.familyProfilesUpdated = new Date().toISOString();
+
+    await saveLocalState();
+    input.value = '';
+    
+    renderFamilyProfilesList();
+    renderHealthDashboard();
+    showToast(`Đã thêm thành viên "${name}" thành công!`, "success");
+    
+    performSync(true);
+}
+
+async function editFamilyProfile(id) {
+    if (id === 'p-self') return;
+
+    const profile = (state.familyProfiles || []).find(p => p.id === id);
+    if (!profile) return;
+
+    const newName = prompt("Nhập tên mới cho thành viên:", profile.name);
+    if (newName === null) return;
+    
+    const trimmed = newName.trim();
+    if (!trimmed) {
+        showToast("Tên thành viên không được để trống!", "warning");
+        return;
+    }
+
+    const normalized = trimmed.toLowerCase();
+    const duplicate = (state.familyProfiles || []).some(p => p.id !== id && p.name.toLowerCase() === normalized);
+    if (duplicate) {
+        showToast("Tên thành viên này đã tồn tại!", "warning");
+        return;
+    }
+
+    const oldName = profile.name;
+    profile.name = trimmed;
+    state.familyProfilesUpdated = new Date().toISOString();
+
+    await saveLocalState();
+    
+    renderFamilyProfilesList();
+    renderHealthDashboard();
+    showToast(`Đã đổi tên thành viên từ "${oldName}" thành "${trimmed}"!`, "success");
+    
+    performSync(true);
+}
+
+async function deleteFamilyProfile(id) {
+    if (id === 'p-self') {
+        showToast("Không thể xóa thành viên mặc định!", "warning");
+        return;
+    }
+
+    const profile = (state.familyProfiles || []).find(p => p.id === id);
+    if (!profile) return;
+
+    if (!confirm(`Bạn có chắc chắn muốn xóa thành viên "${profile.name}"? Tất cả hồ sơ y tế liên kết với thành viên này cũng sẽ bị xóa.`)) {
+        return;
+    }
+
+    const nowIso = new Date().toISOString();
+    let recordsDeletedCount = 0;
+    (state.medicalRecords || []).forEach(r => {
+        if ((r.profileId || 'p-self') === id) {
+            r.deleted_at = nowIso;
+            r.updated_at = nowIso;
+            recordsDeletedCount++;
+        }
+    });
+
+    if (recordsDeletedCount > 0) {
+        state.medicalRecordsUpdated = nowIso;
+    }
+
+    state.familyProfiles = (state.familyProfiles || []).filter(p => p.id !== id);
+    state.familyProfilesUpdated = nowIso;
+
+    if (state.selectedHealthProfileId === id) {
+        state.selectedHealthProfileId = 'all';
+    }
+
+    await saveLocalState();
+    
+    renderFamilyProfilesList();
+    renderHealthDashboard();
+    showToast(`Đã xóa thành viên "${profile.name}" và ${recordsDeletedCount} hồ sơ liên quan.`, "success");
+    
+    performSync(true);
+}
+
+window.editFamilyProfile = editFamilyProfile;
+window.deleteFamilyProfile = deleteFamilyProfile;
+
 let activeMedicalRecordId = null;
 
 function initHealthBindings() {
+    // Member selector bindings
+    document.getElementById('healthProfileSelect')?.addEventListener('change', (e) => {
+        state.selectedHealthProfileId = e.target.value;
+        renderHealthDashboard();
+    });
+
+    document.getElementById('manageProfilesBtn')?.addEventListener('click', () => {
+        openHealthProfilesModal();
+    });
+
+    document.getElementById('closeHealthProfilesModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthProfilesModal').style.display = 'none';
+    });
+
+    document.getElementById('closeHealthProfilesModalBtn2')?.addEventListener('click', () => {
+        document.getElementById('healthProfilesModal').style.display = 'none';
+    });
+
+    document.getElementById('addProfileForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addFamilyProfile();
+    });
+
     // Save API key button
     document.getElementById('saveGeminiKeyBtn')?.addEventListener('click', async () => {
         const apiKey = document.getElementById('geminiApiKeyInput')?.value.trim() || '';
@@ -4313,12 +4538,25 @@ function renderHealthDashboard() {
         geminiInput.value = state.geminiApiKey;
     }
 
+    // Keep top select dropdown in sync with state profiles
+    updateProfileDropdowns();
+
     const recordsGrid = document.getElementById('healthRecordsGrid');
     if (!recordsGrid) return;
     
-    const activeRecords = (state.medicalRecords || [])
-        .filter(r => !r.deleted_at)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Filter by selected family profile
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    let activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at);
+        
+    if (selectedProfileId !== 'all') {
+        activeRecords = activeRecords.filter(r => {
+            const rProfileId = r.profileId || 'p-self';
+            return rProfileId === selectedProfileId;
+        });
+    }
+        
+    activeRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
         
     if (activeRecords.length === 0) {
         recordsGrid.innerHTML = `
@@ -4365,7 +4603,15 @@ function renderHealthDashboard() {
             <div class="health-record-card" onclick="openHealthDetail('${r.id}')">
                 <div class="health-record-card-header">
                     <div class="health-record-title">${escapeHTML(r.title)}</div>
-                    <span class="badge-relationship" style="background: rgba(15, 118, 110, 0.12); color: var(--health-accent); border: 1px solid rgba(15, 118, 110, 0.25);">${escapeHTML(typeLabel)}</span>
+                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                        ${selectedProfileId === 'all' ? `
+                            <span class="badge-relationship" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25);">
+                                <i data-lucide="user" style="width: 10px; height: 10px; display: inline-block; vertical-align: middle; margin-right: 2px;"></i>
+                                ${escapeHTML(getProfileName(r.profileId))}
+                            </span>
+                        ` : ''}
+                        <span class="badge-relationship" style="background: rgba(15, 118, 110, 0.12); color: var(--health-accent); border: 1px solid rgba(15, 118, 110, 0.25);">${escapeHTML(typeLabel)}</span>
+                    </div>
                 </div>
                 <div class="health-record-meta">
                     <span class="health-record-date">
@@ -4398,9 +4644,18 @@ function getHealthTypeLabel(type) {
 }
 
 function renderHealthTrendsChart() {
-    const activeRecords = (state.medicalRecords || [])
-        .filter(r => !r.deleted_at)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    let activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at);
+        
+    if (selectedProfileId !== 'all') {
+        activeRecords = activeRecords.filter(r => {
+            const rProfileId = r.profileId || 'p-self';
+            return rProfileId === selectedProfileId;
+        });
+    }
+        
+    activeRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
         
     // Find all indicator names
     const indicatorNames = new Set();
@@ -4783,6 +5038,14 @@ function openHealthEditModal(recordId = null, initialData = null) {
     
     if (!editModal || !form) return;
     
+    // Populate profile select options
+    const editProfileSelect = document.getElementById('healthEditProfile');
+    if (editProfileSelect) {
+        editProfileSelect.innerHTML = (state.familyProfiles || []).map(p => `
+            <option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>
+        `).join('');
+    }
+    
     // Clear form fields
     document.getElementById('healthRecordId').value = recordId || '';
     document.getElementById('healthEditTitle').value = '';
@@ -4791,6 +5054,12 @@ function openHealthEditModal(recordId = null, initialData = null) {
     document.getElementById('healthEditFacility').value = '';
     document.getElementById('healthEditNotes').value = '';
     document.getElementById('healthIndicatorsEditRows').innerHTML = '';
+    
+    // Pre-select active family member filter if not 'all'
+    if (editProfileSelect) {
+        const curProfile = state.selectedHealthProfileId || 'all';
+        editProfileSelect.value = curProfile !== 'all' ? curProfile : 'p-self';
+    }
     
     if (recordId) {
         modalTitle.innerText = "Chỉnh sửa Hồ sơ y tế";
@@ -4801,6 +5070,9 @@ function openHealthEditModal(recordId = null, initialData = null) {
             document.getElementById('healthEditDate').value = record.date || new Date().toISOString().split('T')[0];
             document.getElementById('healthEditFacility').value = record.facility || '';
             document.getElementById('healthEditNotes').value = record.notes || '';
+            if (editProfileSelect) {
+                editProfileSelect.value = record.profileId || 'p-self';
+            }
             
             (record.indicators || []).forEach(ind => {
                 addIndicatorEditRow(ind.name, ind.value, ind.unit, ind.refRange, ind.assessment);
@@ -4864,6 +5136,7 @@ async function saveMedicalRecord(event) {
     const recordId = document.getElementById('healthRecordId').value;
     const title = document.getElementById('healthEditTitle').value.trim();
     const type = document.getElementById('healthEditType').value;
+    const profileId = document.getElementById('healthEditProfile').value;
     const date = document.getElementById('healthEditDate').value;
     const facility = document.getElementById('healthEditFacility').value.trim();
     const notes = document.getElementById('healthEditNotes').value.trim();
@@ -4892,6 +5165,7 @@ async function saveMedicalRecord(event) {
                 ...state.medicalRecords[index],
                 title,
                 type,
+                profileId,
                 date,
                 facility,
                 notes,
@@ -4904,6 +5178,7 @@ async function saveMedicalRecord(event) {
             id: 'med-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
             title,
             type,
+            profileId,
             date,
             facility,
             notes,
@@ -4970,6 +5245,12 @@ function openHealthDetail(id) {
     document.getElementById('healthDetailDate').innerText = formatDate(record.date) || '-';
     document.getElementById('healthDetailFacility').innerText = record.facility || '-';
     document.getElementById('healthDetailTypeBadge').innerText = getHealthTypeLabel(record.type);
+    
+    const profileBadge = document.getElementById('healthDetailProfileBadge');
+    if (profileBadge) {
+        profileBadge.innerText = getProfileName(record.profileId);
+    }
+    
     document.getElementById('healthDetailNotes').innerText = record.notes || 'Không có ghi chú.';
     
     const tbody = document.getElementById('healthDetailIndicatorsTableBody');
@@ -4997,13 +5278,23 @@ function openHealthDetail(id) {
 }
 
 function openHealthAiAnalysisModal() {
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    if (selectedProfileId === 'all') {
+        showToast("Vui lòng chọn một thành viên cụ thể (không chọn 'Tất cả') để phân tích sức khỏe bằng AI!", "warning");
+        return;
+    }
+
     const modal = document.getElementById('healthAiAnalysisModal');
     if (!modal) return;
     
     modal.style.display = 'flex';
     
+    // Get the profile object
+    const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+    const lastAiAnalysis = profile ? profile.lastAiAnalysis : state.lastAiAnalysis;
+    
     // If we have cached analysis, render it. Otherwise, run analysis.
-    if (state.lastAiAnalysis) {
+    if (lastAiAnalysis) {
         renderHealthAiReport();
     } else {
         generateHealthAiAnalysis(false);
@@ -5011,22 +5302,28 @@ function openHealthAiAnalysisModal() {
 }
 
 function renderHealthAiReport() {
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+    
+    const lastAiAnalysis = profile ? profile.lastAiAnalysis : state.lastAiAnalysis;
+    const lastAiAnalysisDate = profile ? profile.lastAiAnalysisDate : state.lastAiAnalysisDate;
+    
     const dateEl = document.getElementById('healthAiAnalysisDate');
     const reportContentEl = document.getElementById('healthAiReportContent');
     
-    if (dateEl && state.lastAiAnalysisDate) {
-        const formattedDate = formatDate(state.lastAiAnalysisDate);
-        const formattedTime = new Date(state.lastAiAnalysisDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    if (dateEl && lastAiAnalysisDate) {
+        const formattedDate = formatDate(lastAiAnalysisDate);
+        const formattedTime = new Date(lastAiAnalysisDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         dateEl.innerText = `${formattedDate} lúc ${formattedTime}`;
     } else if (dateEl) {
         dateEl.innerText = 'Chưa phân tích';
     }
     
-    if (reportContentEl && state.lastAiAnalysis) {
+    if (reportContentEl && lastAiAnalysis) {
         if (typeof marked !== 'undefined') {
-            reportContentEl.innerHTML = marked.parse(state.lastAiAnalysis);
+            reportContentEl.innerHTML = marked.parse(lastAiAnalysis);
         } else {
-            reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(state.lastAiAnalysis)}</pre>`;
+            reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(lastAiAnalysis)}</pre>`;
         }
     }
 }
@@ -5038,19 +5335,25 @@ async function generateHealthAiAnalysis(forceFresh = false) {
         return;
     }
     
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    if (selectedProfileId === 'all') {
+        showToast("Vui lòng chọn một thành viên cụ thể để phân tích sức khỏe!", "warning");
+        return;
+    }
+    
     const activeRecords = (state.medicalRecords || [])
-        .filter(r => !r.deleted_at)
+        .filter(r => !r.deleted_at && (r.profileId || 'p-self') === selectedProfileId)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
         
     if (activeRecords.length === 0) {
-        showToast("Không tìm thấy hồ sơ y tế nào để phân tích!", "warning");
+        showToast("Không tìm thấy hồ sơ y tế nào của thành viên này để phân tích!", "warning");
         return;
     }
     
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
     if (overlay) overlay.style.display = 'flex';
-    if (statusText) statusText.innerText = 'AI đang tổng hợp và phân tích lịch sử xét nghiệm của bạn...';
+    if (statusText) statusText.innerText = 'AI đang tổng hợp và phân tích lịch sử xét nghiệm của thành viên...';
     
     try {
         let historyStr = "";
@@ -5073,7 +5376,11 @@ async function generateHealthAiAnalysis(forceFresh = false) {
             historyStr += `\n`;
         });
         
-        const prompt = `Hãy đóng vai trò là một chuyên gia y tế, bác sĩ tư vấn sức khỏe cao cấp. Dưới đây là toàn bộ lịch sử kết quả xét nghiệm y tế của tôi (được sắp xếp theo trình tự thời gian từ cũ nhất đến mới nhất):\n\n${historyStr}\n
+        // Find profile name
+        const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+        const memberName = profile ? profile.name : 'Bản thân';
+        
+        const prompt = `Hãy đóng vai trò là một chuyên gia y tế, bác sĩ tư vấn sức khỏe cao cấp. Dưới đây là toàn bộ lịch sử kết quả xét nghiệm y tế của thành viên "${memberName}" (được sắp xếp theo trình tự thời gian từ cũ nhất đến mới nhất):\n\n${historyStr}\n
 Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó lập một bản báo cáo phân tích sức khỏe tổng quan nâng cao bằng tiếng Việt ở định dạng Markdown (sử dụng tiêu đề h2 và h3 để phân cấp rõ ràng). Báo cáo cần bao gồm các mục chính:
 
 1. **Tổng quan xu hướng phát triển sức khỏe**: Nhận định xem tình trạng sức khỏe tổng thể đang tiến triển tốt lên, ổn định hay có xu hướng xấu đi qua thời gian. Đánh giá sự biến động của các chỉ số xét nghiệm chính (ví dụ: chỉ số đường huyết, men gan, mỡ máu... tăng giảm thế nào qua các lần xét nghiệm).
@@ -5118,10 +5425,21 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
             throw new Error("Không nhận được phản hồi phân tích từ Gemini.");
         }
         
-        // Save to state
-        state.lastAiAnalysis = textResponse;
-        state.lastAiAnalysisDate = new Date().toISOString();
-        state.lastAiAnalysisUpdated = new Date().toISOString();
+        const nowIso = new Date().toISOString();
+        
+        if (profile) {
+            profile.lastAiAnalysis = textResponse;
+            profile.lastAiAnalysisDate = nowIso;
+            profile.lastAiAnalysisUpdated = nowIso;
+            
+            if (selectedProfileId === 'p-self') {
+                state.lastAiAnalysis = textResponse;
+                state.lastAiAnalysisDate = nowIso;
+                state.lastAiAnalysisUpdated = nowIso;
+            }
+        }
+        
+        state.familyProfilesUpdated = nowIso;
         
         await saveLocalState();
         

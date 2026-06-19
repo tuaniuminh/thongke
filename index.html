@@ -28,7 +28,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.3.4</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.3.5</span>
                 </div>
             </div>
             
@@ -474,14 +474,30 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v3.3.4
+                        Phiên bản ứng dụng: v3.3.5
                     </div>
                 </div>
             </section>
 
-            <!-- Health Records Tab -->
             <section class="tab-panel" id="tab-health" style="display: none;">
                 <div class="health-theme-container">
+                    <!-- Member Profile Selector Bar -->
+                    <div class="health-card profile-selector-card" style="padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: -4px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="users" style="color: var(--health-accent); width: 20px; height: 20px;"></i>
+                            <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Hồ sơ của:</span>
+                            <div class="health-chart-select-wrapper">
+                                <select id="healthProfileSelect" class="form-control health-input health-select-sm" style="min-width: 150px; max-width: 200px;">
+                                    <option value="all">Tất cả thành viên</option>
+                                    <option value="p-self">Bản thân</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" id="manageProfilesBtn" class="health-btn health-btn-secondary health-select-sm" style="padding: 6px 12px; font-size: 0.78rem;">
+                            <i data-lucide="settings" style="width: 14px; height: 14px;"></i> Quản lý thành viên
+                        </button>
+                    </div>
+
                     <!-- Top section: Gemini API settings & Scanner -->
                     <div class="health-header-row">
                         <!-- Gemini API Settings -->
@@ -587,7 +603,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.4</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.5</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -638,7 +654,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.4</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.5</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -689,7 +705,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.4</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.5</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -1061,9 +1077,15 @@
                             <span id="healthDetailFacility" class="info-value">-</span>
                         </div>
                     </div>
-                    <div style="margin-top: 12px;">
-                        <span class="info-label">Phân loại:</span>
-                        <span id="healthDetailTypeBadge" class="badge-relationship">-</span>
+                    <div style="margin-top: 12px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <span class="info-label" style="display: inline-block; margin-bottom: 2px;">Phân loại:</span>
+                            <span id="healthDetailTypeBadge" class="badge-relationship">-</span>
+                        </div>
+                        <div>
+                            <span class="info-label" style="display: inline-block; margin-bottom: 2px;">Thành viên:</span>
+                            <span id="healthDetailProfileBadge" class="badge-relationship" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25);">-</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1116,7 +1138,7 @@
             <form id="healthEditForm">
                 <input type="hidden" id="healthRecordId">
                 <div class="health-modal-body">
-                    <div class="health-form-grid">
+                    <div class="health-form-grid" style="grid-template-columns: 1.5fr 1fr 1fr;">
                         <div class="form-group">
                             <label class="form-label health-form-label" for="healthEditTitle">Tên hồ sơ / Tên xét nghiệm</label>
                             <input type="text" id="healthEditTitle" class="form-control health-input" required placeholder="Ví dụ: Xét nghiệm máu tổng quát">
@@ -1128,6 +1150,12 @@
                                 <option value="urine_test">Xét nghiệm nước tiểu</option>
                                 <option value="ultrasound">Siêu âm</option>
                                 <option value="other">Loại khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditProfile">Thành viên</label>
+                            <select id="healthEditProfile" class="form-control health-input" required>
+                                <option value="p-self">Bản thân</option>
                             </select>
                         </div>
                     </div>
@@ -1175,6 +1203,42 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Manage Family Profiles Modal -->
+    <div class="modal-overlay health-theme-overlay" id="healthProfilesModal" style="display: none;">
+        <div class="modal-container health-modal-container" style="width: 500px; max-width: 95%;">
+            <div class="modal-header health-modal-header">
+                <h3 class="health-modal-title">
+                    <i data-lucide="users"></i>
+                    <span>Quản lý Thành viên Gia đình</span>
+                </h3>
+                <button type="button" class="close-btn" id="closeHealthProfilesModalBtn">&times;</button>
+            </div>
+            <div class="health-modal-body" style="display: flex; flex-direction: column; overflow: hidden; flex: 1;">
+                <!-- Add new profile form -->
+                <form id="addProfileForm" style="display: flex; gap: 8px; margin-bottom: 20px; align-items: flex-end; flex: none;">
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label class="form-label health-form-label" for="newProfileNameInput">Tên thành viên mới</label>
+                        <input type="text" id="newProfileNameInput" class="form-control health-input" placeholder="Ví dụ: Bố, Mẹ, Con gái..." required>
+                    </div>
+                    <button type="submit" class="health-btn health-btn-primary" style="padding: 10px 16px;">
+                        <i data-lucide="plus"></i> Thêm
+                    </button>
+                </form>
+
+                <h5 class="section-title-sm" style="margin-bottom: 10px; flex-shrink: 0;">Danh sách thành viên</h5>
+                <div class="health-profiles-list" id="healthProfilesListContainer" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; flex: 1; padding-right: 4px;">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div class="health-modal-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; flex-shrink: 0;">
+                    <button type="button" id="closeHealthProfilesModalBtn2" class="health-btn health-btn-outline" style="min-width: 120px;">
+                        Đóng lại
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
