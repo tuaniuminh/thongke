@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thu Chi Đối Ngoại</title>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.1.2">
+    <link rel="stylesheet" href="style.css?v=3.2.0">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -26,7 +26,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.1.2</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.2.0</span>
                 </div>
             </div>
             
@@ -53,6 +53,12 @@
                     <a class="nav-link" data-tab="settings">
                         <i data-lucide="settings"></i>
                         <span>Cài đặt & Đồng bộ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-tab="health">
+                        <i data-lucide="heart-pulse"></i>
+                        <span>Hồ sơ y tế</span>
                     </a>
                 </li>
             </nav>
@@ -466,7 +472,87 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v3.1.2
+                        Phiên bản ứng dụng: v3.2.0
+                    </div>
+                </div>
+            </section>
+
+            <!-- Health Records Tab -->
+            <section class="tab-panel" id="tab-health" style="display: none;">
+                <div class="health-theme-container">
+                    <!-- Top section: Gemini API settings & Scanner -->
+                    <div class="health-header-row">
+                        <!-- Gemini API Settings -->
+                        <div class="health-card api-config-card">
+                            <h4 class="health-card-title">
+                                <i data-lucide="key-round"></i>
+                                <span>Cấu hình Gemini AI</span>
+                            </h4>
+                            <p class="health-card-desc">
+                                Nhập khóa API Key của Google Gemini để sử dụng tính năng quét ảnh y tế tự động.
+                            </p>
+                            <div class="api-input-group">
+                                <input type="password" id="geminiApiKeyInput" class="form-control health-input" placeholder="Dán Gemini API Key tại đây...">
+                                <button type="button" id="saveGeminiKeyBtn" class="health-btn health-btn-primary">Lưu khóa</button>
+                            </div>
+                            <div class="api-help-links">
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">
+                                    <i data-lucide="external-link"></i> Lấy API Key miễn phí từ Google AI Studio
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Image Scanner Dropzone -->
+                        <div class="health-card scanner-card">
+                            <h4 class="health-card-title">
+                                <i data-lucide="scan-line"></i>
+                                <span>Quét kết quả xét nghiệm bằng AI</span>
+                            </h4>
+                            <p class="health-card-desc">
+                                Kéo thả ảnh kết quả xét nghiệm hoặc bấm vào đây để quét tự động chỉ số sức khỏe.
+                            </p>
+                            <div class="health-dropzone" id="healthScannerDropzone">
+                                <i data-lucide="image" class="dropzone-icon"></i>
+                                <span class="dropzone-text">Chọn hoặc kéo thả ảnh xét nghiệm y tế (.png, .jpg)</span>
+                                <input type="file" id="healthFileInput" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle Section: Trends Chart -->
+                    <div class="health-card chart-card" id="healthChartCard" style="display: none; margin-top: 20px;">
+                        <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="trending-up"></i>
+                                <span>Biểu đồ xu hướng chỉ số sức khỏe</span>
+                            </div>
+                            <div class="health-chart-select-wrapper">
+                                <select id="healthChartIndicatorSelect" class="form-control health-input health-select-sm">
+                                    <!-- Options populated dynamically -->
+                                </select>
+                            </div>
+                        </h4>
+                        <div class="health-chart-container">
+                            <canvas id="healthTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Section: Records History -->
+                    <div class="health-card list-card" style="margin-top: 20px;">
+                        <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="clipboard-list"></i>
+                                <span>Lịch sử hồ sơ y tế</span>
+                            </div>
+                            <button type="button" id="addNewRecordBtn" class="health-btn health-btn-secondary">
+                                <i data-lucide="plus"></i>
+                                <span>Thêm hồ sơ thủ công</span>
+                            </button>
+                        </h4>
+                        
+                        <div class="health-records-grid" id="healthRecordsGrid">
+                            <!-- Populated dynamically -->
+                        </div>
                     </div>
                 </div>
             </section>
@@ -482,7 +568,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.1.2</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.2.0</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -533,7 +619,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.1.2</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.2.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -584,7 +670,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.1.2</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.2.0</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -930,10 +1016,162 @@
         </div>
     </div>
 
+    <!-- Health Record Detail Modal -->
+    <div class="modal-overlay health-theme-overlay" id="healthDetailModal" style="display: none;">
+        <div class="modal-container health-modal-container" style="width: 700px; max-width: 95%;">
+            <div class="modal-header health-modal-header">
+                <h3 class="health-modal-title">
+                    <i data-lucide="heart-pulse"></i>
+                    <span>Chi tiết Hồ sơ y tế</span>
+                </h3>
+                <button type="button" class="close-btn" id="closeHealthDetailModalBtn">&times;</button>
+            </div>
+            <div class="health-modal-body">
+                <div class="health-detail-info-row">
+                    <div>
+                        <span class="info-label">Tên hồ sơ:</span>
+                        <h4 id="healthDetailTitle" class="info-value-title">-</h4>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
+                        <div>
+                            <span class="info-label">Ngày khám:</span>
+                            <span id="healthDetailDate" class="info-value">-</span>
+                        </div>
+                        <div>
+                            <span class="info-label">Nơi khám:</span>
+                            <span id="healthDetailFacility" class="info-value">-</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <span class="info-label">Phân loại:</span>
+                        <span id="healthDetailTypeBadge" class="badge-relationship">-</span>
+                    </div>
+                </div>
+
+                <div class="health-detail-indicators-section" style="margin-top: 20px;">
+                    <h5 class="section-title-sm">Kết quả xét nghiệm & Chỉ số</h5>
+                    <div class="table-responsive health-table-wrapper" style="margin-top: 8px;">
+                        <table class="data-table health-table">
+                            <thead>
+                                <tr>
+                                    <th>Tên chỉ số</th>
+                                    <th style="text-align: center;">Trị số</th>
+                                    <th>Đơn vị</th>
+                                    <th>Ngưỡng tham chiếu</th>
+                                    <th style="text-align: center;">Đánh giá</th>
+                                </tr>
+                            </thead>
+                            <tbody id="healthDetailIndicatorsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="health-detail-notes-section" style="margin-top: 20px;">
+                    <span class="info-label">Kết luận của bác sĩ / Ghi chú:</span>
+                    <p id="healthDetailNotes" class="health-notes-display">-</p>
+                </div>
+
+                <div class="health-modal-actions" style="margin-top: 24px; display: flex; gap: 12px;">
+                    <button type="button" id="editHealthRecordBtn" class="health-btn health-btn-primary" style="flex: 1;">
+                        <i data-lucide="edit"></i> Chỉnh sửa
+                    </button>
+                    <button type="button" id="deleteHealthRecordBtn" class="health-btn health-btn-danger" style="flex: 1;">
+                        <i data-lucide="trash-2"></i> Xóa hồ sơ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Record Edit / Confirm Scanner Modal -->
+    <div class="modal-overlay health-theme-overlay" id="healthEditModal" style="display: none;">
+        <div class="modal-container health-modal-container" style="width: 750px; max-width: 95%;">
+            <div class="modal-header health-modal-header">
+                <h3 class="health-modal-title">
+                    <i data-lucide="edit-3"></i>
+                    <span id="healthEditModalTitle">Thêm / Chỉnh sửa Hồ sơ y tế</span>
+                </h3>
+                <button type="button" class="close-btn" id="closeHealthEditModalBtn">&times;</button>
+            </div>
+            <form id="healthEditForm">
+                <input type="hidden" id="healthRecordId">
+                <div class="health-modal-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditTitle">Tên hồ sơ / Tên xét nghiệm</label>
+                            <input type="text" id="healthEditTitle" class="form-control health-input" required placeholder="Ví dụ: Xét nghiệm máu tổng quát">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditType">Phân loại xét nghiệm</label>
+                            <select id="healthEditType" class="form-control health-input" required>
+                                <option value="blood_test">Xét nghiệm máu</option>
+                                <option value="urine_test">Xét nghiệm nước tiểu</option>
+                                <option value="ultrasound">Siêu âm</option>
+                                <option value="other">Loại khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditDate">Ngày xét nghiệm / Khám</label>
+                            <input type="date" id="healthEditDate" class="form-control health-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditFacility">Bệnh viện / Phòng khám</label>
+                            <input type="text" id="healthEditFacility" class="form-control health-input" placeholder="Ví dụ: Bệnh viện Bạch Mai">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Indicators List -->
+                    <div class="health-edit-indicators-container" style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <label class="form-label health-form-label" style="font-weight: 600; margin: 0;">Danh sách chỉ số sức khỏe</label>
+                            <button type="button" id="addIndicatorRowBtn" class="health-btn health-btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">
+                                <i data-lucide="plus"></i> Thêm hàng
+                            </button>
+                        </div>
+                        <div class="health-indicators-edit-header" style="display: grid; grid-template-columns: 2.5fr 1.5fr 1fr 2fr 0.5fr; gap: 8px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; padding-right: 4px;">
+                            <span>Tên chỉ số (Ví dụ: Glucose)</span>
+                            <span>Trị số (Ví dụ: 5.4)</span>
+                            <span>Đơn vị (mmol/L)</span>
+                            <span>Ngưỡng tham chiếu (3.9 - 6.1)</span>
+                            <span></span>
+                        </div>
+                        <div id="healthIndicatorsEditRows" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label health-form-label" for="healthEditNotes">Kết luận của bác sĩ / Ghi chú chung</label>
+                        <textarea id="healthEditNotes" class="form-control health-input" style="height: 60px; min-height: 60px;" placeholder="Nhập chẩn đoán hoặc lời khuyên của bác sĩ..."></textarea>
+                    </div>
+
+                    <div class="health-modal-actions" style="margin-top: 24px; display: flex; gap: 12px;">
+                        <button type="button" id="cancelHealthEditBtn" class="health-btn health-btn-outline" style="flex: 1;">Hủy bỏ</button>
+                        <button type="submit" class="health-btn health-btn-primary" style="flex: 1;">
+                            <i data-lucide="save"></i> Lưu hồ sơ
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Health Scanner Loading Overlay -->
+    <div class="modal-overlay health-theme-overlay" id="healthScannerLoadingOverlay" style="display: none; z-index: 9999;">
+        <div style="text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <div class="health-spinner"></div>
+            <p id="healthScannerStatusText" style="margin-top: 16px; font-weight: 500; font-size: 1.05rem;">Đang xử lý ảnh y tế...</p>
+        </div>
+    </div>
+
     <!-- Toast container for notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.1.2"></script>
+    <script type="module" src="app.js?v=3.2.0"></script>
 </body>
 </html>

@@ -40,6 +40,10 @@ let state = {
     masterPassword: '',
     receivedGifts: [],
     sentGifts: [],
+    medicalRecords: [],
+    medicalRecordsUpdated: '',
+    geminiApiKey: '',
+    geminiApiKeyUpdated: '',
     lastResetTime: '',
     showImportNotesOption: false,
     showImportNotesOptionUpdated: '',
@@ -70,6 +74,7 @@ let state = {
 // Chart.js instances
 let relationshipChart = null;
 let eventTypeChart = null;
+let healthTrendChartInstance = null;
 
 // PIN Code state buffers
 let wizardPinBuffer = "";
@@ -154,6 +159,10 @@ async function saveLocalState() {
     const payload = JSON.stringify({
         receivedGifts: state.receivedGifts,
         sentGifts: state.sentGifts,
+        medicalRecords: state.medicalRecords || [],
+        medicalRecordsUpdated: state.medicalRecordsUpdated || '',
+        geminiApiKey: state.geminiApiKey || '',
+        geminiApiKeyUpdated: state.geminiApiKeyUpdated || '',
         lastResetTime: state.lastResetTime || '',
         showImportNotesOption: !!state.showImportNotesOption,
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -176,6 +185,10 @@ async function loadLocalState(password) {
     if (!encrypted) {
         state.receivedGifts = [];
         state.sentGifts = [];
+        state.medicalRecords = [];
+        state.medicalRecordsUpdated = '';
+        state.geminiApiKey = '';
+        state.geminiApiKeyUpdated = '';
         state.lastResetTime = '';
         state.showImportNotesOption = false;
         state.showImportNotesOptionUpdated = '';
@@ -189,6 +202,10 @@ async function loadLocalState(password) {
         const data = JSON.parse(decrypted);
         state.receivedGifts = data.receivedGifts || [];
         state.sentGifts = data.sentGifts || [];
+        state.medicalRecords = data.medicalRecords || [];
+        state.medicalRecordsUpdated = data.medicalRecordsUpdated || '';
+        state.geminiApiKey = data.geminiApiKey || '';
+        state.geminiApiKeyUpdated = data.geminiApiKeyUpdated || '';
         state.lastResetTime = data.lastResetTime || '';
         state.showImportNotesOption = !!data.showImportNotesOption;
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
@@ -248,6 +265,7 @@ async function performSync(silent = false) {
         
         let mergedReceived = [...state.receivedGifts];
         let mergedSent = [...state.sentGifts];
+        let mergedMedical = [...(state.medicalRecords || [])];
         let localReset = state.lastResetTime || '';
         
         if (remoteRecord && remoteRecord.encrypted_data) {
@@ -259,6 +277,7 @@ async function performSync(silent = false) {
                 const remoteReset = remoteData.lastResetTime || '';
                 let remoteReceived = remoteData.receivedGifts || [];
                 let remoteSent = remoteData.sentGifts || [];
+                let remoteMedical = remoteData.medicalRecords || [];
                 
                 // Compare reset times
                 const localResetTime = localReset ? new Date(localReset).getTime() : 0;
@@ -268,16 +287,24 @@ async function performSync(silent = false) {
                     // Remote has a newer reset/overwrite. Discard local data.
                     state.receivedGifts = [];
                     state.sentGifts = [];
+                    state.medicalRecords = [];
                     state.lastResetTime = remoteReset;
                     localReset = remoteReset;
                     state.showImportNotesOption = !!remoteData.showImportNotesOption;
                     state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
                     state.customEventTypes = remoteData.customEventTypes || [];
                     state.customEventTypesUpdated = remoteData.customEventTypesUpdated || '';
+                    state.medicalRecordsUpdated = remoteData.medicalRecordsUpdated || '';
+                    state.geminiApiKey = remoteData.geminiApiKey || '';
+                    state.geminiApiKeyUpdated = remoteData.geminiApiKeyUpdated || '';
+                    remoteReceived = remoteData.receivedGifts || [];
+                    remoteSent = remoteData.sentGifts || [];
+                    remoteMedical = remoteData.medicalRecords || [];
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
                     remoteSent = [];
+                    remoteMedical = [];
                 } else {
                     // Merge showImportNotesOption using LWW (Last Write Wins)
                     const localOptTime = state.showImportNotesOptionUpdated ? new Date(state.showImportNotesOptionUpdated).getTime() : 0;
@@ -296,11 +323,20 @@ async function performSync(silent = false) {
                         state.customEventTypes = remoteData.customEventTypes || [];
                         state.customEventTypesUpdated = remoteData.customEventTypesUpdated || '';
                     }
+
+                    // Merge geminiApiKey using LWW
+                    const localKeyTime = state.geminiApiKeyUpdated ? new Date(state.geminiApiKeyUpdated).getTime() : 0;
+                    const remoteKeyTime = remoteData.geminiApiKeyUpdated ? new Date(remoteData.geminiApiKeyUpdated).getTime() : 0;
+                    if (remoteKeyTime > localKeyTime) {
+                        state.geminiApiKey = remoteData.geminiApiKey || '';
+                        state.geminiApiKeyUpdated = remoteData.geminiApiKeyUpdated || '';
+                    }
                 }
                 
-                // 3. Merge
+                // 3. Merge lists
                 mergedReceived = mergeLists(state.receivedGifts, remoteReceived);
                 mergedSent = mergeLists(state.sentGifts, remoteSent);
+                mergedMedical = mergeLists(state.medicalRecords || [], remoteMedical);
             } catch (decErr) {
                 console.error("Remote decryption failed:", decErr);
                 throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
@@ -310,6 +346,7 @@ async function performSync(silent = false) {
         // 4. Update local state
         state.receivedGifts = mergedReceived;
         state.sentGifts = mergedSent;
+        state.medicalRecords = mergedMedical;
         state.lastResetTime = localReset;
         await saveLocalState();
         
@@ -317,6 +354,10 @@ async function performSync(silent = false) {
         const payload = JSON.stringify({
             receivedGifts: state.receivedGifts,
             sentGifts: state.sentGifts,
+            medicalRecords: state.medicalRecords || [],
+            medicalRecordsUpdated: state.medicalRecordsUpdated || '',
+            geminiApiKey: state.geminiApiKey || '',
+            geminiApiKeyUpdated: state.geminiApiKeyUpdated || '',
             lastResetTime: state.lastResetTime || '',
             showImportNotesOption: !!state.showImportNotesOption,
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -373,6 +414,7 @@ function renderAll() {
     renderReceivedTable();
     renderSentTable();
     renderSettings();
+    renderHealthDashboard();
     updateThemeUI();
     updateImportNotesOptionUI();
     handleHashRoute();
@@ -674,14 +716,17 @@ const tabHashMapping = {
     'toimungcuoi': 'sent',
     'sent': 'sent',
     'caidat': 'settings',
-    'settings': 'settings'
+    'settings': 'settings',
+    'hosoyte': 'health',
+    'health': 'health'
 };
 
 const tabIdToHash = {
     'dashboard': 'tongquan',
     'received': 'tientoinhan',
     'sent': 'tientoimung',
-    'settings': 'caidat'
+    'settings': 'caidat',
+    'health': 'hosoyte'
 };
 
 function handleHashRoute() {
@@ -744,6 +789,10 @@ function switchTab(tabId, updateHash = true) {
         title.innerText = 'Cài đặt';
         subtitle.innerText = 'Cấu hình bảo mật, đồng bộ dữ liệu và sao lưu';
         renderSettings();
+    } else if (tabId === 'health') {
+        title.innerText = 'Hồ sơ y tế';
+        subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
+        renderHealthDashboard();
     }
     
     if (updateHash) {
@@ -1421,6 +1470,20 @@ window.undoDelete = async function(event) {
             renderSentTable();
             renderDashboard();
             showToast("Đã hoàn tác xóa ghi chép!");
+            performSync(true);
+        }
+    } else if (type === 'medical') {
+        const index = state.medicalRecords.findIndex(r => r.id === id);
+        if (index !== -1) {
+            state.medicalRecords[index] = {
+                ...originalRecord,
+                deleted_at: null,
+                updated_at: new Date().toISOString()
+            };
+            state.medicalRecordsUpdated = new Date().toISOString();
+            await saveLocalState();
+            renderHealthDashboard();
+            showToast("Đã hoàn tác xóa hồ sơ y tế!");
             performSync(true);
         }
     }
@@ -3741,6 +3804,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 state.sentGifts = [];
                 state.customEventTypes = [];
                 state.customEventTypesUpdated = new Date().toISOString();
+                state.medicalRecords = [];
+                state.medicalRecordsUpdated = new Date().toISOString();
+                state.geminiApiKey = '';
+                state.geminiApiKeyUpdated = new Date().toISOString();
                 state.lastResetTime = new Date().toISOString();
                 
                 await saveLocalState();
@@ -3796,6 +3863,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+
+    // Initialize Health/Medical Bindings
+    initHealthBindings();
 
     // Initialize Lucide Icons
     lucide.createIcons();
@@ -4060,5 +4130,692 @@ function renderDashboardSyncBanner() {
     }
     
     lucide.createIcons();
+}
+
+// ==========================================================================
+// HEALTH TAB (HỒ SƠ Y TẾ) LOGIC
+// ==========================================================================
+
+let activeMedicalRecordId = null;
+
+function initHealthBindings() {
+    // Save API key button
+    document.getElementById('saveGeminiKeyBtn')?.addEventListener('click', async () => {
+        const apiKey = document.getElementById('geminiApiKeyInput')?.value.trim() || '';
+        state.geminiApiKey = apiKey;
+        state.geminiApiKeyUpdated = new Date().toISOString();
+        await saveLocalState();
+        showToast("Đã lưu khóa API Gemini thành công!", "success");
+        performSync(true);
+    });
+
+    // Scanner dropzone & file input
+    const dropzone = document.getElementById('healthScannerDropzone');
+    const fileInput = document.getElementById('healthFileInput');
+    if (dropzone && fileInput) {
+        dropzone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                await handleHealthFile(e.target.files[0]);
+            }
+        });
+        
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        
+        dropzone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                await handleHealthFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    // Modal buttons
+    document.getElementById('addNewRecordBtn')?.addEventListener('click', () => {
+        openHealthEditModal();
+    });
+
+    document.getElementById('addIndicatorRowBtn')?.addEventListener('click', () => {
+        addIndicatorEditRow();
+    });
+
+    document.getElementById('healthEditForm')?.addEventListener('submit', (e) => {
+        saveMedicalRecord(e);
+    });
+
+    document.getElementById('editHealthRecordBtn')?.addEventListener('click', () => {
+        document.getElementById('healthDetailModal').style.display = 'none';
+        openHealthEditModal(activeMedicalRecordId);
+    });
+
+    document.getElementById('deleteHealthRecordBtn')?.addEventListener('click', () => {
+        deleteMedicalRecord(activeMedicalRecordId);
+    });
+
+    document.getElementById('closeHealthDetailModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthDetailModal').style.display = 'none';
+    });
+
+    document.getElementById('closeHealthEditModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthEditModal').style.display = 'none';
+    });
+
+    document.getElementById('cancelHealthEditBtn')?.addEventListener('click', () => {
+        document.getElementById('healthEditModal').style.display = 'none';
+    });
+
+    document.getElementById('healthChartIndicatorSelect')?.addEventListener('change', (e) => {
+        const activeRecords = (state.medicalRecords || [])
+            .filter(r => !r.deleted_at)
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        drawTrendChart(e.target.value, activeRecords);
+    });
+}
+
+// Expose health details and removal row functions globally
+window.openHealthDetail = openHealthDetail;
+window.addIndicatorEditRow = addIndicatorEditRow;
+
+function renderHealthDashboard() {
+    // Auto populate Gemini Input if not done
+    const geminiInput = document.getElementById('geminiApiKeyInput');
+    if (geminiInput && !geminiInput.value && state.geminiApiKey) {
+        geminiInput.value = state.geminiApiKey;
+    }
+
+    const recordsGrid = document.getElementById('healthRecordsGrid');
+    if (!recordsGrid) return;
+    
+    const activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+    if (activeRecords.length === 0) {
+        recordsGrid.innerHTML = `
+            <div class="health-empty-state">
+                <i data-lucide="folder-heart"></i>
+                <h5 style="margin-top: 10px; font-weight: 600;">Chưa có hồ sơ y tế nào</h5>
+                <p style="margin-top: 6px; font-size: 0.85rem;">Cấu hình Gemini API Key rồi kéo thả ảnh kết quả xét nghiệm để quét tự động, hoặc nhấp vào "Thêm hồ sơ thủ công" để bắt đầu theo dõi sức khỏe.</p>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        // Hide chart card if empty
+        const chartCard = document.getElementById('healthChartCard');
+        if (chartCard) chartCard.style.display = 'none';
+        return;
+    }
+    
+    recordsGrid.innerHTML = activeRecords.map(r => {
+        const typeLabel = getHealthTypeLabel(r.type);
+        const dateStr = formatDate(r.date);
+        
+        // Extract preview indicators (max 3)
+        const previewIndicators = (r.indicators || []).slice(0, 3);
+        const previewHtml = previewIndicators.length > 0 
+            ? `<div class="health-record-indicators-preview">
+                ${previewIndicators.map(ind => {
+                    const badgeClass = ind.assessment === 'high' ? 'badge-health-high' : (ind.assessment === 'low' ? 'badge-health-low' : 'badge-health-normal');
+                    const badgeText = ind.assessment === 'high' ? 'Cao' : (ind.assessment === 'low' ? 'Thấp' : 'Bình thường');
+                    return `
+                        <div class="health-record-indicator-row">
+                            <span class="indicator-preview-name">${escapeHTML(ind.name)}</span>
+                            <span class="indicator-preview-val">
+                                ${escapeHTML(ind.value)} <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 2px;">${escapeHTML(ind.unit)}</span>
+                                <span class="${badgeClass}">${badgeText}</span>
+                            </span>
+                        </div>
+                    `;
+                }).join('')}
+                ${r.indicators.length > 3 ? `<div style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">và ${r.indicators.length - 3} chỉ số khác...</div>` : ''}
+               </div>`
+            : '';
+            
+        return `
+            <div class="health-record-card" onclick="openHealthDetail('${r.id}')">
+                <div class="health-record-card-header">
+                    <div class="health-record-title">${escapeHTML(r.title)}</div>
+                    <span class="badge-relationship" style="background: rgba(15, 118, 110, 0.12); color: var(--health-accent); border: 1px solid rgba(15, 118, 110, 0.25);">${escapeHTML(typeLabel)}</span>
+                </div>
+                <div class="health-record-meta">
+                    <span class="health-record-date">
+                        <i data-lucide="calendar"></i> ${escapeHTML(dateStr)}
+                    </span>
+                    ${r.facility ? `
+                    <span class="health-record-facility">
+                        <i data-lucide="hospital"></i> ${escapeHTML(r.facility)}
+                    </span>` : ''}
+                </div>
+                ${previewHtml}
+            </div>
+        `;
+    }).join('');
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    
+    // Draw trend charts
+    renderHealthTrendsChart();
+}
+
+function getHealthTypeLabel(type) {
+    switch (type) {
+        case 'blood_test': return 'Xét nghiệm máu';
+        case 'urine_test': return 'Xét nghiệm nước tiểu';
+        case 'ultrasound': return 'Siêu âm';
+        case 'other':
+        default: return 'Khác';
+    }
+}
+
+function renderHealthTrendsChart() {
+    const activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+    // Find all indicator names
+    const indicatorNames = new Set();
+    activeRecords.forEach(r => {
+        (r.indicators || []).forEach(ind => {
+            if (ind.name && ind.name.trim()) {
+                indicatorNames.add(ind.name.trim());
+            }
+        });
+    });
+    
+    const chartCard = document.getElementById('healthChartCard');
+    const selectEl = document.getElementById('healthChartIndicatorSelect');
+    
+    if (indicatorNames.size === 0 || !chartCard || !selectEl) {
+        if (chartCard) chartCard.style.display = 'none';
+        return;
+    }
+    
+    chartCard.style.display = 'block';
+    
+    // Save current selected value
+    const currentSelected = selectEl.value;
+    
+    // Populate select
+    selectEl.innerHTML = Array.from(indicatorNames).map(name => `
+        <option value="${escapeHTML(name)}">${escapeHTML(name)}</option>
+    `).join('');
+    
+    // Restore or default selection
+    if (Array.from(indicatorNames).includes(currentSelected)) {
+        selectEl.value = currentSelected;
+    } else {
+        selectEl.value = Array.from(indicatorNames)[0];
+    }
+    
+    drawTrendChart(selectEl.value, activeRecords);
+}
+
+function drawTrendChart(indicatorName, activeRecords) {
+    const ctx = document.getElementById('healthTrendChart')?.getContext('2d');
+    if (!ctx) return;
+    
+    if (healthTrendChartInstance) {
+        healthTrendChartInstance.destroy();
+    }
+    
+    const points = [];
+    activeRecords.forEach(r => {
+        const ind = (r.indicators || []).find(i => i.name.trim() === indicatorName);
+        if (ind) {
+            const cleanVal = ind.value.toString().replace(/[^0-9.,]/g, '').replace(',', '.');
+            const numVal = parseFloat(cleanVal);
+            if (!isNaN(numVal)) {
+                points.push({
+                    date: r.date,
+                    label: formatDate(r.date),
+                    value: numVal,
+                    unit: ind.unit || '',
+                    title: r.title
+                });
+            }
+        }
+    });
+    
+    if (points.length === 0) {
+        return;
+    }
+    
+    // Sort points chronologically
+    points.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    const labels = points.map(p => p.label);
+    const data = points.map(p => p.value);
+    const unit = points[0]?.unit || '';
+    
+    const gridColor = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+    const textColor = state.theme === 'dark' ? '#94a3b8' : '#4b5563';
+    
+    healthTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `${indicatorName} (${unit})`,
+                data: data,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 1.5,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                tension: 0.15,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: textColor,
+                        font: {
+                            family: 'Be Vietnam Pro',
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const idx = context[0].dataIndex;
+                            return `${points[idx].title} (${points[idx].date})`;
+                        },
+                        label: function(context) {
+                            return ` Trị số: ${context.parsed.y} ${unit}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            family: 'Be Vietnam Pro',
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            family: 'Be Vietnam Pro',
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = error => reject(error);
+    });
+}
+
+async function handleHealthFile(file) {
+    if (!state.geminiApiKey) {
+        showToast("Vui lòng cấu hình Gemini API Key trước khi quét!", "warning");
+        return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+        showToast("Chỉ hỗ trợ quét file ảnh xét nghiệm (.png, .jpg, .jpeg)!", "error");
+        return;
+    }
+    
+    const overlay = document.getElementById('healthScannerLoadingOverlay');
+    const statusText = document.getElementById('healthScannerStatusText');
+    if (overlay) overlay.style.display = 'flex';
+    if (statusText) statusText.innerText = 'Đang đọc file ảnh xét nghiệm...';
+    
+    try {
+        const base64Data = await fileToBase64(file);
+        if (statusText) statusText.innerText = 'Đang phân tích chỉ số xét nghiệm bằng Gemini AI...';
+        
+        const responseJson = await callGeminiAPI(base64Data, file.type);
+        
+        if (overlay) overlay.style.display = 'none';
+        
+        // Open edit modal with results
+        openHealthEditModal(null, responseJson);
+    } catch (err) {
+        console.error("Gemini scanning error:", err);
+        if (overlay) overlay.style.display = 'none';
+        showToast("Quét ảnh thất bại: " + err.message, "error");
+    } finally {
+        const fileInput = document.getElementById('healthFileInput');
+        if (fileInput) fileInput.value = '';
+    }
+}
+
+async function callGeminiAPI(base64Data, mimeType) {
+    const apiKey = state.geminiApiKey;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const promptText = `Hãy đóng vai trò là một chuyên gia y tế và kỹ thuật viên xét nghiệm. Hãy phân tích hình ảnh kết quả xét nghiệm y khoa được cung cấp và trích xuất thông tin sang định dạng JSON chính xác.
+
+Yêu cầu cấu trúc dữ liệu JSON đầu ra:
+{
+  "title": "Tên xét nghiệm hoặc tiêu đề hồ sơ (ví dụ: Xét nghiệm máu tổng quát, Siêu âm ổ bụng)",
+  "type": "Phân loại xét nghiệm, chỉ chọn một trong các giá trị sau: 'blood_test' (nếu là xét nghiệm máu), 'urine_test' (nếu là xét nghiệm nước tiểu), 'ultrasound' (nếu là siêu âm), 'other' (nếu là loại khác)",
+  "facility": "Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện xét nghiệm. Nếu không tìm thấy, để trống",
+  "date": "Ngày xét nghiệm/khám theo định dạng YYYY-MM-DD. Nếu không tìm thấy, hãy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}",
+  "indicators": [
+    {
+      "name": "Tên chỉ số xét nghiệm (ví dụ: Glucose, Cholesterol, SGOT, SGPT, Bạch cầu, Hồng cầu...)",
+      "value": "Trị số đo được (ví dụ: 5.4, 120, có thể là số hoặc chuỗi ngắn như Dương tính/Âm tính)",
+      "unit": "Đơn vị đo (ví dụ: mmol/L, g/L, UI/L, u/l... nếu không có đơn vị thì để trống)",
+      "refRange": "Khoảng tham chiếu hoặc ngưỡng bình thường (ví dụ: 3.9 - 6.1, < 5.2, Âm tính...)",
+      "assessment": "Đánh giá trị số so với ngưỡng tham chiếu, chỉ được chọn một trong các giá trị sau: 'high' (nếu cao hơn ngưỡng), 'low' (nếu thấp hơn ngưỡng), 'normal' (nếu nằm trong khoảng bình thường hoặc bình thường)"
+    }
+  ],
+  "notes": "Tóm tắt ngắn gọn nhận xét chung, kết luận của bác sĩ hoặc lời khuyên sức khỏe dựa trên các chỉ số bất thường (nếu có)"
+}
+
+Lưu ý quan trọng:
+1. Hãy tìm kiếm và trích xuất tất cả các chỉ số xét nghiệm có trong ảnh.
+2. Đảm bảo trị số ('value') và đơn vị ('unit') khớp với hình ảnh xét nghiệm.
+3. Trong trường 'assessment', hãy đánh giá cẩn thận dựa trên 'refRange'. Nếu trị số cao hơn ngưỡng cho phép thì đánh giá là 'high', thấp hơn là 'low', bình thường là 'normal'.
+4. Trả về kết quả hoàn toàn bằng tiếng Việt.
+5. Chỉ trả về một đối tượng JSON hợp lệ duy nhất khớp với cấu trúc trên. Không kèm bất kỳ văn bản giải thích hoặc dấu nháy markdown nào ngoài JSON.`;
+
+    const requestBody = {
+        contents: [
+            {
+                parts: [
+                    { text: promptText },
+                    {
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: base64Data
+                        }
+                    }
+                ]
+            }
+        ],
+        generationConfig: {
+            responseMimeType: "application/json"
+        }
+    };
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
+    
+    if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        const errMsg = errJson?.error?.message || `HTTP error ${response.status}`;
+        throw new Error(errMsg);
+    }
+    
+    const resData = await response.json();
+    const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textResponse) {
+        throw new Error("Không nhận được phản hồi phân tích từ Gemini.");
+    }
+    
+    try {
+        return JSON.parse(textResponse.trim());
+    } catch (e) {
+        console.error("Gemini raw response text parse failure:", textResponse, e);
+        throw new Error("Dữ liệu phản hồi từ AI không đúng định dạng JSON.");
+    }
+}
+
+function openHealthEditModal(recordId = null, initialData = null) {
+    const editModal = document.getElementById('healthEditModal');
+    const modalTitle = document.getElementById('healthEditModalTitle');
+    const form = document.getElementById('healthEditForm');
+    
+    if (!editModal || !form) return;
+    
+    // Clear form fields
+    document.getElementById('healthRecordId').value = recordId || '';
+    document.getElementById('healthEditTitle').value = '';
+    document.getElementById('healthEditType').value = 'blood_test';
+    document.getElementById('healthEditDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('healthEditFacility').value = '';
+    document.getElementById('healthEditNotes').value = '';
+    document.getElementById('healthIndicatorsEditRows').innerHTML = '';
+    
+    if (recordId) {
+        modalTitle.innerText = "Chỉnh sửa Hồ sơ y tế";
+        const record = state.medicalRecords.find(r => r.id === recordId);
+        if (record) {
+            document.getElementById('healthEditTitle').value = record.title || '';
+            document.getElementById('healthEditType').value = record.type || 'blood_test';
+            document.getElementById('healthEditDate').value = record.date || new Date().toISOString().split('T')[0];
+            document.getElementById('healthEditFacility').value = record.facility || '';
+            document.getElementById('healthEditNotes').value = record.notes || '';
+            
+            (record.indicators || []).forEach(ind => {
+                addIndicatorEditRow(ind.name, ind.value, ind.unit, ind.refRange, ind.assessment);
+            });
+        }
+    } else {
+        modalTitle.innerText = initialData ? "Xác nhận kết quả quét bằng AI" : "Thêm Hồ sơ y tế thủ công";
+        
+        if (initialData) {
+            document.getElementById('healthEditTitle').value = initialData.title || '';
+            document.getElementById('healthEditType').value = initialData.type || 'blood_test';
+            document.getElementById('healthEditDate').value = initialData.date || new Date().toISOString().split('T')[0];
+            document.getElementById('healthEditFacility').value = initialData.facility || '';
+            document.getElementById('healthEditNotes').value = initialData.notes || '';
+            
+            (initialData.indicators || []).forEach(ind => {
+                addIndicatorEditRow(ind.name, ind.value, ind.unit, ind.refRange, ind.assessment);
+            });
+        } else {
+            // Add one default empty row
+            addIndicatorEditRow();
+        }
+    }
+    
+    editModal.style.display = 'flex';
+}
+
+function addIndicatorEditRow(name = '', value = '', unit = '', refRange = '', assessment = 'normal') {
+    const container = document.getElementById('healthIndicatorsEditRows');
+    if (!container) return;
+    
+    const rowId = 'ind-row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'health-indicators-edit-row';
+    rowDiv.id = rowId;
+    
+    rowDiv.innerHTML = `
+        <input type="text" class="form-control health-input ind-name" required placeholder="Chỉ số (Glucose)" value="${escapeHTML(name)}">
+        <input type="text" class="form-control health-input ind-value" required placeholder="Trị số (5.4)" value="${escapeHTML(value)}">
+        <input type="text" class="form-control health-input ind-unit" placeholder="Đơn vị (mmol/L)" value="${escapeHTML(unit)}">
+        <input type="text" class="form-control health-input ind-refRange" placeholder="Tham chiếu (3.9 - 6.1)" value="${escapeHTML(refRange)}">
+        <select class="form-control health-input ind-assessment">
+            <option value="normal" ${assessment === 'normal' ? 'selected' : ''}>Bình thường</option>
+            <option value="high" ${assessment === 'high' ? 'selected' : ''}>Cao</option>
+            <option value="low" ${assessment === 'low' ? 'selected' : ''}>Thấp</option>
+        </select>
+        <button type="button" class="health-remove-row-btn" onclick="this.closest('.health-indicators-edit-row').remove()">
+            <i data-lucide="trash-2"></i>
+        </button>
+    `;
+    
+    container.appendChild(rowDiv);
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function saveMedicalRecord(event) {
+    event.preventDefault();
+    
+    const recordId = document.getElementById('healthRecordId').value;
+    const title = document.getElementById('healthEditTitle').value.trim();
+    const type = document.getElementById('healthEditType').value;
+    const date = document.getElementById('healthEditDate').value;
+    const facility = document.getElementById('healthEditFacility').value.trim();
+    const notes = document.getElementById('healthEditNotes').value.trim();
+    
+    const indicatorRows = document.querySelectorAll('#healthIndicatorsEditRows .health-indicators-edit-row');
+    const indicators = [];
+    
+    indicatorRows.forEach(row => {
+        const name = row.querySelector('.ind-name').value.trim();
+        const value = row.querySelector('.ind-value').value.trim();
+        const unit = row.querySelector('.ind-unit').value.trim();
+        const refRange = row.querySelector('.ind-refRange').value.trim();
+        const assessment = row.querySelector('.ind-assessment').value;
+        
+        if (name) {
+            indicators.push({ name, value, unit, refRange, assessment });
+        }
+    });
+    
+    const nowIso = new Date().toISOString();
+    
+    if (recordId) {
+        const index = state.medicalRecords.findIndex(r => r.id === recordId);
+        if (index !== -1) {
+            state.medicalRecords[index] = {
+                ...state.medicalRecords[index],
+                title,
+                type,
+                date,
+                facility,
+                notes,
+                indicators,
+                updated_at: nowIso
+            };
+        }
+    } else {
+        const newRecord = {
+            id: 'med-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+            title,
+            type,
+            date,
+            facility,
+            notes,
+            indicators,
+            created_at: nowIso,
+            updated_at: nowIso
+        };
+        if (!state.medicalRecords) {
+            state.medicalRecords = [];
+        }
+        state.medicalRecords.push(newRecord);
+    }
+    
+    state.medicalRecordsUpdated = nowIso;
+    
+    await saveLocalState();
+    renderHealthDashboard();
+    
+    document.getElementById('healthEditModal').style.display = 'none';
+    showToast(recordId ? "Cập nhật hồ sơ y tế thành công!" : "Lưu hồ sơ y tế thành công!", "success");
+    
+    performSync(true);
+}
+
+window.deleteMedicalRecord = async function(id) {
+    if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ y tế này?")) return;
+    
+    const index = state.medicalRecords.findIndex(r => r.id === id);
+    if (index === -1) return;
+    
+    lastDeletedRecord = {
+        type: 'medical',
+        id: id,
+        originalRecord: { ...state.medicalRecords[index] }
+    };
+    
+    const now = new Date().toISOString();
+    state.medicalRecords[index] = {
+        ...state.medicalRecords[index],
+        deleted_at: now,
+        updated_at: now
+    };
+    state.medicalRecordsUpdated = now;
+    
+    await saveLocalState();
+    renderHealthDashboard();
+    
+    document.getElementById('healthDetailModal').style.display = 'none';
+    
+    showToast(`Đã xóa hồ sơ y tế. <a href="#" onclick="undoDelete(event)" style="color: var(--accent-emerald); font-weight: 600; text-decoration: underline; margin-left: 8px;">Hoàn tác</a>`);
+    
+    performSync(true);
+};
+
+function openHealthDetail(id) {
+    activeMedicalRecordId = id;
+    const modal = document.getElementById('healthDetailModal');
+    if (!modal) return;
+    
+    const record = state.medicalRecords.find(r => r.id === id);
+    if (!record) return;
+    
+    document.getElementById('healthDetailTitle').innerText = record.title || '-';
+    document.getElementById('healthDetailDate').innerText = formatDate(record.date) || '-';
+    document.getElementById('healthDetailFacility').innerText = record.facility || '-';
+    document.getElementById('healthDetailTypeBadge').innerText = getHealthTypeLabel(record.type);
+    document.getElementById('healthDetailNotes').innerText = record.notes || 'Không có ghi chú.';
+    
+    const tbody = document.getElementById('healthDetailIndicatorsTableBody');
+    if (tbody) {
+        if (!record.indicators || record.indicators.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Không có chỉ số xét nghiệm nào.</td></tr>`;
+        } else {
+            tbody.innerHTML = record.indicators.map(ind => {
+                const badgeClass = ind.assessment === 'high' ? 'badge-health-high' : (ind.assessment === 'low' ? 'badge-health-low' : 'badge-health-normal');
+                const badgeText = ind.assessment === 'high' ? 'Cao' : (ind.assessment === 'low' ? 'Thấp' : 'Bình thường');
+                return `
+                    <tr>
+                        <td><strong>${escapeHTML(ind.name)}</strong></td>
+                        <td style="text-align: center; font-weight: 600;">${escapeHTML(ind.value)}</td>
+                        <td>${escapeHTML(ind.unit || '-')}</td>
+                        <td>${escapeHTML(ind.refRange || '-')}</td>
+                        <td style="text-align: center;"><span class="${badgeClass}">${badgeText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+    
+    modal.style.display = 'flex';
 }
 
