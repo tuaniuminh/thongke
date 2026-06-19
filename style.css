@@ -2044,6 +2044,14 @@ body.light-mode {
     margin-bottom: 8px;
 }
 
+.health-chart-card-title {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+}
+
 .health-card-title i, 
 .health-card-title svg {
     color: var(--health-accent);
@@ -2888,6 +2896,41 @@ body.light-mode {
     /* Hide the mobile card label prefix for health tables */
     body:not(.mobile-view-table) .health-table td::before {
         display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Stack controls on mobile to keep trend title on 1 line */
+    .health-chart-card-title {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+    
+    .health-chart-card-title > div:first-child {
+        font-size: clamp(0.8rem, 4.2vw, 0.95rem) !important;
+        white-space: nowrap !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+    
+    .health-chart-card-title > div:first-child i,
+    .health-chart-card-title > div:first-child svg {
+        flex-shrink: 0 !important;
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
+    .health-chart-card-title > div:first-child span {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .health-chart-card-title .health-chart-controls-container {
+        width: 100% !important;
+        align-items: flex-end !important;
     }
 }
 
