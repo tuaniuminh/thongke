@@ -564,6 +564,25 @@
                         <div class="health-chart-container">
                             <canvas id="healthTrendChart"></canvas>
                         </div>
+                        <div class="health-chart-legend" style="display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 12px; font-size: 0.78rem; padding-top: 12px; border-top: 1px dashed var(--border-color);">
+                            <span style="font-weight: 600; color: var(--text-secondary);">Chú thích:</span>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #10b981;"></span>
+                                <span style="color: var(--text-muted);">Bình thường</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #ef4444;"></span>
+                                <span style="color: var(--text-muted);">Cao (Vượt ngưỡng)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #3b82f6;"></span>
+                                <span style="color: var(--text-muted);">Thấp (Dưới ngưỡng)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-left: 4px;">
+                                <span style="display: inline-block; width: 16px; height: 10px; background-color: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.35); border-radius: 2px;"></span>
+                                <span style="color: var(--text-muted);">Vùng an toàn</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Bottom Section: Records History -->
