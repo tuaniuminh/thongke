@@ -196,17 +196,30 @@ function showUpdateNotification(newVersion) {
 }
 
 // Check for App Version Updates from version.json
-async function checkAppVersion() {
+async function checkAppVersion(isManual = false) {
     try {
         const response = await fetch(`version.json?t=${Date.now()}`);
-        if (!response.ok) return;
+        if (!response.ok) {
+            if (isManual) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật.", "error");
+            return false;
+        }
         const data = await response.json();
-        if (data && data.version && data.version !== APP_VERSION) {
-            showUpdateNotification(data.version);
+        if (data && data.version) {
+            if (data.version !== APP_VERSION) {
+                showUpdateNotification(data.version);
+                return true;
+            } else {
+                if (isManual) {
+                    showToast(`Ứng dụng đang ở phiên bản mới nhất (v${APP_VERSION}).`);
+                }
+                return false;
+            }
         }
     } catch (e) {
         console.error("Error checking app version:", e);
+        if (isManual) showToast("Lỗi kiểm tra phiên bản cập nhật.", "error");
     }
+    return false;
 }
 
 // Save database state locally (encrypted)
@@ -3993,6 +4006,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Lucide Icons
     lucide.createIcons();
+
+    // Bind Manual Check Update buttons
+    document.querySelectorAll('.manual-check-update-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const icon = btn.querySelector('i');
+            if (icon) icon.classList.add('spin-anim');
+            btn.disabled = true;
+            
+            await checkAppVersion(true);
+            
+            setTimeout(() => {
+                if (icon) icon.classList.remove('spin-anim');
+                btn.disabled = false;
+            }, 600);
+        });
+    });
 
     // Check app version updates on load
     checkAppVersion();

@@ -3027,6 +3027,15 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
     overflow: hidden !important;
 }
 
+/* Manual update check button hover styling */
+.manual-check-update-btn:hover {
+    color: var(--primary-color) !important;
+}
+.manual-check-update-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+}
+
 
 
 
