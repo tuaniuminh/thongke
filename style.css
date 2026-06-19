@@ -2559,6 +2559,42 @@ body.light-mode {
         top: 6px;
         right: 6px;
     }
+    
+    /* Health records mobile improvements */
+    .health-records-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .health-record-card {
+        padding: 14px !important;
+        gap: 10px !important;
+    }
+    .health-record-card-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+    }
+    .health-record-card-header .badge-relationship {
+        align-self: flex-start !important;
+    }
+    .health-record-meta {
+        gap: 8px !important;
+        font-size: 0.72rem !important;
+        padding-bottom: 8px !important;
+    }
+    .health-record-indicators-preview {
+        padding: 6px 10px !important;
+        font-size: 0.72rem !important;
+    }
+    .health-title-actions {
+        width: 100% !important;
+        display: flex !important;
+        gap: 8px !important;
+    }
+    .health-title-actions .health-btn {
+        flex: 1 !important;
+        font-size: 0.78rem !important;
+        padding: 8px 10px !important;
+    }
 }
 
 @media (max-width: 768px) {
@@ -2577,6 +2613,88 @@ body.light-mode {
         overflow-y: visible !important;
     }
 }
+
+/* API Config Collapsible Styles */
+.collapsed-mode #apiConfigFormContent {
+    display: none !important;
+}
+.collapsed-mode #apiConfigCollapsedContent {
+    display: flex !important;
+}
+.collapsed-mode #toggleApiConfigBtn {
+    display: inline-flex !important;
+}
+
+/* AI Report Markdown Styling */
+.health-ai-report-container h1,
+.health-ai-report-container h2,
+.health-ai-report-container h3 {
+    color: var(--health-accent);
+    margin-top: 18px;
+    margin-bottom: 10px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+.health-ai-report-container h1 {
+    font-size: 1.3rem;
+}
+.health-ai-report-container h2 {
+    font-size: 1.1rem;
+    border-left: 3px solid var(--health-accent);
+    padding-left: 10px;
+}
+.health-ai-report-container h3 {
+    font-size: 0.95rem;
+}
+.health-ai-report-container p {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+.health-ai-report-container ul,
+.health-ai-report-container ol {
+    margin-left: 20px;
+    margin-bottom: 16px;
+}
+.health-ai-report-container li {
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+.health-ai-report-container blockquote {
+    background: rgba(16, 185, 129, 0.06);
+    border-left: 3px solid var(--health-accent);
+    padding: 10px 14px;
+    margin: 14px 0;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+.health-ai-report-container strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.health-ai-report-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.85rem;
+}
+.health-ai-report-container th,
+.health-ai-report-container td {
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    text-align: left;
+}
+.health-ai-report-container th {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--health-accent);
+    font-weight: 600;
+}
+.health-ai-report-container hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 16px 0;
+}
+
 
 
 

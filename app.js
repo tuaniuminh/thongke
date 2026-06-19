@@ -44,6 +44,9 @@ let state = {
     medicalRecordsUpdated: '',
     geminiApiKey: '',
     geminiApiKeyUpdated: '',
+    lastAiAnalysis: '',
+    lastAiAnalysisDate: '',
+    lastAiAnalysisUpdated: '',
     lastResetTime: '',
     showImportNotesOption: false,
     showImportNotesOptionUpdated: '',
@@ -163,6 +166,9 @@ async function saveLocalState() {
         medicalRecordsUpdated: state.medicalRecordsUpdated || '',
         geminiApiKey: state.geminiApiKey || '',
         geminiApiKeyUpdated: state.geminiApiKeyUpdated || '',
+        lastAiAnalysis: state.lastAiAnalysis || '',
+        lastAiAnalysisDate: state.lastAiAnalysisDate || '',
+        lastAiAnalysisUpdated: state.lastAiAnalysisUpdated || '',
         lastResetTime: state.lastResetTime || '',
         showImportNotesOption: !!state.showImportNotesOption,
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -189,6 +195,9 @@ async function loadLocalState(password) {
         state.medicalRecordsUpdated = '';
         state.geminiApiKey = '';
         state.geminiApiKeyUpdated = '';
+        state.lastAiAnalysis = '';
+        state.lastAiAnalysisDate = '';
+        state.lastAiAnalysisUpdated = '';
         state.lastResetTime = '';
         state.showImportNotesOption = false;
         state.showImportNotesOptionUpdated = '';
@@ -206,6 +215,9 @@ async function loadLocalState(password) {
         state.medicalRecordsUpdated = data.medicalRecordsUpdated || '';
         state.geminiApiKey = data.geminiApiKey || '';
         state.geminiApiKeyUpdated = data.geminiApiKeyUpdated || '';
+        state.lastAiAnalysis = data.lastAiAnalysis || '';
+        state.lastAiAnalysisDate = data.lastAiAnalysisDate || '';
+        state.lastAiAnalysisUpdated = data.lastAiAnalysisUpdated || '';
         state.lastResetTime = data.lastResetTime || '';
         state.showImportNotesOption = !!data.showImportNotesOption;
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
@@ -297,6 +309,9 @@ async function performSync(silent = false) {
                     state.medicalRecordsUpdated = remoteData.medicalRecordsUpdated || '';
                     state.geminiApiKey = remoteData.geminiApiKey || '';
                     state.geminiApiKeyUpdated = remoteData.geminiApiKeyUpdated || '';
+                    state.lastAiAnalysis = remoteData.lastAiAnalysis || '';
+                    state.lastAiAnalysisDate = remoteData.lastAiAnalysisDate || '';
+                    state.lastAiAnalysisUpdated = remoteData.lastAiAnalysisUpdated || '';
                     remoteReceived = remoteData.receivedGifts || [];
                     remoteSent = remoteData.sentGifts || [];
                     remoteMedical = remoteData.medicalRecords || [];
@@ -331,6 +346,15 @@ async function performSync(silent = false) {
                         state.geminiApiKey = remoteData.geminiApiKey || '';
                         state.geminiApiKeyUpdated = remoteData.geminiApiKeyUpdated || '';
                     }
+
+                    // Merge lastAiAnalysis using LWW
+                    const localAiTime = state.lastAiAnalysisUpdated ? new Date(state.lastAiAnalysisUpdated).getTime() : 0;
+                    const remoteAiTime = remoteData.lastAiAnalysisUpdated ? new Date(remoteData.lastAiAnalysisUpdated).getTime() : 0;
+                    if (remoteAiTime > localAiTime) {
+                        state.lastAiAnalysis = remoteData.lastAiAnalysis || '';
+                        state.lastAiAnalysisDate = remoteData.lastAiAnalysisDate || '';
+                        state.lastAiAnalysisUpdated = remoteData.lastAiAnalysisUpdated || '';
+                    }
                 }
                 
                 // 3. Merge lists
@@ -358,6 +382,9 @@ async function performSync(silent = false) {
             medicalRecordsUpdated: state.medicalRecordsUpdated || '',
             geminiApiKey: state.geminiApiKey || '',
             geminiApiKeyUpdated: state.geminiApiKeyUpdated || '',
+            lastAiAnalysis: state.lastAiAnalysis || '',
+            lastAiAnalysisDate: state.lastAiAnalysisDate || '',
+            lastAiAnalysisUpdated: state.lastAiAnalysisUpdated || '',
             lastResetTime: state.lastResetTime || '',
             showImportNotesOption: !!state.showImportNotesOption,
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -4156,7 +4183,20 @@ function initHealthBindings() {
         state.geminiApiKeyUpdated = new Date().toISOString();
         await saveLocalState();
         showToast("Đã lưu khóa API Gemini thành công!", "success");
+        updateApiConfigCardState(); // Update collapse state
         performSync(true);
+    });
+
+    // Toggle API config collapse/expand
+    document.getElementById('toggleApiConfigBtn')?.addEventListener('click', () => {
+        const card = document.getElementById('apiConfigCard');
+        if (card) {
+            if (card.classList.contains('collapsed-mode')) {
+                updateApiConfigCardState(true); // Force expand
+            } else {
+                updateApiConfigCardState(false);
+            }
+        }
     });
 
     // Scanner dropzone & file input
@@ -4223,6 +4263,23 @@ function initHealthBindings() {
         document.getElementById('healthEditModal').style.display = 'none';
     });
 
+    // AI Analysis Modal bindings
+    document.getElementById('healthAiAnalysisBtn')?.addEventListener('click', () => {
+        openHealthAiAnalysisModal();
+    });
+
+    document.getElementById('closeHealthAiAnalysisModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthAiAnalysisModal').style.display = 'none';
+    });
+
+    document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
+        document.getElementById('healthAiAnalysisModal').style.display = 'none';
+    });
+
+    document.getElementById('refreshHealthAiAnalysisBtn')?.addEventListener('click', () => {
+        generateHealthAiAnalysis(true); // Force re-analysis
+    });
+
     document.getElementById('healthChartIndicatorSelect')?.addEventListener('change', (e) => {
         const activeRecords = (state.medicalRecords || [])
             .filter(r => !r.deleted_at)
@@ -4231,11 +4288,25 @@ function initHealthBindings() {
     });
 }
 
+function updateApiConfigCardState(forceExpand = false) {
+    const card = document.getElementById('apiConfigCard');
+    if (!card) return;
+    
+    if (state.geminiApiKey && !forceExpand) {
+        card.classList.add('collapsed-mode');
+    } else {
+        card.classList.remove('collapsed-mode');
+    }
+}
+
 // Expose health details and removal row functions globally
 window.openHealthDetail = openHealthDetail;
 window.addIndicatorEditRow = addIndicatorEditRow;
 
 function renderHealthDashboard() {
+    // Update API Key Card Collapsed state
+    updateApiConfigCardState();
+
     // Auto populate Gemini Input if not done
     const geminiInput = document.getElementById('geminiApiKeyInput');
     if (geminiInput && !geminiInput.value && state.geminiApiKey) {
@@ -4389,7 +4460,9 @@ function drawTrendChart(indicatorName, activeRecords) {
                     label: formatDate(r.date),
                     value: numVal,
                     unit: ind.unit || '',
-                    title: r.title
+                    title: r.title,
+                    assessment: ind.assessment || 'normal',
+                    refRange: ind.refRange || ''
                 });
             }
         }
@@ -4409,21 +4482,113 @@ function drawTrendChart(indicatorName, activeRecords) {
     const gridColor = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
     const textColor = state.theme === 'dark' ? '#94a3b8' : '#4b5563';
     
+    // Color points based on assessment: red for high, blue for low, green for normal
+    const pointColors = points.map(p => {
+        if (p.assessment === 'high') return '#ef4444'; // Red
+        if (p.assessment === 'low') return '#3b82f6';  // Blue
+        return '#10b981'; // Green
+    });
+
+    // Parse reference range from the latest record that has one
+    const latestWithRange = [...points].reverse().find(p => p.refRange);
+    const refRange = latestWithRange?.refRange || '';
+    
+    let minVal = null;
+    let maxVal = null;
+    if (refRange) {
+        const rangeMatch = refRange.match(/^\s*([0-9.,]+)\s*[-–—]\s*([0-9.,]+)\s*$/);
+        if (rangeMatch) {
+            minVal = parseFloat(rangeMatch[1].replace(',', '.'));
+            maxVal = parseFloat(rangeMatch[2].replace(',', '.'));
+        } else {
+            const lessMatch = refRange.match(/^\s*<\s*([0-9.,]+)\s*$/);
+            if (lessMatch) {
+                maxVal = parseFloat(lessMatch[1].replace(',', '.'));
+                minVal = 0;
+            } else {
+                const greaterMatch = refRange.match(/^\s*>\s*([0-9.,]+)\s*$/);
+                if (greaterMatch) {
+                    minVal = parseFloat(greaterMatch[1].replace(',', '.'));
+                }
+            }
+        }
+    }
+
+    // Chart.js plugin to draw reference range shading
+    const refRangePlugin = {
+        id: 'refRangeBackground',
+        beforeDraw: (chart) => {
+            const { ctx, chartArea: { top, bottom, left, right }, scales: { y } } = chart;
+            if (y && (minVal !== null || maxVal !== null)) {
+                let startY = bottom;
+                let endY = top;
+                
+                if (minVal !== null) {
+                    if (minVal >= y.min && minVal <= y.max) {
+                        startY = y.getPixelForValue(minVal);
+                    } else if (minVal < y.min) {
+                        startY = bottom;
+                    } else if (minVal > y.max) {
+                        startY = top;
+                    }
+                }
+                
+                if (maxVal !== null) {
+                    if (maxVal >= y.min && maxVal <= y.max) {
+                        endY = y.getPixelForValue(maxVal);
+                    } else if (maxVal > y.max) {
+                        endY = top;
+                    } else if (maxVal < y.min) {
+                        endY = bottom;
+                    }
+                }
+                
+                // Draw shaded background zone
+                ctx.save();
+                ctx.fillStyle = state.theme === 'dark' ? 'rgba(16, 185, 129, 0.04)' : 'rgba(16, 185, 129, 0.08)';
+                ctx.fillRect(left, Math.min(startY, endY), right - left, Math.abs(startY - endY));
+                
+                // Draw boundaries (dotted lines)
+                ctx.strokeStyle = state.theme === 'dark' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.35)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                
+                if (minVal !== null && minVal >= y.min && minVal <= y.max) {
+                    ctx.beginPath();
+                    ctx.moveTo(left, startY);
+                    ctx.lineTo(right, startY);
+                    ctx.stroke();
+                }
+                if (maxVal !== null && maxVal >= y.min && maxVal <= y.max) {
+                    ctx.beginPath();
+                    ctx.moveTo(left, endY);
+                    ctx.lineTo(right, endY);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+        }
+    };
+    
     healthTrendChartInstance = new Chart(ctx, {
         type: 'line',
+        plugins: [refRangePlugin],
         data: {
             labels: labels,
             datasets: [{
                 label: `${indicatorName} (${unit})`,
                 data: data,
                 borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                backgroundColor: 'rgba(16, 185, 129, 0.06)',
                 borderWidth: 2,
-                pointBackgroundColor: '#10b981',
-                pointBorderColor: '#ffffff',
+                pointBackgroundColor: pointColors,
+                pointBorderColor: state.theme === 'dark' ? '#0f172a' : '#ffffff',
                 pointBorderWidth: 1.5,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                pointRadius: points.map(p => p.assessment !== 'normal' ? 6 : 4.5),
+                pointHoverBackgroundColor: pointColors,
+                pointHoverBorderColor: '#ffffff',
+                pointHoverBorderWidth: 2,
+                pointHoverRadius: points.map(p => p.assessment !== 'normal' ? 8 : 6.5),
                 tension: 0.15,
                 fill: true
             }]
@@ -4448,7 +4613,9 @@ function drawTrendChart(indicatorName, activeRecords) {
                             return `${points[idx].title} (${points[idx].date})`;
                         },
                         label: function(context) {
-                            return ` Trị số: ${context.parsed.y} ${unit}`;
+                            const p = points[context.dataIndex];
+                            const statusLabel = p.assessment === 'high' ? ' (Cao)' : (p.assessment === 'low' ? ' (Thấp)' : ' (Bình thường)');
+                            return ` Trị số: ${context.parsed.y} ${unit}${statusLabel}`;
                         }
                     }
                 }
@@ -4828,4 +4995,148 @@ function openHealthDetail(id) {
     
     modal.style.display = 'flex';
 }
+
+function openHealthAiAnalysisModal() {
+    const modal = document.getElementById('healthAiAnalysisModal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // If we have cached analysis, render it. Otherwise, run analysis.
+    if (state.lastAiAnalysis) {
+        renderHealthAiReport();
+    } else {
+        generateHealthAiAnalysis(false);
+    }
+}
+
+function renderHealthAiReport() {
+    const dateEl = document.getElementById('healthAiAnalysisDate');
+    const reportContentEl = document.getElementById('healthAiReportContent');
+    
+    if (dateEl && state.lastAiAnalysisDate) {
+        const formattedDate = formatDate(state.lastAiAnalysisDate);
+        const formattedTime = new Date(state.lastAiAnalysisDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        dateEl.innerText = `${formattedDate} lúc ${formattedTime}`;
+    } else if (dateEl) {
+        dateEl.innerText = 'Chưa phân tích';
+    }
+    
+    if (reportContentEl && state.lastAiAnalysis) {
+        if (typeof marked !== 'undefined') {
+            reportContentEl.innerHTML = marked.parse(state.lastAiAnalysis);
+        } else {
+            reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(state.lastAiAnalysis)}</pre>`;
+        }
+    }
+}
+
+async function generateHealthAiAnalysis(forceFresh = false) {
+    if (!state.geminiApiKey) {
+        showToast("Vui lòng cấu hình Gemini API Key trước!", "warning");
+        updateApiConfigCardState(true); // force expand
+        return;
+    }
+    
+    const activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+    if (activeRecords.length === 0) {
+        showToast("Không tìm thấy hồ sơ y tế nào để phân tích!", "warning");
+        return;
+    }
+    
+    const overlay = document.getElementById('healthScannerLoadingOverlay');
+    const statusText = document.getElementById('healthScannerStatusText');
+    if (overlay) overlay.style.display = 'flex';
+    if (statusText) statusText.innerText = 'AI đang tổng hợp và phân tích lịch sử xét nghiệm của bạn...';
+    
+    try {
+        let historyStr = "";
+        activeRecords.forEach((r, idx) => {
+            const dateStr = formatDate(r.date);
+            const typeLabel = getHealthTypeLabel(r.type);
+            historyStr += `--- LẦN KHÁM ${idx + 1} ---\n`;
+            historyStr += `Tiêu đề: ${r.title}\n`;
+            historyStr += `Ngày: ${dateStr}\n`;
+            historyStr += `Cơ sở y tế: ${r.facility || 'Không ghi rõ'}\n`;
+            historyStr += `Loại xét nghiệm: ${typeLabel}\n`;
+            if (r.notes) {
+                historyStr += `Ghi chú/Kết luận của bác sĩ: ${r.notes}\n`;
+            }
+            historyStr += `Chỉ số kết quả:\n`;
+            (r.indicators || []).forEach(ind => {
+                const assessmentStr = ind.assessment === 'high' ? 'Cao 🔴' : (ind.assessment === 'low' ? 'Thấp 🟡' : 'Bình thường 🟢');
+                historyStr += `- Tên chỉ số: ${ind.name} | Trị số: ${ind.value} ${ind.unit || ''} | Khoảng tham chiếu: ${ind.refRange || 'Không có'} | Đánh giá: ${assessmentStr}\n`;
+            });
+            historyStr += `\n`;
+        });
+        
+        const prompt = `Hãy đóng vai trò là một chuyên gia y tế, bác sĩ tư vấn sức khỏe cao cấp. Dưới đây là toàn bộ lịch sử kết quả xét nghiệm y tế của tôi (được sắp xếp theo trình tự thời gian từ cũ nhất đến mới nhất):\n\n${historyStr}\n
+Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó lập một bản báo cáo phân tích sức khỏe tổng quan nâng cao bằng tiếng Việt ở định dạng Markdown (sử dụng tiêu đề h2 và h3 để phân cấp rõ ràng). Báo cáo cần bao gồm các mục chính:
+
+1. **Tổng quan xu hướng phát triển sức khỏe**: Nhận định xem tình trạng sức khỏe tổng thể đang tiến triển tốt lên, ổn định hay có xu hướng xấu đi qua thời gian. Đánh giá sự biến động của các chỉ số xét nghiệm chính (ví dụ: chỉ số đường huyết, men gan, mỡ máu... tăng giảm thế nào qua các lần xét nghiệm).
+2. **Cảnh báo các nguy cơ sức khỏe lớn nhất**: Nhấn mạnh các chỉ số liên tục bất thường (Cao/Thấp) và các nguy cơ bệnh lý tiềm ẩn đi kèm cần đặc biệt lưu ý.
+3. **Lời khuyên chi tiết từ Chuyên gia**:
+   - **Chế độ ăn uống**: Nên bổ sung hoặc kiêng cữ những nhóm thực phẩm nào để cải thiện các chỉ số xấu.
+   - **Chế độ sinh hoạt & Vận động**: Các bài tập thể thao, cường độ luyện tập và thói quen sinh hoạt tốt phù hợp với tình trạng sức khỏe hiện tại.
+   - **Thăm khám y khoa**: Đưa ra lời khuyên về tần suất xét nghiệm lại hoặc có cần đi khám chuyên khoa sâu nào ngay không.
+
+*Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
+
+        const apiKey = state.geminiApiKey;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        
+        const requestBody = {
+            contents: [
+                {
+                    parts: [
+                        { text: prompt }
+                    ]
+                }
+            ]
+        };
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            const errJson = await response.json().catch(() => ({}));
+            const errMsg = errJson?.error?.message || `HTTP error ${response.status}`;
+            throw new Error(errMsg);
+        }
+        
+        const resData = await response.json();
+        const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!textResponse) {
+            throw new Error("Không nhận được phản hồi phân tích từ Gemini.");
+        }
+        
+        // Save to state
+        state.lastAiAnalysis = textResponse;
+        state.lastAiAnalysisDate = new Date().toISOString();
+        state.lastAiAnalysisUpdated = new Date().toISOString();
+        
+        await saveLocalState();
+        
+        if (overlay) overlay.style.display = 'none';
+        
+        renderHealthAiReport();
+        showToast("Phân tích sức khỏe bằng AI thành công!", "success");
+        
+        performSync(true);
+        
+    } catch (err) {
+        console.error("AI Analysis error:", err);
+        if (overlay) overlay.style.display = 'none';
+        showToast("Phân tích sức khỏe AI thất bại: " + err.message, "error");
+    }
+}
+
 
