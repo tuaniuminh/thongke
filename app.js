@@ -4525,11 +4525,46 @@ function initHealthBindings() {
         generateHealthAiAnalysis(true); // Force re-analysis
     });
 
-    document.getElementById('healthChartIndicatorSelect')?.addEventListener('change', (e) => {
-        const activeRecords = (state.medicalRecords || [])
-            .filter(r => !r.deleted_at)
-            .sort((a, b) => new Date(a.date) - new Date(b.date));
-        drawTrendChart(e.target.value, activeRecords);
+    const indicatorSelect = document.getElementById('healthChartIndicatorSelect');
+    if (indicatorSelect) {
+        indicatorSelect.addEventListener('change', (e) => {
+            const activeRecords = (state.medicalRecords || [])
+                .filter(r => !r.deleted_at)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            drawTrendChart(e.target.value, activeRecords);
+        });
+
+        // Enable quick mouse wheel scroll selection
+        indicatorSelect.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const direction = e.deltaY > 0 ? 1 : -1;
+            const newIndex = indicatorSelect.selectedIndex + direction;
+            if (newIndex >= 0 && newIndex < indicatorSelect.options.length) {
+                indicatorSelect.selectedIndex = newIndex;
+                indicatorSelect.dispatchEvent(new Event('change'));
+            }
+        }, { passive: false });
+    }
+
+    // Previous and Next buttons click handlers
+    document.getElementById('prevIndicatorBtn')?.addEventListener('click', () => {
+        const select = document.getElementById('healthChartIndicatorSelect');
+        if (select && select.options.length > 0) {
+            let newIndex = select.selectedIndex - 1;
+            if (newIndex < 0) newIndex = select.options.length - 1; // loop back to end
+            select.selectedIndex = newIndex;
+            select.dispatchEvent(new Event('change'));
+        }
+    });
+
+    document.getElementById('nextIndicatorBtn')?.addEventListener('click', () => {
+        const select = document.getElementById('healthChartIndicatorSelect');
+        if (select && select.options.length > 0) {
+            let newIndex = select.selectedIndex + 1;
+            if (newIndex >= select.options.length) newIndex = 0; // loop back to start
+            select.selectedIndex = newIndex;
+            select.dispatchEvent(new Event('change'));
+        }
     });
 }
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thu Chi Đối Ngoại</title>
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.3.6">
+    <link rel="stylesheet" href="style.css?v=3.3.7">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -28,7 +28,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">Thu Chi Đối Ngoại</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.3.6</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;" id="sidebarVersion">Phiên bản v3.3.7</span>
                 </div>
             </div>
             
@@ -474,7 +474,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted);" id="settingsVersion">
-                        Phiên bản ứng dụng: v3.3.6
+                        Phiên bản ứng dụng: v3.3.7
                     </div>
                 </div>
             </section>
@@ -554,10 +554,16 @@
                                 <i data-lucide="trending-up"></i>
                                 <span>Biểu đồ xu hướng chỉ số sức khỏe</span>
                             </div>
-                            <div class="health-chart-select-wrapper">
-                                <select id="healthChartIndicatorSelect" class="form-control health-input health-select-sm">
+                            <div class="health-chart-select-wrapper" style="display: flex; align-items: center; gap: 6px;">
+                                <button type="button" id="prevIndicatorBtn" class="health-btn health-btn-secondary" style="padding: 4px 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--border-color);" title="Chỉ số trước">
+                                    <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i>
+                                </button>
+                                <select id="healthChartIndicatorSelect" class="form-control health-input health-select-sm" style="min-width: 160px; text-align: center;" title="Cuộn chuột hoặc click nút mũi tên để đổi nhanh chỉ số">
                                     <!-- Options populated dynamically -->
                                 </select>
+                                <button type="button" id="nextIndicatorBtn" class="health-btn health-btn-secondary" style="padding: 4px 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--border-color);" title="Chỉ số sau">
+                                    <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i>
+                                </button>
                             </div>
                         </h4>
                         <div class="health-chart-container">
@@ -621,7 +627,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.6</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.7</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -672,7 +678,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.6</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.7</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -723,7 +729,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.6</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.3.7</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -1320,6 +1326,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.3.6"></script>
+    <script type="module" src="app.js?v=3.3.7"></script>
 </body>
 </html>
