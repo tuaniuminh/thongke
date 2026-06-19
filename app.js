@@ -5713,6 +5713,42 @@ const HEALTH_INDICATORS_DICTIONARY = {
         high: 'Gặp trong các phản ứng dị ứng nghiêm trọng, viêm mãn tính hoặc bệnh lý tăng sinh tủy xương.',
         low: 'Không có ý nghĩa lâm sàng đặc hiệu.'
     },
+    'rdw': {
+        name: 'RDW (Dải phân bố kích thước hồng cầu)',
+        def: 'Độ phân bố kích thước hồng cầu (Red Cell Distribution Width). Đo lường sự đồng đều về thể tích/kích thước giữa các tế bào hồng cầu.',
+        high: 'Kích thước các tế bào hồng cầu chênh lệch lớn (to nhỏ không đều), là dấu hiệu rất phổ biến của thiếu máu thiếu sắt, thiếu vitamin B12/Folate, hoặc tan máu Thalassemia.',
+        low: 'Kích thước các tế bào hồng cầu rất đồng đều, phản ánh trạng thái bình thường và không có ý nghĩa bệnh lý đáng ngại.'
+    },
+    'pdw': {
+        name: 'PDW (Dải phân bố kích thước tiểu cầu)',
+        def: 'Độ phân bố thể tích tiểu cầu (Platelet Distribution Width). Đánh giá mức độ biến động về kích thước của các tiểu cầu trong máu.',
+        high: 'Kích thước tiểu cầu không đồng đều, thường liên quan đến các rối loạn sản sinh tiểu cầu ở tủy xương, ung thư máu, hoặc phản ứng viêm/nhiễm trùng cấp.',
+        low: 'Kích thước các tiểu cầu đồng đều, thường là biểu hiện bình thường.'
+    },
+    'mpv': {
+        name: 'MPV (Thể tích trung bình tiểu cầu)',
+        def: 'Thể tích trung bình của tiểu cầu (Mean Platelet Volume). Đo lường kích thước trung bình của các tiểu cầu lưu thông trong máu.',
+        high: 'Kích thước tiểu cầu lớn hơn bình thường, phản ánh tủy xương đang tăng tốc giải phóng tiểu cầu mới (phản ứng sau mất máu, nhiễm trùng, đái tháo đường, tim mạch).',
+        low: 'Tiểu cầu có kích thước nhỏ, cảnh báo tủy xương giảm sản xuất tiểu cầu (gặp trong suy tủy xương, thiếu máu bất sản, ung thư máu hoặc sau hóa trị).'
+    },
+    'p-lcr': {
+        name: 'P-LCR (Tỷ lệ tiểu cầu kích thước lớn)',
+        def: 'Tỷ lệ phần trăm tiểu cầu có thể tích lớn (>12 fL) trong tổng số tiểu cầu lưu hành.',
+        high: 'Tăng nguy cơ hình thành cục máu đông gây tắc mạch, hoặc phản ánh tủy xương đang tăng cường giải phóng các tiểu cầu non lớn ra máu ngoại vi.',
+        low: 'Tỷ lệ tiểu cầu lớn thấp, thường đi kèm tình trạng giảm hoạt động tạo máu/tiểu cầu ở tủy xương.'
+    },
+    'mxd': {
+        name: 'MXD / BC đoạn Bazo Mono Axit (Bạch cầu hỗn hợp)',
+        def: 'Chỉ số tổng hợp (tỷ lệ % hoặc số lượng tuyệt đối) của nhóm 3 loại bạch cầu ít gặp hơn bao gồm: Bạch cầu ưa axit (Eosinophil), Bạch cầu ưa kiềm (Basophil) và Bạch cầu Monocyte.',
+        high: 'Cảnh báo tình trạng nhiễm ký sinh trùng (giun, sán), phản ứng dị ứng nặng, hen suyễn, hoặc nhiễm trùng, viêm nhiễm mãn tính.',
+        low: 'Chỉ số thấp thường ít có ý nghĩa lâm sàng đặc hiệu trừ khi đi kèm tình trạng suy giảm toàn bộ các dòng tế bào máu.'
+    },
+    'kst sot ret': {
+        name: 'KST sốt rét (Ký sinh trùng sốt rét)',
+        def: 'Xét nghiệm tìm kiếm sự hiện diện của ký sinh trùng sốt rét (Plasmodium) trong máu ngoại vi để chẩn đoán bệnh sốt rét.',
+        high: 'Dương tính (+): Cơ thể đang bị nhiễm ký sinh trùng sốt rét, cần nhập viện và điều trị bằng thuốc đặc hiệu khẩn cấp để tránh biến chứng ác tính.',
+        low: 'Âm tính (-): Không tìm thấy ký sinh trùng sốt rét trong mẫu máu xét nghiệm tại thời điểm khảo sát.'
+    },
     'tsh': {
         name: 'TSH (Hormone kích thích tuyến giáp)',
         def: 'Hormone do tuyến yên (não) tiết ra để điều khiển tuyến giáp sản xuất hormone giáp T3 và T4.',
@@ -5833,6 +5869,12 @@ function getDictionaryKey(name) {
     if (norm.includes('ketone') || norm.includes('ceton')) return 'ketone';
     if (norm.includes('hồng cầu niệu') || norm.includes('hong cau nieu') || norm.includes('erythrocytes')) return 'hong cau nieu';
     if (norm.includes('bạch cầu niệu') || norm.includes('bach cau nieu') || norm.includes('leukocytes')) return 'bach cau nieu';
+    if (norm.includes('rdw')) return 'rdw';
+    if (norm.includes('pdw')) return 'pdw';
+    if (norm.includes('mpv')) return 'mpv';
+    if (norm.includes('p-lcr') || norm.includes('plcr')) return 'p-lcr';
+    if (norm.includes('mxd') || norm.includes('bazo mono axit') || norm.includes('bazo,mono,axit') || norm.includes('axit,bazo,mono') || norm.includes('axit, bazo, mono')) return 'mxd';
+    if (norm.includes('kst sốt rét') || norm.includes('kst sot ret') || norm.includes('ký sinh trùng sốt rét') || norm.includes('ky sinh trung sot ret')) return 'kst sot ret';
     
     return null;
 }
