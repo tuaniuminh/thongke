@@ -1235,6 +1235,15 @@ body.light-mode .data-table tbody tr:hover {
         padding-right: 0 !important;
     }
 
+    .modal-header h2 {
+        font-size: 1.15rem !important;
+    }
+
+    .health-modal-title {
+        font-size: 1.05rem !important;
+        padding-right: 25px !important;
+    }
+
     .close-btn {
         position: absolute !important;
         top: 8px !important;
