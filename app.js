@@ -6130,11 +6130,11 @@ function getDictionaryKey(name) {
     if (!name) return null;
     const norm = name.toLowerCase().trim();
     
-    if (norm.includes('glucose') || norm === 'đường huyết' || norm === 'duong huyet') return 'glucose';
+    if (norm.includes('glucose') || norm === 'đường huyết' || norm === 'duong huyet' || norm === 'glu') return 'glucose';
     if (norm.includes('hba1c')) return 'hba1c';
     if (norm.includes('insulin')) return 'insulin';
-    if (norm === 'cholesterol' || norm === 'cholesterol toàn phần' || norm === 'cholesterol toan phan' || norm === 'mỡ máu' || norm === 'mo mau') return 'cholesterol';
-    if (norm.includes('triglyceride')) return 'triglycerides';
+    if (norm === 'cholesterol' || norm === 'cholesterol toàn phần' || norm === 'cholesterol toan phan' || norm === 'mỡ máu' || norm === 'mo mau' || norm === 'cho') return 'cholesterol';
+    if (norm.includes('triglyceride') || norm === 'tg') return 'triglycerides';
     if (norm.includes('hdl')) return 'hdl';
     if (norm.includes('ldl')) return 'ldl';
     if (norm.includes('ast') || norm.includes('sgot')) return 'ast';
@@ -6144,9 +6144,9 @@ function getDictionaryKey(name) {
     if (norm.includes('albumin')) return 'albumin';
     if (norm === 'protein toàn phần' || norm === 'protein toan phan' || norm === 'total protein') return 'total protein';
     if (norm === 'ure' || norm === 'urea' || norm === 'bun') return 'ure';
-    if (norm.includes('creatinine')) return 'creatinine';
+    if (norm.includes('creatinine') || norm === 'cre' || norm === 'crea') return 'creatinine';
     if (norm.includes('egfr') || norm.includes('gfr')) return 'egfr';
-    if (norm.includes('uric') || norm === 'gút' || norm === 'gout') return 'uric acid';
+    if (norm.includes('uric') || norm === 'gút' || norm === 'gout' || norm === 'ua') return 'uric acid';
     if (norm.includes('rbc') || norm === 'hồng cầu' || norm === 'hong cau') return 'rbc';
     if (norm.includes('wbc') || norm === 'bạch cầu' || norm === 'bach cau') return 'wbc';
     if (norm.includes('plt') || norm === 'tiểu cầu' || norm === 'tieu cau') return 'plt';
