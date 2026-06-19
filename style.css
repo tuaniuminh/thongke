@@ -2463,8 +2463,9 @@ body.light-mode {
 .health-table-wrapper {
     border-radius: 10px;
     border: 1px solid var(--border-color);
-    overflow: hidden;
+    overflow-x: auto;
     background: rgba(0, 0, 0, 0.1);
+    -webkit-overflow-scrolling: touch;
 }
 
 .health-table {
