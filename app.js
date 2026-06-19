@@ -4830,6 +4830,18 @@ function drawTrendChart(indicatorName, activeRecords) {
                     ctx.lineTo(right, endY);
                     ctx.stroke();
                 }
+                
+                // Draw boundary labels (text)
+                ctx.fillStyle = state.theme === 'dark' ? 'rgba(16, 185, 129, 0.65)' : 'rgba(13, 148, 136, 0.85)';
+                ctx.font = '10px "Be Vietnam Pro", sans-serif';
+                ctx.textAlign = 'left';
+                
+                if (minVal !== null && minVal >= y.min && minVal <= y.max) {
+                    ctx.fillText(`Ngưỡng dưới: ${minVal} ${unit}`, left + 8, startY - 4);
+                }
+                if (maxVal !== null && maxVal >= y.min && maxVal <= y.max) {
+                    ctx.fillText(`Ngưỡng trên: ${maxVal} ${unit}`, left + 8, endY + 12);
+                }
                 ctx.restore();
             }
         }
