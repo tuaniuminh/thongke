@@ -5594,6 +5594,25 @@ function openHealthAiAnalysisModal() {
     }
 }
 
+function cleanLatex(text) {
+    if (!text) return text;
+    let cleaned = text;
+    
+    // Replace \text{...} with just ...
+    cleaned = cleaned.replace(/\\text\s*\{\s*([^}]+)\s*\}/g, '$1');
+    
+    // Replace \times with x
+    cleaned = cleaned.replace(/\\times/g, 'x');
+    
+    // Replace \mu with µ
+    cleaned = cleaned.replace(/\\mu/g, 'µ');
+    
+    // Remove inline LaTeX math delimiters ($...$)
+    cleaned = cleaned.replace(/\$([^\$]+)\$/g, '$1');
+    
+    return cleaned;
+}
+
 function renderHealthAiReport() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
@@ -5613,10 +5632,11 @@ function renderHealthAiReport() {
     }
     
     if (reportContentEl && lastAiAnalysis) {
+        const cleanedReport = cleanLatex(lastAiAnalysis);
         if (typeof marked !== 'undefined') {
-            reportContentEl.innerHTML = marked.parse(lastAiAnalysis);
+            reportContentEl.innerHTML = marked.parse(cleanedReport);
         } else {
-            reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(lastAiAnalysis)}</pre>`;
+            reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(cleanedReport)}</pre>`;
         }
     }
 }
@@ -5686,7 +5706,7 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
    - **Chế độ sinh hoạt & Vận động**: Các bài tập thể thao, cường độ luyện tập và thói quen sinh hoạt tốt phù hợp với tình trạng sức khỏe hiện tại.
    - **Thăm khám y khoa**: Đưa ra lời khuyên về tần suất xét nghiệm lại hoặc có cần đi khám chuyên khoa sâu nào ngay không.
 
-*Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
+*Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Tuyệt đối KHÔNG sử dụng ký tự $ hoặc các ký hiệu toán học LaTeX (như $...$, $$...$$, \text{...}, \times, \mu) để biểu diễn các số liệu hoặc đơn vị đo lường. Thay vào đó, hãy dùng văn bản thường thuần túy (ví dụ: dùng "x" thay cho "\times", dùng "uL" hoặc "µL" thay cho "\mu L", dùng "15.8 g/dL" thay cho "$15.8 \text{ g/dL}$"). Tất cả các số liệu và đơn vị phải hiển thị dưới dạng văn bản thường đọc được trực tiếp. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
         const apiKey = state.geminiApiKey;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
