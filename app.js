@@ -4975,16 +4975,16 @@ function openHealthDetail(id) {
     const tbody = document.getElementById('healthDetailIndicatorsTableBody');
     if (tbody) {
         if (!record.indicators || record.indicators.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Không có chỉ số xét nghiệm nào.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Không có chỉ số xét nghiệm nào.</td></tr>`;
         } else {
             tbody.innerHTML = record.indicators.map(ind => {
                 const badgeClass = ind.assessment === 'high' ? 'badge-health-high' : (ind.assessment === 'low' ? 'badge-health-low' : 'badge-health-normal');
                 const badgeText = ind.assessment === 'high' ? 'Cao' : (ind.assessment === 'low' ? 'Thấp' : 'Bình thường');
+                const unitHtml = ind.unit ? ` <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 2px;">${escapeHTML(ind.unit)}</span>` : '';
                 return `
                     <tr>
                         <td><strong>${escapeHTML(ind.name)}</strong></td>
-                        <td style="text-align: center; font-weight: 600;">${escapeHTML(ind.value)}</td>
-                        <td>${escapeHTML(ind.unit || '-')}</td>
+                        <td style="text-align: center; font-weight: 600;">${escapeHTML(ind.value)}${unitHtml}</td>
                         <td>${escapeHTML(ind.refRange || '-')}</td>
                         <td style="text-align: center;"><span class="${badgeClass}">${badgeText}</span></td>
                     </tr>

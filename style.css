@@ -2614,6 +2614,11 @@ body.light-mode {
         grid-template-columns: 1fr !important;
         gap: 8px !important;
     }
+    .health-table th, 
+    .health-table td {
+        padding: 8px 4px !important;
+        font-size: 0.75rem !important;
+    }
 }
 
 @media (max-width: 768px) {
