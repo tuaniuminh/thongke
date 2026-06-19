@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.7.0';
+const APP_VERSION = '3.7.1';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -3925,7 +3925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearAllDataBtn = document.getElementById('clearAllDataBtn');
     if (clearAllDataBtn) {
         clearAllDataBtn.addEventListener('click', async () => {
-            const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu ghi chép thu chi đối ngoại trên thiết bị này!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
+            const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu ghi chép và sức khỏe trên ứng dụng FamiLife của thiết bị này!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
             if (confirmPin === null) {
                 return; // Cancelled
             }
