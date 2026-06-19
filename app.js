@@ -6147,9 +6147,9 @@ function getDictionaryKey(name) {
     if (norm.includes('creatinine') || norm === 'cre' || norm === 'crea') return 'creatinine';
     if (norm.includes('egfr') || norm.includes('gfr')) return 'egfr';
     if (norm.includes('uric') || norm === 'gút' || norm === 'gout' || norm === 'ua') return 'uric acid';
-    if (norm.includes('rbc') || norm === 'hồng cầu' || norm === 'hong cau') return 'rbc';
-    if (norm.includes('wbc') || norm === 'bạch cầu' || norm === 'bach cau') return 'wbc';
-    if (norm.includes('plt') || norm === 'tiểu cầu' || norm === 'tieu cau') return 'plt';
+    if (norm.includes('rbc') || norm.includes('hồng cầu') || norm.includes('hong cau') || norm === 'hc' || norm === 'so luong hc' || norm === 'số lượng hc') return 'rbc';
+    if (norm.includes('wbc') || norm.includes('bạch cầu') || norm.includes('bach cau') || norm === 'bc' || norm === 'so luong bc' || norm === 'số lượng bc') return 'wbc';
+    if (norm.includes('plt') || norm.includes('tiểu cầu') || norm.includes('tieu cau') || norm === 'tc' || norm === 'so luong tc' || norm === 'số lượng tc') return 'plt';
     if (norm === 'hemoglobin' || norm === 'huyết sắc tố' || norm === 'huyet sac to' || norm === 'hb') return 'hemoglobin';
     if (norm === 'hematocrit' || norm === 'hct') return 'hematocrit';
     if (norm === 'mcv') return 'mcv';
