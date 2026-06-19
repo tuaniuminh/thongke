@@ -2413,6 +2413,29 @@ body.light-mode {
     overflow: hidden;
 }
 
+#addProfileForm {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-end !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+    text-align: left !important;
+    flex: none !important;
+}
+
+#addProfileForm .form-group {
+    flex: 1 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+#addProfileForm .form-group label,
+#addProfileForm .form-group input {
+    text-align: left !important;
+}
+
 .health-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2964,6 +2987,22 @@ body.light-mode {
     #addProfileForm button {
         width: 100% !important;
     }
+}
+
+/* Prevent html/body scroll when any modal or overlay is active */
+html:has(div[id*="Modal"].active),
+html:has(div[id*="Modal"][style*="display: flex"]),
+html:has(div[id*="Modal"][style*="display: block"]),
+html:has(div[id*="Overlay"].active),
+html:has(div[id*="Overlay"][style*="display: flex"]),
+html:has(div[id*="Overlay"][style*="display: block"]),
+body:has(div[id*="Modal"].active),
+body:has(div[id*="Modal"][style*="display: flex"]),
+body:has(div[id*="Modal"][style*="display: block"]),
+body:has(div[id*="Overlay"].active),
+body:has(div[id*="Overlay"][style*="display: flex"]),
+body:has(div[id*="Overlay"][style*="display: block"]) {
+    overflow: hidden !important;
 }
 
 
