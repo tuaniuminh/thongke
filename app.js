@@ -4411,6 +4411,25 @@ function initHealthBindings() {
         addFamilyProfile();
     });
 
+    // Toggle Gemini API popover menu
+    const popoverBtn = document.getElementById('geminiPopoverBtn');
+    const popoverMenu = document.getElementById('geminiPopoverMenu');
+    if (popoverBtn && popoverMenu) {
+        popoverBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = popoverMenu.style.display === 'block';
+            popoverMenu.style.display = isOpen ? 'none' : 'block';
+        });
+        
+        popoverMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        document.addEventListener('click', () => {
+            popoverMenu.style.display = 'none';
+        });
+    }
+
     // Save API key button
     document.getElementById('saveGeminiKeyBtn')?.addEventListener('click', async () => {
         const apiKey = document.getElementById('geminiApiKeyInput')?.value.trim() || '';
@@ -4418,20 +4437,11 @@ function initHealthBindings() {
         state.geminiApiKeyUpdated = new Date().toISOString();
         await saveLocalState();
         showToast("Đã lưu khóa API Gemini thành công!", "success");
-        updateApiConfigCardState(); // Update collapse state
-        performSync(true);
-    });
-
-    // Toggle API config collapse/expand
-    document.getElementById('toggleApiConfigBtn')?.addEventListener('click', () => {
-        const card = document.getElementById('apiConfigCard');
-        if (card) {
-            if (card.classList.contains('collapsed-mode')) {
-                updateApiConfigCardState(true); // Force expand
-            } else {
-                updateApiConfigCardState(false);
-            }
+        updateApiConfigCardState();
+        if (popoverMenu) {
+            popoverMenu.style.display = 'none';
         }
+        performSync(true);
     });
 
     // Scanner dropzone & file input
@@ -4523,14 +4533,10 @@ function initHealthBindings() {
     });
 }
 
-function updateApiConfigCardState(forceExpand = false) {
-    const card = document.getElementById('apiConfigCard');
-    if (!card) return;
-    
-    if (state.geminiApiKey && !forceExpand) {
-        card.classList.add('collapsed-mode');
-    } else {
-        card.classList.remove('collapsed-mode');
+function updateApiConfigCardState() {
+    const dot = document.getElementById('geminiIndicatorDot');
+    if (dot) {
+        dot.style.backgroundColor = state.geminiApiKey ? '#10b981' : '#ef4444';
     }
 }
 
@@ -4942,6 +4948,10 @@ function fileToBase64(file) {
 async function handleHealthFile(file) {
     if (!state.geminiApiKey) {
         showToast("Vui lòng cấu hình Gemini API Key trước khi quét!", "warning");
+        const popoverMenu = document.getElementById('geminiPopoverMenu');
+        if (popoverMenu) {
+            popoverMenu.style.display = 'block';
+        }
         return;
     }
     
@@ -5353,7 +5363,10 @@ function renderHealthAiReport() {
 async function generateHealthAiAnalysis(forceFresh = false) {
     if (!state.geminiApiKey) {
         showToast("Vui lòng cấu hình Gemini API Key trước!", "warning");
-        updateApiConfigCardState(true); // force expand
+        const popoverMenu = document.getElementById('geminiPopoverMenu');
+        if (popoverMenu) {
+            popoverMenu.style.display = 'block';
+        }
         return;
     }
     

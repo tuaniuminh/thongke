@@ -482,7 +482,7 @@
             <section class="tab-panel" id="tab-health" style="display: none;">
                 <div class="health-theme-container">
                     <!-- Member Profile Selector Bar -->
-                    <div class="health-card profile-selector-card" style="padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: -4px;">
+                    <div class="health-card profile-selector-card" style="padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <i data-lucide="users" style="color: var(--health-accent); width: 20px; height: 20px;"></i>
                             <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Hồ sơ của:</span>
@@ -493,46 +493,45 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="button" id="manageProfilesBtn" class="health-btn health-btn-secondary health-select-sm" style="padding: 6px 12px; font-size: 0.78rem;">
-                            <i data-lucide="settings" style="width: 14px; height: 14px;"></i> Quản lý thành viên
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 8px; position: relative;">
+                            <!-- Gemini Config Popover -->
+                            <div class="gemini-popover-container" style="position: relative;">
+                                <button type="button" id="geminiPopoverBtn" class="health-btn health-btn-secondary health-select-sm" style="padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; gap: 6px;">
+                                    <span id="geminiIndicatorDot" style="width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; display: inline-block;"></span>
+                                    <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+                                    <span>Gemini AI</span>
+                                </button>
+                                <div id="geminiPopoverMenu" class="health-card" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; width: 300px; z-index: 1000; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); border: 1px solid var(--border-color);">
+                                    <h5 style="margin: 0 0 8px 0; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; color: var(--text-primary);">
+                                        <i data-lucide="key-round" style="width: 14px; height: 14px; color: var(--health-accent);"></i>
+                                        <span>Khóa API Gemini</span>
+                                    </h5>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 12px 0; line-height: 1.4;">
+                                        Nhập Google Gemini API Key để quét kết quả xét nghiệm tự động bằng AI.
+                                    </p>
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <input type="password" id="geminiApiKeyInput" class="form-control health-input" style="font-size: 0.8rem; padding: 8px 10px;" placeholder="Dán API Key tại đây...">
+                                        <button type="button" id="saveGeminiKeyBtn" class="health-btn health-btn-primary" style="padding: 8px 12px; font-size: 0.8rem; width: 100%; justify-content: center;">
+                                            Lưu cấu hình
+                                        </button>
+                                    </div>
+                                    <div style="margin-top: 12px; font-size: 0.72rem; border-top: 1px solid var(--border-color); padding-top: 8px; text-align: center;">
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color: var(--health-accent); text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i data-lucide="external-link" style="width: 10px; height: 10px;"></i> Lấy API Key miễn phí
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" id="manageProfilesBtn" class="health-btn health-btn-secondary health-select-sm" style="padding: 6px 12px; font-size: 0.78rem;">
+                                <i data-lucide="settings" style="width: 14px; height: 14px;"></i> Quản lý thành viên
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Top section: Gemini API settings & Scanner -->
-                    <div class="health-header-row">
-                        <!-- Gemini API Settings -->
-                        <div class="health-card api-config-card" id="apiConfigCard">
-                            <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <i data-lucide="key-round"></i>
-                                    <span>Cấu hình Gemini AI</span>
-                                </div>
-                                <button type="button" id="toggleApiConfigBtn" class="health-btn health-btn-secondary health-select-sm" style="display: none; padding: 4px 10px; font-size: 0.75rem;">
-                                    <i data-lucide="edit-2" style="width: 12px; height: 12px;"></i> Thay đổi
-                                </button>
-                            </h4>
-                            <div id="apiConfigFormContent">
-                                <p class="health-card-desc">
-                                    Nhập khóa API Key của Google Gemini để sử dụng tính năng quét ảnh y tế tự động.
-                                </p>
-                                <div class="api-input-group">
-                                    <input type="password" id="geminiApiKeyInput" class="form-control health-input" placeholder="Dán Gemini API Key tại đây...">
-                                    <button type="button" id="saveGeminiKeyBtn" class="health-btn health-btn-primary">Lưu khóa</button>
-                                </div>
-                                <div class="api-help-links">
-                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">
-                                        <i data-lucide="external-link"></i> Lấy API Key miễn phí từ Google AI Studio
-                                    </a>
-                                </div>
-                            </div>
-                            <div id="apiConfigCollapsedContent" style="display: none; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
-                                <span class="badge-relationship" style="background: rgba(16, 185, 129, 0.12); color: var(--health-accent); border: 1px solid rgba(16, 185, 129, 0.25);">🟢 Đã cấu hình</span>
-                                <span>API Key đang hoạt động</span>
-                            </div>
-                        </div>
-
+                    <!-- Top section: Scanner (Full width) -->
+                    <div class="health-header-row" style="grid-template-columns: 1fr; margin-bottom: 20px;">
                         <!-- Image Scanner Dropzone -->
-                        <div class="health-card scanner-card">
+                        <div class="health-card scanner-card" style="margin: 0;">
                             <h4 class="health-card-title">
                                 <i data-lucide="scan-line"></i>
                                 <span>Quét kết quả xét nghiệm bằng AI</span>
