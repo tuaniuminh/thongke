@@ -2819,6 +2819,74 @@ body.light-mode {
     }
 }
 
+@media (max-width: 768px) {
+    /* Force table layout for health record detail tables on mobile */
+    body:not(.mobile-view-table) .health-table,
+    body:not(.mobile-view-table) .health-table thead,
+    body:not(.mobile-view-table) .health-table tbody,
+    body:not(.mobile-view-table) .health-table th,
+    body:not(.mobile-view-table) .health-table td,
+    body:not(.mobile-view-table) .health-table tr {
+        display: table !important;
+    }
+    
+    body:not(.mobile-view-table) .health-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 8px !important;
+        box-shadow: none !important;
+    }
+
+    body:not(.mobile-view-table) .health-table thead {
+        display: table-header-group !important;
+        position: static !important;
+        width: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        clip: auto !important;
+    }
+
+    body:not(.mobile-view-table) .health-table thead tr {
+        display: table-row !important;
+        position: static !important;
+    }
+
+    body:not(.mobile-view-table) .health-table tbody {
+        display: table-row-group !important;
+    }
+
+    body:not(.mobile-view-table) .health-table tr {
+        display: table-row !important;
+        border: none !important;
+        background-color: transparent !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    body:not(.mobile-view-table) .health-table th,
+    body:not(.mobile-view-table) .health-table td {
+        display: table-cell !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        padding: 8px 4px !important;
+        font-size: 0.72rem !important;
+        text-align: left !important;
+        white-space: normal !important;
+    }
+
+    body:not(.mobile-view-table) .health-table th:nth-child(2),
+    body:not(.mobile-view-table) .health-table td:nth-child(2),
+    body:not(.mobile-view-table) .health-table th:nth-child(4),
+    body:not(.mobile-view-table) .health-table td:nth-child(4) {
+        text-align: center !important;
+    }
+
+    /* Hide the mobile card label prefix for health tables */
+    body:not(.mobile-view-table) .health-table td::before {
+        display: none !important;
+    }
+}
+
 
 
 
