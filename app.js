@@ -4747,6 +4747,9 @@ function renderHealthTrendsChart() {
 }
 
 function drawTrendChart(indicatorName, activeRecords) {
+    // Update indicator definition explanation card
+    updateIndicatorExplanation(indicatorName);
+
     const ctx = document.getElementById('healthTrendChart')?.getContext('2d');
     if (!ctx) return;
     
@@ -5525,6 +5528,358 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
         if (overlay) overlay.style.display = 'none';
         showToast("Phân tích sức khỏe AI thất bại: " + err.message, "error");
     }
+}
+
+// --- Medical Indicators Dictionary & Explanation Logic ---
+
+const HEALTH_INDICATORS_DICTIONARY = {
+    'glucose': {
+        name: 'Glucose (Đường huyết lúc đói)',
+        def: 'Đường huyết (đường trong máu lúc đói). Đánh giá khả năng chuyển hóa đường của cơ thể và là chỉ số cốt lõi để phát hiện bệnh tiểu đường.',
+        high: 'Cảnh báo nguy cơ tiền tiểu đường, tiểu đường thai kỳ, tiểu đường tuýp 2, hoặc rối loạn dung nạp glucose. Cần hạn chế tinh bột, đồ ngọt, tăng vận động.',
+        low: 'Gây hạ đường huyết (chóng mặt, run tay chân, vã mồ hôi, tim đập nhanh). Cần bổ sung ngay nước đường, bánh kẹo ngọt hoặc tinh bột hấp thu nhanh.'
+    },
+    'hba1c': {
+        name: 'HbA1c (Đường huyết trung bình 3 tháng)',
+        def: 'Tỷ lệ hemoglobin liên kết với đường trong máu. Phản ánh mức kiểm soát đường huyết trung bình trong 2-3 tháng gần nhất.',
+        high: 'Kiểm soát đường huyết kém ở bệnh nhân tiểu đường, hoặc chẩn đoán xác định bệnh tiểu đường (khi >= 6.5%). Tăng nguy cơ biến chứng tim mạch, mắt, thận.',
+        low: 'Ít gặp, có thể xảy ra ở người bị thiếu máu nặng, tan máu huyết tán, hoặc suy gan thận nặng làm thay đổi đời sống hồng cầu.'
+    },
+    'insulin': {
+        name: 'Insulin',
+        def: 'Hormone do tuyến tụy sản sinh, giúp vận chuyển đường từ máu vào trong tế bào để tạo năng lượng.',
+        high: 'Cảnh báo tình trạng kháng insulin (tiền đề của tiểu đường tuýp 2), hội chứng buồng trứng đa nang (PCOS), hoặc u tuyến tụy tiết insulin.',
+        low: 'Cảnh báo suy kiệt tuyến tụy (gặp ở bệnh tiểu đường tuýp 1 hoặc giai đoạn muộn của tiểu đường tuýp 2).'
+    },
+    'cholesterol': {
+        name: 'Cholesterol toàn phần',
+        def: 'Tổng lượng cholesterol trong máu (bao gồm cả mỡ tốt và mỡ xấu). Cần thiết cho hoạt động của màng tế bào và sản sinh hormone.',
+        high: 'Tăng nguy cơ xơ vữa động mạch, cao huyết áp, nhồi máu cơ tim, và đột quỵ. Cần hạn chế mỡ động vật, phủ tạng, tăng chất xơ và tập luyện.',
+        low: 'Có thể do suy dinh dưỡng, cường giáp, suy gan nặng, hoặc hội chứng kém hấp thu.'
+    },
+    'triglycerides': {
+        name: 'Triglycerides (Chất béo trung tính)',
+        def: 'Dạng chất béo phổ biến nhất trong cơ thể, tích tụ từ calo dư thừa. Nguồn năng lượng dự trữ nhưng quá nhiều sẽ gây hại mạch máu.',
+        high: 'Tăng xơ vữa động mạch. Đặc biệt khi triglycerides tăng rất cao (> 11.3 mmol/L hoặc > 1000 mg/dL) có nguy cơ gây viêm tụy cấp nguy hiểm tính mạng.',
+        low: 'Có thể do suy kiệt, chế độ ăn quá ít chất béo, cường giáp, hoặc hội chứng kém hấp thu.'
+    },
+    'hdl': {
+        name: 'HDL-Cholesterol (Mỡ tốt)',
+        def: 'Lipoprotein tỷ trọng cao. Thu gom cholesterol dư thừa từ các mô và mạch máu đưa về gan để xử lý và đào thải ra ngoài.',
+        high: 'Tốt cho hệ tim mạch, giúp bảo vệ mạch máu chống lại mảng xơ vữa (thường do tập luyện thể thao tốt, cơ địa lành mạnh).',
+        low: 'Làm tăng nguy cơ xơ vữa động mạch và các biến cố tim mạch dù các chỉ số mỡ máu khác bình thường.'
+    },
+    'ldl': {
+        name: 'LDL-Cholesterol (Mỡ xấu)',
+        def: 'Lipoprotein tỷ trọng thấp. Vận chuyển cholesterol từ gan đến các tế bào. Dư thừa sẽ bám vào thành mạch tạo xơ vữa gây tắc hẹp lòng mạch.',
+        high: 'Nguy cơ cao gây xơ vữa mạch máu, dẫn tới tai biến mạch máu não, nhồi máu cơ tim. Cần điều trị bằng thuốc hạ mỡ máu nếu có chỉ định.',
+        low: 'Thường ít gặp lâm sàng, có thể do suy gan, suy dinh dưỡng hoặc cường giáp.'
+    },
+    'ast': {
+        name: 'AST / SGOT (Men gan AST)',
+        def: 'Men xúc tác chuyển hóa đạm, có nhiều ở tế bào gan, cơ tim và cơ xương. Tăng lên khi tế bào ở các cơ quan này bị tổn thương hoặc hủy hoại.',
+        high: 'Cảnh báo tổn thương tế bào gan do viêm gan cấp/mãn tính, gan nhiễm mỡ, độc chất, bia rượu, hoặc tổn thương cơ tim (nhồi máu cơ tim).',
+        low: 'Không có ý nghĩa lâm sàng đáng ngại, thường phản ánh tình trạng bình thường.'
+    },
+    'alt': {
+        name: 'ALT / SGPT (Men gan ALT)',
+        def: 'Men gan đặc hiệu nhất cho tế bào gan, hầu như chỉ có ở gan. Là chỉ số nhạy bén nhất để phát hiện hủy hoại tế bào gan.',
+        high: 'Biểu hiện rõ rệt của tổn thương nhu mô gan (viêm gan virus, viêm gan do thuốc, nhiễm độc chất, gan nhiễm mỡ nặng, xơ gan tiến triển).',
+        low: 'Không có ý nghĩa lâm sàng đáng ngại.'
+    },
+    'ggt': {
+        name: 'GGT (Gamma-Glutamyl Transferase)',
+        def: 'Men gan rất nhạy cảm nằm ở màng tế bào ống mật và tế bào gan. Tăng cao nhanh chóng khi có tổn thương gan do cồn hoặc tắc mật.',
+        high: 'Thường gặp ở người uống nhiều bia rượu, viêm đường mật, tắc mật, hoặc tổn thương gan do dùng nhiều thuốc tây hại gan.',
+        low: 'Không có ý nghĩa lâm sàng đáng ngại.'
+    },
+    'bilirubin': {
+        name: 'Bilirubin (Sắc tố mật)',
+        def: 'Sản phẩm của quá trình phân hủy tế bào hồng cầu già. Gan có nhiệm vụ lọc chất này và đào thải qua mật.',
+        high: 'Gây vàng da, vàng mắt, nước tiểu sẫm màu. Cảnh báo các bệnh lý về gan mật (tắc mật, viêm gan) hoặc bệnh tan máu (hủy hồng cầu hàng loạt).',
+        low: 'Thường ít gặp và không có ý nghĩa bệnh lý đáng ngại.'
+    },
+    'albumin': {
+        name: 'Albumin',
+        def: 'Protein chiếm tỷ lệ cao nhất trong máu, do gan sản xuất. Giúp giữ nước không bị rò rỉ ra ngoài mạch máu và vận chuyển thuốc, hormone.',
+        high: 'Thường do cơ thể bị mất nước cấp tính (tiêu chảy, nôn mửa nặng).',
+        low: 'Cảnh báo chức năng gan suy giảm (xơ gan, suy gan) hoặc thận bị thất thoát đạm (hội chứng thận hư), hoặc suy dinh dưỡng nặng.'
+    },
+    'total protein': {
+        name: 'Protein toàn phần',
+        def: 'Tổng lượng protein (Albumin và Globulin) có trong huyết thanh. Phản ánh chức năng gan, thận và tình trạng miễn dịch của cơ thể.',
+        high: 'Có thể gặp trong các bệnh lý huyết học (như đau tủy xương), nhiễm trùng mãn tính hoặc cơ thể bị mất nước.',
+        low: 'Gặp trong suy dinh dưỡng, xơ gan, suy gan, suy thận, hội chứng thận hư, hoặc kém hấp thu đạm.'
+    },
+    'ure': {
+        name: 'Ure / Urea (Chỉ số Ure máu)',
+        def: 'Sản phẩm cuối cùng của quá trình chuyển hóa đạm trong cơ thể, được lọc qua cầu thận và đào thải ra ngoài qua nước tiểu.',
+        high: 'Cảnh báo chức năng lọc của thận suy giảm (suy thận), hoặc do chế độ ăn quá nhiều đạm, xuất huyết tiêu hóa, cơ thể mất nước nặng.',
+        low: 'Gặp khi chế độ ăn nghèo đạm, suy dinh dưỡng, truyền dịch quá nhiều, hoặc suy gan nặng (do gan giảm tổng hợp ure).'
+    },
+    'creatinine': {
+        name: 'Creatinine (Chức năng lọc của thận)',
+        def: 'Chất cặn bã từ quá trình co cơ, đào thải duy nhất qua thận. Là chỉ số chính xác và nhạy nhất để chẩn đoán mức độ suy thận.',
+        high: 'Cảnh báo tình trạng suy thận cấp hoặc mãn tính, tắc nghẽn đường tiểu (sỏi, u chèn ép), hoặc chấn thương hủy hoại cơ nặng.',
+        low: 'Gặp ở người bị suy kiệt, teo cơ, người già yếu ít vận động, phụ nữ mang thai (do tăng lưu lượng lọc máu ở thận).'
+    },
+    'egfr': {
+        name: 'eGFR (Độ lọc cầu thận ước tính)',
+        def: 'Thể tích máu được thận lọc sạch trong một phút. Phản ánh phần trăm năng lực hoạt động còn lại của hai quả thận.',
+        high: 'Thường là bình thường (nếu eGFR > 90), phản ánh chức năng thận rất tốt.',
+        low: 'Cảnh báo suy thận. eGFR càng thấp thì mức độ suy thận càng nặng (dưới 60 là suy thận độ 3 trở lên, dưới 15 là suy thận giai đoạn cuối).'
+    },
+    'uric acid': {
+        name: 'Axit Uric (Chỉ số Gút / Uric Acid)',
+        def: 'Sản phẩm chuyển hóa của nhân purin (có trong thịt đỏ, hải sản, rượu bia). Thận đào thải axit uric ra ngoài, nếu dư thừa sẽ lắng đọng tinh thể.',
+        high: 'Gây lắng đọng tinh thể urat tại các khớp dẫn đến những cơn đau Gút cấp tính (sưng nóng đỏ đau dữ dội khớp ngón chân, cổ chân) hoặc gây sỏi thận.',
+        low: 'Rất ít gặp, có thể liên quan đến hội chứng Fanconi (tổn thương ống thận) hoặc chế độ ăn quá nghèo dinh dưỡng.'
+    },
+    'rbc': {
+        name: 'RBC (Số lượng hồng cầu)',
+        def: 'Tế bào máu phổ biến nhất, chứa huyết sắc tố giúp vận chuyển oxy từ phổi đến nuôi các cơ quan tế bào trong cơ thể.',
+        high: 'Gặp ở người bị mất nước, bệnh đa hồng cầu, người sống ở vùng núi cao thiếu oxy, hoặc người bị bệnh tim phổi mãn tính.',
+        low: 'Biểu hiện của tình trạng thiếu máu (do mất máu, thiếu sắt, thiếu vitamin B12, tan máu, hoặc tủy xương giảm sản xuất).'
+    },
+    'wbc': {
+        name: 'WBC (Số lượng bạch cầu)',
+        def: 'Tế bào máu bảo vệ cơ thể. Đóng vai trò nhận diện, tấn công và tiêu diệt các tác nhân gây bệnh xâm nhập như vi khuẩn, virus.',
+        high: 'Cảnh báo cơ thể đang có nhiễm trùng cấp tính (viêm họng, viêm ruột, áp xe...), phản ứng viêm nặng, hoặc bệnh lý ác tính dòng bạch cầu.',
+        low: 'Cảnh báo suy giam miễn dịch, nhiễm virus nặng (như sốt xuất huyết, cúm), hoặc tổn thương tủy xương do hóa chất/thuốc.'
+    },
+    'plt': {
+        name: 'PLT (Số lượng tiểu cầu)',
+        def: 'Các mảnh tế bào máu cực nhỏ có vai trò kết dính và tạo cục máu đông để cầm vết thương, ngăn chảy máu.',
+        high: 'Tăng nguy cơ hình thành cục máu đông gây tắc mạch (nhồi máu não, nhồi máu cơ tim, tắc mạch phổi), hoặc do viêm nhiễm kéo dài.',
+        low: 'Tăng nguy cơ chảy máu tự nhiên (chảy máu cam, chảy máu chân răng, xuất huyết dưới da, xuất huyết nội tạng). Nguy hiểm khi PLT < 50.'
+    },
+    'hemoglobin': {
+        name: 'Hemoglobin / Hb (Huyết sắc tố)',
+        def: 'Protein chứa sắt nằm trong hồng cầu, trực tiếp làm nhiệm vụ gắn và vận chuyển oxy. Chỉ số chính để định nghĩa thiếu máu.',
+        high: 'Gặp khi cô đặc máu (mất nước nặng), bệnh đa hồng cầu hoặc bệnh tim phổi mạn tính gây thiếu oxy trường kỳ.',
+        low: 'Chẩn đoán xác định thiếu máu. Gây mệt mỏi, hoa mắt, chóng mặt, da xanh xao, tim đập nhanh khi gắng sức.'
+    },
+    'hematocrit': {
+        name: 'Hematocrit / Hct (Tỷ lệ thể tích hồng cầu)',
+        def: 'Tỷ lệ phần trăm thể tích của các tế bào hồng cầu chiếm trên tổng thể tích máu toàn phần.',
+        high: 'Chỉ ra tình trạng cô đặc máu (do mất nước nặng như tiêu chảy, sốt cao, bỏng) hoặc bệnh đa hồng cầu.',
+        low: 'Biểu hiện của thiếu máu hoặc cơ thể bị thừa dịch (loãng máu).'
+    },
+    'mcv': {
+        name: 'MCV (Thể tích trung bình hồng cầu)',
+        def: 'Kích thước trung bình của một tế bào hồng cầu. Giúp bác sĩ phân loại nguyên nhân gây ra thiếu máu.',
+        high: 'Hồng cầu to: Thường do thiếu Vitamin B12 hoặc Axit Folic, người nghiện rượu, hoặc bệnh gan.',
+        low: 'Hồng cầu nhỏ: Thường do thiếu sắt (rất phổ biến) hoặc bệnh tan máu bẩm sinh di truyền Thalassemia.'
+    },
+    'mch': {
+        name: 'MCH (Lượng huyết sắc tố trung bình hồng cầu)',
+        def: 'Khối lượng huyết sắc tố trung bình chứa trong một tế bào hồng cầu.',
+        high: 'Hồng cầu ưu sắc (thường đi kèm MCV cao do thiếu B12/Folic).',
+        low: 'Hồng cầu nhược sắc (thường gặp trong thiếu máu thiếu sắt hoặc bệnh Thalassemia).'
+    },
+    'mchc': {
+        name: 'MCHC (Nồng độ huyết sắc tố trung bình hồng cầu)',
+        def: 'Nồng độ trung bình của huyết sắc tố tính trên một thể tích hồng cầu lắng.',
+        high: 'Ít gặp, có thể do hồng cầu bị biến dạng hình cầu di truyền.',
+        low: 'Hồng cầu nhược sắc (thiếu máu thiếu sắt, thiếu máu do viêm nhiễm mãn tính).'
+    },
+    'neutrophil': {
+        name: 'Neutrophil (Bạch cầu trung tính)',
+        def: 'Thành phần bạch cầu lớn nhất, chuyên thực bào tiêu diệt vi khuẩn ở giai đoạn đầu của phản ứng viêm cấp.',
+        high: 'Biểu hiện rõ của tình trạng nhiễm trùng vi khuẩn cấp tính (viêm phổi, viêm ruột thừa, áp xe) hoặc stress, chấn thương lớn.',
+        low: 'Tăng nguy cơ nhiễm trùng nghiêm trọng (do suy tủy, nhiễm virus nặng, hoặc tác dụng phụ của thuốc hóa trị/kháng sinh).'
+    },
+    'lymphocyte': {
+        name: 'Lymphocyte (Bạch cầu Lympho)',
+        def: 'Tế bào miễn dịch chuyên biệt chịu trách nhiệm sản sinh kháng thể tiêu diệt tế bào nhiễm virus và tế bào ung thư.',
+        high: 'Cảnh báo nhiễm trùng do virus (ho gà, sởi, quai bị, sốt xuất huyết) hoặc các bệnh lý bạch cầu lympho mãn tính.',
+        low: 'Suy giảm miễn dịch (như nhiễm HIV, điều trị corticoid liều cao kéo dài, hóa trị, xạ trị).'
+    },
+    'monocyte': {
+        name: 'Monocyte (Bạch cầu Monocyte)',
+        def: 'Loại bạch cầu có kích thước lớn nhất, thực hiện nhiệm vụ dọn dẹp các mảnh vỡ tế bào và mầm bệnh đã bị tiêu diệt.',
+        high: 'Thường tăng trong giai đoạn hồi phục sau nhiễm trùng cấp, hoặc nhiễm trùng mãn tính (như lao, sốt rét, viêm tâm nội mạc).',
+        low: 'Rất ít ý nghĩa lâm sàng, có thể gặp trong suy tủy xương.'
+    },
+    'eosinophil': {
+        name: 'Eosinophil (Bạch cầu ưa axit)',
+        def: 'Loại bạch cầu chuyên chống lại các phản ứng dị ứng và tiêu diệt ký sinh trùng lớn (như giun, sán).',
+        high: 'Dấu hiệu cơ thể đang bị dị ứng (hen phế quản, viêm da dị ứng, dị ứng thuốc) hoặc đang bị nhiễm ký sinh trùng (giun sán).',
+        low: 'Không có ý nghĩa lâm sàng đặc hiệu.'
+    },
+    'basophil': {
+        name: 'Basophil (Bạch cầu ưa kiềm)',
+        def: 'Loại bạch cầu ít nhất trong máu, chứa histamine và heparin tham gia vào các phản ứng dị ứng tức thì.',
+        high: 'Gặp trong các phản ứng dị ứng nghiêm trọng, viêm mãn tính hoặc bệnh lý tăng sinh tủy xương.',
+        low: 'Không có ý nghĩa lâm sàng đặc hiệu.'
+    },
+    'tsh': {
+        name: 'TSH (Hormone kích thích tuyến giáp)',
+        def: 'Hormone do tuyến yên (não) tiết ra để điều khiển tuyến giáp sản xuất hormone giáp T3 và T4.',
+        high: 'Cảnh báo suy giáp (tuyến giáp hoạt động yếu nên não phải tăng tiết TSH để kích thích). Triệu chứng: sợ lạnh, tăng cân, mệt mỏi, mạch chậm.',
+        low: 'Cảnh báo cường giáp (tuyến giáp hoạt động quá mức nên não giảm tiết TSH). Triệu chứng: sợ nóng, sụt cân, tim đập nhanh, run tay.'
+    },
+    'ft3': {
+        name: 'FT3 (T3 tự do)',
+        def: 'Hormone tuyến giáp dạng tự do hoạt động sinh học mạnh mẽ nhất, quyết định tốc độ chuyển hóa của cơ thể.',
+        high: 'Dấu hiệu của bệnh cường giáp (Basedow, bướu độc tuyến giáp). Gây chuyển hóa nhanh, sụt cân, tim đập nhanh, đánh trống ngực.',
+        low: 'Dấu hiệu của bệnh suy giáp. Gây chậm chạp, mệt mỏi, sợ lạnh, táo bón.'
+    },
+    'ft4': {
+        name: 'FT4 (T4 tự do)',
+        def: 'Hormone tuyến giáp dạng tự do chiếm tỷ lệ cao nhất trong máu, đóng vai trò dự trữ và chuyển hóa thành FT3 khi tế bào cần.',
+        high: 'Cường giáp hoặc viêm tuyến giáp cấp tính.',
+        low: 'Suy giáp hoặc suy tuyến yên (không kích thích được tuyến giáp).'
+    },
+    'crp': {
+        name: 'CRP / hs-CRP (Chỉ số viêm CRP)',
+        def: 'Protein phản ứng C sản xuất tại gan. Chỉ số vô cùng nhạy bén để phát hiện viêm nhiễm cấp tính ở bất kỳ cơ quan nào.',
+        high: 'Cảnh báo có ổ nhiễm trùng nặng, viêm khớp dạng thấp tiến triển, chấn thương mô, hoặc nguy cơ xơ vữa động mạch tim (đối với hs-CRP).',
+        low: 'Chỉ số thấp phản ánh cơ thể bình thường, không có ổ viêm nhiễm hoạt động.'
+    },
+    'ckmb': {
+        name: 'CK-MB (Men tim đặc hiệu)',
+        def: 'Men creatine kinase nhánh cơ tim. Tăng cao rất nhanh trong máu khi có tổn thương cơ tim cấp.',
+        high: 'Chỉ điểm nhồi máu cơ tim cấp tính hoặc viêm cơ tim. Cần cấp cứu y tế ngay lập tức nếu kèm đau thắt ngực.',
+        low: 'Chỉ số thấp phản ánh tình trạng cơ tim bình thường.'
+    },
+    'troponin': {
+        name: 'Troponin T / I (Chỉ số tổn thương tim)',
+        def: 'Protein cấu trúc của cơ tim. Là tiêu chuẩn vàng nhạy bén và đặc hiệu nhất để chẩn đoán tổn thương cơ tim.',
+        high: 'Chẩn đoán xác định nhồi máu cơ tim cấp, viêm cơ tim cấp, hoặc tổn thương tim do suy tim nặng. Cần nhập viện khẩn cấp.',
+        low: 'Chỉ số bình thường, cho thấy không có tổn thương tế bào cơ tim.'
+    },
+    'ph nuoc tieu': {
+        name: 'pH nước tiểu',
+        def: 'Độ axit/kiềm của nước tiểu. Giúp đánh giá chức năng giữ cân bằng toan kiềm của thận và chẩn đoán sỏi thận.',
+        high: 'Nước tiểu kiềm (pH > 7.0): Nhiễm trùng đường tiểu do vi khuẩn phân hủy ure, hoặc chế độ ăn quá nhiều rau củ.',
+        low: 'Nước tiểu axit (pH < 5.0): Mất nước, đói, nhiễm toan tiểu đường, hoặc chế độ ăn quá nhiều thịt động vật.'
+    },
+    'protein nuoc tieu': {
+        name: 'Protein nước tiểu (Albumin niệu)',
+        def: 'Lượng đạm thất thoát qua nước tiểu. Thận bình thường sẽ giữ lại toàn bộ protein trong máu.',
+        high: 'Cảnh báo tổn thương màng lọc cầu thận (suy thận, hội chứng thận hư, viêm cầu thận) hoặc tổn thương thận do tiểu đường, cao huyết áp.',
+        low: 'Chỉ số bình thường (âm tính hoặc vết), chứng tỏ màng lọc thận hoạt động tốt.'
+    },
+    'glucose nuoc tieu': {
+        name: 'Glucose nước tiểu (Đường niệu)',
+        def: 'Lượng đường thất thoát qua nước tiểu. Thường chỉ xuất hiện khi nồng độ đường trong máu vượt quá 10 mmol/L (180 mg/dL).',
+        high: 'Cảnh báo bệnh tiểu đường chưa được kiểm soát tốt, hoặc bệnh lý ống thận làm giảm khả năng tái hấp thu đường.',
+        low: 'Chỉ số bình thường (âm tính), phản ánh tốt chuyển hóa đường.'
+    },
+    'ketone': {
+        name: 'Ketone nước tiểu (Thể ceton niệu)',
+        def: 'Sản phẩm phụ của quá trình phân hủy chất béo để lấy năng lượng thay thế khi cơ thể thiếu hụt nguồn đường.',
+        high: 'Gặp trong nhiễm toan ceton do tiểu đường cấp tính (nguy hiểm), nhịn đói lâu ngày, chế độ ăn kiêng tinh bột quá mức (Keto).',
+        low: 'Chỉ số bình thường (âm tính).'
+    },
+    'hong cau nieu': {
+        name: 'Hồng cầu niệu (Tiểu máu)',
+        def: 'Sự xuất hiện của hồng cầu trong nước tiểu do tổn thương mạch máu dọc đường tiết niệu.',
+        high: 'Cảnh báo sỏi thận, sỏi bàng quang, viêm đường tiết niệu, viêm cầu thận cấp, chấn thương thận hoặc u đường tiết niệu.',
+        low: 'Chỉ số bình thường (âm tính).'
+    },
+    'bach cau nieu': {
+        name: 'Bạch cầu niệu (Nhiễm trùng niệu)',
+        def: 'Sự xuất hiện của tế bào miễn dịch bạch cầu trong nước tiểu do phản ứng chống lại vi khuẩn.',
+        high: 'Cảnh báo nhiễm trùng đường tiết niệu (viêm niệu đạo, viêm bàng quang, viêm bể thận). Cần dùng kháng sinh điều trị theo đơn.',
+        low: 'Chỉ số bình thường (âm tính).'
+    }
+};
+
+function getDictionaryKey(name) {
+    if (!name) return null;
+    const norm = name.toLowerCase().trim();
+    
+    if (norm.includes('glucose') || norm === 'đường huyết' || norm === 'duong huyet') return 'glucose';
+    if (norm.includes('hba1c')) return 'hba1c';
+    if (norm.includes('insulin')) return 'insulin';
+    if (norm === 'cholesterol' || norm === 'cholesterol toàn phần' || norm === 'cholesterol toan phan' || norm === 'mỡ máu' || norm === 'mo mau') return 'cholesterol';
+    if (norm.includes('triglyceride')) return 'triglycerides';
+    if (norm.includes('hdl')) return 'hdl';
+    if (norm.includes('ldl')) return 'ldl';
+    if (norm.includes('ast') || norm.includes('sgot')) return 'ast';
+    if (norm.includes('alt') || norm.includes('sgpt')) return 'alt';
+    if (norm.includes('ggt')) return 'ggt';
+    if (norm.includes('bilirubin')) return 'bilirubin';
+    if (norm.includes('albumin')) return 'albumin';
+    if (norm === 'protein toàn phần' || norm === 'protein toan phan' || norm === 'total protein') return 'total protein';
+    if (norm === 'ure' || norm === 'urea' || norm === 'bun') return 'ure';
+    if (norm.includes('creatinine')) return 'creatinine';
+    if (norm.includes('egfr') || norm.includes('gfr')) return 'egfr';
+    if (norm.includes('uric') || norm === 'gút' || norm === 'gout') return 'uric acid';
+    if (norm.includes('rbc') || norm === 'hồng cầu' || norm === 'hong cau') return 'rbc';
+    if (norm.includes('wbc') || norm === 'bạch cầu' || norm === 'bach cau') return 'wbc';
+    if (norm.includes('plt') || norm === 'tiểu cầu' || norm === 'tieu cau') return 'plt';
+    if (norm === 'hemoglobin' || norm === 'huyết sắc tố' || norm === 'huyet sac to' || norm === 'hb') return 'hemoglobin';
+    if (norm === 'hematocrit' || norm === 'hct') return 'hematocrit';
+    if (norm === 'mcv') return 'mcv';
+    if (norm === 'mch') return 'mch';
+    if (norm === 'mchc') return 'mchc';
+    if (norm.includes('neutrophil')) return 'neutrophil';
+    if (norm.includes('lympho')) return 'lymphocyte';
+    if (norm.includes('monocyte')) return 'monocyte';
+    if (norm.includes('eosinophil')) return 'eosinophil';
+    if (norm.includes('basophil')) return 'basophil';
+    if (norm.includes('tsh')) return 'tsh';
+    if (norm.includes('t3') || norm.includes('ft3')) return 'ft3';
+    if (norm.includes('t4') || norm.includes('ft4')) return 'ft4';
+    if (norm.includes('crp')) return 'crp';
+    if (norm.includes('ck-mb') || norm.includes('ckmb')) return 'ckmb';
+    if (norm.includes('troponin')) return 'troponin';
+    if (norm.includes('ph nước tiểu') || norm.includes('ph nuoc tieu')) return 'ph nuoc tieu';
+    if (norm.includes('protein nước tiểu') || norm.includes('protein nuoc tieu') || norm.includes('albumin nước tiểu') || norm.includes('albumin nuoc tieu')) return 'protein nuoc tieu';
+    if (norm.includes('glucose nước tiểu') || norm.includes('glucose nuoc tieu') || norm.includes('đường niệu') || norm.includes('duong nieu')) return 'glucose nuoc tieu';
+    if (norm.includes('ketone') || norm.includes('ceton')) return 'ketone';
+    if (norm.includes('hồng cầu niệu') || norm.includes('hong cau nieu') || norm.includes('erythrocytes')) return 'hong cau nieu';
+    if (norm.includes('bạch cầu niệu') || norm.includes('bach cau nieu') || norm.includes('leukocytes')) return 'bach cau nieu';
+    
+    return null;
+}
+
+function updateIndicatorExplanation(indicatorName) {
+    const infoBox = document.getElementById('healthIndicatorInfoBox');
+    const nameEl = document.getElementById('infoIndicatorName');
+    const defEl = document.getElementById('infoIndicatorDef');
+    const highEl = document.getElementById('infoIndicatorHigh');
+    const lowEl = document.getElementById('infoIndicatorLow');
+    const highCont = document.getElementById('infoHighContainer');
+    const lowCont = document.getElementById('infoLowContainer');
+
+    if (!infoBox || !nameEl || !defEl || !highEl || !lowEl) return;
+
+    if (!indicatorName) {
+        infoBox.style.display = 'none';
+        return;
+    }
+
+    const dictKey = getDictionaryKey(indicatorName);
+    if (!dictKey || !HEALTH_INDICATORS_DICTIONARY[dictKey]) {
+        infoBox.style.display = 'none';
+        return;
+    }
+
+    const info = HEALTH_INDICATORS_DICTIONARY[dictKey];
+    nameEl.textContent = info.name;
+    defEl.textContent = info.def;
+
+    if (info.high) {
+        highCont.style.display = 'block';
+        highEl.textContent = info.high;
+    } else {
+        highCont.style.display = 'none';
+    }
+
+    if (info.low) {
+        lowCont.style.display = 'block';
+        lowEl.textContent = info.low;
+    } else {
+        lowCont.style.display = 'none';
+    }
+
+    infoBox.style.display = 'flex';
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 
