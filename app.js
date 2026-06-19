@@ -800,6 +800,16 @@ function switchTab(tabId, updateHash = true) {
         window.location.hash = hash;
     }
     
+    // Toggle Quick Add button based on active tab
+    const quickAddBtn = document.getElementById('quickAddBtn');
+    if (quickAddBtn) {
+        if (tabId === 'health' || tabId === 'settings') {
+            quickAddBtn.style.display = 'none';
+        } else {
+            quickAddBtn.style.display = '';
+        }
+    }
+
     // Close mobile menu if open
     document.getElementById('sidebar').classList.remove('mobile-open');
     lucide.createIcons();

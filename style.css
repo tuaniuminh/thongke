@@ -2561,6 +2561,23 @@ body.light-mode {
     }
 }
 
+@media (max-width: 768px) {
+    .health-modal-container {
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        display: block !important;
+    }
+    .health-modal-body {
+        overflow-y: visible !important;
+        padding: 14px !important;
+    }
+    #healthIndicatorsEditRows {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+}
+
 
 
 
