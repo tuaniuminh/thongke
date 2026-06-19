@@ -4551,9 +4551,10 @@ function initHealthBindings() {
         const select = document.getElementById('healthChartIndicatorSelect');
         if (select && select.options.length > 0) {
             let newIndex = select.selectedIndex - 1;
-            if (newIndex < 0) newIndex = select.options.length - 1; // loop back to end
-            select.selectedIndex = newIndex;
-            select.dispatchEvent(new Event('change'));
+            if (newIndex >= 0) { // Do not wrap around
+                select.selectedIndex = newIndex;
+                select.dispatchEvent(new Event('change'));
+            }
         }
     });
 
@@ -4561,9 +4562,10 @@ function initHealthBindings() {
         const select = document.getElementById('healthChartIndicatorSelect');
         if (select && select.options.length > 0) {
             let newIndex = select.selectedIndex + 1;
-            if (newIndex >= select.options.length) newIndex = 0; // loop back to start
-            select.selectedIndex = newIndex;
-            select.dispatchEvent(new Event('change'));
+            if (newIndex < select.options.length) { // Do not wrap around
+                select.selectedIndex = newIndex;
+                select.dispatchEvent(new Event('change'));
+            }
         }
     });
 }
@@ -4749,6 +4751,9 @@ function renderHealthTrendsChart() {
 function drawTrendChart(indicatorName, activeRecords) {
     // Update indicator definition explanation card
     updateIndicatorExplanation(indicatorName);
+    
+    // Update indicators progress bar and buttons disabled state
+    updateIndicatorProgress();
 
     const ctx = document.getElementById('healthTrendChart')?.getContext('2d');
     if (!ctx) return;
@@ -5922,6 +5927,59 @@ function updateIndicatorExplanation(indicatorName) {
     infoBox.style.display = 'flex';
     
     if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function updateIndicatorProgress() {
+    const select = document.getElementById('healthChartIndicatorSelect');
+    const progressBar = document.getElementById('indicatorProgressBar');
+    const progressText = document.getElementById('indicatorProgressText');
+    const prevBtn = document.getElementById('prevIndicatorBtn');
+    const nextBtn = document.getElementById('nextIndicatorBtn');
+
+    if (!select) return;
+
+    const total = select.options.length;
+    const current = total > 0 ? select.selectedIndex + 1 : 0;
+
+    // Update progress text
+    if (progressText) {
+        progressText.textContent = `${current}/${total}`;
+    }
+
+    // Update progress bar width
+    if (progressBar) {
+        const pct = total > 0 ? (current / total) * 100 : 0;
+        progressBar.style.width = `${pct}%`;
+    }
+
+    // Enable/disable navigation buttons based on boundaries
+    if (prevBtn) {
+        if (select.selectedIndex <= 0) {
+            prevBtn.disabled = true;
+            prevBtn.style.opacity = '0.35';
+            prevBtn.style.cursor = 'not-allowed';
+            prevBtn.style.pointerEvents = 'none';
+        } else {
+            prevBtn.disabled = false;
+            prevBtn.style.opacity = '1';
+            prevBtn.style.cursor = 'pointer';
+            prevBtn.style.pointerEvents = 'auto';
+        }
+    }
+
+    if (nextBtn) {
+        if (select.selectedIndex >= total - 1 || total === 0) {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.35';
+            nextBtn.style.cursor = 'not-allowed';
+            nextBtn.style.pointerEvents = 'none';
+        } else {
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = '1';
+            nextBtn.style.cursor = 'pointer';
+            nextBtn.style.pointerEvents = 'auto';
+        }
+    }
 }
 
 
