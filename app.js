@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.1';
+const APP_VERSION = '3.8.2';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -5102,12 +5102,18 @@ function renderHealthTrendsChart() {
         
     activeRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
         
-    // Find all indicator names
-    const indicatorNames = new Set();
+    // Find all indicator keys/names and standard labels
+    const indicatorMap = new Map();
     activeRecords.forEach(r => {
         (r.indicators || []).forEach(ind => {
             if (ind.name && ind.name.trim()) {
-                indicatorNames.add(ind.name.trim());
+                const rawName = ind.name.trim();
+                const dictKey = getDictionaryKey(rawName);
+                if (dictKey && HEALTH_INDICATORS_DICTIONARY[dictKey]) {
+                    indicatorMap.set(dictKey, HEALTH_INDICATORS_DICTIONARY[dictKey].name);
+                } else {
+                    indicatorMap.set("raw:" + rawName, rawName);
+                }
             }
         });
     });
@@ -5115,7 +5121,7 @@ function renderHealthTrendsChart() {
     const chartCard = document.getElementById('healthChartCard');
     const selectEl = document.getElementById('healthChartIndicatorSelect');
     
-    if (indicatorNames.size === 0 || !chartCard || !selectEl) {
+    if (indicatorMap.size === 0 || !chartCard || !selectEl) {
         if (chartCard) chartCard.style.display = 'none';
         return;
     }
@@ -5126,23 +5132,34 @@ function renderHealthTrendsChart() {
     const currentSelected = selectEl.value;
     
     // Populate select
-    selectEl.innerHTML = Array.from(indicatorNames).map(name => `
-        <option value="${escapeHTML(name)}">${escapeHTML(name)}</option>
+    selectEl.innerHTML = Array.from(indicatorMap.entries()).map(([value, label]) => `
+        <option value="${escapeHTML(value)}">${escapeHTML(label)}</option>
     `).join('');
     
     // Restore or default selection
-    if (Array.from(indicatorNames).includes(currentSelected)) {
+    if (indicatorMap.has(currentSelected)) {
         selectEl.value = currentSelected;
     } else {
-        selectEl.value = Array.from(indicatorNames)[0];
+        selectEl.value = Array.from(indicatorMap.keys())[0];
     }
     
     drawTrendChart(selectEl.value, activeRecords);
 }
 
-function drawTrendChart(indicatorName, activeRecords) {
+function drawTrendChart(indicatorIdentifier, activeRecords) {
+    let explanationName = indicatorIdentifier;
+    let chartDisplayName = indicatorIdentifier;
+    
+    if (indicatorIdentifier.startsWith("raw:")) {
+        explanationName = indicatorIdentifier.substring(4);
+        chartDisplayName = indicatorIdentifier.substring(4);
+    } else if (HEALTH_INDICATORS_DICTIONARY[indicatorIdentifier]) {
+        explanationName = HEALTH_INDICATORS_DICTIONARY[indicatorIdentifier].name;
+        chartDisplayName = HEALTH_INDICATORS_DICTIONARY[indicatorIdentifier].name;
+    }
+
     // Update indicator definition explanation card
-    updateIndicatorExplanation(indicatorName);
+    updateIndicatorExplanation(explanationName);
     
     // Update indicators progress bar and buttons disabled state
     updateIndicatorProgress();
@@ -5156,7 +5173,17 @@ function drawTrendChart(indicatorName, activeRecords) {
     
     const points = [];
     activeRecords.forEach(r => {
-        const ind = (r.indicators || []).find(i => i.name.trim() === indicatorName);
+        const ind = (r.indicators || []).find(i => {
+            if (!i.name) return false;
+            const rawName = i.name.trim();
+            const dictKey = getDictionaryKey(rawName);
+            if (indicatorIdentifier.startsWith("raw:")) {
+                const targetRawName = indicatorIdentifier.substring(4);
+                return !dictKey && rawName.toLowerCase() === targetRawName.toLowerCase();
+            } else {
+                return dictKey === indicatorIdentifier;
+            }
+        });
         if (ind) {
             const cleanVal = ind.value.toString().replace(/[^0-9.,]/g, '').replace(',', '.');
             const numVal = parseFloat(cleanVal);
@@ -5294,7 +5321,7 @@ function drawTrendChart(indicatorName, activeRecords) {
         data: {
             labels: labels,
             datasets: [{
-                label: `${indicatorName} (${unit})`,
+                label: `${chartDisplayName} (${unit})`,
                 data: data,
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.06)',
@@ -6372,7 +6399,13 @@ function updateIndicatorExplanation(indicatorName) {
         return;
     }
 
-    const dictKey = getDictionaryKey(indicatorName);
+    let dictKey = null;
+    if (HEALTH_INDICATORS_DICTIONARY[indicatorName]) {
+        dictKey = indicatorName;
+    } else {
+        dictKey = getDictionaryKey(indicatorName);
+    }
+
     if (!dictKey || !HEALTH_INDICATORS_DICTIONARY[dictKey]) {
         infoBox.style.display = 'none';
         return;
