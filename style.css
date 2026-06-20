@@ -1131,7 +1131,7 @@ body.light-mode .data-table tbody tr:hover {
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
-        padding: 2rem 1.5rem;
+        padding: calc(2rem + env(safe-area-inset-top)) 1.5rem 2rem;
         border-right: 1px solid var(--border-color);
         border-bottom: none;
     }
@@ -1185,7 +1185,7 @@ body.light-mode .data-table tbody tr:hover {
     
     .main-content {
         margin-left: 0;
-        padding: 1.25rem 1rem;
+        padding: calc(1.25rem + env(safe-area-inset-top)) 1rem 1.25rem;
     }
     
     .top-header {
@@ -2623,7 +2623,7 @@ body.light-mode {
 
 @media (max-width: 576px) {
     .main-content {
-        padding: 1rem 0.4rem !important;
+        padding: calc(1rem + env(safe-area-inset-top)) 0.4rem 1rem !important;
     }
     .health-theme-container {
         padding: 8px !important;
