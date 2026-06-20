@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.0';
+const APP_VERSION = '3.8.1';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -6283,6 +6283,18 @@ const HEALTH_INDICATORS_DICTIONARY = {
         def: 'Sự xuất hiện của tế bào miễn dịch bạch cầu trong nước tiểu do phản ứng chống lại vi khuẩn.',
         high: 'Cảnh báo nhiễm trùng đường tiết niệu (viêm niệu đạo, viêm bàng quang, viêm bể thận). Cần dùng kháng sinh điều trị theo đơn.',
         low: 'Chỉ số bình thường (âm tính).'
+    },
+    'psa': {
+        name: 'PSA toàn phần (Tầm soát tuyến tiền liệt)',
+        def: 'Kháng nguyên đặc hiệu của tuyến tiền liệt (Prostate-Specific Antigen). Là chỉ số tầm soát sớm các bệnh lý về tuyến tiền liệt ở nam giới.',
+        high: 'Cảnh báo nguy cơ phì đại lành tính tuyến tiền liệt, viêm tuyến tiền liệt, hoặc ung thư tuyến tiền liệt (đặc biệt khi PSA > 4 ng/mL). Cần khám chuyên khoa nam học.',
+        low: 'Chỉ số bình thường (an toàn).'
+    },
+    'calcium': {
+        name: 'Calci toàn phần (Canxi máu)',
+        def: 'Đo lường tổng lượng canxi trong máu bao gồm canxi tự do và canxi liên kết với protein. Canxi đóng vai trò quan trọng trong xương, cơ và thần kinh.',
+        high: 'Cảnh báo cường tuyến cận giáp, ngộ độc Vitamin D, các bệnh lý ác tính hủy xương hoặc suy thận. Gây mệt mỏi, sỏi thận, táo bón.',
+        low: 'Cảnh báo thiếu Vitamin D, suy tuyến cận giáp, suy thận mãn tính hoặc chế độ ăn thiếu hụt canxi. Gây tê bì chân tay, co thắt cơ (tetany).'
     }
 };
 
@@ -6307,6 +6319,8 @@ function getDictionaryKey(name) {
     if (norm.includes('creatinin') || norm === 'cre' || norm === 'crea') return 'creatinine';
     if (norm.includes('egfr') || norm.includes('gfr') || norm.includes('mức lọc cầu thận') || norm.includes('muc loc cau than')) return 'egfr';
     if (norm.includes('uric') || norm === 'gút' || norm === 'gout' || norm === 'ua') return 'uric acid';
+    if (norm.includes('psa') || norm.includes('tpsa')) return 'psa';
+    if (norm.includes('calci') || norm.includes('calcium')) return 'calcium';
     if (norm.includes('rbc') || norm.includes('hồng cầu') || norm.includes('hong cau') || norm === 'hc' || norm === 'so luong hc' || norm === 'số lượng hc') return 'rbc';
     if (norm.includes('wbc') || norm.includes('bạch cầu') || norm.includes('bach cau') || norm === 'bc' || norm === 'so luong bc' || norm === 'số lượng bc') return 'wbc';
     if (norm.includes('plt') || norm.includes('tiểu cầu') || norm.includes('tieu cau') || norm === 'tc' || norm === 'so luong tc' || norm === 'số lượng tc') return 'plt';
