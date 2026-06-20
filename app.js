@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.7.9';
+const APP_VERSION = '3.8.0';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -6293,19 +6293,19 @@ function getDictionaryKey(name) {
     if (norm.includes('glucose') || norm === 'đường huyết' || norm === 'duong huyet' || norm === 'glu') return 'glucose';
     if (norm.includes('hba1c')) return 'hba1c';
     if (norm.includes('insulin')) return 'insulin';
-    if (norm === 'cholesterol' || norm === 'cholesterol toàn phần' || norm === 'cholesterol toan phan' || norm === 'mỡ máu' || norm === 'mo mau' || norm === 'cho') return 'cholesterol';
-    if (norm.includes('triglyceride') || norm === 'tg') return 'triglycerides';
     if (norm.includes('hdl')) return 'hdl';
     if (norm.includes('ldl')) return 'ldl';
+    if (norm.includes('cholesterol') || norm === 'mỡ máu' || norm === 'mo mau' || norm === 'cho') return 'cholesterol';
+    if (norm.includes('triglycerid') || norm === 'tg') return 'triglycerides';
     if (norm.includes('ast') || norm.includes('sgot')) return 'ast';
     if (norm.includes('alt') || norm.includes('sgpt')) return 'alt';
-    if (norm.includes('ggt')) return 'ggt';
+    if (norm.includes('ggt') || norm.includes('gama gt') || norm.includes('gamma gt')) return 'ggt';
     if (norm.includes('bilirubin')) return 'bilirubin';
     if (norm.includes('albumin')) return 'albumin';
     if (norm === 'protein toàn phần' || norm === 'protein toan phan' || norm === 'total protein') return 'total protein';
     if (norm === 'ure' || norm === 'urea' || norm === 'bun') return 'ure';
-    if (norm.includes('creatinine') || norm === 'cre' || norm === 'crea') return 'creatinine';
-    if (norm.includes('egfr') || norm.includes('gfr')) return 'egfr';
+    if (norm.includes('creatinin') || norm === 'cre' || norm === 'crea') return 'creatinine';
+    if (norm.includes('egfr') || norm.includes('gfr') || norm.includes('mức lọc cầu thận') || norm.includes('muc loc cau than')) return 'egfr';
     if (norm.includes('uric') || norm === 'gút' || norm === 'gout' || norm === 'ua') return 'uric acid';
     if (norm.includes('rbc') || norm.includes('hồng cầu') || norm.includes('hong cau') || norm === 'hc' || norm === 'so luong hc' || norm === 'số lượng hc') return 'rbc';
     if (norm.includes('wbc') || norm.includes('bạch cầu') || norm.includes('bach cau') || norm === 'bc' || norm === 'so luong bc' || norm === 'số lượng bc') return 'wbc';
