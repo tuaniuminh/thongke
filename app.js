@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.4';
+const APP_VERSION = '3.8.5';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -4918,9 +4918,7 @@ function initHealthBindings() {
     const indicatorSelect = document.getElementById('healthChartIndicatorSelect');
     if (indicatorSelect) {
         indicatorSelect.addEventListener('change', (e) => {
-            const activeRecords = (state.medicalRecords || [])
-                .filter(r => !r.deleted_at)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            const activeRecords = getFilteredHealthRecords();
             drawTrendChart(e.target.value, activeRecords);
         });
 
@@ -5088,6 +5086,21 @@ function getHealthTypeLabel(type) {
     }
 }
 
+function getFilteredHealthRecords() {
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    let activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at);
+        
+    if (selectedProfileId !== 'all') {
+        activeRecords = activeRecords.filter(r => {
+            const rProfileId = r.profileId || 'p-self';
+            return rProfileId === selectedProfileId;
+        });
+    }
+    activeRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return activeRecords;
+}
+
 function renderHealthTrendsChart() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     
@@ -5098,15 +5111,7 @@ function renderHealthTrendsChart() {
         return;
     }
     
-    let activeRecords = (state.medicalRecords || [])
-        .filter(r => !r.deleted_at);
-        
-    activeRecords = activeRecords.filter(r => {
-        const rProfileId = r.profileId || 'p-self';
-        return rProfileId === selectedProfileId;
-    });
-        
-    activeRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const activeRecords = getFilteredHealthRecords();
         
     // Find all indicator keys/names and standard labels
     const indicatorMap = new Map();
