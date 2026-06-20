@@ -3091,7 +3091,7 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
     font-weight: 850;
     font-family: var(--font-heading);
     letter-spacing: -0.05em;
-    background: linear-gradient(135deg, #fff 30%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -3115,7 +3115,7 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
     padding: 1.5rem;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
+    border-radius: 20px;
     text-decoration: none;
     color: var(--text-primary);
     transition: all var(--transition-normal);

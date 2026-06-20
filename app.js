@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.7.2';
+const APP_VERSION = '3.7.3';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -872,6 +872,7 @@ function enterApp() {
     }
     
     resetViewportZoom();
+    updateHomeLayoutUI();
     renderAll();
 }
 
@@ -894,6 +895,7 @@ function handleHashRoute() {
                 link.classList.remove('active');
             }
         });
+        updateSidebarNavVisibility('home');
         return;
     }
     
@@ -903,6 +905,8 @@ function handleHashRoute() {
         const tabId = tabHashMapping[hash];
         if (state.activeTab !== tabId) {
             switchTab(tabId, false);
+        } else {
+            updateSidebarNavVisibility(tabId);
         }
     } else {
         const defaultHash = tabIdToHash[state.activeTab || 'home'] || 'trangchu';
@@ -984,6 +988,8 @@ function switchTab(tabId, updateHash = true) {
             quickAddBtn.style.display = '';
         }
     }
+    
+    updateSidebarNavVisibility(tabId);
 
     // Close mobile menu if open
     document.getElementById('sidebar').classList.remove('mobile-open');
@@ -1889,32 +1895,6 @@ function renderSettings() {
                         </button>
                     </div>
                 </div>
-                
-                <details style="margin-top: 20px; border-top:1px solid var(--border-color); padding-top:15px; cursor: pointer;">
-                    <summary style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 8px;">
-                        Hướng dẫn Supabase SQL (Cho lần lập đầu)
-                    </summary>
-                    <p class="settings-info" style="font-size:0.75rem;">Copy lệnh sau chạy trong SQL Editor của Supabase để tạo bảng và phân quyền bảo mật RLS:</p>
-                    <div class="sql-copy-block">
-                        <button class="btn-copy" onclick="copySqlCode()">Copy</button>
-                        <pre id="sqlCodeBlock">create table if not exists gift_sync (
-  user_id uuid references auth.users not null primary key,
-  encrypted_data text not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
-alter table gift_sync enable row level security;
-
-drop policy if exists "Users can insert their own sync data" on gift_sync;
-create policy "Users can insert their own sync data" on gift_sync for insert with check (auth.uid() = user_id);
-
-drop policy if exists "Users can update their own sync data" on gift_sync;
-create policy "Users can update their own sync data" on gift_sync for update using (auth.uid() = user_id);
-
-drop policy if exists "Users can select their own sync data" on gift_sync;
-create policy "Users can select their own sync data" on gift_sync for select using (auth.uid() = user_id);</pre>
-                    </div>
-                </details>
             `;
             
             document.getElementById('manualSyncBtn').addEventListener('click', () => performSync(false));
@@ -1946,17 +1926,74 @@ function updateUserBadge() {
     } else {
         badge.style.display = 'none';
     }
+    
+    updateHomeLayoutUI();
 }
 
-// SQL Copy helper
-window.copySqlCode = function() {
-    const pre = document.getElementById('sqlCodeBlock');
-    navigator.clipboard.writeText(pre.innerText).then(() => {
-        showToast("Đã copy SQL script!");
-    }).catch(() => {
-        showToast("Không thể copy tự động, vui lòng chọn để copy.", "error");
-    });
-};
+function updateHomeLayoutUI() {
+    const cardSettings = document.querySelector('.home-card.card-settings');
+    if (cardSettings) {
+        if (state.user !== null) {
+            cardSettings.style.setProperty('display', 'none', 'important');
+        } else {
+            cardSettings.style.removeProperty('display');
+            // Change title and description
+            const titleEl = cardSettings.querySelector('h3');
+            if (titleEl) titleEl.innerText = 'Đăng nhập tài khoản';
+            const descEl = cardSettings.querySelector('p');
+            if (descEl) descEl.innerText = 'Liên kết tài khoản Cloud Supabase để đồng bộ đám mây và bảo vệ dữ liệu';
+            
+            // Update icon to log-in
+            const iconContainer = cardSettings.querySelector('.home-card-icon');
+            if (iconContainer) {
+                iconContainer.innerHTML = '<i data-lucide="log-in"></i>';
+            }
+        }
+    }
+    lucide.createIcons();
+}
+
+function updateSidebarNavVisibility(tabId) {
+    const navItems = {
+        home: document.querySelector('[data-nav="home"]'),
+        dashboard: document.querySelector('[data-nav="dashboard"]'),
+        received: document.querySelector('[data-nav="received"]'),
+        sent: document.querySelector('[data-nav="sent"]'),
+        settings: document.querySelector('[data-nav="settings"]'),
+        financePortal: document.querySelector('[data-nav="finance-portal"]'),
+        health: document.querySelector('[data-nav="health"]')
+    };
+
+    if (!navItems.health) return;
+
+    if (tabId === 'health') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'block';
+        
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.settings) navItems.settings.style.display = 'none';
+        if (navItems.health) navItems.health.style.display = 'none';
+    } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
+        if (navItems.received) navItems.received.style.display = 'block';
+        if (navItems.sent) navItems.sent.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+    } else {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
+        if (navItems.received) navItems.received.style.display = 'block';
+        if (navItems.sent) navItems.sent.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.health) navItems.health.style.display = 'block';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+    }
+}
 
 // Handle Saving Supabase Configuration Credentials
 function handleSaveSupabaseConfig(e) {
