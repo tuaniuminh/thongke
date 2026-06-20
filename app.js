@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.2';
+const APP_VERSION = '3.8.3';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -5090,15 +5090,21 @@ function getHealthTypeLabel(type) {
 
 function renderHealthTrendsChart() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
+    
+    // If 'all' profiles are selected, do not show a combined trend chart as it is medically invalid
+    if (selectedProfileId === 'all') {
+        const chartCard = document.getElementById('healthChartCard');
+        if (chartCard) chartCard.style.display = 'none';
+        return;
+    }
+    
     let activeRecords = (state.medicalRecords || [])
         .filter(r => !r.deleted_at);
         
-    if (selectedProfileId !== 'all') {
-        activeRecords = activeRecords.filter(r => {
-            const rProfileId = r.profileId || 'p-self';
-            return rProfileId === selectedProfileId;
-        });
-    }
+    activeRecords = activeRecords.filter(r => {
+        const rProfileId = r.profileId || 'p-self';
+        return rProfileId === selectedProfileId;
+    });
         
     activeRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
         
