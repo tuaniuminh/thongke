@@ -2866,6 +2866,7 @@ body.light-mode {
 
 .profile-selector-card {
     overflow: visible !important;
+    z-index: 100;
 }
 
 /* Responsive member selector */
