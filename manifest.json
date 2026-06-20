@@ -5,11 +5,11 @@
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#0d9488",
+  "theme_color": "#090d16",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.png?v=3.7.4",
+      "src": "icon.png?v=3.7.5",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

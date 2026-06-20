@@ -8,10 +8,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FamiLife">
-    <link rel="apple-touch-icon" href="icon.png?v=3.7.4">
-    <link rel="manifest" href="manifest.json?v=3.7.4">
+    <!-- Browser Theme Color -->
+    <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#090d16" media="(prefers-color-scheme: dark)">
+    <link rel="apple-touch-icon" href="icon.png?v=3.7.5">
+    <link rel="manifest" href="manifest.json?v=3.7.5">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.7.4">
+    <link rel="stylesheet" href="style.css?v=3.7.5">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,7 +38,7 @@
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">FamiLife</div>
                     <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                        <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;" id="sidebarVersion">Phiên bản v3.7.4</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;" id="sidebarVersion">Phiên bản v3.7.5</span>
                         <button class="manual-check-update-btn" title="Kiểm tra cập nhật" style="background: none; border: none; padding: 2px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; transition: color var(--transition-fast);">
                             <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
                         </button>
@@ -497,7 +500,7 @@
                             </div>
                     </div>
                     <div style="text-align: center; margin-top: 24px; font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <span id="settingsVersion">Phiên bản ứng dụng: v3.7.4</span>
+                        <span id="settingsVersion">Phiên bản ứng dụng: v3.7.5</span>
                         <button class="manual-check-update-btn" title="Kiểm tra cập nhật" style="background: none; border: none; padding: 2px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; transition: color var(--transition-fast);">
                             <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
                         </button>
@@ -682,7 +685,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=3.7.4" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=3.7.5" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -733,7 +736,7 @@
             </div>
             
             <footer class="home-footer">
-                <span>Phiên bản v3.7.4</span>
+                <span>Phiên bản v3.7.5</span>
                 <span>&bull;</span>
                 <button class="manual-check-update-btn" title="Kiểm tra cập nhật" style="background: none; border: none; padding: 2px; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; transition: color var(--transition-fast);">
                     <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
@@ -751,7 +754,7 @@
                 </div>
                 <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                     <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.4</span>
+                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.5</span>
                 </h2>
                 <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                     Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -802,7 +805,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.4</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.5</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="unlockPinSubtext">
                         Nhập 6 chữ số mã PIN để mở khóa
@@ -853,7 +856,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Giải mã Sổ ghi chép</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.4</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.7.5</span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
                         Nhập Master Password để truy cập sổ.
@@ -1483,6 +1486,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script type="module" src="app.js?v=3.7.4"></script>
+    <script type="module" src="app.js?v=3.7.5"></script>
 </body>
 </html>
