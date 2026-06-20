@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.3';
+const APP_VERSION = '3.8.4';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -51,7 +51,7 @@ let state = {
     lastAiAnalysisUpdated: '',
     familyProfiles: [],
     familyProfilesUpdated: '',
-    selectedHealthProfileId: 'all',
+    selectedHealthProfileId: 'p-self',
     familyProfilesEditMode: false,
     lastResetTime: '',
     showImportNotesOption: false,
@@ -269,7 +269,7 @@ async function loadLocalState(password) {
         state.lastAiAnalysisUpdated = '';
         state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
         state.familyProfilesUpdated = '';
-        state.selectedHealthProfileId = 'all';
+        state.selectedHealthProfileId = 'p-self';
         state.lastResetTime = '';
         state.showImportNotesOption = false;
         state.showImportNotesOptionUpdated = '';
@@ -292,7 +292,7 @@ async function loadLocalState(password) {
         state.lastAiAnalysisUpdated = data.lastAiAnalysisUpdated || '';
         state.familyProfiles = data.familyProfiles && data.familyProfiles.length > 0 ? data.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
         state.familyProfilesUpdated = data.familyProfilesUpdated || '';
-        state.selectedHealthProfileId = 'all';
+        state.selectedHealthProfileId = 'p-self';
         state.lastResetTime = data.lastResetTime || '';
         state.showImportNotesOption = !!data.showImportNotesOption;
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
