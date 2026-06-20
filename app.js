@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.7.3';
+const APP_VERSION = '3.7.4';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -3993,31 +3993,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearAllDataBtn = document.getElementById('clearAllDataBtn');
     if (clearAllDataBtn) {
         clearAllDataBtn.addEventListener('click', async () => {
-            const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu ghi chép và sức khỏe trên ứng dụng FamiLife của thiết bị này!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
+            const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu thu chi đối ngoại trên ứng dụng FamiLife của thiết bị này (Dữ liệu hồ sơ y tế vẫn được giữ nguyên)!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
             if (confirmPin === null) {
                 return; // Cancelled
             }
             
             if (confirmPin === state.masterPassword) {
-                const doubleConfirm = confirm("XÁC NHẬN CUỐI CÙNG: Bạn có thực sự chắc chắn muốn xóa toàn bộ dữ liệu ghi chép?\n(Dữ liệu trên Supabase Cloud cũng sẽ bị xóa sạch sau khi đồng bộ)");
+                const doubleConfirm = confirm("XÁC NHẬN CUỐI CÙNG: Bạn có thực sự chắc chắn muốn xóa toàn bộ dữ liệu thu chi đối ngoại?\n(Dữ liệu trên Supabase Cloud cũng sẽ bị xóa sạch sau khi đồng bộ)");
                 if (!doubleConfirm) return;
                 
                 state.receivedGifts = [];
                 state.sentGifts = [];
                 state.customEventTypes = [];
                 state.customEventTypesUpdated = new Date().toISOString();
-                state.medicalRecords = [];
-                state.medicalRecordsUpdated = new Date().toISOString();
-                state.geminiApiKey = '';
-                state.geminiApiKeyUpdated = new Date().toISOString();
-                state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
-                state.familyProfilesUpdated = new Date().toISOString();
-                state.selectedHealthProfileId = 'all';
+                
+                // Keep medicalRecords, familyProfiles, and geminiApiKey intact
                 state.lastResetTime = new Date().toISOString();
                 
                 await saveLocalState();
                 renderAll();
-                showToast("Đã xóa sạch toàn bộ dữ liệu thành công!", "success");
+                showToast("Đã xóa sạch toàn bộ dữ liệu thu chi đối ngoại thành công!", "success");
                 
                 // Sync with Supabase to clear remote database by overwriting it
                 if (sync.isConfigured() && await sync.getCurrentUser()) {
