@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.7.5';
+const APP_VERSION = '3.7.6';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -772,15 +772,18 @@ function updateThemeUI() {
     const body = document.body;
     const icon = document.getElementById('themeIcon');
     const text = document.getElementById('themeText');
+    const themeMeta = document.getElementById('themeColorMeta');
     
     if (state.theme === 'light') {
         body.classList.add('light-mode');
         if (icon) icon.setAttribute('data-lucide', 'moon');
         if (text) text.innerText = 'Giao diện tối';
+        if (themeMeta) themeMeta.setAttribute('content', '#f3f4f6');
     } else {
         body.classList.remove('light-mode');
         if (icon) icon.setAttribute('data-lucide', 'sun');
         if (text) text.innerText = 'Giao diện sáng';
+        if (themeMeta) themeMeta.setAttribute('content', '#090d16');
     }
     lucide.createIcons();
 }
