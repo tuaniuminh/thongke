@@ -1136,6 +1136,7 @@ body.light-mode .data-table tbody tr:hover {
         padding: calc(2rem + env(safe-area-inset-top)) 1.5rem 2rem;
         border-right: 1px solid var(--border-color);
         border-bottom: none;
+        z-index: 990;
     }
     
     .sidebar.mobile-open {

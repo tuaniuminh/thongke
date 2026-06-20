@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.0';
+const APP_VERSION = '3.9.1';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
