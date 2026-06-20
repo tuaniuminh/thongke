@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.5';
+const APP_VERSION = '3.8.6';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -6362,11 +6362,11 @@ function getDictionaryKey(name) {
     if (norm.includes('rbc') || norm.includes('hồng cầu') || norm.includes('hong cau') || norm === 'hc' || norm === 'so luong hc' || norm === 'số lượng hc') return 'rbc';
     if (norm.includes('wbc') || norm.includes('bạch cầu') || norm.includes('bach cau') || norm === 'bc' || norm === 'so luong bc' || norm === 'số lượng bc') return 'wbc';
     if (norm.includes('plt') || norm.includes('tiểu cầu') || norm.includes('tieu cau') || norm === 'tc' || norm === 'so luong tc' || norm === 'số lượng tc') return 'plt';
-    if (norm === 'hemoglobin' || norm === 'huyết sắc tố' || norm === 'huyet sac to' || norm === 'hb') return 'hemoglobin';
-    if (norm === 'hematocrit' || norm === 'hct') return 'hematocrit';
-    if (norm === 'mcv') return 'mcv';
-    if (norm === 'mch') return 'mch';
-    if (norm === 'mchc') return 'mchc';
+    if (norm.includes('hemoglobin') || norm.includes('huyết sắc tố') || norm.includes('huyet sac to') || norm === 'hb') return 'hemoglobin';
+    if (norm.includes('hematocrit') || norm.includes('hct')) return 'hematocrit';
+    if (norm.includes('mcv')) return 'mcv';
+    if (norm.includes('mchc')) return 'mchc';
+    if (norm.includes('mch')) return 'mch';
     if (norm.includes('neutrophil')) return 'neutrophil';
     if (norm.includes('lympho')) return 'lymphocyte';
     if (norm.includes('monocyte')) return 'monocyte';
