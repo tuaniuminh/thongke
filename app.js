@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.8.6';
+const APP_VERSION = '3.8.7';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -6353,7 +6353,7 @@ function getDictionaryKey(name) {
     if (norm.includes('bilirubin')) return 'bilirubin';
     if (norm.includes('albumin')) return 'albumin';
     if (norm === 'protein toàn phần' || norm === 'protein toan phan' || norm === 'total protein') return 'total protein';
-    if (norm === 'ure' || norm === 'urea' || norm === 'bun') return 'ure';
+    if (/\bure\b/.test(norm) || norm.includes('urê') || norm.includes('urea') || norm.includes('bun')) return 'ure';
     if (norm.includes('creatinin') || norm === 'cre' || norm === 'crea') return 'creatinine';
     if (norm.includes('egfr') || norm.includes('gfr') || norm.includes('mức lọc cầu thận') || norm.includes('muc loc cau than')) return 'egfr';
     if (norm.includes('uric') || norm === 'gút' || norm === 'gout' || norm === 'ua') return 'uric acid';
