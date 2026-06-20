@@ -2864,6 +2864,10 @@ body.light-mode {
     background: rgba(255, 255, 255, 0.06);
 }
 
+.profile-selector-card {
+    overflow: visible !important;
+}
+
 /* Responsive member selector */
 @media (max-width: 576px) {
     .profile-selector-card {
