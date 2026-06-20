@@ -832,10 +832,10 @@ body.light-mode .data-table tbody tr:hover {
 /* Modals */
 .modal-overlay {
     position: fixed;
-    top: 0;
+    top: -100px;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 100px);
     background-color: rgba(10, 15, 29, 0.6);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -844,6 +844,8 @@ body.light-mode .data-table tbody tr:hover {
     justify-content: center;
     align-items: center;
     animation: fadeIn var(--transition-fast);
+    padding-top: 100px;
+    box-sizing: border-box;
 }
 
 .modal-overlay.active {
