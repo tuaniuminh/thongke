@@ -2878,6 +2878,17 @@ body.light-mode {
         align-items: center !important;
         justify-content: space-between !important;
     }
+    .profile-selector-card > div:last-child {
+        gap: 8px !important;
+    }
+    .profile-selector-card > div:last-child > .gemini-popover-container {
+        flex: 1 !important;
+        position: static !important;
+    }
+    .profile-selector-card > div:last-child > button {
+        flex: 1 !important;
+        width: auto !important;
+    }
     .profile-selector-card button {
         width: 100% !important;
     }
@@ -2885,6 +2896,11 @@ body.light-mode {
         flex: 1;
         max-width: none !important;
         margin-left: 6px;
+    }
+    #geminiPopoverMenu {
+        left: 0 !important;
+        right: 0 !important;
+        width: auto !important;
     }
 }
 
