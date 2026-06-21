@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.1';
+const APP_VERSION = '3.9.2';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -206,7 +206,12 @@ async function checkAppVersion(isManual = false) {
         const data = await response.json();
         if (data && data.version) {
             if (data.version !== APP_VERSION) {
-                showUpdateNotification(data.version);
+                if (isManual) {
+                    showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
+                    setTimeout(() => window.location.reload(true), 1000);
+                } else {
+                    showUpdateNotification(data.version);
+                }
                 return true;
             } else {
                 if (isManual) {
@@ -4970,6 +4975,7 @@ function updateApiConfigCardState() {
 // Expose health details and removal row functions globally
 window.openHealthDetail = openHealthDetail;
 window.addIndicatorEditRow = addIndicatorEditRow;
+window.handleRemoveIndicatorRow = handleRemoveIndicatorRow;
 
 function renderHealthDashboard() {
     // Update API Key Card Collapsed state
@@ -5120,9 +5126,15 @@ function renderHealthTrendsChart() {
             if (ind.name && ind.name.trim()) {
                 const rawName = ind.name.trim();
                 const dictKey = getDictionaryKey(rawName);
+                if (dictKey === 'bloodgroup') return;
+                
                 if (dictKey && HEALTH_INDICATORS_DICTIONARY[dictKey]) {
                     indicatorMap.set(dictKey, HEALTH_INDICATORS_DICTIONARY[dictKey].name);
                 } else {
+                    const normRaw = rawName.toLowerCase();
+                    if (normRaw.includes('nhóm máu') || normRaw.includes('nhom mau') || normRaw.includes('blood group') || normRaw.includes('bloodgroup')) {
+                        return;
+                    }
                     indicatorMap.set("raw:" + rawName, rawName);
                 }
             }
@@ -5625,7 +5637,7 @@ function addIndicatorEditRow(name = '', value = '', unit = '', refRange = '', as
             <option value="high" ${assessment === 'high' ? 'selected' : ''}>Cao</option>
             <option value="low" ${assessment === 'low' ? 'selected' : ''}>Thấp</option>
         </select>
-        <button type="button" class="health-remove-row-btn" onclick="this.closest('.health-indicators-edit-row').remove()">
+        <button type="button" class="health-remove-row-btn" onclick="handleRemoveIndicatorRow(this)">
             <i data-lucide="trash-2"></i>
         </button>
     `;
@@ -5633,6 +5645,31 @@ function addIndicatorEditRow(name = '', value = '', unit = '', refRange = '', as
     container.appendChild(rowDiv);
     
     if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function handleRemoveIndicatorRow(btn) {
+    if (!btn) return;
+    if (btn.classList.contains('confirm-delete')) {
+        if (btn.dataset.timeoutId) {
+            clearTimeout(parseInt(btn.dataset.timeoutId, 10));
+        }
+        btn.closest('.health-indicators-edit-row').remove();
+    } else {
+        document.querySelectorAll('.health-remove-row-btn.confirm-delete').forEach(otherBtn => {
+            otherBtn.classList.remove('confirm-delete');
+            if (otherBtn.dataset.timeoutId) {
+                clearTimeout(parseInt(otherBtn.dataset.timeoutId, 10));
+                delete otherBtn.dataset.timeoutId;
+            }
+        });
+        
+        btn.classList.add('confirm-delete');
+        const timeoutId = setTimeout(() => {
+            btn.classList.remove('confirm-delete');
+            delete btn.dataset.timeoutId;
+        }, 3000);
+        btn.dataset.timeoutId = timeoutId;
+    }
 }
 
 async function saveMedicalRecord(event) {
@@ -6333,6 +6370,72 @@ const HEALTH_INDICATORS_DICTIONARY = {
         def: 'Đo lường tổng lượng canxi trong máu bao gồm canxi tự do và canxi liên kết với protein. Canxi đóng vai trò quan trọng trong xương, cơ và thần kinh.',
         high: 'Cảnh báo cường tuyến cận giáp, ngộ độc Vitamin D, các bệnh lý ác tính hủy xương hoặc suy thận. Gây mệt mỏi, sỏi thận, táo bón.',
         low: 'Cảnh báo thiếu Vitamin D, suy tuyến cận giáp, suy thận mãn tính hoặc chế độ ăn thiếu hụt canxi. Gây tê bì chân tay, co thắt cơ (tetany).'
+    },
+    'prolactin': {
+        name: 'Prolactin (Nồng độ Prolactin máu)',
+        def: 'Hormone do tuyến yên tiết ra, vai trò chính là kích thích sản xuất sữa mẹ sau sinh. Ở người không mang thai, nồng độ cao có thể ảnh hưởng đến sinh sản.',
+        high: 'Có thể do u tuyến yên (prolactinoma), suy giáp, stress, hoặc do thuốc hại dạ dày/an thần. Gây vô sinh, rối loạn kinh nguyệt hoặc tiết sữa bất thường ở nữ; giảm ham muốn ở nam.',
+        low: 'Rất hiếm gặp, có thể do suy tuyến yên toàn bộ hoặc sau chấn thương/phẫu thuật tuyến yên.'
+    },
+    'amh': {
+        name: 'AMH (Dự trữ buồng trứng)',
+        def: 'Hormone phản ánh số lượng nang noãn còn lại ở buồng trứng (dự trữ buồng trứng). Chỉ số quan trọng nhất đánh giá khả năng sinh sản của phụ nữ.',
+        high: 'Thường gặp ở phụ nữ có hội chứng buồng trứng đa nang (PCOS) hoặc u hạt tế bào buồng trứng. Quá cao làm tăng nguy cơ hội chứng quá kích buồng trứng khi làm thụ tinh ống nghiệm.',
+        low: 'Dự trữ buồng trứng suy giảm, báo hiệu sự suy giảm khả năng sinh sản hoặc mãn kinh sớm. Cần tư vấn bác sĩ chuyên khoa sớm nếu đang muốn sinh con.'
+    },
+    'ferritin': {
+        name: 'Ferritin (Dự trữ sắt)',
+        def: 'Một loại protein tế bào lưu trữ sắt và giải phóng nó một cách có kiểm soát. Chỉ số phản ánh chính xác nhất lượng sắt dự trữ trong cơ thể.',
+        high: 'Có thể do thừa sắt (bệnh nhiễm sắc tố sắt), viêm nhiễm mãn tính, bệnh gan cấp/mãn tính, cường giáp, hoặc một số bệnh lý ác tính/huyết học.',
+        low: 'Chỉ số nhạy nhất báo hiệu thiếu sắt (ngay cả trước khi xảy ra thiếu máu thiếu sắt). Cần bổ sung sắt qua chế độ ăn uống hoặc thuốc theo chỉ định bác sĩ.'
+    },
+    'iron': {
+        name: 'Sắt huyết thanh (Sắt trong máu)',
+        def: 'Lượng sắt tự do lưu thông trong huyết thanh, liên kết với transferrin. Cần thiết cho việc sản xuất huyết sắc tố trong hồng cầu.',
+        high: 'Có thể do tan máu, ngộ độc sắt do uống quá liều, bệnh thừa sắt di truyền, hoặc truyền máu nhiều lần.',
+        low: 'Thiếu hụt sắt do chế độ ăn nghèo nần, kém hấp thu ở ruột, hoặc mất máu mãn tính (ví dụ hành kinh nhiều, trĩ, viêm loét tiêu hóa). Gây mệt mỏi, thiếu máu.'
+    },
+    'bloodgroup': {
+        name: 'Nhóm máu ABO và Rh(D)',
+        def: 'Phân loại nhóm máu dựa trên các kháng nguyên trên bề mặt hồng cầu. Cần thiết và bắt buộc phải biết khi truyền máu, phẫu thuật hoặc quản lý thai sản.',
+        high: 'Không áp dụng chỉ số cao/thấp cho nhóm máu. Đây là đặc tính sinh học cố định suốt đời.',
+        low: 'Không áp dụng chỉ số cao/thấp cho nhóm máu. Đây là đặc tính sinh học cố định suốt đời.'
+    },
+    'nitrite': {
+        name: 'Nitrite nước tiểu',
+        def: 'Xét nghiệm gián tiếp tìm vi khuẩn đường niệu. Bình thường không có nitrite trong nước tiểu.',
+        high: 'Dương tính (+): Cảnh báo mạnh mẽ tình trạng nhiễm trùng đường tiết niệu (UTI) do vi khuẩn (như E. coli) chuyển hóa nitrate thành nitrite. Cần đi khám để điều trị kháng sinh.',
+        low: 'Âm tính (-): Trạng thái bình thường.'
+    },
+    'ascorbic_acid': {
+        name: 'Ascorbic Acid (Vitamin C nước tiểu)',
+        def: 'Nồng độ Vitamin C đào thải qua nước tiểu. Giúp đánh giá chế độ ăn uống và cảnh báo khả năng gây nhiễu các chỉ số xét nghiệm nước tiểu khác.',
+        high: 'Nồng độ cao phản ánh chế độ ăn giàu Vitamin C hoặc uống thực phẩm bổ sung quá mức. Có thể gây nhiễu/âm tính giả cho một số xét nghiệm nước tiểu khác như glucose hay hồng cầu.',
+        low: 'Âm tính hoặc nồng độ thấp là trạng thái bình thường.'
+    },
+    'pct': {
+        name: 'PCT (Thể tích khối tiểu cầu)',
+        def: 'Tỷ lệ thể tích mà tiểu cầu chiếm trong máu toàn phần, tương tự như Hct (Hematocrit) đối với hồng cầu.',
+        high: 'Tăng nguy cơ hình thành cục máu đông gây tắc mạch, hoặc do tăng tiểu cầu thứ phát, phản ứng viêm/nhiễm trùng mãn tính.',
+        low: 'Thường đi kèm giảm số lượng tiểu cầu (PLT), phản ánh tình trạng giảm sinh tiểu cầu ở tủy xương.'
+    },
+    'neutrophil_percent': {
+        name: 'NEUT% (Tỷ lệ bạch cầu trung tính)',
+        def: 'Tỷ lệ phần trăm bạch cầu trung tính trên tổng số bạch cầu. Đóng vai trò chủ chốt trong phản ứng miễn dịch chống vi khuẩn xâm nhập.',
+        high: 'Nhiễm trùng vi khuẩn cấp tính (viêm phổi, viêm ruột thừa), viêm cấp, stress cơ thể nặng, hoặc chấn thương lớn.',
+        low: 'Tăng nguy cơ nhiễm trùng nghiêm trọng do suy giảm chức năng tạo máu của tủy xương, nhiễm virus nặng hoặc suy giảm miễn dịch.'
+    },
+    'lymphocyte_percent': {
+        name: 'LYM% (Tỷ lệ bạch cầu Lympho)',
+        def: 'Tỷ lệ phần trăm bạch cầu lympho trên tổng số bạch cầu. Đóng vai trò chính trong miễn dịch chống virus và tế bào bất thường.',
+        high: 'Cảnh báo nhiễm trùng do virus (ho gà, sởi, quai bị, sốt xuất huyết), hoặc các bệnh lý ác tính dòng lympho.',
+        low: 'Suy giảm miễn dịch (như HIV), điều trị bằng corticoid liều cao kéo dài, hoặc sau hóa trị/xạ trị.'
+    },
+    'mxd_percent': {
+        name: 'MXD% (Tỷ lệ bạch cầu hỗn hợp)',
+        def: 'Tỷ lệ phần trăm nhóm 3 loại bạch cầu ít gặp (Bazo + Mono + Axit) trên tổng số bạch cầu.',
+        high: 'Cảnh báo nhiễm ký sinh trùng (giun sán), phản ứng dị ứng nặng, hen suyễn, hoặc nhiễm trùng/viêm mãn tính lâu ngày.',
+        low: 'Chỉ số thấp ít có ý nghĩa lâm sàng đặc hiệu trừ khi đi kèm suy giảm toàn bộ các dòng tế bào máu khác.'
     }
 };
 
@@ -6367,8 +6470,12 @@ function getDictionaryKey(name) {
     if (norm.includes('mcv')) return 'mcv';
     if (norm.includes('mchc')) return 'mchc';
     if (norm.includes('mch')) return 'mch';
-    if (norm.includes('neutrophil')) return 'neutrophil';
-    if (norm.includes('lympho')) return 'lymphocyte';
+    if (norm.includes('neutrophil') || norm.includes('neut') || norm === 'bc trung tính' || norm === 'bc trung tinh') {
+        return (norm.includes('%') || norm.includes('tỷ lệ') || norm.includes('ty le')) ? 'neutrophil_percent' : 'neutrophil';
+    }
+    if (norm.includes('lympho') || norm.includes('lym')) {
+        return (norm.includes('%') || norm.includes('tỷ lệ') || norm.includes('ty le')) ? 'lymphocyte_percent' : 'lymphocyte';
+    }
     if (norm.includes('monocyte')) return 'monocyte';
     if (norm.includes('eosinophil')) return 'eosinophil';
     if (norm.includes('basophil')) return 'basophil';
@@ -6383,13 +6490,23 @@ function getDictionaryKey(name) {
     if (norm.includes('glucose nước tiểu') || norm.includes('glucose nuoc tieu') || norm.includes('đường niệu') || norm.includes('duong nieu')) return 'glucose nuoc tieu';
     if (norm.includes('ketone') || norm.includes('ceton')) return 'ketone';
     if (norm.includes('hồng cầu niệu') || norm.includes('hong cau nieu') || norm.includes('erythrocytes')) return 'hong cau nieu';
-    if (norm.includes('bạch cầu niệu') || norm.includes('bach cau nieu') || norm.includes('leukocytes')) return 'bach cau nieu';
+    if (norm.includes('bạch cầu niệu') || norm.includes('bach cau nieu') || norm.includes('leukocyte')) return 'bach cau nieu';
     if (norm.includes('rdw')) return 'rdw';
     if (norm.includes('pdw')) return 'pdw';
     if (norm.includes('mpv')) return 'mpv';
     if (norm.includes('p-lcr') || norm.includes('plcr')) return 'p-lcr';
-    if (norm.includes('mxd') || norm.includes('bazo mono axit') || norm.includes('bazo,mono,axit') || norm.includes('axit,bazo,mono') || norm.includes('axit, bazo, mono')) return 'mxd';
+    if (norm.includes('mxd')) {
+        return (norm.includes('%') || norm.includes('tỷ lệ') || norm.includes('ty le')) ? 'mxd_percent' : 'mxd';
+    }
     if (norm.includes('kst sốt rét') || norm.includes('kst sot ret') || norm.includes('ký sinh trùng sốt rét') || norm.includes('ky sinh trung sot ret')) return 'kst sot ret';
+    if (norm.includes('prolactin')) return 'prolactin';
+    if (norm.includes('amh') || norm.includes('anti-mullerian') || norm.includes('anti-müllerian')) return 'amh';
+    if (norm.includes('ferritin')) return 'ferritin';
+    if (norm.includes('sắt huyết thanh') || norm.includes('sat huyet thanh') || norm === 'iron') return 'iron';
+    if (norm.includes('nhóm máu') || norm.includes('nhom mau') || norm.includes('blood group') || norm.includes('bloodgroup')) return 'bloodgroup';
+    if (norm.includes('nitrite')) return 'nitrite';
+    if (norm.includes('ascorbic') || norm.includes('vitamin c') || norm.includes('ascorbate')) return 'ascorbic_acid';
+    if (norm.includes('pct') || norm.includes('plateletcrit')) return 'pct';
     
     return null;
 }
