@@ -3271,6 +3271,79 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
     }
 }
 
+/* User Badge Interactivity */
+.user-badge {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent;
+}
+
+.user-badge:hover {
+    background-color: var(--border-color);
+    border-color: var(--text-muted);
+}
+
+/* Version Badge Button (PRO Version) */
+.version-badge-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-heading);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+body.light-mode .version-badge-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.version-badge-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(13, 148, 136, 0.1);
+    box-shadow: 0 0 15px rgba(13, 148, 136, 0.3);
+    transform: translateY(-2px);
+}
+
+.version-badge-btn:active {
+    transform: translateY(0);
+}
+
+.version-badge-btn i {
+    color: var(--text-muted);
+    transition: color 0.3s;
+}
+
+.version-badge-btn:hover i {
+    color: var(--primary-color);
+}
+
+@media (max-width: 576px) {
+    .version-badge-btn {
+        top: 12px;
+        right: 12px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}
+
 
 
 
