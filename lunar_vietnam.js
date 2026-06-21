@@ -1,5 +1,5 @@
 /**
- * Thư viện tính Lịch âm Việt Nam tối giản (v3.9.9)
+ * Thư viện tính Lịch âm Việt Nam tối giản (v4.0.0)
  * Dựa trên thuật toán chuyển đổi âm dương lịch của tác giả Hồ Ngọc Đức.
  * Thiết lập múi giờ chuẩn GMT+7 cho Việt Nam.
  * Dung lượng tối giản, không chứa các thành phần giao diện thừa.

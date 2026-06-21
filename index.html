@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=3.9.9">
+    <link rel="stylesheet" href="style.css?v=4.0.0">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -32,7 +32,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=3.9.9" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.0" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -96,7 +96,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=3.9.9" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.0" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -695,23 +695,23 @@
 
     <!-- Home Landing Page Layout -->
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
-        <!-- Widget Thời tiết Hà Nội & Lịch âm Việt Nam -->
+        <!-- Widget Lịch âm Việt Nam & Thời tiết Hà Nội -->
         <div class="home-widgets-container" id="homeWidgetsContainer">
+            <div class="home-widget-box" id="homeLunarWidget">
+                <div class="widget-row" id="lunarRow">
+                    <span>Lịch âm: --/--/----</span>
+                </div>
+            </div>
             <div class="home-widget-box" id="homeWeatherWidget">
                 <div class="widget-row" id="weatherRow">
                     <i data-lucide="cloud-sun"></i>
                     <span>--°C Hà Nội</span>
                 </div>
             </div>
-            <div class="home-widget-box" id="homeLunarWidget">
-                <div class="widget-row" id="lunarRow">
-                    <span>Lịch âm: --/--/----</span>
-                </div>
-            </div>
         </div>
         
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span>Ver 3.9.9 PRO</span>
+            <span>Ver 4.0.0 PRO</span>
         </button>
         <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
             <i data-lucide="settings"></i>
@@ -719,7 +719,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=3.9.9" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.0" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1512,7 +1512,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=3.9.9"></script>
-    <script type="module" src="app.js?v=3.9.9"></script>
+    <script src="lunar_vietnam.js?v=4.0.0"></script>
+    <script type="module" src="app.js?v=4.0.0"></script>
 </body>
 </html>
