@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.3';
+const APP_VERSION = '3.9.4';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2000,6 +2000,64 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.settings) navItems.settings.style.display = 'block';
         if (navItems.health) navItems.health.style.display = 'block';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+    }
+    
+    // Call mobile navbar update
+    updateMobileNavbar(tabId);
+}
+
+function updateMobileNavbar(tabId) {
+    const mobileNavbar = document.getElementById('mobileNavbar');
+    if (!mobileNavbar) return;
+
+    const logoImg = document.getElementById('mobileLogoImg');
+    const navbarTitle = document.getElementById('mobileNavbarTitle');
+    const navbarNav = document.getElementById('mobileNavbarNav');
+
+    if (tabId === 'health') {
+        if (logoImg) logoImg.src = 'health_logo.png';
+        if (navbarTitle) navbarTitle.innerText = 'Hồ Sơ Y Tế';
+        if (navbarNav) {
+            navbarNav.innerHTML = `
+                <button class="nav-icon-btn" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                </button>
+                <button class="nav-icon-btn" onclick="switchTab('dashboard')" title="Thu chi đối ngoại">
+                    <i data-lucide="hand-coins"></i>
+                </button>
+                <button class="nav-icon-btn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
+                    <i data-lucide="settings"></i>
+                </button>
+            `;
+        }
+    } else {
+        if (logoImg) logoImg.src = 'icon.png?v=3.9.3';
+        if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
+        if (navbarNav) {
+            navbarNav.innerHTML = `
+                <button class="nav-icon-btn" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                </button>
+                <button class="nav-icon-btn ${tabId === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')" title="Tổng quan">
+                    <i data-lucide="layout-dashboard"></i>
+                </button>
+                <button class="nav-icon-btn ${tabId === 'received' ? 'active' : ''}" onclick="switchTab('received')" title="Tiền tôi nhận">
+                    <i data-lucide="arrow-down-left"></i>
+                </button>
+                <button class="nav-icon-btn ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi mừng">
+                    <i data-lucide="arrow-up-right"></i>
+                </button>
+                <button class="nav-icon-btn" onclick="switchTab('health')" title="Hồ sơ y tế">
+                    <i data-lucide="heart-pulse"></i>
+                </button>
+                <button class="nav-icon-btn ${tabId === 'settings' ? 'active' : ''}" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
+                    <i data-lucide="settings"></i>
+                </button>
+            `;
+        }
+    }
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
 }
 
