@@ -775,19 +775,19 @@ function toggleTheme() {
 
 function updateThemeUI() {
     const body = document.body;
-    const icon = document.getElementById('themeIcon');
-    const text = document.getElementById('themeText');
+    const icons = document.querySelectorAll('.theme-icon');
+    const texts = document.querySelectorAll('.theme-text');
     const themeMeta = document.getElementById('themeColorMeta');
     
     if (state.theme === 'light') {
         body.classList.add('light-mode');
-        if (icon) icon.setAttribute('data-lucide', 'moon');
-        if (text) text.innerText = 'Giao diện tối';
+        icons.forEach(icon => icon.setAttribute('data-lucide', 'moon'));
+        texts.forEach(text => text.innerText = 'Giao diện tối');
         if (themeMeta) themeMeta.setAttribute('content', '#f3f4f6');
     } else {
         body.classList.remove('light-mode');
-        if (icon) icon.setAttribute('data-lucide', 'sun');
-        if (text) text.innerText = 'Giao diện sáng';
+        icons.forEach(icon => icon.setAttribute('data-lucide', 'sun'));
+        texts.forEach(text => text.innerText = 'Giao diện sáng');
         if (themeMeta) themeMeta.setAttribute('content', '#090d16');
     }
     lucide.createIcons();
@@ -4020,7 +4020,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('hashchange', handleHashRoute);
     
     // Theme toggle click
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.querySelectorAll('.theme-toggle-btn-trigger').forEach(btn => {
+        btn.addEventListener('click', toggleTheme);
+    });
     
     // Mobile Navigation Drawer Toggle
     document.getElementById('sidebarToggle').addEventListener('click', () => {
