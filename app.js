@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.5';
+const APP_VERSION = '3.9.6';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2033,7 +2033,7 @@ function updateMobileNavbar(tabId) {
             mobileHomeBtn.style.setProperty('display', 'inline-flex', 'important');
         }
     } else if (tabId === 'health') {
-        if (logoImg) logoImg.src = 'health_logo.png?v=3.9.5';
+        if (logoImg) logoImg.src = 'health_logo.png?v=3.9.6';
         if (navbarTitle) navbarTitle.innerText = 'Hồ Sơ Y Tế';
         
         if (navbarLeft) {
@@ -2056,7 +2056,7 @@ function updateMobileNavbar(tabId) {
     } else {
         // For finance tabs (dashboard, received, sent)
         mobileNavbar.classList.add('two-line');
-        if (logoImg) logoImg.src = 'finance_logo.png?v=3.9.5';
+        if (logoImg) logoImg.src = 'finance_logo.png?v=3.9.6';
         if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
 
         if (navbarLeft) {
