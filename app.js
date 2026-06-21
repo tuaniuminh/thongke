@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.6';
+const APP_VERSION = '3.9.7';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1962,6 +1962,23 @@ function updateHomeLayoutUI() {
 }
 
 function updateSidebarNavVisibility(tabId) {
+    const sidebarLogoText = document.getElementById('sidebarLogoText');
+    const sidebarLogoImg = document.getElementById('sidebarLogoImg');
+    
+    if (sidebarLogoImg) {
+        sidebarLogoImg.src = 'icon.png?v=3.9.7';
+    }
+    
+    if (sidebarLogoText) {
+        if (tabId === 'health') {
+            sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
+        } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings') {
+            sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
+        } else {
+            sidebarLogoText.innerText = 'FamiLife';
+        }
+    }
+
     const navItems = {
         home: document.querySelector('[data-nav="home"]'),
         dashboard: document.querySelector('[data-nav="dashboard"]'),
@@ -2010,10 +2027,6 @@ function updateMobileNavbar(tabId) {
     const mobileNavbar = document.getElementById('mobileNavbar');
     if (!mobileNavbar) return;
 
-    const logoImg = document.getElementById('mobileLogoImg');
-    const navbarTitle = document.getElementById('mobileNavbarTitle');
-    const navbarNav = document.getElementById('mobileNavbarNav');
-    const navbarLeft = document.querySelector('.mobile-navbar-left');
     const pageTitleBlock = document.querySelector('.top-header .page-title');
     const mobileHomeBtn = document.getElementById('mobileHomeBtn');
 
@@ -2033,42 +2046,43 @@ function updateMobileNavbar(tabId) {
             mobileHomeBtn.style.setProperty('display', 'inline-flex', 'important');
         }
     } else if (tabId === 'health') {
-        if (logoImg) logoImg.src = 'health_logo.png?v=3.9.6';
-        if (navbarTitle) navbarTitle.innerText = 'Hồ Sơ Y Tế';
-        
-        if (navbarLeft) {
-            navbarLeft.removeAttribute('onclick');
-            navbarLeft.style.cursor = 'default';
-        }
-        
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');
         }
-
-        if (navbarNav) {
-            navbarNav.innerHTML = `
+        
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="width: 100%; display: flex; align-items: center; gap: 8px;">
+                <div class="mobile-navbar-logo">
+                    <img src="icon.png?v=3.9.7" alt="Logo" id="mobileLogoImg">
+                </div>
+                <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
                 <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
                 </button>
-            `;
-        }
+            </div>
+        `;
     } else {
         // For finance tabs (dashboard, received, sent)
         mobileNavbar.classList.add('two-line');
-        if (logoImg) logoImg.src = 'finance_logo.png?v=3.9.6';
-        if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
-
-        if (navbarLeft) {
-            navbarLeft.setAttribute('onclick', "switchTab('dashboard')");
-            navbarLeft.style.cursor = 'pointer';
-        }
-
-        if (navbarNav) {
-            navbarNav.innerHTML = `
-                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+        
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <div class="mobile-navbar-logo">
+                        <img src="icon.png?v=3.9.7" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
+                </div>
+                <button class="nav-icon-btn" onclick="window.location.hash = 'trangchu'" title="Trang chủ" style="width: 36px; height: 36px;">
                     <i data-lucide="home"></i>
-                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only ${tabId === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')" title="Tổng quan">
+                    Tổng quan
                 </button>
                 <button class="nav-icon-btn text-only ${tabId === 'received' ? 'active' : ''}" onclick="switchTab('received')" title="Tiền tôi Nhận">
                     Tiền tôi Nhận
@@ -2076,8 +2090,8 @@ function updateMobileNavbar(tabId) {
                 <button class="nav-icon-btn text-only ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi Mừng">
                     Tiền tôi Mừng
                 </button>
-            `;
-        }
+            </div>
+        `;
     }
 
     if (typeof lucide !== 'undefined') {

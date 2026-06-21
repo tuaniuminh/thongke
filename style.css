@@ -3563,6 +3563,18 @@ body.light-mode .home-settings-btn {
         background: rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(0, 0, 0, 0.08);
     }
+
+    /* Theme toggle button responsive adjustments on mobile */
+    .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        min-width: 40px;
+    }
+    .theme-toggle-btn #themeText {
+        display: none !important;
+    }
 }
 
 @media (max-width: 576px) {
@@ -3577,4 +3589,12 @@ body.light-mode .home-settings-btn {
     .mobile-navbar {
         margin: -1rem -0.4rem 1.25rem -0.4rem !important;
     }
+}
+
+/* Theme Toggle Button custom layout */
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }

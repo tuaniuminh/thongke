@@ -32,10 +32,10 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=3.9.6" alt="FamiLife Logo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=3.9.7" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                    <div class="logo-text">FamiLife</div>
+                    <div class="logo-text" id="sidebarLogoText">FamiLife</div>
                 </div>
             </div>
             
@@ -96,7 +96,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=3.9.6" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=3.9.7" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -120,6 +120,10 @@
                     <button class="btn btn-primary" id="quickAddBtn">
                         <i data-lucide="plus"></i>
                         <span class="btn-text">Thêm ghi chép</span>
+                    </button>
+                    <button class="btn btn-outline theme-toggle-btn" id="themeToggle" title="Chuyển chế độ sáng/tối">
+                        <i data-lucide="sun" id="themeIcon"></i>
+                        <span id="themeText">Giao diện sáng</span>
                     </button>
                     <button class="btn btn-secondary mobile-home-btn" id="mobileHomeBtn" onclick="window.location.hash = 'trangchu'" style="display: none;" title="Trang chủ">
                         <i data-lucide="home"></i>
@@ -357,20 +361,7 @@
 
             <section class="tab-panel" id="tab-settings" style="display: none;">
                 <div class="settings-grid">
-                    <!-- Theme Settings Card -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="palette"></i>
-                            <span>Giao diện ứng dụng</span>
-                        </h2>
-                        <p class="settings-info">
-                            Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
-                        </p>
-                        <button class="btn btn-outline w-full" id="themeToggle" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
-                            <i data-lucide="sun" id="themeIcon"></i>
-                            <span id="themeText">Giao diện sáng</span>
-                        </button>
-                    </div>
+                    <!-- Theme settings moved to top navbar header-actions -->
 
                     <!-- Security / Master Password Card -->
                     <div class="settings-card">
@@ -692,7 +683,7 @@
     <!-- Home Landing Page Layout -->
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span>Ver 3.9.6 PRO</span>
+            <span>Ver 3.9.7 PRO</span>
         </button>
         <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
             <i data-lucide="settings"></i>
@@ -700,7 +691,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=3.9.6" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=3.9.7" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
