@@ -6741,46 +6741,24 @@ function updateIndicatorProgress() {
 
 // --- WEATHER & LUNAR WIDGET LOGIC ---
 
-// Fetch thời tiết Hà Nội từ Open-Meteo và hiển thị
+// Fetch thời tiết Hà Nội từ Open-Meteo và hiển thị (luôn cập nhật mới mỗi lần mở app/vào trang chủ)
 async function updateHomeWeather() {
-    const cacheKey = 'hanoi_weather_cache';
-    const cacheTimeKey = 'hanoi_weather_cache_time';
-    const cacheExpiry = 30 * 60 * 1000; // 30 phút
-    
-    const now = Date.now();
-    const cachedData = localStorage.getItem(cacheKey);
-    const cachedTime = localStorage.getItem(cacheTimeKey);
-    
-    let weatherData = null;
-    
-    if (cachedData && cachedTime && (now - parseInt(cachedTime) < cacheExpiry)) {
-        try {
-            weatherData = JSON.parse(cachedData);
-        } catch (e) {
-            weatherData = null;
-        }
-    }
-    
-    if (!weatherData) {
-        try {
-            const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=21.0285&longitude=105.8542&current=temperature_2m,weather_code');
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.current) {
-                    weatherData = {
-                        temp: Math.round(data.current.temperature_2m),
-                        code: data.current.weather_code
-                    };
-                    localStorage.setItem(cacheKey, JSON.stringify(weatherData));
-                    localStorage.setItem(cacheTimeKey, now.toString());
-                }
+    try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=21.0285&longitude=105.8542&current=temperature_2m,weather_code');
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.current) {
+                const weatherData = {
+                    temp: Math.round(data.current.temperature_2m),
+                    code: data.current.weather_code
+                };
+                renderWeatherWidget(weatherData);
             }
-        } catch (error) {
-            console.error('Lỗi khi tải thời tiết Hà Nội:', error);
         }
+    } catch (error) {
+        console.error('Lỗi khi tải thời tiết Hà Nội:', error);
+        renderWeatherWidget(null);
     }
-    
-    renderWeatherWidget(weatherData);
 }
 
 function renderWeatherWidget(weatherData) {
@@ -6832,7 +6810,7 @@ function renderWeatherWidget(weatherData) {
     }
 }
 
-// Tính toán và hiển thị âm lịch Việt Nam
+// Tính toán và hiển thị âm lịch Việt Nam (định dạng dd/mm/yyyy, không dùng icon)
 function updateHomeLunar() {
     const lunarContainer = document.getElementById('lunarRow');
     if (!lunarContainer) return;
@@ -6864,23 +6842,16 @@ function updateHomeLunar() {
     };
     const animalVi = animalMap[lunar.animal] || lunar.animal;
     
-    var lunarDateText = '';
-    if (lunar.lDay === 1) {
-        lunarDateText = `Mùng 1/${lunar.lMonth} ÂL`;
-    } else {
-        lunarDateText = `${lunar.lDay}/${lunar.lMonth} ÂL`;
-    }
+    // Format ngày dạng dd/mm/yyyy
+    const dayStr = lunar.lDay < 10 ? '0' + lunar.lDay : lunar.lDay;
+    const monthStr = lunar.lMonth < 10 ? '0' + lunar.lMonth : lunar.lMonth;
+    const lunarDateText = `${dayStr}/${monthStr}/${lunar.lYear}`;
     
     const fullTooltip = `Ngày ${lunar.lDay} tháng ${monthName}${leapText}, năm ${lunar.gzYear} (Ngày ${lunar.gzDay}) - Con giáp: ${animalVi}`;
     
     lunarContainer.innerHTML = `
-        <i data-lucide="moon"></i>
-        <span class="lunar-date-text" title="${fullTooltip}">${lunarDateText} (${lunar.gzYear})</span>
+        <span class="lunar-date-text" title="${fullTooltip}">Lịch âm: ${lunarDateText}</span>
     `;
-    
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
 }
 
 // Gắn các hàm vào global window để tránh tree-shaking

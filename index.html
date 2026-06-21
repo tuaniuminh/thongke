@@ -696,15 +696,17 @@
     <!-- Home Landing Page Layout -->
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
         <!-- Widget Thời tiết Hà Nội & Lịch âm Việt Nam -->
-        <div class="home-weather-lunar-widget" id="homeWeatherLunarWidget">
-            <div class="widget-row" id="weatherRow">
-                <i data-lucide="cloud-sun"></i>
-                <span>--°C Hà Nội</span>
+        <div class="home-widgets-container" id="homeWidgetsContainer">
+            <div class="home-widget-box" id="homeWeatherWidget">
+                <div class="widget-row" id="weatherRow">
+                    <i data-lucide="cloud-sun"></i>
+                    <span>--°C Hà Nội</span>
+                </div>
             </div>
-            <div class="widget-divider"></div>
-            <div class="widget-row" id="lunarRow">
-                <i data-lucide="moon"></i>
-                <span>--/-- ÂL</span>
+            <div class="home-widget-box" id="homeLunarWidget">
+                <div class="widget-row" id="lunarRow">
+                    <span>Lịch âm: --/--/----</span>
+                </div>
             </div>
         </div>
         

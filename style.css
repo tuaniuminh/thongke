@@ -3602,37 +3602,40 @@ body.light-mode .home-settings-btn {
     }
 }
 
-/* Home Page Weather & Lunar Calendar Widget */
-.home-weather-lunar-widget {
+/* Home Page Widgets Container */
+.home-widgets-container {
     position: absolute;
     top: 20px;
     left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+    font-family: var(--font-heading);
+}
+
+.home-widget-box {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    border-radius: 12px;
+    padding: 8px 12px;
     color: var(--text-primary);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-    z-index: 10;
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
-    font-family: var(--font-heading);
 }
 
-body.light-mode .home-weather-lunar-widget {
+body.light-mode .home-widget-box {
     background: rgba(0, 0, 0, 0.03);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 15px 0 rgba(0, 0, 0, 0.04);
 }
 
-.home-weather-lunar-widget:hover {
-    transform: translateY(-2px);
+.home-widget-box:hover {
+    transform: translateY(-1px);
     border-color: var(--primary-color);
-    box-shadow: 0 12px 40px 0 rgba(13, 148, 136, 0.15);
+    box-shadow: 0 8px 25px 0 rgba(13, 148, 136, 0.12);
 }
 
 .widget-row {
@@ -3651,23 +3654,16 @@ body.light-mode .home-weather-lunar-widget {
     flex-shrink: 0;
 }
 
-.widget-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.08);
-    width: 100%;
-}
-
-body.light-mode .widget-divider {
-    background: rgba(0, 0, 0, 0.06);
-}
-
 @media (max-width: 576px) {
-    .home-weather-lunar-widget {
+    .home-widgets-container {
         top: 12px;
         left: 12px;
-        padding: 8px 10px;
-        gap: 4px;
-        max-width: 165px;
+        gap: 6px;
+    }
+    
+    .home-widget-box {
+        padding: 6px 10px;
+        border-radius: 10px;
     }
     
     .widget-row {
