@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.7';
+const APP_VERSION = '3.9.8';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1966,7 +1966,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=3.9.7';
+        sidebarLogoImg.src = 'icon.png?v=3.9.8';
     }
     
     if (sidebarLogoText) {
@@ -2053,7 +2053,7 @@ function updateMobileNavbar(tabId) {
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="width: 100%; display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=3.9.7" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=3.9.8" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2072,7 +2072,7 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=3.9.7" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=3.9.8" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
