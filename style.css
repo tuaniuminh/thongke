@@ -3351,10 +3351,7 @@ body.light-mode .version-badge-btn {
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border-color);
         padding: 10px 14px;
-        position: sticky;
-        top: 0;
-        left: 0;
-        right: 0;
+        position: relative;
         z-index: 900;
         margin: -1.25rem -1rem 1.25rem -1rem; /* Offset main-content padding */
         padding-top: calc(10px + env(safe-area-inset-top));
@@ -3362,6 +3359,27 @@ body.light-mode .version-badge-btn {
 
     body.light-mode .mobile-navbar {
         background: rgba(243, 244, 246, 0.85);
+    }
+
+    /* Two-line layout for Thu Chi Doi Ngoai */
+    .mobile-navbar.two-line {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .mobile-navbar.two-line .mobile-navbar-left {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .mobile-navbar.two-line .mobile-navbar-right {
+        width: 100%;
+        max-width: 100%;
+        justify-content: space-around;
+        border-top: 1px solid var(--border-color);
+        padding-top: 8px;
+        gap: 8px;
     }
 
     .mobile-navbar-left {
@@ -3442,15 +3460,94 @@ body.light-mode .version-badge-btn {
         height: 18px;
     }
 
+    /* Text-below style for Home icon with Trang chủ label */
+    .nav-icon-btn.text-below {
+        flex-direction: column;
+        height: auto;
+        width: auto;
+        padding: 4px 8px;
+        gap: 2px;
+    }
+    .nav-icon-btn.text-below i {
+        width: 18px;
+        height: 18px;
+    }
+    .nav-icon-btn.text-below .btn-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Text-only style for Tiền tôi Nhận / Tiền Tôi Mừng */
+    .nav-icon-btn.text-only {
+        width: auto;
+        height: auto;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+
+    /* Hide duplicate header title on mobile when class applied */
+    .top-header .page-title.mobile-hide-title {
+        display: none !important;
+    }
+
     /* Hide sidebar hamburger button since navbar is now outside and direct */
     .mobile-nav-toggle {
         display: none !important;
     }
 }
 
+/* Home Page Settings Button (Glassmorphism style below version badge) */
+.home-settings-btn {
+    position: absolute;
+    top: 65px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-heading);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
 
+body.light-mode .home-settings-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
 
+.home-settings-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(13, 148, 136, 0.1);
+    box-shadow: 0 0 15px rgba(13, 148, 136, 0.3);
+    transform: translateY(-2px);
+}
 
+.home-settings-btn:active {
+    transform: translateY(0);
+}
 
-
-
+@media (max-width: 576px) {
+    .home-settings-btn {
+        top: 50px;
+        right: 12px;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}

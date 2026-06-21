@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.4';
+const APP_VERSION = '3.9.5';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2013,49 +2013,71 @@ function updateMobileNavbar(tabId) {
     const logoImg = document.getElementById('mobileLogoImg');
     const navbarTitle = document.getElementById('mobileNavbarTitle');
     const navbarNav = document.getElementById('mobileNavbarNav');
+    const navbarLeft = document.querySelector('.mobile-navbar-left');
+    const pageTitleBlock = document.querySelector('.top-header .page-title');
+
+    // Default cleanup
+    mobileNavbar.classList.remove('two-line');
+    if (pageTitleBlock) {
+        pageTitleBlock.classList.remove('mobile-hide-title');
+    }
 
     if (tabId === 'health') {
-        if (logoImg) logoImg.src = 'health_logo.png';
+        if (logoImg) logoImg.src = 'health_logo.png?v=3.9.5';
         if (navbarTitle) navbarTitle.innerText = 'Hồ Sơ Y Tế';
+        
+        if (navbarLeft) {
+            navbarLeft.removeAttribute('onclick');
+            navbarLeft.style.cursor = 'default';
+        }
+        
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+
         if (navbarNav) {
             navbarNav.innerHTML = `
-                <button class="nav-icon-btn" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
-                </button>
-                <button class="nav-icon-btn" onclick="switchTab('dashboard')" title="Thu chi đối ngoại">
-                    <i data-lucide="hand-coins"></i>
-                </button>
-                <button class="nav-icon-btn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
-                    <i data-lucide="settings"></i>
+                    <span class="btn-label">Trang chủ</span>
                 </button>
             `;
         }
     } else {
-        if (logoImg) logoImg.src = 'icon.png?v=3.9.3';
-        if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
+        // For finance tabs (dashboard, received, sent, settings)
+        mobileNavbar.classList.add('two-line');
+        if (logoImg) logoImg.src = 'finance_logo.png?v=3.9.5';
+        
+        if (tabId === 'settings') {
+            if (navbarTitle) navbarTitle.innerText = 'Cài đặt & Đồng bộ';
+        } else {
+            if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
+        }
+
+        if (navbarLeft) {
+            navbarLeft.setAttribute('onclick', "switchTab('dashboard')");
+            navbarLeft.style.cursor = 'pointer';
+        }
+
         if (navbarNav) {
             navbarNav.innerHTML = `
-                <button class="nav-icon-btn" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
                 </button>
-                <button class="nav-icon-btn ${tabId === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')" title="Tổng quan">
-                    <i data-lucide="layout-dashboard"></i>
+                <button class="nav-icon-btn text-only ${tabId === 'received' ? 'active' : ''}" onclick="switchTab('received')" title="Tiền tôi Nhận">
+                    Tiền tôi Nhận
                 </button>
-                <button class="nav-icon-btn ${tabId === 'received' ? 'active' : ''}" onclick="switchTab('received')" title="Tiền tôi nhận">
-                    <i data-lucide="arrow-down-left"></i>
+                <button class="nav-icon-btn text-only ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi Mừng">
+                    Tiền tôi Mừng
                 </button>
-                <button class="nav-icon-btn ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi mừng">
-                    <i data-lucide="arrow-up-right"></i>
-                </button>
-                <button class="nav-icon-btn" onclick="switchTab('health')" title="Hồ sơ y tế">
+                <button class="nav-icon-btn ${tabId === 'health' ? 'active' : ''}" onclick="switchTab('health')" title="Hồ sơ y tế">
                     <i data-lucide="heart-pulse"></i>
-                </button>
-                <button class="nav-icon-btn ${tabId === 'settings' ? 'active' : ''}" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
-                    <i data-lucide="settings"></i>
                 </button>
             `;
         }
     }
+
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }

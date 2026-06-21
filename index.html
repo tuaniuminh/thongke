@@ -32,7 +32,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=3.9.4" alt="FamiLife Logo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=3.9.5" alt="FamiLife Logo" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text">FamiLife</div>
@@ -94,9 +94,9 @@
         <main class="main-content">
             <!-- Mobile Top Navbar -->
             <div class="mobile-navbar" id="mobileNavbar">
-                <div class="mobile-navbar-left">
+                <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=3.9.4" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=3.9.5" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -689,12 +689,16 @@
     <!-- Home Landing Page Layout -->
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span>Ver 3.9.4 PRO</span>
+            <span>Ver 3.9.5 PRO</span>
+        </button>
+        <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
+            <i data-lucide="settings"></i>
+            <span>Cài đặt</span>
         </button>
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=3.9.4" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=3.9.5" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
