@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '3.9.8';
+const APP_VERSION = '3.9.9';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1958,6 +1958,15 @@ function updateHomeLayoutUI() {
             }
         }
     }
+    
+    // Cập nhật thời tiết Hà Nội & Lịch âm Việt Nam
+    if (typeof updateHomeWeather === 'function') {
+        updateHomeWeather();
+    }
+    if (typeof updateHomeLunar === 'function') {
+        updateHomeLunar();
+    }
+    
     lucide.createIcons();
 }
 
@@ -1966,7 +1975,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=3.9.8';
+        sidebarLogoImg.src = 'icon.png?v=3.9.9';
     }
     
     if (sidebarLogoText) {
@@ -2051,9 +2060,9 @@ function updateMobileNavbar(tabId) {
         }
         
         mobileNavbar.innerHTML = `
-            <div class="mobile-navbar-left" style="width: 100%; display: flex; align-items: center; gap: 8px;">
+            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=3.9.8" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=3.9.9" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2072,12 +2081,13 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=3.9.8" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=3.9.9" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
-                <button class="nav-icon-btn" onclick="window.location.hash = 'trangchu'" title="Trang chủ" style="width: 36px; height: 36px;">
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
                 </button>
             </div>
             <div class="mobile-navbar-right" id="mobileNavbarNav">
@@ -6728,5 +6738,154 @@ function updateIndicatorProgress() {
         lastTouchEnd = now;
     }, { passive: false });
 })();
+
+// --- WEATHER & LUNAR WIDGET LOGIC ---
+
+// Fetch thời tiết Hà Nội từ Open-Meteo và hiển thị
+async function updateHomeWeather() {
+    const cacheKey = 'hanoi_weather_cache';
+    const cacheTimeKey = 'hanoi_weather_cache_time';
+    const cacheExpiry = 30 * 60 * 1000; // 30 phút
+    
+    const now = Date.now();
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
+    
+    let weatherData = null;
+    
+    if (cachedData && cachedTime && (now - parseInt(cachedTime) < cacheExpiry)) {
+        try {
+            weatherData = JSON.parse(cachedData);
+        } catch (e) {
+            weatherData = null;
+        }
+    }
+    
+    if (!weatherData) {
+        try {
+            const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=21.0285&longitude=105.8542&current=temperature_2m,weather_code');
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.current) {
+                    weatherData = {
+                        temp: Math.round(data.current.temperature_2m),
+                        code: data.current.weather_code
+                    };
+                    localStorage.setItem(cacheKey, JSON.stringify(weatherData));
+                    localStorage.setItem(cacheTimeKey, now.toString());
+                }
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải thời tiết Hà Nội:', error);
+        }
+    }
+    
+    renderWeatherWidget(weatherData);
+}
+
+function renderWeatherWidget(weatherData) {
+    const weatherContainer = document.getElementById('weatherRow');
+    if (!weatherContainer) return;
+    
+    let tempText = '--°C';
+    let iconName = 'cloud-sun';
+    let descText = 'Thời tiết Hà Nội';
+    
+    if (weatherData) {
+        tempText = `${weatherData.temp}°C`;
+        const code = weatherData.code;
+        
+        if (code === 0) {
+            iconName = 'sun';
+            descText = 'Hà Nội: Trời quang';
+        } else if (code >= 1 && code <= 3) {
+            iconName = 'cloud-sun';
+            descText = 'Hà Nội: Ít mây / Nhiều mây';
+        } else if (code === 45 || code === 48) {
+            iconName = 'cloud-fog';
+            descText = 'Hà Nội: Sương mù';
+        } else if (code >= 51 && code <= 55) {
+            iconName = 'cloud-drizzle';
+            descText = 'Hà Nội: Mưa phùn';
+        } else if (code >= 61 && code <= 65) {
+            iconName = 'cloud-rain';
+            descText = 'Hà Nội: Mưa rào';
+        } else if (code >= 80 && code <= 82) {
+            iconName = 'cloud-rain';
+            descText = 'Hà Nội: Mưa bóng mây';
+        } else if (code >= 95 && code <= 99) {
+            iconName = 'cloud-lightning';
+            descText = 'Hà Nội: Dông bão';
+        } else {
+            iconName = 'cloud';
+            descText = 'Hà Nội: Nhiều mây';
+        }
+    }
+    
+    weatherContainer.innerHTML = `
+        <i data-lucide="${iconName}"></i>
+        <span class="weather-temp-text" title="${descText}">${tempText} Hà Nội</span>
+    `;
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Tính toán và hiển thị âm lịch Việt Nam
+function updateHomeLunar() {
+    const lunarContainer = document.getElementById('lunarRow');
+    if (!lunarContainer) return;
+    
+    const today = new Date();
+    const lYear = today.getFullYear();
+    const lMonth = today.getMonth() + 1;
+    const lDay = today.getDate();
+    
+    if (typeof window.lunarVietnam === 'undefined' || typeof window.lunarVietnam.convertSolar2Lunar !== 'function') {
+        console.error('Không tìm thấy thư viện lunarVietnam.');
+        return;
+    }
+    
+    const lunar = window.lunarVietnam.convertSolar2Lunar(lDay, lMonth, lYear);
+    if (!lunar) return;
+    
+    let monthName = lunar.lMonth.toString();
+    if (lunar.lMonth === 1) monthName = 'Giêng';
+    else if (lunar.lMonth === 11) monthName = 'Một';
+    else if (lunar.lMonth === 12) monthName = 'Chạp';
+    
+    const leapText = lunar.isLeap ? ' (nhuận)' : '';
+    
+    const animalMap = {
+        'Tý': 'Chuột', 'Sửu': 'Trâu', 'Dần': 'Hổ', 'Mão': 'Mèo',
+        'Thìn': 'Rồng', 'Tỵ': 'Rắn', 'Ngọ': 'Ngựa', 'Mùi': 'Dê',
+        'Thân': 'Khỉ', 'Dậu': 'Gà', 'Tuất': 'Chó', 'Hợi': 'Heo'
+    };
+    const animalVi = animalMap[lunar.animal] || lunar.animal;
+    
+    var lunarDateText = '';
+    if (lunar.lDay === 1) {
+        lunarDateText = `Mùng 1/${lunar.lMonth} ÂL`;
+    } else {
+        lunarDateText = `${lunar.lDay}/${lunar.lMonth} ÂL`;
+    }
+    
+    const fullTooltip = `Ngày ${lunar.lDay} tháng ${monthName}${leapText}, năm ${lunar.gzYear} (Ngày ${lunar.gzDay}) - Con giáp: ${animalVi}`;
+    
+    lunarContainer.innerHTML = `
+        <i data-lucide="moon"></i>
+        <span class="lunar-date-text" title="${fullTooltip}">${lunarDateText} (${lunar.gzYear})</span>
+    `;
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Gắn các hàm vào global window để tránh tree-shaking
+window.updateHomeWeather = updateHomeWeather;
+window.updateHomeLunar = updateHomeLunar;
+
 
 
