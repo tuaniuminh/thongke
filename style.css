@@ -3510,16 +3510,14 @@ body.light-mode .version-badge-btn {
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-secondary);
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 0.8rem;
-    font-weight: 700;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-family: var(--font-heading);
+    justify-content: center;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
     z-index: 10;
 }
@@ -3543,11 +3541,40 @@ body.light-mode .home-settings-btn {
     transform: translateY(0);
 }
 
+.mobile-home-btn {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .mobile-home-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+        display: none; /* Controlled dynamically by JS */
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+    body.light-mode .mobile-home-btn {
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+}
+
 @media (max-width: 576px) {
     .home-settings-btn {
         top: 50px;
         right: 12px;
-        padding: 6px 12px;
-        font-size: 0.75rem;
+        width: 34px;
+        height: 34px;
+    }
+
+    /* Adjust mobile-navbar margins to match main-content padding and eliminate horizontal scroll */
+    .mobile-navbar {
+        margin: -1rem -0.4rem 1.25rem -0.4rem !important;
     }
 }

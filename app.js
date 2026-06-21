@@ -2015,14 +2015,24 @@ function updateMobileNavbar(tabId) {
     const navbarNav = document.getElementById('mobileNavbarNav');
     const navbarLeft = document.querySelector('.mobile-navbar-left');
     const pageTitleBlock = document.querySelector('.top-header .page-title');
+    const mobileHomeBtn = document.getElementById('mobileHomeBtn');
 
     // Default cleanup
     mobileNavbar.classList.remove('two-line');
     if (pageTitleBlock) {
         pageTitleBlock.classList.remove('mobile-hide-title');
     }
+    if (mobileHomeBtn) {
+        mobileHomeBtn.style.setProperty('display', 'none', 'important');
+    }
+    mobileNavbar.style.removeProperty('display');
 
-    if (tabId === 'health') {
+    if (tabId === 'settings') {
+        mobileNavbar.style.setProperty('display', 'none', 'important');
+        if (mobileHomeBtn) {
+            mobileHomeBtn.style.setProperty('display', 'inline-flex', 'important');
+        }
+    } else if (tabId === 'health') {
         if (logoImg) logoImg.src = 'health_logo.png?v=3.9.5';
         if (navbarTitle) navbarTitle.innerText = 'Hồ Sơ Y Tế';
         
@@ -2044,15 +2054,10 @@ function updateMobileNavbar(tabId) {
             `;
         }
     } else {
-        // For finance tabs (dashboard, received, sent, settings)
+        // For finance tabs (dashboard, received, sent)
         mobileNavbar.classList.add('two-line');
         if (logoImg) logoImg.src = 'finance_logo.png?v=3.9.5';
-        
-        if (tabId === 'settings') {
-            if (navbarTitle) navbarTitle.innerText = 'Cài đặt & Đồng bộ';
-        } else {
-            if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
-        }
+        if (navbarTitle) navbarTitle.innerText = 'Thu Chi Đối Ngoại';
 
         if (navbarLeft) {
             navbarLeft.setAttribute('onclick', "switchTab('dashboard')");
@@ -2070,9 +2075,6 @@ function updateMobileNavbar(tabId) {
                 </button>
                 <button class="nav-icon-btn text-only ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi Mừng">
                     Tiền tôi Mừng
-                </button>
-                <button class="nav-icon-btn ${tabId === 'health' ? 'active' : ''}" onclick="switchTab('health')" title="Hồ sơ y tế">
-                    <i data-lucide="heart-pulse"></i>
                 </button>
             `;
         }
