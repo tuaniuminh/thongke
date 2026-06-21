@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.2';
+const APP_VERSION = '4.0.3';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1975,7 +1975,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=4.0.2';
+        sidebarLogoImg.src = 'icon.png?v=4.0.3';
     }
     
     if (sidebarLogoText) {
@@ -2062,7 +2062,7 @@ function updateMobileNavbar(tabId) {
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=4.0.2" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=4.0.3" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2081,7 +2081,7 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=4.0.2" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.3" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -5085,7 +5085,23 @@ window.openHealthDetail = openHealthDetail;
 window.addIndicatorEditRow = addIndicatorEditRow;
 window.handleRemoveIndicatorRow = handleRemoveIndicatorRow;
 
+function closeHealthIntro() {
+    const banner = document.getElementById('healthIntroBanner');
+    if (banner) {
+        banner.style.display = 'none';
+        localStorage.setItem('familife_health_intro_closed', 'true');
+    }
+}
+window.closeHealthIntro = closeHealthIntro;
+
 function renderHealthDashboard() {
+    // Show/Hide Intro Banner based on localStorage
+    const isIntroClosed = localStorage.getItem('familife_health_intro_closed');
+    const introBanner = document.getElementById('healthIntroBanner');
+    if (introBanner) {
+        introBanner.style.display = (isIntroClosed === 'true') ? 'none' : 'block';
+    }
+
     // Update API Key Card Collapsed state
     updateApiConfigCardState();
 
