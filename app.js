@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.1';
+const APP_VERSION = '4.0.2';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1975,7 +1975,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=4.0.1';
+        sidebarLogoImg.src = 'icon.png?v=4.0.2';
     }
     
     if (sidebarLogoText) {
@@ -2062,7 +2062,7 @@ function updateMobileNavbar(tabId) {
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=4.0.1" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=4.0.2" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2081,7 +2081,7 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=4.0.1" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.2" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -6768,6 +6768,7 @@ function renderWeatherWidget(weatherData) {
     let tempText = '--°C';
     let iconName = 'cloud-sun';
     let descText = 'Thời tiết Hà Nội';
+    let shortDesc = 'Ngoại tuyến';
     
     if (weatherData) {
         tempText = `${weatherData.temp}°C`;
@@ -6776,33 +6777,50 @@ function renderWeatherWidget(weatherData) {
         if (code === 0) {
             iconName = 'sun';
             descText = 'Hà Nội: Trời quang';
-        } else if (code >= 1 && code <= 3) {
+            shortDesc = 'Trời quang';
+        } else if (code === 1) {
             iconName = 'cloud-sun';
-            descText = 'Hà Nội: Ít mây / Nhiều mây';
+            descText = 'Hà Nội: Ít mây';
+            shortDesc = 'Ít mây';
+        } else if (code === 2) {
+            iconName = 'cloud-sun';
+            descText = 'Hà Nội: Mây rải rác';
+            shortDesc = 'Mây rải rác';
+        } else if (code === 3) {
+            iconName = 'cloud-sun';
+            descText = 'Hà Nội: Nhiều mây';
+            shortDesc = 'Nhiều mây';
         } else if (code === 45 || code === 48) {
             iconName = 'cloud-fog';
             descText = 'Hà Nội: Sương mù';
+            shortDesc = 'Sương mù';
         } else if (code >= 51 && code <= 55) {
             iconName = 'cloud-drizzle';
             descText = 'Hà Nội: Mưa phùn';
+            shortDesc = 'Mưa phùn';
         } else if (code >= 61 && code <= 65) {
             iconName = 'cloud-rain';
-            descText = 'Hà Nội: Mưa rào';
+            descText = 'Hà Nội: Mưa';
+            shortDesc = 'Mưa';
         } else if (code >= 80 && code <= 82) {
             iconName = 'cloud-rain';
-            descText = 'Hà Nội: Mưa bóng mây';
+            descText = 'Hà Nội: Mưa rào';
+            shortDesc = 'Mưa rào';
         } else if (code >= 95 && code <= 99) {
             iconName = 'cloud-lightning';
             descText = 'Hà Nội: Dông bão';
+            shortDesc = 'Dông bão';
         } else {
             iconName = 'cloud';
             descText = 'Hà Nội: Nhiều mây';
+            shortDesc = 'Nhiều mây';
         }
     }
     
     weatherContainer.innerHTML = `
         <i data-lucide="${iconName}"></i>
-        <span class="weather-temp-text" title="${descText}">${tempText} tại Hà Nội</span>
+        <span class="weather-desktop" title="${descText}">${tempText} tại Hà Nội</span>
+        <span class="weather-mobile" title="${descText}" style="display: none;">${tempText} - ${shortDesc}</span>
     `;
     
     if (typeof lucide !== 'undefined') {

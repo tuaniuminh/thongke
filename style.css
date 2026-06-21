@@ -3654,6 +3654,14 @@ body.light-mode .home-widget-box {
     flex-shrink: 0;
 }
 
+/* Responsive visibility for weather widget content */
+.weather-desktop {
+    display: inline;
+}
+.weather-mobile {
+    display: none;
+}
+
 @media (max-width: 576px) {
     .home-widgets-container {
         top: 12px;
@@ -3674,6 +3682,20 @@ body.light-mode .home-widget-box {
     .widget-row i {
         width: 14px;
         height: 14px;
+    }
+    
+    /* Make Lunar widget text larger and bold on mobile */
+    #homeLunarWidget .widget-row {
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+    
+    .weather-desktop {
+        display: none !important;
+    }
+    
+    .weather-mobile {
+        display: inline !important;
     }
 }
 
