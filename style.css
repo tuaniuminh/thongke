@@ -3326,14 +3326,6 @@ body.light-mode .version-badge-btn {
     transform: translateY(0);
 }
 
-.version-badge-btn i {
-    color: var(--text-muted);
-    transition: color 0.3s;
-}
-
-.version-badge-btn:hover i {
-    color: var(--primary-color);
-}
 
 @media (max-width: 576px) {
     .version-badge-btn {
