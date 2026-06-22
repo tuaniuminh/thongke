@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.3';
+const APP_VERSION = '4.0.4';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1975,7 +1975,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=4.0.3';
+        sidebarLogoImg.src = 'icon.png?v=4.0.4';
     }
     
     if (sidebarLogoText) {
@@ -2062,7 +2062,7 @@ function updateMobileNavbar(tabId) {
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=4.0.3" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=4.0.4" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2081,7 +2081,7 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=4.0.3" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.4" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -6249,6 +6249,12 @@ const HEALTH_INDICATORS_DICTIONARY = {
         high: 'Biểu hiện rõ rệt của tổn thương nhu mô gan (viêm gan virus, viêm gan do thuốc, nhiễm độc chất, gan nhiễm mỡ nặng, xơ gan tiến triển).',
         low: 'Không có ý nghĩa lâm sàng đáng ngại.'
     },
+    'amylase': {
+        name: 'Amylase (Men tụy đặc hiệu)',
+        def: 'Men tiêu hóa do tuyến tụy và tuyến nước bọt sản xuất, giúp phân giải tinh bột thành đường. Men amylase tăng cao trong máu khi có tổn thương hoặc viêm tuyến tụy.',
+        high: 'Cảnh báo viêm tụy cấp tính (men amylase thường tăng gấp 3 lần bình thường trở lên, cần nhập viện khẩn cấp vì có nguy cơ tử vong), viêm tụy mạn tính, tắc nghẽn ống tụy, hoặc viêm tuyến nước bọt (quai bị).',
+        low: 'Cảnh báo tổn thương tuyến tụy nghiêm trọng và xơ hóa lâu ngày (như viêm tụy mạn giai đoạn muộn, xơ nang tụy), hoặc suy chức năng gan nặng.'
+    },
     'ggt': {
         name: 'GGT (Gamma-Glutamyl Transferase)',
         def: 'Men gan rất nhạy cảm nằm ở màng tế bào ống mật và tế bào gan. Tăng cao nhanh chóng khi có tổn thương gan do cồn hoặc tắc mật.',
@@ -6362,6 +6368,12 @@ const HEALTH_INDICATORS_DICTIONARY = {
         def: 'Loại bạch cầu có kích thước lớn nhất, thực hiện nhiệm vụ dọn dẹp các mảnh vỡ tế bào và mầm bệnh đã bị tiêu diệt.',
         high: 'Thường tăng trong giai đoạn hồi phục sau nhiễm trùng cấp, hoặc nhiễm trùng mãn tính (như lao, sốt rét, viêm tâm nội mạc).',
         low: 'Rất ít ý nghĩa lâm sàng, có thể gặp trong suy tủy xương.'
+    },
+    'monocyte_percent': {
+        name: 'Monocyte % (Tỷ lệ bạch cầu Monocyte)',
+        def: 'Tỷ lệ phần trăm của bạch cầu Monocyte trên tổng số bạch cầu trong máu ngoại vi.',
+        high: 'Tăng trong nhiễm trùng mãn tính (lao, giang mai, viêm tâm nội mạc), nhiễm ký sinh trùng, hoặc bệnh tự miễn (Lupus ban đỏ, viêm khớp dạng thấp), hoặc một số bệnh lý ác tính dòng tủy.',
+        low: 'Không có ý nghĩa lâm sàng đặc hiệu.'
     },
     'eosinophil': {
         name: 'Eosinophil (Bạch cầu ưa axit)',
@@ -6576,6 +6588,7 @@ function getDictionaryKey(name) {
     if (norm.includes('triglycerid') || norm === 'tg') return 'triglycerides';
     if (norm.includes('ast') || norm.includes('sgot')) return 'ast';
     if (norm.includes('alt') || norm.includes('sgpt')) return 'alt';
+    if (norm.includes('amylase') || norm === 'amy') return 'amylase';
     if (norm.includes('ggt') || norm.includes('gama gt') || norm.includes('gamma gt')) return 'ggt';
     if (norm.includes('bilirubin')) return 'bilirubin';
     if (norm.includes('albumin')) return 'albumin';
@@ -6594,13 +6607,15 @@ function getDictionaryKey(name) {
     if (norm.includes('mcv')) return 'mcv';
     if (norm.includes('mchc')) return 'mchc';
     if (norm.includes('mch')) return 'mch';
-    if (norm.includes('neutrophil') || norm.includes('neut') || norm === 'bc trung tính' || norm === 'bc trung tinh') {
+    if (norm.includes('neutrophil') || norm.includes('neut') || norm.includes('neu') || norm === 'bc trung tính' || norm === 'bc trung tinh') {
         return (norm.includes('%') || norm.includes('tỷ lệ') || norm.includes('ty le')) ? 'neutrophil_percent' : 'neutrophil';
     }
     if (norm.includes('lympho') || norm.includes('lym')) {
         return (norm.includes('%') || norm.includes('tỷ lệ') || norm.includes('ty le')) ? 'lymphocyte_percent' : 'lymphocyte';
     }
-    if (norm.includes('monocyte')) return 'monocyte';
+    if (norm.includes('monocyte') || norm.includes('mono') || norm.includes('mon')) {
+        return (norm.includes('%') || norm.includes('tỷ lệ') || norm.includes('ty le')) ? 'monocyte_percent' : 'monocyte';
+    }
     if (norm.includes('eosinophil')) return 'eosinophil';
     if (norm.includes('basophil')) return 'basophil';
     if (norm.includes('tsh')) return 'tsh';
