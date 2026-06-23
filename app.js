@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.4';
+const APP_VERSION = '4.0.5';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1975,7 +1975,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=4.0.4';
+        sidebarLogoImg.src = 'icon.png?v=4.0.5';
     }
     
     if (sidebarLogoText) {
@@ -2062,7 +2062,7 @@ function updateMobileNavbar(tabId) {
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=4.0.4" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=4.0.5" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2081,7 +2081,7 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=4.0.4" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.5" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -3568,6 +3568,14 @@ async function handleWizardSubmit(e) {
     // Save an empty initial DB to establish local encryption
     await saveLocalState();
     
+    // Ghi nhớ mở khóa
+    const rememberCheckbox = document.getElementById('rememberWizardCheckbox');
+    if (rememberCheckbox && rememberCheckbox.checked) {
+        localStorage.setItem('gift_ledger_remembered_pin', password);
+    } else {
+        localStorage.removeItem('gift_ledger_remembered_pin');
+    }
+    
     // Hide overlay
     if (document.activeElement) document.activeElement.blur();
     setTimeout(() => {
@@ -3743,6 +3751,14 @@ async function handleWizardKeypadPress(val) {
                 state.masterPassword = wizardPinBuffer;
                 await saveLocalState();
                 
+                // Ghi nhớ mở khóa
+                const rememberCheckbox = document.getElementById('rememberWizardCheckbox');
+                if (rememberCheckbox && rememberCheckbox.checked) {
+                    localStorage.setItem('gift_ledger_remembered_pin', wizardPinBuffer);
+                } else {
+                    localStorage.removeItem('gift_ledger_remembered_pin');
+                }
+                
                 if (document.activeElement) document.activeElement.blur();
                 setTimeout(() => {
                     enterApp();
@@ -3916,6 +3932,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         document.getElementById('setupWizardOverlay').style.display = 'flex';
         document.getElementById('unlockOverlay').style.display = 'none';
+        
+        // Auto select mode for setup wizard based on device type (desktop vs mobile)
+        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        const wizardPinView = document.getElementById('wizardPinModeView');
+        const wizardKeyView = document.getElementById('wizardKeyboardModeView');
+        if (wizardPinView && wizardKeyView) {
+            if (!isMobile) {
+                // Show keyboard mode by default on desktop
+                wizardPinView.style.display = 'none';
+                wizardKeyView.style.display = 'block';
+                setTimeout(() => {
+                    const passInput = document.getElementById('setupMasterPassword');
+                    if (passInput) passInput.focus();
+                }, 100);
+            } else {
+                // Show PIN mode by default on mobile
+                wizardPinView.style.display = 'block';
+                wizardKeyView.style.display = 'none';
+            }
+        }
     }
     
     // Bind Wizard Keypad Buttons
@@ -3968,6 +4004,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             pinModeView.style.display = 'block';
             keyboardModeView.style.display = 'none';
             document.getElementById('unlockPassword').value = "";
+        });
+    }
+
+    // Toggle between Keyboard mode and PIN mode on Setup Wizard Overlay
+    const btnWizardSwitchToKeyboard = document.getElementById('btnWizardSwitchToKeyboard');
+    const btnWizardSwitchToPin = document.getElementById('btnWizardSwitchToPin');
+    const wizardPinModeView = document.getElementById('wizardPinModeView');
+    const wizardKeyboardModeView = document.getElementById('wizardKeyboardModeView');
+    
+    if (btnWizardSwitchToKeyboard && btnWizardSwitchToPin && wizardPinModeView && wizardKeyboardModeView) {
+        btnWizardSwitchToKeyboard.addEventListener('click', () => {
+            wizardPinModeView.style.display = 'none';
+            wizardKeyboardModeView.style.display = 'block';
+            wizardPinBuffer = "";
+            wizardFirstPin = "";
+            updatePasscodeDots('wizardPasscodeDots', 0);
+            
+            // Reset title and subtext of Pin mode in case they were on confirmation step
+            const title = document.getElementById('wizardTitle');
+            const subtext = document.getElementById('wizardSubtext');
+            if (title) title.innerText = "Thiết lập Mã PIN";
+            if (subtext) subtext.innerText = "Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ";
+
+            setTimeout(() => {
+                const setupMasterPasswordInput = document.getElementById('setupMasterPassword');
+                if (setupMasterPasswordInput) setupMasterPasswordInput.focus();
+            }, 100);
+        });
+        btnWizardSwitchToPin.addEventListener('click', () => {
+            if (document.activeElement) document.activeElement.blur();
+            wizardPinModeView.style.display = 'block';
+            wizardKeyboardModeView.style.display = 'none';
+            
+            // Reset keyboard inputs
+            const setupMasterPasswordInput = document.getElementById('setupMasterPassword');
+            const setupMasterPasswordConfirmInput = document.getElementById('setupMasterPasswordConfirm');
+            if (setupMasterPasswordInput) setupMasterPasswordInput.value = "";
+            if (setupMasterPasswordConfirmInput) setupMasterPasswordConfirmInput.value = "";
         });
     }
 

@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.4">
+    <link rel="stylesheet" href="style.css?v=4.0.5">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -32,7 +32,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.4" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.5" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -100,7 +100,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.4" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.5" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -730,7 +730,7 @@
         </div>
         
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span>Ver 4.0.4 PRO</span>
+            <span>Ver 4.0.5 PRO</span>
         </button>
         <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
             <i data-lucide="settings"></i>
@@ -738,7 +738,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.4" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.5" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -792,49 +792,97 @@
 
     <!-- Initialization / Master Password Wizard Overlay -->
     <div class="setup-overlay" id="setupWizardOverlay">
-        <div class="setup-card pin-card">
-            <div style="text-align: center; margin-bottom: 1rem;">
-                <div class="logo-icon" style="margin: 0 auto 0.75rem; width: 48px; height: 48px;">
-                    <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+        <div class="setup-card pin-card" id="wizardCard">
+            <!-- 1. PIN Mode View -->
+            <div id="wizardPinModeView">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <div class="logo-icon" style="margin: 0 auto 0.75rem; width: 48px; height: 48px;">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
+                        <span>Thiết lập Mã PIN</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v4.0.5</span>
+                    </h2>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
+                        Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
+                    </p>
                 </div>
-                <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
-                    <span>Thiết lập Mã PIN</span>
-                    <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v3.9.2</span>
-                </h2>
-                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
-                    Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
-                </p>
+
+                <!-- Passcode Dots -->
+                <div class="passcode-dots-container">
+                    <div class="passcode-dots" id="wizardPasscodeDots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+
+                <!-- Keypad -->
+                <div class="pin-keypad" id="wizardKeypad">
+                    <button type="button" class="keypad-btn" data-val="1">1</button>
+                    <button type="button" class="keypad-btn" data-val="2">2</button>
+                    <button type="button" class="keypad-btn" data-val="3">3</button>
+                    
+                    <button type="button" class="keypad-btn" data-val="4">4</button>
+                    <button type="button" class="keypad-btn" data-val="5">5</button>
+                    <button type="button" class="keypad-btn" data-val="6">6</button>
+                    
+                    <button type="button" class="keypad-btn" data-val="7">7</button>
+                    <button type="button" class="keypad-btn" data-val="8">8</button>
+                    <button type="button" class="keypad-btn" data-val="9">9</button>
+                    
+                    <button type="button" class="keypad-btn utility-btn" id="btnWizardClear">C</button>
+                    <button type="button" class="keypad-btn" data-val="0">0</button>
+                    <button type="button" class="keypad-btn utility-btn" id="btnWizardDelete"><i data-lucide="delete"></i></button>
+                </div>
+
+                <button type="button" class="btn-text-mode" id="btnWizardSwitchToKeyboard" style="display: block; margin: 15px auto 0; font-size: 0.8rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; width: 100%;">
+                    Nhập bằng mật khẩu chữ
+                </button>
             </div>
 
-            <!-- Passcode Dots -->
-            <div class="passcode-dots-container">
-                <div class="passcode-dots" id="wizardPasscodeDots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
+            <!-- 2. Keyboard Mode View (Hidden by default, fallback) -->
+            <div id="wizardKeyboardModeView" style="display: none;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div class="logo-icon" style="margin: 0 auto 0.75rem; width: 48px; height: 48px;">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>Thiết lập Mật khẩu</span>
+                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v4.0.5</span>
+                    </h2>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
+                        Thiết lập Master Password để mã hóa dữ liệu sổ
+                    </p>
                 </div>
+
+                <form id="masterPasswordForm">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label" for="setupMasterPassword" style="font-size: 0.8rem; text-align: left; display: block; margin-bottom: 4px;">Mật khẩu chính (Tối thiểu 6 ký tự)</label>
+                        <input type="password" class="form-control" id="setupMasterPassword" required placeholder="Nhập mật khẩu...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="setupMasterPasswordConfirm" style="font-size: 0.8rem; text-align: left; display: block; margin-bottom: 4px;">Xác nhận mật khẩu chính</label>
+                        <input type="password" class="form-control" id="setupMasterPasswordConfirm" required placeholder="Nhập lại mật khẩu...">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full" style="margin-top: 1.25rem;">
+                        <i data-lucide="check"></i>
+                        <span>Xác nhận mật khẩu</span>
+                    </button>
+                </form>
+
+                <button type="button" class="btn-text-mode" id="btnWizardSwitchToPin" style="display: block; margin: 15px auto 0; font-size: 0.8rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; width: 100%;">
+                    Quay lại bàn phím số PIN
+                </button>
             </div>
 
-            <!-- Keypad -->
-            <div class="pin-keypad" id="wizardKeypad">
-                <button type="button" class="keypad-btn" data-val="1">1</button>
-                <button type="button" class="keypad-btn" data-val="2">2</button>
-                <button type="button" class="keypad-btn" data-val="3">3</button>
-                
-                <button type="button" class="keypad-btn" data-val="4">4</button>
-                <button type="button" class="keypad-btn" data-val="5">5</button>
-                <button type="button" class="keypad-btn" data-val="6">6</button>
-                
-                <button type="button" class="keypad-btn" data-val="7">7</button>
-                <button type="button" class="keypad-btn" data-val="8">8</button>
-                <button type="button" class="keypad-btn" data-val="9">9</button>
-                
-                <button type="button" class="keypad-btn utility-btn" id="btnWizardClear">C</button>
-                <button type="button" class="keypad-btn" data-val="0">0</button>
-                <button type="button" class="keypad-btn utility-btn" id="btnWizardDelete"><i data-lucide="delete"></i></button>
+            <!-- Remember Unlock Checkbox for Wizard -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary); border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <input type="checkbox" id="rememberWizardCheckbox" style="width: 16px; height: 16px; accent-color: var(--primary-color); cursor: pointer;" checked>
+                <label for="rememberWizardCheckbox" style="cursor: pointer; user-select: none;">Ghi nhớ mở khóa trên thiết bị này</label>
             </div>
         </div>
     </div>
@@ -1531,7 +1579,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.4"></script>
-    <script type="module" src="app.js?v=4.0.4"></script>
+    <script src="lunar_vietnam.js?v=4.0.5"></script>
+    <script type="module" src="app.js?v=4.0.5"></script>
 </body>
 </html>
