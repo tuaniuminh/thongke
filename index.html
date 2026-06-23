@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.5">
+    <link rel="stylesheet" href="style.css?v=4.0.6">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -32,7 +32,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.5" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.6" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -100,7 +100,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.5" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.6" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -730,7 +730,7 @@
         </div>
         
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span>Ver 4.0.5 PRO</span>
+            <span class="wizard-version-badge" style="font-size: 0.8rem; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 3px 10px; border-radius: 20px; font-weight: 500;"></span>
         </button>
         <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
             <i data-lucide="settings"></i>
@@ -738,7 +738,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.5" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.6" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -801,7 +801,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" id="wizardTitle">
                         <span>Thiết lập Mã PIN</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v4.0.5</span>
+                        <span class="wizard-version-badge" style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;"></span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;" id="wizardSubtext">
                         Nhập 6 chữ số để đặt làm mã PIN bảo vệ sổ
@@ -852,7 +852,7 @@
                     </div>
                     <h2 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <span>Thiết lập Mật khẩu</span>
-                        <span style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;">v4.0.5</span>
+                        <span class="wizard-version-badge" style="font-size: 0.75rem; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 2px 8px; border-radius: 20px; font-weight: 500;"></span>
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
                         Thiết lập Master Password để mã hóa dữ liệu sổ
@@ -1579,7 +1579,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.5"></script>
-    <script type="module" src="app.js?v=4.0.5"></script>
+    <script src="lunar_vietnam.js?v=4.0.6"></script>
+    <script type="module" src="app.js?v=4.0.6"></script>
 </body>
 </html>

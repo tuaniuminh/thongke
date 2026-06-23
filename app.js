@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.5';
+const APP_VERSION = '4.0.6';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -781,11 +781,14 @@ function updateThemeUI() {
     
     if (state.theme === 'light') {
         body.classList.add('light-mode');
+        // Fix: tell browser this is a light page — prevents Cốc Cốc / Chrome Force Dark Mode from inverting colors
+        document.documentElement.style.colorScheme = 'light';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'moon'));
         texts.forEach(text => text.innerText = 'Giao diện tối');
         if (themeMeta) themeMeta.setAttribute('content', '#f3f4f6');
     } else {
         body.classList.remove('light-mode');
+        document.documentElement.style.colorScheme = 'dark';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'sun'));
         texts.forEach(text => text.innerText = 'Giao diện sáng');
         if (themeMeta) themeMeta.setAttribute('content', '#090d16');
@@ -1975,7 +1978,7 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = 'icon.png?v=4.0.5';
+        sidebarLogoImg.src = `icon.png?v=${APP_VERSION}`;
     }
     
     if (sidebarLogoText) {
@@ -2062,7 +2065,7 @@ function updateMobileNavbar(tabId) {
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="icon.png?v=4.0.5" alt="Logo" id="mobileLogoImg">
+                    <img src="icon.png?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -2081,7 +2084,7 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="icon.png?v=4.0.5" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -3856,6 +3859,20 @@ function handleUnlockClear() {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // === Auto-inject APP_VERSION into all UI elements — no need to hardcode in HTML ===
+    // Version badge on home page (top-right): shows "Ver X.X.X PRO"
+    const homeVersionBadgeSpan = document.querySelector('#homeVersionBadge .wizard-version-badge');
+    if (homeVersionBadgeSpan) homeVersionBadgeSpan.textContent = `Ver ${APP_VERSION} PRO`;
+    // Version badges inside Setup Wizard (PIN & Keyboard): shows "vX.X.X"
+    document.querySelectorAll('#setupOverlay .wizard-version-badge').forEach(el => {
+        el.textContent = `v${APP_VERSION}`;
+    });
+    // Sidebar logo icon & home hero logo: cache-bust with APP_VERSION
+    const sidebarLogoImgInit = document.getElementById('sidebarLogoImg');
+    if (sidebarLogoImgInit) sidebarLogoImgInit.src = `icon.png?v=${APP_VERSION}`;
+    const homeLogoImg = document.querySelector('.home-logo-img');
+    if (homeLogoImg) homeLogoImg.src = `icon.png?v=${APP_VERSION}`;
+
     // Theme initialization
     const savedTheme = localStorage.getItem('gift_ledger_theme');
     if (savedTheme) {

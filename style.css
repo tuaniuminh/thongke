@@ -3,6 +3,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
+    /* Prevent browser Force Dark Mode from inverting our manually-managed color scheme */
+    color-scheme: dark;
+
     /* Color Palette - Dark Mode (Default) */
     --bg-primary: #090d16;
     --bg-secondary: #0f1626;
@@ -39,6 +42,9 @@
 
 /* Light Mode Variables Override */
 body.light-mode {
+    /* Tell browser: this is a light page — don't invert (fixes Cốc Cốc Force Dark Mode) */
+    color-scheme: light;
+
     --bg-primary: #f3f4f6;
     --bg-secondary: #ffffff;
     --bg-tertiary: #f9fafb;
