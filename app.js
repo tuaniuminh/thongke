@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.7';
+const APP_VERSION = '4.0.8';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -368,6 +368,7 @@ async function performSync(silent = false) {
         let mergedReceived = [...state.receivedGifts];
         let mergedSent = [...state.sentGifts];
         let mergedMedical = [...(state.medicalRecords || [])];
+        let mergedBP = [...(state.bloodPressureRecords || [])];
         let localReset = state.lastResetTime || '';
         
         if (remoteRecord && remoteRecord.encrypted_data) {
@@ -407,6 +408,8 @@ async function performSync(silent = false) {
                     remoteReceived = remoteData.receivedGifts || [];
                     remoteSent = remoteData.sentGifts || [];
                     remoteMedical = remoteData.medicalRecords || [];
+                    state.bloodPressureRecords = remoteData.bloodPressureRecords || [];
+                    state.bloodPressureRecordsUpdated = remoteData.bloodPressureRecordsUpdated || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -455,12 +458,20 @@ async function performSync(silent = false) {
                         state.familyProfiles = remoteData.familyProfiles && remoteData.familyProfiles.length > 0 ? remoteData.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
                         state.familyProfilesUpdated = remoteData.familyProfilesUpdated || '';
                     }
+                    // Merge bloodPressureRecords using LWW
+                    const localBpTime = state.bloodPressureRecordsUpdated ? new Date(state.bloodPressureRecordsUpdated).getTime() : 0;
+                    const remoteBpTime = remoteData.bloodPressureRecordsUpdated ? new Date(remoteData.bloodPressureRecordsUpdated).getTime() : 0;
+                    if (remoteBpTime > localBpTime) {
+                        state.bloodPressureRecords = remoteData.bloodPressureRecords || [];
+                        state.bloodPressureRecordsUpdated = remoteData.bloodPressureRecordsUpdated || '';
+                    }
                 }
                 
                 // 3. Merge lists
                 mergedReceived = mergeLists(state.receivedGifts, remoteReceived);
                 mergedSent = mergeLists(state.sentGifts, remoteSent);
                 mergedMedical = mergeLists(state.medicalRecords || [], remoteMedical);
+                mergedBP = state.bloodPressureRecords; // BP already merged via LWW above
             } catch (decErr) {
                 console.error("Remote decryption failed:", decErr);
                 throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
@@ -471,6 +482,7 @@ async function performSync(silent = false) {
         state.receivedGifts = mergedReceived;
         state.sentGifts = mergedSent;
         state.medicalRecords = mergedMedical;
+        state.bloodPressureRecords = mergedBP;
         state.lastResetTime = localReset;
         await saveLocalState();
         
@@ -491,7 +503,9 @@ async function performSync(silent = false) {
             customEventTypes: state.customEventTypes || [],
             customEventTypesUpdated: state.customEventTypesUpdated || '',
             familyProfiles: state.familyProfiles || [],
-            familyProfilesUpdated: state.familyProfilesUpdated || ''
+            familyProfilesUpdated: state.familyProfilesUpdated || '',
+            bloodPressureRecords: state.bloodPressureRecords || [],
+            bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
@@ -1487,8 +1501,10 @@ function renderReceivedTable() {
         filtered = filtered.filter(g => g.status === state.receivedFilterStatus);
     }
     
-    // Sort by date desc, then by updated_at desc (most recent first) using helper
-    filtered.sort(compareRecordsByRecent);
+    // Sort by date desc — only when NOT searching (searching uses score-based order)
+    if (!state.receivedSearch) {
+        filtered.sort(compareRecordsByRecent);
+    }
     
     // Pagination
     const totalRecords = filtered.length;
@@ -1758,8 +1774,10 @@ function renderSentTable() {
         filtered = filtered.filter(g => g.relationship === state.sentFilterRelation);
     }
     
-    // Sort by date desc, then by updated_at desc (most recent first) using helper
-    filtered.sort(compareRecordsByRecent);
+    // Sort by date desc — only when NOT searching (searching uses score-based order)
+    if (!state.sentSearch) {
+        filtered.sort(compareRecordsByRecent);
+    }
     
     const totalRecords = filtered.length;
     const totalPages = Math.ceil(totalRecords / state.sentLimit) || 1;
@@ -6982,58 +7000,17 @@ function exportHealthPDF() {
 // 📷 CAMERA CAPTURE
 // ===========================
 
-let cameraStream = null;
-let currentCameraFacing = 'environment'; // 'user' for front, 'environment' for back
+// ===========================
+// 📷 CAMERA — Dùng camera gốc thiết bị (native input[capture])
+// ===========================
 
-async function openCameraModal() {
+async function handleNativeCameraCapture(file) {
+    if (!file) return;
+
     if (!state.geminiApiKey) {
-        showToast('Vui lòng cấu hình Gemini API Key trước khi chụp ảnh!', 'warning');
+        showToast('Vui lòng cấu hình Gemini API Key trước khi phân tích ảnh!', 'warning');
         return;
     }
-    const modal = document.getElementById('cameraModal');
-    if (!modal) return;
-    modal.style.display = 'flex';
-
-    await startCamera();
-    lucide.createIcons();
-}
-
-async function startCamera() {
-    const video = document.getElementById('cameraPreview');
-    if (!video) return;
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(t => t.stop());
-    }
-    try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: currentCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        video.srcObject = cameraStream;
-    } catch (err) {
-        showToast('Không thể truy cập camera: ' + err.message, 'error');
-        closeCameraModal();
-    }
-}
-
-function closeCameraModal() {
-    const modal = document.getElementById('cameraModal');
-    if (modal) modal.style.display = 'none';
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(t => t.stop());
-        cameraStream = null;
-    }
-}
-
-async function captureAndAnalyze() {
-    const video = document.getElementById('cameraPreview');
-    const canvas = document.getElementById('cameraCanvas');
-    if (!video || !canvas) return;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-
-    closeCameraModal();
 
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
@@ -7041,15 +7018,26 @@ async function captureAndAnalyze() {
     if (statusText) statusText.innerText = 'Đang phân tích ảnh chụp bằng Gemini AI...';
 
     try {
-        const base64Data = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-        const responseJson = await callGeminiAPI(base64Data, 'image/jpeg');
-        if (overlay) overlay.style.display = 'none';
-        openHealthEditModal(null, responseJson);
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Data = e.target.result.split(',')[1];
+            const mimeType = file.type || 'image/jpeg';
+            try {
+                const responseJson = await callGeminiAPI(base64Data, mimeType);
+                if (overlay) overlay.style.display = 'none';
+                openHealthEditModal(null, responseJson);
+            } catch (err) {
+                if (overlay) overlay.style.display = 'none';
+                showToast('Phân tích ảnh thất bại: ' + err.message, 'error');
+            }
+        };
+        reader.readAsDataURL(file);
     } catch (err) {
         if (overlay) overlay.style.display = 'none';
-        showToast('Phân tích ảnh thất bại: ' + err.message, 'error');
+        showToast('Không thể đọc file ảnh: ' + err.message, 'error');
     }
 }
+
 
 // ===========================
 // 💉 BLOOD PRESSURE CRUD
@@ -7348,21 +7336,16 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 // ===========================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Camera button
-    const cameraBtn = document.getElementById('healthCameraBtn');
-    if (cameraBtn) cameraBtn.addEventListener('click', openCameraModal);
-
-    const closeCamBtn = document.getElementById('closeCameraBtn');
-    if (closeCamBtn) closeCamBtn.addEventListener('click', closeCameraModal);
-
-    const captureBtn = document.getElementById('capturePhotoBtn');
-    if (captureBtn) captureBtn.addEventListener('click', captureAndAnalyze);
-
-    const switchCamBtn = document.getElementById('switchCameraBtn');
-    if (switchCamBtn) switchCamBtn.addEventListener('click', async () => {
-        currentCameraFacing = currentCameraFacing === 'environment' ? 'user' : 'environment';
-        await startCamera();
-    });
+    // Camera: native input[capture] — dùng camera gốc thiết bị
+    const cameraInput = document.getElementById('healthCameraInput');
+    if (cameraInput) {
+        cameraInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) handleNativeCameraCapture(file);
+            // Reset input để có thể chụp lại ảnh mới lần sau
+            e.target.value = '';
+        });
+    }
 
     // PDF export button
     const pdfBtn = document.getElementById('exportHealthPdfBtn');
@@ -7376,6 +7359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bpForm = document.getElementById('bpForm');
     if (bpForm) bpForm.addEventListener('submit', handleBpFormSubmit);
 });
+
 
 function updateIndicatorExplanation(indicatorName) {
     const infoBox = document.getElementById('healthIndicatorInfoBox');

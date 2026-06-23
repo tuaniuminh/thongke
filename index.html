@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.7">
+    <link rel="stylesheet" href="style.css?v=4.0.8">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,7 +35,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.7" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.8" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -103,7 +103,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.7" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.8" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -610,11 +610,12 @@
                                 <span class="dropzone-text">Chọn hoặc kéo thả ảnh xét nghiệm y tế (.png, .jpg)</span>
                                 <input type="file" id="healthFileInput" accept="image/*" style="display: none;">
                             </div>
-                            <!-- Camera capture button -->
-                            <button type="button" id="healthCameraBtn" class="health-btn health-btn-secondary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px;" title="Chụp ảnh trực tiếp bằng camera">
+                            <!-- Camera capture: dùng camera gốc thiết bị -->
+                            <input type="file" id="healthCameraInput" accept="image/*" capture="environment" style="display: none;">
+                            <label for="healthCameraInput" class="health-btn health-btn-secondary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; cursor: pointer; border-radius: var(--border-radius-sm); font-size: 0.85rem; font-weight: 500; box-sizing: border-box;">
                                 <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
                                 <span>Chụp ảnh trực tiếp bằng Camera</span>
-                            </button>
+                            </label>
                         </div>
                     </div>
 
@@ -767,7 +768,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.7" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.8" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1596,31 +1597,6 @@
         </div>
     </div>
 
-    <!-- Camera Capture Modal -->
-    <div class="modal-overlay health-theme-overlay" id="cameraModal" style="display: none; z-index: 9998; background: rgba(0,0,0,0.92);">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; gap: 16px; max-width: 640px; margin: 0 auto; width: 100%;">
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <h3 style="color: white; margin: 0; font-family: var(--font-heading); display: flex; align-items: center; gap: 10px;">
-                    <i data-lucide="camera" style="width: 20px; height: 20px; color: #10b981;"></i>
-                    Chụp ảnh kết quả xét nghiệm
-                </h3>
-                <button type="button" id="closeCameraBtn" style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 8px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
-                </button>
-            </div>
-            <video id="cameraPreview" style="width: 100%; max-height: 60vh; border-radius: 12px; background: #000; object-fit: cover; border: 2px solid rgba(16,185,129,0.4);" autoplay playsinline></video>
-            <canvas id="cameraCanvas" style="display: none;"></canvas>
-            <div style="display: flex; gap: 12px; width: 100%;">
-                <button type="button" id="capturePhotoBtn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <i data-lucide="camera" style="width: 20px; height: 20px;"></i> Chụp & Phân tích AI
-                </button>
-                <button type="button" id="switchCameraBtn" style="background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 12px; padding: 14px 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Đổi camera">
-                    <i data-lucide="flip-horizontal" style="width: 20px; height: 20px;"></i>
-                </button>
-            </div>
-            <p style="color: rgba(255,255,255,0.5); font-size: 0.78rem; text-align: center; margin: 0;">Hướng camera vào tờ kết quả xét nghiệm. AI sẽ tự động nhận diện và điền các chỉ số.</p>
-        </div>
-    </div>
 
     <!-- Blood Pressure Input Modal -->
     <div class="modal-overlay" id="bpModal" style="display: none; z-index: 9000;">
@@ -1708,7 +1684,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.7"></script>
-    <script type="module" src="app.js?v=4.0.7"></script>
+    <script src="lunar_vietnam.js?v=4.0.8"></script>
+    <script type="module" src="app.js?v=4.0.8"></script>
 </body>
 </html>
