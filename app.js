@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.6';
+const APP_VERSION = '4.0.7';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -77,7 +77,11 @@ let state = {
     sentFilterRelation: '',
     sentPage: 1,
     sentLimit: 10,
-    sentEditMode: false
+    sentEditMode: false,
+
+    // Blood Pressure tracking (Omron HEM-7361T)
+    bloodPressureRecords: [],
+    bloodPressureRecordsUpdated: ''
 };
 
 // Chart.js instances
@@ -247,7 +251,9 @@ async function saveLocalState() {
         showImportNotesOption: !!state.showImportNotesOption,
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
         customEventTypes: state.customEventTypes || [],
-        customEventTypesUpdated: state.customEventTypesUpdated || ''
+        customEventTypesUpdated: state.customEventTypesUpdated || '',
+        bloodPressureRecords: state.bloodPressureRecords || [],
+        bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || ''
     });
     
     try {
@@ -280,6 +286,8 @@ async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = '';
         state.customEventTypes = [];
         state.customEventTypesUpdated = '';
+        state.bloodPressureRecords = [];
+        state.bloodPressureRecordsUpdated = '';
         return true;
     }
     
@@ -303,6 +311,8 @@ async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
         state.customEventTypes = data.customEventTypes || [];
         state.customEventTypesUpdated = data.customEventTypesUpdated || '';
+        state.bloodPressureRecords = data.bloodPressureRecords || [];
+        state.bloodPressureRecordsUpdated = data.bloodPressureRecordsUpdated || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -1439,15 +1449,22 @@ function renderReceivedTable() {
     // Filter active (not soft-deleted)
     let filtered = state.receivedGifts.filter(g => !g.deleted_at);
     
-    // Search filter
+    // Search filter — prioritize name matches over address/notes/event matches
     if (state.receivedSearch) {
         const query = state.receivedSearch.toLowerCase();
-        filtered = filtered.filter(g => 
-            g.name.toLowerCase().includes(query) || 
-            (g.notes && g.notes.toLowerCase().includes(query)) || 
-            (g.address && g.address.toLowerCase().includes(query)) ||
-            (g.event_type && g.event_type.toLowerCase().includes(query))
-        );
+        // Score: 2 = name match (top priority), 1 = address/notes/event match
+        const scored = filtered
+            .map(g => {
+                const nameMatch = g.name.toLowerCase().includes(query);
+                const otherMatch = (g.notes && g.notes.toLowerCase().includes(query)) ||
+                    (g.address && g.address.toLowerCase().includes(query)) ||
+                    (g.event_type && g.event_type.toLowerCase().includes(query));
+                const score = nameMatch ? 2 : (otherMatch ? 1 : 0);
+                return { g, score };
+            })
+            .filter(({ score }) => score > 0)
+            .sort((a, b) => b.score - a.score); // name matches first
+        filtered = scored.map(({ g }) => g);
     }
     
     // Event filter
@@ -1709,15 +1726,21 @@ function renderSentTable() {
     // Filter active
     let filtered = state.sentGifts.filter(g => !g.deleted_at);
     
-    // Search
+    // Search — prioritize name matches over address/notes/event matches
     if (state.sentSearch) {
         const query = state.sentSearch.toLowerCase();
-        filtered = filtered.filter(g => 
-            g.name.toLowerCase().includes(query) || 
-            (g.notes && g.notes.toLowerCase().includes(query)) || 
-            (g.address && g.address.toLowerCase().includes(query)) ||
-            (g.event_type && g.event_type.toLowerCase().includes(query))
-        );
+        const scored = filtered
+            .map(g => {
+                const nameMatch = g.name.toLowerCase().includes(query);
+                const otherMatch = (g.notes && g.notes.toLowerCase().includes(query)) ||
+                    (g.address && g.address.toLowerCase().includes(query)) ||
+                    (g.event_type && g.event_type.toLowerCase().includes(query));
+                const score = nameMatch ? 2 : (otherMatch ? 1 : 0);
+                return { g, score };
+            })
+            .filter(({ score }) => score > 0)
+            .sort((a, b) => b.score - a.score);
+        filtered = scored.map(({ g }) => g);
     }
     
     // Event Type
@@ -1942,26 +1965,72 @@ function updateUserBadge() {
 }
 
 function updateHomeLayoutUI() {
+    const isLoggedIn = state.user !== null;
     const cardSettings = document.querySelector('.home-card.card-settings');
+    const cardFinance = document.getElementById('homeCardFinance');
+    const cardHealth = document.getElementById('homeCardHealth');
+    const settingsBtn = document.getElementById('homeSettingsBtn');
+
+    // --- Card "Đồng bộ & Cấu hình" / "Đăng nhập tài khoản" ---
     if (cardSettings) {
-        if (state.user !== null) {
+        if (isLoggedIn) {
+            // Ẩn card cài đặt/đăng nhập khi đã đăng nhập
             cardSettings.style.setProperty('display', 'none', 'important');
         } else {
             cardSettings.style.removeProperty('display');
-            // Change title and description
+            // Đổi thành card "Đăng nhập tài khoản"
             const titleEl = cardSettings.querySelector('h3');
             if (titleEl) titleEl.innerText = 'Đăng nhập tài khoản';
             const descEl = cardSettings.querySelector('p');
             if (descEl) descEl.innerText = 'Liên kết tài khoản Cloud Supabase để đồng bộ đám mây và bảo vệ dữ liệu';
-            
-            // Update icon to log-in
             const iconContainer = cardSettings.querySelector('.home-card-icon');
-            if (iconContainer) {
-                iconContainer.innerHTML = '<i data-lucide="log-in"></i>';
-            }
+            if (iconContainer) iconContainer.innerHTML = '<i data-lucide="log-in"></i>';
         }
     }
-    
+
+    // --- Khóa / Mở khóa card Finance & Health ---
+    if (cardFinance) {
+        if (!isLoggedIn) {
+            cardFinance.classList.add('locked');
+            cardFinance.removeAttribute('href');
+            cardFinance.onclick = (e) => {
+                e.preventDefault();
+                showToast('Vui lòng đăng nhập tài khoản Supabase trước để truy cập!', 'warning');
+                switchTab('settings');
+            };
+        } else {
+            cardFinance.classList.remove('locked');
+            cardFinance.href = '#tongquan';
+            cardFinance.onclick = null;
+        }
+    }
+    if (cardHealth) {
+        if (!isLoggedIn) {
+            cardHealth.classList.add('locked');
+            cardHealth.removeAttribute('href');
+            cardHealth.onclick = (e) => {
+                e.preventDefault();
+                showToast('Vui lòng đăng nhập tài khoản Supabase trước để truy cập!', 'warning');
+                switchTab('settings');
+            };
+        } else {
+            cardHealth.classList.remove('locked');
+            cardHealth.href = '#hosoyte';
+            cardHealth.onclick = null;
+        }
+    }
+
+    // --- Nút homeSettingsBtn: icon login khi chưa đăng nhập ---
+    if (settingsBtn) {
+        if (!isLoggedIn) {
+            settingsBtn.innerHTML = '<i data-lucide="log-in"></i>';
+            settingsBtn.title = 'Đăng nhập tài khoản';
+        } else {
+            settingsBtn.innerHTML = '<i data-lucide="settings"></i>';
+            settingsBtn.title = 'Cài đặt & Đồng bộ';
+        }
+    }
+
     // Cập nhật thời tiết Hà Nội & Lịch âm Việt Nam
     if (typeof updateHomeWeather === 'function') {
         updateHomeWeather();
@@ -1969,7 +2038,7 @@ function updateHomeLayoutUI() {
     if (typeof updateHomeLunar === 'function') {
         updateHomeLunar();
     }
-    
+
     lucide.createIcons();
 }
 
@@ -2012,7 +2081,17 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.sent) navItems.sent.style.display = 'none';
         if (navItems.settings) navItems.settings.style.display = 'none';
         if (navItems.health) navItems.health.style.display = 'none';
-    } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings') {
+    } else if (tabId === 'settings') {
+        // Khi vào Cài đặt: ẩn toàn bộ nav Thu Chi đối ngoại trên desktop sidebar
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.health) navItems.health.style.display = 'block';
+        
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+    } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent') {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.dashboard) navItems.dashboard.style.display = 'block';
         if (navItems.received) navItems.received.style.display = 'block';
@@ -5116,7 +5195,7 @@ function initHealthBindings() {
     });
 
     document.getElementById('refreshHealthAiAnalysisBtn')?.addEventListener('click', () => {
-        generateHealthAiAnalysis(true); // Force re-analysis
+        generateHealthAiAnalysisWithBP(true); // Force re-analysis
     });
 
     const indicatorSelect = document.getElementById('healthChartIndicatorSelect');
@@ -5295,6 +5374,9 @@ function renderHealthDashboard() {
     
     // Draw trend charts
     renderHealthTrendsChart();
+    
+    // Render blood pressure section
+    renderBloodPressureSection();
 }
 
 function getHealthTypeLabel(type) {
@@ -6100,7 +6182,7 @@ function openHealthAiAnalysisModal() {
     if (lastAiAnalysis) {
         renderHealthAiReport();
     } else {
-        generateHealthAiAnalysis(false);
+        generateHealthAiAnalysisWithBP(false);
     }
 }
 
@@ -6737,9 +6819,563 @@ function getDictionaryKey(name) {
     if (norm.includes('nitrite')) return 'nitrite';
     if (norm.includes('ascorbic') || norm.includes('vitamin c') || norm.includes('ascorbate')) return 'ascorbic_acid';
     if (norm.includes('pct') || norm.includes('plateletcrit')) return 'pct';
-    
+
     return null;
 }
+
+// ===========================
+// 📄 XUẤT BÁO CÁO PDF
+function exportHealthPDF() {
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+    const memberName = profile ? profile.name : 'Tất cả thành viên';
+
+    if (typeof window.jspdf === 'undefined') {
+        showToast('Thư viện PDF chưa tải xong, vui lòng thử lại!', 'error');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    // --- Font & Color Setup ---
+    const primaryColor = [16, 185, 129]; // Emerald
+    const darkColor = [17, 24, 39];
+    const grayColor = [107, 114, 128];
+    const lightGray = [249, 250, 251];
+    const redColor = [239, 68, 68];
+    const blueColor = [59, 130, 246];
+
+    let y = 15;
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const contentW = pageW - margin * 2;
+
+    // Header gradient bar
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, pageW, 28, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FamiLife - Bao Cao Ho So Suc Khoe', margin, 13);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Thanh vien: ${memberName}   |   Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}   |   v${APP_VERSION}`, margin, 22);
+
+    y = 38;
+
+    // === BLOOD PRESSURE RECORDS ===
+    const bpRecords = (state.bloodPressureRecords || [])
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (bpRecords.length > 0) {
+        doc.setTextColor(...darkColor);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setFillColor(254, 226, 226); // light red
+        doc.rect(margin, y - 5, contentW, 10, 'F');
+        doc.text('LICH SU DO HUYET AP (Omron HEM-7361T)', margin + 3, y + 1);
+        y += 12;
+
+        const bpRows = bpRecords.map(r => {
+            const sysStatus = r.systolic >= 140 ? 'CAO' : (r.systolic < 90 ? 'THAP' : 'BT');
+            const diaStatus = r.diastolic >= 90 ? 'CAO' : (r.diastolic < 60 ? 'THAP' : 'BT');
+            const session = r.session === 'morning' ? 'Sang' : (r.session === 'evening' ? 'Toi' : 'Khac');
+            return [
+                formatDate(r.date),
+                session,
+                `${r.systolic} mmHg (${sysStatus})`,
+                `${r.diastolic} mmHg (${diaStatus})`,
+                r.pulse ? `${r.pulse} bpm` : '-',
+                r.notes || '-'
+            ];
+        });
+
+        doc.autoTable({
+            startY: y,
+            head: [['Ngay do', 'Buoi', 'Tam thu (SYS)', 'Tam truong (DIA)', 'Nhip tim', 'Ghi chu']],
+            body: bpRows,
+            margin: { left: margin, right: margin },
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: redColor, textColor: 255, fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [255, 245, 245] },
+            columnStyles: { 5: { cellWidth: 35 } }
+        });
+        y = doc.lastAutoTable.finalY + 10;
+    }
+
+    // === MEDICAL RECORDS ===
+    const activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || (r.profileId || 'p-self') === selectedProfileId))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (activeRecords.length > 0) {
+        if (y > 240) { doc.addPage(); y = 20; }
+        doc.setTextColor(...darkColor);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setFillColor(209, 250, 229); // light green
+        doc.rect(margin, y - 5, contentW, 10, 'F');
+        doc.text('HO SO KET QUA XET NGHIEM', margin + 3, y + 1);
+        y += 12;
+
+        activeRecords.forEach(record => {
+            if (y > 250) { doc.addPage(); y = 20; }
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...primaryColor);
+            doc.text(`• ${record.title || 'Ket qua xet nghiem'} — ${formatDate(record.date)}`, margin, y);
+            y += 5;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...grayColor);
+            if (record.facility) doc.text(`Co so: ${record.facility}`, margin + 4, y);
+            y += 4;
+            if (record.notes) {
+                doc.text(`Ket luan: ${record.notes.substring(0, 120)}`, margin + 4, y);
+                y += 4;
+            }
+
+            if (record.indicators && record.indicators.length > 0) {
+                const rows = record.indicators.map(ind => {
+                    const status = ind.assessment === 'high' ? 'CAO' : (ind.assessment === 'low' ? 'THAP' : 'Binh thuong');
+                    return [ind.name, ind.value, ind.unit || '-', ind.refRange || '-', status];
+                });
+                doc.autoTable({
+                    startY: y,
+                    head: [['Chi so', 'Tri so', 'Don vi', 'Nguong BT', 'Danh gia']],
+                    body: rows,
+                    margin: { left: margin + 4, right: margin },
+                    styles: { fontSize: 7.5, cellPadding: 1.5 },
+                    headStyles: { fillColor: primaryColor, textColor: 255 },
+                    didParseCell: (data) => {
+                        if (data.column.index === 4) {
+                            const v = data.cell.text[0];
+                            if (v === 'CAO') data.cell.styles.textColor = redColor;
+                            else if (v === 'THAP') data.cell.styles.textColor = blueColor;
+                        }
+                    }
+                });
+                y = doc.lastAutoTable.finalY + 6;
+            } else {
+                y += 4;
+            }
+        });
+    }
+
+    // Footer
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(7);
+        doc.setTextColor(...grayColor);
+        doc.text(`Trang ${i}/${totalPages} — Tao boi FamiLife v${APP_VERSION} — Chi mang tinh chat tham khao, khong thay the y kien bac si.`, margin, doc.internal.pageSize.getHeight() - 8);
+    }
+
+    doc.save(`FamiLife_SucKhoe_${memberName.replace(/\s/g, '_')}_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.pdf`);
+    showToast('Đã xuất báo cáo PDF thành công!', 'success');
+}
+
+// ===========================
+// 📷 CAMERA CAPTURE
+// ===========================
+
+let cameraStream = null;
+let currentCameraFacing = 'environment'; // 'user' for front, 'environment' for back
+
+async function openCameraModal() {
+    if (!state.geminiApiKey) {
+        showToast('Vui lòng cấu hình Gemini API Key trước khi chụp ảnh!', 'warning');
+        return;
+    }
+    const modal = document.getElementById('cameraModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    await startCamera();
+    lucide.createIcons();
+}
+
+async function startCamera() {
+    const video = document.getElementById('cameraPreview');
+    if (!video) return;
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+    }
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: currentCameraFacing, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = cameraStream;
+    } catch (err) {
+        showToast('Không thể truy cập camera: ' + err.message, 'error');
+        closeCameraModal();
+    }
+}
+
+function closeCameraModal() {
+    const modal = document.getElementById('cameraModal');
+    if (modal) modal.style.display = 'none';
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+    }
+}
+
+async function captureAndAnalyze() {
+    const video = document.getElementById('cameraPreview');
+    const canvas = document.getElementById('cameraCanvas');
+    if (!video || !canvas) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    closeCameraModal();
+
+    const overlay = document.getElementById('healthScannerLoadingOverlay');
+    const statusText = document.getElementById('healthScannerStatusText');
+    if (overlay) overlay.style.display = 'flex';
+    if (statusText) statusText.innerText = 'Đang phân tích ảnh chụp bằng Gemini AI...';
+
+    try {
+        const base64Data = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+        const responseJson = await callGeminiAPI(base64Data, 'image/jpeg');
+        if (overlay) overlay.style.display = 'none';
+        openHealthEditModal(null, responseJson);
+    } catch (err) {
+        if (overlay) overlay.style.display = 'none';
+        showToast('Phân tích ảnh thất bại: ' + err.message, 'error');
+    }
+}
+
+// ===========================
+// 💉 BLOOD PRESSURE CRUD
+// ===========================
+
+function getBpClassification(sys, dia) {
+    if (sys >= 180 || dia >= 120) return { label: 'Khủng hoảng', color: '#7c3aed', bg: 'rgba(124,58,237,0.1)' };
+    if (sys >= 140 || dia >= 90) return { label: 'Cao độ 2', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' };
+    if (sys >= 130 || dia >= 80) return { label: 'Cao độ 1', color: '#f97316', bg: 'rgba(249,115,22,0.1)' };
+    if (sys >= 120 && dia < 80) return { label: 'Tiền tăng HA', color: '#eab308', bg: 'rgba(234,179,8,0.1)' };
+    if (sys >= 90 && dia >= 60) return { label: 'Bình thường', color: '#10b981', bg: 'rgba(16,185,129,0.1)' };
+    return { label: 'Thấp', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' };
+}
+
+function renderBloodPressureSection() {
+    const container = document.getElementById('bpRecordsList');
+    if (!container) return;
+
+    const selectedProfileId = state.selectedHealthProfileId || 'p-self';
+    const records = (state.bloodPressureRecords || [])
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
+        .sort((a, b) => new Date(b.date + (b.session === 'morning' ? 'T06' : b.session === 'evening' ? 'T18' : 'T12')) - new Date(a.date + (a.session === 'morning' ? 'T06' : a.session === 'evening' ? 'T18' : 'T12')));
+
+    if (records.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.85rem;">
+                <i data-lucide="heart" style="width: 32px; height: 32px; opacity: 0.3; display: block; margin: 0 auto 8px;"></i>
+                Chưa có chỉ số huyết áp nào. Nhấn "Thêm chỉ số" để bắt đầu theo dõi.
+            </div>`;
+        lucide.createIcons();
+        return;
+    }
+
+    container.innerHTML = records.map(r => {
+        const cls = getBpClassification(r.systolic, r.diastolic);
+        const sessionLabel = r.session === 'morning' ? '🌅 Sáng' : (r.session === 'evening' ? '🌙 Tối' : '🕐 Khác');
+        return `
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${cls.color};">
+            <div style="text-align: center; min-width: 56px;">
+                <div style="font-size: 1.3rem; font-weight: 800; color: ${cls.color}; line-height: 1;">${r.systolic}</div>
+                <div style="font-size: 0.65rem; color: var(--text-muted); margin: 1px 0;">───</div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: ${cls.color}; line-height: 1;">${r.diastolic}</div>
+                <div style="font-size: 0.6rem; color: var(--text-muted);">mmHg</div>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;">
+                    <span style="font-size: 0.72rem; background: ${cls.bg}; color: ${cls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">${cls.label}</span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">${sessionLabel}</span>
+                    ${r.pulse ? `<span style="font-size: 0.72rem; color: var(--text-muted);">💓 ${r.pulse} bpm</span>` : ''}
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary);">${formatDate(r.date)}${r.notes ? ` · ${r.notes}` : ''}</div>
+            </div>
+            <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                <button onclick="openBpModal('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
+                    <i data-lucide="pencil" style="width: 13px; height: 13px;"></i>
+                </button>
+                <button onclick="deleteBpRecord('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
+                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+function openBpModal(recordId = null) {
+    const modal = document.getElementById('bpModal');
+    if (!modal) return;
+
+    // Populate profile select
+    const profileSelect = document.getElementById('bpProfileSelect');
+    if (profileSelect) {
+        profileSelect.innerHTML = (state.familyProfiles || [{ id: 'p-self', name: 'Bản thân' }])
+            .map(p => `<option value="${p.id}">${escapeHTML(p.name)}</option>`).join('');
+        profileSelect.value = state.selectedHealthProfileId !== 'all' ? state.selectedHealthProfileId : 'p-self';
+    }
+
+    // Default date to today
+    document.getElementById('bpDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('bpRecordId').value = '';
+    document.getElementById('bpSystolic').value = '';
+    document.getElementById('bpDiastolic').value = '';
+    document.getElementById('bpPulse').value = '';
+    document.getElementById('bpNotes').value = '';
+    document.getElementById('bpSession').value = 'morning';
+
+    if (recordId) {
+        const rec = (state.bloodPressureRecords || []).find(r => r.id === recordId);
+        if (rec) {
+            document.getElementById('bpRecordId').value = rec.id;
+            if (profileSelect) profileSelect.value = rec.profileId || 'p-self';
+            document.getElementById('bpSystolic').value = rec.systolic;
+            document.getElementById('bpDiastolic').value = rec.diastolic;
+            document.getElementById('bpPulse').value = rec.pulse || '';
+            document.getElementById('bpSession').value = rec.session || 'morning';
+            document.getElementById('bpDate').value = rec.date;
+            document.getElementById('bpNotes').value = rec.notes || '';
+        }
+    }
+
+    modal.style.display = 'flex';
+    lucide.createIcons();
+}
+
+function closeBpModal() {
+    const modal = document.getElementById('bpModal');
+    if (modal) modal.style.display = 'none';
+}
+window.closeBpModal = closeBpModal;
+
+async function handleBpFormSubmit(e) {
+    e.preventDefault();
+    const sys = parseInt(document.getElementById('bpSystolic').value);
+    const dia = parseInt(document.getElementById('bpDiastolic').value);
+    if (!sys || !dia) {
+        showToast('Vui lòng nhập đầy đủ tâm thu và tâm trương!', 'warning');
+        return;
+    }
+
+    const recordId = document.getElementById('bpRecordId').value;
+    const now = new Date().toISOString();
+    const record = {
+        id: recordId || 'bp-' + Date.now(),
+        profileId: document.getElementById('bpProfileSelect').value || 'p-self',
+        systolic: sys,
+        diastolic: dia,
+        pulse: parseInt(document.getElementById('bpPulse').value) || null,
+        session: document.getElementById('bpSession').value,
+        date: document.getElementById('bpDate').value || new Date().toISOString().split('T')[0],
+        notes: document.getElementById('bpNotes').value.trim(),
+        updated_at: now
+    };
+
+    if (recordId) {
+        const idx = (state.bloodPressureRecords || []).findIndex(r => r.id === recordId);
+        if (idx !== -1) state.bloodPressureRecords[idx] = record;
+    } else {
+        state.bloodPressureRecords = state.bloodPressureRecords || [];
+        state.bloodPressureRecords.push(record);
+    }
+    state.bloodPressureRecordsUpdated = now;
+
+    await saveLocalState();
+    closeBpModal();
+    renderBloodPressureSection();
+    const cls = getBpClassification(sys, dia);
+    showToast(`Đã lưu huyết áp ${sys}/${dia} mmHg (${cls.label})`, 'success');
+}
+
+async function deleteBpRecord(recordId) {
+    if (!confirm('Xóa chỉ số huyết áp này?')) return;
+    state.bloodPressureRecords = (state.bloodPressureRecords || []).filter(r => r.id !== recordId);
+    state.bloodPressureRecordsUpdated = new Date().toISOString();
+    await saveLocalState();
+    renderBloodPressureSection();
+    showToast('Đã xóa chỉ số huyết áp.', 'success');
+}
+window.openBpModal = openBpModal;
+window.deleteBpRecord = deleteBpRecord;
+
+// ===========================
+// 🤖 CẬP NHẬT AI ANALYSIS — Tích hợp Huyết Áp
+// ===========================
+
+async function generateHealthAiAnalysisWithBP(forceFresh = false) {
+    if (!state.geminiApiKey) {
+        showToast('Vui lòng cấu hình Gemini API Key trước!', 'warning');
+        const popoverMenu = document.getElementById('geminiPopoverMenu');
+        if (popoverMenu) popoverMenu.style.display = 'block';
+        return;
+    }
+
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    if (selectedProfileId === 'all') {
+        showToast('Vui lòng chọn một thành viên cụ thể để phân tích sức khỏe!', 'warning');
+        return;
+    }
+
+    const activeRecords = (state.medicalRecords || [])
+        .filter(r => !r.deleted_at && (r.profileId || 'p-self') === selectedProfileId)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const bpRecords = (state.bloodPressureRecords || [])
+        .filter(r => !r.deleted_at && r.profileId === selectedProfileId)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (activeRecords.length === 0 && bpRecords.length === 0) {
+        showToast('Không có dữ liệu y tế hoặc huyết áp để phân tích!', 'warning');
+        return;
+    }
+
+    const overlay = document.getElementById('healthScannerLoadingOverlay');
+    const statusText = document.getElementById('healthScannerStatusText');
+    if (overlay) overlay.style.display = 'flex';
+    if (statusText) statusText.innerText = 'AI đang tổng hợp xét nghiệm máu và huyết áp...';
+
+    try {
+        const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+        const memberName = profile ? profile.name : 'Bản thân';
+
+        // Build blood test history string
+        let bloodTestStr = '';
+        activeRecords.forEach((r, idx) => {
+            bloodTestStr += `--- XET NGHIEM ${idx + 1}: ${r.title} (${formatDate(r.date)}) ---\n`;
+            bloodTestStr += `Co so: ${r.facility || 'Khong ro'}\n`;
+            if (r.notes) bloodTestStr += `Ket luan bac si: ${r.notes}\n`;
+            (r.indicators || []).forEach(ind => {
+                const a = ind.assessment === 'high' ? 'CAO' : (ind.assessment === 'low' ? 'THAP' : 'Binh thuong');
+                bloodTestStr += `  - ${ind.name}: ${ind.value} ${ind.unit || ''} [${ind.refRange || 'n/a'}] → ${a}\n`;
+            });
+            bloodTestStr += '\n';
+        });
+
+        // Build blood pressure history string
+        let bpStr = '';
+        if (bpRecords.length > 0) {
+            bpStr = '\n=== LICH SU HUYET AP (Omron HEM-7361T) ===\n';
+            bpRecords.forEach(r => {
+                const cls = getBpClassification(r.systolic, r.diastolic);
+                const session = r.session === 'morning' ? 'sang' : (r.session === 'evening' ? 'toi' : 'khac');
+                bpStr += `- ${formatDate(r.date)} (${session}): Tam thu ${r.systolic} mmHg / Tam truong ${r.diastolic} mmHg`;
+                if (r.pulse) bpStr += ` / Nhip tim ${r.pulse} bpm`;
+                bpStr += ` → ${cls.label}`;
+                if (r.notes) bpStr += ` (${r.notes})`;
+                bpStr += '\n';
+            });
+        }
+
+        const prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${bloodTestStr}${bpStr}\n
+Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
+
+1. **Tổng quan tình trạng sức khỏe**: Nhận định chung về tình trạng sức khỏe tổng thể.
+
+2. **Phân tích Huyết Áp** (nếu có dữ liệu):
+   - Xu hướng huyết áp theo thời gian (sáng/tối)
+   - Mức độ kiểm soát huyết áp hiện tại
+   - Nguy cơ tim mạch liên quan
+
+3. **Phân tích Kết quả Xét nghiệm Máu** (nếu có dữ liệu):
+   - Các chỉ số bất thường cần chú ý
+   - Xu hướng thay đổi qua thời gian
+
+4. **Mối liên hệ giữa Huyết Áp và Xét nghiệm Máu**:
+   - Phân tích tổng hợp nguy cơ tim mạch, mỡ máu, đường huyết...
+
+5. **Cảnh báo và Khuyến nghị**:
+   - Chế độ ăn uống phù hợp
+   - Vận động thể chất
+   - Khi nào cần gặp bác sĩ ngay
+
+*Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
+
+        const apiKey = state.geminiApiKey;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        if (!response.ok) {
+            const errJson = await response.json().catch(() => ({}));
+            throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
+        }
+
+        const resData = await response.json();
+        const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!textResponse) throw new Error('Không nhận được phản hồi từ Gemini.');
+
+        const nowIso = new Date().toISOString();
+        if (profile) {
+            profile.lastAiAnalysis = textResponse;
+            profile.lastAiAnalysisDate = nowIso;
+            profile.lastAiAnalysisUpdated = nowIso;
+            if (selectedProfileId === 'p-self') {
+                state.lastAiAnalysis = textResponse;
+                state.lastAiAnalysisDate = nowIso;
+                state.lastAiAnalysisUpdated = nowIso;
+            }
+        }
+        state.familyProfilesUpdated = nowIso;
+        await saveLocalState();
+
+        if (overlay) overlay.style.display = 'none';
+        renderHealthAiAnalysisPanel();
+        showToast('Đã phân tích sức khỏe toàn diện (xét nghiệm máu + huyết áp) thành công!', 'success');
+
+    } catch (err) {
+        if (overlay) overlay.style.display = 'none';
+        showToast('Phân tích AI thất bại: ' + err.message, 'error');
+    }
+}
+
+// ===========================
+// 🔌 Event Listeners — Mới
+// ===========================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Camera button
+    const cameraBtn = document.getElementById('healthCameraBtn');
+    if (cameraBtn) cameraBtn.addEventListener('click', openCameraModal);
+
+    const closeCamBtn = document.getElementById('closeCameraBtn');
+    if (closeCamBtn) closeCamBtn.addEventListener('click', closeCameraModal);
+
+    const captureBtn = document.getElementById('capturePhotoBtn');
+    if (captureBtn) captureBtn.addEventListener('click', captureAndAnalyze);
+
+    const switchCamBtn = document.getElementById('switchCameraBtn');
+    if (switchCamBtn) switchCamBtn.addEventListener('click', async () => {
+        currentCameraFacing = currentCameraFacing === 'environment' ? 'user' : 'environment';
+        await startCamera();
+    });
+
+    // PDF export button
+    const pdfBtn = document.getElementById('exportHealthPdfBtn');
+    if (pdfBtn) pdfBtn.addEventListener('click', exportHealthPDF);
+
+    // Blood pressure add button
+    const addBpBtn = document.getElementById('addBpBtn');
+    if (addBpBtn) addBpBtn.addEventListener('click', () => openBpModal());
+
+    // Blood pressure form submit
+    const bpForm = document.getElementById('bpForm');
+    if (bpForm) bpForm.addEventListener('submit', handleBpFormSubmit);
+});
 
 function updateIndicatorExplanation(indicatorName) {
     const infoBox = document.getElementById('healthIndicatorInfoBox');

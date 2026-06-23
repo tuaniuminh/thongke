@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.6">
+    <link rel="stylesheet" href="style.css?v=4.0.7">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -24,6 +24,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Marked.js for Markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <!-- App Layout -->
@@ -32,7 +35,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.6" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.7" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -100,7 +103,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.6" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.7" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -585,6 +588,9 @@
                             <button type="button" id="manageProfilesBtn" class="health-btn health-btn-secondary health-select-sm" style="padding: 6px 12px; font-size: 0.78rem;">
                                 <i data-lucide="settings" style="width: 14px; height: 14px;"></i> Quản lý thành viên
                             </button>
+                            <button type="button" id="exportHealthPdfBtn" class="health-btn health-btn-secondary health-select-sm" style="padding: 6px 12px; font-size: 0.78rem;" title="Xuất báo cáo PDF">
+                                <i data-lucide="file-down" style="width: 14px; height: 14px;"></i> Xuất PDF
+                            </button>
                         </div>
                     </div>
 
@@ -604,6 +610,11 @@
                                 <span class="dropzone-text">Chọn hoặc kéo thả ảnh xét nghiệm y tế (.png, .jpg)</span>
                                 <input type="file" id="healthFileInput" accept="image/*" style="display: none;">
                             </div>
+                            <!-- Camera capture button -->
+                            <button type="button" id="healthCameraBtn" class="health-btn health-btn-secondary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px;" title="Chụp ảnh trực tiếp bằng camera">
+                                <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+                                <span>Chụp ảnh trực tiếp bằng Camera</span>
+                            </button>
                         </div>
                     </div>
 
@@ -683,6 +694,24 @@
                         </div>
                     </div>
 
+                    <!-- Blood Pressure Tracking Section -->
+                    <div class="health-card" id="bpSectionCard" style="margin-top: 20px;">
+                        <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="heart-pulse" style="color: #ef4444;"></i>
+                                <span>Theo dõi Huyết Áp</span>
+                                <span style="font-size: 0.72rem; background: rgba(239,68,68,0.12); color: #ef4444; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Omron HEM-7361T</span>
+                            </div>
+                            <button type="button" id="addBpBtn" class="health-btn health-btn-primary" style="padding: 7px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Thêm chỉ số
+                            </button>
+                        </h4>
+                        <p class="health-card-desc" style="margin-bottom: 14px;">Nhập và theo dõi chỉ số huyết áp theo thời gian. AI sẽ tổng hợp cùng kết quả xét nghiệm máu để phân tích sức khỏe toàn diện.</p>
+                        <div id="bpRecordsList" style="display: flex; flex-direction: column; gap: 8px; min-height: 60px;">
+                            <!-- Dynamically rendered by JS -->
+                        </div>
+                    </div>
+
                     <!-- Bottom Section: Records History -->
                     <div class="health-card list-card" style="margin-top: 20px;">
                         <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -738,7 +767,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.6" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.7" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -760,7 +789,7 @@
                 </a>
                 
                 <!-- Card 2: Thu chi đối ngoại -->
-                <a href="#tongquan" class="home-card card-finance">
+                <a href="#tongquan" class="home-card card-finance" id="homeCardFinance">
                     <div class="home-card-icon">
                         <i data-lucide="hand-coins"></i>
                     </div>
@@ -774,7 +803,7 @@
                 </a>
                 
                 <!-- Card 3: Hồ sơ y tế -->
-                <a href="#hosoyte" class="home-card card-health">
+                <a href="#hosoyte" class="home-card card-health" id="homeCardHealth">
                     <div class="home-card-icon">
                         <i data-lucide="activity"></i>
                     </div>
@@ -1567,6 +1596,106 @@
         </div>
     </div>
 
+    <!-- Camera Capture Modal -->
+    <div class="modal-overlay health-theme-overlay" id="cameraModal" style="display: none; z-index: 9998; background: rgba(0,0,0,0.92);">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; gap: 16px; max-width: 640px; margin: 0 auto; width: 100%;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <h3 style="color: white; margin: 0; font-family: var(--font-heading); display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="camera" style="width: 20px; height: 20px; color: #10b981;"></i>
+                    Chụp ảnh kết quả xét nghiệm
+                </h3>
+                <button type="button" id="closeCameraBtn" style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 8px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                </button>
+            </div>
+            <video id="cameraPreview" style="width: 100%; max-height: 60vh; border-radius: 12px; background: #000; object-fit: cover; border: 2px solid rgba(16,185,129,0.4);" autoplay playsinline></video>
+            <canvas id="cameraCanvas" style="display: none;"></canvas>
+            <div style="display: flex; gap: 12px; width: 100%;">
+                <button type="button" id="capturePhotoBtn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-lucide="camera" style="width: 20px; height: 20px;"></i> Chụp & Phân tích AI
+                </button>
+                <button type="button" id="switchCameraBtn" style="background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 12px; padding: 14px 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Đổi camera">
+                    <i data-lucide="flip-horizontal" style="width: 20px; height: 20px;"></i>
+                </button>
+            </div>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.78rem; text-align: center; margin: 0;">Hướng camera vào tờ kết quả xét nghiệm. AI sẽ tự động nhận diện và điền các chỉ số.</p>
+        </div>
+    </div>
+
+    <!-- Blood Pressure Input Modal -->
+    <div class="modal-overlay" id="bpModal" style="display: none; z-index: 9000;">
+        <div class="modal-dialog" style="max-width: 480px; margin: 20px auto;">
+            <div class="health-card" style="border-radius: 16px; padding: 0; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(220,38,38,0.06)); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                    <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="heart-pulse" style="width: 20px; height: 20px; color: #ef4444;"></i>
+                        Nhập chỉ số huyết áp
+                    </h3>
+                    <button type="button" onclick="closeBpModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                    </button>
+                </div>
+                <form id="bpForm" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+                    <input type="hidden" id="bpRecordId" value="">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Thành viên</label>
+                        <select id="bpProfileSelect" class="form-control">
+                            <option value="p-self">Bản thân</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Tâm thu (SYS) <span style="color: #ef4444;">*</span></label>
+                            <div style="position: relative;">
+                                <input type="number" id="bpSystolic" class="form-control" placeholder="120" min="60" max="250" required>
+                                <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">mmHg</span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Tâm trương (DIA) <span style="color: #ef4444;">*</span></label>
+                            <div style="position: relative;">
+                                <input type="number" id="bpDiastolic" class="form-control" placeholder="80" min="40" max="160" required>
+                                <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">mmHg</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Nhịp tim (Pulse)</label>
+                            <div style="position: relative;">
+                                <input type="number" id="bpPulse" class="form-control" placeholder="72" min="30" max="200">
+                                <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">bpm</span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Thời điểm đo</label>
+                            <select id="bpSession" class="form-control">
+                                <option value="morning">Buổi sáng</option>
+                                <option value="evening">Buổi tối</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Ngày đo</label>
+                        <input type="date" id="bpDate" class="form-control">
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Ghi chú (tùy chọn)</label>
+                        <input type="text" id="bpNotes" class="form-control" placeholder="VD: sau khi nghỉ ngơi, trước khi ngủ...">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 4px;">
+                        <button type="button" onclick="closeBpModal()" class="btn btn-outline" style="flex: 1;">Hủy</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 2; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                            <span>Lưu chỉ số</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Health Scanner Loading Overlay -->
     <div class="modal-overlay health-theme-overlay" id="healthScannerLoadingOverlay" style="display: none; z-index: 9999;">
         <div style="text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
@@ -1579,7 +1708,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.6"></script>
-    <script type="module" src="app.js?v=4.0.6"></script>
+    <script src="lunar_vietnam.js?v=4.0.7"></script>
+    <script type="module" src="app.js?v=4.0.7"></script>
 </body>
 </html>
