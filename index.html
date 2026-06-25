@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.10">
+    <link rel="stylesheet" href="style.css?v=4.0.11">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,7 +35,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.10" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.11" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -103,7 +103,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.10" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.11" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -703,9 +703,14 @@
                                 <span>Theo dõi Huyết Áp</span>
                                 <span style="font-size: 0.72rem; background: rgba(239,68,68,0.12); color: #ef4444; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Omron HEM-7361T</span>
                             </div>
-                            <button type="button" id="addBpBtn" class="health-btn health-btn-primary" style="padding: 7px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
-                                <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Thêm chỉ số
-                            </button>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" id="bpAiAnalysisBtn" class="health-btn health-btn-secondary" style="padding: 7px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Phân tích kết quả
+                                </button>
+                                <button type="button" id="addBpBtn" class="health-btn health-btn-primary" style="padding: 7px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i> Thêm chỉ số
+                                </button>
+                            </div>
                         </h4>
                         <p class="health-card-desc" style="margin-bottom: 14px;">Nhập và theo dõi chỉ số huyết áp theo thời gian. AI sẽ tổng hợp cùng kết quả xét nghiệm máu để phân tích sức khỏe toàn diện.</p>
                         <div id="bpRecordsList" style="display: flex; flex-direction: column; gap: 8px; min-height: 60px;">
@@ -768,7 +773,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.10" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.11" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1539,14 +1544,14 @@
                 </p>
                 
                 <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
-                    <button type="button" id="analyzeBpOnlyBtn" class="health-btn health-btn-secondary" style="padding: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; width: 100%; border-radius: 8px;">
+                    <button type="button" id="analyzeBpOnlyBtn" class="health-btn health-btn-secondary" style="padding: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; width: 100%; border-radius: 8px; white-space: normal; height: auto; min-height: 48px; line-height: 1.4; text-align: center;">
                         <i data-lucide="activity" style="width: 18px; height: 18px;"></i>
-                        <span>Chỉ phân tích kết quả Huyết áp (Hôm nay & Lịch sử)</span>
+                        <span>Phân tích kết quả đo huyết áp</span>
                     </button>
                     
-                    <button type="button" id="analyzeBpAndAllBtn" class="health-btn health-btn-primary" style="padding: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; width: 100%; border-radius: 8px;">
+                    <button type="button" id="analyzeBpAndAllBtn" class="health-btn health-btn-primary" style="padding: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; width: 100%; border-radius: 8px; white-space: normal; height: auto; min-height: 48px; line-height: 1.4; text-align: center;">
                         <i data-lucide="heart-pulse" style="width: 18px; height: 18px;"></i>
-                        <span>Phân tích Huyết áp & Toàn bộ Dữ liệu Sức khỏe</span>
+                        <span>Phân tích toàn bộ dữ liệu sức khỏe</span>
                     </button>
                 </div>
                 
@@ -1563,7 +1568,7 @@
             <div class="modal-header health-modal-header">
                 <h3 class="health-modal-title">
                     <i data-lucide="sparkles"></i>
-                    <span>Phân tích Sức khỏe Nâng cao bằng AI</span>
+                    <span id="healthAiAnalysisModalTitle">Phân tích Sức khỏe Nâng cao bằng AI</span>
                 </h3>
                 <button type="button" class="close-btn" id="closeHealthAiAnalysisModalBtn">&times;</button>
             </div>
@@ -1574,7 +1579,10 @@
                             <span class="info-label">Trạng thái phân tích:</span>
                             <span id="healthAiAnalysisDate" style="font-weight: 500; font-size: 0.9rem;">Chưa thực hiện phân tích nào</span>
                         </div>
-                        <div style="display: flex; gap: 8px;">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <select id="healthSpeechVoiceSelect" class="health-btn health-btn-outline health-select-sm" style="display: none; padding: 4px 8px; font-size: 0.8rem; border-color: var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; max-width: 140px;">
+                                <!-- Populated dynamically -->
+                            </select>
                             <button type="button" id="speakHealthAiAnalysisBtn" class="health-btn health-btn-outline health-select-sm" style="display: none; align-items: center; gap: 6px;">
                                 <i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả
                             </button>
@@ -1723,7 +1731,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.10"></script>
-    <script type="module" src="app.js?v=4.0.10"></script>
+    <script src="lunar_vietnam.js?v=4.0.11"></script>
+    <script type="module" src="app.js?v=4.0.11"></script>
 </body>
 </html>

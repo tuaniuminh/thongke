@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.10';
+const APP_VERSION = '4.0.11';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -49,6 +49,11 @@ let state = {
     lastAiAnalysis: '',
     lastAiAnalysisDate: '',
     lastAiAnalysisUpdated: '',
+    lastBpAnalysis: '',
+    lastBpAnalysisDate: '',
+    lastBpAnalysisUpdated: '',
+    currentAiAnalysisType: 'full',
+    selectedSpeechVoiceName: '',
     familyProfiles: [],
     familyProfilesUpdated: '',
     selectedHealthProfileId: 'p-self',
@@ -245,6 +250,10 @@ async function saveLocalState() {
         lastAiAnalysis: state.lastAiAnalysis || '',
         lastAiAnalysisDate: state.lastAiAnalysisDate || '',
         lastAiAnalysisUpdated: state.lastAiAnalysisUpdated || '',
+        lastBpAnalysis: state.lastBpAnalysis || '',
+        lastBpAnalysisDate: state.lastBpAnalysisDate || '',
+        lastBpAnalysisUpdated: state.lastBpAnalysisUpdated || '',
+        selectedSpeechVoiceName: state.selectedSpeechVoiceName || '',
         familyProfiles: state.familyProfiles || [],
         familyProfilesUpdated: state.familyProfilesUpdated || '',
         lastResetTime: state.lastResetTime || '',
@@ -278,6 +287,10 @@ async function loadLocalState(password) {
         state.lastAiAnalysis = '';
         state.lastAiAnalysisDate = '';
         state.lastAiAnalysisUpdated = '';
+        state.lastBpAnalysis = '';
+        state.lastBpAnalysisDate = '';
+        state.lastBpAnalysisUpdated = '';
+        state.selectedSpeechVoiceName = '';
         state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
         state.familyProfilesUpdated = '';
         state.selectedHealthProfileId = 'p-self';
@@ -303,6 +316,10 @@ async function loadLocalState(password) {
         state.lastAiAnalysis = data.lastAiAnalysis || '';
         state.lastAiAnalysisDate = data.lastAiAnalysisDate || '';
         state.lastAiAnalysisUpdated = data.lastAiAnalysisUpdated || '';
+        state.lastBpAnalysis = data.lastBpAnalysis || '';
+        state.lastBpAnalysisDate = data.lastBpAnalysisDate || '';
+        state.lastBpAnalysisUpdated = data.lastBpAnalysisUpdated || '';
+        state.selectedSpeechVoiceName = data.selectedSpeechVoiceName || '';
         state.familyProfiles = data.familyProfiles && data.familyProfiles.length > 0 ? data.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
         state.familyProfilesUpdated = data.familyProfilesUpdated || '';
         state.selectedHealthProfileId = 'p-self';
@@ -403,6 +420,10 @@ async function performSync(silent = false) {
                     state.lastAiAnalysis = remoteData.lastAiAnalysis || '';
                     state.lastAiAnalysisDate = remoteData.lastAiAnalysisDate || '';
                     state.lastAiAnalysisUpdated = remoteData.lastAiAnalysisUpdated || '';
+                    state.lastBpAnalysis = remoteData.lastBpAnalysis || '';
+                    state.lastBpAnalysisDate = remoteData.lastBpAnalysisDate || '';
+                    state.lastBpAnalysisUpdated = remoteData.lastBpAnalysisUpdated || '';
+                    state.selectedSpeechVoiceName = remoteData.selectedSpeechVoiceName || '';
                     state.familyProfiles = remoteData.familyProfiles && remoteData.familyProfiles.length > 0 ? remoteData.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
                     state.familyProfilesUpdated = remoteData.familyProfilesUpdated || '';
                     remoteReceived = remoteData.receivedGifts || [];
@@ -451,6 +472,20 @@ async function performSync(silent = false) {
                         state.lastAiAnalysisUpdated = remoteData.lastAiAnalysisUpdated || '';
                     }
 
+                    // Merge lastBpAnalysis using LWW
+                    const localBpAnalysisTime = state.lastBpAnalysisUpdated ? new Date(state.lastBpAnalysisUpdated).getTime() : 0;
+                    const remoteBpAnalysisTime = remoteData.lastBpAnalysisUpdated ? new Date(remoteData.lastBpAnalysisUpdated).getTime() : 0;
+                    if (remoteBpAnalysisTime > localBpAnalysisTime) {
+                        state.lastBpAnalysis = remoteData.lastBpAnalysis || '';
+                        state.lastBpAnalysisDate = remoteData.lastBpAnalysisDate || '';
+                        state.lastBpAnalysisUpdated = remoteData.lastBpAnalysisUpdated || '';
+                    }
+
+                    // Sync selectedSpeechVoiceName
+                    if (remoteData.selectedSpeechVoiceName) {
+                        state.selectedSpeechVoiceName = remoteData.selectedSpeechVoiceName;
+                    }
+
                     // Merge familyProfiles using LWW
                     const localProfilesTime = state.familyProfilesUpdated ? new Date(state.familyProfilesUpdated).getTime() : 0;
                     const remoteProfilesTime = remoteData.familyProfilesUpdated ? new Date(remoteData.familyProfilesUpdated).getTime() : 0;
@@ -497,6 +532,10 @@ async function performSync(silent = false) {
             lastAiAnalysis: state.lastAiAnalysis || '',
             lastAiAnalysisDate: state.lastAiAnalysisDate || '',
             lastAiAnalysisUpdated: state.lastAiAnalysisUpdated || '',
+            lastBpAnalysis: state.lastBpAnalysis || '',
+            lastBpAnalysisDate: state.lastBpAnalysisDate || '',
+            lastBpAnalysisUpdated: state.lastBpAnalysisUpdated || '',
+            selectedSpeechVoiceName: state.selectedSpeechVoiceName || '',
             lastResetTime: state.lastResetTime || '',
             showImportNotesOption: !!state.showImportNotesOption,
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -4894,7 +4933,10 @@ async function exportMemberBackup(profileId) {
             name: profile.name,
             lastAiAnalysis: profile.lastAiAnalysis || '',
             lastAiAnalysisDate: profile.lastAiAnalysisDate || '',
-            lastAiAnalysisUpdated: profile.lastAiAnalysisUpdated || ''
+            lastAiAnalysisUpdated: profile.lastAiAnalysisUpdated || '',
+            lastBpAnalysis: profile.lastBpAnalysis || '',
+            lastBpAnalysisDate: profile.lastBpAnalysisDate || '',
+            lastBpAnalysisUpdated: profile.lastBpAnalysisUpdated || ''
         },
         medicalRecords: records.map(r => ({
             title: r.title || 'Hồ sơ sức khỏe',
@@ -5036,6 +5078,15 @@ async function handleMemberBackupImportFile(e) {
                     profile.lastAiAnalysis = importedProfile.lastAiAnalysis;
                     profile.lastAiAnalysisDate = importedProfile.lastAiAnalysisDate || nowIso;
                     profile.lastAiAnalysisUpdated = nowIso;
+                    state.familyProfilesUpdated = nowIso;
+                }
+            }
+            if (importedProfile.lastBpAnalysis) {
+                const overwriteBp = confirm(`Tệp sao lưu có chứa báo cáo phân tích huyết áp bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
+                if (overwriteBp) {
+                    profile.lastBpAnalysis = importedProfile.lastBpAnalysis;
+                    profile.lastBpAnalysisDate = importedProfile.lastBpAnalysisDate || nowIso;
+                    profile.lastBpAnalysisUpdated = nowIso;
                     state.familyProfilesUpdated = nowIso;
                 }
             }
@@ -5193,7 +5244,7 @@ function initHealthBindings() {
 
     // AI Analysis Modal bindings
     document.getElementById('healthAiAnalysisBtn')?.addEventListener('click', () => {
-        openHealthAiAnalysisModal();
+        openHealthAiAnalysisModal('full');
     });
 
     document.getElementById('closeHealthAiAnalysisModalBtn')?.addEventListener('click', () => {
@@ -5205,6 +5256,8 @@ function initHealthBindings() {
             speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
             lucide.createIcons();
         }
+        const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+        if (voiceSelect) voiceSelect.style.display = 'none';
     });
 
     document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
@@ -5216,6 +5269,8 @@ function initHealthBindings() {
             speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
             lucide.createIcons();
         }
+        const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+        if (voiceSelect) voiceSelect.style.display = 'none';
     });
 
     document.getElementById('closeHealthAiMemberSelectorModalBtn')?.addEventListener('click', () => {
@@ -5227,7 +5282,7 @@ function initHealthBindings() {
     });
 
     document.getElementById('refreshHealthAiAnalysisBtn')?.addEventListener('click', () => {
-        generateHealthAiAnalysisWithBP(true); // Force re-analysis
+        generateHealthAiAnalysisWithBP(true, state.currentAiAnalysisType === 'bp' ? 'bp_only' : 'full'); // Force re-analysis
     });
 
     const indicatorSelect = document.getElementById('healthChartIndicatorSelect');
@@ -6284,7 +6339,8 @@ function selectMemberForAiAnalysis(profileId) {
     openHealthAiAnalysisModal();
 }
 
-function openHealthAiAnalysisModal() {
+function openHealthAiAnalysisModal(type = 'full') {
+    state.currentAiAnalysisType = type;
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     if (selectedProfileId === 'all') {
         openHealthAiMemberSelectorModal();
@@ -6296,15 +6352,32 @@ function openHealthAiAnalysisModal() {
     
     modal.style.display = 'flex';
     
+    // Update modal title dynamically
+    const titleEl = document.getElementById('healthAiAnalysisModalTitle');
+    if (titleEl) {
+        titleEl.innerText = type === 'bp' ? 'Phân tích Chỉ số Huyết áp bằng AI' : 'Phân tích Sức khỏe Nâng cao bằng AI';
+    }
+    
     // Get the profile object
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
-    const lastAiAnalysis = profile ? profile.lastAiAnalysis : state.lastAiAnalysis;
+    const lastAiAnalysis = type === 'bp'
+        ? (profile ? profile.lastBpAnalysis : state.lastBpAnalysis)
+        : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
+        
+    // Reset speech state when opening
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    isSpeaking = false;
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    if (speakBtn) {
+        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+        lucide.createIcons();
+    }
     
     // If we have cached analysis, render it. Otherwise, run analysis.
     if (lastAiAnalysis) {
         renderHealthAiReport();
     } else {
-        generateHealthAiAnalysisWithBP(false);
+        generateHealthAiAnalysisWithBP(false, type === 'bp' ? 'bp_only' : 'full');
     }
 }
 
@@ -6376,7 +6449,11 @@ function toggleSpeech() {
     
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
-    const lastAiAnalysis = profile ? profile.lastAiAnalysis : state.lastAiAnalysis;
+    
+    const isBp = state.currentAiAnalysisType === 'bp';
+    const lastAiAnalysis = isBp
+        ? (profile ? profile.lastBpAnalysis : state.lastBpAnalysis)
+        : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
     
     if (!lastAiAnalysis) {
         showToast('Không có nội dung phân tích để đọc!', 'warning');
@@ -6401,16 +6478,28 @@ function toggleSpeech() {
     
     speechUtterance = new SpeechSynthesisUtterance(cleanText);
     speechUtterance.lang = 'vi-VN';
-    speechUtterance.rate = 0.9;  // Slightly slower rate makes voices sound significantly more natural
+    speechUtterance.rate = 1.0;  // Tốc độ đọc đặt về 1.0
     speechUtterance.pitch = 1.0;
     
-    // Choose the best voice available
+    // Choose selected voice or fallback
     const voices = window.speechSynthesis.getVoices();
-    const viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN'));
-    if (viVoices.length > 0) {
-        // Look for Google, Microsoft, or Natural voices first
-        const bestVoice = viVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Natural')) || viVoices[0];
-        speechUtterance.voice = bestVoice;
+    const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+    const selectedVoiceName = voiceSelect?.value || state.selectedSpeechVoiceName;
+    
+    if (selectedVoiceName) {
+        const foundVoice = voices.find(v => v.name === selectedVoiceName);
+        if (foundVoice) {
+            speechUtterance.voice = foundVoice;
+        }
+    }
+    
+    // Fallback if no voice matches
+    if (!speechUtterance.voice) {
+        const viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN') || v.lang.includes('vi_VN'));
+        if (viVoices.length > 0) {
+            const bestVoice = viVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Natural')) || viVoices[0];
+            speechUtterance.voice = bestVoice;
+        }
     }
     
     speechUtterance.onend = () => {
@@ -6433,12 +6522,63 @@ function toggleSpeech() {
     window.speechSynthesis.speak(speechUtterance);
 }
 
+function populateVoiceList() {
+    if (!window.speechSynthesis) return;
+    const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+    if (!voiceSelect) return;
+
+    const voices = window.speechSynthesis.getVoices();
+    const viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN') || v.lang.includes('vi_VN'));
+
+    // Clear previous options
+    voiceSelect.innerHTML = '';
+
+    if (viVoices.length === 0) {
+        voiceSelect.style.display = 'none';
+        return;
+    }
+
+    viVoices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        // Clean Microsoft/Google names for compact display
+        let displayName = voice.name
+            .replace(/Microsoft/g, 'MS')
+            .replace(/Google/g, 'Google')
+            .replace(/Apple/g, 'Apple')
+            .replace(/natural/gi, 'Tự nhiên')
+            .replace(/text-to-speech/gi, 'TTS');
+        option.textContent = displayName;
+        
+        if (state.selectedSpeechVoiceName && voice.name === state.selectedSpeechVoiceName) {
+            option.selected = true;
+        } else if (!state.selectedSpeechVoiceName && (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Natural') || voice.name.includes('Linh'))) {
+            option.selected = true;
+            state.selectedSpeechVoiceName = voice.name;
+        }
+        
+        voiceSelect.appendChild(option);
+    });
+
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    if (speakBtn && speakBtn.style.display !== 'none' && viVoices.length > 0) {
+        voiceSelect.style.display = 'inline-flex';
+    } else {
+        voiceSelect.style.display = 'none';
+    }
+}
+
 function renderHealthAiReport() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
     
-    const lastAiAnalysis = profile ? profile.lastAiAnalysis : state.lastAiAnalysis;
-    const lastAiAnalysisDate = profile ? profile.lastAiAnalysisDate : state.lastAiAnalysisDate;
+    const isBp = state.currentAiAnalysisType === 'bp';
+    const lastAiAnalysis = isBp
+        ? (profile ? profile.lastBpAnalysis : state.lastBpAnalysis)
+        : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
+    const lastAiAnalysisDate = isBp
+        ? (profile ? profile.lastBpAnalysisDate : state.lastBpAnalysisDate)
+        : (profile ? profile.lastAiAnalysisDate : state.lastAiAnalysisDate);
     
     const dateEl = document.getElementById('healthAiAnalysisDate');
     const reportContentEl = document.getElementById('healthAiReportContent');
@@ -6465,9 +6605,25 @@ function renderHealthAiReport() {
                 speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
             }
         }
+        
+        // Populate voices dropdown when report is shown
+        populateVoiceList();
     } else {
+        if (reportContentEl) {
+            reportContentEl.innerHTML = `
+                <div class="health-empty-state" style="padding: 24px 0;">
+                    <i data-lucide="sparkles" style="animation: pulse 2s infinite;"></i>
+                    <h5 style="margin-top: 10px; font-weight: 600;">Sẵn sàng phân tích</h5>
+                    <p style="margin-top: 6px; font-size: 0.85rem; max-width: 320px;">Nhấp vào "Phân tích lại" để tổng hợp và nhận nhận định chi tiết từ Gemini AI.</p>
+                </div>
+            `;
+        }
         if (speakBtn) {
             speakBtn.style.display = 'none';
+        }
+        const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+        if (voiceSelect) {
+            voiceSelect.style.display = 'none';
         }
     }
     lucide.createIcons();
@@ -7561,13 +7717,24 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 
         const nowIso = new Date().toISOString();
         if (profile) {
-            profile.lastAiAnalysis = textResponse;
-            profile.lastAiAnalysisDate = nowIso;
-            profile.lastAiAnalysisUpdated = nowIso;
-            if (selectedProfileId === 'p-self') {
-                state.lastAiAnalysis = textResponse;
-                state.lastAiAnalysisDate = nowIso;
-                state.lastAiAnalysisUpdated = nowIso;
+            if (mode === 'bp_only') {
+                profile.lastBpAnalysis = textResponse;
+                profile.lastBpAnalysisDate = nowIso;
+                profile.lastBpAnalysisUpdated = nowIso;
+                if (selectedProfileId === 'p-self') {
+                    state.lastBpAnalysis = textResponse;
+                    state.lastBpAnalysisDate = nowIso;
+                    state.lastBpAnalysisUpdated = nowIso;
+                }
+            } else {
+                profile.lastAiAnalysis = textResponse;
+                profile.lastAiAnalysisDate = nowIso;
+                profile.lastAiAnalysisUpdated = nowIso;
+                if (selectedProfileId === 'p-self') {
+                    state.lastAiAnalysis = textResponse;
+                    state.lastAiAnalysisDate = nowIso;
+                    state.lastAiAnalysisUpdated = nowIso;
+                }
             }
         }
         state.familyProfilesUpdated = nowIso;
@@ -7618,19 +7785,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // Blood pressure analysis choice modal buttons
     document.getElementById('analyzeBpOnlyBtn')?.addEventListener('click', async () => {
         document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
-        openHealthAiAnalysisModal();
+        openHealthAiAnalysisModal('bp');
         await generateHealthAiAnalysisWithBP(true, 'bp_only');
     });
 
     document.getElementById('analyzeBpAndAllBtn')?.addEventListener('click', async () => {
         document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
-        openHealthAiAnalysisModal();
+        openHealthAiAnalysisModal('full');
         await generateHealthAiAnalysisWithBP(true, 'full');
     });
 
     document.getElementById('closeBpChoiceModalBtn')?.addEventListener('click', () => {
         document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
     });
+
+    // Blood pressure card analysis button
+    document.getElementById('bpAiAnalysisBtn')?.addEventListener('click', () => {
+        openHealthAiAnalysisModal('bp');
+    });
+
+    // Speech voice selector change
+    document.getElementById('healthSpeechVoiceSelect')?.addEventListener('change', (e) => {
+        state.selectedSpeechVoiceName = e.target.value;
+        saveLocalState();
+    });
+
+    // Voice loaded event
+    if (window.speechSynthesis) {
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+    }
 });
 
 
