@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.9';
+const APP_VERSION = '4.0.10';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -5800,9 +5800,12 @@ async function processScannedHealthImage(responseJson) {
         }
         renderHealthDashboard();
         
-        // Open the AI analysis modal and run generation
-        openHealthAiAnalysisModal();
-        await generateHealthAiAnalysisWithBP(true);
+        // Show the choice modal instead of auto analyzing
+        const choiceModal = document.getElementById('healthBpAnalysisChoiceModal');
+        if (choiceModal) {
+            choiceModal.style.display = 'flex';
+            lucide.createIcons();
+        }
     } else {
         openHealthEditModal(null, responseJson);
     }
@@ -6398,6 +6401,17 @@ function toggleSpeech() {
     
     speechUtterance = new SpeechSynthesisUtterance(cleanText);
     speechUtterance.lang = 'vi-VN';
+    speechUtterance.rate = 0.9;  // Slightly slower rate makes voices sound significantly more natural
+    speechUtterance.pitch = 1.0;
+    
+    // Choose the best voice available
+    const voices = window.speechSynthesis.getVoices();
+    const viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN'));
+    if (viVoices.length > 0) {
+        // Look for Google, Microsoft, or Natural voices first
+        const bestVoice = viVoices.find(v => v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Natural')) || viVoices[0];
+        speechUtterance.voice = bestVoice;
+    }
     
     speechUtterance.onend = () => {
         isSpeaking = false;
@@ -7433,7 +7447,7 @@ window.deleteBpRecord = deleteBpRecord;
 // 🤖 CẬP NHẬT AI ANALYSIS — Tích hợp Huyết Áp
 // ===========================
 
-async function generateHealthAiAnalysisWithBP(forceFresh = false) {
+async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full') {
     if (!state.geminiApiKey) {
         showToast('Vui lòng cấu hình Gemini API Key trước!', 'warning');
         const popoverMenu = document.getElementById('geminiPopoverMenu');
@@ -7447,7 +7461,7 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false) {
         return;
     }
 
-    const activeRecords = (state.medicalRecords || [])
+    const activeRecords = (mode === 'bp_only') ? [] : (state.medicalRecords || [])
         .filter(r => !r.deleted_at && (r.profileId || 'p-self') === selectedProfileId)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -7463,7 +7477,11 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false) {
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
     if (overlay) overlay.style.display = 'flex';
-    if (statusText) statusText.innerText = 'AI đang tổng hợp xét nghiệm máu và huyết áp...';
+    if (statusText) {
+        statusText.innerText = mode === 'bp_only' 
+            ? 'AI đang phân tích kết quả đo huyết áp...' 
+            : 'AI đang tổng hợp xét nghiệm máu và huyết áp...';
+    }
 
     try {
         const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
@@ -7471,16 +7489,18 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false) {
 
         // Build blood test history string
         let bloodTestStr = '';
-        activeRecords.forEach((r, idx) => {
-            bloodTestStr += `--- XET NGHIEM ${idx + 1}: ${r.title} (${formatDate(r.date)}) ---\n`;
-            bloodTestStr += `Co so: ${r.facility || 'Khong ro'}\n`;
-            if (r.notes) bloodTestStr += `Ket luan bac si: ${r.notes}\n`;
-            (r.indicators || []).forEach(ind => {
-                const a = ind.assessment === 'high' ? 'CAO' : (ind.assessment === 'low' ? 'THAP' : 'Binh thuong');
-                bloodTestStr += `  - ${ind.name}: ${ind.value} ${ind.unit || ''} [${ind.refRange || 'n/a'}] → ${a}\n`;
+        if (activeRecords.length > 0) {
+            activeRecords.forEach((r, idx) => {
+                bloodTestStr += `--- XET NGHIEM ${idx + 1}: ${r.title} (${formatDate(r.date)}) ---\n`;
+                bloodTestStr += `Co so: ${r.facility || 'Khong ro'}\n`;
+                if (r.notes) bloodTestStr += `Ket luan bac si: ${r.notes}\n`;
+                (r.indicators || []).forEach(ind => {
+                    const a = ind.assessment === 'high' ? 'CAO' : (ind.assessment === 'low' ? 'THAP' : 'Binh thuong');
+                    bloodTestStr += `  - ${ind.name}: ${ind.value} ${ind.unit || ''} [${ind.refRange || 'n/a'}] → ${a}\n`;
+                });
+                bloodTestStr += '\n';
             });
-            bloodTestStr += '\n';
-        });
+        }
 
         // Build blood pressure history string
         let bpStr = '';
@@ -7497,7 +7517,22 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false) {
             });
         }
 
-        const prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${bloodTestStr}${bpStr}\n
+        let prompt = '';
+        if (mode === 'bp_only') {
+            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là toàn bộ dữ liệu lịch sử huyết áp của thành viên "${memberName}":\n\n${bpStr}\n
+Hãy lập một báo cáo phân tích xu hướng huyết áp bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
+
+1. **Nhận định chung về Huyết Áp**: Đánh giá chỉ số huyết áp hôm nay và xu hướng qua lịch sử đo.
+2. **Buổi đo (Sáng/Tối)**: Sự chênh lệch (nếu có) giữa các buổi và ý nghĩa y khoa.
+3. **Mức độ kiểm soát & Nguy cơ Tim mạch**: Nhận định xem huyết áp đã được kiểm soát tốt chưa, các cảnh báo nguy cơ tim mạch liên quan.
+4. **Lời khuyên chi tiết**:
+   - Chế độ ăn uống giảm muối, dinh dưỡng tốt cho tim mạch.
+   - Chế độ vận động, nghỉ ngơi phù hợp.
+   - Khi nào cần tham vấn bác sĩ hoặc đi khám chuyên khoa ngay.
+
+*Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
+        } else {
+            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${bloodTestStr}${bpStr}\n
 Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
 
 1. **Tổng quan tình trạng sức khỏe**: Nhận định chung về tình trạng sức khỏe tổng thể.
@@ -7520,6 +7555,7 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
    - Khi nào cần gặp bác sĩ ngay
 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
+        }
 
         const textResponse = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
 
@@ -7538,8 +7574,8 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
         await saveLocalState();
 
         if (overlay) overlay.style.display = 'none';
-        renderHealthAiAnalysisPanel();
-        showToast('Đã phân tích sức khỏe toàn diện (xét nghiệm máu + huyết áp) thành công!', 'success');
+        renderHealthAiReport();
+        showToast(mode === 'bp_only' ? 'Đã phân tích kết quả huyết áp thành công!' : 'Đã phân tích sức khỏe toàn diện (xét nghiệm máu + huyết áp) thành công!', 'success');
 
     } catch (err) {
         if (overlay) overlay.style.display = 'none';
@@ -7578,6 +7614,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Blood pressure form submit
     const bpForm = document.getElementById('bpForm');
     if (bpForm) bpForm.addEventListener('submit', handleBpFormSubmit);
+
+    // Blood pressure analysis choice modal buttons
+    document.getElementById('analyzeBpOnlyBtn')?.addEventListener('click', async () => {
+        document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
+        openHealthAiAnalysisModal();
+        await generateHealthAiAnalysisWithBP(true, 'bp_only');
+    });
+
+    document.getElementById('analyzeBpAndAllBtn')?.addEventListener('click', async () => {
+        document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
+        openHealthAiAnalysisModal();
+        await generateHealthAiAnalysisWithBP(true, 'full');
+    });
+
+    document.getElementById('closeBpChoiceModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
+    });
 });
 
 
