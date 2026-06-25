@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.8">
+    <link rel="stylesheet" href="style.css?v=4.0.9">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,7 +35,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.8" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.9" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -103,7 +103,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.8" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.9" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -768,7 +768,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.8" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.9" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1540,9 +1540,14 @@
                             <span class="info-label">Trạng thái phân tích:</span>
                             <span id="healthAiAnalysisDate" style="font-weight: 500; font-size: 0.9rem;">Chưa thực hiện phân tích nào</span>
                         </div>
-                        <button type="button" id="refreshHealthAiAnalysisBtn" class="health-btn health-btn-secondary health-select-sm">
-                            <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i> Phân tích lại
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" id="speakHealthAiAnalysisBtn" class="health-btn health-btn-outline health-select-sm" style="display: none; align-items: center; gap: 6px;">
+                                <i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả
+                            </button>
+                            <button type="button" id="refreshHealthAiAnalysisBtn" class="health-btn health-btn-secondary health-select-sm">
+                                <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i> Phân tích lại
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1684,7 +1689,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.8"></script>
-    <script type="module" src="app.js?v=4.0.8"></script>
+    <script src="lunar_vietnam.js?v=4.0.9"></script>
+    <script type="module" src="app.js?v=4.0.9"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.8';
+const APP_VERSION = '4.0.9';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -5198,10 +5198,24 @@ function initHealthBindings() {
 
     document.getElementById('closeHealthAiAnalysisModalBtn')?.addEventListener('click', () => {
         document.getElementById('healthAiAnalysisModal').style.display = 'none';
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        isSpeaking = false;
+        const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+        if (speakBtn) {
+            speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+            lucide.createIcons();
+        }
     });
 
     document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
         document.getElementById('healthAiAnalysisModal').style.display = 'none';
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        isSpeaking = false;
+        const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+        if (speakBtn) {
+            speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+            lucide.createIcons();
+        }
     });
 
     document.getElementById('closeHealthAiMemberSelectorModalBtn')?.addEventListener('click', () => {
@@ -5745,6 +5759,55 @@ function fileToBase64(file) {
     });
 }
 
+async function processScannedHealthImage(responseJson) {
+    if (responseJson.isBloodPressure) {
+        // Save blood pressure record
+        const targetProfileId = state.selectedHealthProfileId !== 'all' ? state.selectedHealthProfileId : 'p-self';
+        const now = new Date().toISOString();
+        const dateStr = responseJson.date || now.split('T')[0];
+        
+        // Determine session: morning (5h - 12h) or evening (rest)
+        const hour = new Date().getHours();
+        const session = (hour >= 5 && hour < 12) ? 'morning' : 'evening';
+        
+        const record = {
+            id: 'bp-' + Date.now(),
+            profileId: targetProfileId,
+            systolic: parseInt(responseJson.systolic),
+            diastolic: parseInt(responseJson.diastolic),
+            pulse: parseInt(responseJson.pulse) || null,
+            session: session,
+            date: dateStr,
+            notes: responseJson.notes || 'Tự động nhận diện từ ảnh',
+            updated_at: now
+        };
+        
+        state.bloodPressureRecords = state.bloodPressureRecords || [];
+        state.bloodPressureRecords.push(record);
+        state.bloodPressureRecordsUpdated = now;
+        
+        await saveLocalState();
+        renderBloodPressureSection();
+        
+        const cls = getBpClassification(record.systolic, record.diastolic);
+        showToast(`Đã tự động nhận diện và lưu huyết áp: ${record.systolic}/${record.diastolic} mmHg (${cls.label})`, 'success');
+        
+        // Auto select the profile in UI and update the dashboard
+        state.selectedHealthProfileId = targetProfileId;
+        const mainSelect = document.getElementById('healthProfileSelect');
+        if (mainSelect) {
+            mainSelect.value = targetProfileId;
+        }
+        renderHealthDashboard();
+        
+        // Open the AI analysis modal and run generation
+        openHealthAiAnalysisModal();
+        await generateHealthAiAnalysisWithBP(true);
+    } else {
+        openHealthEditModal(null, responseJson);
+    }
+}
+
 async function handleHealthFile(file) {
     if (!state.geminiApiKey) {
         showToast("Vui lòng cấu hình Gemini API Key trước khi quét!", "warning");
@@ -5767,14 +5830,14 @@ async function handleHealthFile(file) {
     
     try {
         const base64Data = await fileToBase64(file);
-        if (statusText) statusText.innerText = 'Đang phân tích chỉ số xét nghiệm bằng Gemini AI...';
+        if (statusText) statusText.innerText = 'Đang phân tích ảnh y tế bằng Gemini AI...';
         
         const responseJson = await callGeminiAPI(base64Data, file.type);
         
         if (overlay) overlay.style.display = 'none';
         
-        // Open edit modal with results
-        openHealthEditModal(null, responseJson);
+        // Process results (BP vs Lab tests)
+        await processScannedHealthImage(responseJson);
     } catch (err) {
         console.error("Gemini scanning error:", err);
         if (overlay) overlay.style.display = 'none';
@@ -5787,80 +5850,118 @@ async function handleHealthFile(file) {
 
 async function callGeminiAPI(base64Data, mimeType) {
     const apiKey = state.geminiApiKey;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+    const models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+    let lastError = null;
     
-    const promptText = `Hãy đóng vai trò là một chuyên gia y tế và kỹ thuật viên xét nghiệm. Hãy phân tích hình ảnh kết quả xét nghiệm y khoa được cung cấp và trích xuất thông tin sang định dạng JSON chính xác.
+    const promptText = `Hãy đóng vai trò là một chuyên gia phân tích hình ảnh y tế. Bạn được cung cấp một hình ảnh có thể là kết quả xét nghiệm y khoa (xét nghiệm máu, nước tiểu, siêu âm, v.v.) hoặc hình ảnh chụp màn hình hiển thị của máy đo huyết áp (ví dụ: máy Omron).
 
-Yêu cầu cấu trúc dữ liệu JSON đầu ra:
+Nhiệm vụ của bạn là nhận diện loại hình ảnh này và trích xuất thông tin chính xác sang định dạng JSON.
+
+HƯỚNG DẪN CHI TIẾT:
+1. Xác định xem hình ảnh có phải là màn hình máy đo huyết áp hay không:
+   - Nếu là máy đo huyết áp:
+     + Trích xuất chỉ số Huyết áp tâm thu (SYS mmHg), Huyết áp tâm trương (DIA mmHg) và Nhịp tim (PULSE/min nếu có).
+     + ĐẶC BIỆT CHÚ Ý (Rất quan trọng): Nếu trên màn hình máy đo huyết áp hiển thị hai cột kết quả song song (như máy Omron HEM-7361T hiển thị kết quả đo trước đó ở cột bên trái và kết quả mới nhất ở cột bên phải, thường cột phải có nhãn "LATEST" hoặc số lần đo mới nhất), bạn chỉ được phép trích xuất kết quả ở cột bên PHẢI (kết quả đo hiện tại/mới nhất). Tuyệt đối không lấy kết quả ở cột bên trái.
+     + Trả về JSON có thuộc tính "isBloodPressure": true.
+   - Nếu là kết quả xét nghiệm y khoa (xét nghiệm máu, siêu âm, nước tiểu, v.v.):
+     + Trích xuất tên xét nghiệm, cơ sở y tế, ngày thực hiện, và danh sách các chỉ số.
+     + Trả về JSON có thuộc tính "isBloodPressure": false.
+
+CẤU TRÚC ĐẦU RA JSON YÊU CẦU:
+Bạn bắt buộc phải trả về một đối tượng JSON thuộc một trong hai định dạng sau tùy theo kết quả nhận diện:
+
+ĐỊNH DẠNG 1 (Nếu là ảnh đo huyết áp):
 {
-  "title": "Tên xét nghiệm hoặc tiêu đề hồ sơ (ví dụ: Xét nghiệm máu tổng quát, Siêu âm ổ bụng)",
-  "type": "Phân loại xét nghiệm, chỉ chọn một trong các giá trị sau: 'blood_test' (nếu là xét nghiệm máu), 'urine_test' (nếu là xét nghiệm nước tiểu), 'ultrasound' (nếu là siêu âm), 'other' (nếu là loại khác)",
-  "facility": "Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện xét nghiệm. Nếu không tìm thấy, để trống",
-  "date": "Ngày xét nghiệm/khám theo định dạng YYYY-MM-DD. Nếu không tìm thấy, hãy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}",
+  "isBloodPressure": true,
+  "systolic": <số nguyên, ví dụ: 120>,
+  "diastolic": <số nguyên, ví dụ: 80>,
+  "pulse": <số nguyên hoặc null nếu không có, ví dụ: 72>,
+  "date": "<ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy hãy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
+  "notes": "<nhận xét ngắn gọn về kết quả đo huyết áp của người dùng bằng tiếng Việt, ví dụ: Huyết áp bình thường / hơi cao...>"
+}
+
+ĐỊNH DẠNG 2 (Nếu là kết quả xét nghiệm y khoa thông thường):
+{
+  "isBloodPressure": false,
+  "title": "<Tên xét nghiệm hoặc tiêu đề hồ sơ y tế, ví dụ: Xét nghiệm máu tổng quát>",
+  "type": "<Phân loại xét nghiệm, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'other'>",
+  "facility": "<Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện. Nếu không tìm thấy, để trống>",
+  "date": "<Ngày xét nghiệm định dạng YYYY-MM-DD. Nếu không tìm thấy, lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
   "indicators": [
     {
-      "name": "Tên chỉ số xét nghiệm (ví dụ: Glucose, Cholesterol, SGOT, SGPT, Bạch cầu, Hồng cầu...)",
-      "value": "Trị số đo được (ví dụ: 5.4, 120, có thể là số hoặc chuỗi ngắn như Dương tính/Âm tính)",
-      "unit": "Đơn vị đo (ví dụ: mmol/L, g/L, UI/L, u/l... nếu không có đơn vị thì để trống)",
-      "refRange": "Khoảng tham chiếu hoặc ngưỡng bình thường (ví dụ: 3.9 - 6.1, < 5.2, Âm tính...)",
-      "assessment": "Đánh giá trị số so với ngưỡng tham chiếu, chỉ được chọn một trong các giá trị sau: 'high' (nếu cao hơn ngưỡng), 'low' (nếu thấp hơn ngưỡng), 'normal' (nếu nằm trong khoảng bình thường hoặc bình thường)"
+      "name": "<Tên chỉ số xét nghiệm, ví dụ: Glucose, Cholesterol, SGOT, SGPT, Bạch cầu...>",
+      "value": "<Trị số đo được, ví dụ: 5.4 hoặc 'Dương tính'>",
+      "unit": "<Đơn vị đo, ví dụ: mmol/L, g/L, nếu không có để trống>",
+      "refRange": "<Khoảng tham chiếu hoặc ngưỡng bình thường, ví dụ: 3.9 - 6.1, < 5.2>",
+      "assessment": "<Đánh giá trị số so với ngưỡng tham chiếu, chỉ được chọn một trong các giá trị sau: 'high' (nếu cao hơn ngưỡng), 'low' (nếu thấp hơn ngưỡng), 'normal' (nếu bình thường hoặc nằm trong khoảng tham chiếu)>"
     }
   ],
-  "notes": "Tóm tắt ngắn gọn nhận xét chung, kết luận của bác sĩ hoặc lời khuyên sức khỏe dựa trên các chỉ số bất thường (nếu có)"
+  "notes": "<Tóm tắt ngắn gọn nhận xét chung hoặc kết luận bằng tiếng Việt>"
 }
 
 Lưu ý quan trọng:
-1. Hãy tìm kiếm và trích xuất tất cả các chỉ số xét nghiệm có trong ảnh.
-2. Đảm bảo trị số ('value') và đơn vị ('unit') khớp với hình ảnh xét nghiệm.
-3. Trong trường 'assessment', hãy đánh giá cẩn thận dựa trên 'refRange'. Nếu trị số cao hơn ngưỡng cho phép thì đánh giá là 'high', thấp hơn là 'low', bình thường là 'normal'.
-4. Trả về kết quả hoàn toàn bằng tiếng Việt.
-5. Chỉ trả về một đối tượng JSON hợp lệ duy nhất khớp với cấu trúc trên. Không kèm bất kỳ văn bản giải thích hoặc dấu nháy markdown nào ngoài JSON.`;
+1. Đảm bảo trị số trích xuất khớp chính xác với hình ảnh.
+2. Trả về kết quả hoàn toàn bằng tiếng Việt.
+3. Chỉ trả về một đối tượng JSON hợp lệ duy nhất khớp với cấu trúc trên. Không kèm bất kỳ văn bản giải thích nào ngoài JSON.`;
 
-    const requestBody = {
-        contents: [
-            {
-                parts: [
-                    { text: promptText },
+    for (const model of models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const requestBody = {
+                contents: [
                     {
-                        inlineData: {
-                            mimeType: mimeType,
-                            data: base64Data
-                        }
+                        parts: [
+                            { text: promptText },
+                            {
+                                inlineData: {
+                                    mimeType: mimeType,
+                                    data: base64Data
+                                }
+                            }
+                        ]
                     }
-                ]
+                ],
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            };
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                const errJson = await response.json().catch(() => ({}));
+                const errMsg = errJson?.error?.message || `HTTP error ${response.status}`;
+                throw new Error(errMsg);
             }
-        ],
-        generationConfig: {
-            responseMimeType: "application/json"
+            
+            const resData = await response.json();
+            const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textResponse) {
+                throw new Error("Không nhận được phản hồi phân tích từ Gemini.");
+            }
+            
+            try {
+                return JSON.parse(textResponse.trim());
+            } catch (e) {
+                console.error(`Gemini raw response text parse failure on model ${model}:`, textResponse, e);
+                throw new Error("Dữ liệu phản hồi từ AI không đúng định dạng JSON.");
+            }
+        } catch (err) {
+            console.warn(`Model ${model} in callGeminiAPI failed:`, err);
+            lastError = err;
+            if (err.message.includes("demand") || err.message.includes("quota") || err.message.includes("limit") || err.message.includes("429") || err.message.includes("503")) {
+                continue;
+            }
+            continue;
         }
-    };
-    
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-    });
-    
-    if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        const errMsg = errJson?.error?.message || `HTTP error ${response.status}`;
-        throw new Error(errMsg);
     }
-    
-    const resData = await response.json();
-    const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!textResponse) {
-        throw new Error("Không nhận được phản hồi phân tích từ Gemini.");
-    }
-    
-    try {
-        return JSON.parse(textResponse.trim());
-    } catch (e) {
-        console.error("Gemini raw response text parse failure:", textResponse, e);
-        throw new Error("Dữ liệu phản hồi từ AI không đúng định dạng JSON.");
-    }
+    throw lastError || new Error("Tất cả các mô hình Gemini đều quá tải hoặc thất bại.");
 }
 
 function openHealthEditModal(recordId = null, initialData = null) {
@@ -6223,6 +6324,101 @@ function cleanLatex(text) {
     return cleaned;
 }
 
+async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
+    const apiKey = state.geminiApiKey;
+    const models = [defaultModel, "gemini-1.5-flash", "gemini-3.5-flash"];
+    let lastError = null;
+    for (const model of models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            if (!response.ok) {
+                const errJson = await response.json().catch(() => ({}));
+                throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
+            }
+            const resData = await response.json();
+            const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("Không nhận được phản hồi.");
+            return text;
+        } catch (err) {
+            console.warn(`Text model ${model} failed:`, err);
+            lastError = err;
+            if (err.message.includes("demand") || err.message.includes("quota") || err.message.includes("limit") || err.message.includes("429") || err.message.includes("503")) {
+                continue;
+            }
+            continue;
+        }
+    }
+    throw lastError || new Error("Lỗi khi kết nối Gemini API.");
+}
+
+let speechUtterance = null;
+let isSpeaking = false;
+
+function toggleSpeech() {
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    if (!speakBtn) return;
+    
+    if (isSpeaking) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        isSpeaking = false;
+        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+        lucide.createIcons();
+        return;
+    }
+    
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+    const lastAiAnalysis = profile ? profile.lastAiAnalysis : state.lastAiAnalysis;
+    
+    if (!lastAiAnalysis) {
+        showToast('Không có nội dung phân tích để đọc!', 'warning');
+        return;
+    }
+    
+    let cleanText = cleanLatex(lastAiAnalysis);
+    // Clean markdown for speaking
+    cleanText = cleanText
+        .replace(/#{1,6}\s+/g, '') // remove headers
+        .replace(/\*\*/g, '')      // remove bold
+        .replace(/\*/g, '')        // remove bullets
+        .replace(/-\s+/g, '')      // remove bullets
+        .replace(/`{1,3}[^`]*`{1,3}/g, '') // remove code blocks
+        .replace(/__+/g, '')       // remove underscores
+        .trim();
+        
+    if (!window.speechSynthesis) {
+        showToast('Trình duyệt của bạn không hỗ trợ đọc văn bản!', 'error');
+        return;
+    }
+    
+    speechUtterance = new SpeechSynthesisUtterance(cleanText);
+    speechUtterance.lang = 'vi-VN';
+    
+    speechUtterance.onend = () => {
+        isSpeaking = false;
+        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+        lucide.createIcons();
+    };
+    
+    speechUtterance.onerror = (e) => {
+        console.error('Speech synthesis error:', e);
+        isSpeaking = false;
+        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+        lucide.createIcons();
+    };
+    
+    isSpeaking = true;
+    speakBtn.innerHTML = '<i data-lucide="volume-x" style="width: 12px; height: 12px;"></i> Dừng nghe';
+    lucide.createIcons();
+    
+    window.speechSynthesis.speak(speechUtterance);
+}
+
 function renderHealthAiReport() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
@@ -6232,6 +6428,7 @@ function renderHealthAiReport() {
     
     const dateEl = document.getElementById('healthAiAnalysisDate');
     const reportContentEl = document.getElementById('healthAiReportContent');
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
     
     if (dateEl && lastAiAnalysisDate) {
         const formattedDate = formatDate(lastAiAnalysisDate);
@@ -6248,7 +6445,18 @@ function renderHealthAiReport() {
         } else {
             reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(cleanedReport)}</pre>`;
         }
+        if (speakBtn) {
+            speakBtn.style.display = 'inline-flex';
+            if (!isSpeaking) {
+                speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+            }
+        }
+    } else {
+        if (speakBtn) {
+            speakBtn.style.display = 'none';
+        }
     }
+    lucide.createIcons();
 }
 
 async function generateHealthAiAnalysis(forceFresh = false) {
@@ -6318,38 +6526,7 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
 
 *Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Tuyệt đối KHÔNG sử dụng ký tự $ hoặc các ký hiệu toán học LaTeX (như $...$, $$...$$, \text{...}, \times, \mu) để biểu diễn các số liệu hoặc đơn vị đo lường. Thay vào đó, hãy dùng văn bản thường thuần túy (ví dụ: dùng "x" thay cho "\times", dùng "uL" hoặc "µL" thay cho "\mu L", dùng "15.8 g/dL" thay cho "$15.8 \text{ g/dL}$"). Tất cả các số liệu và đơn vị phải hiển thị dưới dạng văn bản thường đọc được trực tiếp. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
-        const apiKey = state.geminiApiKey;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
-        
-        const requestBody = {
-            contents: [
-                {
-                    parts: [
-                        { text: prompt }
-                    ]
-                }
-            ]
-        };
-        
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-        });
-        
-        if (!response.ok) {
-            const errJson = await response.json().catch(() => ({}));
-            const errMsg = errJson?.error?.message || `HTTP error ${response.status}`;
-            throw new Error(errMsg);
-        }
-        
-        const resData = await response.json();
-        const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!textResponse) {
-            throw new Error("Không nhận được phản hồi phân tích từ Gemini.");
-        }
+        const textResponse = await callGeminiTextAPI(prompt, 'gemini-3.5-flash');
         
         const nowIso = new Date().toISOString();
         
@@ -6843,7 +7020,47 @@ function getDictionaryKey(name) {
 
 // ===========================
 // 📄 XUẤT BÁO CÁO PDF
-function exportHealthPDF() {
+let cachedRobotoRegular = null;
+let cachedRobotoBold = null;
+
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
+async function loadRobotoFonts(doc) {
+    if (!cachedRobotoRegular || !cachedRobotoBold) {
+        const regularUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf';
+        const boldUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf'; // Medium behaves well as bold
+        
+        const [resRegular, resBold] = await Promise.all([
+            fetch(regularUrl).then(r => {
+                if (!r.ok) throw new Error("Không thể tải Roboto-Regular từ CDN");
+                return r.arrayBuffer();
+            }),
+            fetch(boldUrl).then(r => {
+                if (!r.ok) throw new Error("Không thể tải Roboto-Medium từ CDN");
+                return r.arrayBuffer();
+            })
+        ]);
+        
+        cachedRobotoRegular = arrayBufferToBase64(resRegular);
+        cachedRobotoBold = arrayBufferToBase64(resBold);
+    }
+    
+    doc.addFileToVFS('Roboto-Regular.ttf', cachedRobotoRegular);
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+    
+    doc.addFileToVFS('Roboto-Bold.ttf', cachedRobotoBold);
+    doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+}
+
+async function exportHealthPDF() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
     const memberName = profile ? profile.name : 'Tất cả thành viên';
@@ -6856,11 +7073,24 @@ function exportHealthPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
+    // --- Try loading Vietnamese font ---
+    try {
+        showToast('Đang tải cấu hình font tiếng Việt cho PDF...', 'info');
+        await loadRobotoFonts(doc);
+        doc.setFont('Roboto', 'normal');
+    } catch (err) {
+        console.warn("Failed to load custom Vietnamese font, falling back to Helvetica:", err);
+        showToast('Không thể tải font tiếng Việt, PDF sẽ dùng font mặc định không dấu.', 'warning');
+        doc.setFont('helvetica', 'normal');
+    }
+
+    const isRoboto = doc.getFont().fontName === 'Roboto';
+    const getTxt = (vi, en) => isRoboto ? vi : en;
+
     // --- Font & Color Setup ---
     const primaryColor = [16, 185, 129]; // Emerald
     const darkColor = [17, 24, 39];
     const grayColor = [107, 114, 128];
-    const lightGray = [249, 250, 251];
     const redColor = [239, 68, 68];
     const blueColor = [59, 130, 246];
 
@@ -6874,11 +7104,11 @@ function exportHealthPDF() {
     doc.rect(0, 0, pageW, 28, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('FamiLife - Bao Cao Ho So Suc Khoe', margin, 13);
+    doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'bold');
+    doc.text(getTxt('FamiLife - Báo cáo Hồ sơ Sức khỏe', 'FamiLife - Bao Cao Ho So Suc Khoe'), margin, 13);
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Thanh vien: ${memberName}   |   Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}   |   v${APP_VERSION}`, margin, 22);
+    doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'normal');
+    doc.text(getTxt(`Thành viên: ${memberName}   |   Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}   |   v${APP_VERSION}`, `Thanh vien: ${memberName}   |   Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}   |   v${APP_VERSION}`), margin, 22);
 
     y = 38;
 
@@ -6890,16 +7120,16 @@ function exportHealthPDF() {
     if (bpRecords.length > 0) {
         doc.setTextColor(...darkColor);
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'bold');
         doc.setFillColor(254, 226, 226); // light red
         doc.rect(margin, y - 5, contentW, 10, 'F');
-        doc.text('LICH SU DO HUYET AP (Omron HEM-7361T)', margin + 3, y + 1);
+        doc.text(getTxt('LỊCH SỬ ĐO HUYẾT ÁP (Omron HEM-7361T)', 'LICH SU DO HUYET AP (Omron HEM-7361T)'), margin + 3, y + 1);
         y += 12;
 
         const bpRows = bpRecords.map(r => {
-            const sysStatus = r.systolic >= 140 ? 'CAO' : (r.systolic < 90 ? 'THAP' : 'BT');
-            const diaStatus = r.diastolic >= 90 ? 'CAO' : (r.diastolic < 60 ? 'THAP' : 'BT');
-            const session = r.session === 'morning' ? 'Sang' : (r.session === 'evening' ? 'Toi' : 'Khac');
+            const sysStatus = r.systolic >= 140 ? getTxt('CAO', 'CAO') : (r.systolic < 90 ? getTxt('THẤP', 'THAP') : getTxt('BT', 'BT'));
+            const diaStatus = r.diastolic >= 90 ? getTxt('CAO', 'CAO') : (r.diastolic < 60 ? getTxt('THẤP', 'THAP') : getTxt('BT', 'BT'));
+            const session = r.session === 'morning' ? getTxt('Sáng', 'Sang') : (r.session === 'evening' ? getTxt('Tối', 'Toi') : getTxt('Khác', 'Khac'));
             return [
                 formatDate(r.date),
                 session,
@@ -6912,11 +7142,11 @@ function exportHealthPDF() {
 
         doc.autoTable({
             startY: y,
-            head: [['Ngay do', 'Buoi', 'Tam thu (SYS)', 'Tam truong (DIA)', 'Nhip tim', 'Ghi chu']],
+            head: [[getTxt('Ngày đo', 'Ngay do'), getTxt('Buổi', 'Buoi'), getTxt('Tâm thu (SYS)', 'Tam thu (SYS)'), getTxt('Tâm trương (DIA)', 'Tam truong (DIA)'), getTxt('Nhịp tim', 'Nhip tim'), getTxt('Ghi chú', 'Ghi chu')]],
             body: bpRows,
             margin: { left: margin, right: margin },
-            styles: { fontSize: 8, cellPadding: 2 },
-            headStyles: { fillColor: redColor, textColor: 255, fontStyle: 'bold' },
+            styles: { font: isRoboto ? 'Roboto' : 'helvetica', fontSize: 8, cellPadding: 2 },
+            headStyles: { font: isRoboto ? 'Roboto' : 'helvetica', fontStyle: 'bold', fillColor: redColor, textColor: 255 },
             alternateRowStyles: { fillColor: [255, 245, 245] },
             columnStyles: { 5: { cellWidth: 35 } }
         });
@@ -6932,47 +7162,47 @@ function exportHealthPDF() {
         if (y > 240) { doc.addPage(); y = 20; }
         doc.setTextColor(...darkColor);
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'bold');
         doc.setFillColor(209, 250, 229); // light green
         doc.rect(margin, y - 5, contentW, 10, 'F');
-        doc.text('HO SO KET QUA XET NGHIEM', margin + 3, y + 1);
+        doc.text(getTxt('HỒ SƠ KẾT QUẢ XÉT NGHIỆM', 'HO SO KET QUA XET NGHIEM'), margin + 3, y + 1);
         y += 12;
 
         activeRecords.forEach(record => {
             if (y > 250) { doc.addPage(); y = 20; }
 
             doc.setFontSize(10);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'bold');
             doc.setTextColor(...primaryColor);
-            doc.text(`• ${record.title || 'Ket qua xet nghiem'} — ${formatDate(record.date)}`, margin, y);
+            doc.text(`• ${record.title || getTxt('Kết quả xét nghiệm', 'Ket qua xet nghiem')} — ${formatDate(record.date)}`, margin, y);
             y += 5;
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'normal');
+            doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'normal');
             doc.setTextColor(...grayColor);
-            if (record.facility) doc.text(`Co so: ${record.facility}`, margin + 4, y);
+            if (record.facility) doc.text(getTxt(`Cơ sở: ${record.facility}`, `Co so: ${record.facility}`), margin + 4, y);
             y += 4;
             if (record.notes) {
-                doc.text(`Ket luan: ${record.notes.substring(0, 120)}`, margin + 4, y);
+                doc.text(getTxt(`Kết luận: ${record.notes.substring(0, 120)}`, `Ket luan: ${record.notes.substring(0, 120)}`), margin + 4, y);
                 y += 4;
             }
 
             if (record.indicators && record.indicators.length > 0) {
                 const rows = record.indicators.map(ind => {
-                    const status = ind.assessment === 'high' ? 'CAO' : (ind.assessment === 'low' ? 'THAP' : 'Binh thuong');
+                    const status = ind.assessment === 'high' ? getTxt('CAO', 'CAO') : (ind.assessment === 'low' ? getTxt('THẤP', 'THAP') : getTxt('Bình thường', 'Binh thuong'));
                     return [ind.name, ind.value, ind.unit || '-', ind.refRange || '-', status];
                 });
                 doc.autoTable({
                     startY: y,
-                    head: [['Chi so', 'Tri so', 'Don vi', 'Nguong BT', 'Danh gia']],
+                    head: [[getTxt('Chỉ số', 'Chi so'), getTxt('Trị số', 'Tri so'), getTxt('Đơn vị', 'Don vi'), getTxt('Ngưỡng BT', 'Nguong BT'), getTxt('Đánh giá', 'Danh gia')]],
                     body: rows,
                     margin: { left: margin + 4, right: margin },
-                    styles: { fontSize: 7.5, cellPadding: 1.5 },
-                    headStyles: { fillColor: primaryColor, textColor: 255 },
+                    styles: { font: isRoboto ? 'Roboto' : 'helvetica', fontSize: 7.5, cellPadding: 1.5 },
+                    headStyles: { font: isRoboto ? 'Roboto' : 'helvetica', fontStyle: 'bold', fillColor: primaryColor, textColor: 255 },
                     didParseCell: (data) => {
                         if (data.column.index === 4) {
                             const v = data.cell.text[0];
                             if (v === 'CAO') data.cell.styles.textColor = redColor;
-                            else if (v === 'THAP') data.cell.styles.textColor = blueColor;
+                            else if (v === 'THẤP') data.cell.styles.textColor = blueColor;
                         }
                     }
                 });
@@ -6988,8 +7218,9 @@ function exportHealthPDF() {
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         doc.setFontSize(7);
+        doc.setFont(isRoboto ? 'Roboto' : 'helvetica', 'normal');
         doc.setTextColor(...grayColor);
-        doc.text(`Trang ${i}/${totalPages} — Tao boi FamiLife v${APP_VERSION} — Chi mang tinh chat tham khao, khong thay the y kien bac si.`, margin, doc.internal.pageSize.getHeight() - 8);
+        doc.text(getTxt(`Trang ${i}/${totalPages} — Tạo bởi FamiLife v${APP_VERSION} — Chỉ mang tính chất tham khảo, không thay thế ý kiến bác sĩ.`, `Trang ${i}/${totalPages} — Tao boi FamiLife v${APP_VERSION} — Chi mang tinh chat tham khao, khong thay the y kien bac si.`), margin, doc.internal.pageSize.getHeight() - 8);
     }
 
     doc.save(`FamiLife_SucKhoe_${memberName.replace(/\s/g, '_')}_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.pdf`);
@@ -7290,22 +7521,7 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
 
-        const apiKey = state.geminiApiKey;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-
-        if (!response.ok) {
-            const errJson = await response.json().catch(() => ({}));
-            throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
-        }
-
-        const resData = await response.json();
-        const textResponse = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!textResponse) throw new Error('Không nhận được phản hồi từ Gemini.');
+        const textResponse = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
 
         const nowIso = new Date().toISOString();
         if (profile) {
@@ -7350,6 +7566,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // PDF export button
     const pdfBtn = document.getElementById('exportHealthPdfBtn');
     if (pdfBtn) pdfBtn.addEventListener('click', exportHealthPDF);
+
+    // Speak button
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    if (speakBtn) speakBtn.addEventListener('click', toggleSpeech);
 
     // Blood pressure add button
     const addBpBtn = document.getElementById('addBpBtn');
