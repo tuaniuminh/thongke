@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.12';
+const APP_VERSION = '4.0.13';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -5258,13 +5258,7 @@ function initHealthBindings() {
 
     document.getElementById('closeHealthAiAnalysisModalBtn')?.addEventListener('click', () => {
         document.getElementById('healthAiAnalysisModal').style.display = 'none';
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        isSpeaking = false;
-        const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
-        if (speakBtn) {
-            speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
-            lucide.createIcons();
-        }
+        stopAllSpeech();
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) voiceSelect.style.display = 'none';
         const rateSelect = document.getElementById('healthSpeechRateSelect');
@@ -5273,13 +5267,7 @@ function initHealthBindings() {
 
     document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
         document.getElementById('healthAiAnalysisModal').style.display = 'none';
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        isSpeaking = false;
-        const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
-        if (speakBtn) {
-            speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
-            lucide.createIcons();
-        }
+        stopAllSpeech();
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) voiceSelect.style.display = 'none';
         const rateSelect = document.getElementById('healthSpeechRateSelect');
@@ -6378,13 +6366,7 @@ function openHealthAiAnalysisModal(type = 'full') {
         : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
         
     // Reset speech state when opening
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    isSpeaking = false;
-    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
-    if (speakBtn) {
-        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
-        lucide.createIcons();
-    }
+    stopAllSpeech();
     const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
     if (voiceSelect) voiceSelect.style.display = 'none';
     const rateSelect = document.getElementById('healthSpeechRateSelect');
@@ -6451,16 +6433,147 @@ async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
 
 let speechUtterance = null;
 let isSpeaking = false;
+let ttsAudioQueue = [];
+let ttsQueueIndex = 0;
+let currentTtsAudio = null;
+
+function stopAllSpeech() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (currentTtsAudio) {
+        currentTtsAudio.pause();
+        currentTtsAudio = null;
+    }
+    ttsAudioQueue = [];
+    ttsQueueIndex = 0;
+    isSpeaking = false;
+    
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    if (speakBtn) {
+        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
+        lucide.createIcons();
+    }
+}
+
+function chunkTextForTts(text, maxLength = 150) {
+    if (!text) return [];
+    
+    let cleaned = text.replace(/\r\n/g, '\n').replace(/\n\n+/g, '\n');
+    const sentences = cleaned.split(/([.\n!?]+)/);
+    const chunks = [];
+    let currentChunk = "";
+    
+    for (let i = 0; i < sentences.length; i++) {
+        const part = sentences[i];
+        if (!part) continue;
+        
+        if (/^[.\n!?]+$/.test(part)) {
+            currentChunk += part;
+            continue;
+        }
+        
+        if (part.length > maxLength) {
+            if (currentChunk.trim()) {
+                chunks.push(currentChunk.trim());
+                currentChunk = "";
+            }
+            
+            const subParts = part.split(/([,]+)/);
+            for (let j = 0; j < subParts.length; j++) {
+                const sub = subParts[j];
+                if (!sub) continue;
+                if (/^[,]+$/.test(sub)) {
+                    currentChunk += sub;
+                    continue;
+                }
+                
+                if (sub.length > maxLength) {
+                    if (currentChunk.trim()) {
+                        chunks.push(currentChunk.trim());
+                        currentChunk = "";
+                    }
+                    const words = sub.split(/\s+/);
+                    for (let w of words) {
+                        if ((currentChunk + " " + w).length > maxLength) {
+                            if (currentChunk.trim()) chunks.push(currentChunk.trim());
+                            currentChunk = w;
+                        } else {
+                            currentChunk = currentChunk ? currentChunk + " " + w : w;
+                        }
+                    }
+                } else {
+                    if ((currentChunk + sub).length > maxLength) {
+                        if (currentChunk.trim()) chunks.push(currentChunk.trim());
+                        currentChunk = sub;
+                    } else {
+                        currentChunk += sub;
+                    }
+                }
+            }
+        } else {
+            if ((currentChunk + part).length > maxLength) {
+                if (currentChunk.trim()) chunks.push(currentChunk.trim());
+                currentChunk = part;
+            } else {
+                currentChunk += part;
+            }
+        }
+    }
+    
+    if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+    }
+    
+    return chunks;
+}
+
+function playTtsQueue() {
+    const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    if (ttsQueueIndex >= ttsAudioQueue.length) {
+        stopAllSpeech();
+        return;
+    }
+    
+    const textToSpeak = ttsAudioQueue[ttsQueueIndex];
+    if (!textToSpeak || !textToSpeak.trim()) {
+        ttsQueueIndex++;
+        playTtsQueue();
+        return;
+    }
+    
+    const encodedText = encodeURIComponent(textToSpeak.trim());
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodedText}`;
+    
+    currentTtsAudio = new Audio(ttsUrl);
+    isSpeaking = true;
+    
+    if (speakBtn) {
+        speakBtn.innerHTML = '<i data-lucide="volume-x" style="width: 12px; height: 12px;"></i> Dừng nghe';
+        lucide.createIcons();
+    }
+    
+    currentTtsAudio.onended = () => {
+        ttsQueueIndex++;
+        playTtsQueue();
+    };
+    
+    currentTtsAudio.onerror = (e) => {
+        console.error("Google Translate TTS playback error:", e);
+        ttsQueueIndex++;
+        playTtsQueue();
+    };
+    
+    currentTtsAudio.play().catch(err => {
+        console.error("Failed to play audio chunk:", err);
+        stopAllSpeech();
+    });
+}
 
 function toggleSpeech() {
     const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
     if (!speakBtn) return;
     
     if (isSpeaking) {
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        isSpeaking = false;
-        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
-        lucide.createIcons();
+        stopAllSpeech();
         return;
     }
     
@@ -6478,25 +6591,18 @@ function toggleSpeech() {
     }
     
     let cleanText = cleanLatex(lastAiAnalysis);
-    // Clean markdown for speaking
     cleanText = cleanText
-        .replace(/#{1,6}\s+/g, '') // remove headers
-        .replace(/\*\*/g, '')      // remove bold
-        .replace(/\*/g, '')        // remove bullets
-        .replace(/-\s+/g, '')      // remove bullets
-        .replace(/`{1,3}[^`]*`{1,3}/g, '') // remove code blocks
-        .replace(/__+/g, '')       // remove underscores
+        .replace(/#{1,6}\s+/g, '') 
+        .replace(/\*\*/g, '')      
+        .replace(/\*/g, '')        
+        .replace(/-\s+/g, '')      
+        .replace(/`{1,3}[^`]*`{1,3}/g, '') 
+        .replace(/__+/g, '')       
         .trim();
         
-    if (!window.speechSynthesis) {
-        showToast('Trình duyệt của bạn không hỗ trợ đọc văn bản!', 'error');
-        return;
-    }
+    const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+    const selectedVoiceName = voiceSelect?.value || state.selectedSpeechVoiceName;
     
-    speechUtterance = new SpeechSynthesisUtterance(cleanText);
-    speechUtterance.lang = 'vi-VN';
-    
-    // Choose speech rate from dropdown selector or fallback
     let selectedRate = 1.0;
     const rateSelect = document.getElementById('healthSpeechRateSelect');
     if (rateSelect) {
@@ -6504,14 +6610,34 @@ function toggleSpeech() {
     } else {
         selectedRate = state.selectedSpeechRate || 1.0;
     }
+    
+    if (selectedVoiceName === 'google-translate') {
+        stopAllSpeech();
+        ttsAudioQueue = chunkTextForTts(cleanText);
+        ttsQueueIndex = 0;
+        
+        if (ttsAudioQueue.length === 0) {
+            showToast('Không có nội dung để đọc!', 'warning');
+            return;
+        }
+        
+        playTtsQueue();
+        return;
+    }
+    
+    if (!window.speechSynthesis) {
+        showToast('Trình duyệt của bạn không hỗ trợ đọc văn bản!', 'error');
+        return;
+    }
+    
+    stopAllSpeech();
+    
+    speechUtterance = new SpeechSynthesisUtterance(cleanText);
+    speechUtterance.lang = 'vi-VN';
     speechUtterance.rate = selectedRate;
     speechUtterance.pitch = 1.0;
     
-    // Choose selected voice or fallback
     const voices = window.speechSynthesis.getVoices();
-    const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
-    const selectedVoiceName = voiceSelect?.value || state.selectedSpeechVoiceName;
-    
     if (selectedVoiceName) {
         const foundVoice = voices.find(v => v.name === selectedVoiceName);
         if (foundVoice) {
@@ -6519,7 +6645,6 @@ function toggleSpeech() {
         }
     }
     
-    // Fallback if no voice matches
     if (!speechUtterance.voice) {
         const viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN') || v.lang.includes('vi_VN'));
         if (viVoices.length > 0) {
@@ -6529,16 +6654,12 @@ function toggleSpeech() {
     }
     
     speechUtterance.onend = () => {
-        isSpeaking = false;
-        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
-        lucide.createIcons();
+        stopAllSpeech();
     };
     
     speechUtterance.onerror = (e) => {
         console.error('Speech synthesis error:', e);
-        isSpeaking = false;
-        speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
-        lucide.createIcons();
+        stopAllSpeech();
     };
     
     isSpeaking = true;
@@ -6549,51 +6670,57 @@ function toggleSpeech() {
 }
 
 function populateVoiceList() {
-    if (!window.speechSynthesis) return;
     const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
     if (!voiceSelect) return;
 
-    const voices = window.speechSynthesis.getVoices();
-    const viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN') || v.lang.includes('vi_VN'));
-
-    // Clear previous options
     voiceSelect.innerHTML = '';
 
-    if (viVoices.length === 0) {
-        voiceSelect.style.display = 'none';
-        return;
+    const optGoogleTranslate = document.createElement('option');
+    optGoogleTranslate.value = 'google-translate';
+    optGoogleTranslate.textContent = 'Google Dịch (Khuyên dùng - Miễn phí)';
+    
+    if (state.selectedSpeechVoiceName === 'google-translate' || !state.selectedSpeechVoiceName) {
+        optGoogleTranslate.selected = true;
+        state.selectedSpeechVoiceName = 'google-translate';
     }
+    voiceSelect.appendChild(optGoogleTranslate);
 
-    viVoices.forEach(voice => {
-        const option = document.createElement('option');
-        option.value = voice.name;
-        // Clean Microsoft/Google names for compact display
-        let displayName = voice.name
-            .replace(/Microsoft/g, 'MS')
-            .replace(/Google/g, 'Google')
-            .replace(/Apple/g, 'Apple')
-            .replace(/natural/gi, 'Tự nhiên')
-            .replace(/text-to-speech/gi, 'TTS');
-        option.textContent = displayName;
+    let viVoices = [];
+    if (window.speechSynthesis) {
+        const voices = window.speechSynthesis.getVoices();
+        viVoices = voices.filter(v => v.lang.startsWith('vi') || v.lang.includes('vi-VN') || v.lang.includes('vi_VN'));
         
-        if (state.selectedSpeechVoiceName && voice.name === state.selectedSpeechVoiceName) {
-            option.selected = true;
-        } else if (!state.selectedSpeechVoiceName && (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Natural') || voice.name.includes('Linh'))) {
-            option.selected = true;
-            state.selectedSpeechVoiceName = voice.name;
-        }
-        
-        voiceSelect.appendChild(option);
-    });
+        viVoices.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.name;
+            let displayName = voice.name
+                .replace(/Microsoft/g, 'MS')
+                .replace(/Google/g, 'Google')
+                .replace(/Apple/g, 'Apple')
+                .replace(/natural/gi, 'Tự nhiên')
+                .replace(/text-to-speech/gi, 'TTS');
+            option.textContent = displayName;
+            
+            if (state.selectedSpeechVoiceName && voice.name === state.selectedSpeechVoiceName) {
+                option.selected = true;
+            }
+            
+            voiceSelect.appendChild(option);
+        });
+    }
 
     const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
     const rateSelect = document.getElementById('healthSpeechRateSelect');
-    if (speakBtn && speakBtn.style.display !== 'none' && viVoices.length > 0) {
+    if (speakBtn && speakBtn.style.display !== 'none') {
         voiceSelect.style.display = 'inline-flex';
         if (rateSelect) {
-            rateSelect.style.display = 'inline-flex';
-            if (state.selectedSpeechRate) {
-                rateSelect.value = state.selectedSpeechRate.toFixed(1);
+            if (state.selectedSpeechVoiceName === 'google-translate') {
+                rateSelect.style.display = 'none';
+            } else {
+                rateSelect.style.display = 'inline-flex';
+                if (state.selectedSpeechRate) {
+                    rateSelect.value = state.selectedSpeechRate.toFixed(1);
+                }
             }
         }
     } else {
@@ -7850,6 +7977,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('healthSpeechVoiceSelect')?.addEventListener('change', (e) => {
         state.selectedSpeechVoiceName = e.target.value;
         saveLocalState();
+        
+        const rateSelect = document.getElementById('healthSpeechRateSelect');
+        if (rateSelect) {
+            rateSelect.style.display = e.target.value === 'google-translate' ? 'none' : 'inline-flex';
+        }
     });
 
     // Speech rate selector change
