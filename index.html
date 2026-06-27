@@ -11,10 +11,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.19">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.21">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.19">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.21">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -36,7 +36,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.19" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.21" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -104,7 +104,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.19" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.21" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -546,7 +546,7 @@
                     </div>
 
                     <!-- Member Profile Selector Bar -->
-                    <div class="health-card profile-selector-card" style="padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                    <div class="health-card profile-selector-card" style="overflow: visible; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <i data-lucide="users" style="color: var(--health-accent); width: 20px; height: 20px;"></i>
                             <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Hồ sơ của:</span>
@@ -774,7 +774,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.19" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.21" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1529,6 +1529,61 @@
         </div>
     </div>
 
+    <!-- Edit Member Details Modal -->
+    <div class="modal-overlay health-theme-overlay" id="healthMemberDetailsModal" style="display: none; z-index: 1100;">
+        <div class="modal-container health-modal-container" style="width: 500px; max-width: 95%;">
+            <div class="modal-header health-modal-header">
+                <h3 class="health-modal-title">
+                    <i data-lucide="user-cog"></i>
+                    <span>Thông tin Sức khỏe Thành viên</span>
+                </h3>
+                <button type="button" class="close-btn" id="closeHealthMemberDetailsModalBtn">&times;</button>
+            </div>
+            <form id="healthMemberDetailsForm" style="display: flex; flex-direction: column; overflow: hidden; flex: 1;">
+                <div class="health-modal-body" style="overflow-y: auto; max-height: 450px; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+                    <input type="hidden" id="editMemberIdInput">
+                    
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label health-form-label" for="editMemberNameInput">Tên thành viên</label>
+                        <input type="text" id="editMemberNameInput" class="form-control health-input" required>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
+                            <label class="form-label health-form-label" for="editMemberBirthYearInput">Năm sinh</label>
+                            <input type="number" id="editMemberBirthYearInput" class="form-control health-input" placeholder="Ví dụ: 1985" min="1900" max="2100">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
+                            <label class="form-label health-form-label" for="editMemberHeightInput">Chiều cao (cm)</label>
+                            <input type="number" id="editMemberHeightInput" class="form-control health-input" placeholder="Ví dụ: 170" min="10" max="300">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
+                            <label class="form-label health-form-label" for="editMemberWeightInput">Cân nặng (kg)</label>
+                            <input type="number" id="editMemberWeightInput" class="form-control health-input" placeholder="Ví dụ: 65" min="1" max="500">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label health-form-label" for="editMemberMedicationsInput">Các loại thuốc đang uống</label>
+                        <textarea id="editMemberMedicationsInput" class="form-control health-input" style="height: 80px; min-height: 60px; font-size: 0.9rem;" placeholder="Nhập tên thuốc, liều lượng, tần suất sử dụng..."></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label health-form-label" for="editMemberHistoryInput">Tiền sử bệnh lý</label>
+                        <textarea id="editMemberHistoryInput" class="form-control health-input" style="height: 80px; min-height: 60px; font-size: 0.9rem;" placeholder="Mắc bệnh mãn tính nào? Dị ứng thuốc hay thực phẩm gì không?..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="health-modal-actions" style="padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: flex-end; flex-shrink: 0; background: rgba(0, 0, 0, 0.05);">
+                    <button type="button" id="closeHealthMemberDetailsModalBtn2" class="health-btn health-btn-outline" style="min-width: 100px;">Hủy bỏ</button>
+                    <button type="submit" class="health-btn health-btn-primary" style="min-width: 120px;">
+                        <i data-lucide="save"></i> Lưu lại
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Blood Pressure Analysis Choice Modal -->
     <div class="modal-overlay health-theme-overlay" id="healthBpAnalysisChoiceModal" style="display: none; z-index: 1050;">
         <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
@@ -1585,14 +1640,11 @@
                                 <!-- Populated dynamically -->
                             </select>
                             <select id="healthSpeechRateSelect" class="health-btn health-btn-outline health-select-sm" style="display: none; padding: 4px 8px; font-size: 0.8rem; border-color: var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; width: 85px;">
-                                <option value="0.7">0.7x</option>
-                                <option value="0.8">0.8x</option>
-                                <option value="0.9">0.9x</option>
-                                <option value="1.0" selected>1.0x</option>
-                                <option value="1.1">1.1x</option>
-                                <option value="1.2">1.2x</option>
-                                <option value="1.3">1.3x</option>
+                                <option value="1.0" selected>1x</option>
                                 <option value="1.5">1.5x</option>
+                                <option value="2.0">2x</option>
+                                <option value="2.5">2.5x</option>
+                                <option value="3.0">3x</option>
                             </select>
                             <button type="button" id="speakHealthAiAnalysisBtn" class="health-btn health-btn-outline health-select-sm" style="display: none; align-items: center; gap: 6px;">
                                 <i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả
@@ -1742,7 +1794,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.19"></script>
-    <script type="module" src="src/core/app.js?v=4.0.19"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.21"></script>
+    <script type="module" src="src/core/app.js?v=4.0.21"></script>
 </body>
 </html>

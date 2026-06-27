@@ -66,9 +66,19 @@ function renderFamilyProfilesList() {
         const isDefault = p.id === 'p-self';
         return `
             <div class="health-profile-item" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 6px;">
-                <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
-                ${isEditMode ? `
-                    <div style="display: flex; gap: 4px;">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">
+                        ${p.birthYear ? `Năm sinh: ${p.birthYear}` : 'Chưa cập nhật năm sinh'}
+                        ${p.height ? ` | ${p.height}cm` : ''}
+                        ${p.weight ? ` | ${p.weight}kg` : ''}
+                    </span>
+                </div>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                    <button type="button" class="profile-action-btn edit-details" onclick="openMemberDetailsModal('${p.id}')" title="Sửa thông tin sức khỏe" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 5px 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                        <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    ${isEditMode ? `
                         <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)">
                             <i data-lucide="download" style="width: 14px; height: 14px;"></i>
                         </button>
@@ -83,8 +93,8 @@ function renderFamilyProfilesList() {
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                         ` : ''}
-                    </div>
-                ` : ''}
+                    ` : ''}
+                </div>
             </div>
         `;
     }).join('');
@@ -396,6 +406,94 @@ async function handleMemberBackupImportFile(e) {
     reader.readAsText(file);
 }
 
+function openMemberDetailsModal(profileId) {
+    const profile = (state.familyProfiles || []).find(p => p.id === profileId);
+    if (!profile) {
+        showToast("Không tìm thấy thành viên!", "error");
+        return;
+    }
+
+    const modal = document.getElementById('healthMemberDetailsModal');
+    if (!modal) return;
+
+    modal.style.display = 'flex';
+
+    // Populate inputs
+    document.getElementById('editMemberIdInput').value = profile.id;
+    
+    const nameInput = document.getElementById('editMemberNameInput');
+    nameInput.value = profile.name || '';
+    if (profile.id === 'p-self') {
+        nameInput.readOnly = true;
+        nameInput.style.opacity = '0.7';
+    } else {
+        nameInput.readOnly = false;
+        nameInput.style.opacity = '1';
+    }
+
+    document.getElementById('editMemberBirthYearInput').value = profile.birthYear || '';
+    document.getElementById('editMemberHeightInput').value = profile.height || '';
+    document.getElementById('editMemberWeightInput').value = profile.weight || '';
+    document.getElementById('editMemberMedicationsInput').value = profile.currentMedications || '';
+    document.getElementById('editMemberHistoryInput').value = profile.medicalHistory || '';
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function handleMemberDetailsFormSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('editMemberIdInput').value;
+    const profile = (state.familyProfiles || []).find(p => p.id === id);
+    if (!profile) {
+        showToast("Không tìm thấy thành viên để cập nhật!", "error");
+        return;
+    }
+
+    const name = document.getElementById('editMemberNameInput').value.trim();
+    if (!name) {
+        showToast("Tên thành viên không được để trống!", "warning");
+        return;
+    }
+
+    // If ID is not 'p-self' and name has changed, check for duplicates
+    if (id !== 'p-self' && name.toLowerCase() !== profile.name.toLowerCase()) {
+        const normalized = name.toLowerCase();
+        const duplicate = (state.familyProfiles || []).some(p => p.id !== id && p.name.toLowerCase() === normalized);
+        if (duplicate) {
+            showToast("Tên thành viên này đã tồn tại!", "warning");
+            return;
+        }
+        profile.name = name;
+    }
+
+    const birthYear = parseInt(document.getElementById('editMemberBirthYearInput').value) || null;
+    const height = parseInt(document.getElementById('editMemberHeightInput').value) || null;
+    const weight = parseInt(document.getElementById('editMemberWeightInput').value) || null;
+    const currentMedications = document.getElementById('editMemberMedicationsInput').value.trim();
+    const medicalHistory = document.getElementById('editMemberHistoryInput').value.trim();
+
+    profile.birthYear = birthYear;
+    profile.height = height;
+    profile.weight = weight;
+    profile.currentMedications = currentMedications;
+    profile.medicalHistory = medicalHistory;
+
+    state.familyProfilesUpdated = new Date().toISOString();
+
+    await saveLocalState();
+
+    document.getElementById('healthMemberDetailsModal').style.display = 'none';
+    
+    // Refresh UI lists
+    renderFamilyProfilesList();
+    renderHealthDashboard();
+    showToast(`Đã cập nhật thông tin sức khỏe của "${profile.name}" thành công!`, "success");
+
+    performSync(true);
+}
+
+window.openMemberDetailsModal = openMemberDetailsModal;
+window.handleMemberDetailsFormSubmit = handleMemberDetailsFormSubmit;
 window.editFamilyProfile = editFamilyProfile;
 window.deleteFamilyProfile = deleteFamilyProfile;
 window.exportMemberBackup = exportMemberBackup;
@@ -435,6 +533,17 @@ function initHealthBindings() {
         updateProfilesEditModeButtonUI();
         renderFamilyProfilesList();
     });
+
+    // Edit Member Details Modal Bindings
+    document.getElementById('closeHealthMemberDetailsModalBtn')?.addEventListener('click', () => {
+        document.getElementById('healthMemberDetailsModal').style.display = 'none';
+    });
+
+    document.getElementById('closeHealthMemberDetailsModalBtn2')?.addEventListener('click', () => {
+        document.getElementById('healthMemberDetailsModal').style.display = 'none';
+    });
+
+    document.getElementById('healthMemberDetailsForm')?.addEventListener('submit', handleMemberDetailsFormSubmit);
 
     // Toggle Gemini API popover menu
     const popoverBtn = document.getElementById('geminiPopoverBtn');
@@ -1965,7 +2074,7 @@ function populateVoiceList() {
 
     const optGoogleTranslate = document.createElement('option');
     optGoogleTranslate.value = 'google-translate';
-    optGoogleTranslate.textContent = 'Google Dịch (Khuyên dùng - Miễn phí)';
+    optGoogleTranslate.textContent = 'Google dịch';
     
     if (state.selectedSpeechVoiceName === 'google-translate' || !state.selectedSpeechVoiceName) {
         optGoogleTranslate.selected = true;
@@ -2007,7 +2116,9 @@ function populateVoiceList() {
             } else {
                 rateSelect.style.display = 'inline-flex';
                 if (state.selectedSpeechRate) {
-                    rateSelect.value = state.selectedSpeechRate.toFixed(1);
+                    const formattedRate = state.selectedSpeechRate.toFixed(1);
+                    const rateExists = Array.from(rateSelect.options).some(opt => opt.value === formattedRate);
+                    rateSelect.value = rateExists ? formattedRate : '1.0';
                 }
             }
         }
@@ -2138,8 +2249,20 @@ async function generateHealthAiAnalysis(forceFresh = false) {
         // Find profile name
         const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
         const memberName = profile ? profile.name : 'Bản thân';
+
+        let memberDetailsStr = '';
+        if (profile) {
+            memberDetailsStr += `=== THÔNG TIN THÀNH VIÊN ===\n`;
+            memberDetailsStr += `- Tên: ${profile.name}\n`;
+            if (profile.birthYear) memberDetailsStr += `- Năm sinh: ${profile.birthYear}\n`;
+            if (profile.height) memberDetailsStr += `- Chiều cao: ${profile.height} cm\n`;
+            if (profile.weight) memberDetailsStr += `- Cân nặng: ${profile.weight} kg\n`;
+            if (profile.currentMedications) memberDetailsStr += `- Các loại thuốc đang uống: ${profile.currentMedications}\n`;
+            if (profile.medicalHistory) memberDetailsStr += `- Tiền sử bệnh lý: ${profile.medicalHistory}\n`;
+            memberDetailsStr += `\n`;
+        }
         
-        const prompt = `Hãy đóng vai trò là một chuyên gia y tế, bác sĩ tư vấn sức khỏe cao cấp. Dưới đây là toàn bộ lịch sử kết quả xét nghiệm y tế của thành viên "${memberName}" (được sắp xếp theo trình tự thời gian từ cũ nhất đến mới nhất):\n\n${historyStr}\n
+        const prompt = `Hãy đóng vai trò là một chuyên gia y tế, bác sĩ tư vấn sức khỏe cao cấp. Dưới đây là thông tin cá nhân và toàn bộ lịch sử kết quả xét nghiệm y tế của thành viên "${memberName}" (được sắp xếp theo trình tự thời gian từ cũ nhất đến mới nhất):\n\n${memberDetailsStr}${historyStr}\n
 Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó lập một bản báo cáo phân tích sức khỏe tổng quan nâng cao bằng tiếng Việt ở định dạng Markdown (sử dụng tiêu đề h2 và h3 để phân cấp rõ ràng). Báo cáo cần bao gồm các mục chính:
 
 1. **Tổng quan xu hướng phát triển sức khỏe**: Nhận định xem tình trạng sức khỏe tổng thể đang tiến triển tốt lên, ổn định hay có xu hướng xấu đi qua thời gian. Đánh giá sự biến động của các chỉ số xét nghiệm chính (ví dụ: chỉ số đường huyết, men gan, mỡ máu... tăng giảm thế nào qua các lần xét nghiệm).
@@ -3098,6 +3221,18 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
         const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
         const memberName = profile ? profile.name : 'Bản thân';
 
+        let memberDetailsStr = '';
+        if (profile) {
+            memberDetailsStr += `=== THÔNG TIN THÀNH VIÊN ===\n`;
+            memberDetailsStr += `- Tên: ${profile.name}\n`;
+            if (profile.birthYear) memberDetailsStr += `- Năm sinh: ${profile.birthYear}\n`;
+            if (profile.height) memberDetailsStr += `- Chiều cao: ${profile.height} cm\n`;
+            if (profile.weight) memberDetailsStr += `- Cân nặng: ${profile.weight} kg\n`;
+            if (profile.currentMedications) memberDetailsStr += `- Các loại thuốc đang uống: ${profile.currentMedications}\n`;
+            if (profile.medicalHistory) memberDetailsStr += `- Tiền sử bệnh lý: ${profile.medicalHistory}\n`;
+            memberDetailsStr += `\n`;
+        }
+
         // Build blood test history string
         let bloodTestStr = '';
         if (activeRecords.length > 0) {
@@ -3130,7 +3265,7 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
 
         let prompt = '';
         if (mode === 'bp_only') {
-            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là toàn bộ dữ liệu lịch sử huyết áp của thành viên "${memberName}":\n\n${bpStr}\n
+            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là thông tin cá nhân và toàn bộ dữ liệu lịch sử huyết áp của thành viên "${memberName}":\n\n${memberDetailsStr}${bpStr}\n
 Hãy lập một báo cáo phân tích xu hướng huyết áp bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
 
 1. **Nhận định chung về Huyết Áp**: Đánh giá chỉ số huyết áp hôm nay và xu hướng qua lịch sử đo.
@@ -3143,7 +3278,7 @@ Hãy lập một báo cáo phân tích xu hướng huyết áp bằng tiếng Vi
 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
         } else {
-            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${bloodTestStr}${bpStr}\n
+            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là thông tin cá nhân và toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${memberDetailsStr}${bloodTestStr}${bpStr}\n
 Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
 
 1. **Tổng quan tình trạng sức khỏe**: Nhận định chung về tình trạng sức khỏe tổng thể.
