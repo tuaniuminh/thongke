@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.14';
+const APP_VERSION = '4.0.15';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -6441,6 +6441,7 @@ function stopAllSpeech() {
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (currentTtsAudio) {
         currentTtsAudio.pause();
+        currentTtsAudio.src = "";
         currentTtsAudio = null;
     }
     ttsAudioQueue = [];
@@ -6543,8 +6544,22 @@ function playTtsQueue() {
     const encodedText = encodeURIComponent(textToSpeak.trim());
     const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodedText}`;
     
-    currentTtsAudio = document.createElement('audio');
-    currentTtsAudio.referrerPolicy = 'no-referrer';
+    if (!currentTtsAudio) {
+        currentTtsAudio = document.createElement('audio');
+        currentTtsAudio.referrerPolicy = 'no-referrer';
+        
+        currentTtsAudio.onended = () => {
+            ttsQueueIndex++;
+            playTtsQueue();
+        };
+        
+        currentTtsAudio.onerror = (e) => {
+            console.error("Google Translate TTS playback error:", e);
+            ttsQueueIndex++;
+            playTtsQueue();
+        };
+    }
+    
     currentTtsAudio.src = ttsUrl;
     isSpeaking = true;
     
@@ -6552,17 +6567,6 @@ function playTtsQueue() {
         speakBtn.innerHTML = '<i data-lucide="volume-x" style="width: 12px; height: 12px;"></i> Dừng nghe';
         lucide.createIcons();
     }
-    
-    currentTtsAudio.onended = () => {
-        ttsQueueIndex++;
-        playTtsQueue();
-    };
-    
-    currentTtsAudio.onerror = (e) => {
-        console.error("Google Translate TTS playback error:", e);
-        ttsQueueIndex++;
-        playTtsQueue();
-    };
     
     currentTtsAudio.play().catch(err => {
         console.error("Failed to play audio chunk:", err);
