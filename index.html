@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="icon.png?v=3.7.9">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=4.0.11">
+    <link rel="stylesheet" href="style.css?v=4.0.12">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -35,7 +35,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="icon.png?v=4.0.11" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="icon.png?v=4.0.12" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -103,7 +103,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="icon.png?v=4.0.11" alt="Logo" id="mobileLogoImg">
+                        <img src="icon.png?v=4.0.12" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -773,7 +773,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="icon.png?v=4.0.11" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="icon.png?v=4.0.12" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1583,6 +1583,16 @@
                             <select id="healthSpeechVoiceSelect" class="health-btn health-btn-outline health-select-sm" style="display: none; padding: 4px 8px; font-size: 0.8rem; border-color: var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; max-width: 140px;">
                                 <!-- Populated dynamically -->
                             </select>
+                            <select id="healthSpeechRateSelect" class="health-btn health-btn-outline health-select-sm" style="display: none; padding: 4px 8px; font-size: 0.8rem; border-color: var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; width: 85px;">
+                                <option value="0.7">0.7x</option>
+                                <option value="0.8">0.8x</option>
+                                <option value="0.9">0.9x</option>
+                                <option value="1.0" selected>1.0x</option>
+                                <option value="1.1">1.1x</option>
+                                <option value="1.2">1.2x</option>
+                                <option value="1.3">1.3x</option>
+                                <option value="1.5">1.5x</option>
+                            </select>
                             <button type="button" id="speakHealthAiAnalysisBtn" class="health-btn health-btn-outline health-select-sm" style="display: none; align-items: center; gap: 6px;">
                                 <i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả
                             </button>
@@ -1731,7 +1741,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="lunar_vietnam.js?v=4.0.11"></script>
-    <script type="module" src="app.js?v=4.0.11"></script>
+    <script src="lunar_vietnam.js?v=4.0.12"></script>
+    <script type="module" src="app.js?v=4.0.12"></script>
 </body>
 </html>

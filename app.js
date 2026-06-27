@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.11';
+const APP_VERSION = '4.0.12';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -54,6 +54,7 @@ let state = {
     lastBpAnalysisUpdated: '',
     currentAiAnalysisType: 'full',
     selectedSpeechVoiceName: '',
+    selectedSpeechRate: 1.0,
     familyProfiles: [],
     familyProfilesUpdated: '',
     selectedHealthProfileId: 'p-self',
@@ -254,6 +255,7 @@ async function saveLocalState() {
         lastBpAnalysisDate: state.lastBpAnalysisDate || '',
         lastBpAnalysisUpdated: state.lastBpAnalysisUpdated || '',
         selectedSpeechVoiceName: state.selectedSpeechVoiceName || '',
+        selectedSpeechRate: state.selectedSpeechRate || 1.0,
         familyProfiles: state.familyProfiles || [],
         familyProfilesUpdated: state.familyProfilesUpdated || '',
         lastResetTime: state.lastResetTime || '',
@@ -291,6 +293,7 @@ async function loadLocalState(password) {
         state.lastBpAnalysisDate = '';
         state.lastBpAnalysisUpdated = '';
         state.selectedSpeechVoiceName = '';
+        state.selectedSpeechRate = 1.0;
         state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
         state.familyProfilesUpdated = '';
         state.selectedHealthProfileId = 'p-self';
@@ -320,6 +323,7 @@ async function loadLocalState(password) {
         state.lastBpAnalysisDate = data.lastBpAnalysisDate || '';
         state.lastBpAnalysisUpdated = data.lastBpAnalysisUpdated || '';
         state.selectedSpeechVoiceName = data.selectedSpeechVoiceName || '';
+        state.selectedSpeechRate = data.selectedSpeechRate || 1.0;
         state.familyProfiles = data.familyProfiles && data.familyProfiles.length > 0 ? data.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
         state.familyProfilesUpdated = data.familyProfilesUpdated || '';
         state.selectedHealthProfileId = 'p-self';
@@ -424,6 +428,7 @@ async function performSync(silent = false) {
                     state.lastBpAnalysisDate = remoteData.lastBpAnalysisDate || '';
                     state.lastBpAnalysisUpdated = remoteData.lastBpAnalysisUpdated || '';
                     state.selectedSpeechVoiceName = remoteData.selectedSpeechVoiceName || '';
+                    state.selectedSpeechRate = remoteData.selectedSpeechRate || 1.0;
                     state.familyProfiles = remoteData.familyProfiles && remoteData.familyProfiles.length > 0 ? remoteData.familyProfiles : [{ id: 'p-self', name: 'Bản thân' }];
                     state.familyProfilesUpdated = remoteData.familyProfilesUpdated || '';
                     remoteReceived = remoteData.receivedGifts || [];
@@ -481,9 +486,12 @@ async function performSync(silent = false) {
                         state.lastBpAnalysisUpdated = remoteData.lastBpAnalysisUpdated || '';
                     }
 
-                    // Sync selectedSpeechVoiceName
+                    // Sync selectedSpeechVoiceName and selectedSpeechRate
                     if (remoteData.selectedSpeechVoiceName) {
                         state.selectedSpeechVoiceName = remoteData.selectedSpeechVoiceName;
+                    }
+                    if (remoteData.selectedSpeechRate) {
+                        state.selectedSpeechRate = remoteData.selectedSpeechRate;
                     }
 
                     // Merge familyProfiles using LWW
@@ -536,6 +544,7 @@ async function performSync(silent = false) {
             lastBpAnalysisDate: state.lastBpAnalysisDate || '',
             lastBpAnalysisUpdated: state.lastBpAnalysisUpdated || '',
             selectedSpeechVoiceName: state.selectedSpeechVoiceName || '',
+            selectedSpeechRate: state.selectedSpeechRate || 1.0,
             lastResetTime: state.lastResetTime || '',
             showImportNotesOption: !!state.showImportNotesOption,
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
@@ -5258,6 +5267,8 @@ function initHealthBindings() {
         }
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) voiceSelect.style.display = 'none';
+        const rateSelect = document.getElementById('healthSpeechRateSelect');
+        if (rateSelect) rateSelect.style.display = 'none';
     });
 
     document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
@@ -5271,6 +5282,8 @@ function initHealthBindings() {
         }
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) voiceSelect.style.display = 'none';
+        const rateSelect = document.getElementById('healthSpeechRateSelect');
+        if (rateSelect) rateSelect.style.display = 'none';
     });
 
     document.getElementById('closeHealthAiMemberSelectorModalBtn')?.addEventListener('click', () => {
@@ -6372,6 +6385,10 @@ function openHealthAiAnalysisModal(type = 'full') {
         speakBtn.innerHTML = '<i data-lucide="volume-2" style="width: 12px; height: 12px;"></i> Đọc kết quả';
         lucide.createIcons();
     }
+    const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
+    if (voiceSelect) voiceSelect.style.display = 'none';
+    const rateSelect = document.getElementById('healthSpeechRateSelect');
+    if (rateSelect) rateSelect.style.display = 'none';
     
     // If we have cached analysis, render it. Otherwise, run analysis.
     if (lastAiAnalysis) {
@@ -6478,7 +6495,16 @@ function toggleSpeech() {
     
     speechUtterance = new SpeechSynthesisUtterance(cleanText);
     speechUtterance.lang = 'vi-VN';
-    speechUtterance.rate = 1.0;  // Tốc độ đọc đặt về 1.0
+    
+    // Choose speech rate from dropdown selector or fallback
+    let selectedRate = 1.0;
+    const rateSelect = document.getElementById('healthSpeechRateSelect');
+    if (rateSelect) {
+        selectedRate = parseFloat(rateSelect.value) || 1.0;
+    } else {
+        selectedRate = state.selectedSpeechRate || 1.0;
+    }
+    speechUtterance.rate = selectedRate;
     speechUtterance.pitch = 1.0;
     
     // Choose selected voice or fallback
@@ -6561,10 +6587,20 @@ function populateVoiceList() {
     });
 
     const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
+    const rateSelect = document.getElementById('healthSpeechRateSelect');
     if (speakBtn && speakBtn.style.display !== 'none' && viVoices.length > 0) {
         voiceSelect.style.display = 'inline-flex';
+        if (rateSelect) {
+            rateSelect.style.display = 'inline-flex';
+            if (state.selectedSpeechRate) {
+                rateSelect.value = state.selectedSpeechRate.toFixed(1);
+            }
+        }
     } else {
         voiceSelect.style.display = 'none';
+        if (rateSelect) {
+            rateSelect.style.display = 'none';
+        }
     }
 }
 
@@ -6624,6 +6660,10 @@ function renderHealthAiReport() {
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) {
             voiceSelect.style.display = 'none';
+        }
+        const rateSelect = document.getElementById('healthSpeechRateSelect');
+        if (rateSelect) {
+            rateSelect.style.display = 'none';
         }
     }
     lucide.createIcons();
@@ -7743,6 +7783,8 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
         if (overlay) overlay.style.display = 'none';
         renderHealthAiReport();
         showToast(mode === 'bp_only' ? 'Đã phân tích kết quả huyết áp thành công!' : 'Đã phân tích sức khỏe toàn diện (xét nghiệm máu + huyết áp) thành công!', 'success');
+        
+        performSync(true);
 
     } catch (err) {
         if (overlay) overlay.style.display = 'none';
@@ -7807,6 +7849,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Speech voice selector change
     document.getElementById('healthSpeechVoiceSelect')?.addEventListener('change', (e) => {
         state.selectedSpeechVoiceName = e.target.value;
+        saveLocalState();
+    });
+
+    // Speech rate selector change
+    document.getElementById('healthSpeechRateSelect')?.addEventListener('change', (e) => {
+        state.selectedSpeechRate = parseFloat(e.target.value) || 1.0;
         saveLocalState();
     });
 
