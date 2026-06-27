@@ -570,11 +570,13 @@ body.light-mode .nav-link:hover {
     transition: all var(--transition-fast);
 }
 
-/* Prevent iOS Safari auto-zoom on form elements globally */
-input, 
-select, 
-textarea {
-    font-size: 16px !important;
+/* Prevent iOS Safari auto-zoom on form elements on mobile */
+@media (max-width: 768px) {
+    input, 
+    select, 
+    textarea {
+        font-size: 16px !important;
+    }
 }
 
 .form-control:focus {
@@ -1249,7 +1251,7 @@ body.light-mode .data-table tbody tr:hover {
     }
 
     .health-modal-title {
-        font-size: 1.05rem !important;
+        font-size: 1.2rem !important;
         padding-right: 25px !important;
     }
 
@@ -2114,9 +2116,9 @@ body.light-mode {
     border: 1px solid var(--border-color) !important;
     border-radius: var(--btn-radius) !important;
     color: var(--text-primary) !important;
-    padding: 10px 14px !important;
+    padding: 8px 12px !important;
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     transition: border-color 0.2s, box-shadow 0.2s;
     width: 100%;
 }
@@ -2132,6 +2134,17 @@ body.light-mode {
     font-size: 0.8rem !important;
     height: auto !important;
     border-radius: 8px !important;
+}
+
+select.health-select-sm {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 8px center !important;
+    background-size: 12px !important;
+    padding-right: 24px !important;
 }
 
 .health-btn {
@@ -2660,6 +2673,9 @@ body.light-mode {
     .modal-container, .health-modal-container {
         max-width: 96% !important;
         width: 96% !important;
+    }
+    .health-form-label {
+        font-size: 0.85rem !important;
     }
     .setup-card {
         max-width: 95% !important;
