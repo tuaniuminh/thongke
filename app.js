@@ -2,7 +2,7 @@
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.13';
+const APP_VERSION = '4.0.14';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -6543,7 +6543,9 @@ function playTtsQueue() {
     const encodedText = encodeURIComponent(textToSpeak.trim());
     const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodedText}`;
     
-    currentTtsAudio = new Audio(ttsUrl);
+    currentTtsAudio = document.createElement('audio');
+    currentTtsAudio.referrerPolicy = 'no-referrer';
+    currentTtsAudio.src = ttsUrl;
     isSpeaking = true;
     
     if (speakBtn) {
