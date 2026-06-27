@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -11,10 +11,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.21">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.22">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.21">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.22">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -36,7 +36,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.21" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.22" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -104,7 +104,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.21" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.22" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -774,7 +774,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.21" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.22" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1549,15 +1549,23 @@
                     </div>
 
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
+                        <div class="form-group" style="flex: 1; min-width: 80px; margin: 0;">
+                            <label class="form-label health-form-label" for="editMemberGenderInput">Giới tính</label>
+                            <select id="editMemberGenderInput" class="form-control health-input" style="cursor: pointer; padding: 10px 12px; height: auto;">
+                                <option value="">Chọn...</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 80px; margin: 0;">
                             <label class="form-label health-form-label" for="editMemberBirthYearInput">Năm sinh</label>
                             <input type="number" id="editMemberBirthYearInput" class="form-control health-input" placeholder="Ví dụ: 1985" min="1900" max="2100">
                         </div>
-                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
+                        <div class="form-group" style="flex: 1; min-width: 80px; margin: 0;">
                             <label class="form-label health-form-label" for="editMemberHeightInput">Chiều cao (cm)</label>
                             <input type="number" id="editMemberHeightInput" class="form-control health-input" placeholder="Ví dụ: 170" min="10" max="300">
                         </div>
-                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
+                        <div class="form-group" style="flex: 1; min-width: 80px; margin: 0;">
                             <label class="form-label health-form-label" for="editMemberWeightInput">Cân nặng (kg)</label>
                             <input type="number" id="editMemberWeightInput" class="form-control health-input" placeholder="Ví dụ: 65" min="1" max="500">
                         </div>
@@ -1794,7 +1802,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.21"></script>
-    <script type="module" src="src/core/app.js?v=4.0.21"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.22"></script>
+    <script type="module" src="src/core/app.js?v=4.0.22"></script>
 </body>
 </html>

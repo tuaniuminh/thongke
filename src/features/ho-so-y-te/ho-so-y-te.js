@@ -69,7 +69,8 @@ function renderFamilyProfilesList() {
                 <div style="display: flex; flex-direction: column; gap: 2px;">
                     <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
                     <span style="font-size: 0.75rem; color: var(--text-muted);">
-                        ${p.birthYear ? `Năm sinh: ${p.birthYear}` : 'Chưa cập nhật năm sinh'}
+                        ${p.gender ? `Giới tính: ${p.gender}` : 'Chưa chọn giới tính'}
+                        ${p.birthYear ? ` | Năm sinh: ${p.birthYear}` : ''}
                         ${p.height ? ` | ${p.height}cm` : ''}
                         ${p.weight ? ` | ${p.weight}kg` : ''}
                     </span>
@@ -431,6 +432,7 @@ function openMemberDetailsModal(profileId) {
         nameInput.style.opacity = '1';
     }
 
+    document.getElementById('editMemberGenderInput').value = profile.gender || '';
     document.getElementById('editMemberBirthYearInput').value = profile.birthYear || '';
     document.getElementById('editMemberHeightInput').value = profile.height || '';
     document.getElementById('editMemberWeightInput').value = profile.weight || '';
@@ -466,12 +468,14 @@ async function handleMemberDetailsFormSubmit(e) {
         profile.name = name;
     }
 
+    const gender = document.getElementById('editMemberGenderInput').value;
     const birthYear = parseInt(document.getElementById('editMemberBirthYearInput').value) || null;
     const height = parseInt(document.getElementById('editMemberHeightInput').value) || null;
     const weight = parseInt(document.getElementById('editMemberWeightInput').value) || null;
     const currentMedications = document.getElementById('editMemberMedicationsInput').value.trim();
     const medicalHistory = document.getElementById('editMemberHistoryInput').value.trim();
 
+    profile.gender = gender || null;
     profile.birthYear = birthYear;
     profile.height = height;
     profile.weight = weight;
@@ -2254,6 +2258,7 @@ async function generateHealthAiAnalysis(forceFresh = false) {
         if (profile) {
             memberDetailsStr += `=== THÔNG TIN THÀNH VIÊN ===\n`;
             memberDetailsStr += `- Tên: ${profile.name}\n`;
+            if (profile.gender) memberDetailsStr += `- Giới tính: ${profile.gender}\n`;
             if (profile.birthYear) memberDetailsStr += `- Năm sinh: ${profile.birthYear}\n`;
             if (profile.height) memberDetailsStr += `- Chiều cao: ${profile.height} cm\n`;
             if (profile.weight) memberDetailsStr += `- Cân nặng: ${profile.weight} kg\n`;
@@ -3225,6 +3230,7 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
         if (profile) {
             memberDetailsStr += `=== THÔNG TIN THÀNH VIÊN ===\n`;
             memberDetailsStr += `- Tên: ${profile.name}\n`;
+            if (profile.gender) memberDetailsStr += `- Giới tính: ${profile.gender}\n`;
             if (profile.birthYear) memberDetailsStr += `- Năm sinh: ${profile.birthYear}\n`;
             if (profile.height) memberDetailsStr += `- Chiều cao: ${profile.height} cm\n`;
             if (profile.weight) memberDetailsStr += `- Cân nặng: ${profile.weight} kg\n`;

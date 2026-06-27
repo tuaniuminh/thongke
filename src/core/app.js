@@ -1,4 +1,4 @@
-﻿import { 
+import { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
@@ -9,7 +9,7 @@ import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js';
 
-const APP_VERSION = '4.0.21';
+const APP_VERSION = '4.0.22';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
