@@ -41,9 +41,9 @@ jobs:
             KEY_VAL="${{ vars.VITE_SUPABASE_ANON_KEY }}"
           fi
 
-          # Replace VITE_SUPABASE_URL_PLACEHOLDER and VITE_SUPABASE_ANON_KEY_PLACEHOLDER in app.js
-          sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" app.js
-          sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" app.js
+          # Replace VITE_SUPABASE_URL_PLACEHOLDER and VITE_SUPABASE_ANON_KEY_PLACEHOLDER in src/core/app.js
+          sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" src/core/app.js
+          sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" src/core/app.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
