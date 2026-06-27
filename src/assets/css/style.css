@@ -3747,3 +3747,29 @@ body.light-mode .home-widget-box {
     }
 }
 
+/* Responsive health analysis controls on mobile screens */
+@media (max-width: 576px) {
+    .health-analysis-controls {
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        margin-top: 8px;
+    }
+    #healthSpeechVoiceSelect {
+        flex: 1 1 calc(60% - 4px) !important;
+        max-width: 100% !important;
+        width: auto !important;
+    }
+    #healthSpeechRateSelect {
+        flex: 1 1 calc(40% - 4px) !important;
+        max-width: 100% !important;
+        width: auto !important;
+    }
+    #speakHealthAiAnalysisBtn, 
+    #refreshHealthAiAnalysisBtn {
+        flex: 1 1 calc(50% - 4px) !important;
+        max-width: 100% !important;
+        width: auto !important;
+    }
+}
+
+

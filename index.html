@@ -11,10 +11,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.18">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.19">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.18">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.19">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -36,7 +36,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.18" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.19" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -104,7 +104,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.18" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.19" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -365,6 +365,17 @@
 
             <section class="tab-panel" id="tab-settings" style="display: none;">
                 <div class="settings-grid">
+                    <!-- Supabase Sync Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="cloud-lightning"></i>
+                            <span>Cấu hình Đồng bộ Supabase</span>
+                        </h2>
+                        <div id="supabaseConfigView">
+                            <!-- Dynamically showing details -->
+                        </div>
+                    </div>
+
                     <!-- Theme Settings Card (Mobile only) -->
                     <div class="settings-card mobile-only-settings-card">
                         <h2>
@@ -442,17 +453,6 @@
                             <div id="customEventsList" style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 <!-- Dynamic custom events will be rendered here -->
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Supabase Sync Card -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="cloud-lightning"></i>
-                            <span>Cấu hình Đồng bộ Supabase</span>
-                        </h2>
-                        <div id="supabaseConfigView">
-                            <!-- Dynamically showing details -->
                         </div>
                     </div>
 
@@ -766,7 +766,7 @@
         </div>
         
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span class="wizard-version-badge" style="font-size: 0.8rem; background-color: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-muted); padding: 3px 10px; border-radius: 20px; font-weight: 500;"></span>
+            <span class="wizard-version-badge"></span>
         </button>
         <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
             <i data-lucide="settings"></i>
@@ -774,7 +774,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.18" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.19" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1580,7 +1580,7 @@
                             <span class="info-label">Trạng thái phân tích:</span>
                             <span id="healthAiAnalysisDate" style="font-weight: 500; font-size: 0.9rem;">Chưa thực hiện phân tích nào</span>
                         </div>
-                        <div style="display: flex; gap: 8px; align-items: center;">
+                        <div class="health-analysis-controls" style="display: flex; gap: 8px; align-items: center;">
                             <select id="healthSpeechVoiceSelect" class="health-btn health-btn-outline health-select-sm" style="display: none; padding: 4px 8px; font-size: 0.8rem; border-color: var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; max-width: 140px;">
                                 <!-- Populated dynamically -->
                             </select>
@@ -1742,7 +1742,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.18"></script>
-    <script type="module" src="src/core/app.js?v=4.0.18"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.19"></script>
+    <script type="module" src="src/core/app.js?v=4.0.19"></script>
 </body>
 </html>

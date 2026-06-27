@@ -8,7 +8,7 @@ import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } fro
 import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 
-const APP_VERSION = '4.0.18';
+const APP_VERSION = '4.0.19';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
