@@ -3352,7 +3352,7 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 // 🔌 Event Listeners — Mới
 // ===========================
 
-document.addEventListener('DOMContentLoaded', () => {
+function initHealthEventListeners() {
     // Camera: native input[capture] — dùng camera gốc thiết bị
     const cameraInput = document.getElementById('healthCameraInput');
     if (cameraInput) {
@@ -3425,7 +3425,13 @@ document.addEventListener('DOMContentLoaded', () => {
             speechSynthesis.onvoiceschanged = populateVoiceList;
         }
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHealthEventListeners);
+} else {
+    initHealthEventListeners();
+}
 
 
 function updateIndicatorExplanation(indicatorName) {

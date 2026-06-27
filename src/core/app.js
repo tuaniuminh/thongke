@@ -1,4 +1,4 @@
-﻿import { 
+import { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
@@ -9,7 +9,7 @@ import { encrypt, decrypt } from './crypto.js';
 import * as sync from './sync.js';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js';
 
-const APP_VERSION = '4.0.23';
+const APP_VERSION = '4.0.24';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1410,7 +1410,7 @@ function handleUnlockClear() {
 // --- DOM Init Bindings ---
 
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initializeApp() {
     // === Auto-inject APP_VERSION into all UI elements — no need to hardcode in HTML ===
     // Version badge on home page (top-right): shows "Ver X.X.X PRO"
     const homeVersionBadgeSpan = document.querySelector('#homeVersionBadge .wizard-version-badge');
@@ -1859,7 +1859,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             checkAppVersion();
         }
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
 
 // Setup lists filtering, search, and pagination triggers
 function setupTableSearchAndFilters() {
