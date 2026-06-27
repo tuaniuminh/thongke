@@ -3788,8 +3788,11 @@ body.light-mode .home-widget-box {
     }
 }
 
-/* Prevent background scrolling when modal is open */
-body.modal-open {
+/* Prevent background scrolling when modal is open (Pure CSS layout-reactive scroll locking) */
+body:has(.modal-overlay[style*="display: flex"]),
+body:has(.modal-overlay[style*="display: block"]),
+body:has(.modal-overlay[style*="display:flex"]),
+body:has(.modal-overlay[style*="display:block"]) {
     overflow: hidden !important;
 }
 
