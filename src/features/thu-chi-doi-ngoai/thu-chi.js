@@ -5,6 +5,8 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
 } from '../../core/app.js';
+import * as sync from '../../core/sync.js';
+import { encrypt, decrypt } from '../../core/crypto.js';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
