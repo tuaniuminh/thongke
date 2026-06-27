@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.28** |
-| **v4.0.28** | ✅ **Sửa lỗi đơ màn hình (Freeze Fix):** Gỡ bỏ MutationObserver trong JS để tránh vòng lặp tuần hoàn (layout loop) gây treo trình duyệt trên di động; Thay thế bằng giải pháp thuần CSS sử dụng bộ chọn giả `:has` (`body:has(.modal-overlay[style*="display: flex"])`) giúp chặn cuộn nền mượt mà, hiệu năng cao và tuyệt đối không gây đơ máy. |
+| **Phiên bản hiện tại** | **v4.0.29** |
+| **v4.0.29** | ✅ **Nâng cấp Giao diện & Tính năng:** Chặn cuộn nền di động iOS khi vuốt ở viền modal (iOS touchmove scroll lock); Sửa lỗi căn giữa danh sách thành viên (căn lề trái thẳng hàng như Bản thân); Di chuyển nút Sao lưu, Đồng bộ, Xóa vào modal Sửa thể trạng; Nâng cấp thuật toán Sao lưu/Đồng bộ để bao gồm 100% dữ liệu (các chỉ số xét nghiệm, lịch sử huyết áp, và thông tin thể trạng). |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -103,6 +103,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.26** | ✅ **Tinh chỉnh giao diện y tế:** Sửa lỗi tràn/đè phần tử nhập liệu Tiền sử bệnh lý lên các nút lưu của Modal thông tin thành viên; Khắc phục viền thừa (double border) trên các hộp chọn Google dịch/Tốc độ đọc; Tối ưu hóa cỡ chữ & padding cho các ô nhập liệu giúp giao diện hài hòa, cao cấp hơn. |
 | **v4.0.27** | ✅ **Nâng cấp Trải nghiệm Người dùng:** Chặn cuộn nền trang (scroll lock) bằng MutationObserver khi bất kỳ modal nào đang mở; Cấu trúc lại danh sách thành viên trong Quản lý thành viên (ẩn nút 'Sửa thể trạng' khi chưa bật chế độ sửa; hiển thị nút kèm chữ rõ ràng cho 'Sao lưu' và 'Đồng bộ' khi bật sửa; xóa nút sửa tên cũ do đã tích hợp sửa tên trực tiếp trong modal chi tiết thể trạng). |
 | **v4.0.28** | ✅ **Sửa lỗi đơ màn hình (Freeze Fix):** Gỡ bỏ MutationObserver trong JS để tránh vòng lặp tuần hoàn (layout loop) gây treo trình duyệt trên di động; Thay thế bằng giải pháp thuần CSS sử dụng bộ chọn giả `:has` (`body:has(.modal-overlay[style*="display: flex"])`) giúp chặn cuộn nền mượt mà, hiệu năng cao và tuyệt đối không gây đơ máy. |
+| **v4.0.29** | ✅ **Nâng cấp Giao diện & Tính năng:** Chặn cuộn nền di động iOS khi vuốt ở viền modal (iOS touchmove scroll lock); Sửa lỗi căn giữa danh sách thành viên (căn lề trái thẳng hàng như Bản thân); Di chuyển nút Sao lưu, Đồng bộ, Xóa vào modal Sửa thể trạng; Nâng cấp thuật toán Sao lưu/Đồng bộ để bao gồm 100% dữ liệu (các chỉ số xét nghiệm, lịch sử huyết áp, và thông tin thể trạng). |
 
 ---
 

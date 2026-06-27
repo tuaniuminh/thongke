@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.28';
+} from '../../core/app.js?v=4.0.29';
 
 let healthTrendChartInstance = null;
 
@@ -227,15 +227,27 @@ async function exportMemberBackup(profileId) {
     }
 
     const name = profile.name;
-    const records = (state.medicalRecords || []).filter(r => r.profileId === profileId);
+    const records = (state.medicalRecords || []).filter(r => {
+        const rProfileId = r.profileId || 'p-self';
+        return rProfileId === profileId;
+    });
+    const bpRecords = (state.bloodPressureRecords || []).filter(r => {
+        const rProfileId = r.profileId || 'p-self';
+        return rProfileId === profileId;
+    });
 
-    // Ask user if they want to encrypt the backup file
     const password = prompt(`Bạn có muốn đặt mật khẩu bảo mật cho tệp sao lưu của "${name}" không?\n(Để trống nếu muốn xuất tệp dạng văn bản thường không mã hóa)`);
-    if (password === null) return; // User cancelled
+    if (password === null) return;
 
     const payloadObj = {
         profile: {
             name: profile.name,
+            gender: profile.gender || '',
+            birthYear: profile.birthYear || '',
+            height: profile.height || '',
+            weight: profile.weight || '',
+            currentMedications: profile.currentMedications || '',
+            medicalHistory: profile.medicalHistory || '',
             lastAiAnalysis: profile.lastAiAnalysis || '',
             lastAiAnalysisDate: profile.lastAiAnalysisDate || '',
             lastAiAnalysisUpdated: profile.lastAiAnalysisUpdated || '',
@@ -250,6 +262,17 @@ async function exportMemberBackup(profileId) {
             facility: r.facility || '',
             notes: r.notes || '',
             indicators: r.indicators || {},
+            created_at: r.created_at || new Date().toISOString(),
+            updated_at: r.updated_at || new Date().toISOString()
+        })),
+        bloodPressureRecords: bpRecords.map(r => ({
+            sys: r.sys,
+            dia: r.dia,
+            pulse: r.pulse,
+            date: r.date,
+            time: r.time,
+            notes: r.notes || '',
+            condition: r.condition || '',
             created_at: r.created_at || new Date().toISOString(),
             updated_at: r.updated_at || new Date().toISOString()
         }))
@@ -342,41 +365,73 @@ async function handleMemberBackupImportFile(e) {
                 decryptedPayload = data.payload;
             }
 
-            if (!decryptedPayload || !decryptedPayload.profile || !Array.isArray(decryptedPayload.medicalRecords)) {
+            if (!decryptedPayload || !decryptedPayload.profile) {
                 showToast("Dữ liệu sao lưu không đúng cấu trúc!", "error");
                 return;
             }
 
-            const importedRecords = decryptedPayload.medicalRecords;
-            const confirmMsg = `Bạn có chắc chắn muốn nhập ${importedRecords.length} kết quả xét nghiệm vào hồ sơ của "${profile.name}"?\n(Dữ liệu sức khỏe cũ của thành viên này vẫn được giữ nguyên)`;
+            const importedRecords = decryptedPayload.medicalRecords || [];
+            const importedBpRecords = decryptedPayload.bloodPressureRecords || [];
+            const importedProfile = decryptedPayload.profile;
+
+            const confirmMsg = `Bạn có chắc chắn muốn nhập dữ liệu sức khỏe của "${importedProfile.name}" vào hồ sơ của "${profile.name}"?\n(Bao gồm: ${importedRecords.length} kết quả xét nghiệm và ${importedBpRecords.length} lịch sử huyết áp. Dữ liệu cũ vẫn được giữ nguyên)`;
             if (!confirm(confirmMsg)) return;
 
-            // Import medical records
-            if (!state.medicalRecords) {
-                state.medicalRecords = [];
+            const nowIso = new Date().toISOString();
+
+            profile.gender = importedProfile.gender || profile.gender || '';
+            profile.birthYear = importedProfile.birthYear || profile.birthYear || '';
+            profile.height = importedProfile.height || profile.height || '';
+            profile.weight = importedProfile.weight || profile.weight || '';
+            profile.currentMedications = importedProfile.currentMedications || profile.currentMedications || '';
+            profile.medicalHistory = importedProfile.medicalHistory || profile.medicalHistory || '';
+            state.familyProfilesUpdated = nowIso;
+
+            if (importedRecords.length > 0) {
+                if (!state.medicalRecords) {
+                    state.medicalRecords = [];
+                }
+                importedRecords.forEach((r, idx) => {
+                    const newRecord = {
+                        id: 'med-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + idx,
+                        title: r.title || 'Hồ sơ nhập khẩu',
+                        type: r.type || 'general',
+                        profileId: targetProfileId,
+                        date: r.date || nowIso.slice(0, 10),
+                        facility: r.facility || '',
+                        notes: r.notes || '',
+                        indicators: r.indicators || {},
+                        created_at: r.created_at || nowIso,
+                        updated_at: nowIso
+                    };
+                    state.medicalRecords.push(newRecord);
+                });
+                state.medicalRecordsUpdated = nowIso;
             }
 
-            const nowIso = new Date().toISOString();
-            importedRecords.forEach((r, idx) => {
-                const newRecord = {
-                    id: 'med-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + idx,
-                    title: r.title || 'Hồ sơ nhập khẩu',
-                    type: r.type || 'general',
-                    profileId: targetProfileId,
-                    date: r.date || nowIso.slice(0, 10),
-                    facility: r.facility || '',
-                    notes: r.notes || '',
-                    indicators: r.indicators || {},
-                    created_at: r.created_at || nowIso,
-                    updated_at: nowIso
-                };
-                state.medicalRecords.push(newRecord);
-            });
+            if (importedBpRecords.length > 0) {
+                if (!state.bloodPressureRecords) {
+                    state.bloodPressureRecords = [];
+                }
+                importedBpRecords.forEach((r, idx) => {
+                    const newRecord = {
+                        id: 'bp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + idx,
+                        profileId: targetProfileId,
+                        sys: r.sys,
+                        dia: r.dia,
+                        pulse: r.pulse,
+                        date: r.date,
+                        time: r.time,
+                        notes: r.notes || '',
+                        condition: r.condition || '',
+                        created_at: r.created_at || nowIso,
+                        updated_at: nowIso
+                    };
+                    state.bloodPressureRecords.push(newRecord);
+                });
+                state.bloodPressureRecordsUpdated = nowIso;
+            }
 
-            state.medicalRecordsUpdated = nowIso;
-
-            // Optionally import AI analysis report
-            const importedProfile = decryptedPayload.profile;
             if (importedProfile.lastAiAnalysis) {
                 const overwriteAi = confirm(`Tệp sao lưu có chứa báo cáo phân tích sức khỏe bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
                 if (overwriteAi) {
@@ -422,7 +477,6 @@ function openMemberDetailsModal(profileId) {
 
     modal.style.display = 'flex';
 
-    // Populate inputs
     document.getElementById('editMemberIdInput').value = profile.id;
     
     const nameInput = document.getElementById('editMemberNameInput');
@@ -441,6 +495,15 @@ function openMemberDetailsModal(profileId) {
     document.getElementById('editMemberWeightInput').value = profile.weight || '';
     document.getElementById('editMemberMedicationsInput').value = profile.currentMedications || '';
     document.getElementById('editMemberHistoryInput').value = profile.medicalHistory || '';
+    
+    const deleteBtn = document.getElementById('modalMemberDeleteBtn');
+    if (deleteBtn) {
+        if (profile.id === 'p-self') {
+            deleteBtn.style.display = 'none';
+        } else {
+            deleteBtn.style.display = 'inline-flex';
+        }
+    }
     
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -551,6 +614,29 @@ function initHealthBindings() {
     });
 
     document.getElementById('healthMemberDetailsForm')?.addEventListener('submit', handleMemberDetailsFormSubmit);
+
+    // Modal Member management action bindings
+    document.getElementById('modalMemberDeleteBtn')?.addEventListener('click', () => {
+        const profileId = document.getElementById('editMemberIdInput').value;
+        if (profileId && profileId !== 'p-self') {
+            deleteFamilyProfile(profileId);
+            document.getElementById('healthMemberDetailsModal').style.display = 'none';
+        }
+    });
+
+    document.getElementById('modalMemberBackupBtn')?.addEventListener('click', () => {
+        const profileId = document.getElementById('editMemberIdInput').value;
+        if (profileId) {
+            exportMemberBackup(profileId);
+        }
+    });
+
+    document.getElementById('modalMemberRestoreBtn')?.addEventListener('click', () => {
+        const profileId = document.getElementById('editMemberIdInput').value;
+        if (profileId) {
+            triggerImportMemberBackup(profileId);
+        }
+    });
 
     // Toggle Gemini API popover menu
     const popoverBtn = document.getElementById('geminiPopoverBtn');
