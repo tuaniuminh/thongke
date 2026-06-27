@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.29';
+} from '../../core/app.js?v=4.0.30';
 
 let healthTrendChartInstance = null;
 
@@ -65,35 +65,25 @@ function renderFamilyProfilesList() {
     container.innerHTML = profiles.map(p => {
         const isDefault = p.id === 'p-self';
         return `
-            <div class="health-profile-item" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                        <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">
-                            ${p.gender ? `Giới tính: ${p.gender}` : 'Chưa chọn giới tính'}
-                            ${p.birthYear ? ` | Năm sinh: ${p.birthYear}` : ''}
-                            ${p.height ? ` | ${p.height}cm` : ''}
-                            ${p.weight ? ` | ${p.weight}kg` : ''}
-                        </span>
-                    </div>
+            <div class="health-profile-item" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 8px; width: 100%; box-sizing: border-box; text-align: left; align-items: center !important;">
+                <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; align-items: flex-start !important;">
+                    <span style="font-weight: 500; color: var(--text-primary); text-align: left;">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">
+                        ${p.gender ? `Giới tính: ${p.gender}` : 'Chưa chọn giới tính'}
+                        ${p.birthYear ? ` | Năm sinh: ${p.birthYear}` : ''}
+                        ${p.height ? ` | ${p.height}cm` : ''}
+                        ${p.weight ? ` | ${p.weight}kg` : ''}
+                    </span>
                 </div>
                 ${isEditMode ? `
-                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; margin-top: 2px;">
-                        <button type="button" class="profile-action-btn edit-details" onclick="openMemberDetailsModal('${p.id}')" title="Sửa thông tin sức khỏe (thể trạng, chiều cao, cân nặng...)" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem;">
-                            <i data-lucide="user-cog" style="width: 13px; height: 13px;"></i>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+                        <button type="button" class="profile-action-btn edit-details" onclick="openMemberDetailsModal('${p.id}')" title="Sửa thể trạng" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 6px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600;">
+                            <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
                             <span>Sửa thể trạng</span>
                         </button>
-                        <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem;">
-                            <i data-lucide="download" style="width: 13px; height: 13px;"></i>
-                            <span>Sao lưu</span>
-                        </button>
-                        <button type="button" class="profile-action-btn import" onclick="triggerImportMemberBackup('${p.id}')" title="Nhập sao lưu hồ sơ (.json)" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem;">
-                            <i data-lucide="upload" style="width: 13px; height: 13px;"></i>
-                            <span>Đồng bộ</span>
-                        </button>
                         ${!isDefault ? `
-                            <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem; margin-left: auto;">
-                                <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                            <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); padding: 6px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600;">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                 <span>Xóa</span>
                             </button>
                         ` : ''}
@@ -495,16 +485,6 @@ function openMemberDetailsModal(profileId) {
     document.getElementById('editMemberWeightInput').value = profile.weight || '';
     document.getElementById('editMemberMedicationsInput').value = profile.currentMedications || '';
     document.getElementById('editMemberHistoryInput').value = profile.medicalHistory || '';
-    
-    const deleteBtn = document.getElementById('modalMemberDeleteBtn');
-    if (deleteBtn) {
-        if (profile.id === 'p-self') {
-            deleteBtn.style.display = 'none';
-        } else {
-            deleteBtn.style.display = 'inline-flex';
-        }
-    }
-    
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -616,13 +596,6 @@ function initHealthBindings() {
     document.getElementById('healthMemberDetailsForm')?.addEventListener('submit', handleMemberDetailsFormSubmit);
 
     // Modal Member management action bindings
-    document.getElementById('modalMemberDeleteBtn')?.addEventListener('click', () => {
-        const profileId = document.getElementById('editMemberIdInput').value;
-        if (profileId && profileId !== 'p-self') {
-            deleteFamilyProfile(profileId);
-            document.getElementById('healthMemberDetailsModal').style.display = 'none';
-        }
-    });
 
     document.getElementById('modalMemberBackupBtn')?.addEventListener('click', () => {
         const profileId = document.getElementById('editMemberIdInput').value;
