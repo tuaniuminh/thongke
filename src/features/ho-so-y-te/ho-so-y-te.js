@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.26';
+} from '../../core/app.js?v=4.0.27';
 
 let healthTrendChartInstance = null;
 
@@ -65,37 +65,40 @@ function renderFamilyProfilesList() {
     container.innerHTML = profiles.map(p => {
         const isDefault = p.id === 'p-self';
         return `
-            <div class="health-profile-item" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 6px;">
-                <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);">
-                        ${p.gender ? `Giới tính: ${p.gender}` : 'Chưa chọn giới tính'}
-                        ${p.birthYear ? ` | Năm sinh: ${p.birthYear}` : ''}
-                        ${p.height ? ` | ${p.height}cm` : ''}
-                        ${p.weight ? ` | ${p.weight}kg` : ''}
-                    </span>
+            <div class="health-profile-item" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-weight: 500; color: var(--text-primary);">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">
+                            ${p.gender ? `Giới tính: ${p.gender}` : 'Chưa chọn giới tính'}
+                            ${p.birthYear ? ` | Năm sinh: ${p.birthYear}` : ''}
+                            ${p.height ? ` | ${p.height}cm` : ''}
+                            ${p.weight ? ` | ${p.weight}kg` : ''}
+                        </span>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 4px; align-items: center;">
-                    <button type="button" class="profile-action-btn edit-details" onclick="openMemberDetailsModal('${p.id}')" title="Sửa thông tin sức khỏe" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 5px 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-                        <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
-                    </button>
-                    ${isEditMode ? `
-                        <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)">
-                            <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                ${isEditMode ? `
+                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; margin-top: 2px;">
+                        <button type="button" class="profile-action-btn edit-details" onclick="openMemberDetailsModal('${p.id}')" title="Sửa thông tin sức khỏe (thể trạng, chiều cao, cân nặng...)" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem;">
+                            <i data-lucide="user-cog" style="width: 13px; height: 13px;"></i>
+                            <span>Sửa thể trạng</span>
                         </button>
-                        <button type="button" class="profile-action-btn import" onclick="triggerImportMemberBackup('${p.id}')" title="Nhập sao lưu hồ sơ (.json)">
-                            <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
+                        <button type="button" class="profile-action-btn export" onclick="exportMemberBackup('${p.id}')" title="Xuất sao lưu hồ sơ (.json)" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem;">
+                            <i data-lucide="download" style="width: 13px; height: 13px;"></i>
+                            <span>Sao lưu</span>
+                        </button>
+                        <button type="button" class="profile-action-btn import" onclick="triggerImportMemberBackup('${p.id}')" title="Nhập sao lưu hồ sơ (.json)" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem;">
+                            <i data-lucide="upload" style="width: 13px; height: 13px;"></i>
+                            <span>Đồng bộ</span>
                         </button>
                         ${!isDefault ? `
-                            <button type="button" class="profile-action-btn edit" onclick="editFamilyProfile('${p.id}')" title="Sửa tên">
-                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
-                            </button>
-                            <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên">
-                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            <button type="button" class="profile-action-btn delete" onclick="deleteFamilyProfile('${p.id}')" title="Xóa thành viên" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); padding: 5px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem; margin-left: auto;">
+                                <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                                <span>Xóa</span>
                             </button>
                         ` : ''}
-                    ` : ''}
-                </div>
+                    </div>
+                ` : ''}
             </div>
         `;
     }).join('');

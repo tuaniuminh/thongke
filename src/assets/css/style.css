@@ -3788,4 +3788,9 @@ body.light-mode .home-widget-box {
     }
 }
 
+/* Prevent background scrolling when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+}
+
 

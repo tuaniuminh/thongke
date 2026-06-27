@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.26';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.26';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.27';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.27';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.26';
-import * as sync from './sync.js?v=4.0.26';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.26';
+import { encrypt, decrypt } from './crypto.js?v=4.0.27';
+import * as sync from './sync.js?v=4.0.27';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.27';
 
-const APP_VERSION = '4.0.26';
+const APP_VERSION = '4.0.27';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2187,6 +2187,30 @@ function updateHomeLunar() {
 // Gắn các hàm vào global window để tránh tree-shaking
 window.updateHomeWeather = updateHomeWeather;
 window.updateHomeLunar = updateHomeLunar;
+
+// MutationObserver to automatically block background scrolling when modals are open
+(function() {
+    const observer = new MutationObserver(() => {
+        const overlays = document.querySelectorAll('.modal-overlay');
+        let hasOpenModal = false;
+        overlays.forEach(overlay => {
+            if (overlay.style.display && overlay.style.display !== 'none') {
+                hasOpenModal = true;
+            }
+        });
+        if (hasOpenModal) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+    });
+
+    observer.observe(document.body, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['style', 'class']
+    });
+})();
 
 
 
