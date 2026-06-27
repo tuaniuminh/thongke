@@ -2,6 +2,33 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('Captured Error: ', e);
+            let div = document.getElementById('js-debug-error-console');
+            if (!div) {
+                div = document.createElement('div');
+                div.id = 'js-debug-error-console';
+                div.style.position = 'fixed';
+                div.style.bottom = '20px';
+                div.style.left = '20px';
+                div.style.right = '20px';
+                div.style.background = 'rgba(239, 68, 68, 0.95)';
+                div.style.color = '#fff';
+                div.style.padding = '14px 18px';
+                div.style.zIndex = '999999';
+                div.style.fontSize = '13px';
+                div.style.borderRadius = '8px';
+                div.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+                div.style.fontFamily = 'monospace';
+                div.style.whiteSpace = 'pre-wrap';
+                div.style.border = '1px solid rgba(255,255,255,0.2)';
+                div.innerHTML = '<div style="font-weight:bold;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:4px;">⚠️ Lỗi Hệ thống (Debug):</div>';
+                document.body.appendChild(div);
+            }
+            div.innerHTML += '<div style="margin-bottom:6px;">❌ ' + e.message + ' <br><span style="opacity:0.8;font-size:11px;">(' + e.filename.split('/').pop() + ':' + e.lineno + ')</span></div>';
+        });
+    </script>
     <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FamiLife - Thu Chi & Sức Khỏe Gia Đình</title>
