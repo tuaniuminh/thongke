@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.30';
+} from '../../core/app.js?v=4.0.31';
 
 let healthTrendChartInstance = null;
 
@@ -65,18 +65,20 @@ function renderFamilyProfilesList() {
     container.innerHTML = profiles.map(p => {
         const isDefault = p.id === 'p-self';
         return `
-            <div class="health-profile-item" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 8px; width: 100%; box-sizing: border-box; text-align: left; align-items: center !important;">
-                <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; align-items: flex-start !important;">
-                    <span style="font-weight: 500; color: var(--text-primary); text-align: left;">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
-                    <span style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">
+            <div class="health-profile-item" style="display: flex; flex-direction: column; align-items: flex-start !important; gap: 10px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 8px; width: 100%; box-sizing: border-box; text-align: left;">
+                <!-- Member details section (Full width, left-aligned) -->
+                <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; align-items: flex-start !important; width: 100%;">
+                    <span style="font-weight: 500; color: var(--text-primary); text-align: left; width: 100%;">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); text-align: left; width: 100%;">
                         ${p.gender ? `Giới tính: ${p.gender}` : 'Chưa chọn giới tính'}
                         ${p.birthYear ? ` | Năm sinh: ${p.birthYear}` : ''}
                         ${p.height ? ` | ${p.height}cm` : ''}
                         ${p.weight ? ` | ${p.weight}kg` : ''}
                     </span>
                 </div>
+                <!-- Action buttons underneath (Edit details and delete buttons) -->
                 ${isEditMode ? `
-                    <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+                    <div style="display: flex; gap: 8px; align-items: center; width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 8px; justify-content: flex-start;">
                         <button type="button" class="profile-action-btn edit-details" onclick="openMemberDetailsModal('${p.id}')" title="Sửa thể trạng" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); padding: 6px 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600;">
                             <i data-lucide="user-cog" style="width: 14px; height: 14px;"></i>
                             <span>Sửa thể trạng</span>

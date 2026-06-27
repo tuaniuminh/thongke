@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.30** |
-| **v4.0.30** | ✅ **Tối ưu hóa Bố cục Thành viên:** Căn lề trái hoàn chỉnh cho danh sách thành viên sử dụng cấu trúc Flex Row; Di chuyển nút "Xóa" trực tiếp ra ngoài danh sách khi bật chế độ Sửa; Di chuyển nút "Sao lưu" và "Đồng bộ" lên trên cùng của Modal Sửa thể trạng, bổ sung viền màu nổi bật; Loại bỏ hoàn toàn nút Xóa khỏi modal footer. |
+| **Phiên bản hiện tại** | **v4.0.31** |
+| **v4.0.31** | ✅ **Tối ưu Bố cục Danh sách:** Chuyển đổi thẻ thành viên sang dạng cột Flex Column; Tách biệt dòng hiển thị thông tin thể trạng (độ rộng 100%, căn lề trái tự nhiên) và dòng nút hành động bên dưới khi ở chế độ Sửa; Tránh hiện tượng co hẹp chữ thông tin và lệch nút trên di động. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -105,6 +105,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.28** | ✅ **Sửa lỗi đơ màn hình (Freeze Fix):** Gỡ bỏ MutationObserver trong JS để tránh vòng lặp tuần hoàn (layout loop) gây treo trình duyệt trên di động; Thay thế bằng giải pháp thuần CSS sử dụng bộ chọn giả `:has` (`body:has(.modal-overlay[style*="display: flex"])`) giúp chặn cuộn nền mượt mà, hiệu năng cao và tuyệt đối không gây đơ máy. |
 | **v4.0.29** | ✅ **Nâng cấp Giao diện & Tính năng:** Chặn cuộn nền di động iOS khi vuốt ở viền modal (iOS touchmove scroll lock); Sửa lỗi căn giữa danh sách thành viên (căn lề trái thẳng hàng như Bản thân); Di chuyển nút Sao lưu, Đồng bộ, Xóa vào modal Sửa thể trạng; Nâng cấp thuật toán Sao lưu/Đồng bộ để bao gồm 100% dữ liệu (các chỉ số xét nghiệm, lịch sử huyết áp, và thông tin thể trạng). |
 | **v4.0.30** | ✅ **Tối ưu hóa Bố cục Thành viên:** Căn lề trái hoàn chỉnh cho danh sách thành viên sử dụng cấu trúc Flex Row; Di chuyển nút "Xóa" trực tiếp ra ngoài danh sách khi bật chế độ Sửa; Di chuyển nút "Sao lưu" và "Đồng bộ" lên trên cùng của Modal Sửa thể trạng, bổ sung viền màu nổi bật; Loại bỏ hoàn toàn nút Xóa khỏi modal footer. |
+| **v4.0.31** | ✅ **Tối ưu Bố cục Danh sách:** Chuyển đổi thẻ thành viên sang dạng cột Flex Column; Tách biệt dòng hiển thị thông tin thể trạng (độ rộng 100%, căn lề trái tự nhiên) và dòng nút hành động bên dưới khi ở chế độ Sửa; Tránh hiện tượng co hẹp chữ thông tin và lệch nút trên di động. |
 
 ---
 
