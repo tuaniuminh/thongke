@@ -3805,9 +3805,13 @@ body:has(.modal-overlay.active) {
 .health-profiles-list,
 #healthProfilesListContainer,
 #healthIndicatorsEditRows,
-#healthAiMemberSelectorList,
-.table-responsive {
+#healthAiMemberSelectorList {
     overscroll-behavior: contain !important;
+}
+
+.table-responsive {
+    overscroll-behavior-x: contain !important;
+    overscroll-behavior-y: auto !important;
 }
 
 /* --- Target v4.0.40 - Home settings button and sidebar locking --- */
