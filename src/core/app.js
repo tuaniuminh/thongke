@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.37';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.37';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.38';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.38';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.37';
-import * as sync from './sync.js?v=4.0.37';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.37';
+import { encrypt, decrypt } from './crypto.js?v=4.0.38';
+import * as sync from './sync.js?v=4.0.38';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.38';
 
-const APP_VERSION = '4.0.37';
+const APP_VERSION = '4.0.38';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2197,8 +2197,19 @@ document.addEventListener('touchstart', (e) => {
 document.addEventListener('touchmove', (e) => {
     const activeOverlay = document.querySelector('.modal-overlay.active, .modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"]');
     if (activeOverlay) {
-        // Find the closest scrollable container
-        const scrollable = e.target.closest('#healthProfilesListContainer, .health-modal-body, #healthIndicatorsEditRows, #healthAiMemberSelectorList, .modal-container, .table-responsive');
+        // Find the closest ancestor that is actually scrollable vertically
+        let scrollable = null;
+        let el = e.target;
+        while (el && el !== activeOverlay && el !== document.body && el !== document.documentElement) {
+            const style = window.getComputedStyle(el);
+            const overflowY = style.overflowY || '';
+            const isScrollableStyle = overflowY.includes('auto') || overflowY.includes('scroll');
+            if (isScrollableStyle && el.scrollHeight > el.clientHeight) {
+                scrollable = el;
+                break;
+            }
+            el = el.parentElement;
+        }
         
         if (!scrollable) {
             e.preventDefault();
@@ -2210,12 +2221,6 @@ document.addEventListener('touchmove', (e) => {
         const scrollTop = scrollable.scrollTop;
         const touchEndY = e.touches[0].clientY;
         const deltaY = touchEndY - touchStartY;
-
-        // If the container is not scrollable (no scrollbar), block scrolling!
-        if (scrollHeight <= clientHeight) {
-            e.preventDefault();
-            return;
-        }
 
         // If at top and scrolling down, block scrolling!
         if (scrollTop === 0 && deltaY > 0) {
