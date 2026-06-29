@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.40';
-import * as sync from '../../core/sync.js?v=4.0.40';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.40';
+} from '../../core/app.js?v=4.0.41';
+import * as sync from '../../core/sync.js?v=4.0.41';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.41';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;

@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.40** |
-| **v4.0.40** | ✅ **Giao diện đăng nhập & Khóa lối tắt:** Ẩn thẻ cài đặt/đăng nhập trang chủ khi chưa đăng nhập; hiển thị nút chữ "Đăng nhập" viền vàng ở góc phải với hiệu ứng phóng to/nhấp nháy khi bấm vào các thẻ y tế/tài chính bị khóa. Khóa/mờ các lối tắt tương ứng trên Sidebar. Chuẩn hóa tiêu đề di động trang Cài đặt có nút Trang chủ kèm nhãn chữ bên dưới. |
+| **Phiên bản hiện tại** | **v4.0.41** |
+| **v4.0.41** | ✅ **Sửa đổi cuộn Modal y tế & Thanh cuộn giới hạn:** Khắc phục lỗi trễ cuộn danh sách thành viên trên di động bằng cách khóa cuộn modal cha. Bo tròn các nút chụp ảnh, xóa dữ liệu và hộp chỉ số. Thay đổi bộ lọc input để ẩn chụp ảnh trùng lặp trong bộ chọn ảnh. Giới hạn chiều cao và thêm thanh cuộn mượt cho danh sách huyết áp (320px) và lịch sử y tế (485px) khi có nhiều bản ghi. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -115,6 +115,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.38** | ✅ **Sửa lỗi cuộn bảng chi tiết y tế:** Cấu trúc lại trình chặn cuộn nền di động (`touchmove`) trong JS bằng bộ tìm kiếm tổ tiên cuộn dọc động (`window.getComputedStyle`), sửa lỗi triệt để hành vi không thể cuộn bảng kết quả xét nghiệm máu khi người dùng vuốt trên các dòng bảng (do sự kiện chạm bị chặn nhầm bởi phần tử con). |
 | **v4.0.39** | ✅ **Sửa lỗi mã hóa sao lưu thành viên:** Nhập trực tiếp các hàm `encrypt` và `decrypt` từ module `crypto.js` vào `ho-so-y-te.js`, khắc phục triệt để lỗi ReferenceError "Lỗi khi xuất sao lưu hồ sơ" xảy ra khi người dùng cố gắng sao lưu thông tin thành viên có sử dụng mật khẩu bảo vệ. |
 | **v4.0.40** | ✅ **Giao diện đăng nhập & Khóa lối tắt:** Ẩn thẻ cài đặt/đăng nhập trang chủ khi chưa đăng nhập; hiển thị nút chữ "Đăng nhập" viền vàng ở góc phải với hiệu ứng phóng to/nhấp nháy khi bấm vào các thẻ y tế/tài chính bị khóa. Khóa/mờ các lối tắt tương ứng trên Sidebar. Chuẩn hóa tiêu đề di động trang Cài đặt có nút Trang chủ kèm nhãn chữ bên dưới. |
+| **v4.0.41** | ✅ **Sửa đổi cuộn Modal y tế & Thanh cuộn giới hạn:** Khắc phục lỗi trễ cuộn danh sách thành viên trên di động bằng cách khóa cuộn modal cha. Bo tròn các nút chụp ảnh, xóa dữ liệu và hộp chỉ số. Thay đổi bộ lọc input để ẩn chụp ảnh trùng lặp trong bộ chọn ảnh. Giới hạn chiều cao và thêm thanh cuộn mượt cho danh sách huyết áp (320px) và lịch sử y tế (485px) khi có nhiều bản ghi. |
 
 ---
 

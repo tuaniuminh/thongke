@@ -38,10 +38,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.40">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.41">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.40">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.41">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -63,7 +63,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.40" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.41" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -131,7 +131,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.40" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.41" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -542,7 +542,7 @@
                                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
                                     Xóa sạch toàn bộ ghi chép thu chi đối ngoại trên thiết bị này. Lưu ý: Nếu bạn có liên kết tài khoản Supabase, dữ liệu trên đám mây cũng sẽ bị xóa sạch sau khi đồng bộ.
                                 </p>
-                                <button class="btn w-full" id="clearAllDataBtn" style="background-color: #ef4444; color: white; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: var(--border-radius-sm);">
+                                <button class="btn w-full" id="clearAllDataBtn" style="background-color: #ef4444; color: white; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: var(--btn-radius);">
                                     <i data-lucide="trash-2"></i>
                                     <span>Xóa sạch toàn bộ ghi chép</span>
                                 </button>
@@ -635,12 +635,12 @@
                             </p>
                             <div class="health-dropzone" id="healthScannerDropzone">
                                 <i data-lucide="image" class="dropzone-icon"></i>
-                                <span class="dropzone-text">Chọn hoặc kéo thả ảnh xét nghiệm y tế (.png, .jpg)</span>
-                                <input type="file" id="healthFileInput" accept="image/*" style="display: none;">
+                                <span class="dropzone-text">Chọn hoặc kéo thả ảnh xét nghiệm y tế (.png, .jpg, .jpeg, .webp)</span>
+                                <input type="file" id="healthFileInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
                             </div>
                             <!-- Camera capture: dùng camera gốc thiết bị -->
                             <input type="file" id="healthCameraInput" accept="image/*" capture="environment" style="display: none;">
-                            <label for="healthCameraInput" class="health-btn health-btn-secondary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; cursor: pointer; border-radius: var(--border-radius-sm); font-size: 0.85rem; font-weight: 500; box-sizing: border-box;">
+                            <label for="healthCameraInput" class="health-btn health-btn-secondary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; cursor: pointer; border-radius: var(--btn-radius); font-size: 0.85rem; font-weight: 500; box-sizing: border-box;">
                                 <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
                                 <span>Chụp ảnh trực tiếp bằng Camera</span>
                             </label>
@@ -698,7 +698,7 @@
                             </div>
                         </div>
                         <!-- Health Indicator Explanation Box -->
-                        <div id="healthIndicatorInfoBox" style="margin-top: 16px; padding: 16px; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); font-size: 0.82rem; display: none; flex-direction: column; gap: 10px;">
+                        <div id="healthIndicatorInfoBox" style="margin-top: 16px; padding: 16px; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--btn-radius); font-size: 0.82rem; display: none; flex-direction: column; gap: 10px;">
                             <h5 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
                                 <i data-lucide="info" style="width: 16px; height: 16px; color: var(--accent-color);"></i>
                                 <span id="infoIndicatorName">-</span>
@@ -801,7 +801,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.40" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.41" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1841,7 +1841,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.40"></script>
-    <script type="module" src="src/core/app.js?v=4.0.40"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.41"></script>
+    <script type="module" src="src/core/app.js?v=4.0.41"></script>
 </body>
 </html>
