@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.31';
+} from '../../core/app.js?v=4.0.32';
 
 let healthTrendChartInstance = null;
 
@@ -65,7 +65,7 @@ function renderFamilyProfilesList() {
     container.innerHTML = profiles.map(p => {
         const isDefault = p.id === 'p-self';
         return `
-            <div class="health-profile-item" style="display: flex; flex-direction: column; align-items: flex-start !important; gap: 10px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); margin-bottom: 8px; width: 100%; box-sizing: border-box; text-align: left;">
+            <div class="health-profile-item" style="display: flex; flex-direction: column; align-items: flex-start !important; gap: 10px; padding: 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 8px; width: 100%; box-sizing: border-box; text-align: left;">
                 <!-- Member details section (Full width, left-aligned) -->
                 <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; align-items: flex-start !important; width: 100%;">
                     <span style="font-weight: 500; color: var(--text-primary); text-align: left; width: 100%;">${escapeHTML(p.name)} ${isDefault ? '<span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 4px;">(Mặc định)</span>' : ''}</span>
@@ -3073,7 +3073,7 @@ async function handleNativeCameraCapture(file) {
             try {
                 const responseJson = await callGeminiAPI(base64Data, mimeType);
                 if (overlay) overlay.style.display = 'none';
-                openHealthEditModal(null, responseJson);
+                await processScannedHealthImage(responseJson);
             } catch (err) {
                 if (overlay) overlay.style.display = 'none';
                 showToast('Phân tích ảnh thất bại: ' + err.message, 'error');

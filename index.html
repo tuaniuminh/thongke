@@ -38,10 +38,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.31">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.32">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.31">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.32">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -63,7 +63,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.31" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.32" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -131,7 +131,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.31" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.32" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -801,7 +801,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.31" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.32" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1525,14 +1525,15 @@
             </div>
             <div class="health-modal-body" style="display: flex; flex-direction: column; overflow: hidden; flex: 1;">
                 <!-- Add new profile form -->
-                <form id="addProfileForm" style="display: flex; gap: 8px; margin-bottom: 20px; align-items: flex-end; flex: none;">
-                    <div class="form-group" style="flex: 1; margin: 0;">
-                        <label class="form-label health-form-label" for="newProfileNameInput">Tên thành viên mới</label>
-                        <input type="text" id="newProfileNameInput" class="form-control health-input" placeholder="Ví dụ: Bố, Mẹ, Con gái..." required>
+                <form id="addProfileForm">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <label class="form-label health-form-label" for="newProfileNameInput" style="margin: 0; font-size: 0.88rem;">Tên thành viên mới</label>
+                        <button type="submit" class="health-btn health-btn-primary" style="padding: 5px 12px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; height: auto; min-height: 0; line-height: 1.2;">
+                            <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                            <span>Thêm</span>
+                        </button>
                     </div>
-                    <button type="submit" class="health-btn health-btn-primary" style="padding: 10px 16px;">
-                        <i data-lucide="plus"></i> Thêm
-                    </button>
+                    <input type="text" id="newProfileNameInput" class="form-control health-input" placeholder="Ví dụ: Bố, Mẹ, Con gái..." required style="width: 100%; box-sizing: border-box; height: 42px;">
                 </form>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-shrink: 0;">
@@ -1542,16 +1543,10 @@
                         <span>Sửa</span>
                     </button>
                 </div>
-                <div class="health-profiles-list" id="healthProfilesListContainer" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; flex: 1; padding-right: 4px;">
+                <div class="health-profiles-list" id="healthProfilesListContainer" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; flex: 1; padding-right: 4px;">
                     <!-- Populated dynamically -->
                 </div>
                 <input type="file" id="memberBackupFileInput" accept=".json" style="display: none;">
-
-                <div class="health-modal-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; flex-shrink: 0;">
-                    <button type="button" id="closeHealthProfilesModalBtn2" class="health-btn health-btn-outline" style="min-width: 120px;">
-                        Đóng lại
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -1841,7 +1836,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.31"></script>
-    <script type="module" src="src/core/app.js?v=4.0.31"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.32"></script>
+    <script type="module" src="src/core/app.js?v=4.0.32"></script>
 </body>
 </html>
