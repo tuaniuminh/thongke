@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.36';
+} from '../../core/app.js?v=4.0.37';
 
 let healthTrendChartInstance = null;
 
@@ -1341,9 +1341,14 @@ async function processScannedHealthImage(responseJson) {
         const minutes = String(localNow.getMinutes()).padStart(2, '0');
         const timeStr = `${hours}:${minutes}`;
         
-        // Determine session: morning (5h - 12h) or evening (rest)
+        // Determine session: morning (5h - 12h), midday/other (12h - 18h), or evening (rest)
         const hour = localNow.getHours();
-        const session = (hour >= 5 && hour < 12) ? 'morning' : 'evening';
+        let session = 'evening';
+        if (hour >= 5 && hour < 12) {
+            session = 'morning';
+        } else if (hour >= 12 && hour < 18) {
+            session = 'other';
+        }
         
         const record = {
             id: 'bp-' + Date.now(),
@@ -3266,6 +3271,14 @@ function openBpModal(recordId = null) {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
+    const hourNum = now.getHours();
+    let defaultSession = 'evening';
+    if (hourNum >= 5 && hourNum < 12) {
+        defaultSession = 'morning';
+    } else if (hourNum >= 12 && hourNum < 18) {
+        defaultSession = 'other';
+    }
+
     document.getElementById('bpDate').value = now.toISOString().split('T')[0];
     document.getElementById('bpTime').value = `${hours}:${minutes}`;
     document.getElementById('bpRecordId').value = '';
@@ -3273,7 +3286,7 @@ function openBpModal(recordId = null) {
     document.getElementById('bpDiastolic').value = '';
     document.getElementById('bpPulse').value = '';
     document.getElementById('bpNotes').value = '';
-    document.getElementById('bpSession').value = 'morning';
+    document.getElementById('bpSession').value = defaultSession;
 
     if (recordId) {
         const rec = (state.bloodPressureRecords || []).find(r => r.id === recordId);
@@ -3561,6 +3574,25 @@ function initHealthEventListeners() {
     // Blood pressure form submit
     const bpForm = document.getElementById('bpForm');
     if (bpForm) bpForm.addEventListener('submit', handleBpFormSubmit);
+
+    // Auto-update session based on time input
+    const bpTimeInput = document.getElementById('bpTime');
+    const bpSessionSelect = document.getElementById('bpSession');
+    if (bpTimeInput && bpSessionSelect) {
+        bpTimeInput.addEventListener('change', () => {
+            const timeVal = bpTimeInput.value;
+            if (timeVal) {
+                const hour = parseInt(timeVal.split(':')[0]);
+                if (hour >= 5 && hour < 12) {
+                    bpSessionSelect.value = 'morning';
+                } else if (hour >= 12 && hour < 18) {
+                    bpSessionSelect.value = 'other';
+                } else {
+                    bpSessionSelect.value = 'evening';
+                }
+            }
+        });
+    }
 
     // Blood pressure analysis choice modal buttons
     document.getElementById('analyzeBpOnlyBtn')?.addEventListener('click', async () => {
