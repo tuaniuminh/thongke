@@ -3797,4 +3797,17 @@ body:has(.modal-overlay.active) {
     overflow: hidden !important;
 }
 
+/* Prevent scroll chaining (overscroll bubble) to background */
+.modal-overlay,
+.modal-container,
+.health-modal-container,
+.health-modal-body,
+.health-profiles-list,
+#healthProfilesListContainer,
+#healthIndicatorsEditRows,
+#healthAiMemberSelectorList,
+.table-responsive {
+    overscroll-behavior: contain !important;
+}
+
 

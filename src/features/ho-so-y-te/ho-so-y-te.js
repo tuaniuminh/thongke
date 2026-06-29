@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.35';
+} from '../../core/app.js?v=4.0.36';
 
 let healthTrendChartInstance = null;
 
@@ -1335,8 +1335,14 @@ async function processScannedHealthImage(responseJson) {
         const now = new Date().toISOString();
         const dateStr = responseJson.date || now.split('T')[0];
         
+        // Capture upload time
+        const localNow = new Date();
+        const hours = String(localNow.getHours()).padStart(2, '0');
+        const minutes = String(localNow.getMinutes()).padStart(2, '0');
+        const timeStr = `${hours}:${minutes}`;
+        
         // Determine session: morning (5h - 12h) or evening (rest)
-        const hour = new Date().getHours();
+        const hour = localNow.getHours();
         const session = (hour >= 5 && hour < 12) ? 'morning' : 'evening';
         
         const record = {
@@ -1347,6 +1353,7 @@ async function processScannedHealthImage(responseJson) {
             pulse: parseInt(responseJson.pulse) || null,
             session: session,
             date: dateStr,
+            time: timeStr,
             notes: responseJson.notes || 'Tự động nhận diện từ ảnh',
             updated_at: now
         };
@@ -3033,7 +3040,7 @@ async function exportHealthPDF() {
             const diaStatus = r.diastolic >= 90 ? getTxt('CAO', 'CAO') : (r.diastolic < 60 ? getTxt('THẤP', 'THAP') : getTxt('BT', 'BT'));
             const session = r.session === 'morning' ? getTxt('Sáng', 'Sang') : (r.session === 'evening' ? getTxt('Tối', 'Toi') : getTxt('Khác', 'Khac'));
             return [
-                formatDate(r.date),
+                formatDate(r.date) + (r.time ? ' lúc ' + r.time : ''),
                 session,
                 `${r.systolic} mmHg (${sysStatus})`,
                 `${r.diastolic} mmHg (${diaStatus})`,
@@ -3228,7 +3235,7 @@ function renderBloodPressureSection() {
                     <span style="font-size: 0.72rem; color: var(--text-muted);">${sessionLabel}</span>
                     ${r.pulse ? `<span style="font-size: 0.72rem; color: var(--text-muted);">💓 ${r.pulse} bpm</span>` : ''}
                 </div>
-                <div style="font-size: 0.78rem; color: var(--text-secondary);">${formatDate(r.date)}${r.notes ? ` · ${r.notes}` : ''}</div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary);">${formatDate(r.date)}${r.time ? ` lúc ${r.time}` : ''}${r.notes ? ` · ${r.notes}` : ''}</div>
             </div>
             <div style="display: flex; gap: 6px; flex-shrink: 0;">
                 <button onclick="openBpModal('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
@@ -3255,8 +3262,12 @@ function openBpModal(recordId = null) {
         profileSelect.value = state.selectedHealthProfileId !== 'all' ? state.selectedHealthProfileId : 'p-self';
     }
 
-    // Default date to today
-    document.getElementById('bpDate').value = new Date().toISOString().split('T')[0];
+    // Default date and time to today and now
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('bpDate').value = now.toISOString().split('T')[0];
+    document.getElementById('bpTime').value = `${hours}:${minutes}`;
     document.getElementById('bpRecordId').value = '';
     document.getElementById('bpSystolic').value = '';
     document.getElementById('bpDiastolic').value = '';
@@ -3274,6 +3285,7 @@ function openBpModal(recordId = null) {
             document.getElementById('bpPulse').value = rec.pulse || '';
             document.getElementById('bpSession').value = rec.session || 'morning';
             document.getElementById('bpDate').value = rec.date;
+            document.getElementById('bpTime').value = rec.time || '';
             document.getElementById('bpNotes').value = rec.notes || '';
         }
     }
@@ -3311,6 +3323,7 @@ async function handleBpFormSubmit(e) {
         pulse: parseInt(document.getElementById('bpPulse').value) || null,
         session: document.getElementById('bpSession').value,
         date: document.getElementById('bpDate').value || new Date().toISOString().split('T')[0],
+        time: document.getElementById('bpTime').value || null,
         notes: document.getElementById('bpNotes').value.trim(),
         updated_at: now
     };
@@ -3424,7 +3437,7 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
             bpRecords.forEach(r => {
                 const cls = getBpClassification(r.systolic, r.diastolic);
                 const session = r.session === 'morning' ? 'sang' : (r.session === 'evening' ? 'toi' : 'khac');
-                bpStr += `- ${formatDate(r.date)} (${session}): Tam thu ${r.systolic} mmHg / Tam truong ${r.diastolic} mmHg`;
+                bpStr += `- ${formatDate(r.date)}${r.time ? ' lúc ' + r.time : ''} (${session}): Tam thu ${r.systolic} mmHg / Tam truong ${r.diastolic} mmHg`;
                 if (r.pulse) bpStr += ` / Nhip tim ${r.pulse} bpm`;
                 bpStr += ` → ${cls.label}`;
                 if (r.notes) bpStr += ` (${r.notes})`;

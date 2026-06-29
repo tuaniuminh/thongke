@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.35** |
-| **v4.0.35** | ✅ **Sửa lỗi cuộn nền & tối ưu cỡ chữ:** Chặn cuộn nền triệt để khi mở các modal y tế bằng class `.active` kết hợp `:has` selector cho cả `html` và `body`; thu gọn kích thước nút "Thêm" thành viên gia đình (loại bỏ biểu tượng "+", sửa lỗi nút bị kéo giãn trên di động); đồng bộ cỡ chữ các trường nhập liệu y tế bằng với cỡ chữ tiêu đề (`0.82rem`). |
+| **Phiên bản hiện tại** | **v4.0.36** |
+| **v4.0.36** | ✅ **Ngăn chặn cuộn nền triệt để & Thêm giờ đo huyết áp:** Cập nhật cơ chế chặn cuộn nền iOS/Safari bằng cách thêm TouchStart/TouchMove boundary-lock ở JS và \`overscroll-behavior: contain\` ở CSS; Tự động nhận diện thời gian tải lên/chụp ảnh để ghi nhận giờ đo huyết áp và tích hợp thêm trường "Giờ đo" vào form nhập thủ công lẫn báo cáo PDF. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -110,6 +110,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.33** | ✅ **Nâng cấp tính năng Xuất PDF:** Thay thế hành vi tự động tải file xuống bằng cách mở file PDF trực tiếp trong một tab mới trên trình duyệt máy tính (thông qua Blob URL và `window.open`), giúp người dùng xem trước/in trực quan; Trên các thiết bị di động, hệ thống vẫn duy trì tải file y tế trực tiếp xuống để đảm bảo tính tương thích tốt nhất. |
 | **v4.0.34** | ✅ **Cực cưỡng chế xóa Cache:** Cập nhật đồng loạt toàn bộ các tham số truy vấn cache-busting từ `?v=4.0.32` lên `?v=4.0.34` ở tất cả các file liên kết (`index.html`, `app.js`, `ho-so-y-te.js`, `thu-chi.js`), giải quyết triệt để lỗi xung đột mã nguồn cũ/mới và treo ứng dụng. |
 | **v4.0.35** | ✅ **Sửa lỗi cuộn nền & tối ưu cỡ chữ:** Chặn cuộn nền triệt để khi mở các modal y tế bằng class `.active` kết hợp `:has` selector cho cả `html` và `body`; thu gọn kích thước nút "Thêm" thành viên gia đình (loại bỏ biểu tượng "+", sửa lỗi nút bị kéo giãn trên di động); đồng bộ cỡ chữ các trường nhập liệu y tế bằng với cỡ chữ tiêu đề (`0.82rem`). |
+| **v4.0.36** | ✅ **Ngăn chặn cuộn nền triệt để & Thêm giờ đo huyết áp:** Cập nhật cơ chế chặn cuộn nền iOS/Safari bằng cách thêm TouchStart/TouchMove boundary-lock ở JS và `overscroll-behavior: contain` ở CSS; Tự động nhận diện thời gian tải lên/chụp ảnh để ghi nhận giờ đo huyết áp và tích hợp thêm trường "Giờ đo" vào form nhập thủ công lẫn báo cáo PDF. |
 
 ---
 

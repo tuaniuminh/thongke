@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.35';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.35';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.36';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.36';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.35';
-import * as sync from './sync.js?v=4.0.35';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.35';
+import { encrypt, decrypt } from './crypto.js?v=4.0.36';
+import * as sync from './sync.js?v=4.0.36';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.36';
 
-const APP_VERSION = '4.0.35';
+const APP_VERSION = '4.0.36';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2189,12 +2189,44 @@ window.updateHomeWeather = updateHomeWeather;
 window.updateHomeLunar = updateHomeLunar;
 
 // iOS Safari background scroll prevention
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
 document.addEventListener('touchmove', (e) => {
-    const activeOverlay = document.querySelector('.modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"], .modal-overlay.active');
+    const activeOverlay = document.querySelector('.modal-overlay.active, .modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"]');
     if (activeOverlay) {
-        const isScrollable = e.target.closest('.health-modal-body, #healthProfilesListContainer, .modal-container');
-        if (!isScrollable) {
+        // Find the closest scrollable container
+        const scrollable = e.target.closest('#healthProfilesListContainer, .health-modal-body, #healthIndicatorsEditRows, #healthAiMemberSelectorList, .modal-container, .table-responsive');
+        
+        if (!scrollable) {
             e.preventDefault();
+            return;
+        }
+
+        const clientHeight = scrollable.clientHeight;
+        const scrollHeight = scrollable.scrollHeight;
+        const scrollTop = scrollable.scrollTop;
+        const touchEndY = e.touches[0].clientY;
+        const deltaY = touchEndY - touchStartY;
+
+        // If the container is not scrollable (no scrollbar), block scrolling!
+        if (scrollHeight <= clientHeight) {
+            e.preventDefault();
+            return;
+        }
+
+        // If at top and scrolling down, block scrolling!
+        if (scrollTop === 0 && deltaY > 0) {
+            e.preventDefault();
+            return;
+        }
+
+        // If at bottom and scrolling up, block scrolling!
+        if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1.5 && deltaY < 0) {
+            e.preventDefault();
+            return;
         }
     }
 }, { passive: false });
