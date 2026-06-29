@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.32';
+} from '../../core/app.js?v=4.0.34';
 
 let healthTrendChartInstance = null;
 
