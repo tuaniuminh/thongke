@@ -2118,7 +2118,7 @@ body.light-mode {
     color: var(--text-primary) !important;
     padding: 8px 12px !important;
     font-family: var(--font-body);
-    font-size: 0.88rem;
+    font-size: 0.82rem !important;
     transition: border-color 0.2s, box-shadow 0.2s;
     width: 100%;
 }
@@ -3073,10 +3073,6 @@ select.health-select-sm {
         width: 100% !important;
         text-align: left !important;
     }
-    
-    #addProfileForm button {
-        width: 100% !important;
-    }
 }
 
 /* Prevent html/body scroll when any modal or overlay is active */
@@ -3788,10 +3784,16 @@ body.light-mode .home-widget-box {
 }
 
 /* Prevent background scrolling when modal is open (Pure CSS layout-reactive scroll locking) */
+html:has(.modal-overlay[style*="display: flex"]),
+html:has(.modal-overlay[style*="display: block"]),
+html:has(.modal-overlay[style*="display:flex"]),
+html:has(.modal-overlay[style*="display:block"]),
+html:has(.modal-overlay.active),
 body:has(.modal-overlay[style*="display: flex"]),
 body:has(.modal-overlay[style*="display: block"]),
 body:has(.modal-overlay[style*="display:flex"]),
-body:has(.modal-overlay[style*="display:block"]) {
+body:has(.modal-overlay[style*="display:block"]),
+body:has(.modal-overlay.active) {
     overflow: hidden !important;
 }
 

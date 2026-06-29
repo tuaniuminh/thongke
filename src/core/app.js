@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.34';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.34';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.35';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.35';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.34';
-import * as sync from './sync.js?v=4.0.34';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.34';
+import { encrypt, decrypt } from './crypto.js?v=4.0.35';
+import * as sync from './sync.js?v=4.0.35';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.35';
 
-const APP_VERSION = '4.0.34';
+const APP_VERSION = '4.0.35';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -2190,9 +2190,9 @@ window.updateHomeLunar = updateHomeLunar;
 
 // iOS Safari background scroll prevention
 document.addEventListener('touchmove', (e) => {
-    const activeOverlay = document.querySelector('.modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"]');
+    const activeOverlay = document.querySelector('.modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"], .modal-overlay.active');
     if (activeOverlay) {
-        const isScrollable = e.target.closest('.health-modal-body, #healthProfilesListContainer');
+        const isScrollable = e.target.closest('.health-modal-body, #healthProfilesListContainer, .modal-container');
         if (!isScrollable) {
             e.preventDefault();
         }

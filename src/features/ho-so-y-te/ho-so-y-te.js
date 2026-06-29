@@ -1,7 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.34';
+} from '../../core/app.js?v=4.0.35';
 
 let healthTrendChartInstance = null;
 
@@ -32,6 +32,7 @@ function openHealthProfilesModal() {
     const modal = document.getElementById('healthProfilesModal');
     if (!modal) return;
     modal.style.display = 'flex';
+    modal.classList.add('active');
     const input = document.getElementById('newProfileNameInput');
     if (input) input.value = '';
     state.familyProfilesEditMode = false;
@@ -468,6 +469,7 @@ function openMemberDetailsModal(profileId) {
     if (!modal) return;
 
     modal.style.display = 'flex';
+    modal.classList.add('active');
 
     document.getElementById('editMemberIdInput').value = profile.id;
     
@@ -534,7 +536,11 @@ async function handleMemberDetailsFormSubmit(e) {
 
     await saveLocalState();
 
-    document.getElementById('healthMemberDetailsModal').style.display = 'none';
+    const modal = document.getElementById('healthMemberDetailsModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
     
     // Refresh UI lists
     renderFamilyProfilesList();
@@ -568,11 +574,19 @@ function initHealthBindings() {
     });
 
     document.getElementById('closeHealthProfilesModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthProfilesModal').style.display = 'none';
+        const modal = document.getElementById('healthProfilesModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('closeHealthProfilesModalBtn2')?.addEventListener('click', () => {
-        document.getElementById('healthProfilesModal').style.display = 'none';
+        const modal = document.getElementById('healthProfilesModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('addProfileForm')?.addEventListener('submit', (e) => {
@@ -588,11 +602,19 @@ function initHealthBindings() {
 
     // Edit Member Details Modal Bindings
     document.getElementById('closeHealthMemberDetailsModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthMemberDetailsModal').style.display = 'none';
+        const modal = document.getElementById('healthMemberDetailsModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('closeHealthMemberDetailsModalBtn2')?.addEventListener('click', () => {
-        document.getElementById('healthMemberDetailsModal').style.display = 'none';
+        const modal = document.getElementById('healthMemberDetailsModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('healthMemberDetailsForm')?.addEventListener('submit', handleMemberDetailsFormSubmit);
@@ -690,7 +712,11 @@ function initHealthBindings() {
     });
 
     document.getElementById('editHealthRecordBtn')?.addEventListener('click', () => {
-        document.getElementById('healthDetailModal').style.display = 'none';
+        const modal = document.getElementById('healthDetailModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
         openHealthEditModal(activeMedicalRecordId);
     });
 
@@ -699,15 +725,27 @@ function initHealthBindings() {
     });
 
     document.getElementById('closeHealthDetailModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthDetailModal').style.display = 'none';
+        const modal = document.getElementById('healthDetailModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('closeHealthEditModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthEditModal').style.display = 'none';
+        const modal = document.getElementById('healthEditModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('cancelHealthEditBtn')?.addEventListener('click', () => {
-        document.getElementById('healthEditModal').style.display = 'none';
+        const modal = document.getElementById('healthEditModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     // AI Analysis Modal bindings
@@ -716,7 +754,11 @@ function initHealthBindings() {
     });
 
     document.getElementById('closeHealthAiAnalysisModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthAiAnalysisModal').style.display = 'none';
+        const modal = document.getElementById('healthAiAnalysisModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
         stopAllSpeech();
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) voiceSelect.style.display = 'none';
@@ -725,7 +767,11 @@ function initHealthBindings() {
     });
 
     document.getElementById('closeHealthAiAnalysisModalBtn2')?.addEventListener('click', () => {
-        document.getElementById('healthAiAnalysisModal').style.display = 'none';
+        const modal = document.getElementById('healthAiAnalysisModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
         stopAllSpeech();
         const voiceSelect = document.getElementById('healthSpeechVoiceSelect');
         if (voiceSelect) voiceSelect.style.display = 'none';
@@ -734,11 +780,19 @@ function initHealthBindings() {
     });
 
     document.getElementById('closeHealthAiMemberSelectorModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthAiMemberSelectorModal').style.display = 'none';
+        const modal = document.getElementById('healthAiMemberSelectorModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('closeHealthAiMemberSelectorModalBtn2')?.addEventListener('click', () => {
-        document.getElementById('healthAiMemberSelectorModal').style.display = 'none';
+        const modal = document.getElementById('healthAiMemberSelectorModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     document.getElementById('refreshHealthAiAnalysisBtn')?.addEventListener('click', () => {
@@ -1319,6 +1373,7 @@ async function processScannedHealthImage(responseJson) {
         const choiceModal = document.getElementById('healthBpAnalysisChoiceModal');
         if (choiceModal) {
             choiceModal.style.display = 'flex';
+            choiceModal.classList.add('active');
             lucide.createIcons();
         }
     } else {
@@ -1343,7 +1398,10 @@ async function handleHealthFile(file) {
     
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
-    if (overlay) overlay.style.display = 'flex';
+    if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.classList.add('active');
+    }
     if (statusText) statusText.innerText = 'Đang đọc file ảnh xét nghiệm...';
     
     try {
@@ -1352,13 +1410,19 @@ async function handleHealthFile(file) {
         
         const responseJson = await callGeminiAPI(base64Data, file.type);
         
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
         
         // Process results (BP vs Lab tests)
         await processScannedHealthImage(responseJson);
     } catch (err) {
         console.error("Gemini scanning error:", err);
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
         showToast("Quét ảnh thất bại: " + err.message, "error");
     } finally {
         const fileInput = document.getElementById('healthFileInput');
@@ -1673,7 +1737,11 @@ async function saveMedicalRecord(event) {
     await saveLocalState();
     renderHealthDashboard();
     
-    document.getElementById('healthEditModal').style.display = 'none';
+    const modal = document.getElementById('healthEditModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
     showToast(recordId ? "Cập nhật hồ sơ y tế thành công!" : "Lưu hồ sơ y tế thành công!", "success");
     
     performSync(true);
@@ -1702,7 +1770,11 @@ window.deleteMedicalRecord = async function(id) {
     await saveLocalState();
     renderHealthDashboard();
     
-    document.getElementById('healthDetailModal').style.display = 'none';
+    const dModal = document.getElementById('healthDetailModal');
+    if (dModal) {
+        dModal.style.display = 'none';
+        dModal.classList.remove('active');
+    }
     
     showToast(`Đã xóa hồ sơ y tế. <a href="#" onclick="undoDelete(event)" style="color: var(--accent-emerald); font-weight: 600; text-decoration: underline; margin-left: 8px;">Hoàn tác</a>`);
     
@@ -1751,6 +1823,7 @@ function openHealthDetail(id) {
     }
     
     modal.style.display = 'flex';
+    modal.classList.add('active');
 }
 
 function openHealthAiMemberSelectorModal() {
@@ -1758,6 +1831,7 @@ function openHealthAiMemberSelectorModal() {
     if (!modal) return;
     
     modal.style.display = 'flex';
+    modal.classList.add('active');
     
     const listContainer = document.getElementById('healthAiMemberSelectorList');
     if (!listContainer) return;
@@ -1787,6 +1861,7 @@ function selectMemberForAiAnalysis(profileId) {
     const modal = document.getElementById('healthAiMemberSelectorModal');
     if (modal) {
         modal.style.display = 'none';
+        modal.classList.remove('active');
     }
     
     state.selectedHealthProfileId = profileId;
@@ -1811,6 +1886,7 @@ function openHealthAiAnalysisModal(type = 'full') {
     if (!modal) return;
     
     modal.style.display = 'flex';
+    modal.classList.add('active');
     
     // Update modal title dynamically
     const titleEl = document.getElementById('healthAiAnalysisModalTitle');
@@ -2290,7 +2366,10 @@ async function generateHealthAiAnalysis(forceFresh = false) {
     
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
-    if (overlay) overlay.style.display = 'flex';
+    if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.classList.add('active');
+    }
     if (statusText) statusText.innerText = 'AI đang tổng hợp và phân tích lịch sử xét nghiệm của thành viên...';
     
     try {
@@ -2363,7 +2442,10 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
         
         await saveLocalState();
         
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
         
         renderHealthAiReport();
         showToast("Phân tích sức khỏe bằng AI thành công!", "success");
@@ -2372,7 +2454,10 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
         
     } catch (err) {
         console.error("AI Analysis error:", err);
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
         showToast("Phân tích sức khỏe AI thất bại: " + err.message, "error");
     }
 }
@@ -3194,12 +3279,16 @@ function openBpModal(recordId = null) {
     }
 
     modal.style.display = 'flex';
+    modal.classList.add('active');
     lucide.createIcons();
 }
 
 function closeBpModal() {
     const modal = document.getElementById('bpModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
 }
 window.closeBpModal = closeBpModal;
 
@@ -3286,7 +3375,10 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
 
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
-    if (overlay) overlay.style.display = 'flex';
+    if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.classList.add('active');
+    }
     if (statusText) {
         statusText.innerText = mode === 'bp_only' 
             ? 'AI đang phân tích kết quả đo huyết áp...' 
@@ -3407,14 +3499,20 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
         state.familyProfilesUpdated = nowIso;
         await saveLocalState();
 
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
         renderHealthAiReport();
         showToast(mode === 'bp_only' ? 'Đã phân tích kết quả huyết áp thành công!' : 'Đã phân tích sức khỏe toàn diện (xét nghiệm máu + huyết áp) thành công!', 'success');
         
         performSync(true);
 
     } catch (err) {
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
         showToast('Phân tích AI thất bại: ' + err.message, 'error');
     }
 }
@@ -3453,19 +3551,31 @@ function initHealthEventListeners() {
 
     // Blood pressure analysis choice modal buttons
     document.getElementById('analyzeBpOnlyBtn')?.addEventListener('click', async () => {
-        document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
+        const modal = document.getElementById('healthBpAnalysisChoiceModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
         openHealthAiAnalysisModal('bp');
         await generateHealthAiAnalysisWithBP(true, 'bp_only');
     });
 
     document.getElementById('analyzeBpAndAllBtn')?.addEventListener('click', async () => {
-        document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
+        const modal = document.getElementById('healthBpAnalysisChoiceModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
         openHealthAiAnalysisModal('full');
         await generateHealthAiAnalysisWithBP(true, 'full');
     });
 
     document.getElementById('closeBpChoiceModalBtn')?.addEventListener('click', () => {
-        document.getElementById('healthBpAnalysisChoiceModal').style.display = 'none';
+        const modal = document.getElementById('healthBpAnalysisChoiceModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        }
     });
 
     // Blood pressure card analysis button
