@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.38';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.38';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.40';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.40';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.38';
-import * as sync from './sync.js?v=4.0.38';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.38';
+import { encrypt, decrypt } from './crypto.js?v=4.0.40';
+import * as sync from './sync.js?v=4.0.40';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.40';
 
-const APP_VERSION = '4.0.38';
+const APP_VERSION = '4.0.40';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -986,9 +986,16 @@ function handleHashRoute() {
     }
     
     if (hash && tabHashMapping[hash]) {
+        const tabId = tabHashMapping[hash];
+        const isLoggedIn = state.user !== null;
+        if (!isLoggedIn && (tabId === 'health' || tabId === 'dashboard' || tabId === 'received' || tabId === 'sent')) {
+            showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
+            window.location.hash = 'trangchu';
+            return;
+        }
+
         if (homeLayout) homeLayout.style.display = 'none';
         if (appLayout) appLayout.style.display = 'flex';
-        const tabId = tabHashMapping[hash];
         if (state.activeTab !== tabId) {
             switchTab(tabId, false);
         } else {
@@ -1004,6 +1011,12 @@ function handleHashRoute() {
 
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true) {
+    const isLoggedIn = state.user !== null;
+    if (!isLoggedIn && (tabId === 'health' || tabId === 'dashboard' || tabId === 'received' || tabId === 'sent')) {
+        showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
+        if (updateHash) window.location.hash = 'trangchu';
+        return;
+    }
     state.activeTab = tabId;
     
     // Update active class on nav links
@@ -1664,6 +1677,11 @@ async function initializeApp() {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
+            const navItem = link.closest('.nav-item');
+            if (navItem && navItem.classList.contains('nav-locked')) {
+                showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
+                return;
+            }
             const tabId = link.getAttribute('data-tab');
             const hash = tabIdToHash[tabId] || tabId;
             window.location.hash = hash;

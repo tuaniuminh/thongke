@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.38';
-import * as sync from '../../core/sync.js?v=4.0.38';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.38';
+} from '../../core/app.js?v=4.0.40';
+import * as sync from '../../core/sync.js?v=4.0.40';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.40';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -966,65 +966,57 @@ function updateUserBadge() {
 function updateHomeLayoutUI() {
     const isLoggedIn = state.user !== null;
     const cardSettings = document.querySelector('.home-card.card-settings');
-    const cardFinance = document.getElementById('homeCardFinance');
-    const cardHealth = document.getElementById('homeCardHealth');
     const settingsBtn = document.getElementById('homeSettingsBtn');
 
     // --- Card "Đồng bộ & Cấu hình" / "Đăng nhập tài khoản" ---
+    // Target v4.0.40: Always hide cardSettings on homepage
     if (cardSettings) {
-        if (isLoggedIn) {
-            // Ẩn card cài đặt/đăng nhập khi đã đăng nhập
-            cardSettings.style.setProperty('display', 'none', 'important');
-        } else {
-            cardSettings.style.removeProperty('display');
-            // Đổi thành card "Đăng nhập tài khoản"
-            const titleEl = cardSettings.querySelector('h3');
-            if (titleEl) titleEl.innerText = 'Đăng nhập tài khoản';
-            const descEl = cardSettings.querySelector('p');
-            if (descEl) descEl.innerText = 'Liên kết tài khoản Cloud Supabase để đồng bộ đám mây và bảo vệ dữ liệu';
-            const iconContainer = cardSettings.querySelector('.home-card-icon');
-            if (iconContainer) iconContainer.innerHTML = '<i data-lucide="log-in"></i>';
-        }
+        cardSettings.style.setProperty('display', 'none', 'important');
     }
 
-    // --- Khóa / Mở khóa card Finance & Health ---
-    if (cardFinance) {
-        if (!isLoggedIn) {
-            cardFinance.classList.add('locked');
-            cardFinance.removeAttribute('href');
-            cardFinance.onclick = (e) => {
-                e.preventDefault();
-                showToast('Vui lòng đăng nhập tài khoản Supabase trước để truy cập!', 'warning');
-                switchTab('settings');
-            };
-        } else {
-            cardFinance.classList.remove('locked');
-            cardFinance.href = '#tongquan';
-            cardFinance.onclick = null;
-        }
-    }
-    if (cardHealth) {
-        if (!isLoggedIn) {
-            cardHealth.classList.add('locked');
-            cardHealth.removeAttribute('href');
-            cardHealth.onclick = (e) => {
-                e.preventDefault();
-                showToast('Vui lòng đăng nhập tài khoản Supabase trước để truy cập!', 'warning');
-                switchTab('settings');
-            };
-        } else {
-            cardHealth.classList.remove('locked');
-            cardHealth.href = '#hosoyte';
-            cardHealth.onclick = null;
-        }
-    }
+    // --- Khóa / Mở khóa tất cả các card khác một cách tổng quát ---
+    document.querySelectorAll('.home-card').forEach(card => {
+        if (card === cardSettings) return;
 
-    // --- Nút homeSettingsBtn: icon login khi chưa đăng nhập ---
+        // Lưu giữ href ban đầu nếu chưa có
+        if (!card.hasAttribute('data-original-href')) {
+            const href = card.getAttribute('href');
+            if (href) {
+                card.setAttribute('data-original-href', href);
+            }
+        }
+        
+        if (!isLoggedIn) {
+            card.classList.add('locked');
+            card.removeAttribute('href');
+            card.onclick = (e) => {
+                e.preventDefault();
+                showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
+                const btn = document.getElementById('homeSettingsBtn');
+                if (btn) {
+                    btn.classList.remove('pulse-highlight');
+                    void btn.offsetWidth; // force reflow to restart keyframe animation
+                    btn.classList.add('pulse-highlight');
+                }
+            };
+        } else {
+            card.classList.remove('locked');
+            const origHref = card.getAttribute('data-original-href');
+            if (origHref) {
+                card.setAttribute('href', origHref);
+            }
+            card.onclick = null;
+        }
+    });
+
+    // --- Nút homeSettingsBtn: hiển thị chữ "Đăng nhập" có viền vàng nổi bật khi chưa đăng nhập ---
     if (settingsBtn) {
         if (!isLoggedIn) {
-            settingsBtn.innerHTML = '<i data-lucide="log-in"></i>';
+            settingsBtn.classList.add('not-logged-in');
+            settingsBtn.innerHTML = 'Đăng nhập';
             settingsBtn.title = 'Đăng nhập tài khoản';
         } else {
+            settingsBtn.classList.remove('not-logged-in');
             settingsBtn.innerHTML = '<i data-lucide="settings"></i>';
             settingsBtn.title = 'Cài đặt & Đồng bộ';
         }
@@ -1109,6 +1101,20 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
     }
     
+    // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in
+    const isLoggedIn = state.user !== null;
+    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health'];
+    lockableNavKeys.forEach(key => {
+        const item = navItems[key];
+        if (item) {
+            if (!isLoggedIn) {
+                item.classList.add('nav-locked');
+            } else {
+                item.classList.remove('nav-locked');
+            }
+        }
+    });
+    
     // Call mobile navbar update
     updateMobileNavbar(tabId);
 }
@@ -1131,10 +1137,24 @@ function updateMobileNavbar(tabId) {
     mobileNavbar.style.removeProperty('display');
 
     if (tabId === 'settings') {
-        mobileNavbar.style.setProperty('display', 'none', 'important');
-        if (mobileHomeBtn) {
-            mobileHomeBtn.style.setProperty('display', 'inline-flex', 'important');
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
         }
+        
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
+                <div class="mobile-navbar-logo">
+                    <img src="src/assets/images/icon.png?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                </div>
+                <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài đặt</span>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+        `;
     } else if (tabId === 'health') {
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');

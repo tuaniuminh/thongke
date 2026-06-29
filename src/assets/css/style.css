@@ -3810,4 +3810,100 @@ body:has(.modal-overlay.active) {
     overscroll-behavior: contain !important;
 }
 
+/* --- Target v4.0.40 - Home settings button and sidebar locking --- */
+
+/* Prominent gold/yellow "Đăng nhập" button */
+.home-settings-btn.not-logged-in {
+    width: auto !important;
+    height: 40px !important;
+    padding: 0 16px !important;
+    border-radius: 20px !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    border: 2px solid #fbbf24 !important; /* Gold border */
+    color: #fbbf24 !important;
+    background: rgba(251, 191, 36, 0.1) !important;
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-transform: none !important;
+    letter-spacing: 0.5px !important;
+}
+
+.home-settings-btn.not-logged-in:hover {
+    border-color: #f59e0b !important;
+    color: #1e1b4b !important; /* Dark text on hover */
+    background: #fbbf24 !important;
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.5) !important;
+    transform: translateY(-2px) !important;
+}
+
+body.light-mode .home-settings-btn.not-logged-in {
+    color: #b45309 !important; /* Dark amber text in light mode */
+    border-color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.08) !important;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.15) !important;
+}
+
+body.light-mode .home-settings-btn.not-logged-in:hover {
+    color: #ffffff !important;
+    background: #f59e0b !important;
+    border-color: #d97706 !important;
+}
+
+/* Micro-animation for settings button pulse and scale up when clicking locked card */
+@keyframes loginBtnPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.25);
+        border-color: #fbbf24;
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 25px rgba(251, 191, 36, 0.8), 0 0 35px rgba(251, 191, 36, 0.4);
+        border-color: #ffffff;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.25);
+        border-color: #fbbf24;
+    }
+}
+
+.home-settings-btn.not-logged-in.pulse-highlight {
+    animation: loginBtnPulse 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* Locked sidebar navigation item state */
+.nav-item.nav-locked {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+}
+
+.nav-item.nav-locked .nav-link {
+    cursor: not-allowed !important;
+    pointer-events: auto !important; /* keep enabling click so we can show warning toast */
+}
+
+.nav-item.nav-locked .nav-link:hover {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Responsive updates for not-logged-in button */
+@media (max-width: 576px) {
+    .home-settings-btn.not-logged-in {
+        top: 50px !important;
+        right: 12px !important;
+        height: 34px !important;
+        padding: 0 12px !important;
+        border-radius: 17px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+
 

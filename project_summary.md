@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.38** |
-| **v4.0.38** | ✅ **Sửa lỗi cuộn bảng chi tiết y tế:** Cấu trúc lại trình chặn cuộn nền di động (`touchmove`) trong JS bằng bộ tìm kiếm tổ tiên cuộn dọc động (\`window.getComputedStyle\`), sửa lỗi triệt để hành vi không thể cuộn bảng kết quả xét nghiệm máu khi người dùng vuốt trên các dòng bảng (do sự kiện chạm bị chặn nhầm bởi phần tử con). |
+| **Phiên bản hiện tại** | **v4.0.40** |
+| **v4.0.40** | ✅ **Giao diện đăng nhập & Khóa lối tắt:** Ẩn thẻ cài đặt/đăng nhập trang chủ khi chưa đăng nhập; hiển thị nút chữ "Đăng nhập" viền vàng ở góc phải với hiệu ứng phóng to/nhấp nháy khi bấm vào các thẻ y tế/tài chính bị khóa. Khóa/mờ các lối tắt tương ứng trên Sidebar. Chuẩn hóa tiêu đề di động trang Cài đặt có nút Trang chủ kèm nhãn chữ bên dưới. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -113,6 +113,8 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.36** | ✅ **Ngăn chặn cuộn nền triệt để & Thêm giờ đo huyết áp:** Cập nhật cơ chế chặn cuộn nền iOS/Safari bằng cách thêm TouchStart/TouchMove boundary-lock ở JS và `overscroll-behavior: contain` ở CSS; Tự động nhận diện thời gian tải lên/chụp ảnh để ghi nhận giờ đo huyết áp và tích hợp thêm trường "Giờ đo" vào form nhập thủ công lẫn báo cáo PDF. |
 | **v4.0.37** | ✅ **Tự động nhận diện buổi đo huyết áp:** Thêm bộ lắng nghe sự kiện thay đổi Giờ đo để tự động chọn thời điểm đo tương ứng (Sáng: 5h-12h, Tối: 18h-5h, Khác: 12h-18h); Cung cấp giải thích y khoa về lý do đo huyết áp tại nhà (HBPM) chỉ cần tập trung vào buổi Sáng và Tối theo tiêu chuẩn lâm sàng quốc tế. |
 | **v4.0.38** | ✅ **Sửa lỗi cuộn bảng chi tiết y tế:** Cấu trúc lại trình chặn cuộn nền di động (`touchmove`) trong JS bằng bộ tìm kiếm tổ tiên cuộn dọc động (`window.getComputedStyle`), sửa lỗi triệt để hành vi không thể cuộn bảng kết quả xét nghiệm máu khi người dùng vuốt trên các dòng bảng (do sự kiện chạm bị chặn nhầm bởi phần tử con). |
+| **v4.0.39** | ✅ **Sửa lỗi mã hóa sao lưu thành viên:** Nhập trực tiếp các hàm `encrypt` và `decrypt` từ module `crypto.js` vào `ho-so-y-te.js`, khắc phục triệt để lỗi ReferenceError "Lỗi khi xuất sao lưu hồ sơ" xảy ra khi người dùng cố gắng sao lưu thông tin thành viên có sử dụng mật khẩu bảo vệ. |
+| **v4.0.40** | ✅ **Giao diện đăng nhập & Khóa lối tắt:** Ẩn thẻ cài đặt/đăng nhập trang chủ khi chưa đăng nhập; hiển thị nút chữ "Đăng nhập" viền vàng ở góc phải với hiệu ứng phóng to/nhấp nháy khi bấm vào các thẻ y tế/tài chính bị khóa. Khóa/mờ các lối tắt tương ứng trên Sidebar. Chuẩn hóa tiêu đề di động trang Cài đặt có nút Trang chủ kèm nhãn chữ bên dưới. |
 
 ---
 
