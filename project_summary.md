@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.32** |
-| **v4.0.32** | ✅ **Sửa lỗi Camera & Tối ưu Giao diện:** Định tuyến ảnh chụp camera gốc trực tiếp qua hàm phân tích/nhận diện thông minh (`processScannedHealthImage`) thay vì tự động mở modal xét nghiệm máu (giúp nhận diện ảnh đo huyết áp chính xác từ camera); Bo tròn viền danh sách thành viên thành `12px`; Bố cục lại form thêm thành viên (nút "Thêm" đưa lên cao góc phải đối diện nhãn tên, ô nhập tên dãn rộng 100% bên dưới); Xóa bỏ nút "Đóng lại" ở footer của modal quản lý thành viên vì đã có nút X ở góc trên bên phải; Tăng chiều cao danh sách thành viên lên `380px`. |
+| **Phiên bản hiện tại** | **v4.0.33** |
+| **v4.0.33** | ✅ **Nâng cấp tính năng Xuất PDF:** Thay thế hành vi tự động tải file xuống bằng cách mở file PDF trực tiếp trong một tab mới trên trình duyệt máy tính (thông qua Blob URL và `window.open`), giúp người dùng xem trước/in trực quan; Trên các thiết bị di động, hệ thống vẫn duy trì tải file y tế trực tiếp xuống để đảm bảo tính tương thích tốt nhất. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -107,6 +107,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.30** | ✅ **Tối ưu hóa Bố cục Thành viên:** Căn lề trái hoàn chỉnh cho danh sách thành viên sử dụng cấu trúc Flex Row; Di chuyển nút "Xóa" trực tiếp ra ngoài danh sách khi bật chế độ Sửa; Di chuyển nút "Sao lưu" và "Đồng bộ" lên trên cùng của Modal Sửa thể trạng, bổ sung viền màu nổi bật; Loại bỏ hoàn toàn nút Xóa khỏi modal footer. |
 | **v4.0.31** | ✅ **Tối ưu Bố cục Danh sách:** Chuyển đổi thẻ thành viên sang dạng cột Flex Column; Tách biệt dòng hiển thị thông tin thể trạng (độ rộng 100%, căn lề trái tự nhiên) và dòng nút hành động bên dưới khi ở chế độ Sửa; Tránh hiện tượng co hẹp chữ thông tin và lệch nút trên di động. |
 | **v4.0.32** | ✅ **Sửa lỗi Camera & Tối ưu Giao diện:** Định tuyến ảnh chụp camera gốc trực tiếp qua hàm phân tích/nhận diện thông minh (`processScannedHealthImage`) thay vì tự động mở modal xét nghiệm máu (giúp nhận diện ảnh đo huyết áp chính xác từ camera); Bo tròn viền danh sách thành viên thành `12px`; Bố cục lại form thêm thành viên (nút "Thêm" đưa lên cao góc phải đối diện nhãn tên, ô nhập tên dãn rộng 100% bên dưới); Xóa bỏ nút "Đóng lại" ở footer của modal quản lý thành viên vì đã có nút X ở góc trên bên phải; Tăng chiều cao danh sách thành viên lên `380px`. |
+| **v4.0.33** | ✅ **Nâng cấp tính năng Xuất PDF:** Thay thế hành vi tự động tải file xuống bằng cách mở file PDF trực tiếp trong một tab mới trên trình duyệt máy tính (thông qua Blob URL và `window.open`), giúp người dùng xem trước/in trực quan; Trên các thiết bị di động, hệ thống vẫn duy trì tải file y tế trực tiếp xuống để đảm bảo tính tương thích tốt nhất. |
 
 ---
 

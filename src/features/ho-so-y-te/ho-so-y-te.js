@@ -3040,8 +3040,15 @@ async function exportHealthPDF() {
         doc.text(getTxt(`Trang ${i}/${totalPages} — Tạo bởi FamiLife v${APP_VERSION} — Chỉ mang tính chất tham khảo, không thay thế ý kiến bác sĩ.`, `Trang ${i}/${totalPages} — Tao boi FamiLife v${APP_VERSION} — Chi mang tinh chat tham khao, khong thay the y kien bac si.`), margin, doc.internal.pageSize.getHeight() - 8);
     }
 
-    doc.save(`FamiLife_SucKhoe_${memberName.replace(/\s/g, '_')}_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.pdf`);
-    showToast('Đã xuất báo cáo PDF thành công!', 'success');
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        doc.save(`FamiLife_SucKhoe_${memberName.replace(/\s/g, '_')}_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.pdf`);
+        showToast('Đã tải xuống báo cáo PDF thành công!', 'success');
+    } else {
+        const blobUrl = doc.output('bloburl');
+        window.open(blobUrl, '_blank');
+        showToast('Đã mở báo cáo PDF trong tab mới!', 'success');
+    }
 }
 
 // ===========================
