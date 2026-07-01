@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.44';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.44';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.46';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.46';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.44';
-import * as sync from './sync.js?v=4.0.44';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.44';
+import { encrypt, decrypt } from './crypto.js?v=4.0.46';
+import * as sync from './sync.js?v=4.0.46';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.46';
 
-const APP_VERSION = '4.0.44';
+const APP_VERSION = '4.0.46';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -94,7 +94,11 @@ let state = {
 
     // Blood Pressure tracking (Omron HEM-7361T)
     bloodPressureRecords: [],
-    bloodPressureRecordsUpdated: ''
+    bloodPressureRecordsUpdated: '',
+
+    // Body Composition tracking (Accuniq/InBody)
+    bodyCompositionRecords: [],
+    bodyCompositionRecordsUpdated: ''
 };
 
 // Chart.js instances
@@ -267,7 +271,9 @@ async function saveLocalState() {
         customEventTypes: state.customEventTypes || [],
         customEventTypesUpdated: state.customEventTypesUpdated || '',
         bloodPressureRecords: state.bloodPressureRecords || [],
-        bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || ''
+        bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || '',
+        bodyCompositionRecords: state.bodyCompositionRecords || [],
+        bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || ''
     });
     
     try {
@@ -307,6 +313,8 @@ async function loadLocalState(password) {
         state.customEventTypesUpdated = '';
         state.bloodPressureRecords = [];
         state.bloodPressureRecordsUpdated = '';
+        state.bodyCompositionRecords = [];
+        state.bodyCompositionRecordsUpdated = '';
         return true;
     }
     
@@ -337,6 +345,8 @@ async function loadLocalState(password) {
         state.customEventTypesUpdated = data.customEventTypesUpdated || '';
         state.bloodPressureRecords = data.bloodPressureRecords || [];
         state.bloodPressureRecordsUpdated = data.bloodPressureRecordsUpdated || '';
+        state.bodyCompositionRecords = data.bodyCompositionRecords || [];
+        state.bodyCompositionRecordsUpdated = data.bodyCompositionRecordsUpdated || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -393,6 +403,7 @@ async function performSync(silent = false) {
         let mergedSent = [...state.sentGifts];
         let mergedMedical = [...(state.medicalRecords || [])];
         let mergedBP = [...(state.bloodPressureRecords || [])];
+        let mergedBodyComp = [...(state.bodyCompositionRecords || [])];
         let localReset = state.lastResetTime || '';
         
         if (remoteRecord && remoteRecord.encrypted_data) {
@@ -439,6 +450,8 @@ async function performSync(silent = false) {
                     remoteMedical = remoteData.medicalRecords || [];
                     state.bloodPressureRecords = remoteData.bloodPressureRecords || [];
                     state.bloodPressureRecordsUpdated = remoteData.bloodPressureRecordsUpdated || '';
+                    state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
+                    state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -511,6 +524,13 @@ async function performSync(silent = false) {
                         state.bloodPressureRecords = remoteData.bloodPressureRecords || [];
                         state.bloodPressureRecordsUpdated = remoteData.bloodPressureRecordsUpdated || '';
                     }
+                    // Merge bodyCompositionRecords using LWW
+                    const localBcTime = state.bodyCompositionRecordsUpdated ? new Date(state.bodyCompositionRecordsUpdated).getTime() : 0;
+                    const remoteBcTime = remoteData.bodyCompositionRecordsUpdated ? new Date(remoteData.bodyCompositionRecordsUpdated).getTime() : 0;
+                    if (remoteBcTime > localBcTime) {
+                        state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
+                        state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
+                    }
                 }
                 
                 // 3. Merge lists
@@ -518,6 +538,7 @@ async function performSync(silent = false) {
                 mergedSent = mergeLists(state.sentGifts, remoteSent);
                 mergedMedical = mergeLists(state.medicalRecords || [], remoteMedical);
                 mergedBP = state.bloodPressureRecords; // BP already merged via LWW above
+                mergedBodyComp = state.bodyCompositionRecords;
             } catch (decErr) {
                 console.error("Remote decryption failed:", decErr);
                 throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
@@ -529,6 +550,7 @@ async function performSync(silent = false) {
         state.sentGifts = mergedSent;
         state.medicalRecords = mergedMedical;
         state.bloodPressureRecords = mergedBP;
+        state.bodyCompositionRecords = mergedBodyComp;
         state.lastResetTime = localReset;
         await saveLocalState();
         
@@ -556,7 +578,9 @@ async function performSync(silent = false) {
             familyProfiles: state.familyProfiles || [],
             familyProfilesUpdated: state.familyProfilesUpdated || '',
             bloodPressureRecords: state.bloodPressureRecords || [],
-            bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || ''
+            bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || '',
+            bodyCompositionRecords: state.bodyCompositionRecords || [],
+            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);

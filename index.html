@@ -38,10 +38,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.44">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.46">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.44">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.46">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -63,7 +63,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.44" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.46" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -131,7 +131,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.44" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.46" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -749,6 +749,33 @@
                         </div>
                     </div>
 
+                    <!-- Middle Section: Body Composition (Accuniq/InBody) -->
+                    <div class="health-card" id="bodyCompSectionCard" style="margin-top: 20px; display: none;">
+                        <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="dumbbell"></i>
+                                <span>Chỉ số cơ thể (InBody/Accuniq)</span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" id="bodyCompAiAnalysisBtn" class="health-btn health-btn-primary" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+                                    <span>Phân tích cơ thể (AI)</span>
+                                </button>
+                                <button type="button" id="addNewBodyCompBtn" class="health-btn health-btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                                    <span>Thêm chỉ số</span>
+                                </button>
+                            </div>
+                        </h4>
+                        <p class="health-card-desc" style="margin-bottom: 14px;">Theo dõi cân nặng, tỷ lệ cơ xương, phần trăm mỡ cơ thể và các chỉ số đo phân tích sâu khác của bạn.</p>
+                        <div id="bodyCompRecordsList" style="display: flex; flex-direction: column; gap: 8px; min-height: 60px;">
+                            <!-- Dynamically rendered by JS -->
+                        </div>
+                        <div id="bodyCompRecordsMoreContainer" style="display: flex; justify-content: center; margin-top: 12px; width: 100%;">
+                            <!-- Xem thêm button populated dynamically -->
+                        </div>
+                    </div>
+
                     <!-- Bottom Section: Records History -->
                     <div class="health-card list-card" style="margin-top: 20px;">
                         <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -807,7 +834,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.44" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.46" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1619,6 +1646,11 @@
                         <label class="form-label health-form-label" for="editMemberHistoryInput">Tiền sử bệnh lý</label>
                         <textarea id="editMemberHistoryInput" class="form-control health-input" style="height: 80px; min-height: 60px;" placeholder="Mắc bệnh mãn tính nào? Dị ứng thuốc hay thực phẩm gì không?..."></textarea>
                     </div>
+
+                    <div class="form-group" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="editMemberTrackBodyCompInput" style="width: 16px; height: 16px; cursor: pointer; margin: 0;">
+                        <label class="form-label health-form-label" for="editMemberTrackBodyCompInput" style="margin: 0; cursor: pointer; font-weight: 600;">Theo dõi chỉ số cơ thể (Accuniq/InBody)</label>
+                    </div>
                 </div>
                 
                 <div class="health-modal-actions" style="padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: flex-end; flex-shrink: 0; background: rgba(0, 0, 0, 0.05);">
@@ -1835,6 +1867,414 @@
         </div>
     </div>
 
+
+    <!-- Body Composition Input Modal -->
+    <div class="modal-overlay" id="bodyCompModal" style="display: none; z-index: 9000;">
+        <div class="modal-dialog" style="max-width: 650px; margin: 20px auto;">
+            <div class="health-card" style="border-radius: 16px; padding: 0; overflow: hidden;">
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(15,118,110,0.06)); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                    <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="dumbbell" style="width: 20px; height: 20px; color: #10b981;"></i>
+                        Nhập chỉ số cơ thể (Accuniq/InBody)
+                    </h3>
+                    <button type="button" onclick="closeBodyCompModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                    </button>
+                </div>
+
+                <form id="bodyCompForm" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+                    <input type="hidden" id="bodyCompRecordId" value="">
+                    
+                    <!-- Metadata section -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Thành viên</label>
+                            <select id="bodyCompProfileSelect" class="form-control">
+                                <option value="p-self">Bản thân</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Thiết bị đo</label>
+                            <input type="text" id="bodyCompDevice" class="form-control" placeholder="VD: Accuniq BC380, InBody 270...">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Ngày đo</label>
+                            <input type="date" id="bodyCompDate" class="form-control">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Giờ đo</label>
+                            <input type="time" id="bodyCompTime" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <div class="health-indicators-edit-header" style="display: flex; gap: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 10px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+                        <button type="button" class="body-comp-tab-btn active" data-tab="tabMain" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 600; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); cursor: pointer; color: var(--text-secondary); transition: all 0.2s;">Chỉ số chính</button>
+                        <button type="button" class="body-comp-tab-btn" data-tab="tabWater" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 600; border: 1px solid transparent; border-radius: 6px; background: none; cursor: pointer; color: var(--text-muted); transition: all 0.2s;">Thành phần & Nước</button>
+                        <button type="button" class="body-comp-tab-btn" data-tab="tabSegmental" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 600; border: 1px solid transparent; border-radius: 6px; background: none; cursor: pointer; color: var(--text-muted); transition: all 0.2s;">Cơ/Mỡ bộ phận</button>
+                        <button type="button" class="body-comp-tab-btn" data-tab="tabEnergy" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 600; border: 1px solid transparent; border-radius: 6px; background: none; cursor: pointer; color: var(--text-muted); transition: all 0.2s;">Kiểm soát & Calo</button>
+                        <button type="button" class="body-comp-tab-btn" data-tab="tabAdvanced" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 600; border: 1px solid transparent; border-radius: 6px; background: none; cursor: pointer; color: var(--text-muted); transition: all 0.2s;">Chỉ số khác</button>
+                    </div>
+
+                    <!-- Tab Contents Container -->
+                    <div id="bodyCompTabsContent" style="min-height: 250px;">
+                        
+                        <!-- TAB 1: Chỉ số chính -->
+                        <div class="body-comp-tab-pane" id="tabMain" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Cân nặng <span style="color: #ef4444;">*</span></label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompWeight" class="form-control" placeholder="65.0" min="20" max="300" step="0.1" required>
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Cơ xương (SMM)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompSmm" class="form-control" placeholder="30.0" min="5" max="150" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Mỡ cơ thể (Fat Mass)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompFatMass" class="form-control" placeholder="12.0" min="1" max="150" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Tỷ lệ mỡ (PBF)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompPbf" class="form-control" placeholder="18.5" min="2" max="70" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Chỉ số BMI</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompBmi" class="form-control" placeholder="22.0" min="10" max="60" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg/m²</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Mức mỡ nội tạng (VFL)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompVisceral" class="form-control" placeholder="5" min="1" max="30">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">level</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Vòng bụng (Vòng eo)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompAbdominal" class="form-control" placeholder="78.0" min="40" max="200" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">cm</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Phân loại thể trạng</label>
+                                    <input type="text" id="bodyCompType" class="form-control" placeholder="VD: Thừa cân, Bình thường, Nhiều cơ...">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Điểm số cơ thể</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompScore" class="form-control" placeholder="80" min="10" max="120">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">điểm</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Tuổi sinh học</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompBioAge" class="form-control" placeholder="30" min="5" max="120">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">tuổi</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: Thành phần & Nước -->
+                        <div class="body-comp-tab-pane" id="tabWater" style="display: none; flex-direction: column; gap: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Tổng lượng nước (TBW)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompTbw" class="form-control" placeholder="38.5" min="10" max="100" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">L</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Nước nội bào (ICW)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompIcw" class="form-control" placeholder="24.0" min="5" max="70" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">L</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Nước ngoại bào (ECW)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompEcw" class="form-control" placeholder="14.5" min="2" max="50" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">L</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Tỷ lệ nước ngoại bào</label>
+                                    <input type="number" id="bodyCompEcwRatio" class="form-control" placeholder="0.375" min="0.1" max="0.6" step="0.001">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Chất đạm (Protein)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompProtein" class="form-control" placeholder="10.5" min="2" max="50" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Chất khoáng (Mineral)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompMineral" class="form-control" placeholder="3.5" min="0.5" max="20" step="0.01">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Khối lượng cơ mềm (SLM)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompSlm" class="form-control" placeholder="48.0" min="10" max="150" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Khối lượng không mỡ (FFM)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompFfm" class="form-control" placeholder="52.0" min="10" max="160" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0; grid-column: span 1;">
+                                    <label class="form-label">Khối lượng tế bào (BCM)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompBcm" class="form-control" placeholder="35.0" min="5" max="100" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: Phân tích cơ/mỡ bộ phận -->
+                        <div class="body-comp-tab-pane" id="tabSegmental" style="display: none; flex-direction: column; gap: 16px;">
+                            <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
+                                <h5 class="section-title-sm" style="margin: 0 0 8px; color: #3b82f6;">Khối lượng cơ xương từng vùng (Lean Mass)</h5>
+                                <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; font-size: 0.78rem; color: var(--text-muted); font-weight: 600; padding: 0 4px 4px;">
+                                    <div>Bộ phận</div>
+                                    <div>Trị số (kg)</div>
+                                    <div>Tỷ lệ (%)</div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tay Phải</span>
+                                        <input type="number" id="bodyCompSegLeanRightArmKg" class="form-control health-input" placeholder="2.8" min="0.5" max="10" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegLeanRightArmPct" class="form-control health-input" placeholder="98" min="20" max="250" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tay Trái</span>
+                                        <input type="number" id="bodyCompSegLeanLeftArmKg" class="form-control health-input" placeholder="2.8" min="0.5" max="10" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegLeanLeftArmPct" class="form-control health-input" placeholder="98" min="20" max="250" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Thân (Trunk)</span>
+                                        <input type="number" id="bodyCompSegLeanTrunkKg" class="form-control health-input" placeholder="22.5" min="5" max="80" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegLeanTrunkPct" class="form-control health-input" placeholder="100" min="20" max="250" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Chân Phải</span>
+                                        <input type="number" id="bodyCompSegLeanRightLegKg" class="form-control health-input" placeholder="7.8" min="1" max="30" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegLeanRightLegPct" class="form-control health-input" placeholder="95" min="20" max="250" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Chân Trái</span>
+                                        <input type="number" id="bodyCompSegLeanLeftLegKg" class="form-control health-input" placeholder="7.8" min="1" max="30" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegLeanLeftLegPct" class="form-control health-input" placeholder="95" min="20" max="250" step="0.1" style="height: 34px;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 class="section-title-sm" style="margin: 0 0 8px; color: #f59e0b;">Khối lượng mỡ từng vùng (Fat Mass)</h5>
+                                <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; font-size: 0.78rem; color: var(--text-muted); font-weight: 600; padding: 0 4px 4px;">
+                                    <div>Bộ phận</div>
+                                    <div>Trị số (kg)</div>
+                                    <div>Tỷ lệ (%)</div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tay Phải</span>
+                                        <input type="number" id="bodyCompSegFatRightArmKg" class="form-control health-input" placeholder="0.5" min="0.01" max="15" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegFatRightArmPct" class="form-control health-input" placeholder="110" min="5" max="500" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tay Trái</span>
+                                        <input type="number" id="bodyCompSegFatLeftArmKg" class="form-control health-input" placeholder="0.5" min="0.01" max="15" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegFatLeftArmPct" class="form-control health-input" placeholder="110" min="5" max="500" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Thân (Trunk)</span>
+                                        <input type="number" id="bodyCompSegFatTrunkKg" class="form-control health-input" placeholder="6.5" min="0.1" max="60" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegFatTrunkPct" class="form-control health-input" placeholder="140" min="5" max="500" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Chân Phải</span>
+                                        <input type="number" id="bodyCompSegFatRightLegKg" class="form-control health-input" placeholder="1.8" min="0.1" max="25" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegFatRightLegPct" class="form-control health-input" placeholder="120" min="5" max="500" step="0.1" style="height: 34px;">
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 10px; align-items: center;">
+                                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Chân Trái</span>
+                                        <input type="number" id="bodyCompSegFatLeftLegKg" class="form-control health-input" placeholder="1.8" min="0.1" max="25" step="0.01" style="height: 34px;">
+                                        <input type="number" id="bodyCompSegFatLeftLegPct" class="form-control health-input" placeholder="120" min="5" max="500" step="0.1" style="height: 34px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 4: Kiểm soát & Calo -->
+                        <div class="body-comp-tab-pane" id="tabEnergy" style="display: none; flex-direction: column; gap: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Năng lượng nghỉ (BMR)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompBmr" class="form-control" placeholder="1500" min="500" max="4000">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kcal</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Năng lượng tiêu thụ (TDEE)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompTdee" class="form-control" placeholder="2200" min="800" max="6000">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kcal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Calo khuyến nghị nạp</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompRecommendedCaloricIntake" class="form-control" placeholder="2500" min="800" max="6000">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kcal</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Cân nặng mục tiêu</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompTargetWeight" class="form-control" placeholder="64.0" min="20" max="250" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Điều chỉnh Cân nặng</label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="bodyCompWeightControl" class="form-control" placeholder="+9.9 hoặc -2.2">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Điều chỉnh Cơ</label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="bodyCompMuscleControl" class="form-control" placeholder="+2.2 hoặc -0.5">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0; grid-column: span 1;">
+                                    <label class="form-label">Điều chỉnh Mỡ</label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="bodyCompFatControl" class="form-control" placeholder="-4.4 hoặc +1.2">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 5: Chỉ số khác -->
+                        <div class="body-comp-tab-pane" id="tabAdvanced" style="display: none; flex-direction: column; gap: 12px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Tỷ lệ eo/mông (WHR)</label>
+                                    <input type="number" id="bodyCompWhr" class="form-control" placeholder="0.85" min="0.5" max="1.5" step="0.01">
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Diện tích mỡ nội tạng</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompVfa" class="form-control" placeholder="73" min="10" max="300">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">cm²</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Khối lượng mỡ nội tạng</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompVisceralFatMass" class="form-control" placeholder="0.5" min="0.05" max="30" step="0.01">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label">Mức độ béo phì</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompObesityDegree" class="form-control" placeholder="-15.9" min="-100" max="300" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group" style="margin: 0; grid-column: span 1;">
+                                    <label class="form-label">Chỉ số cơ xương (SMI)</label>
+                                    <div style="position: relative;">
+                                        <input type="number" id="bodyCompSmi" class="form-control" placeholder="7.7" min="2" max="25" step="0.1">
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem;">kg/m²</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- End Tab Contents -->
+
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Ghi chú (tùy chọn)</label>
+                        <input type="text" id="bodyCompNotes" class="form-control" placeholder="VD: đo lúc đói sáng sớm, sau tập...">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 4px;">
+                        <button type="button" onclick="closeBodyCompModal()" class="btn btn-outline" style="flex: 1;">Hủy</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 2; background: linear-gradient(135deg, #10b981, #0f766e);">
+                            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                            <span>Lưu chỉ số</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Health Scanner Loading Overlay -->
     <div class="modal-overlay health-theme-overlay" id="healthScannerLoadingOverlay" style="display: none; z-index: 9999;">
         <div style="text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
@@ -1847,7 +2287,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.44"></script>
-    <script type="module" src="src/core/app.js?v=4.0.44"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.46"></script>
+    <script type="module" src="src/core/app.js?v=4.0.46"></script>
 </body>
 </html>

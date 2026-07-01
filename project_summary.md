@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.44** |
-| **v4.0.44** | ✅ **Đồng bộ cuộn huyết áp & Xem thêm:** Đồng bộ cuộn danh sách kết quả đo huyết áp theo trang (bỏ scroll container riêng); Chỉ hiển thị 3 kết quả đo huyết áp gần nhất và bổ sung nút Xem thêm/Thu gọn ở dưới để mở rộng danh sách khi cần. |
+| **Phiên bản hiện tại** | **v4.0.46** |
+| **v4.0.46** | ✅ **Quét ảnh Phiếu đo Cơ thể (Accuniq/InBody) & Cảnh báo chỉ số lạ:** Cải tiến prompt Gemini Vision tự nhận diện phiếu đo cơ thể, tự động điền 56 trường; Phát hiện các chỉ số lạ ngoài danh mục, tự động điền vào Ghi chú kèm Toast cảnh báo. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -122,6 +122,8 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.42** | ✅ **Sửa cuộn danh sách & Quy định module:** Tách biệt `overscroll-behavior` cho `.table-responsive` giúp sửa lỗi cuộn danh sách thu chi đối ngoại trên máy tính (desktop) và thiết bị cảm ứng khi rê chuột; Thêm quy định thiết kế đảm bảo các chỉnh sửa của tính năng Thu chi đối ngoại không ảnh hưởng đến Hồ sơ sức khỏe và ngược lại. |
 | **v4.0.43** | ✅ **Đồng bộ vuốt trang, thu gọn lịch sử & Tinh chỉnh Grid nhập chỉ số:** Đồng bộ cuộn lưới lịch sử xét nghiệm theo trang (bỏ scroll container riêng); Chỉ hiển thị 3 bản ghi y tế gần nhất kèm nút Xem thêm/Thu gọn; Ẩn bảng tóm tắt chỉ số ngoài card lịch sử y tế; Mở rộng modal nhập thủ công lên 850px và căn chỉnh 6 cột thẳng hàng ngăn nắp cho bảng nhập chỉ số trên desktop. |
 | **v4.0.44** | ✅ **Đồng bộ cuộn huyết áp & Xem thêm:** Đồng bộ cuộn danh sách kết quả đo huyết áp theo trang (bỏ scroll container riêng); Chỉ hiển thị 3 kết quả đo huyết áp gần nhất và bổ sung nút Xem thêm/Thu gọn ở dưới để mở rộng danh sách khi cần. |
+| **v4.0.45** | ✅ **Tích hợp Theo dõi Chỉ số Cơ thể (InBody/Accuniq) & AI:** Bổ sung phân hệ theo dõi chỉ số cơ thể toàn diện 56 trường (5 tab) có trường điền thiết bị đo và phân loại thể trạng; Cho phép cấu hình bật/tắt theo dõi cho từng thành viên; Triển khai logic CRUD, đồng bộ LWW Supabase và tích hợp báo cáo phân tích AI chuyên biệt/toàn diện. |
+| **v4.0.46** | ✅ **Quét ảnh Phiếu đo Cơ thể (Accuniq/InBody) & Cảnh báo chỉ số lạ:** Cải tiến prompt Gemini Vision tự nhận diện phiếu đo cơ thể, tự động điền 56 trường; Phát hiện các chỉ số lạ ngoài danh mục, tự động điền vào Ghi chú kèm Toast cảnh báo màu vàng nổi bật. |
 
 ---
 

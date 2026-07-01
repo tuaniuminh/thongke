@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.44';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.44';
+} from '../../core/app.js?v=4.0.46';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.46';
 
 let healthTrendChartInstance = null;
 
@@ -490,6 +490,7 @@ function openMemberDetailsModal(profileId) {
     document.getElementById('editMemberWeightInput').value = profile.weight || '';
     document.getElementById('editMemberMedicationsInput').value = profile.currentMedications || '';
     document.getElementById('editMemberHistoryInput').value = profile.medicalHistory || '';
+    document.getElementById('editMemberTrackBodyCompInput').checked = !!profile.trackBodyComp;
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -526,12 +527,15 @@ async function handleMemberDetailsFormSubmit(e) {
     const currentMedications = document.getElementById('editMemberMedicationsInput').value.trim();
     const medicalHistory = document.getElementById('editMemberHistoryInput').value.trim();
 
+    const trackBodyComp = document.getElementById('editMemberTrackBodyCompInput').checked;
+
     profile.gender = gender || null;
     profile.birthYear = birthYear;
     profile.height = height;
     profile.weight = weight;
     profile.currentMedications = currentMedications;
     profile.medicalHistory = medicalHistory;
+    profile.trackBodyComp = trackBodyComp;
 
     state.familyProfilesUpdated = new Date().toISOString();
 
@@ -564,6 +568,7 @@ window.selectMemberForAiAnalysis = selectMemberForAiAnalysis;
 let activeMedicalRecordId = null;
 let showAllMedicalRecords = false;
 let showAllBpRecords = false;
+let showAllBodyCompRecords = false;
 
 function initHealthBindings() {
     // Member selector bindings
@@ -571,6 +576,7 @@ function initHealthBindings() {
         state.selectedHealthProfileId = e.target.value;
         showAllMedicalRecords = false;
         showAllBpRecords = false;
+        showAllBodyCompRecords = false;
         renderHealthDashboard();
     });
 
@@ -847,6 +853,7 @@ function initHealthBindings() {
     });
 
     document.getElementById('memberBackupFileInput')?.addEventListener('change', handleMemberBackupImportFile);
+    initBodyCompBindings();
 }
 
 function updateApiConfigCardState() {
@@ -889,6 +896,18 @@ function renderHealthDashboard() {
 
     // Keep top select dropdown in sync with state profiles
     updateProfileDropdowns();
+
+    // Toggle Body Composition Card visibility based on member settings
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    const currentProfile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
+    const shouldShowBodyComp = selectedProfileId === 'all'
+        ? (state.familyProfiles || []).some(p => p.trackBodyComp)
+        : (currentProfile && currentProfile.trackBodyComp);
+    
+    const bodyCompCard = document.getElementById('bodyCompSectionCard');
+    if (bodyCompCard) {
+        bodyCompCard.style.display = shouldShowBodyComp ? 'block' : 'none';
+    }
 
     const recordsGrid = document.getElementById('healthRecordsGrid');
     if (!recordsGrid) return;
@@ -994,6 +1013,16 @@ function renderHealthDashboard() {
     
     // Render blood pressure section
     renderBloodPressureSection();
+
+    // Render body composition section
+    const selectedProfileIdForBc = state.selectedHealthProfileId || 'all';
+    const currentProfileForBc = (state.familyProfiles || []).find(p => p.id === selectedProfileIdForBc);
+    const shouldShowBodyCompForRender = selectedProfileIdForBc === 'all'
+        ? (state.familyProfiles || []).some(p => p.trackBodyComp)
+        : (currentProfileForBc && currentProfileForBc.trackBodyComp);
+    if (shouldShowBodyCompForRender) {
+        renderBodyCompSection();
+    }
 }
 
 function getHealthTypeLabel(type) {
@@ -1404,6 +1433,8 @@ async function processScannedHealthImage(responseJson) {
             choiceModal.classList.add('active');
             lucide.createIcons();
         }
+    } else if (responseJson.isBodyComposition) {
+        openBodyCompModal(null, responseJson);
     } else {
         openHealthEditModal(null, responseJson);
     }
@@ -1463,36 +1494,119 @@ async function callGeminiAPI(base64Data, mimeType) {
     const models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
     let lastError = null;
     
-    const promptText = `Hãy đóng vai trò là một chuyên gia phân tích hình ảnh y tế. Bạn được cung cấp một hình ảnh có thể là kết quả xét nghiệm y khoa (xét nghiệm máu, nước tiểu, siêu âm, v.v.) hoặc hình ảnh chụp màn hình hiển thị của máy đo huyết áp (ví dụ: máy Omron).
+    const promptText = `Hãy đóng vai trò là một chuyên gia phân tích hình ảnh y tế. Bạn được cung cấp một hình ảnh có thể là: (1) Kết quả xét nghiệm y khoa (xét nghiệm máu, nước tiểu, siêu âm, v.v.), (2) Hình ảnh chụp màn hình hiển thị của máy đo huyết áp (ví dụ: máy Omron), hoặc (3) Phiếu kết quả đo thành phần cơ thể (Body Composition Analysis từ máy InBody hoặc Accuniq).
 
 Nhiệm vụ của bạn là nhận diện loại hình ảnh này và trích xuất thông tin chính xác sang định dạng JSON.
 
 HƯỚNG DẪN CHI TIẾT:
-1. Xác định xem hình ảnh có phải là màn hình máy đo huyết áp hay không:
+1. Xác định loại hình ảnh:
    - Nếu là máy đo huyết áp:
      + Trích xuất chỉ số Huyết áp tâm thu (SYS mmHg), Huyết áp tâm trương (DIA mmHg) và Nhịp tim (PULSE/min nếu có).
      + ĐẶC BIỆT CHÚ Ý (Rất quan trọng): Nếu trên màn hình máy đo huyết áp hiển thị hai cột kết quả song song (như máy Omron HEM-7361T hiển thị kết quả đo trước đó ở cột bên trái và kết quả mới nhất ở cột bên phải, thường cột phải có nhãn "LATEST" hoặc số lần đo mới nhất), bạn chỉ được phép trích xuất kết quả ở cột bên PHẢI (kết quả đo hiện tại/mới nhất). Tuyệt đối không lấy kết quả ở cột bên trái.
-     + Trả về JSON có thuộc tính "isBloodPressure": true.
-   - Nếu là kết quả xét nghiệm y khoa (xét nghiệm máu, siêu âm, nước tiểu, v.v.):
+     + Trả về JSON có thuộc tính "isBloodPressure": true, "isBodyComposition": false.
+   - Nếu là phiếu đo thành phần cơ thể (InBody/Accuniq):
+     + Trích xuất tên thiết bị (InBody 270, Accuniq BC380...), ngày đo, giờ đo, các chỉ số cơ thể.
+     + Các chỉ số chuẩn phải được xếp vào đối tượng "indicators" với các khóa tương ứng:
+       * weight (Cân nặng, kg), muscleMass (Cơ xương SMM, kg), fatMass (Khối lượng mỡ, kg), pctFat (Tỷ lệ mỡ PBF, %), bmi (BMI), visceralFat (Mức mỡ nội tạng VFL, level), abdominalCircumference (Vòng bụng, cm), bodyType (Phân loại thể trạng, chữ), score (Điểm số cơ thể), bioAge (Tuổi sinh học)
+       * tbw (Tổng lượng nước TBW, L), icw (Nước nội bào ICW, L), ecw (Nước ngoại bào ECW, L), ecwRatio (Tỷ lệ nước ngoại bào), protein (Chất đạm, kg), mineral (Chất khoáng, kg), slm (Cơ mềm SLM, kg), ffm (Không mỡ FFM, kg), bcm (Tế bào BCM, kg)
+       * segLeanRightArmKg, segLeanRightArmPct, segLeanLeftArmKg, segLeanLeftArmPct, segLeanTrunkKg, segLeanTrunkPct, segLeanRightLegKg, segLeanRightLegPct, segLeanLeftLegKg, segLeanLeftLegPct (Cơ tay Phải/Trái, Thân, Chân Phải/Trái)
+       * segFatRightArmKg, segFatRightArmPct, segFatLeftArmKg, segFatLeftArmPct, segFatTrunkKg, segFatTrunkPct, segFatRightLegKg, segFatRightLegPct, segFatLeftLegKg, segFatLeftLegPct (Mỡ tay Phải/Trái, Thân, Chân Phải/Trái)
+       * bmr (BMR, kcal), tdee (TDEE, kcal), recommendedCaloricIntake (Calo khuyên nghị, kcal), targetWeight (Cân nặng mục tiêu, kg), weightControl (Điều chỉnh cân nặng, kg), muscleControl (Điều chỉnh cơ, kg), fatControl (Điều chỉnh mỡ, kg)
+       * whr (Eo/mông WHR), vfa (Diện tích mỡ nội tạng VFA, cm2), visceralFatMass (Khối lượng mỡ nội tạng, kg), obesityDegree (Mức độ béo phì, %), smi (Chỉ số cơ xương SMI, kg/m2)
+     + BẮT BUỘC: Nếu phát hiện bất kỳ chỉ số cơ thể nào xuất hiện trên phiếu đo mà KHÔNG khớp với danh sách các khóa tiêu chuẩn ở trên (ví dụ: Hàm lượng khoáng chất trong xương BMC, Tỷ lệ nước trong tế bào riêng lẻ, chu vi vòng cánh tay, v.v.), hãy xếp chúng vào mảng "unmappedIndicators" dưới dạng đối tượng: { "name": "<Tên chỉ số gốc>", "value": "<Giá trị>", "unit": "<Đơn vị nếu có>" }.
+     + Trả về JSON có thuộc tính "isBloodPressure": false, "isBodyComposition": true.
+   - Nếu là kết quả xét nghiệm y khoa thông thường (xét nghiệm máu, siêu âm, nước tiểu, v.v.):
      + Trích xuất tên xét nghiệm, cơ sở y tế, ngày thực hiện, và danh sách các chỉ số.
-     + Trả về JSON có thuộc tính "isBloodPressure": false.
+     + Trả về JSON có thuộc tính "isBloodPressure": false, "isBodyComposition": false.
 
 CẤU TRÚC ĐẦU RA JSON YÊU CẦU:
-Bạn bắt buộc phải trả về một đối tượng JSON thuộc một trong hai định dạng sau tùy theo kết quả nhận diện:
+Bạn bắt buộc phải trả về một đối tượng JSON thuộc một trong ba định dạng sau tùy theo kết quả nhận diện:
 
 ĐỊNH DẠNG 1 (Nếu là ảnh đo huyết áp):
 {
   "isBloodPressure": true,
+  "isBodyComposition": false,
   "systolic": <số nguyên, ví dụ: 120>,
   "diastolic": <số nguyên, ví dụ: 80>,
   "pulse": <số nguyên hoặc null nếu không có, ví dụ: 72>,
   "date": "<ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy hãy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
-  "notes": "<nhận xét ngắn gọn về kết quả đo huyết áp của người dùng bằng tiếng Việt, ví dụ: Huyết áp bình thường / hơi cao...>"
+  "notes": "<nhận xét ngắn gọn về kết quả đo huyết áp của người dùng bằng tiếng Việt>"
 }
 
-ĐỊNH DẠNG 2 (Nếu là kết quả xét nghiệm y khoa thông thường):
+ĐỊNH DẠNG 2 (Nếu là phiếu đo chỉ số cơ thể InBody/Accuniq):
 {
   "isBloodPressure": false,
+  "isBodyComposition": true,
+  "device": "<Tên thiết bị đo, ví dụ: Accuniq BC380, InBody 270>",
+  "date": "<Ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
+  "time": "<Giờ đo định dạng HH:MM, nếu không tìm thấy để trống>",
+  "notes": "<Nhận xét ngắn gọn về thể trạng của người dùng bằng tiếng Việt>",
+  "indicators": {
+    "weight": <số hoặc null>,
+    "muscleMass": <số hoặc null>,
+    "fatMass": <số hoặc null>,
+    "pctFat": <số hoặc null>,
+    "bmi": <số hoặc null>,
+    "visceralFat": <số hoặc null>,
+    "abdominalCircumference": <số hoặc null>,
+    "bodyType": "<chữ hoặc null>",
+    "score": <số hoặc null>,
+    "bioAge": <số hoặc null>,
+    "tbw": <số hoặc null>,
+    "icw": <số hoặc null>,
+    "ecw": <số hoặc null>,
+    "ecwRatio": <số hoặc null>,
+    "protein": <số hoặc null>,
+    "mineral": <số hoặc null>,
+    "slm": <số hoặc null>,
+    "ffm": <số hoặc null>,
+    "bcm": <số hoặc null>,
+    "segLeanRightArmKg": <số hoặc null>,
+    "segLeanRightArmPct": <số hoặc null>,
+    "segLeanLeftArmKg": <số hoặc null>,
+    "segLeanLeftArmPct": <số hoặc null>,
+    "segLeanTrunkKg": <số hoặc null>,
+    "segLeanTrunkPct": <số hoặc null>,
+    "segLeanRightLegKg": <số hoặc null>,
+    "segLeanRightLegPct": <số hoặc null>,
+    "segLeanLeftLegKg": <số hoặc null>,
+    "segLeanLeftLegPct": <số hoặc null>,
+    "segFatRightArmKg": <số hoặc null>,
+    "segFatRightArmPct": <số || null>,
+    "segFatLeftArmKg": <số || null>,
+    "segFatLeftArmPct": <số || null>,
+    "segFatTrunkKg": <số || null>,
+    "segFatTrunkPct": <số || null>,
+    "segFatRightLegKg": <số || null>,
+    "segFatRightLegPct": <số || null>,
+    "segFatLeftLegKg": <số || null>,
+    "segFatLeftLegPct": <số || null>,
+    "bmr": <số || null>,
+    "tdee": <số || null>,
+    "recommendedCaloricIntake": <số || null>,
+    "targetWeight": <số || null>,
+    "weightControl": "<chuỗi ký tự ví dụ: '+2.5' hoặc '-1.2' hoặc null>",
+    "muscleControl": "<chuỗi ký tự ví dụ: '+1.5' hoặc null>",
+    "fatControl": "<chuỗi ký tự ví dụ: '-3.0' hoặc null>",
+    "whr": <số || null>,
+    "vfa": <số || null>,
+    "visceralFatMass": <số || null>,
+    "obesityDegree": <số || null>,
+    "smi": <số || null>
+  },
+  "unmappedIndicators": [
+    {
+      "name": "<Tên chỉ số khác gốc>",
+      "value": "<Giá trị>",
+      "unit": "<Đơn vị nếu có>"
+    }
+  ]
+}
+
+ĐỊNH DẠNG 3 (Nếu là kết quả xét nghiệm y khoa thông thường):
+{
+  "isBloodPressure": false,
+  "isBodyComposition": false,
   "title": "<Tên xét nghiệm hoặc tiêu đề hồ sơ y tế, ví dụ: Xét nghiệm máu tổng quát>",
   "type": "<Phân loại xét nghiệm, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'other'>",
   "facility": "<Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện. Nếu không tìm thấy, để trống>",
@@ -1919,14 +2033,18 @@ function openHealthAiAnalysisModal(type = 'full') {
     // Update modal title dynamically
     const titleEl = document.getElementById('healthAiAnalysisModalTitle');
     if (titleEl) {
-        titleEl.innerText = type === 'bp' ? 'Phân tích Chỉ số Huyết áp bằng AI' : 'Phân tích Sức khỏe Nâng cao bằng AI';
+        titleEl.innerText = type === 'bp' 
+            ? 'Phân tích Chỉ số Huyết áp bằng AI' 
+            : (type === 'body_comp' ? 'Phân tích Thành phần Cơ thể bằng AI' : 'Phân tích Sức khỏe Nâng cao bằng AI');
     }
     
     // Get the profile object
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
     const lastAiAnalysis = type === 'bp'
         ? (profile ? profile.lastBpAnalysis : state.lastBpAnalysis)
-        : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
+        : (type === 'body_comp'
+            ? (profile ? profile.lastBodyCompAnalysis : state.lastBodyCompAnalysis)
+            : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis));
         
     // Reset speech state when opening
     stopAllSpeech();
@@ -1939,7 +2057,7 @@ function openHealthAiAnalysisModal(type = 'full') {
     if (lastAiAnalysis) {
         renderHealthAiReport();
     } else {
-        generateHealthAiAnalysisWithBP(false, type === 'bp' ? 'bp_only' : 'full');
+        generateHealthAiAnalysisWithBP(false, type === 'bp' ? 'bp_only' : (type === 'body_comp' ? 'body_comp_only' : 'full'));
     }
 }
 
@@ -3413,8 +3531,419 @@ async function deleteBpRecord(recordId) {
     renderBloodPressureSection();
     showToast('Đã xóa chỉ số huyết áp.', 'success');
 }
-window.openBpModal = openBpModal;
-window.deleteBpRecord = deleteBpRecord;
+// ===========================
+// 🏋️‍♂️ PHÂN HỆ THEO DÕI CHỈ SỐ CƠ THỂ (ACCUNIQ/INBODY)
+// ===========================
+
+function getPbfClassification(pbf, gender) {
+    if (!pbf) return { label: '-', color: 'var(--text-secondary)', bg: 'transparent' };
+    const p = parseFloat(pbf);
+    if (gender === 'Nam') {
+        if (p < 10) return { label: 'Dưới chuẩn (Thấp)', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' };
+        if (p <= 20) return { label: 'Bình thường', color: '#10b981', bg: 'rgba(16,185,129,0.1)' };
+        if (p <= 25) return { label: 'Cao nhẹ', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' };
+        return { label: 'Béo phì', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' };
+    } else {
+        if (p < 18) return { label: 'Dưới chuẩn (Thấp)', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' };
+        if (p <= 28) return { label: 'Bình thường', color: '#10b981', bg: 'rgba(16,185,129,0.1)' };
+        if (p <= 33) return { label: 'Cao nhẹ', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' };
+        return { label: 'Béo phì', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' };
+    }
+}
+
+function getVflClassification(vfl) {
+    if (!vfl) return { label: '-', color: 'var(--text-secondary)', bg: 'transparent' };
+    const v = parseInt(vfl);
+    if (v < 10) return { label: 'Bình thường', color: '#10b981', bg: 'rgba(16,185,129,0.1)' };
+    if (v < 15) return { label: 'Cao (Cảnh báo)', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' };
+    return { label: 'Rất cao (Nguy hiểm)', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' };
+}
+
+function renderBodyCompSection() {
+    const container = document.getElementById('bodyCompRecordsList');
+    if (!container) return;
+
+    const selectedProfileId = state.selectedHealthProfileId || 'p-self';
+    const records = (state.bodyCompositionRecords || [])
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
+        .sort((a, b) => new Date(b.date + 'T' + (b.time || '12:00')) - new Date(a.date + 'T' + (a.time || '12:00')));
+
+    const moreContainer = document.getElementById('bodyCompRecordsMoreContainer');
+
+    if (records.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.85rem;">
+                <i data-lucide="dumbbell" style="width: 32px; height: 32px; opacity: 0.3; display: block; margin: 0 auto 8px;"></i>
+                Chưa có chỉ số cơ thể nào. Nhấn "Thêm chỉ số" để bắt đầu theo dõi.
+            </div>`;
+        if (moreContainer) {
+            moreContainer.style.display = 'none';
+            moreContainer.innerHTML = '';
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+    }
+
+    const totalCount = records.length;
+    const displayedRecords = showAllBodyCompRecords ? records : records.slice(0, 3);
+
+    container.innerHTML = displayedRecords.map(r => {
+        const profile = (state.familyProfiles || []).find(p => p.id === r.profileId);
+        const gender = profile ? profile.gender : 'Nam';
+        const pbfCls = getPbfClassification(r.pctFat, gender);
+        const vflCls = getVflClassification(r.visceralFat);
+        
+        return `
+        <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${pbfCls.color || '#10b981'};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; width: 100%;">
+                <div style="min-width: 0; flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                        <span style="font-size: 0.72rem; background: ${pbfCls.bg}; color: ${pbfCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">PBF: ${r.pctFat ? r.pctFat + '%' : 'n/a'} (${pbfCls.label})</span>
+                        ${r.visceralFat ? `<span style="font-size: 0.72rem; background: ${vflCls.bg}; color: ${vflCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">VFL: Lvl ${r.visceralFat}</span>` : ''}
+                        ${r.score ? `<span style="font-size: 0.72rem; background: rgba(16,185,129,0.08); color: #10b981; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Điểm: ${r.score}</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px;">
+                        Cân nặng: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.weight} kg</span>
+                        ${r.muscleMass ? ` · Cơ xương: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.muscleMass} kg</span>` : ''}
+                        ${r.fatMass ? ` · Mỡ: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.fatMass} kg</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted);">
+                        ${r.device ? `<span style="font-weight: 600; color: var(--text-secondary);">📟 ${escapeHTML(r.device)}</span> · ` : ''}
+                        📅 ${formatDate(r.date)}${r.time ? ' lúc ' + r.time : ''}${r.notes ? ` · 📝 ${escapeHTML(r.notes)}` : ''}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 6px; flex-shrink: 0; align-items: center; height: 100%;">
+                    <button onclick="openBodyCompModal('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
+                        <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button onclick="deleteBodyCompRecord('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    if (moreContainer) {
+        if (totalCount > 3) {
+            moreContainer.style.display = 'flex';
+            moreContainer.innerHTML = `
+                <button type="button" id="toggleShowAllBodyCompBtn" class="health-btn health-btn-secondary" style="padding: 8px 24px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border: 1px solid var(--border-color); border-radius: var(--btn-radius); font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    <i data-lucide="${showAllBodyCompRecords ? 'chevron-up' : 'chevron-down'}" style="width: 15px; height: 15px;"></i>
+                    <span>${showAllBodyCompRecords ? 'Thu gọn' : 'Xem thêm'}</span>
+                </button>
+            `;
+            const toggleBtn = document.getElementById('toggleShowAllBodyCompBtn');
+            if (toggleBtn) {
+                toggleBtn.onclick = () => {
+                    showAllBodyCompRecords = !showAllBodyCompRecords;
+                    renderBodyCompSection();
+                };
+            }
+        } else {
+            moreContainer.style.display = 'none';
+            moreContainer.innerHTML = '';
+        }
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openBodyCompModal(recordId = null, scannedData = null) {
+    const modal = document.getElementById('bodyCompModal');
+    if (!modal) return;
+
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+
+    const profileSelect = document.getElementById('bodyCompProfileSelect');
+    if (profileSelect) {
+        profileSelect.innerHTML = (state.familyProfiles || [{ id: 'p-self', name: 'Bản thân' }])
+            .map(p => `<option value="${p.id}">${escapeHTML(p.name)}</option>`)
+            .join('');
+        profileSelect.value = state.selectedHealthProfileId !== 'all' ? state.selectedHealthProfileId : 'p-self';
+    }
+
+    const dateInput = document.getElementById('bodyCompDate');
+    const timeInput = document.getElementById('bodyCompTime');
+    const now = new Date();
+    
+    if (dateInput) dateInput.value = now.toISOString().split('T')[0];
+    if (timeInput) {
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        timeInput.value = `${hh}:${mm}`;
+    }
+
+    document.getElementById('bodyCompRecordId').value = recordId || '';
+    document.getElementById('bodyCompDevice').value = '';
+    document.getElementById('bodyCompNotes').value = '';
+    
+    const numericFields = [
+        'Weight', 'Smm', 'FatMass', 'Pbf', 'Bmi', 'Visceral', 'Abdominal', 'Type', 'Score', 'BioAge',
+        'Tbw', 'Icw', 'Ecw', 'EcwRatio', 'Protein', 'Mineral', 'Slm', 'Ffm', 'Bcm',
+        'Bmr', 'Tdee', 'RecommendedCaloricIntake', 'TargetWeight', 'WeightControl', 'MuscleControl', 'FatControl',
+        'Whr', 'Vfa', 'VisceralFatMass', 'ObesityDegree', 'Smi',
+        'SegLeanRightArmKg', 'SegLeanRightArmPct', 'SegLeanLeftArmKg', 'SegLeanLeftArmPct', 'SegLeanTrunkKg', 'SegLeanTrunkPct', 'SegLeanRightLegKg', 'SegLeanRightLegPct', 'SegLeanLeftLegKg', 'SegLeanLeftLegPct',
+        'SegFatRightArmKg', 'SegFatRightArmPct', 'SegFatLeftArmKg', 'SegFatLeftArmPct', 'SegFatTrunkKg', 'SegFatTrunkPct', 'SegFatRightLegKg', 'SegFatRightLegPct', 'SegFatLeftLegKg', 'SegFatLeftLegPct'
+    ];
+    numericFields.forEach(f => {
+        const input = document.getElementById(`bodyComp${f}`);
+        if (input) input.value = '';
+    });
+
+    const varMapping = {
+        Weight: 'weight', Smm: 'muscleMass', FatMass: 'fatMass', Pbf: 'pctFat', Bmi: 'bmi',
+        Visceral: 'visceralFat', Abdominal: 'abdominalCircumference', Type: 'bodyType',
+        Score: 'score', BioAge: 'bioAge', Tbw: 'tbw', Icw: 'icw', Ecw: 'ecw', EcwRatio: 'ecwRatio',
+        Protein: 'protein', Mineral: 'mineral', Slm: 'slm', Ffm: 'ffm', Bcm: 'bcm',
+        Bmr: 'bmr', Tdee: 'tdee', RecommendedCaloricIntake: 'recommendedCaloricIntake',
+        TargetWeight: 'targetWeight', WeightControl: 'weightControl', MuscleControl: 'muscleControl', FatControl: 'fatControl',
+        Whr: 'whr', Vfa: 'vfa', VisceralFatMass: 'visceralFatMass', ObesityDegree: 'obesityDegree', Smi: 'smi',
+        SegLeanRightArmKg: 'segLeanRightArmKg', SegLeanRightArmPct: 'segLeanRightArmPct',
+        SegLeanLeftArmKg: 'segLeanLeftArmKg', SegLeanLeftArmPct: 'segLeanLeftArmPct',
+        SegLeanTrunkKg: 'segLeanTrunkKg', SegLeanTrunkPct: 'segLeanTrunkPct',
+        SegLeanRightLegKg: 'segLeanRightLegKg', SegLeanRightLegPct: 'segLeanRightLegPct',
+        SegLeanLeftLegKg: 'segLeanLeftLegKg', SegLeanLeftLegPct: 'segLeanLeftLegPct',
+        SegFatRightArmKg: 'segFatRightArmKg', SegFatRightArmPct: 'segFatRightArmPct',
+        SegFatLeftArmKg: 'segFatLeftArmKg', SegFatLeftArmPct: 'segFatLeftArmPct',
+        SegFatTrunkKg: 'segFatTrunkKg', SegFatTrunkPct: 'segFatTrunkPct',
+        SegFatRightLegKg: 'segFatRightLegKg', SegFatRightLegPct: 'segFatRightLegPct',
+        SegFatLeftLegKg: 'segFatLeftLegKg', SegFatLeftLegPct: 'segFatLeftLegPct'
+    };
+
+    if (recordId) {
+        const rec = (state.bodyCompositionRecords || []).find(r => r.id === recordId);
+        if (rec) {
+            if (profileSelect) profileSelect.value = rec.profileId || 'p-self';
+            if (dateInput) dateInput.value = rec.date || '';
+            if (timeInput) timeInput.value = rec.time || '';
+            document.getElementById('bodyCompDevice').value = rec.device || '';
+            document.getElementById('bodyCompNotes').value = rec.notes || '';
+
+            for (const [fieldId, dbKey] of Object.entries(varMapping)) {
+                const val = rec[dbKey];
+                const input = document.getElementById(`bodyComp${fieldId}`);
+                if (input && val !== undefined && val !== null) {
+                    input.value = val;
+                }
+            }
+        }
+    } else if (scannedData) {
+        // Auto-fill from Gemini scan
+        const targetProfileId = state.selectedHealthProfileId !== 'all' ? state.selectedHealthProfileId : 'p-self';
+        if (profileSelect) profileSelect.value = targetProfileId;
+        
+        if (scannedData.date && dateInput) dateInput.value = scannedData.date;
+        if (scannedData.time && timeInput) timeInput.value = scannedData.time;
+        if (scannedData.device) document.getElementById('bodyCompDevice').value = scannedData.device;
+        
+        // Auto-fill indicators
+        const indicators = scannedData.indicators || {};
+        for (const [fieldId, dbKey] of Object.entries(varMapping)) {
+            const val = indicators[dbKey];
+            const input = document.getElementById(`bodyComp${fieldId}`);
+            if (input && val !== undefined && val !== null) {
+                input.value = val;
+            }
+        }
+
+        // Handle unmapped indicators
+        let unmappedNotes = '';
+        if (scannedData.unmappedIndicators && scannedData.unmappedIndicators.length > 0) {
+            const unmappedStr = scannedData.unmappedIndicators.map(i => `${i.name}: ${i.value} ${i.unit || ''}`).join(', ');
+            unmappedNotes = `[Chỉ số chưa hỗ trợ điền: ${unmappedStr}] `;
+            
+            // Show toast warning
+            showToast(`⚠️ Phát hiện chỉ số không thuộc biểu mẫu: ${unmappedStr}. Đã đưa vào phần Ghi chú.`, 'warning', 10000);
+        }
+
+        document.getElementById('bodyCompNotes').value = unmappedNotes + (scannedData.notes || 'Tự động quét từ ảnh');
+        
+        showToast('Đã tự động nhận dạng và điền chỉ số cơ thể từ ảnh thành công!', 'success');
+    }
+
+    switchBodyCompTab('tabMain');
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+
+function closeBodyCompModal() {
+    const modal = document.getElementById('bodyCompModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
+}
+
+function switchBodyCompTab(tabId) {
+    document.querySelectorAll('.body-comp-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'none';
+        btn.style.border = '1px solid transparent';
+        btn.style.color = 'var(--text-muted)';
+    });
+
+    document.querySelectorAll('.body-comp-tab-pane').forEach(pane => {
+        pane.style.display = 'none';
+    });
+
+    const activeBtn = document.querySelector(`.body-comp-tab-btn[data-tab="${tabId}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.background = 'var(--bg-secondary)';
+        activeBtn.style.border = '1px solid var(--border-color)';
+        activeBtn.style.color = 'var(--text-secondary)';
+    }
+
+    const activePane = document.getElementById(tabId);
+    if (activePane) {
+        activePane.style.display = 'flex';
+    }
+}
+
+async function saveBodyCompRecord(e) {
+    if (e) e.preventDefault();
+
+    const recordId = document.getElementById('bodyCompRecordId').value || '';
+    const profileId = document.getElementById('bodyCompProfileSelect').value || 'p-self';
+    const device = document.getElementById('bodyCompDevice').value.trim() || null;
+    const date = document.getElementById('bodyCompDate').value || new Date().toISOString().split('T')[0];
+    const time = document.getElementById('bodyCompTime').value || '';
+    const notes = document.getElementById('bodyCompNotes').value.trim() || null;
+
+    const weightVal = parseFloat(document.getElementById('bodyCompWeight').value);
+    if (isNaN(weightVal)) {
+        showToast('Vui lòng nhập cân nặng hợp lệ!', 'warning');
+        return;
+    }
+
+    const recData = {
+        id: recordId || 'bc-' + Math.random().toString(36).substr(2, 9),
+        profileId,
+        device,
+        date,
+        time,
+        notes,
+        weight: weightVal,
+        created_at: new Date().toISOString(),
+        deleted_at: null
+    };
+
+    const mappings = {
+        muscleMass: 'Smm', fatMass: 'FatMass', pctFat: 'Pbf', bmi: 'Bmi',
+        visceralFat: 'Visceral', abdominalCircumference: 'Abdominal', bodyType: 'Type',
+        score: 'Score', bioAge: 'BioAge', tbw: 'Tbw', icw: 'Icw', ecw: 'Ecw', ecwRatio: 'EcwRatio',
+        protein: 'Protein', mineral: 'Mineral', slm: 'Slm', ffm: 'Ffm', bcm: 'Bcm',
+        bmr: 'Bmr', tdee: 'Tdee', recommendedCaloricIntake: 'RecommendedCaloricIntake',
+        targetWeight: 'TargetWeight',
+        segLeanRightArmKg: 'SegLeanRightArmKg', segLeanRightArmPct: 'SegLeanRightArmPct',
+        segLeanLeftArmKg: 'SegLeanLeftArmKg', segLeanLeftArmPct: 'SegLeanLeftArmPct',
+        segLeanTrunkKg: 'SegLeanTrunkKg', segLeanTrunkPct: 'SegLeanTrunkPct',
+        segLeanRightLegKg: 'SegLeanRightLegKg', segLeanRightLegPct: 'SegLeanRightLegPct',
+        segLeanLeftLegKg: 'SegLeanLeftLegKg', segLeanLeftLegPct: 'SegLeanLeftLegPct',
+        segFatRightArmKg: 'SegFatRightArmKg', segFatRightArmPct: 'SegFatRightArmPct',
+        segFatLeftArmKg: 'SegFatLeftArmKg', segFatLeftArmPct: 'SegFatLeftArmPct',
+        segFatTrunkKg: 'SegFatTrunkKg', segFatTrunkPct: 'SegFatTrunkPct',
+        segFatRightLegKg: 'SegFatRightLegKg', segFatRightLegPct: 'SegFatRightLegPct',
+        segFatLeftLegKg: 'SegFatLeftLegKg', segFatLeftLegPct: 'SegFatLeftLegPct'
+    };
+
+    for (const [dbKey, fieldId] of Object.entries(mappings)) {
+        const input = document.getElementById(`bodyComp${fieldId}`);
+        if (input && input.value !== '') {
+            if (input.type === 'number') {
+                recData[dbKey] = parseFloat(input.value);
+            } else {
+                recData[dbKey] = input.value;
+            }
+        } else {
+            recData[dbKey] = null;
+        }
+    }
+
+    const controlFields = { weightControl: 'WeightControl', muscleControl: 'MuscleControl', fatControl: 'FatControl' };
+    for (const [dbKey, fieldId] of Object.entries(controlFields)) {
+        const input = document.getElementById(`bodyComp${fieldId}`);
+        if (input && input.value !== '') {
+            recData[dbKey] = input.value.trim();
+        } else {
+            recData[dbKey] = null;
+        }
+    }
+    
+    const advFields = { whr: 'Whr', vfa: 'Vfa', visceralFatMass: 'VisceralFatMass', obesityDegree: 'ObesityDegree', smi: 'Smi' };
+    for (const [dbKey, fieldId] of Object.entries(advFields)) {
+        const input = document.getElementById(`bodyComp${fieldId}`);
+        if (input && input.value !== '') {
+            recData[dbKey] = parseFloat(input.value);
+        } else {
+            recData[dbKey] = null;
+        }
+    }
+
+    if (!state.bodyCompositionRecords) state.bodyCompositionRecords = [];
+
+    if (recordId) {
+        const idx = state.bodyCompositionRecords.findIndex(r => r.id === recordId);
+        if (idx !== -1) {
+            const oldRec = state.bodyCompositionRecords[idx];
+            recData.created_at = oldRec.created_at;
+            recData.updated_at = new Date().toISOString();
+            state.bodyCompositionRecords[idx] = recData;
+        }
+    } else {
+        state.bodyCompositionRecords.push(recData);
+    }
+
+    state.bodyCompositionRecordsUpdated = new Date().toISOString();
+    await saveLocalState();
+    
+    closeBodyCompModal();
+    renderBodyCompSection();
+    
+    showToast(recordId ? 'Cập nhật chỉ số cơ thể thành công!' : 'Thêm chỉ số cơ thể thành công!', 'success');
+    performSync(true);
+}
+
+async function deleteBodyCompRecord(recordId) {
+    if (!confirm('Xóa bản ghi chỉ số cơ thể này?')) return;
+    
+    state.bodyCompositionRecords = (state.bodyCompositionRecords || []).filter(r => r.id !== recordId);
+    state.bodyCompositionRecordsUpdated = new Date().toISOString();
+    await saveLocalState();
+    
+    renderBodyCompSection();
+    showToast('Đã xóa bản ghi chỉ số cơ thể.', 'success');
+    performSync(true);
+}
+
+function initBodyCompBindings() {
+    document.getElementById('addNewBodyCompBtn')?.addEventListener('click', () => {
+        openBodyCompModal();
+    });
+
+    document.getElementById('bodyCompAiAnalysisBtn')?.addEventListener('click', () => {
+        openHealthAiAnalysisModal('body_comp');
+    });
+
+    document.querySelectorAll('.body-comp-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tabId = e.currentTarget.getAttribute('data-tab');
+            switchBodyCompTab(tabId);
+        });
+    });
+
+    document.getElementById('bodyCompForm')?.addEventListener('submit', saveBodyCompRecord);
+}
+
+window.openBodyCompModal = openBodyCompModal;
+window.closeBodyCompModal = closeBodyCompModal;
+window.deleteBodyCompRecord = deleteBodyCompRecord;
+window.switchBodyCompTab = switchBodyCompTab;
+
+// ===========================
 
 // ===========================
 // 🤖 CẬP NHẬT AI ANALYSIS — Tích hợp Huyết Áp
@@ -3434,16 +3963,20 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
         return;
     }
 
-    const activeRecords = (mode === 'bp_only') ? [] : (state.medicalRecords || [])
+    const activeRecords = (mode === 'bp_only' || mode === 'body_comp_only') ? [] : (state.medicalRecords || [])
         .filter(r => !r.deleted_at && (r.profileId || 'p-self') === selectedProfileId)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    const bpRecords = (state.bloodPressureRecords || [])
+    const bpRecords = (mode === 'body_comp_only') ? [] : (state.bloodPressureRecords || [])
         .filter(r => !r.deleted_at && r.profileId === selectedProfileId)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    if (activeRecords.length === 0 && bpRecords.length === 0) {
-        showToast('Không có dữ liệu y tế hoặc huyết áp để phân tích!', 'warning');
+    const bcRecords = (mode === 'bp_only') ? [] : (state.bodyCompositionRecords || [])
+        .filter(r => !r.deleted_at && r.profileId === selectedProfileId)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (activeRecords.length === 0 && bpRecords.length === 0 && bcRecords.length === 0) {
+        showToast('Không có dữ liệu y tế, huyết áp hoặc chỉ số cơ thể để phân tích!', 'warning');
         return;
     }
 
@@ -3456,7 +3989,7 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
     if (statusText) {
         statusText.innerText = mode === 'bp_only' 
             ? 'AI đang phân tích kết quả đo huyết áp...' 
-            : 'AI đang tổng hợp xét nghiệm máu và huyết áp...';
+            : (mode === 'body_comp_only' ? 'AI đang phân tích chỉ số cơ thể...' : 'AI đang tổng hợp sức khỏe toàn diện...');
     }
 
     try {
@@ -3506,6 +4039,79 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
             });
         }
 
+        // Build body composition history string
+        let bodyCompStr = '';
+        if (bcRecords.length > 0) {
+            bodyCompStr = '\n=== LICH SU CHI SO CO THE (ACCUNIQ/INBODY) ===\n';
+            bcRecords.forEach((r, idx) => {
+                bodyCompStr += `--- LAN DO THU ${idx + 1}: ${r.device || 'Thiet bi do'} (${formatDate(r.date)})${r.time ? ' luc ' + r.time : ''} ---\n`;
+                bodyCompStr += `  - Can nang: ${r.weight} kg\n`;
+                if (r.muscleMass) bodyCompStr += `  - Khoi luong co xuong (SMM): ${r.muscleMass} kg\n`;
+                if (r.fatMass) bodyCompStr += `  - Khoi luong mo co the: ${r.fatMass} kg\n`;
+                if (r.pctFat) bodyCompStr += `  - Ty le mo co the (PBF): ${r.pctFat} %\n`;
+                if (r.bmi) bodyCompStr += `  - Chi so BMI: ${r.bmi} kg/m2\n`;
+                if (r.visceralFat) bodyCompStr += `  - Muc mo noi tang (VFL): Level ${r.visceralFat}\n`;
+                if (r.abdominalCircumference) bodyCompStr += `  - Vong bung: ${r.abdominalCircumference} cm\n`;
+                if (r.bodyType) bodyCompStr += `  - Phan loai the trang: ${r.bodyType}\n`;
+                if (r.score) bodyCompStr += `  - Diem so co the: ${r.score} diem\n`;
+                if (r.bioAge) bodyCompStr += `  - Tuoi sinh hoc: ${r.bioAge} tuoi\n`;
+                
+                // Water & Composition
+                if (r.tbw || r.icw || r.ecw || r.ecwRatio || r.protein || r.mineral || r.slm || r.ffm || r.bcm) {
+                    bodyCompStr += `  - Thanh phan nuoc & dinh duong:\n`;
+                    if (r.tbw) bodyCompStr += `    + Tong luong nuoc (TBW): ${r.tbw} L\n`;
+                    if (r.icw) bodyCompStr += `    + Nuoc noi bao (ICW): ${r.icw} L\n`;
+                    if (r.ecw) bodyCompStr += `    + Nuoc ngoai bao (ECW): ${r.ecw} L\n`;
+                    if (r.ecwRatio) bodyCompStr += `    + Ty le nuoc ngoai bao: ${r.ecwRatio}\n`;
+                    if (r.protein) bodyCompStr += `    + Chat dam: ${r.protein} kg\n`;
+                    if (r.mineral) bodyCompStr += `    + Chat khoang: ${r.mineral} kg\n`;
+                    if (r.slm) bodyCompStr += `    + Co mem (SLM): ${r.slm} kg\n`;
+                    if (r.ffm) bodyCompStr += `    + Khong mo (FFM): ${r.ffm} kg\n`;
+                    if (r.bcm) bodyCompStr += `    + Khong te bao (BCM): ${r.bcm} kg\n`;
+                }
+
+                // Segmental
+                if (r.segLeanRightArmKg || r.segLeanLeftArmKg || r.segLeanTrunkKg || r.segLeanRightLegKg || r.segLeanLeftLegKg ||
+                    r.segFatRightArmKg || r.segFatLeftArmKg || r.segFatTrunkKg || r.segFatRightLegKg || r.segFatLeftLegKg) {
+                    bodyCompStr += `  - Phan tich tung bo phan (Segmental Analysis):\n`;
+                    if (r.segLeanRightArmKg) bodyCompStr += `    + Co tay Phai: ${r.segLeanRightArmKg} kg (${r.segLeanRightArmPct || 'n/a'} %)\n`;
+                    if (r.segLeanLeftArmKg) bodyCompStr += `    + Co tay Trai: ${r.segLeanLeftArmKg} kg (${r.segLeanLeftArmPct || 'n/a'} %)\n`;
+                    if (r.segLeanTrunkKg) bodyCompStr += `    + Co vung Than: ${r.segLeanTrunkKg} kg (${r.segLeanTrunkPct || 'n/a'} %)\n`;
+                    if (r.segLeanRightLegKg) bodyCompStr += `    + Co chan Phai: ${r.segLeanRightLegKg} kg (${r.segLeanRightLegPct || 'n/a'} %)\n`;
+                    if (r.segLeanLeftLegKg) bodyCompStr += `    + Co chan Trai: ${r.segLeanLeftLegKg} kg (${r.segLeanLeftLegPct || 'n/a'} %)\n`;
+                    if (r.segFatRightArmKg) bodyCompStr += `    + Mo tay Phai: ${r.segFatRightArmKg} kg (${r.segFatRightArmPct || 'n/a'} %)\n`;
+                    if (r.segFatLeftArmKg) bodyCompStr += `    + Mo tay Trai: ${r.segFatLeftArmKg} kg (${r.segFatLeftArmPct || 'n/a'} %)\n`;
+                    if (r.segFatTrunkKg) bodyCompStr += `    + Mo vung Than: ${r.segFatTrunkKg} kg (${r.segFatTrunkPct || 'n/a'} %)\n`;
+                    if (r.segFatRightLegKg) bodyCompStr += `    + Mo chan Phai: ${r.segFatRightLegKg} kg (${r.segFatRightLegPct || 'n/a'} %)\n`;
+                    if (r.segFatLeftLegKg) bodyCompStr += `    + Mo chan Trai: ${r.segFatLeftLegKg} kg (${r.segFatLeftLegPct || 'n/a'} %)\n`;
+                }
+
+                // Control & energy
+                if (r.bmr || r.tdee || r.recommendedCaloricIntake || r.targetWeight || r.weightControl || r.muscleControl || r.fatControl) {
+                    bodyCompStr += `  - Kiem soat & Calo:\n`;
+                    if (r.bmr) bodyCompStr += `    + Ty le trao doi chat (BMR): ${r.bmr} kcal\n`;
+                    if (r.tdee) bodyCompStr += `    + Tieu hao hang ngay (TDEE): ${r.tdee} kcal\n`;
+                    if (r.recommendedCaloricIntake) bodyCompStr += `    + Calo khuyen nghi: ${r.recommendedCaloricIntake} kcal\n`;
+                    if (r.targetWeight) bodyCompStr += `    + Can nang muc tieu: ${r.targetWeight} kg\n`;
+                    if (r.weightControl) bodyCompStr += `    + Dieu chinh can nang: ${r.weightControl} kg\n`;
+                    if (r.muscleControl) bodyCompStr += `    + Dieu chinh co: ${r.muscleControl} kg\n`;
+                    if (r.fatControl) bodyCompStr += `    + Dieu chinh mo: ${r.fatControl} kg\n`;
+                }
+
+                // Advanced
+                if (r.whr || r.vfa || r.visceralFatMass || r.obesityDegree || r.smi) {
+                    bodyCompStr += `  - Chi so nang cao khac:\n`;
+                    if (r.whr) bodyCompStr += `    + Ty le eo/mong (WHR): ${r.whr}\n`;
+                    if (r.vfa) bodyCompStr += `    + Dien tich mo noi tang (VFA): ${r.vfa} cm2\n`;
+                    if (r.visceralFatMass) bodyCompStr += `    + Khoi luong mo noi tang: ${r.visceralFatMass} kg\n`;
+                    if (r.obesityDegree) bodyCompStr += `    + Muc do beo phi: ${r.obesityDegree} %\n`;
+                    if (r.smi) bodyCompStr += `    + Chi so co xuong (SMI): ${r.smi} kg/m2\n`;
+                }
+                if (r.notes) bodyCompStr += `  - Ghi chu: ${r.notes}\n`;
+                bodyCompStr += '\n';
+            });
+        }
+
         let prompt = '';
         if (mode === 'bp_only') {
             prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là thông tin cá nhân và toàn bộ dữ liệu lịch sử huyết áp của thành viên "${memberName}":\n\n${memberDetailsStr}${bpStr}\n
@@ -3520,8 +4126,22 @@ Hãy lập một báo cáo phân tích xu hướng huyết áp bằng tiếng Vi
    - Khi nào cần tham vấn bác sĩ hoặc đi khám chuyên khoa ngay.
 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
+        } else if (mode === 'body_comp_only') {
+            prompt = `Hãy đóng vai trò là một chuyên gia dinh dưỡng, huấn luyện viên thể hình (Gym Coach) và chuyên gia y học thể thao cao cấp. Dưới đây là thông tin cá nhân và lịch sử đo thành phần cơ thể chi tiết của thành viên "${memberName}":\n\n${memberDetailsStr}${bodyCompStr}\n
+Hãy lập một báo cáo phân tích chỉ số cơ thể chuyên sâu bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
+
+1. **Đánh giá Chỉ số Thể trạng & Cơ/Mỡ**: Nhận định về Cân nặng, SMM, PBF, BMI và Điểm số cơ thể. Đánh giá xem thành viên thuộc phân nhóm nào và mức độ cân đối tổng thể.
+2. **Nước & Dinh dưỡng tế bào**: Phân tích tổng lượng nước (TBW), nước nội bào/ngoại bào, tỷ lệ ECW, Protein và Khoáng chất. Nhận định về mức độ giữ nước hoặc thiếu dinh dưỡng tế bào (nếu có).
+3. **Mỡ nội tạng & Sức khỏe chuyển hóa**: Đánh giá mức mỡ nội tạng (VFL) và diện tích mỡ nội tạng (VFA). Đưa ra các cảnh báo về sức khỏe chuyển hóa, tim mạch liên quan.
+4. **Phân tích cơ/mỡ từng bộ phận**: Đánh giá sự phát triển cơ và mỡ ở tay, chân, thân. Chỉ ra các vùng bị lệch cơ hoặc tích mỡ nhiều để tập trung tập luyện.
+5. **Khuyến nghị Dinh dưỡng, Vận động & Kiểm soát**:
+   - Mức năng lượng nạp vào khuyến nghị (dựa trên BMR/TDEE) và chế độ vĩ lượng (Carb, Protein, Fat) phù hợp mục tiêu (tăng cơ, giảm mỡ).
+   - Giáo án tập luyện Gym phù hợp (cardio, kháng lực, bài tập khắc phục lệch cơ).
+   - Cách theo dõi và các lưu ý y học thể thao khác.
+
+*Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn chuyên gia hoặc bác sĩ chuyên môn.*`;
         } else {
-            prompt = `Hãy đóng vai trò là một chuyên gia y tế và bác sĩ tim mạch cao cấp. Dưới đây là thông tin cá nhân và toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${memberDetailsStr}${bloodTestStr}${bpStr}\n
+            prompt = `Hãy đóng vai trò là một chuyên gia y tế, bác sĩ tim mạch và chuyên gia dinh dưỡng cao cấp. Dưới đây là thông tin cá nhân và toàn bộ dữ liệu sức khỏe của thành viên "${memberName}":\n\n${memberDetailsStr}${bloodTestStr}${bpStr}${bodyCompStr}\n
 Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng Việt ở định dạng Markdown. Báo cáo gồm các mục:
 
 1. **Tổng quan tình trạng sức khỏe**: Nhận định chung về tình trạng sức khỏe tổng thể.
@@ -3535,12 +4155,17 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
    - Các chỉ số bất thường cần chú ý
    - Xu hướng thay đổi qua thời gian
 
-4. **Mối liên hệ giữa Huyết Áp và Xét nghiệm Máu**:
-   - Phân tích tổng hợp nguy cơ tim mạch, mỡ máu, đường huyết...
+4. **Phân tích Thành phần Cơ thể (InBody/Accuniq)** (nếu có dữ liệu):
+   - Đánh giá thể trạng (Cơ, Mỡ, Nước, Điểm số cơ thể).
+   - Đánh giá mỡ nội tạng và các nguy cơ chuyển hóa.
+   - Nhận định về sự phát triển cơ mỡ từng bộ phận.
 
-5. **Cảnh báo và Khuyến nghị**:
+5. **Mối liên hệ tổng hợp**:
+   - Phân tích mối liên quan giữa các chỉ số xét nghiệm máu (như mỡ máu, đường huyết), huyết áp và thành phần cơ thể (như tỷ lệ mỡ, mỡ nội tạng). Nhận định toàn diện nguy cơ tim mạch và chuyển hóa.
+
+6. **Cảnh báo và Khuyến nghị**:
    - Chế độ ăn uống phù hợp
-   - Vận động thể chất
+   - Chế độ vận động thể chất & tập Gym cụ thể
    - Khi nào cần gặp bác sĩ ngay
 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
@@ -3558,6 +4183,15 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
                     state.lastBpAnalysis = textResponse;
                     state.lastBpAnalysisDate = nowIso;
                     state.lastBpAnalysisUpdated = nowIso;
+                }
+            } else if (mode === 'body_comp_only') {
+                profile.lastBodyCompAnalysis = textResponse;
+                profile.lastBodyCompAnalysisDate = nowIso;
+                profile.lastBodyCompAnalysisUpdated = nowIso;
+                if (selectedProfileId === 'p-self') {
+                    state.lastBodyCompAnalysis = textResponse;
+                    state.lastBodyCompAnalysisDate = nowIso;
+                    state.lastBodyCompAnalysisUpdated = nowIso;
                 }
             } else {
                 profile.lastAiAnalysis = textResponse;
@@ -3578,7 +4212,11 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
             overlay.classList.remove('active');
         }
         renderHealthAiReport();
-        showToast(mode === 'bp_only' ? 'Đã phân tích kết quả huyết áp thành công!' : 'Đã phân tích sức khỏe toàn diện (xét nghiệm máu + huyết áp) thành công!', 'success');
+        
+        let successMsg = 'Đã phân tích sức khỏe toàn diện thành công!';
+        if (mode === 'bp_only') successMsg = 'Đã phân tích kết quả huyết áp thành công!';
+        else if (mode === 'body_comp_only') successMsg = 'Đã phân tích thành phần cơ thể thành công!';
+        showToast(successMsg, 'success');
         
         performSync(true);
 
