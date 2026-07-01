@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.43';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.43';
+} from '../../core/app.js?v=4.0.44';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.44';
 
 let healthTrendChartInstance = null;
 
@@ -563,12 +563,14 @@ window.selectMemberForAiAnalysis = selectMemberForAiAnalysis;
 
 let activeMedicalRecordId = null;
 let showAllMedicalRecords = false;
+let showAllBpRecords = false;
 
 function initHealthBindings() {
     // Member selector bindings
     document.getElementById('healthProfileSelect')?.addEventListener('change', (e) => {
         state.selectedHealthProfileId = e.target.value;
         showAllMedicalRecords = false;
+        showAllBpRecords = false;
         renderHealthDashboard();
     });
 
@@ -3227,17 +3229,26 @@ function renderBloodPressureSection() {
         .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
         .sort((a, b) => new Date(b.date + (b.session === 'morning' ? 'T06' : b.session === 'evening' ? 'T18' : 'T12')) - new Date(a.date + (a.session === 'morning' ? 'T06' : a.session === 'evening' ? 'T18' : 'T12')));
 
+    const moreContainer = document.getElementById('bpRecordsMoreContainer');
+
     if (records.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.85rem;">
                 <i data-lucide="heart" style="width: 32px; height: 32px; opacity: 0.3; display: block; margin: 0 auto 8px;"></i>
                 Chưa có chỉ số huyết áp nào. Nhấn "Thêm chỉ số" để bắt đầu theo dõi.
             </div>`;
-        lucide.createIcons();
+        if (moreContainer) {
+            moreContainer.style.display = 'none';
+            moreContainer.innerHTML = '';
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
 
-    container.innerHTML = records.map(r => {
+    const totalCount = records.length;
+    const displayedRecords = showAllBpRecords ? records : records.slice(0, 3);
+
+    container.innerHTML = displayedRecords.map(r => {
         const cls = getBpClassification(r.systolic, r.diastolic);
         const sessionLabel = r.session === 'morning' ? '🌅 Sáng' : (r.session === 'evening' ? '🌙 Tối' : '🕐 Khác');
         return `
@@ -3266,7 +3277,30 @@ function renderBloodPressureSection() {
             </div>
         </div>`;
     }).join('');
-    lucide.createIcons();
+
+    if (moreContainer) {
+        if (totalCount > 3) {
+            moreContainer.style.display = 'flex';
+            moreContainer.innerHTML = `
+                <button type="button" id="toggleShowAllBpBtn" class="health-btn health-btn-secondary" style="padding: 8px 24px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border: 1px solid var(--border-color); border-radius: var(--btn-radius); font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    <i data-lucide="${showAllBpRecords ? 'chevron-up' : 'chevron-down'}" style="width: 15px; height: 15px;"></i>
+                    <span>${showAllBpRecords ? 'Thu gọn' : 'Xem thêm'}</span>
+                </button>
+            `;
+            const toggleBtn = document.getElementById('toggleShowAllBpBtn');
+            if (toggleBtn) {
+                toggleBtn.onclick = () => {
+                    showAllBpRecords = !showAllBpRecords;
+                    renderBloodPressureSection();
+                };
+            }
+        } else {
+            moreContainer.style.display = 'none';
+            moreContainer.innerHTML = '';
+        }
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function openBpModal(recordId = null) {

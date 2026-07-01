@@ -3909,13 +3909,6 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
     }
 }
 
-/* Target v4.0.41: Scrollable containers for many records */
-#bpRecordsList {
-    max-height: 320px !important;
-    overflow-y: auto !important;
-    padding-right: 6px !important;
-    overscroll-behavior: contain !important;
-}
 
 
 /* Modal scrolling fixes for family profiles on mobile */
