@@ -38,10 +38,10 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.47">
+    <link rel="apple-touch-icon" href="src/assets/images/icon.png?v=4.0.49">
     <link rel="manifest" href="manifest.json?v=3.7.9">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.47">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.49">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -63,7 +63,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.47" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.49" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -131,7 +131,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.47" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.49" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -636,7 +636,7 @@
                             <div class="health-dropzone" id="healthScannerDropzone">
                                 <i data-lucide="image" class="dropzone-icon"></i>
                                 <span class="dropzone-text">Chọn hoặc kéo thả ảnh xét nghiệm y tế (.png, .jpg, .jpeg, .webp)</span>
-                                <input type="file" id="healthFileInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                                <input type="file" id="healthFileInput" accept="image/png, image/jpeg, image/jpg, image/webp" multiple style="display: none;">
                             </div>
                             <!-- Camera capture: dùng camera gốc thiết bị -->
                             <input type="file" id="healthCameraInput" accept="image/*" capture="environment" style="display: none;">
@@ -834,7 +834,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.47" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.49" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1870,20 +1870,19 @@
 
     <!-- Body Composition Input Modal -->
     <div class="modal-overlay" id="bodyCompModal" style="display: none; z-index: 9000;">
-        <div class="modal-dialog" style="max-width: 650px; margin: 20px auto;">
-            <div class="health-card" style="border-radius: 16px; padding: 0; overflow: hidden;">
-                <!-- Header -->
-                <div style="background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(15,118,110,0.06)); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
-                    <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
-                        <i data-lucide="dumbbell" style="width: 20px; height: 20px; color: #10b981;"></i>
-                        Nhập chỉ số cơ thể (Accuniq/InBody)
-                    </h3>
-                    <button type="button" onclick="closeBodyCompModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center;">
-                        <i data-lucide="x" style="width: 20px; height: 20px;"></i>
-                    </button>
-                </div>
+        <div class="modal-container" style="max-width: 650px; width: 95%; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(15,118,110,0.06)); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <h3 style="margin: 0; font-family: var(--font-heading); font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="dumbbell" style="width: 20px; height: 20px; color: #10b981;"></i>
+                    Nhập chỉ số cơ thể (Accuniq/InBody)
+                </h3>
+                <button type="button" onclick="closeBodyCompModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                </button>
+            </div>
 
-                <form id="bodyCompForm" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <form id="bodyCompForm" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1; min-height: 0;">
                     <input type="hidden" id="bodyCompRecordId" value="">
                     
                     <!-- Metadata section -->
@@ -2273,7 +2272,6 @@
                 </form>
             </div>
         </div>
-    </div>
 
     <!-- Health Scanner Loading Overlay -->
     <div class="modal-overlay health-theme-overlay" id="healthScannerLoadingOverlay" style="display: none; z-index: 9999;">
@@ -2287,7 +2285,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.47"></script>
-    <script type="module" src="src/core/app.js?v=4.0.47"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.49"></script>
+    <script type="module" src="src/core/app.js?v=4.0.49"></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.47';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.47';
+} from '../../core/app.js?v=4.0.49';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.49';
 
 let healthTrendChartInstance = null;
 
@@ -687,7 +687,7 @@ function initHealthBindings() {
         
         fileInput.addEventListener('change', async (e) => {
             if (e.target.files.length > 0) {
-                await handleHealthFile(e.target.files[0]);
+                await handleHealthFiles(e.target.files);
             }
         });
         
@@ -704,7 +704,7 @@ function initHealthBindings() {
             e.preventDefault();
             dropzone.classList.remove('dragover');
             if (e.dataTransfer.files.length > 0) {
-                await handleHealthFile(e.dataTransfer.files[0]);
+                await handleHealthFiles(e.dataTransfer.files);
             }
         });
     }
@@ -1434,7 +1434,7 @@ async function processScannedHealthImage(responseJson) {
     }
 }
 
-async function handleHealthFile(file) {
+async function handleHealthFiles(files) {
     if (!state.geminiApiKey) {
         showToast("Vui lòng cấu hình Gemini API Key trước khi quét!", "warning");
         const popoverMenu = document.getElementById('geminiPopoverMenu');
@@ -1444,8 +1444,9 @@ async function handleHealthFile(file) {
         return;
     }
     
-    if (!file.type.startsWith('image/')) {
-        showToast("Chỉ hỗ trợ quét file ảnh xét nghiệm (.png, .jpg, .jpeg)!", "error");
+    const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    if (validFiles.length === 0) {
+        showToast("Chỉ hỗ trợ quét file ảnh xét nghiệm (.png, .jpg, .jpeg, .webp)!", "error");
         return;
     }
     
@@ -1455,13 +1456,30 @@ async function handleHealthFile(file) {
         overlay.style.display = 'flex';
         overlay.classList.add('active');
     }
-    if (statusText) statusText.innerText = 'Đang đọc file ảnh xét nghiệm...';
+    
+    if (statusText) {
+        statusText.innerText = validFiles.length > 1
+            ? `Đang đọc ${validFiles.length} ảnh kết quả...`
+            : 'Đang đọc file ảnh xét nghiệm...';
+    }
     
     try {
-        const base64Data = await fileToBase64(file);
-        if (statusText) statusText.innerText = 'Đang phân tích ảnh y tế bằng Gemini AI...';
+        const imagesData = [];
+        for (const file of validFiles) {
+            const base64Data = await fileToBase64(file);
+            imagesData.push({
+                base64Data: base64Data,
+                mimeType: file.type
+            });
+        }
         
-        const responseJson = await callGeminiAPI(base64Data, file.type);
+        if (statusText) {
+            statusText.innerText = validFiles.length > 1
+                ? `Đang gửi ${validFiles.length} ảnh lên Gemini AI để phân tích gộp...`
+                : 'Đang phân tích ảnh y tế bằng Gemini AI...';
+        }
+        
+        const responseJson = await callGeminiAPI(imagesData);
         
         if (overlay) {
             overlay.style.display = 'none';
@@ -1483,14 +1501,26 @@ async function handleHealthFile(file) {
     }
 }
 
-async function callGeminiAPI(base64Data, mimeType) {
+async function callGeminiAPI(imagesData, legacyMimeType = null) {
     const apiKey = state.geminiApiKey;
     const models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
     let lastError = null;
     
-    const promptText = `Hãy đóng vai trò là một chuyên gia phân tích hình ảnh y tế. Bạn được cung cấp một hình ảnh có thể là: (1) Kết quả xét nghiệm y khoa (xét nghiệm máu, nước tiểu, siêu âm, v.v.), (2) Hình ảnh chụp màn hình hiển thị của máy đo huyết áp (ví dụ: máy Omron), hoặc (3) Phiếu kết quả đo thành phần cơ thể (Body Composition Analysis từ máy InBody hoặc Accuniq).
+    // Normalize input to array of { base64Data, mimeType }
+    let images = [];
+    if (legacyMimeType) {
+        images = [{ base64Data: imagesData, mimeType: legacyMimeType }];
+    } else if (Array.isArray(imagesData)) {
+        images = imagesData;
+    } else if (imagesData && typeof imagesData === 'object') {
+        images = [imagesData];
+    } else if (typeof imagesData === 'string') {
+        images = [{ base64Data: imagesData, mimeType: 'image/jpeg' }];
+    }
+    
+    const promptText = `Hãy đóng vai trò là một chuyên gia phân tích hình ảnh y tế. Bạn được cung cấp một hoặc nhiều hình ảnh (có thể là các trang khác nhau hoặc góc chụp khác nhau của cùng một phiếu kết quả). Các hình ảnh này có thể là: (1) Kết quả xét nghiệm y khoa (xét nghiệm máu, nước tiểu, siêu âm, v.v.), (2) Hình ảnh chụp màn hình hiển thị của máy đo huyết áp (ví dụ: máy Omron), hoặc (3) Phiếu kết quả đo thành phần cơ thể (Body Composition Analysis từ máy InBody hoặc Accuniq).
 
-Nhiệm vụ của bạn là nhận diện loại hình ảnh này và trích xuất thông tin chính xác sang định dạng JSON.
+Nhiệm vụ của bạn là nhận diện loại hình ảnh này, tổng hợp và gộp thông tin từ tất cả các hình ảnh được cung cấp (nếu chúng là các trang khác nhau hoặc các phần hiển thị khác nhau của cùng một lần đo) và trích xuất thông tin chính xác sang một đối tượng JSON duy nhất.
 
 HƯỚNG DẪN CHI TIẾT:
 1. Xác định loại hình ảnh:
@@ -1621,6 +1651,19 @@ Lưu ý quan trọng:
 1. Đảm bảo trị số trích xuất khớp chính xác với hình ảnh.
 2. Trả về kết quả hoàn toàn bằng tiếng Việt.
 3. Chỉ trả về một đối tượng JSON hợp lệ duy nhất khớp với cấu trúc trên. Không kèm bất kỳ văn bản giải thích nào ngoài JSON.`;
+
+    const parts = [
+        { text: promptText }
+    ];
+    
+    images.forEach(img => {
+        parts.push({
+            inlineData: {
+                mimeType: img.mimeType,
+                data: img.base64Data
+            }
+        });
+    });
 
     for (const model of models) {
         try {
