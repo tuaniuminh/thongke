@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.46';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.46';
+} from '../../core/app.js?v=4.0.47';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.47';
 
 let healthTrendChartInstance = null;
 
@@ -913,7 +913,6 @@ function renderHealthDashboard() {
     if (!recordsGrid) return;
     
     // Filter by selected family profile
-    const selectedProfileId = state.selectedHealthProfileId || 'all';
     let activeRecords = (state.medicalRecords || [])
         .filter(r => !r.deleted_at);
         
@@ -1015,12 +1014,7 @@ function renderHealthDashboard() {
     renderBloodPressureSection();
 
     // Render body composition section
-    const selectedProfileIdForBc = state.selectedHealthProfileId || 'all';
-    const currentProfileForBc = (state.familyProfiles || []).find(p => p.id === selectedProfileIdForBc);
-    const shouldShowBodyCompForRender = selectedProfileIdForBc === 'all'
-        ? (state.familyProfiles || []).some(p => p.trackBodyComp)
-        : (currentProfileForBc && currentProfileForBc.trackBodyComp);
-    if (shouldShowBodyCompForRender) {
+    if (shouldShowBodyComp) {
         renderBodyCompSection();
     }
 }
