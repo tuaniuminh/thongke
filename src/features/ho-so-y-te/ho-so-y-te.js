@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.42';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.42';
+} from '../../core/app.js?v=4.0.43';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.43';
 
 let healthTrendChartInstance = null;
 
@@ -562,11 +562,13 @@ window.openHealthAiMemberSelectorModal = openHealthAiMemberSelectorModal;
 window.selectMemberForAiAnalysis = selectMemberForAiAnalysis;
 
 let activeMedicalRecordId = null;
+let showAllMedicalRecords = false;
 
 function initHealthBindings() {
     // Member selector bindings
     document.getElementById('healthProfileSelect')?.addEventListener('change', (e) => {
         state.selectedHealthProfileId = e.target.value;
+        showAllMedicalRecords = false;
         renderHealthDashboard();
     });
 
@@ -911,6 +913,11 @@ function renderHealthDashboard() {
                 <p style="margin-top: 6px; font-size: 0.85rem;">Cấu hình Gemini API Key rồi kéo thả ảnh kết quả xét nghiệm để quét tự động, hoặc nhấp vào "Thêm hồ sơ thủ công" để bắt đầu theo dõi sức khỏe.</p>
             </div>
         `;
+        const moreContainer = document.getElementById('healthRecordsMoreContainer');
+        if (moreContainer) {
+            moreContainer.style.display = 'none';
+            moreContainer.innerHTML = '';
+        }
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
         // Hide chart card if empty
@@ -919,30 +926,13 @@ function renderHealthDashboard() {
         return;
     }
     
-    recordsGrid.innerHTML = activeRecords.map(r => {
+    const totalRecordsCount = activeRecords.length;
+    const displayedRecords = showAllMedicalRecords ? activeRecords : activeRecords.slice(0, 3);
+    
+    recordsGrid.innerHTML = displayedRecords.map(r => {
         const typeLabel = getHealthTypeLabel(r.type);
         const dateStr = formatDate(r.date);
-        
-        // Extract preview indicators (max 3)
-        const previewIndicators = (r.indicators || []).slice(0, 3);
-        const previewHtml = previewIndicators.length > 0 
-            ? `<div class="health-record-indicators-preview">
-                ${previewIndicators.map(ind => {
-                    const badgeClass = ind.assessment === 'high' ? 'badge-health-high' : (ind.assessment === 'low' ? 'badge-health-low' : 'badge-health-normal');
-                    const badgeText = ind.assessment === 'high' ? 'Cao' : (ind.assessment === 'low' ? 'Thấp' : 'Bình thường');
-                    return `
-                        <div class="health-record-indicator-row">
-                            <span class="indicator-preview-name">${escapeHTML(ind.name)}</span>
-                            <span class="indicator-preview-val">
-                                ${escapeHTML(ind.value)} <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 2px;">${escapeHTML(ind.unit)}</span>
-                                <span class="${badgeClass}">${badgeText}</span>
-                            </span>
-                        </div>
-                    `;
-                }).join('')}
-                ${r.indicators.length > 3 ? `<div style="text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">và ${r.indicators.length - 3} chỉ số khác...</div>` : ''}
-               </div>`
-            : '';
+        const previewHtml = ''; // Hide indicators table preview to save space
             
         return `
             <div class="health-record-card" onclick="openHealthDetail('${r.id}')">
@@ -971,6 +961,29 @@ function renderHealthDashboard() {
             </div>
         `;
     }).join('');
+    
+    const moreContainer = document.getElementById('healthRecordsMoreContainer');
+    if (moreContainer) {
+        if (totalRecordsCount > 3) {
+            moreContainer.style.display = 'flex';
+            moreContainer.innerHTML = `
+                <button type="button" id="toggleShowAllRecordsBtn" class="health-btn health-btn-secondary" style="padding: 8px 24px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border: 1px solid var(--border-color); border-radius: var(--btn-radius); font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    <i data-lucide="${showAllMedicalRecords ? 'chevron-up' : 'chevron-down'}" style="width: 15px; height: 15px;"></i>
+                    <span>${showAllMedicalRecords ? 'Thu gọn' : 'Xem thêm'}</span>
+                </button>
+            `;
+            const toggleBtn = document.getElementById('toggleShowAllRecordsBtn');
+            if (toggleBtn) {
+                toggleBtn.onclick = () => {
+                    showAllMedicalRecords = !showAllMedicalRecords;
+                    renderHealthDashboard();
+                };
+            }
+        } else {
+            moreContainer.style.display = 'none';
+            moreContainer.innerHTML = '';
+        }
+    }
     
     if (typeof lucide !== 'undefined') lucide.createIcons();
     

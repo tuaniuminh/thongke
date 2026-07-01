@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.42';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.42';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.43';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.43';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.42';
-import * as sync from './sync.js?v=4.0.42';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.42';
+import { encrypt, decrypt } from './crypto.js?v=4.0.43';
+import * as sync from './sync.js?v=4.0.43';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.43';
 
-const APP_VERSION = '4.0.42';
+const APP_VERSION = '4.0.43';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';

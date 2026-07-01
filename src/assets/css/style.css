@@ -2604,7 +2604,7 @@ select.health-select-sm {
 
 .health-indicators-edit-row {
     display: grid;
-    grid-template-columns: 2.5fr 1.5fr 1fr 2fr 0.5fr;
+    grid-template-columns: 2fr 1.2fr 1fr 1.8fr 1.5fr 0.5fr;
     gap: 8px;
     align-items: center;
 }
@@ -3917,12 +3917,6 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
     overscroll-behavior: contain !important;
 }
 
-#healthRecordsGrid {
-    max-height: 485px !important;
-    overflow-y: auto !important;
-    padding-right: 6px !important;
-    overscroll-behavior: contain !important;
-}
 
 /* Modal scrolling fixes for family profiles on mobile */
 @media (max-width: 768px) {
