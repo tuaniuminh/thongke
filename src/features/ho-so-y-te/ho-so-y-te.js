@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.60';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.60';
+} from '../../core/app.js?v=4.0.61';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.61';
 
 let healthTrendChartInstance = null;
 
@@ -589,33 +589,7 @@ let showAllBpRecords = false;
 let showAllBodyCompRecords = false;
 
 function initHealthBindings() {
-    // Lock/Unlock edit actions
-    let healthActionsUnlocked = localStorage.getItem('health_actions_unlocked') === 'true';
-    const updateLockUI = () => {
-        const body = document.body;
-        if (healthActionsUnlocked) {
-            body.classList.add('health-actions-unlocked');
-        } else {
-            body.classList.remove('health-actions-unlocked');
-        }
-        document.querySelectorAll('.toggle-health-lock-btn').forEach(btn => {
-            btn.innerHTML = healthActionsUnlocked 
-                ? '<i data-lucide="lock-open" style="width: 16px; height: 16px; color: #10b981;"></i>' 
-                : '<i data-lucide="lock" style="width: 16px; height: 16px; color: var(--text-muted);"></i>';
-        });
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    };
 
-    updateLockUI();
-
-    document.querySelectorAll('.toggle-health-lock-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            healthActionsUnlocked = !healthActionsUnlocked;
-            localStorage.setItem('health_actions_unlocked', healthActionsUnlocked);
-            updateLockUI();
-            showToast(healthActionsUnlocked ? 'Đã mở khóa chế độ Sửa/Xóa chỉ số!' : 'Đã khóa chế độ Sửa/Xóa để tránh bấm nhầm.', healthActionsUnlocked ? 'info' : 'success');
-        });
-    });
 
     // Member selector bindings
     document.getElementById('healthProfileSelect')?.addEventListener('change', (e) => {
@@ -991,6 +965,12 @@ function renderHealthDashboard() {
         // Hide chart card if empty
         const chartCard = document.getElementById('healthChartCard');
         if (chartCard) chartCard.style.display = 'none';
+        
+        // Render blood pressure and body composition sections
+        renderBloodPressureSection();
+        if (shouldShowBodyComp) {
+            renderBodyCompSection();
+        }
         return;
     }
     

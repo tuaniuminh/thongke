@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.60** |
-| **v4.0.60** | ✅ **Bỏ qua Kháng trở & Đánh giá Cân bằng cơ thể khi quét AI:** Cập nhật prompt của Gemini Vision để bỏ qua không trích xuất kháng trở điện (Impedance ohms) và Đánh giá cân bằng cơ thể (Body Balance Assessment). Đồng thời tích hợp thêm bộ lọc tại JS (`openBodyCompModal`) để chủ động loại bỏ các chỉ số này trước khi hiển thị/ghi chú để tránh sinh cảnh báo cảnh báo màu vàng phiền hà. |
+| **Phiên bản hiện tại** | **v4.0.61** |
+| **v4.0.61** | ✅ **Xóa bỏ nút Khóa bảo vệ & Sửa lỗi chuyển hồ sơ rỗng:** Loại bỏ hoàn toàn tính năng Khóa bảo vệ (Edit Lock) theo yêu cầu, hiện nút Sửa/Xóa mọi lúc; Khắc phục lỗi rò rỉ dữ liệu khi chuyển sang hồ sơ chưa có dữ liệu y tế bằng cách loại bỏ early return cản trở vẽ biểu đồ huyết áp và chỉ số cơ thể. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -138,6 +138,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.58** | ✅ **Bố cục lại Chỉ số cơ thể & Khóa bảo vệ tránh bấm nhầm:** Sắp xếp lại thẻ chỉ số cơ thể (Tên máy/ngày đo ở trên cùng; Cân nặng bên trái; Cơ xương & Mỡ bên phải); Tách biệt phần ghi chú và chống tràn chữ. Tích hợp nút Khóa/Mở khóa Sửa & Xóa ở cả 2 mục huyết áp/cơ thể để tránh bấm nhầm. |
 | **v4.0.59** | ✅ **Sửa lỗi lọc hồ sơ & Đồng bộ Xóa:** Sửa lỗi thiếu fallback `'p-self'` khi lọc huyết áp và chỉ số cơ thể khiến dữ liệu của Bản thân biến mất khi chuyển hồ sơ; Thay thế cơ chế lọc mảng trực tiếp bằng đánh dấu `deleted_at` (soft-delete) kết hợp gọi `performSync()` khi bấm Xóa để đồng bộ chuẩn xác với máy chủ. |
 | **v4.0.60** | ✅ **Bỏ qua Kháng trở & Đánh giá Cân bằng cơ thể khi quét AI:** Cập nhật prompt của Gemini Vision để bỏ qua không trích xuất kháng trở điện (Impedance ohms) và Đánh giá cân bằng cơ thể (Body Balance Assessment). Đồng thời tích hợp thêm bộ lọc tại JS (`openBodyCompModal`) để chủ động loại bỏ các chỉ số này trước khi hiển thị/ghi chú để tránh sinh cảnh báo cảnh báo màu vàng phiền hà. |
+| **v4.0.61** | ✅ **Xóa bỏ nút Khóa bảo vệ & Sửa lỗi chuyển hồ sơ rỗng:** Loại bỏ hoàn toàn tính năng Khóa bảo vệ (Edit Lock) theo yêu cầu, hiện nút Sửa/Xóa mọi lúc; Khắc phục lỗi rò rỉ dữ liệu khi chuyển sang hồ sơ chưa có dữ liệu y tế bằng cách loại bỏ early return cản trở vẽ biểu đồ huyết áp và chỉ số cơ thể. |
 
 ---
 
