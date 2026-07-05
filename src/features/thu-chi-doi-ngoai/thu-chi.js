@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.63';
-import * as sync from '../../core/sync.js?v=4.0.63';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.63';
+} from '../../core/app.js?v=4.0.64';
+import * as sync from '../../core/sync.js?v=4.0.64';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.64';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1141,10 +1141,14 @@ function updateMobileNavbar(tabId) {
             pageTitleBlock.classList.add('mobile-hide-title');
         }
         
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+            
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="src/assets/images/icon.png?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài đặt</span>
             </div>
@@ -1160,10 +1164,14 @@ function updateMobileNavbar(tabId) {
             pageTitleBlock.classList.add('mobile-hide-title');
         }
         
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
                 <div class="mobile-navbar-logo">
-                    <img src="src/assets/images/icon.png?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                 </div>
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
             </div>
@@ -1178,11 +1186,15 @@ function updateMobileNavbar(tabId) {
         // For finance tabs (dashboard, received, sent)
         mobileNavbar.classList.add('two-line');
         
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
                 <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
-                        <img src="src/assets/images/icon.png?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
