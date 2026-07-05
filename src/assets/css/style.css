@@ -3943,9 +3943,31 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain !important;
     }
+}/* Collapsible record cards in health module */
+.health-collapsible-card {
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-
-
-
-
+.health-collapsible-card:hover {
+    border-color: rgba(15, 118, 110, 0.3) !important;
+}
+.health-collapsible-card.active {
+    border-color: var(--health-accent) !important;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.08);
+    background: var(--bg-secondary) !important;
+    transform: translateY(-2px);
+}
+.health-collapsible-card .health-record-actions {
+    display: flex !important;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+.health-collapsible-card.active .health-record-actions {
+    opacity: 1;
+    max-width: 120px;
+    pointer-events: auto;
+    margin-left: 8px;
+}

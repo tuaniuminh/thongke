@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.61';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.61';
+} from '../../core/app.js?v=4.0.62';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.62';
 
 let healthTrendChartInstance = null;
 
@@ -582,6 +582,26 @@ window.triggerImportMemberBackup = triggerImportMemberBackup;
 window.handleMemberBackupImportFile = handleMemberBackupImportFile;
 window.openHealthAiMemberSelectorModal = openHealthAiMemberSelectorModal;
 window.selectMemberForAiAnalysis = selectMemberForAiAnalysis;
+window.toggleCollapsibleCard = toggleCollapsibleCard;
+
+function toggleCollapsibleCard(card, event) {
+    if (event.target.closest('button')) {
+        return;
+    }
+    const wasActive = card.classList.contains('active');
+    
+    // Close other active cards in the same parent container
+    const container = card.parentElement;
+    if (container) {
+        container.querySelectorAll('.health-collapsible-card').forEach(c => {
+            c.classList.remove('active');
+        });
+    }
+    
+    if (!wasActive) {
+        card.classList.add('active');
+    }
+}
 
 let activeMedicalRecordId = null;
 let showAllMedicalRecords = false;
@@ -3434,7 +3454,7 @@ function renderBloodPressureSection() {
         const cls = getBpClassification(r.systolic, r.diastolic);
         const sessionLabel = r.session === 'morning' ? '🌅 Sáng' : (r.session === 'evening' ? '🌙 Tối' : '🕐 Khác');
         return `
-        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${cls.color};">
+        <div class="health-collapsible-card" onclick="toggleCollapsibleCard(this, event)" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${cls.color};">
             <div style="text-align: center; min-width: 56px;">
                 <div style="font-size: 1.3rem; font-weight: 800; color: ${cls.color}; line-height: 1;">${r.systolic}</div>
                 <div style="font-size: 0.65rem; color: var(--text-muted); margin: 1px 0;">───</div>
@@ -3450,10 +3470,10 @@ function renderBloodPressureSection() {
                 <div style="font-size: 0.78rem; color: var(--text-secondary);">${formatDate(r.date)}${r.time ? ` lúc ${r.time}` : ''}${r.notes ? ` · ${r.notes}` : ''}</div>
             </div>
             <div class="health-record-actions" style="display: flex; gap: 6px; flex-shrink: 0;">
-                <button onclick="openBpModal('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
+                <button onclick="openBpModal('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
                     <i data-lucide="pencil" style="width: 13px; height: 13px;"></i>
                 </button>
-                <button onclick="deleteBpRecord('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
+                <button onclick="deleteBpRecord('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
                     <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
                 </button>
             </div>
@@ -3671,7 +3691,7 @@ function renderBodyCompSection() {
         const vflCls = getVflClassification(r.visceralFat);
         
         return `
-        <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${pbfCls.color || '#10b981'};">
+        <div class="health-collapsible-card" onclick="toggleCollapsibleCard(this, event)" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${pbfCls.color || '#10b981'};">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; width: 100%;">
                 <div style="min-width: 0; flex: 1; display: flex; flex-direction: column;">
                     <!-- Top Tags Row -->
@@ -3720,10 +3740,10 @@ function renderBodyCompSection() {
                     </div>` : ''}
                 </div>
                 <div class="health-record-actions" style="display: flex; gap: 6px; flex-shrink: 0; align-items: center; height: 100%;">
-                    <button onclick="openBodyCompModal('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
+                    <button onclick="openBodyCompModal('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
                         <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
                     </button>
-                    <button onclick="deleteBodyCompRecord('${r.id}')" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
+                    <button onclick="deleteBodyCompRecord('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                     </button>
                 </div>
