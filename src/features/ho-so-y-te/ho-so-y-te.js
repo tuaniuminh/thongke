@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.58';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.58';
+} from '../../core/app.js?v=4.0.59';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.59';
 
 let healthTrendChartInstance = null;
 
@@ -193,8 +193,26 @@ async function deleteFamilyProfile(id) {
         }
     });
 
+    (state.bloodPressureRecords || []).forEach(r => {
+        if ((r.profileId || 'p-self') === id) {
+            r.deleted_at = nowIso;
+            r.updated_at = nowIso;
+            recordsDeletedCount++;
+        }
+    });
+
+    (state.bodyCompositionRecords || []).forEach(r => {
+        if ((r.profileId || 'p-self') === id) {
+            r.deleted_at = nowIso;
+            r.updated_at = nowIso;
+            recordsDeletedCount++;
+        }
+    });
+
     if (recordsDeletedCount > 0) {
         state.medicalRecordsUpdated = nowIso;
+        state.bloodPressureRecordsUpdated = nowIso;
+        state.bodyCompositionRecordsUpdated = nowIso;
     }
 
     state.familyProfiles = (state.familyProfiles || []).filter(p => p.id !== id);
@@ -208,7 +226,7 @@ async function deleteFamilyProfile(id) {
     
     renderFamilyProfilesList();
     renderHealthDashboard();
-    showToast(`Đã xóa thành viên "${profile.name}" và ${recordsDeletedCount} hồ sơ liên quan.`, "success");
+    showToast(`Đã xóa thành viên "${profile.name}" và các hồ sơ, chỉ số liên quan.`, "success");
     
     performSync(true);
 }
@@ -3227,7 +3245,7 @@ async function exportHealthPDF() {
 
     // === BLOOD PRESSURE RECORDS ===
     const bpRecords = (state.bloodPressureRecords || [])
-        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || (r.profileId || 'p-self') === selectedProfileId))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (bpRecords.length > 0) {
@@ -3409,7 +3427,7 @@ function renderBloodPressureSection() {
 
     const selectedProfileId = state.selectedHealthProfileId || 'p-self';
     const records = (state.bloodPressureRecords || [])
-        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || (r.profileId || 'p-self') === selectedProfileId))
         .sort((a, b) => new Date(b.date + (b.session === 'morning' ? 'T06' : b.session === 'evening' ? 'T18' : 'T12')) - new Date(a.date + (a.session === 'morning' ? 'T06' : a.session === 'evening' ? 'T18' : 'T12')));
 
     const moreContainer = document.getElementById('bpRecordsMoreContainer');
@@ -3592,11 +3610,22 @@ async function handleBpFormSubmit(e) {
 
 async function deleteBpRecord(recordId) {
     if (!confirm('Xóa chỉ số huyết áp này?')) return;
-    state.bloodPressureRecords = (state.bloodPressureRecords || []).filter(r => r.id !== recordId);
-    state.bloodPressureRecordsUpdated = new Date().toISOString();
+    
+    const index = (state.bloodPressureRecords || []).findIndex(r => r.id === recordId);
+    if (index === -1) return;
+
+    const now = new Date().toISOString();
+    state.bloodPressureRecords[index] = {
+        ...state.bloodPressureRecords[index],
+        deleted_at: now,
+        updated_at: now
+    };
+    state.bloodPressureRecordsUpdated = now;
+    
     await saveLocalState();
     renderBloodPressureSection();
     showToast('Đã xóa chỉ số huyết áp.', 'success');
+    performSync(true);
 }
 // ===========================
 // 🏋️‍♂️ PHÂN HỆ THEO DÕI CHỈ SỐ CƠ THỂ (ACCUNIQ/INBODY)
@@ -3632,7 +3661,7 @@ function renderBodyCompSection() {
 
     const selectedProfileId = state.selectedHealthProfileId || 'p-self';
     const records = (state.bodyCompositionRecords || [])
-        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || r.profileId === selectedProfileId))
+        .filter(r => !r.deleted_at && (selectedProfileId === 'all' || (r.profileId || 'p-self') === selectedProfileId))
         .sort((a, b) => new Date(b.date + 'T' + (b.time || '12:00')) - new Date(a.date + 'T' + (a.time || '12:00')));
 
     const moreContainer = document.getElementById('bodyCompRecordsMoreContainer');
@@ -4007,10 +4036,18 @@ async function saveBodyCompRecord(e) {
 async function deleteBodyCompRecord(recordId) {
     if (!confirm('Xóa bản ghi chỉ số cơ thể này?')) return;
     
-    state.bodyCompositionRecords = (state.bodyCompositionRecords || []).filter(r => r.id !== recordId);
-    state.bodyCompositionRecordsUpdated = new Date().toISOString();
-    await saveLocalState();
+    const index = (state.bodyCompositionRecords || []).findIndex(r => r.id === recordId);
+    if (index === -1) return;
+
+    const now = new Date().toISOString();
+    state.bodyCompositionRecords[index] = {
+        ...state.bodyCompositionRecords[index],
+        deleted_at: now,
+        updated_at: now
+    };
+    state.bodyCompositionRecordsUpdated = now;
     
+    await saveLocalState();
     renderBodyCompSection();
     showToast('Đã xóa bản ghi chỉ số cơ thể.', 'success');
     performSync(true);
@@ -4065,11 +4102,11 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const bpRecords = (mode === 'body_comp_only') ? [] : (state.bloodPressureRecords || [])
-        .filter(r => !r.deleted_at && r.profileId === selectedProfileId)
+        .filter(r => !r.deleted_at && (r.profileId || 'p-self') === selectedProfileId)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const bcRecords = (mode === 'bp_only') ? [] : (state.bodyCompositionRecords || [])
-        .filter(r => !r.deleted_at && r.profileId === selectedProfileId)
+        .filter(r => !r.deleted_at && (r.profileId || 'p-self') === selectedProfileId)
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     if (activeRecords.length === 0 && bpRecords.length === 0 && bcRecords.length === 0) {

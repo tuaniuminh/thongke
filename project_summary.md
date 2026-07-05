@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.58** |
-| **v4.0.58** | ✅ **Bố cục lại Chỉ số cơ thể & Khóa bảo vệ tránh bấm nhầm:** Sắp xếp lại thẻ chỉ số cơ thể (Tên máy/ngày đo ở trên cùng; Cân nặng bên trái; Cơ xương & Mỡ bên phải); Tách biệt phần ghi chú và chống tràn chữ. Tích hợp nút Khóa/Mở khóa Sửa & Xóa ở cả 2 mục huyết áp/cơ thể để tránh bấm nhầm. |
+| **Phiên bản hiện tại** | **v4.0.59** |
+| **v4.0.59** | ✅ **Sửa lỗi lọc hồ sơ & Đồng bộ Xóa:** Sửa lỗi thiếu fallback `'p-self'` khi lọc huyết áp và chỉ số cơ thể khiến dữ liệu của Bản thân biến mất khi chuyển hồ sơ; Thay thế cơ chế lọc mảng trực tiếp bằng đánh dấu `deleted_at` (soft-delete) kết hợp gọi `performSync()` khi bấm Xóa để đồng bộ chuẩn xác với máy chủ. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -136,6 +136,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.56** | ✅ **Nâng cấp phiên bản kích hoạt deploy:** Commit kích hoạt tiến trình triển khai GitHub Actions mới để bỏ qua lỗi ghi đè tệp tin tạm (transient duplicate artifact error) trên GitHub Pages. |
 | **v4.0.57** | ✅ **Sửa lỗi hiển thị backdrop-filter Safari:** Khắc phục lỗi rã/mất hiệu ứng làm mờ ở thanh tiêu đề di động do lỗi composite của công cụ dựng hình Webkit khi hai bộ lọc nền (backdrop-filter) đè lên nhau. |
 | **v4.0.58** | ✅ **Bố cục lại Chỉ số cơ thể & Khóa bảo vệ tránh bấm nhầm:** Sắp xếp lại thẻ chỉ số cơ thể (Tên máy/ngày đo ở trên cùng; Cân nặng bên trái; Cơ xương & Mỡ bên phải); Tách biệt phần ghi chú và chống tràn chữ. Tích hợp nút Khóa/Mở khóa Sửa & Xóa ở cả 2 mục huyết áp/cơ thể để tránh bấm nhầm. |
+| **v4.0.59** | ✅ **Sửa lỗi lọc hồ sơ & Đồng bộ Xóa:** Sửa lỗi thiếu fallback `'p-self'` khi lọc huyết áp và chỉ số cơ thể khiến dữ liệu của Bản thân biến mất khi chuyển hồ sơ; Thay thế cơ chế lọc mảng trực tiếp bằng đánh dấu `deleted_at` (soft-delete) kết hợp gọi `performSync()` khi bấm Xóa để đồng bộ chuẩn xác với máy chủ. |
 
 ---
 
