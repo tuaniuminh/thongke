@@ -3945,5 +3945,13 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
     }
 }
 
+/* Health Record Edit/Delete Actions Lock System */
+.health-record-actions {
+    display: none !important;
+}
+.health-actions-unlocked .health-record-actions {
+    display: flex !important;
+}
+
 
 
