@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.55** |
-| **v4.0.55** | ✅ **Sửa lỗi làm mờ modal & Chống tràn chữ di động:** Thêm class `health-theme-overlay` cho `#bpModal` và `#bodyCompModal` để làm mờ và tối hóa thanh trạng thái/header trên di động; Thay đổi layout hiển thị chỉ số cơ thể sang flexbox kết hợp `white-space: nowrap` chống xuống dòng tách rời đơn vị (`kg`). |
+| **Phiên bản hiện tại** | **v4.0.56** |
+| **v4.0.56** | ✅ **Nâng cấp phiên bản kích hoạt deploy:** Commit kích hoạt tiến trình triển khai GitHub Actions mới để bỏ qua lỗi ghi đè tệp tin tạm (transient duplicate artifact error) trên GitHub Pages. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -132,7 +132,8 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.52** | ✅ **Sửa hiển thị Tabs chỉ số cơ thể di động:** Thay đổi class của thanh chọn tab trong modal nhập chỉ số cơ thể để không bị đè bởi thuộc tính `display:none` của bảng nhập chỉ số y tế cũ trên di động. |
 | **v4.0.53** | ✅ **Cô lập phân tích AI chỉ số cơ thể:** Sửa lỗi nút phân tích lại (Refresh) và hiển thị kết quả AI của Chỉ số cơ thể bị lẫn lộn sang dữ liệu Xét nghiệm máu & Huyết áp; đảm bảo báo cáo AI chỉ tập trung phân tích thành phần cơ thể. |
 | **v4.0.54** | ✅ **Sửa lỗi sửa/xóa huyết áp:** Khắc phục lỗi `openBpModal is not defined` và `deleteBpRecord is not defined` khi bấm nút sửa/xóa bản ghi huyết áp bằng cách liên kết các hàm này vào phạm vi toàn cục `window`. |
-| **v4.0.55** | ✅ **Sửa lỗi làm mờ modal & Chống tràn chữ di động:** Thêm class `health-theme-overlay` cho `#bpModal` và `#bodyCompModal` để làm mờ và tối hóa thanh trạng thái/header trên di động; Thay đổi layout hiển thị chỉ số cơ thể sang flexbox kết hợp `white-space: nowrap` chống xuống dòng tách rời đơn vị (`kg`). |
+| **v4.0.55** | ✅ **Sửa lỗi làm mờ modal & Chống tràn chữ di động:** Thêm class `health-theme-overlay` cho `#bpModal` and `#bodyCompModal` để làm mờ và tối hóa thanh trạng thái/header trên di động; Thay đổi layout hiển thị chỉ số cơ thể sang flexbox kết hợp `white-space: nowrap` chống xuống dòng tách rời đơn vị (`kg`). |
+| **v4.0.56** | ✅ **Nâng cấp phiên bản kích hoạt deploy:** Commit kích hoạt tiến trình triển khai GitHub Actions mới để bỏ qua lỗi ghi đè tệp tin tạm (transient duplicate artifact error) trên GitHub Pages. |
 
 ---
 
