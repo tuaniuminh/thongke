@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.62';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.62';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.63';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.63';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.62';
-import * as sync from './sync.js?v=4.0.62';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.62';
+import { encrypt, decrypt } from './crypto.js?v=4.0.63';
+import * as sync from './sync.js?v=4.0.63';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.63';
 
-const APP_VERSION = '4.0.62';
+const APP_VERSION = '4.0.63';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -892,6 +892,20 @@ function updateThemeUI() {
         texts.forEach(text => text.innerText = 'Giao diện sáng');
         if (themeMeta) themeMeta.setAttribute('content', '#090d16');
     }
+
+    // Swap logos based on theme
+    const sidebarLogo = document.getElementById('sidebarLogoImg');
+    const mobileLogo = document.getElementById('mobileLogoImg');
+    const homeLogo = document.querySelector('.home-logo-img');
+    
+    const logoSrc = state.theme === 'light' 
+        ? `src/assets/images/icon-light.png?v=${APP_VERSION}` 
+        : `src/assets/images/icon.png?v=${APP_VERSION}`;
+        
+    if (sidebarLogo) sidebarLogo.src = logoSrc;
+    if (mobileLogo) mobileLogo.src = logoSrc;
+    if (homeLogo) homeLogo.src = logoSrc;
+
     lucide.createIcons();
 }
 

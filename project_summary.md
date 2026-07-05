@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.62** |
-| **v4.0.62** | ✅ **Nổi bật thẻ ghi và hiện nút Sửa/Xóa khi nhấp chọn:** Thiết kế lại cách hiển thị nút Sửa/Xóa của danh sách Huyết Áp và Chỉ số cơ thể thành dạng thẻ thu gọn/mở rộng (Collapsible Card); khi nhấp chọn thẻ, thẻ sẽ nổi lên (Active shadow & transform) đồng thời nút Sửa/Xóa sẽ tự động trượt ra (slide-in) mượt mà; nhấp ra ngoài hoặc nhấp thẻ khác sẽ tự động thu hồi nút. |
+| **Phiên bản hiện tại** | **v4.0.63** |
+| **v4.0.63** | ✅ **Thiết kế Logo thông minh khi đổi giao diện Sáng/Tối:** Tạo tệp logo sáng chuyên biệt (`icon-light.png` với nền trắng sạch, hình vẽ tay nâng tim/đồng tiền vàng 3D hiển thị rõ nét); Tích hợp logic trong `updateThemeUI` để tự động thay đổi nguồn ảnh logo ở cả thanh bên (sidebar), thanh điều hướng di động (mobile navbar) và trang chủ khi chuyển đổi chế độ sáng/tối. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -140,6 +140,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.60** | ✅ **Bỏ qua Kháng trở & Đánh giá Cân bằng cơ thể khi quét AI:** Cập nhật prompt của Gemini Vision để bỏ qua không trích xuất kháng trở điện (Impedance ohms) và Đánh giá cân bằng cơ thể (Body Balance Assessment). Đồng thời tích hợp thêm bộ lọc tại JS (`openBodyCompModal`) để chủ động loại bỏ các chỉ số này trước khi hiển thị/ghi chú để tránh sinh cảnh báo cảnh báo màu vàng phiền hà. |
 | **v4.0.61** | ✅ **Xóa bỏ nút Khóa bảo vệ & Sửa lỗi chuyển hồ sơ rỗng:** Loại bỏ hoàn toàn tính năng Khóa bảo vệ (Edit Lock) theo yêu cầu, hiện nút Sửa/Xóa mọi lúc; Khắc phục lỗi rò rỉ dữ liệu khi chuyển sang hồ sơ chưa có dữ liệu y tế bằng cách loại bỏ early return cản trở vẽ biểu đồ huyết áp và chỉ số cơ thể. |
 | **v4.0.62** | ✅ **Nổi bật thẻ ghi và hiện nút Sửa/Xóa khi nhấp chọn:** Thiết kế lại cách hiển thị nút Sửa/Xóa của danh sách Huyết Áp và Chỉ số cơ thể thành dạng thẻ thu gọn/mở rộng (Collapsible Card); khi nhấp chọn thẻ, thẻ sẽ nổi lên (Active shadow & transform) đồng thời nút Sửa/Xóa sẽ tự động trượt ra (slide-in) mượt mà; nhấp ra ngoài hoặc nhấp thẻ khác sẽ tự động thu hồi nút. |
+| **v4.0.63** | ✅ **Thiết kế Logo thông minh khi đổi giao diện Sáng/Tối:** Tạo tệp logo sáng chuyên biệt (`icon-light.png` với nền trắng sạch, hình vẽ tay nâng tim/đồng tiền vàng 3D hiển thị rõ nét); Tích hợp logic trong `updateThemeUI` để tự động thay đổi nguồn ảnh logo ở cả thanh bên (sidebar), thanh điều hướng di động (mobile navbar) và trang chủ khi chuyển đổi chế độ sáng/tối. |
 
 ---
 
