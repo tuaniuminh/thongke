@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.53';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.53';
+} from '../../core/app.js?v=4.0.54';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.54';
 
 let healthTrendChartInstance = null;
 
@@ -3518,7 +3518,9 @@ function closeBpModal() {
         modal.classList.remove('active');
     }
 }
+window.openBpModal = openBpModal;
 window.closeBpModal = closeBpModal;
+window.deleteBpRecord = deleteBpRecord;
 
 async function handleBpFormSubmit(e) {
     e.preventDefault();
