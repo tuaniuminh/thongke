@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.51** |
-| **v4.0.51** | ✅ **Sửa lỗi API mimeType:** Sửa lỗi gọi biến không tồn tại `mimeType` trong cấu hình yêu cầu của `callGeminiAPI` khi truyền dữ liệu ảnh. |
+| **Phiên bản hiện tại** | **v4.0.52** |
+| **v4.0.52** | ✅ **Sửa hiển thị Tabs chỉ số cơ thể di động:** Thay đổi class của thanh chọn tab trong modal nhập chỉ số cơ thể để không bị đè bởi thuộc tính `display:none` của bảng nhập chỉ số y tế cũ trên di động. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -129,6 +129,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.49** | ✅ **Quét gộp nhiều ảnh bằng AI (Multi-Image Scan):** Hỗ trợ chọn/kéo thả đồng thời nhiều ảnh (ví dụ: chụp nhiều trang màn hình máy đo Accuniq/InBody); Gửi gộp lên Gemini để phân tích và điền tự động hợp nhất các chỉ số cơ thể. |
 | **v4.0.50** | ✅ **Sửa triệt để cuộn Modal cơ thể (Accuniq/InBody):** Loại bỏ inline style overflow:hidden cản trở và chuyển sang cuộn toàn bộ container modal; giải quyết triệt để vấn đề không cuộn được biểu mẫu thêm chỉ số thủ công trên thiết bị di động. |
 | **v4.0.51** | ✅ **Sửa lỗi API mimeType:** Sửa lỗi gọi biến không tồn tại `mimeType` trong cấu hình yêu cầu của `callGeminiAPI` khi truyền dữ liệu ảnh. |
+| **v4.0.52** | ✅ **Sửa hiển thị Tabs chỉ số cơ thể di động:** Thay đổi class của thanh chọn tab trong modal nhập chỉ số cơ thể để không bị đè bởi thuộc tính `display:none` của bảng nhập chỉ số y tế cũ trên di động. |
 
 ---
 
