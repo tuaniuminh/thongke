@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.54';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.54';
+} from '../../core/app.js?v=4.0.55';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.55';
 
 let healthTrendChartInstance = null;
 
@@ -3641,10 +3641,10 @@ function renderBodyCompSection() {
                         ${r.visceralFat ? `<span style="font-size: 0.72rem; background: ${vflCls.bg}; color: ${vflCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">VFL: Lvl ${r.visceralFat}</span>` : ''}
                         ${r.score ? `<span style="font-size: 0.72rem; background: rgba(16,185,129,0.08); color: #10b981; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Điểm: ${r.score}</span>` : ''}
                     </div>
-                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px;">
-                        Cân nặng: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.weight} kg</span>
-                        ${r.muscleMass ? ` · Cơ xương: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.muscleMass} kg</span>` : ''}
-                        ${r.fatMass ? ` · Mỡ: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.fatMass} kg</span>` : ''}
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center;">
+                        <span style="white-space: nowrap;">Cân nặng: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.weight} kg</span></span>
+                        ${r.muscleMass ? `<span style="color: var(--text-muted);">·</span> <span style="white-space: nowrap;">Cơ xương: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.muscleMass} kg</span></span>` : ''}
+                        ${r.fatMass ? `<span style="color: var(--text-muted);">·</span> <span style="white-space: nowrap;">Mỡ: <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">${r.fatMass} kg</span></span>` : ''}
                     </div>
                     <div style="font-size: 0.74rem; color: var(--text-muted);">
                         ${r.device ? `<span style="font-weight: 600; color: var(--text-secondary);">📟 ${escapeHTML(r.device)}</span> · ` : ''}
