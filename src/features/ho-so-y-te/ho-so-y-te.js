@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.50';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.50';
+} from '../../core/app.js?v=4.0.51';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.51';
 
 let healthTrendChartInstance = null;
 
@@ -1671,15 +1671,7 @@ Lưu ý quan trọng:
             const requestBody = {
                 contents: [
                     {
-                        parts: [
-                            { text: promptText },
-                            {
-                                inlineData: {
-                                    mimeType: mimeType,
-                                    data: base64Data
-                                }
-                            }
-                        ]
+                        parts: parts
                     }
                 ],
                 generationConfig: {
