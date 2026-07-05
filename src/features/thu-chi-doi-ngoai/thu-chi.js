@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.65';
-import * as sync from '../../core/sync.js?v=4.0.65';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.65';
+} from '../../core/app.js?v=4.0.66';
+import * as sync from '../../core/sync.js?v=4.0.66';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.66';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1038,7 +1038,10 @@ function updateSidebarNavVisibility(tabId) {
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
     
     if (sidebarLogoImg) {
-        sidebarLogoImg.src = `src/assets/images/icon.png?v=${APP_VERSION}`;
+        const currentLogoSrc = state.theme === 'light' 
+            ? `src/assets/images/icon-light.png?v=${APP_VERSION}` 
+            : `src/assets/images/icon.png?v=${APP_VERSION}`;
+        sidebarLogoImg.src = currentLogoSrc;
     }
     
     if (sidebarLogoText) {

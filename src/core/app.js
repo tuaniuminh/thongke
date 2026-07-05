@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.65';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.65';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.66';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.66';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.65';
-import * as sync from './sync.js?v=4.0.65';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.65';
+import { encrypt, decrypt } from './crypto.js?v=4.0.66';
+import * as sync from './sync.js?v=4.0.66';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.66';
 
-const APP_VERSION = '4.0.65';
+const APP_VERSION = '4.0.66';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1470,11 +1470,14 @@ async function initializeApp() {
     document.querySelectorAll('#setupOverlay .wizard-version-badge').forEach(el => {
         el.textContent = `v${APP_VERSION}`;
     });
-    // Sidebar logo icon & home hero logo: cache-bust with APP_VERSION
+    // Sidebar logo icon & home hero logo: cache-bust with APP_VERSION & select dynamic based on theme
+    const currentLogoSrcInit = state.theme === 'light' 
+        ? `src/assets/images/icon-light.png?v=${APP_VERSION}` 
+        : `src/assets/images/icon.png?v=${APP_VERSION}`;
     const sidebarLogoImgInit = document.getElementById('sidebarLogoImg');
-    if (sidebarLogoImgInit) sidebarLogoImgInit.src = `src/assets/images/icon.png?v=${APP_VERSION}`;
+    if (sidebarLogoImgInit) sidebarLogoImgInit.src = currentLogoSrcInit;
     const homeLogoImg = document.querySelector('.home-logo-img');
-    if (homeLogoImg) homeLogoImg.src = `src/assets/images/icon.png?v=${APP_VERSION}`;
+    if (homeLogoImg) homeLogoImg.src = currentLogoSrcInit;
 
     // Theme initialization
     const savedTheme = localStorage.getItem('gift_ledger_theme');
