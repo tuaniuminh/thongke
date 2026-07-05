@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.52';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.52';
+} from '../../core/app.js?v=4.0.53';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.53';
 
 let healthTrendChartInstance = null;
 
@@ -807,7 +807,9 @@ function initHealthBindings() {
     });
 
     document.getElementById('refreshHealthAiAnalysisBtn')?.addEventListener('click', () => {
-        generateHealthAiAnalysisWithBP(true, state.currentAiAnalysisType === 'bp' ? 'bp_only' : 'full'); // Force re-analysis
+        const type = state.currentAiAnalysisType;
+        const mode = type === 'bp' ? 'bp_only' : (type === 'body_comp' ? 'body_comp_only' : 'full');
+        generateHealthAiAnalysisWithBP(true, mode); // Force re-analysis
     });
 
     const indicatorSelect = document.getElementById('healthChartIndicatorSelect');
@@ -2296,10 +2298,12 @@ function toggleSpeech() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
     
-    const isBp = state.currentAiAnalysisType === 'bp';
-    const lastAiAnalysis = isBp
+    const type = state.currentAiAnalysisType;
+    const lastAiAnalysis = type === 'bp'
         ? (profile ? profile.lastBpAnalysis : state.lastBpAnalysis)
-        : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
+        : (type === 'body_comp'
+            ? (profile ? profile.lastBodyCompAnalysis : state.lastBodyCompAnalysis)
+            : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis));
     
     if (!lastAiAnalysis) {
         showToast('Không có nội dung phân tích để đọc!', 'warning');
@@ -2453,13 +2457,17 @@ function renderHealthAiReport() {
     const selectedProfileId = state.selectedHealthProfileId || 'all';
     const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
     
-    const isBp = state.currentAiAnalysisType === 'bp';
-    const lastAiAnalysis = isBp
+    const type = state.currentAiAnalysisType;
+    const lastAiAnalysis = type === 'bp'
         ? (profile ? profile.lastBpAnalysis : state.lastBpAnalysis)
-        : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis);
-    const lastAiAnalysisDate = isBp
+        : (type === 'body_comp'
+            ? (profile ? profile.lastBodyCompAnalysis : state.lastBodyCompAnalysis)
+            : (profile ? profile.lastAiAnalysis : state.lastAiAnalysis));
+    const lastAiAnalysisDate = type === 'bp'
         ? (profile ? profile.lastBpAnalysisDate : state.lastBpAnalysisDate)
-        : (profile ? profile.lastAiAnalysisDate : state.lastAiAnalysisDate);
+        : (type === 'body_comp'
+            ? (profile ? profile.lastBodyCompAnalysisDate : state.lastBodyCompAnalysisDate)
+            : (profile ? profile.lastAiAnalysisDate : state.lastAiAnalysisDate));
     
     const dateEl = document.getElementById('healthAiAnalysisDate');
     const reportContentEl = document.getElementById('healthAiReportContent');
