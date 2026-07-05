@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.66';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.66';
+} from '../../core/app.js?v=4.0.67';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.67';
 
 let healthTrendChartInstance = null;
 
@@ -3709,26 +3709,26 @@ function renderBodyCompSection() {
                         ${r.time ? `<span style="white-space: nowrap;">lúc ${r.time}</span>` : ''}
                     </div>
 
-                    <!-- Main Values Layout (Left: Weight, Right: Muscle/Fat) -->
-                    <div style="display: flex; gap: 16px; margin-bottom: 4px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                    <!-- Main Values Layout (Responsive: 1 row on desktop, split columns on mobile) -->
+                    <div class="body-comp-summary-layout" style="display: flex; gap: 16px; margin-bottom: 4px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
                         <!-- Left Column: Weight -->
-                        <div style="flex: 1; min-width: 0;">
-                            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Cân nặng</div>
-                            <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">${r.weight} <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">kg</span></div>
+                        <div class="body-comp-col weight-col" style="flex: 1; min-width: 0;">
+                            <div class="metric-label" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Cân nặng</div>
+                            <div class="metric-value" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">${r.weight} <span class="metric-unit" style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">kg</span></div>
                         </div>
                         <!-- Divider line -->
-                        <div style="width: 1px; background: var(--border-color); align-self: stretch;"></div>
+                        <div class="body-comp-divider divider-1" style="width: 1px; background: var(--border-color); align-self: stretch;"></div>
                         <!-- Right Column: Muscle & Fat -->
-                        <div style="flex: 1.4; min-width: 0; display: flex; flex-direction: column; gap: 2px; justify-content: center;">
+                        <div class="body-comp-col stats-col" style="flex: 1.4; min-width: 0; display: flex; flex-direction: column; gap: 2px; justify-content: center;">
                             ${r.muscleMass ? `
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
-                                <span style="color: var(--text-muted);">Cơ xương:</span>
-                                <span style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.muscleMass} kg</span>
+                            <div class="stat-item muscle-item" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                                <span class="stat-label" style="color: var(--text-muted);">Cơ xương:</span>
+                                <span class="stat-value" style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.muscleMass} <span class="stat-unit" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">kg</span></span>
                             </div>` : ''}
                             ${r.fatMass ? `
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
-                                <span style="color: var(--text-muted);">Mỡ:</span>
-                                <span style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.fatMass} kg</span>
+                            <div class="stat-item fat-item" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                                <span class="stat-label" style="color: var(--text-muted);">Mỡ:</span>
+                                <span class="stat-value" style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.fatMass} <span class="stat-unit" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">kg</span></span>
                             </div>` : ''}
                         </div>
                     </div>

@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.66** |
-| **v4.0.66** | ✅ **Khắc phục lỗi Logo trên máy tính & PWA:** Sửa lỗi logo sidebar/navbar không tự chuyển sang logo sáng trên máy tính ở light mode. Đồng thời cấu hình `manifest.json` sử dụng logo sáng (`icon-light.png`) làm logo cài đặt PWA ngoài desktop và đặt `purpose: any` để xóa viền tròn/bo góc trắng tự động. |
+| **Phiên bản hiện tại** | **v4.0.67** |
+| **v4.0.67** | ✅ **Bố cục lại Chỉ số cơ thể trên Desktop:** Cấu hình lại layout hiển thị chỉ số cơ thể (Cân nặng, Cơ xương, Mỡ) dàn ngang trên cùng 1 hàng trên màn hình máy tính (với các đường kẻ phân cách dọc), đồng thời giữ nguyên bố cục di động ban đầu. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -144,6 +144,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.64** | ✅ **Sửa lỗi giữ chủ đề Logo trên Navbar & Thiết kế đồng xu $:** Thay đổi biểu tượng đồng tiền trên logo sáng (`icon-light.png`) thành ký hiệu đô la `$` đồng bộ với logo tối; Khắc phục lỗi logo trên navbar tự động chuyển về màu đen khi chuyển đổi tab/mục y tế/cài đặt bằng cách tích hợp điều kiện chọn logo `state.theme` động trong hàm tái tạo navbar `updateMobileNavbar`. |
 | **v4.0.65** | ✅ **Cập nhật Mẫu Logo Flat Material (Phương án 3):** Sử dụng thiết kế Logo sáng theo phương án 3 do người dùng lựa chọn (phong cách phẳng hiện đại, tay nâng đồng tiền vàng có ký hiệu $ và tim đỏ sắc nét trên nền trắng). |
 | **v4.0.66** | ✅ **Khắc phục lỗi Logo trên máy tính & PWA:** Sửa lỗi logo sidebar/navbar không tự chuyển sang logo sáng trên máy tính ở light mode. Đồng thời cấu hình `manifest.json` sử dụng logo sáng (`icon-light.png`) làm logo cài đặt PWA ngoài desktop và đặt `purpose: any` để xóa viền tròn/bo góc trắng tự động. |
+| **v4.0.67** | ✅ **Bố cục lại Chỉ số cơ thể trên Desktop:** Cấu hình lại layout hiển thị chỉ số cơ thể (Cân nặng, Cơ xương, Mỡ) dàn ngang trên cùng 1 hàng trên màn hình máy tính (với các đường kẻ phân cách dọc), đồng thời giữ nguyên bố cục di động ban đầu. |
 
 ---
 

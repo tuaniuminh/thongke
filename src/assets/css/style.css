@@ -3971,3 +3971,70 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
     pointer-events: auto;
     margin-left: 8px;
 }
+
+/* Custom responsive layout for body composition cards on desktop */
+@media (min-width: 768px) {
+    .body-comp-summary-layout {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0 !important;
+    }
+    
+    .body-comp-summary-layout .body-comp-col.weight-col {
+        flex: 1 !important;
+        text-align: center !important;
+    }
+    
+    .body-comp-summary-layout .body-comp-divider.divider-1 {
+        width: 1px !important;
+        height: 35px !important;
+        background: var(--border-color) !important;
+        margin: 0 !important;
+        align-self: center !important;
+    }
+    
+    .body-comp-summary-layout .body-comp-col.stats-col {
+        flex: 2 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        gap: 0 !important;
+    }
+    
+    .body-comp-summary-layout .stat-item {
+        flex: 1 !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    
+    .body-comp-summary-layout .stat-item .stat-label {
+        font-size: 0.7rem !important;
+        color: var(--text-muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 2px !important;
+    }
+    
+    .body-comp-summary-layout .stat-item .stat-value {
+        font-size: 1.15rem !important;
+        font-weight: 800 !important;
+        color: var(--text-primary) !important;
+        margin-left: 0 !important;
+    }
+    
+    .body-comp-summary-layout .stat-item .stat-unit {
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        color: var(--text-muted) !important;
+    }
+    
+    /* Divider line between muscleMass and fatMass on desktop */
+    .body-comp-summary-layout .body-comp-col.stats-col > .stat-item:not(:last-child) {
+        border-right: 1px solid var(--border-color) !important;
+    }
+}
