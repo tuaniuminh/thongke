@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.59';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.59';
+} from '../../core/app.js?v=4.0.60';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.60';
 
 let healthTrendChartInstance = null;
 
@@ -1585,7 +1585,8 @@ HƯỚNG DẪN CHI TIẾT:
        * segFatRightArmKg, segFatRightArmPct, segFatLeftArmKg, segFatLeftArmPct, segFatTrunkKg, segFatTrunkPct, segFatRightLegKg, segFatRightLegPct, segFatLeftLegKg, segFatLeftLegPct (Mỡ tay Phải/Trái, Thân, Chân Phải/Trái)
        * bmr (BMR, kcal), tdee (TDEE, kcal), recommendedCaloricIntake (Calo khuyên nghị, kcal), targetWeight (Cân nặng mục tiêu, kg), weightControl (Điều chỉnh cân nặng, kg), muscleControl (Điều chỉnh cơ, kg), fatControl (Điều chỉnh mỡ, kg)
        * whr (Eo/mông WHR), vfa (Diện tích mỡ nội tạng VFA, cm2), visceralFatMass (Khối lượng mỡ nội tạng, kg), obesityDegree (Mức độ béo phì, %), smi (Chỉ số cơ xương SMI, kg/m2)
-     + BẮT BUỘC: Nếu phát hiện bất kỳ chỉ số cơ thể nào xuất hiện trên phiếu đo mà KHÔNG khớp với danh sách các khóa tiêu chuẩn ở trên (ví dụ: Hàm lượng khoáng chất trong xương BMC, Tỷ lệ nước trong tế bào riêng lẻ, chu vi vòng cánh tay, v.v.), hãy xếp chúng vào mảng "unmappedIndicators" dưới dạng đối tượng: { "name": "<Tên chỉ số gốc>", "value": "<Giá trị>", "unit": "<Đơn vị nếu có>" }.
+      + BẮT BUỘC: Nếu phát hiện bất kỳ chỉ số cơ thể nào xuất hiện trên phiếu đo mà KHÔNG khớp với danh sách các khóa tiêu chuẩn ở trên (ví dụ: Hàm lượng khoáng chất trong xương BMC, Tỷ lệ nước trong tế bào riêng lẻ, chu vi vòng cánh tay, v.v.), hãy xếp chúng vào mảng "unmappedIndicators" dưới dạng đối tượng: { "name": "<Tên chỉ số gốc>", "value": "<Giá trị>", "unit": "<Đơn vị nếu có>" }.
+      + ĐẶC BIỆT CHÚ Ý: Tuyệt đối BỎ QUA không trích xuất thông tin về "Body Balance Assessment" và "Impedance" (Kháng trở điện). Không đưa chúng vào unmappedIndicators.
      + Trả về JSON có thuộc tính "isBloodPressure": false, "isBodyComposition": true.
    - Nếu là kết quả xét nghiệm y khoa thông thường (xét nghiệm máu, siêu âm, nước tiểu, v.v.):
      + Trích xuất tên xét nghiệm, cơ sở y tế, ngày thực hiện, và danh sách các chỉ số.
@@ -3877,11 +3878,20 @@ function openBodyCompModal(recordId = null, scannedData = null) {
         // Handle unmapped indicators
         let unmappedNotes = '';
         if (scannedData.unmappedIndicators && scannedData.unmappedIndicators.length > 0) {
-            const unmappedStr = scannedData.unmappedIndicators.map(i => `${i.name}: ${i.value} ${i.unit || ''}`).join(', ');
-            unmappedNotes = `[Chỉ số chưa hỗ trợ điền: ${unmappedStr}] `;
+            const filteredUnmapped = scannedData.unmappedIndicators.filter(i => {
+                const nameLower = (i.name || '').toLowerCase();
+                const isImpedance = nameLower.includes('imp') || nameLower.includes('impedance') || nameLower.includes('kháng trở') || nameLower.includes('ohm') || nameLower.includes('ôm') || nameLower.includes('Ω');
+                const isBalance = nameLower.includes('balance') || nameLower.includes('cân bằng') || nameLower.includes('đối xứng');
+                return !isImpedance && !isBalance;
+            });
             
-            // Show toast warning
-            showToast(`⚠️ Phát hiện chỉ số không thuộc biểu mẫu: ${unmappedStr}. Đã đưa vào phần Ghi chú.`, 'warning', 10000);
+            if (filteredUnmapped.length > 0) {
+                const unmappedStr = filteredUnmapped.map(i => `${i.name}: ${i.value} ${i.unit || ''}`).join(', ');
+                unmappedNotes = `[Chỉ số chưa hỗ trợ điền: ${unmappedStr}] `;
+                
+                // Show toast warning
+                showToast(`⚠️ Phát hiện chỉ số không thuộc biểu mẫu: ${unmappedStr}. Đã đưa vào phần Ghi chú.`, 'warning', 10000);
+            }
         }
 
         document.getElementById('bodyCompNotes').value = unmappedNotes + (scannedData.notes || 'Tự động quét từ ảnh');
