@@ -4,8 +4,8 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.78';
-import { decrypt } from '../../core/crypto.js?v=4.0.78';
+} from '../../core/app.js?v=4.0.79';
+import { decrypt } from '../../core/crypto.js?v=4.0.79';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -179,8 +179,8 @@ function ensureDefaultFunds() {
     if (!state.familyFunds || state.familyFunds.length === 0) {
         state.familyFunds = [
             { id: 'fund-main', name: 'Quỹ chính', type: 'main', balance: 0 },
-            { id: 'fund-spending', name: 'Quỹ chi tiêu', type: 'spending', balance: 0 },
-            { id: 'fund-investment', name: 'Quỹ đầu tư', type: 'investment', balance: 0 }
+            { id: 'fund-spending', name: 'Quỹ chi tiêu', type: 'spending', balance: 0, hasContribution: false },
+            { id: 'fund-investment', name: 'Quỹ đầu tư', type: 'investment', balance: 0, hasContribution: true }
         ];
         state.familyFundsUpdated = new Date().toISOString();
     } else {
@@ -190,13 +190,27 @@ function ensureDefaultFunds() {
                 fund.name = 'Quỹ chính';
                 updated = true;
             }
-            if (fund.id === 'fund-spending' && fund.name !== 'Quỹ chi tiêu') {
-                fund.name = 'Quỹ chi tiêu';
-                updated = true;
+            if (fund.id === 'fund-spending') {
+                if (fund.name !== 'Quỹ chi tiêu') {
+                    fund.name = 'Quỹ chi tiêu';
+                    updated = true;
+                }
+                // If hasContribution is undefined, default it to false for spending fund
+                if (fund.hasContribution === undefined) {
+                    fund.hasContribution = false;
+                    updated = true;
+                }
             }
-            if (fund.id === 'fund-investment' && fund.name !== 'Quỹ đầu tư') {
-                fund.name = 'Quỹ đầu tư';
-                updated = true;
+            if (fund.id === 'fund-investment') {
+                if (fund.name !== 'Quỹ đầu tư') {
+                    fund.name = 'Quỹ đầu tư';
+                    updated = true;
+                }
+                // Default hasContribution to true for investment fund
+                if (fund.hasContribution === undefined) {
+                    fund.hasContribution = true;
+                    updated = true;
+                }
             }
         });
         if (updated) {
@@ -294,6 +308,9 @@ export async function checkForSharedFamilyFund() {
                                 spouse_email: parsed.spouse_email,
                                 google_sheets_webhook: parsed.google_sheets_webhook
                             };
+                            if (typeof window.updateHomeLayoutUI === 'function') {
+                                window.updateHomeLayoutUI();
+                            }
                             return;
                         }
                     }
@@ -307,6 +324,9 @@ export async function checkForSharedFamilyFund() {
                         state.fundTransactions = legacyParsed.fundTransactions || [];
                         state.viewingSharedFund = true;
                         state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                        if (typeof window.updateHomeLayoutUI === 'function') {
+                            window.updateHomeLayoutUI();
+                        }
                         return;
                     }
                 }
@@ -316,9 +336,15 @@ export async function checkForSharedFamilyFund() {
         }
         
         state.viewingSharedFund = false;
+        if (typeof window.updateHomeLayoutUI === 'function') {
+            window.updateHomeLayoutUI();
+        }
     } catch (e) {
         console.error("Error checking shared family fund:", e);
         state.viewingSharedFund = false;
+        if (typeof window.updateHomeLayoutUI === 'function') {
+            window.updateHomeLayoutUI();
+        }
     }
 }
 
@@ -385,10 +411,15 @@ function renderFundCards() {
         } else if (fund.type === 'spending') {
             themeClass = 'spending-fund';
             iconName = 'shopping-bag';
-            buttonsHtml = `
+            
+            const contributionButton = fund.hasContribution ? `
                 <button class="btn-fund-action" onclick="openFundActionModal('contribution', '${fund.id}')" style="--accent-color: #10b981;">
                     <i data-lucide="arrow-down-left"></i> Đóng góp
                 </button>
+            ` : '';
+            
+            buttonsHtml = `
+                ${contributionButton}
                 <button class="btn-fund-action" onclick="openFundActionModal('spending', '${fund.id}')" style="--accent-color: #ef4444;">
                     <i data-lucide="arrow-up-right"></i> Chi tiêu
                 </button>
@@ -399,7 +430,15 @@ function renderFundCards() {
         } else if (fund.type === 'investment') {
             themeClass = 'investment-fund';
             iconName = 'trending-up';
+            
+            const contributionButton = fund.hasContribution ? `
+                <button class="btn-fund-action" onclick="openFundActionModal('contribution', '${fund.id}')" style="--accent-color: #10b981;">
+                    <i data-lucide="arrow-down-left"></i> Đóng góp
+                </button>
+            ` : '';
+            
             buttonsHtml = `
+                ${contributionButton}
                 <button class="btn-fund-action" onclick="openFundActionModal('invest', '${fund.id}')" style="--accent-color: #f59e0b;">
                     <i data-lucide="trending-up"></i> Chốt lãi/lỗ
                 </button>
@@ -1254,6 +1293,19 @@ window.openFundEditModal = function(fundId) {
     const showChartCheckbox = document.getElementById('editFundShowChart');
     const activeIds = state.activeChartFundIds || ['fund-main'];
     showChartCheckbox.checked = activeIds.includes(fund.id);
+
+    const hasContribCheckbox = document.getElementById('editFundHasContribution');
+    const hasContribContainer = document.getElementById('editFundHasContributionContainer');
+    if (hasContribCheckbox) {
+        hasContribCheckbox.checked = !!fund.hasContribution;
+    }
+    if (hasContribContainer) {
+        if (fund.id === 'fund-main') {
+            hasContribContainer.style.display = 'none';
+        } else {
+            hasContribContainer.style.display = 'flex';
+        }
+    }
     
     // Only custom funds can be renamed
     document.getElementById('editFundName').disabled = !isCustom;
@@ -1283,6 +1335,7 @@ async function handleFundEditSubmit(e) {
     const fundId = document.getElementById('editFundId').value;
     const name = document.getElementById('editFundName').value.trim();
     const showChart = document.getElementById('editFundShowChart').checked;
+    const hasContrib = document.getElementById('editFundHasContribution')?.checked || false;
     
     const fund = state.familyFunds.find(f => f.id === fundId);
     if (!fund) return;
@@ -1295,6 +1348,10 @@ async function handleFundEditSubmit(e) {
             return;
         }
         fund.name = name;
+    }
+
+    if (fundId !== 'fund-main') {
+        fund.hasContribution = hasContrib;
     }
     
     // Update activeChartFundIds
@@ -1372,8 +1429,6 @@ async function handleAddCustomFundSubmit(e) {
 
     const nameInput = document.getElementById('newCustomFundName').value.trim();
     if (!nameInput) return;
-    
-    const hasContrib = document.getElementById('newCustomFundHasContribution')?.checked || false;
 
     // Check duplicates
     const isDup = (state.familyFunds || []).some(f => f.name.toLowerCase() === nameInput.toLowerCase());
@@ -1387,7 +1442,7 @@ async function handleAddCustomFundSubmit(e) {
         name: nameInput,
         type: 'custom',
         balance: 0,
-        hasContribution: hasContrib
+        hasContribution: false
     };
 
     state.familyFunds = state.familyFunds || [];
@@ -1398,8 +1453,6 @@ async function handleAddCustomFundSubmit(e) {
     
     // Reset input
     document.getElementById('newCustomFundName').value = '';
-    const hasContribEl = document.getElementById('newCustomFundHasContribution');
-    if (hasContribEl) hasContribEl.checked = false;
     
     renderManagementTab();
     showToast(`Đã thêm quỹ "${nameInput}" thành công!`);

@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.78';
-import * as sync from '../../core/sync.js?v=4.0.78';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.78';
+} from '../../core/app.js?v=4.0.79';
+import * as sync from '../../core/sync.js?v=4.0.79';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.79';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -983,11 +983,21 @@ function updateHomeLayoutUI() {
     const isLoggedIn = state.user !== null;
     const cardSettings = document.querySelector('.home-card.card-settings');
     const settingsBtn = document.getElementById('homeSettingsBtn');
+    const cardFund = document.getElementById('homeCardFund');
 
     // --- Card "Đồng bộ & Cấu hình" / "Đăng nhập tài khoản" ---
     // Target v4.0.40: Always hide cardSettings on homepage
     if (cardSettings) {
         cardSettings.style.setProperty('display', 'none', 'important');
+    }
+
+    // --- Card "Quỹ gia đình" ---
+    if (cardFund) {
+        if (state.showFamilyFundCard) {
+            cardFund.style.display = 'flex';
+        } else {
+            cardFund.style.display = 'none';
+        }
     }
 
     // --- Khóa / Mở khóa tất cả các card khác một cách tổng quát ---
@@ -1023,7 +1033,55 @@ function updateHomeLayoutUI() {
         }
     }
 
-    // Cập nhật thời tiết Hà Nội & Lịch âm Việt Nam
+    // --- Lời mời tham gia Quỹ gia đình ---
+    const inviteCard = document.getElementById('spouseFundInviteCard');
+    const inviteText = document.getElementById('spouseFundInviteText');
+    const btnAccept = document.getElementById('btnAcceptSpouseFund');
+    const btnDecline = document.getElementById('btnDeclineSpouseFund');
+    
+    if (inviteCard && inviteText) {
+        if (state.viewingSharedFund && state.sharedFundOwnerEmail) {
+            const inviteStatus = localStorage.getItem('family_fund_invite_' + state.sharedFundOwnerEmail);
+            if (!inviteStatus) {
+                inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${state.sharedFundOwnerEmail}`;
+                inviteCard.style.display = 'flex';
+                
+                if (btnAccept) {
+                    btnAccept.onclick = async () => {
+                        localStorage.setItem('family_fund_invite_' + state.sharedFundOwnerEmail, 'accepted');
+                        state.showFamilyFundCard = true;
+                        state.showFamilyFundCardUpdated = new Date().toISOString();
+                        
+                        await saveLocalState();
+                        performSync(true);
+                        
+                        inviteCard.style.display = 'none';
+                        showToast("Đã chấp nhận lời mời tham gia quỹ chung!");
+                        updateHomeLayoutUI();
+                    };
+                }
+                
+                if (btnDecline) {
+                    btnDecline.onclick = () => {
+                        localStorage.setItem('family_fund_invite_' + state.sharedFundOwnerEmail, 'declined');
+                        inviteCard.style.display = 'none';
+                        showToast("Đã từ chối lời mời.");
+                        updateHomeLayoutUI();
+                    };
+                }
+            } else {
+                inviteCard.style.display = 'none';
+                if (inviteStatus === 'accepted' && !state.showFamilyFundCard) {
+                    state.showFamilyFundCard = true;
+                    state.showFamilyFundCardUpdated = new Date().toISOString();
+                    if (cardFund) cardFund.style.display = 'flex';
+                }
+            }
+        } else {
+            inviteCard.style.display = 'none';
+        }
+    }
+
     if (typeof updateHomeWeather === 'function') {
         updateHomeWeather();
     }
@@ -1086,10 +1144,10 @@ function updateSidebarNavVisibility(tabId) {
         // Khi vào Cài đặt: ẩn toàn bộ nav Thu Chi đối ngoại trên desktop sidebar
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
-        if (navItems.health) navItems.health.style.display = 'block';
-        if (navItems.fund) navItems.fund.style.display = 'block';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
         if (navItems.received) navItems.received.style.display = 'none';
         if (navItems.sent) navItems.sent.style.display = 'none';
@@ -2711,6 +2769,8 @@ async function handleSentSubmit(e) {
     performSync(true);
 }
 
+
+window.updateHomeLayoutUI = updateHomeLayoutUI;
 
 export { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
