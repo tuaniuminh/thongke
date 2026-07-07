@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.0.67';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.67';
+} from '../../core/app.js?v=4.0.69';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.69';
 
 let healthTrendChartInstance = null;
 
@@ -101,6 +101,10 @@ function renderFamilyProfilesList() {
 }
 
 async function addFamilyProfile() {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+        return;
+    }
     const input = document.getElementById('newProfileNameInput');
     if (!input) return;
     const name = input.value.trim();
@@ -136,6 +140,10 @@ async function addFamilyProfile() {
 }
 
 async function editFamilyProfile(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để sửa thông tin", "warning");
+        return;
+    }
     if (id === 'p-self') return;
 
     const profile = (state.familyProfiles || []).find(p => p.id === id);
@@ -171,6 +179,10 @@ async function editFamilyProfile(id) {
 }
 
 async function deleteFamilyProfile(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (id === 'p-self') {
         showToast("Không thể xóa thành viên mặc định!", "warning");
         return;
@@ -478,6 +490,10 @@ async function handleMemberBackupImportFile(e) {
 }
 
 function openMemberDetailsModal(profileId) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để sửa thông tin", "warning");
+        return;
+    }
     const profile = (state.familyProfiles || []).find(p => p.id === profileId);
     if (!profile) {
         showToast("Không tìm thấy thành viên!", "error");
@@ -1483,6 +1499,10 @@ async function processScannedHealthImage(responseJson) {
 }
 
 async function handleHealthFiles(files) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+        return;
+    }
     if (!state.geminiApiKey) {
         showToast("Vui lòng cấu hình Gemini API Key trước khi quét!", "warning");
         const popoverMenu = document.getElementById('geminiPopoverMenu');
@@ -1767,6 +1787,10 @@ Lưu ý quan trọng:
 }
 
 function openHealthEditModal(recordId = null, initialData = null) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm/sửa thông tin", "warning");
+        return;
+    }
     const editModal = document.getElementById('healthEditModal');
     const modalTitle = document.getElementById('healthEditModalTitle');
     const form = document.getElementById('healthEditForm');
@@ -1968,6 +1992,10 @@ async function saveMedicalRecord(event) {
 }
 
 window.deleteMedicalRecord = async function(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ y tế này?")) return;
     
     const index = state.medicalRecords.findIndex(r => r.id === id);
@@ -3375,6 +3403,10 @@ async function exportHealthPDF() {
 // ===========================
 
 async function handleNativeCameraCapture(file) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+        return;
+    }
     if (!file) return;
 
     if (!state.geminiApiKey) {
@@ -3506,6 +3538,10 @@ function renderBloodPressureSection() {
 }
 
 function openBpModal(recordId = null) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm/sửa thông tin", "warning");
+        return;
+    }
     const modal = document.getElementById('bpModal');
     if (!modal) return;
 
@@ -3610,6 +3646,10 @@ async function handleBpFormSubmit(e) {
 }
 
 async function deleteBpRecord(recordId) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (!confirm('Xóa chỉ số huyết áp này?')) return;
     
     const index = (state.bloodPressureRecords || []).findIndex(r => r.id === recordId);
@@ -3777,6 +3817,10 @@ function renderBodyCompSection() {
 }
 
 function openBodyCompModal(recordId = null, scannedData = null) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm/sửa thông tin", "warning");
+        return;
+    }
     const modal = document.getElementById('bodyCompModal');
     if (!modal) return;
 
@@ -4044,6 +4088,10 @@ async function saveBodyCompRecord(e) {
 }
 
 async function deleteBodyCompRecord(recordId) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (!confirm('Xóa bản ghi chỉ số cơ thể này?')) return;
     
     const index = (state.bodyCompositionRecords || []).findIndex(r => r.id === recordId);

@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.67';
-import * as sync from '../../core/sync.js?v=4.0.67';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.67';
+} from '../../core/app.js?v=4.0.69';
+import * as sync from '../../core/sync.js?v=4.0.69';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.69';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -327,6 +327,10 @@ function toggleSentGiftType(type) {
 }
 
 window.editReceivedRecord = function(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để sửa thông tin", "warning");
+        return;
+    }
     const record = state.receivedGifts.find(g => g.id === id);
     if (!record) return;
     
@@ -375,6 +379,10 @@ window.editReceivedRecord = function(id) {
 };
 
 window.deleteReceivedRecord = async function(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (!confirm("Bạn có chắc chắn muốn xóa ghi chép này?")) return;
     
     const index = state.receivedGifts.findIndex(g => g.id === id);
@@ -581,6 +589,10 @@ function renderReceivedTable() {
 // --- Sent Gifts List Views ---
 
 window.editSentRecord = function(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để sửa thông tin", "warning");
+        return;
+    }
     const record = state.sentGifts.find(g => g.id === id);
     if (!record) return;
     
@@ -624,6 +636,10 @@ window.editSentRecord = function(id) {
 };
 
 window.deleteSentRecord = async function(id) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (!confirm("Bạn có chắc chắn muốn xóa ghi chép này?")) return;
     
     const index = state.sentGifts.findIndex(g => g.id === id);
@@ -986,27 +1002,12 @@ function updateHomeLayoutUI() {
             }
         }
         
-        if (!isLoggedIn) {
-            card.classList.add('locked');
-            card.removeAttribute('href');
-            card.onclick = (e) => {
-                e.preventDefault();
-                showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
-                const btn = document.getElementById('homeSettingsBtn');
-                if (btn) {
-                    btn.classList.remove('pulse-highlight');
-                    void btn.offsetWidth; // force reflow to restart keyframe animation
-                    btn.classList.add('pulse-highlight');
-                }
-            };
-        } else {
-            card.classList.remove('locked');
-            const origHref = card.getAttribute('data-original-href');
-            if (origHref) {
-                card.setAttribute('href', origHref);
-            }
-            card.onclick = null;
+        card.classList.remove('locked');
+        const origHref = card.getAttribute('data-original-href');
+        if (origHref) {
+            card.setAttribute('href', origHref);
         }
+        card.onclick = null;
     });
 
     // --- Nút homeSettingsBtn: hiển thị chữ "Đăng nhập" có viền vàng nổi bật khi chưa đăng nhập ---
@@ -1104,17 +1105,12 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
     }
     
-    // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in
-    const isLoggedIn = state.user !== null;
+    // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in (disabled to allow offline access)
     const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health'];
     lockableNavKeys.forEach(key => {
         const item = navItems[key];
         if (item) {
-            if (!isLoggedIn) {
-                item.classList.add('nav-locked');
-            } else {
-                item.classList.remove('nav-locked');
-            }
+            item.classList.remove('nav-locked');
         }
     });
     
@@ -1550,6 +1546,11 @@ function handleExportExcel(type = 'all') {
 window.handleExportExcel = handleExportExcel;
 
 function handleImportFile(e) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm/nhập dữ liệu", "warning");
+        e.target.value = '';
+        return;
+    }
     const file = e.target.files[0];
     if (!file) return;
     
@@ -2049,10 +2050,18 @@ window.closeModal = function(modalId) {
 function setupModalListeners() {
     // Quick add button
     document.getElementById('quickAddBtn').addEventListener('click', () => {
+        if (!state.user) {
+            showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+            return;
+        }
         document.getElementById('quickAddModal').classList.add('active');
     });
     
     document.getElementById('chooseAddReceivedBtn').addEventListener('click', () => {
+        if (!state.user) {
+            showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+            return;
+        }
         closeModal('quickAddModal');
         // Reset received form
         document.getElementById('receivedForm').reset();
@@ -2072,6 +2081,10 @@ function setupModalListeners() {
     });
     
     document.getElementById('chooseAddSentBtn').addEventListener('click', () => {
+        if (!state.user) {
+            showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+            return;
+        }
         closeModal('quickAddModal');
         // Reset sent form
         document.getElementById('sentForm').reset();

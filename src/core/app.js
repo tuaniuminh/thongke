@@ -2,14 +2,14 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.67';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.67';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.69';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.69';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.67';
-import * as sync from './sync.js?v=4.0.67';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.67';
+import { encrypt, decrypt } from './crypto.js?v=4.0.69';
+import * as sync from './sync.js?v=4.0.69';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.69';
 
-const APP_VERSION = '4.0.67';
+const APP_VERSION = '4.0.69';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -795,6 +795,10 @@ function renderCustomEventsSettingsList() {
 }
 
 async function addCustomEventType(name) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+        return;
+    }
     const trimmed = name.trim();
     if (!trimmed) {
         showToast("Tên sự kiện không được để trống!", "warning");
@@ -836,6 +840,10 @@ async function addCustomEventType(name) {
 }
 
 async function deleteCustomEventType(name) {
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
+        return;
+    }
     if (!confirm(`Bạn có chắc chắn muốn xóa loại sự kiện "${name}" khỏi danh sách?`)) {
         return;
     }
@@ -1025,13 +1033,6 @@ function handleHashRoute() {
     
     if (hash && tabHashMapping[hash]) {
         const tabId = tabHashMapping[hash];
-        const isLoggedIn = state.user !== null;
-        if (!isLoggedIn && (tabId === 'health' || tabId === 'dashboard' || tabId === 'received' || tabId === 'sent')) {
-            showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
-            window.location.hash = 'trangchu';
-            return;
-        }
-
         if (homeLayout) homeLayout.style.display = 'none';
         if (appLayout) appLayout.style.display = 'flex';
         if (state.activeTab !== tabId) {
@@ -1049,12 +1050,6 @@ function handleHashRoute() {
 
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true) {
-    const isLoggedIn = state.user !== null;
-    if (!isLoggedIn && (tabId === 'health' || tabId === 'dashboard' || tabId === 'received' || tabId === 'sent')) {
-        showToast('Vui lòng đăng nhập tài khoản trước', 'warning');
-        if (updateHash) window.location.hash = 'trangchu';
-        return;
-    }
     state.activeTab = tabId;
     
     // Update active class on nav links
