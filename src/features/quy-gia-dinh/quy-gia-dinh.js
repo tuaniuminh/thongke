@@ -4,8 +4,8 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.82';
-import { decrypt } from '../../core/crypto.js?v=4.0.82';
+} from '../../core/app.js?v=4.0.83';
+import { decrypt } from '../../core/crypto.js?v=4.0.83';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -262,31 +262,47 @@ export async function checkForSharedFamilyFund() {
     }
 
     try {
+        console.log("[E2EE Debug] Starting checkForSharedFamilyFund for user:", state.user.email);
         const { data, error } = await window.supabase
             .from('gift_sync')
-            .select('user_id, encrypted_data, updated_at');
+            .select('user_id, encrypted_data, updated_at, user_email');
 
-        if (error || !data) return;
+        if (error) {
+            console.error("[E2EE Debug] Supabase error fetching gift_sync:", error);
+            return;
+        }
+        if (!data) {
+            console.warn("[E2EE Debug] No data returned from gift_sync select");
+            return;
+        }
 
+        console.log("[E2EE Debug] Fetched rows count:", data.length);
         const myEmail = state.user.email.toLowerCase().trim();
 
         for (const row of data) {
-            if (row.user_id === state.user.id) continue; // Skip own data
+            if (row.user_id === state.user.id) {
+                console.log("[E2EE Debug] Skipping own row:", row.user_email || row.user_id);
+                continue; // Skip own data
+            }
 
             try {
                 const parsed = JSON.parse(row.encrypted_data);
+                console.log("[E2EE Debug] Processing remote row from:", parsed.owner_email || row.user_email, "shared with spouse:", parsed.spouse_email);
                 
                 if (parsed && parsed.is_hybrid) {
                     if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {
+                        console.log("[E2EE Debug] Match found for spouse_email!");
                         let fundKey = '';
                         if (state.asymmetricPrivateKeyEncrypted) {
                             const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
                             const myEncryptedFundKey = parsed.fund_shared_keys ? parsed.fund_shared_keys[myEmail] : null;
+                            console.log("[E2EE Debug] myEncryptedFundKey exists:", !!myEncryptedFundKey);
                             if (myEncryptedFundKey) {
                                 try {
                                     fundKey = await decryptWithPrivateKey(decryptedPrivKey, myEncryptedFundKey);
+                                    console.log("[E2EE Debug] Decrypted fundKey successfully!");
                                 } catch (decKeyErr) {
-                                    console.error("Spouse failed to decrypt Fund Key:", decKeyErr);
+                                    console.error("[E2EE Debug] Spouse failed to decrypt Fund Key:", decKeyErr);
                                 }
                             }
                         }
@@ -315,6 +331,7 @@ export async function checkForSharedFamilyFund() {
                             return;
                         } else {
                             // Case B: Husband has shared with us, but hasn't encrypted the key using our new public key yet
+                            console.log("[E2EE Debug] Case B: spouse_email matched but no valid fundKey decrypted yet.");
                             state.spouseFundInvitePending = true;
                             state.spouseFundInviteOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
                         }

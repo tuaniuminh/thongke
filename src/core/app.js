@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.82';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.82';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.82';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.83';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.83';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.83';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.82';
-import * as sync from './sync.js?v=4.0.82';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.82';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.83';
+import * as sync from './sync.js?v=4.0.83';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.83';
 
-const APP_VERSION = '4.0.82';
+const APP_VERSION = '4.0.83';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -439,12 +439,21 @@ function mergeLists(localList, remoteList) {
 async function fetchSpousePublicKey(email) {
     if (!window.supabase || !email) return null;
     try {
+        console.log("[E2EE Debug] fetchSpousePublicKey searching for:", email);
         const { data, error } = await window.supabase
             .from('gift_sync')
-            .select('public_key')
+            .select('public_key, user_email, user_id')
             .eq('user_email', email.toLowerCase().trim())
             .maybeSingle();
-        if (error || !data) return null;
+        if (error) {
+            console.error("[E2EE Debug] Supabase error in fetchSpousePublicKey:", error);
+            return null;
+        }
+        if (!data) {
+            console.warn("[E2EE Debug] No public key row found for:", email);
+            return null;
+        }
+        console.log("[E2EE Debug] Found public key for:", email, "key:", !!data.public_key);
         return data.public_key;
     } catch (e) {
         console.error("Failed to fetch spouse public key:", e);
