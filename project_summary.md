@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.76** |
+| **Phiên bản hiện tại** | **v4.0.77** |
+| **v4.0.77** | ✅ **Nâng cấp Bảo Mật Liên Kết Vợ/Chồng (Hybrid E2EE):** Tách biệt dữ liệu mã hóa bằng thuật toán mã hóa bất đối xứng RSA-OAEP 2048-bit (Web Crypto API). Tự động sinh cặp khóa riêng khi mở khóa, lưu khóa công khai/email thô lên Supabase để đối tác tra cứu. Dữ liệu Quỹ gia đình được mã hóa qua một Khóa Quỹ (AES-GCM) độc lập, khóa này được mã hóa bằng khóa công khai của vợ/chồng giúp chỉ hai vợ chồng có quyền giải mã, giữ bí mật tuyệt đối cho hồ sơ y tế/thu chi cá nhân khác. |
 | **v4.0.76** | ✅ **Sửa lỗi đồng bộ & Xóa quỹ tùy chỉnh:** Khắc phục lỗi xóa quỹ tùy chỉnh nhưng đồng bộ tải lại vẫn xuất hiện do hàm `mergeLists` gộp danh sách quỹ đã bị xóa cứng. Bỏ hàm gộp đối với cấu trúc phiên bản toàn phần LWW của `familyFunds` và `fundTransactions`. Sửa lỗi cú pháp nhập nhầm `familyFunds` thay vì `fundTransactions` trong hàm gộp giao dịch. |
 | **v4.0.75** | ✅ **Sửa lỗi kích hoạt Modals & Hoàn tác safe-area di động:** Loại bỏ thuộc tính inline `style="display: none;"` trên các modals Quỹ gia đình để kích hoạt bình thường qua lớp CSS `.active`. Hoàn tác các tùy biến padding-top/safe-area trên trang chủ di động để đưa về lề gốc ban đầu theo yêu cầu. |
 | **v4.0.74** | ✅ **Cải thiện UI Modals & Hỗ trợ Đa biểu đồ:** Tách/Nâng cấp giao diện modals nhập liệu sang phong cách y tế, thêm nút "Chỉnh sửa" quỹ trong danh sách quản lý, hỗ trợ đổi tên, bật/tắt vẽ biểu đồ cho nhiều quỹ cùng lúc ở Tổng quan, sửa lỗi mất làm mờ (blur) thanh trạng thái trên điện thoại khi mở modal. |

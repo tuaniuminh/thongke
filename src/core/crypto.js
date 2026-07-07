@@ -103,3 +103,78 @@ export async function decrypt(cipherText, password) {
         throw new Error("Sai mật khẩu giải mã hoặc dữ liệu bị lỗi");
     }
 }
+
+// Generate Asymmetric RSA-OAEP Keypair
+export async function generateAsymmetricKeypair() {
+    try {
+        const keyPair = await window.crypto.subtle.generateKey(
+            {
+                name: "RSA-OAEP",
+                modulusLength: 2048,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: "SHA-256"
+            },
+            true, // extractable
+            ["encrypt", "decrypt"]
+        );
+        
+        const publicKeyJwk = await window.crypto.subtle.exportKey("jwk", keyPair.publicKey);
+        const privateKeyJwk = await window.crypto.subtle.exportKey("jwk", keyPair.privateKey);
+        
+        return {
+            publicKey: JSON.stringify(publicKeyJwk),
+            privateKey: JSON.stringify(privateKeyJwk)
+        };
+    } catch (e) {
+        console.error("Failed to generate asymmetric keypair:", e);
+        throw new Error("Tạo cặp khóa mã hóa bất đối xứng thất bại");
+    }
+}
+
+// Encrypt plain text using a JWK public key
+export async function encryptWithPublicKey(pubKeyJwkStr, plainText) {
+    try {
+        const pubKey = await window.crypto.subtle.importKey(
+            "jwk",
+            JSON.parse(pubKeyJwkStr),
+            { name: "RSA-OAEP", hash: "SHA-256" },
+            false,
+            ["encrypt"]
+        );
+        const encoder = new TextEncoder();
+        const encrypted = await window.crypto.subtle.encrypt(
+            { name: "RSA-OAEP" },
+            pubKey,
+            encoder.encode(plainText)
+        );
+        return bufToHex(encrypted);
+    } catch (e) {
+        console.error("Public key encryption failed:", e);
+        throw new Error("Mã hóa bằng khóa công khai thất bại");
+    }
+}
+
+// Decrypt cipher text (hex) using a JWK private key
+export async function decryptWithPrivateKey(privKeyJwkStr, cipherTextHex) {
+    try {
+        const privKey = await window.crypto.subtle.importKey(
+            "jwk",
+            JSON.parse(privKeyJwkStr),
+            { name: "RSA-OAEP", hash: "SHA-256" },
+            false,
+            ["decrypt"]
+        );
+        const cipherBuf = hexToBuf(cipherTextHex);
+        const decrypted = await window.crypto.subtle.decrypt(
+            { name: "RSA-OAEP" },
+            privKey,
+            cipherBuf
+        );
+        const decoder = new TextDecoder();
+        return decoder.decode(decrypted);
+    } catch (e) {
+        console.error("Private key decryption failed:", e);
+        throw new Error("Giải mã bằng khóa bí mật thất bại");
+    }
+}
+

@@ -2,9 +2,10 @@
 
 import { 
     state, saveLocalState, showToast, performSync,
-    formatDate, escapeHTML, formatVND, generateId
-} from '../../core/app.js?v=4.0.76';
-import { decrypt } from '../../core/crypto.js?v=4.0.76';
+    formatDate, escapeHTML, formatVND, generateId,
+    decryptWithPrivateKey
+} from '../../core/app.js?v=4.0.77';
+import { decrypt } from '../../core/crypto.js?v=4.0.77';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -203,23 +204,55 @@ export async function checkForSharedFamilyFund() {
 
         if (error || !data) return;
 
+        const myEmail = state.user.email.toLowerCase().trim();
+
         for (const row of data) {
             if (row.user_id === state.user.id) continue; // Skip own data
 
             try {
-                const decrypted = await decrypt(row.encrypted_data, state.masterPassword);
-                const parsed = JSON.parse(decrypted);
+                const parsed = JSON.parse(row.encrypted_data);
+                
+                if (parsed && parsed.is_hybrid) {
+                    if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {
+                        let fundKey = '';
+                        if (state.asymmetricPrivateKeyEncrypted) {
+                            const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
+                            const myEncryptedFundKey = parsed.fund_shared_keys ? parsed.fund_shared_keys[myEmail] : null;
+                            if (myEncryptedFundKey) {
+                                try {
+                                    fundKey = await decryptWithPrivateKey(decryptedPrivKey, myEncryptedFundKey);
+                                } catch (decKeyErr) {
+                                    console.error("Spouse failed to decrypt Fund Key:", decKeyErr);
+                                }
+                            }
+                        }
+                        
+                        if (fundKey && parsed.encrypted_fund) {
+                            const decryptedFund = await decrypt(parsed.encrypted_fund, fundKey);
+                            const fundData = JSON.parse(decryptedFund);
+                            state.familyFunds = fundData.familyFunds || [];
+                            state.fundTransactions = fundData.fundTransactions || [];
+                            state.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
+                            state.viewingSharedFund = true;
+                            state.sharedFundOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
+                            return;
+                        }
+                    }
+                } else {
+                    // Fallback to legacy E2EE format
+                    const decrypted = await decrypt(row.encrypted_data, state.masterPassword);
+                    const legacyParsed = JSON.parse(decrypted);
 
-                if (parsed.spouseEmail && parsed.spouseEmail.toLowerCase().trim() === state.user.email.toLowerCase().trim()) {
-                    // Loaded shared Family Fund
-                    state.familyFunds = parsed.familyFunds || [];
-                    state.fundTransactions = parsed.fundTransactions || [];
-                    state.viewingSharedFund = true;
-                    state.sharedFundOwnerEmail = parsed.ownerEmail || 'Chồng/Vợ';
-                    return;
+                    if (legacyParsed.spouseEmail && legacyParsed.spouseEmail.toLowerCase().trim() === myEmail) {
+                        state.familyFunds = legacyParsed.familyFunds || [];
+                        state.fundTransactions = legacyParsed.fundTransactions || [];
+                        state.viewingSharedFund = true;
+                        state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                        return;
+                    }
                 }
             } catch (decErr) {
-                // Ignore decryption failures
+                // Ignore decryption/parsing failures for other users' rows
             }
         }
         

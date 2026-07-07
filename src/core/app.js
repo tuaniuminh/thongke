@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.76';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.76';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.76';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.77';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.77';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.77';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.76';
-import * as sync from './sync.js?v=4.0.76';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.76';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.77';
+import * as sync from './sync.js?v=4.0.77';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.77';
 
-const APP_VERSION = '4.0.76';
+const APP_VERSION = '4.0.77';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -48,6 +48,9 @@ function getSupabaseConfig() {
 // --- State Variables ---
 let state = {
     masterPassword: '',
+    asymmetricPublicKey: '',
+    asymmetricPrivateKeyEncrypted: '',
+    fundSymmetricKey: '',
     receivedGifts: [],
     sentGifts: [],
     medicalRecords: [],
@@ -288,7 +291,10 @@ async function saveLocalState() {
         familyFunds: state.familyFunds || [],
         familyFundsUpdated: state.familyFundsUpdated || '',
         fundTransactions: state.fundTransactions || [],
-        fundTransactionsUpdated: state.fundTransactionsUpdated || ''
+        fundTransactionsUpdated: state.fundTransactionsUpdated || '',
+        asymmetricPublicKey: state.asymmetricPublicKey || '',
+        asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted || '',
+        fundSymmetricKey: state.fundSymmetricKey || ''
     });
     
     try {
@@ -334,6 +340,9 @@ async function loadLocalState(password) {
         state.familyFundsUpdated = '';
         state.fundTransactions = [];
         state.fundTransactionsUpdated = '';
+        state.asymmetricPublicKey = '';
+        state.asymmetricPrivateKeyEncrypted = '';
+        state.fundSymmetricKey = '';
         return true;
     }
     
@@ -370,6 +379,9 @@ async function loadLocalState(password) {
         state.familyFundsUpdated = data.familyFundsUpdated || '';
         state.fundTransactions = data.fundTransactions || [];
         state.fundTransactionsUpdated = data.fundTransactionsUpdated || '';
+        state.asymmetricPublicKey = data.asymmetricPublicKey || '';
+        state.asymmetricPrivateKeyEncrypted = data.asymmetricPrivateKeyEncrypted || '';
+        state.fundSymmetricKey = data.fundSymmetricKey || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -401,6 +413,23 @@ function mergeLists(localList, remoteList) {
     });
     
     return Array.from(mergedMap.values());
+}
+
+// Fetch spouse public key from Supabase
+async function fetchSpousePublicKey(email) {
+    if (!window.supabase || !email) return null;
+    try {
+        const { data, error } = await window.supabase
+            .from('gift_sync')
+            .select('public_key')
+            .eq('user_email', email.toLowerCase().trim())
+            .maybeSingle();
+        if (error || !data) return null;
+        return data.public_key;
+    } catch (e) {
+        console.error("Failed to fetch spouse public key:", e);
+        return null;
+    }
 }
 
 // Auto-sync function
@@ -438,9 +467,69 @@ async function performSync(silent = false) {
         
         if (remoteRecord && remoteRecord.encrypted_data) {
             try {
-                // 2. Decrypt remote data
-                const remoteDecrypted = await decrypt(remoteRecord.encrypted_data, state.masterPassword);
-                const remoteData = JSON.parse(remoteDecrypted);
+                // 2. Decrypt remote data (Hybrid / Standard fallback)
+                let remoteData = null;
+                let isHybrid = false;
+                
+                try {
+                    const parsedObj = JSON.parse(remoteRecord.encrypted_data);
+                    if (parsedObj && parsedObj.is_hybrid) {
+                        isHybrid = true;
+                        
+                        // Decrypt personal data
+                        const decryptedPersonal = await decrypt(parsedObj.encrypted_personal, state.masterPassword);
+                        remoteData = JSON.parse(decryptedPersonal);
+                        
+                        // Decrypt Fund Key using our private key
+                        let fundKey = '';
+                        if (state.asymmetricPrivateKeyEncrypted) {
+                            const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
+                            const myEmail = user.email.toLowerCase().trim();
+                            const myEncryptedFundKey = parsedObj.fund_shared_keys ? parsedObj.fund_shared_keys[myEmail] : null;
+                            if (myEncryptedFundKey) {
+                                try {
+                                    fundKey = await decryptWithPrivateKey(decryptedPrivKey, myEncryptedFundKey);
+                                } catch (decKeyErr) {
+                                    console.error("Failed to decrypt Fund Key using Private Key:", decKeyErr);
+                                }
+                            }
+                        }
+                        
+                        // Decrypt family fund data
+                        if (fundKey && parsedObj.encrypted_fund) {
+                            try {
+                                const decryptedFund = await decrypt(parsedObj.encrypted_fund, fundKey);
+                                const fundData = JSON.parse(decryptedFund);
+                                remoteData.familyFunds = fundData.familyFunds || [];
+                                remoteData.familyFundsUpdated = fundData.familyFundsUpdated || '';
+                                remoteData.fundTransactions = fundData.fundTransactions || [];
+                                remoteData.fundTransactionsUpdated = fundData.fundTransactionsUpdated || '';
+                                remoteData.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
+                            } catch (decFundErr) {
+                                console.error("Failed to decrypt Fund Data using Fund Key:", decFundErr);
+                                remoteData.familyFunds = state.familyFunds;
+                                remoteData.familyFundsUpdated = state.familyFundsUpdated;
+                                remoteData.fundTransactions = state.fundTransactions;
+                                remoteData.fundTransactionsUpdated = state.fundTransactionsUpdated;
+                            }
+                        } else {
+                            remoteData.familyFunds = state.familyFunds;
+                            remoteData.familyFundsUpdated = state.familyFundsUpdated;
+                            remoteData.fundTransactions = state.fundTransactions;
+                            remoteData.fundTransactionsUpdated = state.fundTransactionsUpdated;
+                        }
+                        
+                        remoteData.spouseEmail = parsedObj.spouse_email || '';
+                        remoteData.googleSheetsWebhook = parsedObj.google_sheets_webhook || '';
+                    }
+                } catch (jsonErr) {
+                    // Fallback below
+                }
+                
+                if (!isHybrid) {
+                    const remoteDecrypted = await decrypt(remoteRecord.encrypted_data, state.masterPassword);
+                    remoteData = JSON.parse(remoteDecrypted);
+                }
                 
                 const remoteReset = remoteData.lastResetTime || '';
                 let remoteReceived = remoteData.receivedGifts || [];
@@ -609,8 +698,20 @@ async function performSync(silent = false) {
         state.lastResetTime = localReset;
         await saveLocalState();
         
-        // 5. Encrypt and upload merged state to server
-        const payload = JSON.stringify({
+        // 5. Encrypt and upload merged state to server (Hybrid E2EE payload)
+        if (state.masterPassword && !state.asymmetricPublicKey) {
+            try {
+                const keys = await generateAsymmetricKeypair();
+                state.asymmetricPublicKey = keys.publicKey;
+                state.asymmetricPrivateKeyEncrypted = await encrypt(keys.privateKey, state.masterPassword);
+                await saveLocalState();
+            } catch (keysErr) {
+                console.error("Failed to generate keys during performSync:", keysErr);
+            }
+        }
+
+        // 5a. Encrypt personal data with Master Password
+        const personalPayload = JSON.stringify({
             receivedGifts: state.receivedGifts,
             sentGifts: state.sentGifts,
             medicalRecords: state.medicalRecords || [],
@@ -635,18 +736,63 @@ async function performSync(silent = false) {
             bloodPressureRecords: state.bloodPressureRecords || [],
             bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || '',
             bodyCompositionRecords: state.bodyCompositionRecords || [],
-            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || '',
+            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || ''
+        });
+        const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
+
+        // 5b. Encrypt Family Fund data with Fund Key
+        if (!state.fundSymmetricKey) {
+            state.fundSymmetricKey = generateId() + generateId();
+            await saveLocalState();
+        }
+        
+        const fundPayload = JSON.stringify({
             familyFunds: state.familyFunds || [],
             familyFundsUpdated: state.familyFundsUpdated || '',
-            spouseEmail: state.spouseEmail || '',
-            ownerEmail: state.user ? state.user.email : '',
-            googleSheetsWebhook: state.googleSheetsWebhook || '',
-            activeChartFundIds: state.activeChartFundIds || ['fund-main'],
             fundTransactions: state.fundTransactions || [],
-            fundTransactionsUpdated: state.fundTransactionsUpdated || ''
+            fundTransactionsUpdated: state.fundTransactionsUpdated || '',
+            activeChartFundIds: state.activeChartFundIds || ['fund-main']
         });
-        const encrypted = await encrypt(payload, state.masterPassword);
-        await sync.saveSyncData(encrypted);
+        const encryptedFund = await encrypt(fundPayload, state.fundSymmetricKey);
+
+        // 5c. Encrypt Fund Key for ourselves
+        const fundSharedKeys = {};
+        if (state.asymmetricPublicKey) {
+            try {
+                const encryptedSelfKey = await encryptWithPublicKey(state.asymmetricPublicKey, state.fundSymmetricKey);
+                fundSharedKeys[user.email.toLowerCase().trim()] = encryptedSelfKey;
+            } catch (selfKeyErr) {
+                console.error("Failed to encrypt fund key for self:", selfKeyErr);
+            }
+        }
+
+        // 5d. Encrypt Fund Key for spouse (if configured)
+        if (state.spouseEmail) {
+            const spousePubKey = await fetchSpousePublicKey(state.spouseEmail);
+            if (spousePubKey) {
+                try {
+                    const encryptedSpouseKey = await encryptWithPublicKey(spousePubKey, state.fundSymmetricKey);
+                    fundSharedKeys[state.spouseEmail.toLowerCase().trim()] = encryptedSpouseKey;
+                } catch (spouseKeyErr) {
+                    console.error("Failed to encrypt fund key for spouse:", spouseKeyErr);
+                }
+            }
+        }
+
+        // 5e. Construct and upload hybrid payload
+        const hybridPayload = JSON.stringify({
+            is_hybrid: true,
+            encrypted_personal: encryptedPersonal,
+            encrypted_fund: encryptedFund,
+            fund_shared_keys: fundSharedKeys,
+            owner_email: user.email,
+            spouse_email: state.spouseEmail || '',
+            google_sheets_webhook: state.googleSheetsWebhook || '',
+            family_funds_updated: state.familyFundsUpdated || '',
+            fund_transactions_updated: state.fundTransactionsUpdated || ''
+        });
+
+        await sync.saveSyncData(hybridPayload);
         
         // 6. Refresh UI
         localStorage.setItem('last_sync_time', new Date().toISOString());
@@ -1050,6 +1196,21 @@ const tabIdToHash = {
 
 // Central helper to enter the application layout or home landing view
 function enterApp() {
+    if (state.masterPassword && !state.asymmetricPublicKey) {
+        (async () => {
+            try {
+                const keys = await generateAsymmetricKeypair();
+                state.asymmetricPublicKey = keys.publicKey;
+                state.asymmetricPrivateKeyEncrypted = await encrypt(keys.privateKey, state.masterPassword);
+                await saveLocalState();
+                console.log("Generated asymmetric keypair successfully.");
+                performSync(true); // Silent sync to publish keys
+            } catch (e) {
+                console.error("Failed to generate asymmetric keys on enterApp:", e);
+            }
+        })();
+    }
+
     const wizardOverlay = document.getElementById('setupWizardOverlay');
     if (wizardOverlay) wizardOverlay.style.display = 'none';
     const unlockOverlay = document.getElementById('unlockOverlay');
@@ -2379,5 +2540,6 @@ export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate,
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 
     checkLoginStatus, renderDashboardSyncBanner, updateHomeWeather, 
-    updateHomeLunar, compareRecordsByRecent, renderAll 
+    updateHomeLunar, compareRecordsByRecent, renderAll,
+    generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey
 };

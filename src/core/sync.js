@@ -85,6 +85,8 @@ export async function getSyncData() {
     return data;
 }
 
+import { state } from './app.js?v=4.0.77';
+
 // Save encrypted data to gift_sync table (insert or update)
 export async function saveSyncData(encryptedData) {
     if (!supabase) throw new Error("Chưa cấu hình kết nối Supabase");
@@ -97,7 +99,9 @@ export async function saveSyncData(encryptedData) {
         .upsert({
             user_id: user.id,
             encrypted_data: encryptedData,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            user_email: user.email,
+            public_key: state.asymmetricPublicKey || null
         });
 
     if (error) {
