@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.77';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.77';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.77';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.78';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.78';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.78';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.77';
-import * as sync from './sync.js?v=4.0.77';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.77';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.78';
+import * as sync from './sync.js?v=4.0.78';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.78';
 
-const APP_VERSION = '4.0.77';
+const APP_VERSION = '4.0.78';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -83,6 +83,7 @@ let state = {
     activeChartFundIds: ['fund-main'],
     viewingSharedFund: false,
     sharedFundOwnerEmail: '',
+    sharedFundSourceRow: null,
     fundTransactions: [],
     fundTransactionsUpdated: '',
     activeTab: 'dashboard',
@@ -142,7 +143,10 @@ function parseAmountInput(valStr) {
     if (!valStr) return 0;
     const clean = valStr.replace(/\D/g, '');
     let num = Number(clean) || 0;
-    return num * 1000; // Always multiply by 1000
+    if (num > 0 && num < 1000000) {
+        num = num * 1000;
+    }
+    return num;
 }
 
 // Compare records by date (descending) and updated_at (descending)
@@ -435,7 +439,80 @@ async function fetchSpousePublicKey(email) {
 // Auto-sync function
 async function performSync(silent = false) {
     if (state.viewingSharedFund) {
-        // Skip sync if viewing shared fund (read-only mode)
+        if (!state.sharedFundSourceRow || !state.sharedFundSourceRow.user_id) {
+            console.error("No shared fund source metadata found.");
+            return;
+        }
+        
+        try {
+            if (!silent) showToast("Đang đồng bộ lên quỹ chung...", "warning");
+            
+            const { data: remoteRecord, error: fetchErr } = await window.supabase
+                .from('gift_sync')
+                .select('encrypted_data')
+                .eq('user_id', state.sharedFundSourceRow.user_id)
+                .maybeSingle();
+                
+            if (fetchErr) throw fetchErr;
+            
+            let latestFamilyFunds = state.familyFunds;
+            let latestFundTransactions = state.fundTransactions;
+            let fundKey = state.fundSymmetricKey;
+            let originalParsed = {};
+            
+            if (remoteRecord && remoteRecord.encrypted_data) {
+                originalParsed = JSON.parse(remoteRecord.encrypted_data);
+                if (originalParsed.is_hybrid && originalParsed.encrypted_fund) {
+                    const decryptedFund = await decrypt(originalParsed.encrypted_fund, fundKey);
+                    const fundData = JSON.parse(decryptedFund);
+                    
+                    latestFundTransactions = mergeLists(state.fundTransactions, fundData.fundTransactions || []);
+                    latestFamilyFunds = fundData.familyFunds || state.familyFunds;
+                }
+            }
+            
+            const fundPayload = JSON.stringify({
+                familyFunds: latestFamilyFunds,
+                familyFundsUpdated: new Date().toISOString(),
+                fundTransactions: latestFundTransactions,
+                fundTransactionsUpdated: new Date().toISOString(),
+                activeChartFundIds: state.activeChartFundIds || ['fund-main']
+            });
+            const encryptedFund = await encrypt(fundPayload, fundKey);
+            
+            const hybridPayload = JSON.stringify({
+                is_hybrid: true,
+                encrypted_personal: originalParsed.encrypted_personal,
+                encrypted_fund: encryptedFund,
+                fund_shared_keys: originalParsed.fund_shared_keys,
+                owner_email: originalParsed.owner_email,
+                spouse_email: originalParsed.spouse_email,
+                google_sheets_webhook: originalParsed.google_sheets_webhook || '',
+                family_funds_updated: new Date().toISOString(),
+                fund_transactions_updated: new Date().toISOString()
+            });
+            
+            const { error: uploadErr } = await window.supabase
+                .from('gift_sync')
+                .upsert({
+                    user_id: state.sharedFundSourceRow.user_id,
+                    encrypted_data: hybridPayload,
+                    updated_at: new Date().toISOString(),
+                    user_email: originalParsed.owner_email,
+                    public_key: originalParsed.public_key || null
+                });
+                
+            if (uploadErr) throw uploadErr;
+            
+            state.familyFunds = latestFamilyFunds;
+            state.fundTransactions = latestFundTransactions;
+            
+            if (!silent) showToast("Đồng bộ quỹ chung thành công!");
+            renderAll();
+        } catch (e) {
+            console.error("Shared fund sync error:", e);
+            if (!silent) showToast("Lỗi đồng bộ lên quỹ chung: " + e.message, "danger");
+        }
         return;
     }
 

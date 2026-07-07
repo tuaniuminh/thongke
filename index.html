@@ -38,11 +38,11 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.77">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.78">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.77">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.77">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.78">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.78">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -64,7 +64,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.77" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.78" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -144,7 +144,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.77" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.78" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -933,6 +933,10 @@
                                     <label class="form-label" for="newCustomFundName" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Tên quỹ</label>
                                     <input type="text" id="newCustomFundName" class="form-input" placeholder="Ví dụ: Quỹ du lịch" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 8px 12px; color: var(--text-primary);" required>
                                 </div>
+                                <div class="form-group" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="newCustomFundHasContribution" style="width: 16px; height: 16px; accent-color: var(--accent-emerald);">
+                                    <label for="newCustomFundHasContribution" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; user-select: none;">Cho phép đóng góp từ tiền riêng</label>
+                                </div>
                                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px;">Tạo Quỹ</button>
                             </form>
                             <div class="custom-funds-list-section" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; flex-grow: 1;">
@@ -961,6 +965,10 @@
                             <div class="form-group">
                                 <label class="form-label health-form-label" for="contribMember">Thành viên đóng góp</label>
                                 <select id="contribMember" class="form-control health-input" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label health-form-label" for="contribFundSelect">Nạp vào quỹ</label>
+                                <select id="contribFundSelect" class="form-control health-input" required></select>
                             </div>
                             <div class="health-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div class="form-group">
@@ -1062,6 +1070,44 @@
                             <div class="form-group">
                                 <label class="form-label health-form-label" for="spendingNotes">Lý do chi tiêu</label>
                                 <input type="text" id="spendingNotes" class="form-control health-input" placeholder="Ví dụ: Mua thực phẩm hàng ngày" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label health-form-label" for="spendingEventType">Loại sự kiện</label>
+                                <select id="spendingEventType" class="form-control health-input">
+                                    <option value="none" selected>Không có sự kiện</option>
+                                    <option value="Đám cưới">Đám cưới</option>
+                                    <option value="Đám hiếu">Đám hiếu</option>
+                                    <option value="Sinh nhật">Sinh nhật</option>
+                                    <option value="Thăm ốm">Thăm ốm</option>
+                                    <option value="Tân gia">Tân gia</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="spendingSyncExternalGroup" style="display: none; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="spendingSyncExternal" style="width: 18px; height: 18px; accent-color: var(--accent-emerald);">
+                                <label for="spendingSyncExternal" class="form-label health-form-label" style="margin: 0; cursor: pointer; user-select: none;">Đồng bộ vào Thu chi đối ngoại (Tiền tôi mừng)</label>
+                            </div>
+                            <div id="spendingExternalDetails" style="display: none; flex-direction: column; gap: 12px; border-left: 2px solid var(--accent-emerald); padding-left: 12px; margin-top: 4px;">
+                                <div class="form-group">
+                                    <label class="form-label health-form-label" for="spendingExternalName">Họ và Tên người nhận</label>
+                                    <input type="text" id="spendingExternalName" class="form-control health-input" placeholder="Ví dụ: Nguyễn Văn A">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label health-form-label" for="spendingExternalRelationship">Mối quan hệ</label>
+                                    <select id="spendingExternalRelationship" class="form-control health-input">
+                                        <option value="Họ hàng">Họ hàng</option>
+                                        <option value="Bạn học">Bạn học</option>
+                                        <option value="Đồng nghiệp">Đồng nghiệp</option>
+                                        <option value="Hàng xóm">Hàng xóm</option>
+                                        <option value="Bạn xã hội">Bạn xã hội</option>
+                                        <option value="Chính quyền">Chính quyền</option>
+                                        <option value="Khác" selected>Khác</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label health-form-label" for="spendingExternalAddress">Địa chỉ / Nơi diễn ra sự kiện</label>
+                                    <input type="text" id="spendingExternalAddress" class="form-control health-input" placeholder="Ví dụ: Nhà hàng tiệc cưới...">
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: rgba(0,0,0,0.15);">
@@ -1191,7 +1237,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.77" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.78" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2656,7 +2702,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.77"></script>
-    <script type="module" src="src/core/app.js?v=4.0.77"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.78"></script>
+    <script type="module" src="src/core/app.js?v=4.0.78"></script>
 </body>
 </html>
