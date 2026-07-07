@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId
-} from '../../core/app.js?v=4.0.75';
-import { decrypt } from '../../core/crypto.js?v=4.0.75';
+} from '../../core/app.js?v=4.0.76';
+import { decrypt } from '../../core/crypto.js?v=4.0.76';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};

@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.75';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.75';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.75';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.76';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.76';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.76';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.75';
-import * as sync from './sync.js?v=4.0.75';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.75';
+import { encrypt, decrypt } from './crypto.js?v=4.0.76';
+import * as sync from './sync.js?v=4.0.76';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.76';
 
-const APP_VERSION = '4.0.75';
+const APP_VERSION = '4.0.76';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -590,8 +590,8 @@ async function performSync(silent = false) {
                 mergedMedical = mergeLists(state.medicalRecords || [], remoteMedical);
                 mergedBP = state.bloodPressureRecords; // BP already merged via LWW above
                 mergedBodyComp = state.bodyCompositionRecords;
-                mergedFamilyFunds = mergeLists(state.familyFunds || [], remoteData.familyFunds || []);
-                mergedFundTransactions = mergeLists(state.fundTransactions || [], remoteData.fundTransactions || []);
+                mergedFamilyFunds = state.familyFunds; // Already merged via LWW above
+                mergedFundTransactions = state.fundTransactions; // Already merged via LWW above
             } catch (decErr) {
                 console.error("Remote decryption failed:", decErr);
                 throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
