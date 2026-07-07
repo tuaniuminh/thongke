@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.69** |
-| **v4.0.69** | ✅ **Cho phép truy cập Offline & Chặn Sửa/Xóa khi chưa Đăng nhập:** Gỡ bỏ bắt buộc đăng nhập tài khoản Sync (Supabase) để vào các card y tế và tài chính. Đồng thời thêm quy tắc bảo mật chặn các hành động sửa/xóa bản ghi và thành viên gia đình khi chưa đăng nhập, hiển thị thông báo Toast yêu cầu đăng nhập. |
+| **Phiên bản hiện tại** | **v4.0.70** |
+| **v4.0.70** | ✅ **Logo PWA mới:** Cập nhật logo cài ngoài Desktop (PWA) `icon-light-pwa.png` bằng hình ảnh mới được người dùng cung cấp (đã xử lý loại bỏ nền caro xám trắng giả trong suốt, thay bằng nền trong suốt thật sự bên ngoài viền xanh bo góc, phóng to sát viền và resize chuẩn 512x512), nâng cấp phiên bản v4.0.70. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -147,6 +147,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.67** | ✅ **Bố cục lại Chỉ số cơ thể trên Desktop:** Cấu hình lại layout hiển thị chỉ số cơ thể (Cân nặng, Cơ xương, Mỡ) dàn ngang trên cùng 1 hàng trên màn hình máy tính (với các đường kẻ phân cách dọc), đồng thời giữ nguyên bố cục di động ban đầu. |
 | **v4.0.68** | ✅ **Hoàn tác Logo PWA:** Khôi phục logo cài ngoài Desktop (PWA) `icon-light-pwa.png` về phiên bản có nền trắng vuông và viền màu xanh bọc ngoài cùng (trước khi dùng thuật toán xóa nền trong suốt), nâng cấp phiên bản v4.0.68. |
 | **v4.0.69** | ✅ **Cho phép truy cập Offline & Chặn Sửa/Xóa khi chưa Đăng nhập:** Gỡ bỏ bắt buộc đăng nhập tài khoản Sync (Supabase) để vào các card y tế và tài chính. Đồng thời thêm quy tắc bảo mật chặn các hành động sửa/xóa bản ghi và thành viên gia đình khi chưa đăng nhập, hiển thị thông báo Toast yêu cầu đăng nhập. |
+| **v4.0.70** | ✅ **Logo PWA mới:** Cập nhật logo cài ngoài Desktop (PWA) `icon-light-pwa.png` bằng hình ảnh mới được người dùng cung cấp (đã xử lý loại bỏ nền caro xám trắng giả trong suốt, thay bằng nền trong suốt thật sự bên ngoài viền xanh bo góc, phóng to sát viền và resize chuẩn 512x512), nâng cấp phiên bản v4.0.70. |
 
 ---
 
