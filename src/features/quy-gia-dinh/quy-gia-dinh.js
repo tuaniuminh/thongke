@@ -4,8 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.83';
-import { decrypt } from '../../core/crypto.js?v=4.0.83';
+} from '../../core/app.js?v=4.0.84';
+import { decrypt } from '../../core/crypto.js?v=4.0.84';
+import * as sync from '../../core/sync.js?v=4.0.84';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -256,14 +257,15 @@ export function calculateFundBalances() {
 
 // Check for shared family fund on Supabase (Wife's view)
 export async function checkForSharedFamilyFund() {
-    if (!state.user || !window.supabase) {
+    const supabaseClient = sync.getSupabase();
+    if (!state.user || !supabaseClient) {
         state.viewingSharedFund = false;
         return;
     }
 
     try {
         console.log("[E2EE Debug] Starting checkForSharedFamilyFund for user:", state.user.email);
-        const { data, error } = await window.supabase
+        const { data, error } = await supabaseClient
             .from('gift_sync')
             .select('user_id, encrypted_data, updated_at, user_email');
 

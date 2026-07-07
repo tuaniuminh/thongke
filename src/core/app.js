@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.83';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.83';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.83';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.84';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.84';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.84';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.83';
-import * as sync from './sync.js?v=4.0.83';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.83';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.84';
+import * as sync from './sync.js?v=4.0.84';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.84';
 
-const APP_VERSION = '4.0.83';
+const APP_VERSION = '4.0.84';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -437,10 +437,11 @@ function mergeLists(localList, remoteList) {
 
 // Fetch spouse public key from Supabase
 async function fetchSpousePublicKey(email) {
-    if (!window.supabase || !email) return null;
+    const supabaseClient = sync.getSupabase();
+    if (!supabaseClient || !email) return null;
     try {
         console.log("[E2EE Debug] fetchSpousePublicKey searching for:", email);
-        const { data, error } = await window.supabase
+        const { data, error } = await supabaseClient
             .from('gift_sync')
             .select('public_key, user_email, user_id')
             .eq('user_email', email.toLowerCase().trim())
@@ -469,10 +470,16 @@ async function performSync(silent = false) {
             return;
         }
         
+        const supabaseClient = sync.getSupabase();
+        if (!supabaseClient) {
+            console.error("Supabase client is not initialized.");
+            return;
+        }
+        
         try {
             if (!silent) showToast("Đang đồng bộ lên quỹ chung...", "warning");
             
-            const { data: remoteRecord, error: fetchErr } = await window.supabase
+            const { data: remoteRecord, error: fetchErr } = await supabaseClient
                 .from('gift_sync')
                 .select('encrypted_data')
                 .eq('user_id', state.sharedFundSourceRow.user_id)
@@ -517,7 +524,7 @@ async function performSync(silent = false) {
                 fund_transactions_updated: new Date().toISOString()
             });
             
-            const { error: uploadErr } = await window.supabase
+            const { error: uploadErr } = await supabaseClient
                 .from('gift_sync')
                 .upsert({
                     user_id: state.sharedFundSourceRow.user_id,

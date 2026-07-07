@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.83** |
+| **Phiên bản hiện tại** | **v4.0.84** |
+| **v4.0.84** | ✅ **Sửa lỗi crash gọi sai đối tượng Supabase (from is not a function):** Đã sửa đổi triệt để lỗi gọi nhầm constructor CDN `window.supabase` thay vì instance client đã khởi tạo qua `sync.getSupabase()`. Lỗi này gây crash hoàn toàn tiến trình đồng bộ ngầm khi truy vấn và upload khóa E2EE, làm hỏng toàn bộ tính năng liên kết Quỹ gia đình trên cả thiết bị của chồng và vợ. |
 | **v4.0.83** | ✅ **Bổ sung công cụ chẩn đoán E2EE Debug Console:** Thêm tiền tố `[E2EE Debug]` in các log của hàm kiểm tra quỹ chung `checkForSharedFamilyFund` và tìm kiếm khóa công khai `fetchSpousePublicKey`. Giúp người dùng dễ dàng mở màn hình kiểm tra lỗi F12 (Console) để cung cấp log phản hồi tức thì về trạng thái liên kết và lỗi nếu có trên cơ sở dữ liệu Supabase. |
 | **v4.0.82** | ✅ **Sửa lỗi bay cài đặt liên kết vợ/chồng & webhook khi mở lại app:** Sửa lỗi thiếu tuần tự hóa (serialization) các cấu hình `spouseEmail` và `googleSheetsWebhook` trong hàm `saveLocalState` và `loadLocalState`. Lỗi này khiến các trường này bị xóa rỗng về `""` sau mỗi lần người dùng tải lại trang hoặc mở lại ứng dụng, gián tiếp hủy hoại liên kết ghép đôi E2EE trên Supabase và làm vợ không nhận được lời mời. |
 | **v4.0.81** | ✅ **Nâng cấp ghép đôi E2EE tự phục hồi & Thông báo liên kết:** Sửa lỗi cuộc đua tranh chấp khóa khi ghép đôi vợ chồng (lỗi do người nhận chưa khởi tạo khóa hoặc đăng nhập lần đầu). Bổ sung trạng thái `spouseFundInvitePending` để hiển thị Banner thông báo chờ liên kết trên màn hình vợ/chồng. Thiết kế cơ chế tự động trao đổi và cập nhật lại mã khóa mã hóa (Self-healing E2EE Key Exchange) ngay khi đối tác đăng nhập hoặc đồng bộ lại, giúp đồng bộ Quỹ gia đình tự phục hồi mà không cần thiết lập lại thủ công. |
