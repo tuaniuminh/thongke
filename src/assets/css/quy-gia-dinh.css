@@ -392,3 +392,93 @@
     align-items: center;
     gap: 4px;
 }
+
+/* Subtabs Navigation */
+.fund-subtabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.fund-subtab-btn {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.fund-subtab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.fund-subtab-btn.active {
+    color: #fff;
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
+.fund-subtab-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+/* Custom Funds Management styles */
+.mgmt-fund-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.mgmt-fund-item .fund-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mgmt-fund-item .fund-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mgmt-fund-item .fund-balance {
+    font-weight: 700;
+    color: var(--accent-emerald);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.mgmt-fund-item .btn-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mgmt-fund-item .btn-delete:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}

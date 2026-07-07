@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.71';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.71';
-import { initFundBindings, renderFundDashboard } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.71';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.72';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.72';
+import { initFundBindings, renderFundDashboard } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.72';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.71';
-import * as sync from './sync.js?v=4.0.71';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.71';
+import { encrypt, decrypt } from './crypto.js?v=4.0.72';
+import * as sync from './sync.js?v=4.0.72';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.72';
 
-const APP_VERSION = '4.0.71';
+const APP_VERSION = '4.0.72';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -74,6 +74,10 @@ let state = {
     customEventTypesUpdated: '',
     familyFunds: [],
     familyFundsUpdated: '',
+    spouseEmail: '',
+    ownerEmail: '',
+    viewingSharedFund: false,
+    sharedFundOwnerEmail: '',
     fundTransactions: [],
     fundTransactionsUpdated: '',
     activeTab: 'dashboard',
@@ -399,6 +403,11 @@ function mergeLists(localList, remoteList) {
 
 // Auto-sync function
 async function performSync(silent = false) {
+    if (state.viewingSharedFund) {
+        // Skip sync if viewing shared fund (read-only mode)
+        return;
+    }
+
     if (!sync.isConfigured()) {
         if (!silent) showToast("Supabase chưa được cấu hình!", "warning");
         return;
@@ -560,6 +569,7 @@ async function performSync(silent = false) {
                     if (remoteFundsTime > localFundsTime) {
                         state.familyFunds = remoteData.familyFunds || [];
                         state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
+                        state.spouseEmail = remoteData.spouseEmail || '';
                     }
                     // Merge fundTransactions using LWW
                     const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
@@ -624,6 +634,8 @@ async function performSync(silent = false) {
             bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || '',
             familyFunds: state.familyFunds || [],
             familyFundsUpdated: state.familyFundsUpdated || '',
+            spouseEmail: state.spouseEmail || '',
+            ownerEmail: state.user ? state.user.email : '',
             fundTransactions: state.fundTransactions || [],
             fundTransactionsUpdated: state.fundTransactionsUpdated || ''
         });

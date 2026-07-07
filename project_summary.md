@@ -5,8 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.71** |
-| **v4.0.71** | ✅ **Phân hệ Quỹ Gia Đình:** Phát triển tính năng Quỹ gia đình cho phép theo dõi đóng góp hàng tháng của vợ chồng, quản lý các quỹ nhỏ (Chi tiêu, Đầu tư), vẽ biểu đồ tròn trực quan tỷ lệ đóng góp (Chart.js), theo dõi lịch sử nhật ký giao dịch, và tự động mã hóa local & đồng bộ đám mây (Supabase), nâng cấp phiên bản v4.0.71. |
+| **Phiên bản hiện tại** | **v4.0.72** |
+| **v4.0.72** | ✅ **Nâng cấp Quỹ Gia Đình:** Thêm tab "Quản lý", liên kết email vợ chồng, thêm/xóa quỹ tùy chỉnh, xuất Excel, hiển thị đúng tên thành viên trong nhật ký giao dịch, sửa lỗi đè logo trên điện thoại di động và sửa lỗi đứng hình modal hành động quỹ. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -149,6 +149,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.69** | ✅ **Cho phép truy cập Offline & Chặn Sửa/Xóa khi chưa Đăng nhập:** Gỡ bỏ bắt buộc đăng nhập tài khoản Sync (Supabase) để vào các card y tế và tài chính. Đồng thời thêm quy tắc bảo mật chặn các hành động sửa/xóa bản ghi và thành viên gia đình khi chưa đăng nhập, hiển thị thông báo Toast yêu cầu đăng nhập. |
 | **v4.0.70** | ✅ **Logo PWA mới:** Cập nhật logo cài ngoài Desktop (PWA) `icon-light-pwa.png` bằng hình ảnh mới được người dùng cung cấp (đã xử lý loại bỏ nền caro xám trắng giả trong suốt, thay bằng nền trong suốt thật sự bên ngoài viền xanh bo góc, phóng to sát viền và resize chuẩn 512x512), nâng cấp phiên bản v4.0.70. |
 | **v4.0.71** | ✅ **Phân hệ Quỹ Gia Đình:** Phát triển tính năng Quỹ gia đình cho phép theo dõi đóng góp hàng tháng của vợ chồng, quản lý các quỹ nhỏ (Chi tiêu, Đầu tư), vẽ biểu đồ tròn trực quan tỷ lệ đóng góp (Chart.js), theo dõi lịch sử nhật ký giao dịch, và tự động mã hóa local & đồng bộ đám mây (Supabase), nâng cấp phiên bản v4.0.71. |
+| **v4.0.72** | ✅ **Nâng cấp Quỹ Gia Đình:** Thêm tab "Quản lý", liên kết email vợ chồng, thêm/xóa quỹ tùy chỉnh, xuất Excel, hiển thị đúng tên thành viên trong nhật ký giao dịch, sửa lỗi đè logo trên điện thoại di động và sửa lỗi đứng hình modal hành động quỹ. |
 
 ---
 

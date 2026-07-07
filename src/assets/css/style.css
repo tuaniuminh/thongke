@@ -3311,6 +3311,11 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
 
 /* Mobile responsive fixes */
 @media (max-width: 576px) {
+    .home-layout {
+        align-items: flex-start !important;
+        padding-top: 110px !important;
+    }
+
     .home-title {
         font-size: 2rem;
     }
