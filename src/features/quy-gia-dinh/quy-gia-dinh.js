@@ -3,11 +3,11 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId
-} from '../../core/app.js?v=4.0.73';
-import { decrypt } from '../../core/crypto.js?v=4.0.73';
+} from '../../core/app.js?v=4.0.74';
+import { decrypt } from '../../core/crypto.js?v=4.0.74';
 
 let fundContributionChart = null;
-let fundDetailsChartInstance = null;
+let fundDetailsChartsMap = {};
 
 // Initialize Family Fund module bindings
 export function initFundBindings() {
@@ -68,6 +68,12 @@ export function initFundBindings() {
     const sheetsForm = document.getElementById('fundGoogleSheetsForm');
     if (sheetsForm) {
         sheetsForm.addEventListener('submit', handleGoogleSheetsSubmit);
+    }
+
+    // Fund edit form submit
+    const editForm = document.getElementById('fundEditForm');
+    if (editForm) {
+        editForm.addEventListener('submit', handleFundEditSubmit);
     }
 }
 
@@ -250,8 +256,8 @@ export async function renderFundDashboard() {
     // 4. Render Contribution Chart (Chồng vs Vợ)
     renderContributionChart();
 
-    // 5. Render selected Fund's details Inflow/Outflow chart
-    renderFundDetailsChart();
+    // 5. Render selected Fund's details Inflow/Outflow charts
+    renderFundDetailsCharts();
 
     // 6. Populate members list in Contribution Form
     populateMemberSelects();
@@ -473,103 +479,129 @@ function renderContributionChart() {
     });
 }
 
-// Render selected Fund's Details Inflow/Outflow Chart
-function renderFundDetailsChart() {
-    const ctx = document.getElementById('fundDetailsChartCanvas');
-    if (!ctx) return;
+// Render dynamic cashflow Doughnut charts for all active selections
+function renderFundDetailsCharts() {
+    const container = document.getElementById('fundDynamicChartsContainer');
+    if (!container) return;
 
-    const fundId = state.activeChartFundId || 'fund-main';
-    const fund = (state.familyFunds || []).find(f => f.id === fundId);
-    const fundName = fund ? fund.name : 'Quỹ chính';
+    // Clear previous charts HTML
+    container.innerHTML = '';
 
-    // Update title
-    const titleEl = document.getElementById('fundDetailsChartTitle');
-    if (titleEl) titleEl.innerText = `Dòng tiền: ${fundName}`;
+    const activeFundIds = state.activeChartFundIds || ['fund-main'];
+    
+    if (activeFundIds.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem; border:1px dashed var(--border-color); border-radius:12px; background:rgba(0,0,0,0.1);">
+                Không có biểu đồ quỹ nào được bật. (Cấu hình bật biểu đồ trong tab Quản lý)
+            </div>
+        `;
+        return;
+    }
 
-    let totalInflow = 0;
-    let totalOutflow = 0;
+    // Re-create canvases and render charts
+    activeFundIds.forEach(fundId => {
+        const fund = (state.familyFunds || []).find(f => f.id === fundId);
+        if (!fund) return;
 
-    const activeTx = (state.fundTransactions || []).filter(t => !t.deleted_at);
+        let totalInflow = 0;
+        let totalOutflow = 0;
 
-    activeTx.forEach(tx => {
-        const amount = Math.abs(tx.amount || 0);
+        const activeTx = (state.fundTransactions || []).filter(t => !t.deleted_at);
 
-        if (tx.fundId === fundId) {
-            if (tx.type === 'contribution' || tx.type === 'external_income') {
-                totalInflow += amount;
-            } else if (tx.type === 'spending') {
-                totalOutflow += amount;
-            } else if (tx.type === 'investment_change') {
-                if (tx.amount >= 0) {
+        activeTx.forEach(tx => {
+            const amount = Math.abs(tx.amount || 0);
+
+            if (tx.fundId === fundId) {
+                if (tx.type === 'contribution' || tx.type === 'external_income') {
                     totalInflow += amount;
-                } else {
+                } else if (tx.type === 'spending') {
+                    totalOutflow += amount;
+                } else if (tx.type === 'investment_change') {
+                    if (tx.amount >= 0) {
+                        totalInflow += amount;
+                    } else {
+                        totalOutflow += amount;
+                    }
+                }
+            } else if (tx.type === 'transfer') {
+                if (tx.toFundId === fundId) {
+                    totalInflow += amount;
+                } else if (tx.fromFundId === fundId) {
                     totalOutflow += amount;
                 }
             }
-        } else if (tx.type === 'transfer') {
-            if (tx.toFundId === fundId) {
-                totalInflow += amount;
-            } else if (tx.fromFundId === fundId) {
-                totalOutflow += amount;
-            }
-        }
-    });
+        });
 
-    const total = totalInflow + totalOutflow;
-    const inflowPercent = total > 0 ? Math.round((totalInflow / total) * 100) : 50;
-    const outflowPercent = total > 0 ? Math.round((totalOutflow / total) * 100) : 50;
+        const total = totalInflow + totalOutflow;
+        const inflowPercent = total > 0 ? Math.round((totalInflow / total) * 100) : 50;
+        const outflowPercent = total > 0 ? Math.round((totalOutflow / total) * 100) : 50;
 
-    // Render legend
-    const legendContainer = document.getElementById('fundDetailsChartLegend');
-    if (legendContainer) {
-        legendContainer.innerHTML = `
-            <div class="legend-item" style="display:flex; justify-content:space-between; font-size:0.82rem;">
-                <span><span class="legend-color" style="background-color: #10b981; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;"></span>Tổng thu (nạp vào):</span>
-                <strong>${formatVND(totalInflow)} (${inflowPercent}%)</strong>
+        // Append chart card layout
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'fund-chart-card';
+        cardDiv.style.margin = '0';
+        cardDiv.style.width = '100%';
+        cardDiv.innerHTML = `
+            <h4 class="health-card-title">Dòng tiền: ${escapeHTML(fund.name)}</h4>
+            <p class="health-card-desc">Tỷ lệ nạp vào vs chi ra của quỹ</p>
+            <div class="fund-chart-container">
+                <canvas id="canvas-chart-${fund.id}"></canvas>
             </div>
-            <div class="legend-item" style="display:flex; justify-content:space-between; font-size:0.82rem; margin-top:4px;">
-                <span><span class="legend-color" style="background-color: #ef4444; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;"></span>Tổng chi (rút đi):</span>
-                <strong>${formatVND(totalOutflow)} (${outflowPercent}%)</strong>
+            <div class="chart-legend-custom" style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                <div class="legend-item" style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                    <span><span class="legend-color" style="background-color: #10b981; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;"></span>Tổng thu (nạp vào):</span>
+                    <strong>${formatVND(totalInflow)} (${inflowPercent}%)</strong>
+                </div>
+                <div class="legend-item" style="display:flex; justify-content:space-between; font-size:0.82rem; margin-top:4px;">
+                    <span><span class="legend-color" style="background-color: #ef4444; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;"></span>Tổng chi (rút đi):</span>
+                    <strong>${formatVND(totalOutflow)} (${outflowPercent}%)</strong>
+                </div>
             </div>
         `;
-    }
+        container.appendChild(cardDiv);
 
-    const dataValues = total > 0 ? [totalInflow, totalOutflow] : [1, 1];
-    const labelValues = total > 0 ? ['Tổng thu', 'Tổng chi'] : ['Chưa có dòng tiền', 'Chưa có dòng tiền'];
-    const colorValues = total > 0 ? ['#10b981', '#ef4444'] : ['#3b82f6', '#3b82f6'];
+        // Render Chart.js on the canvas
+        const canvasCtx = document.getElementById(`canvas-chart-${fund.id}`);
+        if (canvasCtx) {
+            // Destroy existing chart instance
+            if (fundDetailsChartsMap[fundId]) {
+                fundDetailsChartsMap[fundId].destroy();
+            }
 
-    if (fundDetailsChartInstance) {
-        fundDetailsChartInstance.destroy();
-    }
+            const dataValues = total > 0 ? [totalInflow, totalOutflow] : [1, 1];
+            const labelValues = total > 0 ? ['Tổng thu', 'Tổng chi'] : ['Chưa có dòng tiền', 'Chưa có dòng tiền'];
+            const colorValues = total > 0 ? ['#10b981', '#ef4444'] : ['#3b82f6', '#3b82f6'];
 
-    fundDetailsChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labelValues,
-            datasets: [{
-                data: dataValues,
-                backgroundColor: colorValues,
-                borderColor: '#111827',
-                borderWidth: 2,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            if (total === 0) return ' Chưa có giao dịch';
-                            const val = context.raw || 0;
-                            return ` ${context.label}: ${formatVND(val)}`;
+            fundDetailsChartsMap[fundId] = new Chart(canvasCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labelValues,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: colorValues,
+                        borderColor: '#111827',
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (total === 0) return ' Chưa có giao dịch';
+                                    const val = context.raw || 0;
+                                    return ` ${context.label}: ${formatVND(val)}`;
+                                }
+                            }
                         }
-                    }
+                    },
+                    cutout: '70%'
                 }
-            },
-            cutout: '70%'
+            });
         }
     });
 }
@@ -1017,7 +1049,7 @@ export function renderManagementTab() {
         sheetsInput.value = state.googleSheetsWebhook || '';
     }
 
-    // 3. Custom funds list
+    // 3. Custom funds list with edit button
     const mgmtList = document.getElementById('mgmtCustomFundsList');
     if (!mgmtList) return;
 
@@ -1028,21 +1060,17 @@ export function renderManagementTab() {
     }
 
     mgmtList.innerHTML = funds.map(f => {
-        const isCustom = f.type === 'custom';
-        const canDelete = isCustom && f.balance === 0 && !state.viewingSharedFund;
-        const isActiveChart = f.id === (state.activeChartFundId || 'fund-main');
+        const isActiveChart = (state.activeChartFundIds || ['fund-main']).includes(f.id);
         
         return `
             <div class="mgmt-fund-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; font-size:0.85rem; margin-bottom:6px;">
-                <span class="fund-name">${escapeHTML(f.name)} (${f.type === 'main' ? 'Quỹ chính' : (f.type === 'spending' ? 'Chi tiêu' : (f.type === 'investment' ? 'Đầu tư' : 'Tùy chỉnh'))})</span>
+                <span class="fund-name" style="font-weight: 500;">${escapeHTML(f.name)} (${f.type === 'main' ? 'Quỹ chính' : (f.type === 'spending' ? 'Chi tiêu' : (f.type === 'investment' ? 'Đầu tư' : 'Tùy chỉnh'))})</span>
                 <div class="fund-actions" style="display:flex; align-items:center; gap:10px;">
-                    <button class="btn-delete" onclick="setActiveChartFund('${f.id}')" title="Hiển thị biểu đồ quỹ này ở Trang tổng quan" style="color: ${isActiveChart ? 'var(--accent-blue)' : 'var(--text-muted)'}; background: ${isActiveChart ? 'rgba(2, 132, 199, 0.15)' : 'none'}; border:none; cursor:pointer; padding:4px; border-radius:4px; display:flex; align-items:center; justify-content:center;">
-                        <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
-                    </button>
+                    ${isActiveChart ? `<span style="font-size: 0.7rem; background: rgba(2, 132, 199, 0.15); color: var(--accent-blue); padding: 2px 6px; border-radius: 4px; font-weight: 600;">Biểu đồ</span>` : ''}
                     <span class="fund-balance" style="font-weight:700; color:var(--accent-emerald);">${formatVND(f.balance)}</span>
-                    ${canDelete ? `
-                        <button class="btn-delete" onclick="deleteCustomFund('${f.id}')" title="Xóa quỹ" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; border-radius:4px; display:flex; align-items:center; justify-content:center;">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    ${!state.viewingSharedFund ? `
+                        <button type="button" class="health-btn health-btn-outline" onclick="openFundEditModal('${f.id}')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px; display: flex; align-items: center; gap: 4px; height: 28px;">
+                            <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i> Chỉnh sửa
                         </button>
                     ` : ''}
                 </div>
@@ -1055,15 +1083,80 @@ export function renderManagementTab() {
     }
 }
 
-// Set Active Chart Fund
-window.setActiveChartFund = async function(fundId) {
-    state.activeChartFundId = fundId;
-    state.familyFundsUpdated = new Date().toISOString();
-    await saveLocalState();
-    renderManagementTab();
-    showToast("Đã chọn hiển thị biểu đồ dòng tiền cho quỹ này!");
-    performSync(true);
+// Open Edit Fund Modal
+window.openFundEditModal = function(fundId) {
+    if (state.viewingSharedFund) return;
+    const fund = state.familyFunds.find(f => f.id === fundId);
+    if (!fund) return;
+    
+    document.getElementById('editFundId').value = fund.id;
+    document.getElementById('editFundName').value = fund.name;
+    
+    const isCustom = fund.type === 'custom';
+    const showChartCheckbox = document.getElementById('editFundShowChart');
+    const activeIds = state.activeChartFundIds || ['fund-main'];
+    showChartCheckbox.checked = activeIds.includes(fund.id);
+    
+    // Only custom funds can be renamed
+    document.getElementById('editFundName').disabled = !isCustom;
+    
+    // Only custom funds with 0 balance can be deleted
+    const deleteContainer = document.getElementById('editFundDeleteContainer');
+    if (isCustom && fund.balance === 0) {
+        deleteContainer.style.display = 'block';
+        const btnDelete = document.getElementById('btnDeleteFundFromEdit');
+        btnDelete.onclick = () => {
+            closeModal('fundEditModal');
+            deleteCustomFund(fund.id);
+        };
+    } else {
+        deleteContainer.style.display = 'none';
+    }
+    
+    document.getElementById('fundEditModal').classList.add('active');
+    lucide.createIcons();
 };
+
+// Handle edit fund submission
+async function handleFundEditSubmit(e) {
+    e.preventDefault();
+    if (state.viewingSharedFund) return;
+    
+    const fundId = document.getElementById('editFundId').value;
+    const name = document.getElementById('editFundName').value.trim();
+    const showChart = document.getElementById('editFundShowChart').checked;
+    
+    const fund = state.familyFunds.find(f => f.id === fundId);
+    if (!fund) return;
+    
+    if (fund.type === 'custom' && name) {
+        // Check duplicates
+        const isDup = state.familyFunds.some(f => f.id !== fundId && f.name.toLowerCase() === name.toLowerCase());
+        if (isDup) {
+            showToast("Tên quỹ này đã tồn tại!", "warning");
+            return;
+        }
+        fund.name = name;
+    }
+    
+    // Update activeChartFundIds
+    let activeIds = state.activeChartFundIds || ['fund-main'];
+    if (showChart) {
+        if (!activeIds.includes(fundId)) {
+            activeIds.push(fundId);
+        }
+    } else {
+        activeIds = activeIds.filter(id => id !== fundId);
+    }
+    state.activeChartFundIds = activeIds;
+    state.familyFundsUpdated = new Date().toISOString();
+    
+    await saveLocalState();
+    closeModal('fundEditModal');
+    renderManagementTab();
+    showToast("Đã lưu thay đổi quỹ thành công!");
+    performSync(true);
+}
 
 // Spouse Email Save handler
 async function handleSpouseEmailSubmit(e) {
@@ -1151,7 +1244,7 @@ async function handleAddCustomFundSubmit(e) {
 }
 
 // Delete Custom Fund
-window.deleteCustomFund = async function(fundId) {
+async function deleteCustomFund(fundId) {
     if (state.viewingSharedFund) return;
     if (!state.user) {
         showToast("Vui lòng đăng nhập tài khoản trước", "warning");
@@ -1171,9 +1264,9 @@ window.deleteCustomFund = async function(fundId) {
     state.familyFunds = state.familyFunds.filter(f => f.id !== fundId);
     state.familyFundsUpdated = new Date().toISOString();
 
-    // If active chart was pointing here, reset to fund-main
-    if (state.activeChartFundId === fundId) {
-        state.activeChartFundId = 'fund-main';
+    // Remove from activeChartFundIds if deleted
+    if (state.activeChartFundIds) {
+        state.activeChartFundIds = state.activeChartFundIds.filter(id => id !== fundId);
     }
 
     await saveLocalState();
@@ -1181,7 +1274,7 @@ window.deleteCustomFund = async function(fundId) {
     renderManagementTab();
     showToast("Đã xóa quỹ thành công!");
     performSync(true);
-};
+}
 
 // Export to Google Sheet (Excel download)
 function handleExportFundExcel() {

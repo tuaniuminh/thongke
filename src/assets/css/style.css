@@ -3313,7 +3313,17 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
 @media (max-width: 576px) {
     .home-layout {
         align-items: flex-start !important;
-        padding-top: 110px !important;
+        padding-top: calc(120px + env(safe-area-inset-top, 24px)) !important;
+    }
+
+    .home-widgets-container {
+        top: calc(12px + env(safe-area-inset-top, 24px)) !important;
+        left: 12px !important;
+    }
+
+    #homeSettingsBtn {
+        top: calc(12px + env(safe-area-inset-top, 24px)) !important;
+        right: 12px !important;
     }
 
     .home-title {
@@ -3804,15 +3814,7 @@ body:has(.modal-overlay.active) {
     overflow: hidden !important;
 }
 
-/* Avoid iOS Safari overlapping backdrop-filter rendering bugs when modal is active */
-body:has(.modal-overlay[style*="display: flex"]) .mobile-navbar,
-body:has(.modal-overlay[style*="display: block"]) .mobile-navbar,
-body:has(.modal-overlay[style*="display:flex"]) .mobile-navbar,
-body:has(.modal-overlay[style*="display:block"]) .mobile-navbar,
-body:has(.modal-overlay.active) .mobile-navbar {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
+
 
 /* Prevent scroll chaining (overscroll bubble) to background */
 .modal-overlay,

@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.73';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.73';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.73';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.74';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.74';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.74';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.73';
-import * as sync from './sync.js?v=4.0.73';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.73';
+import { encrypt, decrypt } from './crypto.js?v=4.0.74';
+import * as sync from './sync.js?v=4.0.74';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.74';
 
-const APP_VERSION = '4.0.73';
+const APP_VERSION = '4.0.74';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -77,7 +77,7 @@ let state = {
     spouseEmail: '',
     ownerEmail: '',
     googleSheetsWebhook: '',
-    activeChartFundId: 'fund-main',
+    activeChartFundIds: ['fund-main'],
     viewingSharedFund: false,
     sharedFundOwnerEmail: '',
     fundTransactions: [],
@@ -573,7 +573,7 @@ async function performSync(silent = false) {
                         state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                         state.spouseEmail = remoteData.spouseEmail || '';
                         state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
-                        state.activeChartFundId = remoteData.activeChartFundId || 'fund-main';
+                        state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
                     }
                     // Merge fundTransactions using LWW
                     const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
@@ -641,7 +641,7 @@ async function performSync(silent = false) {
             spouseEmail: state.spouseEmail || '',
             ownerEmail: state.user ? state.user.email : '',
             googleSheetsWebhook: state.googleSheetsWebhook || '',
-            activeChartFundId: state.activeChartFundId || 'fund-main',
+            activeChartFundIds: state.activeChartFundIds || ['fund-main'],
             fundTransactions: state.fundTransactions || [],
             fundTransactionsUpdated: state.fundTransactionsUpdated || ''
         });
