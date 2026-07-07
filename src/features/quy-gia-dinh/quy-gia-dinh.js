@@ -4,8 +4,8 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.80';
-import { decrypt } from '../../core/crypto.js?v=4.0.80';
+} from '../../core/app.js?v=4.0.81';
+import { decrypt } from '../../core/crypto.js?v=4.0.81';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -292,6 +292,7 @@ export async function checkForSharedFamilyFund() {
                         }
                         
                         if (fundKey && parsed.encrypted_fund) {
+                            state.spouseFundInvitePending = false;
                             const decryptedFund = await decrypt(parsed.encrypted_fund, fundKey);
                             const fundData = JSON.parse(decryptedFund);
                             state.familyFunds = fundData.familyFunds || [];
@@ -312,6 +313,10 @@ export async function checkForSharedFamilyFund() {
                                 window.updateHomeLayoutUI();
                             }
                             return;
+                        } else {
+                            // Case B: Husband has shared with us, but hasn't encrypted the key using our new public key yet
+                            state.spouseFundInvitePending = true;
+                            state.spouseFundInviteOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
                         }
                     }
                 } else {

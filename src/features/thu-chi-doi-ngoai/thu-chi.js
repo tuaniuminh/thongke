@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.80';
-import * as sync from '../../core/sync.js?v=4.0.80';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.80';
+} from '../../core/app.js?v=4.0.81';
+import * as sync from '../../core/sync.js?v=4.0.81';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.81';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1045,6 +1045,8 @@ function updateHomeLayoutUI() {
             if (!inviteStatus) {
                 inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${state.sharedFundOwnerEmail}`;
                 inviteCard.style.display = 'flex';
+                if (btnAccept) btnAccept.style.display = 'inline-block';
+                if (btnDecline) btnDecline.style.display = 'inline-block';
                 
                 if (btnAccept) {
                     btnAccept.onclick = async () => {
@@ -1077,6 +1079,11 @@ function updateHomeLayoutUI() {
                     if (cardFund) cardFund.style.display = 'flex';
                 }
             }
+        } else if (state.spouseFundInvitePending && state.spouseFundInviteOwnerEmail) {
+            inviteText.innerText = `Đối tác (${state.spouseFundInviteOwnerEmail}) muốn chia sẻ Quỹ gia đình với bạn. Vui lòng bảo đối tác mở ứng dụng FamiLife trên thiết bị của họ một lần để tự động kích hoạt liên kết!`;
+            inviteCard.style.display = 'flex';
+            if (btnAccept) btnAccept.style.display = 'none';
+            if (btnDecline) btnDecline.style.display = 'none';
         } else {
             inviteCard.style.display = 'none';
         }
