@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.79';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.79';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.79';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.80';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.80';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.80';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.79';
-import * as sync from './sync.js?v=4.0.79';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.79';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.80';
+import * as sync from './sync.js?v=4.0.80';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.80';
 
-const APP_VERSION = '4.0.79';
+const APP_VERSION = '4.0.80';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -565,9 +565,10 @@ async function performSync(silent = false) {
                         const decryptedPersonal = await decrypt(parsedObj.encrypted_personal, state.masterPassword);
                         remoteData = JSON.parse(decryptedPersonal);
                         
-                        // Decrypt Fund Key using our private key
-                        let fundKey = '';
-                        if (state.asymmetricPrivateKeyEncrypted) {
+                        // Get Fund Key directly from decrypted personal data or fallback to private key decryption
+                        let fundKey = remoteData.fundSymmetricKey || state.fundSymmetricKey;
+                        
+                        if (!fundKey && state.asymmetricPrivateKeyEncrypted) {
                             const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
                             const myEmail = user.email.toLowerCase().trim();
                             const myEncryptedFundKey = parsedObj.fund_shared_keys ? parsedObj.fund_shared_keys[myEmail] : null;
@@ -636,6 +637,9 @@ async function performSync(silent = false) {
                     state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
                     state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                     state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                    state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
+                    state.asymmetricPublicKey = remoteData.asymmetricPublicKey || '';
+                    state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted || '';
                     state.customEventTypes = remoteData.customEventTypes || [];
                     state.customEventTypesUpdated = remoteData.customEventTypesUpdated || '';
                     state.medicalRecordsUpdated = remoteData.medicalRecordsUpdated || '';
@@ -684,6 +688,15 @@ async function performSync(silent = false) {
                     if (remoteFundCardTime > localFundCardTime) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                    }
+
+                    // Recover key fields from remote if they are missing locally but exist remotely
+                    if (!state.fundSymmetricKey && remoteData.fundSymmetricKey) {
+                        state.fundSymmetricKey = remoteData.fundSymmetricKey;
+                    }
+                    if (!state.asymmetricPublicKey && remoteData.asymmetricPublicKey) {
+                        state.asymmetricPublicKey = remoteData.asymmetricPublicKey;
+                        state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted;
                     }
 
                     // Merge customEventTypes using LWW (Last Write Wins)
@@ -834,7 +847,10 @@ async function performSync(silent = false) {
             bloodPressureRecords: state.bloodPressureRecords || [],
             bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || '',
             bodyCompositionRecords: state.bodyCompositionRecords || [],
-            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || ''
+            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || '',
+            asymmetricPublicKey: state.asymmetricPublicKey || '',
+            asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted || '',
+            fundSymmetricKey: state.fundSymmetricKey || ''
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 

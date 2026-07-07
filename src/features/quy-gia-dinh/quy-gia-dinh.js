@@ -4,8 +4,8 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.79';
-import { decrypt } from '../../core/crypto.js?v=4.0.79';
+} from '../../core/app.js?v=4.0.80';
+import { decrypt } from '../../core/crypto.js?v=4.0.80';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -988,6 +988,7 @@ async function handleTransferSubmit(e) {
     closeModal('fundTransferModal');
 
     showToast("Đã trích chuyển quỹ thành công!");
+    performSync(true);
     performSync(true);
 }
 
