@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.72';
-import * as sync from '../../core/sync.js?v=4.0.72';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.72';
+} from '../../core/app.js?v=4.0.73';
+import * as sync from '../../core/sync.js?v=4.0.73';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.73';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1065,16 +1065,11 @@ function updateSidebarNavVisibility(tabId) {
         settings: document.querySelector('[data-nav="settings"]'),
         financePortal: document.querySelector('[data-nav="finance-portal"]'),
         health: document.querySelector('[data-nav="health"]'),
-        fund: document.querySelector('[data-nav="fund"]')
+        fund: document.querySelector('[data-nav="fund"]'),
+        fundManagement: document.querySelector('[data-nav="fund-management"]')
     };
 
     if (!navItems.health) return;
-
-    // Reset fund tab label
-    const fundLabel = navItems.fund ? navItems.fund.querySelector('span') : null;
-    if (fundLabel) {
-        fundLabel.innerText = tabId === 'fund' ? 'Tổng quan' : 'Quỹ gia đình';
-    }
 
     if (tabId === 'health') {
         if (navItems.home) navItems.home.style.display = 'block';
@@ -1086,12 +1081,14 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
     } else if (tabId === 'settings') {
         // Khi vào Cài đặt: ẩn toàn bộ nav Thu Chi đối ngoại trên desktop sidebar
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
         if (navItems.health) navItems.health.style.display = 'block';
         if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
         if (navItems.received) navItems.received.style.display = 'none';
@@ -1107,9 +1104,11 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
-    } else if (tabId === 'fund') {
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+    } else if (tabId === 'fund' || tabId === 'fund-management') {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
 
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
@@ -1125,11 +1124,12 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.settings) navItems.settings.style.display = 'block';
         if (navItems.health) navItems.health.style.display = 'block';
         if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
     }
     
     // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in (disabled to allow offline access)
-    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund'];
+    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundManagement'];
     lockableNavKeys.forEach(key => {
         const item = navItems[key];
         if (item) {
@@ -1204,7 +1204,8 @@ function updateMobileNavbar(tabId) {
                 </button>
             </div>
         `;
-    } else if (tabId === 'fund') {
+    } else if (tabId === 'fund' || tabId === 'fund-management') {
+        mobileNavbar.classList.add('two-line');
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');
         }
@@ -1214,16 +1215,24 @@ function updateMobileNavbar(tabId) {
             : 'src/assets/images/icon.png';
 
         mobileNavbar.innerHTML = `
-            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
-                <div class="mobile-navbar-logo">
-                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div onclick="switchTab('fund')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Quỹ gia đình</span>
                 </div>
-                <span class="mobile-navbar-title" id="mobileNavbarTitle">Quỹ gia đình</span>
-            </div>
-            <div class="mobile-navbar-right" id="mobileNavbarNav">
                 <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only ${tabId === 'fund' ? 'active' : ''}" onclick="switchTab('fund')" title="Tổng quan">
+                    Tổng quan
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'fund-management' ? 'active' : ''}" onclick="switchTab('fund-management')" title="Quản lý">
+                    Quản lý
                 </button>
             </div>
         `;

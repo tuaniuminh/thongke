@@ -3,10 +3,11 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId
-} from '../../core/app.js?v=4.0.72';
-import { decrypt } from '../../core/crypto.js?v=4.0.72';
+} from '../../core/app.js?v=4.0.73';
+import { decrypt } from '../../core/crypto.js?v=4.0.73';
 
 let fundContributionChart = null;
+let fundDetailsChartInstance = null;
 
 // Initialize Family Fund module bindings
 export function initFundBindings() {
@@ -45,33 +46,6 @@ export function initFundBindings() {
         });
     }
 
-    // Bind subtab buttons
-    const subtabBtns = document.querySelectorAll('.fund-subtab-btn');
-    subtabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const subtabId = btn.getAttribute('data-fund-subtab');
-            
-            // Toggle active class on buttons
-            subtabBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Toggle tab panels
-            document.querySelectorAll('.fund-subtab-content').forEach(p => {
-                if (p.id === `fund-subtab-${subtabId}`) {
-                    p.style.display = 'block';
-                } else {
-                    p.style.display = 'none';
-                }
-            });
-
-            if (subtabId === 'overview') {
-                renderFundDashboard();
-            } else if (subtabId === 'management') {
-                renderManagementTab();
-            }
-        });
-    });
-
     // Link spouse email form
     const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
     if (spouseEmailForm) {
@@ -89,6 +63,12 @@ export function initFundBindings() {
     if (exportExcelBtn) {
         exportExcelBtn.addEventListener('click', handleExportFundExcel);
     }
+
+    // Google Sheets webhook form
+    const sheetsForm = document.getElementById('fundGoogleSheetsForm');
+    if (sheetsForm) {
+        sheetsForm.addEventListener('submit', handleGoogleSheetsSubmit);
+    }
 }
 
 // Format input as money
@@ -105,10 +85,55 @@ function setupMoneyFormatting(input) {
     });
 }
 
-// Parse input string back to integer
+// Parse input string back to integer (supports shorthand: X < 10000 -> X * 1000)
 function parseMoneyInput(str) {
     if (!str) return 0;
-    return parseInt(str.replace(/\./g, '').replace(/,/g, ''), 10) || 0;
+    let val = parseInt(str.replace(/\./g, '').replace(/,/g, ''), 10) || 0;
+    if (val > 0 && val < 10000) {
+        val = val * 1000;
+    }
+    return val;
+}
+
+// Trigger Google Sheets Webhook Sync
+async function triggerGoogleSheetsSync(tx, isDeletion = false) {
+    if (!state.googleSheetsWebhook || state.viewingSharedFund) return;
+
+    const fund = state.familyFunds.find(f => f.id === tx.fundId || f.id === tx.fromFundId);
+    
+    let memberName = 'Khác';
+    if (tx.memberId === 'p-husband') {
+        memberName = 'Chồng';
+    } else if (tx.memberId === 'p-wife') {
+        memberName = 'Vợ';
+    } else {
+        const foundProfile = (state.familyProfiles || []).find(p => p.id === tx.memberId);
+        if (foundProfile) memberName = foundProfile.name;
+    }
+
+    const payload = {
+        ...tx,
+        fundName: fund ? fund.name : '',
+        memberName: memberName,
+        isDeleted: isDeletion
+    };
+
+    try {
+        fetch(state.googleSheetsWebhook, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            console.log("Triggered Google Sheets webhook sync successfully");
+        }).catch(err => {
+            console.error("Failed to post to Google Sheets webhook:", err);
+        });
+    } catch (e) {
+        console.error("Error in triggerGoogleSheetsSync:", e);
+    }
 }
 
 // Ensure default funds exist in state
@@ -219,23 +244,26 @@ export async function renderFundDashboard() {
         }
     }
 
-    // 3. Render Fund Cards Dynamically
+    // 3. Render Fund Cards Dynamically (Hiding delete buttons here!)
     renderFundCards();
 
     // 4. Render Contribution Chart (Chồng vs Vợ)
     renderContributionChart();
 
-    // 5. Populate members list in Contribution Form
+    // 5. Render selected Fund's details Inflow/Outflow chart
+    renderFundDetailsChart();
+
+    // 6. Populate members list in Contribution Form
     populateMemberSelects();
 
-    // 6. Populate fund selectors in Transfer/Spending/Invest forms
+    // 7. Populate fund selectors in Transfer/Spending/Invest forms
     populateFundSelects();
 
-    // 7. Render Transaction List (Audit Log)
+    // 8. Render Transaction List (Audit Log)
     renderTransactionList();
 }
 
-// Render the cards dynamically including custom funds
+// Render the cards dynamically including custom funds (delete buttons hidden)
 function renderFundCards() {
     const grid = document.querySelector('.fund-balance-grid');
     if (!grid) return;
@@ -287,9 +315,6 @@ function renderFundCards() {
                 </button>
                 <button class="btn-fund-action" onclick="openFundActionModal('transfer', '${fund.id}')">
                     <i data-lucide="arrow-left-right"></i> Chuyển tiền
-                </button>
-                <button class="btn-fund-action btn-delete-fund" onclick="deleteCustomFund('${fund.id}')" style="--accent-color: #7f1d1d; max-width: 36px; flex: none;" title="Xóa quỹ">
-                    <i data-lucide="trash-2"></i>
                 </button>
             `;
         }
@@ -369,7 +394,7 @@ function populateFundSelects() {
     }
 }
 
-// Render Doughnut Chart using Chart.js
+// Render Doughnut Chart using Chart.js (Contributions)
 function renderContributionChart() {
     const ctx = document.getElementById('fundContributionChartCanvas');
     if (!ctx) return;
@@ -403,6 +428,11 @@ function renderContributionChart() {
     const wifeText = document.getElementById('chartWifeText');
     if (wifeText) wifeText.innerText = `${formatVND(wifeTotal)} (${wifePercent}%)`;
 
+    const totalTextEl = document.getElementById('fundTotalContributionText');
+    if (totalTextEl) {
+        totalTextEl.innerText = `Tổng tích lũy đóng góp: ${formatVND(total)}`;
+    }
+
     const dataValues = total > 0 ? [husbandTotal, wifeTotal] : [1, 1];
     const labelValues = total > 0 ? ['Chồng đóng góp', 'Vợ đóng góp'] : ['Chưa có đóng góp', 'Chưa có đóng góp'];
     const colorValues = total > 0 ? ['#0284c7', '#ef4444'] : ['#3b82f6', '#3b82f6'];
@@ -432,6 +462,107 @@ function renderContributionChart() {
                     callbacks: {
                         label: function(context) {
                             if (total === 0) return ' Chưa có đóng góp';
+                            const val = context.raw || 0;
+                            return ` ${context.label}: ${formatVND(val)}`;
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+// Render selected Fund's Details Inflow/Outflow Chart
+function renderFundDetailsChart() {
+    const ctx = document.getElementById('fundDetailsChartCanvas');
+    if (!ctx) return;
+
+    const fundId = state.activeChartFundId || 'fund-main';
+    const fund = (state.familyFunds || []).find(f => f.id === fundId);
+    const fundName = fund ? fund.name : 'Quỹ chính';
+
+    // Update title
+    const titleEl = document.getElementById('fundDetailsChartTitle');
+    if (titleEl) titleEl.innerText = `Dòng tiền: ${fundName}`;
+
+    let totalInflow = 0;
+    let totalOutflow = 0;
+
+    const activeTx = (state.fundTransactions || []).filter(t => !t.deleted_at);
+
+    activeTx.forEach(tx => {
+        const amount = Math.abs(tx.amount || 0);
+
+        if (tx.fundId === fundId) {
+            if (tx.type === 'contribution' || tx.type === 'external_income') {
+                totalInflow += amount;
+            } else if (tx.type === 'spending') {
+                totalOutflow += amount;
+            } else if (tx.type === 'investment_change') {
+                if (tx.amount >= 0) {
+                    totalInflow += amount;
+                } else {
+                    totalOutflow += amount;
+                }
+            }
+        } else if (tx.type === 'transfer') {
+            if (tx.toFundId === fundId) {
+                totalInflow += amount;
+            } else if (tx.fromFundId === fundId) {
+                totalOutflow += amount;
+            }
+        }
+    });
+
+    const total = totalInflow + totalOutflow;
+    const inflowPercent = total > 0 ? Math.round((totalInflow / total) * 100) : 50;
+    const outflowPercent = total > 0 ? Math.round((totalOutflow / total) * 100) : 50;
+
+    // Render legend
+    const legendContainer = document.getElementById('fundDetailsChartLegend');
+    if (legendContainer) {
+        legendContainer.innerHTML = `
+            <div class="legend-item" style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                <span><span class="legend-color" style="background-color: #10b981; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;"></span>Tổng thu (nạp vào):</span>
+                <strong>${formatVND(totalInflow)} (${inflowPercent}%)</strong>
+            </div>
+            <div class="legend-item" style="display:flex; justify-content:space-between; font-size:0.82rem; margin-top:4px;">
+                <span><span class="legend-color" style="background-color: #ef4444; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px;"></span>Tổng chi (rút đi):</span>
+                <strong>${formatVND(totalOutflow)} (${outflowPercent}%)</strong>
+            </div>
+        `;
+    }
+
+    const dataValues = total > 0 ? [totalInflow, totalOutflow] : [1, 1];
+    const labelValues = total > 0 ? ['Tổng thu', 'Tổng chi'] : ['Chưa có dòng tiền', 'Chưa có dòng tiền'];
+    const colorValues = total > 0 ? ['#10b981', '#ef4444'] : ['#3b82f6', '#3b82f6'];
+
+    if (fundDetailsChartInstance) {
+        fundDetailsChartInstance.destroy();
+    }
+
+    fundDetailsChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labelValues,
+            datasets: [{
+                data: dataValues,
+                backgroundColor: colorValues,
+                borderColor: '#111827',
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (total === 0) return ' Chưa có giao dịch';
                             const val = context.raw || 0;
                             return ` ${context.label}: ${formatVND(val)}`;
                         }
@@ -610,6 +741,10 @@ async function handleContributionSubmit(e) {
     state.fundTransactionsUpdated = new Date().toISOString();
 
     await saveLocalState();
+    
+    // Webhook auto sync
+    triggerGoogleSheetsSync(tx);
+    
     renderFundDashboard();
     
     document.getElementById('contribAmount').value = '';
@@ -673,6 +808,10 @@ async function handleTransferSubmit(e) {
     state.fundTransactionsUpdated = new Date().toISOString();
 
     await saveLocalState();
+    
+    // Webhook auto sync
+    triggerGoogleSheetsSync(tx);
+    
     renderFundDashboard();
 
     document.getElementById('transferAmount').value = '';
@@ -721,6 +860,10 @@ async function handleSpendingSubmit(e) {
     state.fundTransactionsUpdated = new Date().toISOString();
 
     await saveLocalState();
+    
+    // Webhook auto sync
+    triggerGoogleSheetsSync(tx);
+    
     renderFundDashboard();
 
     document.getElementById('spendingAmount').value = '';
@@ -774,6 +917,10 @@ async function handleInvestSubmit(e) {
     state.fundTransactionsUpdated = new Date().toISOString();
 
     await saveLocalState();
+    
+    // Webhook auto sync
+    triggerGoogleSheetsSync(tx);
+    
     renderFundDashboard();
 
     document.getElementById('investAmount').value = '';
@@ -797,6 +944,8 @@ window.deleteFundTransaction = async function(id) {
     const index = (state.fundTransactions || []).findIndex(t => t.id === id);
     if (index === -1) return;
 
+    const deletedTx = state.fundTransactions[index];
+
     state.fundTransactions[index] = {
         ...state.fundTransactions[index],
         deleted_at: new Date().toISOString(),
@@ -805,6 +954,10 @@ window.deleteFundTransaction = async function(id) {
     state.fundTransactionsUpdated = new Date().toISOString();
 
     await saveLocalState();
+    
+    // Webhook auto sync deletion
+    triggerGoogleSheetsSync(deletedTx, true);
+    
     renderFundDashboard();
 
     showToast("Đã xóa giao dịch thành công!");
@@ -850,15 +1003,21 @@ window.openFundActionModal = function(action, targetFundId = '') {
     }
 };
 
-// Render management tab elements
-function renderManagementTab() {
+// Render management tab elements (Linked to tab-fund-management view)
+export function renderManagementTab() {
     // 1. Spouse email
     const emailInput = document.getElementById('spouseEmailInput');
     if (emailInput) {
         emailInput.value = state.spouseEmail || '';
     }
 
-    // 2. Custom funds list
+    // 2. Google Sheets Webhook Url
+    const sheetsInput = document.getElementById('googleSheetsWebhookInput');
+    if (sheetsInput) {
+        sheetsInput.value = state.googleSheetsWebhook || '';
+    }
+
+    // 3. Custom funds list
     const mgmtList = document.getElementById('mgmtCustomFundsList');
     if (!mgmtList) return;
 
@@ -871,14 +1030,18 @@ function renderManagementTab() {
     mgmtList.innerHTML = funds.map(f => {
         const isCustom = f.type === 'custom';
         const canDelete = isCustom && f.balance === 0 && !state.viewingSharedFund;
+        const isActiveChart = f.id === (state.activeChartFundId || 'fund-main');
         
         return `
-            <div class="mgmt-fund-item">
+            <div class="mgmt-fund-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; font-size:0.85rem; margin-bottom:6px;">
                 <span class="fund-name">${escapeHTML(f.name)} (${f.type === 'main' ? 'Quỹ chính' : (f.type === 'spending' ? 'Chi tiêu' : (f.type === 'investment' ? 'Đầu tư' : 'Tùy chỉnh'))})</span>
-                <div class="fund-actions">
+                <div class="fund-actions" style="display:flex; align-items:center; gap:10px;">
+                    <button class="btn-delete" onclick="setActiveChartFund('${f.id}')" title="Hiển thị biểu đồ quỹ này ở Trang tổng quan" style="color: ${isActiveChart ? 'var(--accent-blue)' : 'var(--text-muted)'}; background: ${isActiveChart ? 'rgba(2, 132, 199, 0.15)' : 'none'}; border:none; cursor:pointer; padding:4px; border-radius:4px; display:flex; align-items:center; justify-content:center;">
+                        <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
+                    </button>
                     <span class="fund-balance" style="font-weight:700; color:var(--accent-emerald);">${formatVND(f.balance)}</span>
                     ${canDelete ? `
-                        <button class="btn-delete" onclick="deleteCustomFund('${f.id}')" title="Xóa quỹ">
+                        <button class="btn-delete" onclick="deleteCustomFund('${f.id}')" title="Xóa quỹ" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; border-radius:4px; display:flex; align-items:center; justify-content:center;">
                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                         </button>
                     ` : ''}
@@ -891,6 +1054,16 @@ function renderManagementTab() {
         lucide.createIcons();
     }
 }
+
+// Set Active Chart Fund
+window.setActiveChartFund = async function(fundId) {
+    state.activeChartFundId = fundId;
+    state.familyFundsUpdated = new Date().toISOString();
+    await saveLocalState();
+    renderManagementTab();
+    showToast("Đã chọn hiển thị biểu đồ dòng tiền cho quỹ này!");
+    performSync(true);
+};
 
 // Spouse Email Save handler
 async function handleSpouseEmailSubmit(e) {
@@ -910,6 +1083,27 @@ async function handleSpouseEmailSubmit(e) {
 
     await saveLocalState();
     showToast("Đã lưu email liên kết thành công!");
+    performSync(true);
+}
+
+// Google Sheets Webhook submit
+async function handleGoogleSheetsSubmit(e) {
+    e.preventDefault();
+    if (state.viewingSharedFund) {
+        showToast("Đang ở chế độ xem tài khoản liên kết, không thể sửa cài đặt này!", "warning");
+        return;
+    }
+    if (!state.user) {
+        showToast("Vui lòng đăng nhập tài khoản trước", "warning");
+        return;
+    }
+
+    const webhook = document.getElementById('googleSheetsWebhookInput').value.trim();
+    state.googleSheetsWebhook = webhook;
+    state.familyFundsUpdated = new Date().toISOString();
+
+    await saveLocalState();
+    showToast("Đã lưu Webhook đồng bộ Google Sheets thành công!");
     performSync(true);
 }
 
@@ -976,6 +1170,11 @@ window.deleteCustomFund = async function(fundId) {
 
     state.familyFunds = state.familyFunds.filter(f => f.id !== fundId);
     state.familyFundsUpdated = new Date().toISOString();
+
+    // If active chart was pointing here, reset to fund-main
+    if (state.activeChartFundId === fundId) {
+        state.activeChartFundId = 'fund-main';
+    }
 
     await saveLocalState();
     

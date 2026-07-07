@@ -38,11 +38,11 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.72">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.73">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.72">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.72">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.73">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.73">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -64,7 +64,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.72" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.73" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -109,10 +109,16 @@
                         <span>Hồ sơ y tế</span>
                     </a>
                 </li>
-                <li class="nav-item" data-nav="fund">
+                <li class="nav-item" data-nav="fund" style="display: none;">
                     <a class="nav-link" data-tab="fund">
-                        <i data-lucide="wallet"></i>
-                        <span>Quỹ gia đình</span>
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Tổng quan</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-nav="fund-management" style="display: none;">
+                    <a class="nav-link" data-tab="fund-management">
+                        <i data-lucide="settings"></i>
+                        <span>Quản lý</span>
                     </a>
                 </li>
             </nav>
@@ -138,7 +144,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.72" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.73" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -812,19 +818,14 @@
                 </div>
             </section>
 
-            <!-- Family Fund Tab -->
+            <!-- Family Fund Tab: Overview -->
             <section class="tab-panel" id="tab-fund" style="display: none;">
-                <!-- Subtabs Navigation -->
-                <div class="fund-subtabs">
-                    <button class="fund-subtab-btn active" data-fund-subtab="overview">
-                        <i data-lucide="layout-dashboard"></i> Tổng quan
-                    </button>
-                    <button class="fund-subtab-btn" data-fund-subtab="management">
-                        <i data-lucide="settings"></i> Quản lý
-                    </button>
+                <div id="sharedFundBanner" class="sync-banner" style="display: none; margin-bottom: 16px; background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(2, 132, 199, 0.25); color: var(--accent-blue); padding: 12px; border-radius: 12px; font-weight: 500; font-size: 0.88rem; align-items: center; gap: 8px;">
+                    <i data-lucide="info" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+                    <span id="sharedFundBannerText">Đang xem Quỹ gia đình chia sẻ...</span>
                 </div>
 
-                <div class="fund-dashboard fund-subtab-content" id="fund-subtab-overview">
+                <div class="fund-dashboard">
                     <!-- Top Balance Cards -->
                     <div class="fund-balance-grid">
                         <!-- Populated dynamically -->
@@ -832,26 +833,41 @@
 
                     <!-- Chart and Transactions Row -->
                     <div class="fund-analytics-row">
-                        <!-- Chart Card -->
-                        <div class="fund-chart-card">
-                            <h4 class="health-card-title">Tỷ lệ đóng góp (Chồng vs Vợ)</h4>
-                            <p class="health-card-desc">Thống kê tỷ lệ tiền lương đóng góp lũy kế</p>
-                            <div class="fund-chart-container">
-                                <canvas id="fundContributionChartCanvas"></canvas>
-                            </div>
-                            <div class="chart-legend-custom">
-                                <div class="legend-item">
-                                    <span><span class="legend-color" style="background: #0284c7;"></span>Chồng đóng góp:</span>
-                                    <span id="chartHusbandText" style="font-weight: 700;">0đ (50%)</span>
+                        <!-- Charts Column (left) -->
+                        <div class="fund-charts-column" style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Chart Card 1: Contributions -->
+                            <div class="fund-chart-card" style="margin: 0; width: 100%;">
+                                <h4 class="health-card-title">Tỷ lệ đóng góp gia đình</h4>
+                                <p class="health-card-desc" id="fundTotalContributionText" style="font-weight: 600; color: var(--text-primary); margin-top: 4px;">Tổng tích lũy đóng góp: 0đ</p>
+                                <div class="fund-chart-container">
+                                    <canvas id="fundContributionChartCanvas"></canvas>
                                 </div>
-                                <div class="legend-item">
-                                    <span><span class="legend-color" style="background: #ef4444;"></span>Vợ đóng góp:</span>
-                                    <span id="chartWifeText" style="font-weight: 700;">0đ (50%)</span>
+                                <div class="chart-legend-custom">
+                                    <div class="legend-item">
+                                        <span><span class="legend-color" style="background: #0284c7;"></span>Chồng đóng góp:</span>
+                                        <span id="chartHusbandText" style="font-weight: 700;">0đ (50%)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span><span class="legend-color" style="background: #ef4444;"></span>Vợ đóng góp:</span>
+                                        <span id="chartWifeText" style="font-weight: 700;">0đ (50%)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chart Card 2: Fund cashflow breakdown -->
+                            <div class="fund-chart-card" style="margin: 0; width: 100%;">
+                                <h4 class="health-card-title" id="fundDetailsChartTitle">Dòng tiền của quỹ</h4>
+                                <p class="health-card-desc" id="fundDetailsChartDesc">Tỷ lệ nạp vào vs chi ra của quỹ đang được chọn</p>
+                                <div class="fund-chart-container">
+                                    <canvas id="fundDetailsChartCanvas"></canvas>
+                                </div>
+                                <div class="chart-legend-custom" id="fundDetailsChartLegend" style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                                    <!-- Populated dynamically -->
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Transaction History Card -->
+                        <!-- Transaction History Card (right) -->
                         <div class="fund-transactions-card">
                             <div class="card-header-actions">
                                 <div>
@@ -871,9 +887,11 @@
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Management Tab Content -->
-                <div class="fund-management-container fund-subtab-content" id="fund-subtab-management" style="display: none; padding: 8px 4px;">
+            <!-- Family Fund Tab: Management -->
+            <section class="tab-panel" id="tab-fund-management" style="display: none;">
+                <div class="fund-management-container" style="padding: 8px 4px;">
                     <div class="fund-mgmt-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px;">
                         <!-- Block 1: Link Spouses -->
                         <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
@@ -900,7 +918,20 @@
                             </div>
                         </div>
 
-                        <!-- Block 3: Manage Other Funds -->
+                        <!-- Block 3: Auto Sync Google Sheets Webhook -->
+                        <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
+                            <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="refresh-cw" style="color: #4f46e5;"></i> Tự động đồng bộ Google Sheets</h4>
+                            <p class="health-card-desc" style="margin: 4px 0 0 0; font-size: 0.82rem;">Đồng bộ thời gian thực mỗi khi có giao dịch mới thông qua Google Apps Script Webhook.</p>
+                            <form id="fundGoogleSheetsForm" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label class="form-label" for="googleSheetsWebhookInput" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Webhook URL Apps Script</label>
+                                    <input type="url" id="googleSheetsWebhookInput" class="form-input" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 8px 12px; color: var(--text-primary);">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="margin-top: auto; width: 100%; padding: 10px;">Lưu Webhook</button>
+                            </form>
+                        </div>
+
+                        <!-- Block 4: Manage Other Funds -->
                         <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; grid-column: span 1; min-height: 320px;">
                             <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="folder-plus" style="color: #a855f7;"></i> Thêm Quỹ chi tiêu sinh hoạt khác</h4>
                             <p class="health-card-desc" style="margin: 4px 0 0 0; font-size: 0.82rem;">Tạo các quỹ nhỏ phục vụ nhu cầu khác như: Tiết kiệm, Du lịch, Mua sắm...</p>
@@ -912,7 +943,7 @@
                                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px;">Tạo Quỹ</button>
                             </form>
                             <div class="custom-funds-list-section" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; flex-grow: 1;">
-                                <h5 style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Danh sách quỹ của tôi</h5>
+                                <h5 style="margin: 0 0 8px 0; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Danh sách quỹ của tôi (Chọn biểu đồ bằng cách click nút cột hành động)</h5>
                                 <div id="mgmtCustomFundsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto;">
                                     <!-- Populated dynamically -->
                                 </div>
@@ -937,7 +968,8 @@
                         <div class="fund-form-row">
                             <div class="form-group">
                                 <label for="contribAmount">Số tiền đóng góp (đ)</label>
-                                <input type="text" id="contribAmount" class="form-input" placeholder="Ví dụ: 10.000" required style="width:100%;">
+                                <input type="text" id="contribAmount" class="form-input" placeholder="Ví dụ: 10.000 hoặc 500 (500k)" required style="width:100%;">
+                                <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; display: block;">* Nhập ví dụ: 500 = 500.000đ, 2000 = 2.000.000đ</span>
                             </div>
                             <div class="form-group">
                                 <label for="contribDate">Ngày đóng góp</label>
@@ -977,7 +1009,8 @@
                         <div class="fund-form-row">
                             <div class="form-group">
                                 <label for="transferAmount">Số tiền chuyển (đ)</label>
-                                <input type="text" id="transferAmount" class="form-input" placeholder="Ví dụ: 2.000" required style="width:100%;">
+                                <input type="text" id="transferAmount" class="form-input" placeholder="Ví dụ: 2.000 hoặc 500 (500k)" required style="width:100%;">
+                                <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; display: block;">* Nhập ví dụ: 500 = 500.000đ, 2000 = 2.000.000đ</span>
                             </div>
                             <div class="form-group">
                                 <label for="transferDate">Ngày chuyển</label>
@@ -1016,7 +1049,8 @@
                         </div>
                         <div class="form-group">
                             <label for="spendingAmount">Số tiền chi tiêu (đ)</label>
-                            <input type="text" id="spendingAmount" class="form-input" placeholder="Ví dụ: 1.500" required style="width:100%;">
+                            <input type="text" id="spendingAmount" class="form-input" placeholder="Ví dụ: 1.500 hoặc 500 (500k)" required style="width:100%;">
+                            <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; display: block;">* Nhập ví dụ: 500 = 500.000đ, 2000 = 2.000.000đ</span>
                         </div>
                         <div class="form-group">
                             <label for="spendingNotes">Lý do chi tiêu</label>
@@ -1054,7 +1088,8 @@
                         <div class="fund-form-row">
                             <div class="form-group">
                                 <label for="investAmount">Số tiền chênh lệch (đ)</label>
-                                <input type="text" id="investAmount" class="form-input" placeholder="Ví dụ: 500" required style="width:100%;">
+                                <input type="text" id="investAmount" class="form-input" placeholder="Ví dụ: 500 hoặc 200 (200k)" required style="width:100%;">
+                                <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; display: block;">* Nhập ví dụ: 500 = 500.000đ, 2000 = 2.000.000đ</span>
                             </div>
                             <div class="form-group">
                                 <label for="investDate">Ngày chốt</label>
@@ -1102,7 +1137,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.72" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.73" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2567,7 +2602,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.72"></script>
-    <script type="module" src="src/core/app.js?v=4.0.72"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.73"></script>
+    <script type="module" src="src/core/app.js?v=4.0.73"></script>
 </body>
 </html>

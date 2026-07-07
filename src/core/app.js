@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.72';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.72';
-import { initFundBindings, renderFundDashboard } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.72';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.73';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.73';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.73';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.72';
-import * as sync from './sync.js?v=4.0.72';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.72';
+import { encrypt, decrypt } from './crypto.js?v=4.0.73';
+import * as sync from './sync.js?v=4.0.73';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.73';
 
-const APP_VERSION = '4.0.72';
+const APP_VERSION = '4.0.73';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -76,6 +76,8 @@ let state = {
     familyFundsUpdated: '',
     spouseEmail: '',
     ownerEmail: '',
+    googleSheetsWebhook: '',
+    activeChartFundId: 'fund-main',
     viewingSharedFund: false,
     sharedFundOwnerEmail: '',
     fundTransactions: [],
@@ -570,6 +572,8 @@ async function performSync(silent = false) {
                         state.familyFunds = remoteData.familyFunds || [];
                         state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                         state.spouseEmail = remoteData.spouseEmail || '';
+                        state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
+                        state.activeChartFundId = remoteData.activeChartFundId || 'fund-main';
                     }
                     // Merge fundTransactions using LWW
                     const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
@@ -636,6 +640,8 @@ async function performSync(silent = false) {
             familyFundsUpdated: state.familyFundsUpdated || '',
             spouseEmail: state.spouseEmail || '',
             ownerEmail: state.user ? state.user.email : '',
+            googleSheetsWebhook: state.googleSheetsWebhook || '',
+            activeChartFundId: state.activeChartFundId || 'fund-main',
             fundTransactions: state.fundTransactions || [],
             fundTransactionsUpdated: state.fundTransactionsUpdated || ''
         });
@@ -1026,7 +1032,9 @@ const tabHashMapping = {
     'hosoyte': 'health',
     'health': 'health',
     'quy-gia-dinh': 'fund',
-    'fund': 'fund'
+    'fund': 'fund',
+    'quan-ly-quy': 'fund-management',
+    'fund-management': 'fund-management'
 };
 
 const tabIdToHash = {
@@ -1036,7 +1044,8 @@ const tabIdToHash = {
     'sent': 'tientoimung',
     'settings': 'caidat',
     'health': 'hosoyte',
-    'fund': 'quy-gia-dinh'
+    'fund': 'quy-gia-dinh',
+    'fund-management': 'quan-ly-quy'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -1166,9 +1175,13 @@ function switchTab(tabId, updateHash = true) {
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
         renderHealthDashboard();
     } else if (tabId === 'fund') {
-        title.innerText = 'Quỹ gia đình';
+        title.innerText = 'Tổng quan Quỹ';
         subtitle.innerText = 'Theo dõi đóng góp của hai vợ chồng, quản lý các quỹ chi tiêu và đầu tư';
         renderFundDashboard();
+    } else if (tabId === 'fund-management') {
+        title.innerText = 'Quản lý Quỹ';
+        subtitle.innerText = 'Cài đặt liên kết Vợ/Chồng, tự động đồng bộ Google Sheets và quản lý các quỹ';
+        renderManagementTab();
     }
     
     if (updateHash) {
@@ -1179,7 +1192,7 @@ function switchTab(tabId, updateHash = true) {
     // Toggle Quick Add button based on active tab
     const quickAddBtn = document.getElementById('quickAddBtn');
     if (quickAddBtn) {
-        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund') {
+        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-management') {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';

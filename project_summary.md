@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.72** |
+| **Phiên bản hiện tại** | **v4.0.73** |
+| **v4.0.73** | ✅ **Nâng cấp Quỹ Gia Đình & Google Sheets Auto Sync:** Di chuyển tab Quản lý lên navbar/sidebar, ẩn nút xóa quỹ con ở tổng quan, hiển thị tổng tiền đóng góp, thêm biểu đồ phân tích dòng tiền tùy chọn cho từng quỹ con, tích hợp tự động đồng bộ Webhook Google Sheets và hỗ trợ nhập tiền viết tắt (ví dụ 500 = 500.000). |
 | **v4.0.72** | ✅ **Nâng cấp Quỹ Gia Đình:** Thêm tab "Quản lý", liên kết email vợ chồng, thêm/xóa quỹ tùy chỉnh, xuất Excel, hiển thị đúng tên thành viên trong nhật ký giao dịch, sửa lỗi đè logo trên điện thoại di động và sửa lỗi đứng hình modal hành động quỹ. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
