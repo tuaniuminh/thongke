@@ -5,8 +5,9 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.74** |
-| **v4.0.74** | ✅ **Cải thiện UI Modals & Hỗ trợ Đa biểu đồ:** Tách/Nâng cấp giao diện modals nhập liệu sang phong cách y tế, thêm nút "Chỉnh sửa" quỹ trong danh sách quản lý, hỗ trợ đổi tên, bật/tắt vẽ biểu đồ cho nhiều quỹ cùng lúc ở Tổng quan, sửa lỗi mất làm mờ (blur) thanh trạng thái trên điện thoại khi mở modal, và đẩy khoảng đệm an toàn (safe-area) cho logo/weather widget trên iOS/Android. |
+| **Phiên bản hiện tại** | **v4.0.75** |
+| **v4.0.75** | ✅ **Sửa lỗi kích hoạt Modals & Hoàn tác safe-area di động:** Loại bỏ thuộc tính inline `style="display: none;"` trên các modals Quỹ gia đình để kích hoạt bình thường qua lớp CSS `.active`. Hoàn tác các tùy biến padding-top/safe-area trên trang chủ di động để đưa về lề gốc ban đầu theo yêu cầu. |
+| **v4.0.74** | ✅ **Cải thiện UI Modals & Hỗ trợ Đa biểu đồ:** Tách/Nâng cấp giao diện modals nhập liệu sang phong cách y tế, thêm nút "Chỉnh sửa" quỹ trong danh sách quản lý, hỗ trợ đổi tên, bật/tắt vẽ biểu đồ cho nhiều quỹ cùng lúc ở Tổng quan, sửa lỗi mất làm mờ (blur) thanh trạng thái trên điện thoại khi mở modal. |
 | **v4.0.73** | ✅ **Nâng cấp Quỹ Gia Đình & Google Sheets Auto Sync:** Di chuyển tab Quản lý lên navbar/sidebar, ẩn nút xóa quỹ con ở tổng quan, hiển thị tổng tiền đóng góp, thêm biểu đồ phân tích dòng tiền tùy chọn cho từng quỹ con, tích hợp tự động đồng bộ Webhook Google Sheets và hỗ trợ nhập tiền viết tắt (ví dụ 500 = 500.000). |
 | **v4.0.72** | ✅ **Nâng cấp Quỹ Gia Đình:** Thêm tab "Quản lý", liên kết email vợ chồng, thêm/xóa quỹ tùy chỉnh, xuất Excel, hiển thị đúng tên thành viên trong nhật ký giao dịch, sửa lỗi đè logo trên điện thoại di động và sửa lỗi đứng hình modal hành động quỹ. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Downloads\Thong-ke` |

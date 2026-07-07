@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.74';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.74';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.74';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.75';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.75';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.75';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.74';
-import * as sync from './sync.js?v=4.0.74';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.74';
+import { encrypt, decrypt } from './crypto.js?v=4.0.75';
+import * as sync from './sync.js?v=4.0.75';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.75';
 
-const APP_VERSION = '4.0.74';
+const APP_VERSION = '4.0.75';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
