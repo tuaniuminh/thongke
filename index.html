@@ -38,10 +38,11 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.70">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.71">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.70">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.71">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.71">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -63,7 +64,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.70" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.71" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -108,6 +109,12 @@
                         <span>Hồ sơ y tế</span>
                     </a>
                 </li>
+                <li class="nav-item" data-nav="fund">
+                    <a class="nav-link" data-tab="fund">
+                        <i data-lucide="wallet"></i>
+                        <span>Quỹ gia đình</span>
+                    </a>
+                </li>
             </nav>
 
             <div class="sidebar-footer">
@@ -131,7 +138,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.70" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.71" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -804,6 +811,263 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Family Fund Tab -->
+            <section class="tab-panel" id="tab-fund" style="display: none;">
+                <div class="fund-dashboard">
+                    <!-- Top Balance Cards -->
+                    <div class="fund-balance-grid">
+                        <!-- Main Fund -->
+                        <div class="fund-card main-fund">
+                            <div class="fund-card-header">
+                                <span class="fund-title">Quỹ chính (Lương chung)</span>
+                                <div class="fund-icon-wrapper">
+                                    <i data-lucide="wallet"></i>
+                                </div>
+                            </div>
+                            <div class="fund-balance" id="mainFundBalance">0đ</div>
+                            <div class="fund-actions">
+                                <button class="btn-fund-action" onclick="openFundActionModal('contribution')" style="--accent-color: #10b981;">
+                                    <i data-lucide="arrow-down-left"></i> Đóng góp
+                                </button>
+                                <button class="btn-fund-action" onclick="openFundActionModal('transfer', 'fund-main')">
+                                    <i data-lucide="arrow-left-right"></i> Trích quỹ
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Spending Fund -->
+                        <div class="fund-card spending-fund">
+                            <div class="fund-card-header">
+                                <span class="fund-title">Quỹ chi tiêu (Sinh hoạt)</span>
+                                <div class="fund-icon-wrapper">
+                                    <i data-lucide="shopping-bag"></i>
+                                </div>
+                            </div>
+                            <div class="fund-balance" id="spendingFundBalance">0đ</div>
+                            <div class="fund-actions">
+                                <button class="btn-fund-action" onclick="openFundActionModal('spending', 'fund-spending')" style="--accent-color: #ef4444;">
+                                    <i data-lucide="arrow-up-right"></i> Chi tiêu
+                                </button>
+                                <button class="btn-fund-action" onclick="openFundActionModal('transfer', 'fund-spending')">
+                                    <i data-lucide="arrow-left-right"></i> Chuyển tiền
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Investment Fund -->
+                        <div class="fund-card investment-fund">
+                            <div class="fund-card-header">
+                                <span class="fund-title">Quỹ đầu tư (Lãi/Lỗ)</span>
+                                <div class="fund-icon-wrapper">
+                                    <i data-lucide="trending-up"></i>
+                                </div>
+                            </div>
+                            <div class="fund-balance" id="investFundBalance">0đ</div>
+                            <div class="fund-actions">
+                                <button class="btn-fund-action" onclick="openFundActionModal('invest', 'fund-investment')" style="--accent-color: #f59e0b;">
+                                    <i data-lucide="trending-up"></i> Chốt lãi/lỗ
+                                </button>
+                                <button class="btn-fund-action" onclick="openFundActionModal('transfer', 'fund-investment')">
+                                    <i data-lucide="arrow-left-right"></i> Chuyển tiền
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart and Transactions Row -->
+                    <div class="fund-analytics-row">
+                        <!-- Chart Card -->
+                        <div class="fund-chart-card">
+                            <h4 class="health-card-title">Tỷ lệ đóng góp (Chồng vs Vợ)</h4>
+                            <p class="health-card-desc">Thống kê tỷ lệ tiền lương đóng góp lũy kế</p>
+                            <div class="fund-chart-container">
+                                <canvas id="fundContributionChartCanvas"></canvas>
+                            </div>
+                            <div class="chart-legend-custom">
+                                <div class="legend-item">
+                                    <span><span class="legend-color" style="background: #0284c7;"></span>Chồng đóng góp:</span>
+                                    <span id="chartHusbandText" style="font-weight: 700;">0đ (50%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span><span class="legend-color" style="background: #ef4444;"></span>Vợ đóng góp:</span>
+                                    <span id="chartWifeText" style="font-weight: 700;">0đ (50%)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction History Card -->
+                        <div class="fund-transactions-card">
+                            <div class="card-header-actions">
+                                <div>
+                                    <h4 class="health-card-title" style="margin: 0;">Nhật ký quỹ gia đình</h4>
+                                    <p class="health-card-desc" style="margin: 4px 0 0 0;">Lịch sử thay đổi và giao dịch quỹ</p>
+                                </div>
+                                <select id="filterFundSelect" class="filter-fund-select">
+                                    <option value="all">Tất cả giao dịch</option>
+                                    <option value="fund-main">Quỹ chính</option>
+                                    <option value="fund-spending">Quỹ chi tiêu</option>
+                                    <option value="fund-investment">Quỹ đầu tư</option>
+                                </select>
+                            </div>
+                            <div class="fund-transaction-list" id="fundTransactionList">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Modal: Đóng góp lương -->
+                <div class="modal" id="fundContributionModal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Đóng góp lương vào quỹ</h3>
+                            <button class="btn-close" onclick="closeModal('fundContributionModal')">&times;</button>
+                        </div>
+                        <form id="fundContributionForm">
+                            <div class="form-group">
+                                <label for="contribMember">Thành viên đóng góp</label>
+                                <select id="contribMember" class="form-input"></select>
+                            </div>
+                            <div class="fund-form-row">
+                                <div class="form-group">
+                                    <label for="contribAmount">Số tiền đóng góp (đ)</label>
+                                    <input type="text" id="contribAmount" class="form-input" placeholder="Ví dụ: 10.000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contribDate">Ngày đóng góp</label>
+                                    <input type="date" id="contribDate" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contribNotes">Ghi chú (Tùy chọn)</label>
+                                <input type="text" id="contribNotes" class="form-input" placeholder="Ví dụ: Lương tháng 7">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline" onclick="closeModal('fundContributionModal')">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Xác nhận nạp</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 2. Modal: Trích chuyển quỹ -->
+                <div class="modal" id="fundTransferModal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Trích chuyển tiền giữa các quỹ</h3>
+                            <button class="btn-close" onclick="closeModal('fundTransferModal')">&times;</button>
+                        </div>
+                        <form id="fundTransferForm">
+                            <div class="fund-form-row">
+                                <div class="form-group">
+                                    <label for="transferFromFund">Từ quỹ (Nguồn)</label>
+                                    <select id="transferFromFund" class="form-input"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transferToFund">Đến quỹ (Đích)</label>
+                                    <select id="transferToFund" class="form-input"></select>
+                                </div>
+                            </div>
+                            <div class="fund-form-row">
+                                <div class="form-group">
+                                    <label for="transferAmount">Số tiền chuyển (đ)</label>
+                                    <input type="text" id="transferAmount" class="form-input" placeholder="Ví dụ: 2.000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transferDate">Ngày chuyển</label>
+                                    <input type="date" id="transferDate" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="transferNotes">Ghi chú / Lý do chuyển</label>
+                                <input type="text" id="transferNotes" class="form-input" placeholder="Ví dụ: Trích quỹ chi tiêu sinh hoạt tháng 7" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline" onclick="closeModal('fundTransferModal')">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Xác nhận chuyển</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 3. Modal: Ghi nhận chi tiêu -->
+                <div class="modal" id="fundSpendingModal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Ghi nhận chi tiêu từ quỹ</h3>
+                            <button class="btn-close" onclick="closeModal('fundSpendingModal')">&times;</button>
+                        </div>
+                        <form id="fundSpendingForm">
+                            <div class="fund-form-row">
+                                <div class="form-group">
+                                    <label for="spendingFundSelect">Chi từ quỹ</label>
+                                    <select id="spendingFundSelect" class="form-input"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="spendingDate">Ngày chi</label>
+                                    <input type="date" id="spendingDate" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="spendingAmount">Số tiền chi tiêu (đ)</label>
+                                <input type="text" id="spendingAmount" class="form-input" placeholder="Ví dụ: 1.500" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="spendingNotes">Lý do chi tiêu</label>
+                                <input type="text" id="spendingNotes" class="form-input" placeholder="Ví dụ: Thanh toán hóa đơn điện nước" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline" onclick="closeModal('fundSpendingModal')">Hủy</button>
+                                <button type="submit" class="btn btn-primary" style="background-color: #ef4444; border-color: #ef4444;">Xác nhận chi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 4. Modal: Chốt đầu tư lãi/lỗ -->
+                <div class="modal" id="fundInvestModal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Chốt giá trị đầu tư Lãi/Lỗ</h3>
+                            <button class="btn-close" onclick="closeModal('fundInvestModal')">&times;</button>
+                        </div>
+                        <form id="fundInvestForm">
+                            <div class="fund-form-row">
+                                <div class="form-group">
+                                    <label for="investFundSelect">Quỹ đầu tư</label>
+                                    <select id="investFundSelect" class="form-input"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="investTypeSelect">Loại biến động</label>
+                                    <select id="investTypeSelect" class="form-input">
+                                        <option value="profit">Lãi đầu tư (+)</option>
+                                        <option value="loss">Lỗ đầu tư (-)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="fund-form-row">
+                                <div class="form-group">
+                                    <label for="investAmount">Số tiền chênh lệch (đ)</label>
+                                    <input type="text" id="investAmount" class="form-input" placeholder="Ví dụ: 500" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="investDate">Ngày chốt</label>
+                                    <input type="date" id="investDate" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="investNotes">Ghi chú (Tên dự án, cổ phiếu, v.v.)</label>
+                                <input type="text" id="investNotes" class="form-input" placeholder="Ví dụ: Chốt lãi vàng nhẫn" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline" onclick="closeModal('fundInvestModal')">Hủy</button>
+                                <button type="submit" class="btn btn-primary" style="background-color: #f59e0b; border-color: #f59e0b;">Xác nhận chốt</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -834,7 +1098,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.70" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.71" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -877,6 +1141,20 @@
                     <div class="home-card-content">
                         <h3>Hồ sơ y tế</h3>
                         <p>Theo dõi chỉ số sức khỏe, lịch sử y khoa của thành viên và phân tích bằng trợ lý AI</p>
+                    </div>
+                    <div class="home-card-arrow">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </a>
+
+                <!-- Card 4: Quỹ gia đình -->
+                <a href="#quy-gia-dinh" class="home-card card-fund" id="homeCardFund">
+                    <div class="home-card-icon" style="background: rgba(2, 132, 199, 0.1); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.25);">
+                        <i data-lucide="wallet"></i>
+                    </div>
+                    <div class="home-card-content">
+                        <h3>Quỹ gia đình</h3>
+                        <p>Theo dõi số tiền đóng góp hàng tháng của vợ chồng, quản lý các quỹ nhỏ (Chi tiêu, Đầu tư)</p>
                     </div>
                     <div class="home-card-arrow">
                         <i data-lucide="chevron-right"></i>
@@ -2285,7 +2563,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.70"></script>
-    <script type="module" src="src/core/app.js?v=4.0.70"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.71"></script>
+    <script type="module" src="src/core/app.js?v=4.0.71"></script>
 </body>
 </html>

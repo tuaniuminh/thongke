@@ -2,14 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.70';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.70';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.71';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.71';
+import { initFundBindings, renderFundDashboard } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.71';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt } from './crypto.js?v=4.0.70';
-import * as sync from './sync.js?v=4.0.70';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.70';
+import { encrypt, decrypt } from './crypto.js?v=4.0.71';
+import * as sync from './sync.js?v=4.0.71';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.71';
 
-const APP_VERSION = '4.0.70';
+const APP_VERSION = '4.0.71';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -71,6 +72,10 @@ let state = {
     showImportNotesOptionUpdated: '',
     customEventTypes: [],
     customEventTypesUpdated: '',
+    familyFunds: [],
+    familyFundsUpdated: '',
+    fundTransactions: [],
+    fundTransactionsUpdated: '',
     activeTab: 'dashboard',
     theme: 'dark',
     mobileViewMode: 'cards',
@@ -273,7 +278,11 @@ async function saveLocalState() {
         bloodPressureRecords: state.bloodPressureRecords || [],
         bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || '',
         bodyCompositionRecords: state.bodyCompositionRecords || [],
-        bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || ''
+        bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || '',
+        familyFunds: state.familyFunds || [],
+        familyFundsUpdated: state.familyFundsUpdated || '',
+        fundTransactions: state.fundTransactions || [],
+        fundTransactionsUpdated: state.fundTransactionsUpdated || ''
     });
     
     try {
@@ -315,6 +324,10 @@ async function loadLocalState(password) {
         state.bloodPressureRecordsUpdated = '';
         state.bodyCompositionRecords = [];
         state.bodyCompositionRecordsUpdated = '';
+        state.familyFunds = [];
+        state.familyFundsUpdated = '';
+        state.fundTransactions = [];
+        state.fundTransactionsUpdated = '';
         return true;
     }
     
@@ -347,6 +360,10 @@ async function loadLocalState(password) {
         state.bloodPressureRecordsUpdated = data.bloodPressureRecordsUpdated || '';
         state.bodyCompositionRecords = data.bodyCompositionRecords || [];
         state.bodyCompositionRecordsUpdated = data.bodyCompositionRecordsUpdated || '';
+        state.familyFunds = data.familyFunds || [];
+        state.familyFundsUpdated = data.familyFundsUpdated || '';
+        state.fundTransactions = data.fundTransactions || [];
+        state.fundTransactionsUpdated = data.fundTransactionsUpdated || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -404,6 +421,8 @@ async function performSync(silent = false) {
         let mergedMedical = [...(state.medicalRecords || [])];
         let mergedBP = [...(state.bloodPressureRecords || [])];
         let mergedBodyComp = [...(state.bodyCompositionRecords || [])];
+        let mergedFamilyFunds = [...(state.familyFunds || [])];
+        let mergedFundTransactions = [...(state.fundTransactions || [])];
         let localReset = state.lastResetTime || '';
         
         if (remoteRecord && remoteRecord.encrypted_data) {
@@ -452,6 +471,10 @@ async function performSync(silent = false) {
                     state.bloodPressureRecordsUpdated = remoteData.bloodPressureRecordsUpdated || '';
                     state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
                     state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
+                    state.familyFunds = remoteData.familyFunds || [];
+                    state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
+                    state.fundTransactions = remoteData.fundTransactions || [];
+                    state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -531,6 +554,20 @@ async function performSync(silent = false) {
                         state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
                         state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
                     }
+                    // Merge familyFunds using LWW
+                    const localFundsTime = state.familyFundsUpdated ? new Date(state.familyFundsUpdated).getTime() : 0;
+                    const remoteFundsTime = remoteData.familyFundsUpdated ? new Date(remoteData.familyFundsUpdated).getTime() : 0;
+                    if (remoteFundsTime > localFundsTime) {
+                        state.familyFunds = remoteData.familyFunds || [];
+                        state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
+                    }
+                    // Merge fundTransactions using LWW
+                    const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
+                    const remoteTxTime = remoteData.fundTransactionsUpdated ? new Date(remoteData.fundTransactionsUpdated).getTime() : 0;
+                    if (remoteTxTime > localTxTime) {
+                        state.fundTransactions = remoteData.fundTransactions || [];
+                        state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                    }
                 }
                 
                 // 3. Merge lists
@@ -539,6 +576,8 @@ async function performSync(silent = false) {
                 mergedMedical = mergeLists(state.medicalRecords || [], remoteMedical);
                 mergedBP = state.bloodPressureRecords; // BP already merged via LWW above
                 mergedBodyComp = state.bodyCompositionRecords;
+                mergedFamilyFunds = mergeLists(state.familyFunds || [], remoteData.familyFunds || []);
+                mergedFundTransactions = mergeLists(state.fundTransactions || [], remoteData.fundTransactions || []);
             } catch (decErr) {
                 console.error("Remote decryption failed:", decErr);
                 throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
@@ -551,6 +590,8 @@ async function performSync(silent = false) {
         state.medicalRecords = mergedMedical;
         state.bloodPressureRecords = mergedBP;
         state.bodyCompositionRecords = mergedBodyComp;
+        state.familyFunds = mergedFamilyFunds;
+        state.fundTransactions = mergedFundTransactions;
         state.lastResetTime = localReset;
         await saveLocalState();
         
@@ -580,7 +621,11 @@ async function performSync(silent = false) {
             bloodPressureRecords: state.bloodPressureRecords || [],
             bloodPressureRecordsUpdated: state.bloodPressureRecordsUpdated || '',
             bodyCompositionRecords: state.bodyCompositionRecords || [],
-            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || ''
+            bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || '',
+            familyFunds: state.familyFunds || [],
+            familyFundsUpdated: state.familyFundsUpdated || '',
+            fundTransactions: state.fundTransactions || [],
+            fundTransactionsUpdated: state.fundTransactionsUpdated || ''
         });
         const encrypted = await encrypt(payload, state.masterPassword);
         await sync.saveSyncData(encrypted);
@@ -633,6 +678,7 @@ function renderAll() {
     renderSentTable();
     renderSettings();
     renderHealthDashboard();
+    renderFundDashboard();
     updateThemeUI();
     updateImportNotesOptionUI();
     handleHashRoute();
@@ -966,7 +1012,9 @@ const tabHashMapping = {
     'caidat': 'settings',
     'settings': 'settings',
     'hosoyte': 'health',
-    'health': 'health'
+    'health': 'health',
+    'quy-gia-dinh': 'fund',
+    'fund': 'fund'
 };
 
 const tabIdToHash = {
@@ -975,7 +1023,8 @@ const tabIdToHash = {
     'received': 'tientoinhan',
     'sent': 'tientoimung',
     'settings': 'caidat',
-    'health': 'hosoyte'
+    'health': 'hosoyte',
+    'fund': 'quy-gia-dinh'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -1104,6 +1153,10 @@ function switchTab(tabId, updateHash = true) {
         title.innerText = 'Hồ sơ y tế';
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
         renderHealthDashboard();
+    } else if (tabId === 'fund') {
+        title.innerText = 'Quỹ gia đình';
+        subtitle.innerText = 'Theo dõi đóng góp của hai vợ chồng, quản lý các quỹ chi tiêu và đầu tư';
+        renderFundDashboard();
     }
     
     if (updateHash) {
@@ -1114,7 +1167,7 @@ function switchTab(tabId, updateHash = true) {
     // Toggle Quick Add button based on active tab
     const quickAddBtn = document.getElementById('quickAddBtn');
     if (quickAddBtn) {
-        if (tabId === 'health' || tabId === 'settings') {
+        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund') {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';
@@ -1879,6 +1932,9 @@ async function initializeApp() {
 
     // Initialize Health/Medical Bindings
     initHealthBindings();
+
+    // Initialize Fund Bindings
+    initFundBindings();
 
     // Initialize Lucide Icons
     lucide.createIcons();
