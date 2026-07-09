@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.1.03';
-import * as sync from '../../core/sync.js?v=4.1.03';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.03';
+} from '../../core/app.js?v=4.1.04';
+import * as sync from '../../core/sync.js?v=4.1.04';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.04';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1066,6 +1066,30 @@ function updateHomeLayoutUI() {
                     state.showFamilyFundCard = true;
                     state.showFamilyFundCardUpdated = new Date().toISOString();
                     
+                    // Notify owner of acceptance via Supabase
+                    if (state.sharedFundSourceRow && state.sharedFundSourceRow.user_id) {
+                        try {
+                            const parsed = JSON.parse(state.sharedFundSourceRow.encrypted_data);
+                            if (parsed && parsed.is_hybrid) {
+                                parsed.spouse_status = 'accepted';
+                                const updatedPayload = JSON.stringify(parsed);
+                                const supabaseClient = sync.getSupabase();
+                                if (supabaseClient) {
+                                    await supabaseClient
+                                        .from('gift_sync')
+                                        .update({
+                                            encrypted_data: updatedPayload,
+                                            updated_at: new Date().toISOString()
+                                        })
+                                        .eq('user_id', state.sharedFundSourceRow.user_id);
+                                    console.log("[E2EE Debug] Notified spouse of acceptance status.");
+                                }
+                            }
+                        } catch (updateErr) {
+                            console.error("Failed to notify spouse of acceptance:", updateErr);
+                        }
+                    }
+
                     await saveLocalState();
                     performSync(true);
                     
@@ -1159,7 +1183,7 @@ function updateSidebarNavVisibility(tabId) {
     if (sidebarLogoText) {
         if (tabId === 'health') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
-        } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings') {
+        } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
         } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
             sidebarLogoText.innerText = 'Quỹ gia đình';
@@ -1178,7 +1202,8 @@ function updateSidebarNavVisibility(tabId) {
         health: document.querySelector('[data-nav="health"]'),
         fund: document.querySelector('[data-nav="fund"]'),
         fundHistory: document.querySelector('[data-nav="fund-history"]'),
-        fundManagement: document.querySelector('[data-nav="fund-management"]')
+        fundManagement: document.querySelector('[data-nav="fund-management"]'),
+        tcManagement: document.querySelector('[data-nav="tc-management"]')
     };
 
     if (!navItems.health) return;
@@ -1195,6 +1220,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.fund) navItems.fund.style.display = 'none';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
     } else if (tabId === 'settings') {
         // Khi vào Cài đặt: ẩn toàn bộ nav Thu Chi đối ngoại trên desktop sidebar
         if (navItems.home) navItems.home.style.display = 'block';
@@ -1208,12 +1234,14 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.received) navItems.received.style.display = 'none';
         if (navItems.sent) navItems.sent.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
     } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent') {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.dashboard) navItems.dashboard.style.display = 'block';
         if (navItems.received) navItems.received.style.display = 'block';
         if (navItems.sent) navItems.sent.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
         
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
@@ -1232,6 +1260,20 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.sent) navItems.sent.style.display = 'none';
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
+    } else if (tabId === 'tc-management') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
+        if (navItems.received) navItems.received.style.display = 'block';
+        if (navItems.sent) navItems.sent.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
+
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
     } else {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.dashboard) navItems.dashboard.style.display = 'block';
@@ -1242,11 +1284,12 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.fund) navItems.fund.style.display = 'block';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
     }
     
     // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in (disabled to allow offline access)
-    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundHistory', 'fundManagement'];
+    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundHistory', 'fundManagement', 'tcManagement'];
     lockableNavKeys.forEach(key => {
         const item = navItems[key];
         if (item) {
@@ -1357,7 +1400,7 @@ function updateMobileNavbar(tabId) {
             </div>
         `;
     } else {
-        // For finance tabs (dashboard, received, sent)
+        // For finance tabs (dashboard, received, sent, tc-management)
         mobileNavbar.classList.add('two-line');
         
         const currentLogoSrc = state.theme === 'light' 
@@ -1386,6 +1429,9 @@ function updateMobileNavbar(tabId) {
                 </button>
                 <button class="nav-icon-btn text-only ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi Mừng">
                     Tiền tôi Mừng
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'tc-management' ? 'active' : ''}" onclick="switchTab('tc-management')" title="Quản lý">
+                    Quản lý
                 </button>
             </div>
         `;

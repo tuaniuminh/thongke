@@ -39,11 +39,11 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.03">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.04">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.03">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.03">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.04">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.04">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -96,7 +96,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.1.03" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.1.04" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -126,6 +126,12 @@
                     <a class="nav-link" data-tab="sent">
                         <i data-lucide="arrow-up-right"></i>
                         <span>Tiền tôi mừng</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-nav="tc-management" style="display: none;">
+                    <a class="nav-link" data-tab="tc-management">
+                        <i data-lucide="wrench"></i>
+                        <span>Quản lý</span>
                     </a>
                 </li>
 
@@ -182,7 +188,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.1.03" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.1.04" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -441,50 +447,10 @@
                 </div>
             </section>
 
-            <section class="tab-panel" id="tab-settings" style="display: none;">
+            <!-- Thu Chi Management Tab -->
+            <section class="tab-panel" id="tab-tc-management" style="display: none;">
                 <div class="settings-grid">
-                    <!-- Supabase Sync Card -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="cloud-lightning"></i>
-                            <span>Cấu hình Đồng bộ Supabase</span>
-                        </h2>
-                        <div id="supabaseConfigView">
-                            <!-- Dynamically showing details -->
-                        </div>
-                    </div>
-
-                    <!-- Theme Settings Card (Mobile only) -->
-                    <div class="settings-card mobile-only-settings-card">
-                        <h2>
-                            <i data-lucide="palette"></i>
-                            <span>Giao diện ứng dụng</span>
-                        </h2>
-                        <p class="settings-info">
-                            Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
-                        </p>
-                        <button class="btn btn-outline w-full theme-toggle-btn-trigger" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
-                            <i data-lucide="sun" class="theme-icon"></i>
-                            <span class="theme-text">Giao diện sáng</span>
-                        </button>
-                    </div>
-
-                    <!-- Security / Master Password Card -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="key-round"></i>
-                            <span>Mật khẩu chính (Master Password)</span>
-                        </h2>
-                        <p class="settings-info">
-                            Dùng để mã hóa dữ liệu cục bộ trong trình duyệt của bạn trước khi đưa lên máy chủ. Bạn phải lưu trữ mật khẩu này thật kỹ. Nếu mất, dữ liệu của bạn sẽ không bao giờ được phục hồi.
-                        </p>
-                        <button class="btn btn-primary w-full" id="changePasswordBtn">
-                            <i data-lucide="refresh-cw"></i>
-                            <span>Đổi Master Password</span>
-                        </button>
-                    </div>
-
-                    <!-- Feature Customization Card -->
+                    <!-- Feature Toggles Card -->
                     <div class="settings-card">
                         <h2>
                             <i data-lucide="sliders"></i>
@@ -508,44 +474,39 @@
                                     <span class="status-slider"></span>
                                 </div>
                             </label>
-                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị thẻ "Quỹ gia đình" ở trang chủ chính</span>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" id="toggleShowFamilyFundCard" class="status-checkbox">
-                                    <span class="status-slider"></span>
-                                </div>
-                            </label>
-                        </div>
-                        <div style="border-top: 1px solid var(--border-color); margin-top: 16px; padding-top: 16px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px; font-family: var(--font-heading);">
-                                    <i data-lucide="tag" style="width: 16px; height: 16px; color: var(--accent-rose);"></i>
-                                    <span>Quản lý loại sự kiện tùy chỉnh</span>
-                                </h3>
-                                <button type="button" id="toggleEditCustomEventsBtn" class="btn-text-mode" style="font-size: 0.8rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0;">
-                                    Chỉnh sửa
-                                </button>
-                            </div>
-                            <p class="settings-info" style="margin-bottom: 12px;">
-                                Thêm các loại sự kiện khác của riêng bạn (ví dụ: Mừng thọ, Sinh nhật, Đầy tháng...) để hiển thị trong bộ lọc và biểu mẫu.
-                            </p>
-                            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                                <input type="text" id="customEventInput" class="form-control" placeholder="Tên sự kiện mới..." style="flex: 1;">
-                                <button class="btn btn-primary" id="addCustomEventBtn" style="padding: 0 16px;" title="Thêm sự kiện">
-                                    <i data-lucide="plus"></i>
-                                </button>
-                            </div>
-                            <div id="customEventsList" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                <!-- Dynamic custom events will be rendered here -->
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Import/Export Card -->
+                    <!-- Custom Event Types Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="tag"></i>
+                            <span>Quản lý loại sự kiện tùy chỉnh</span>
+                        </h2>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <p class="settings-info" style="margin-bottom: 0;">
+                                Thêm các loại sự kiện khác của riêng bạn (ví dụ: Mừng thọ, Sinh nhật, Đầy tháng...) để hiển thị trong bộ lọc và biểu mẫu.
+                            </p>
+                            <button type="button" id="toggleEditCustomEventsBtn" class="btn-text-mode" style="font-size: 0.8rem; color: var(--text-secondary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; white-space: nowrap; margin-left: 12px;">
+                                Chỉnh sửa
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <input type="text" id="customEventInput" class="form-control" placeholder="Tên sự kiện mới..." style="flex: 1;">
+                            <button class="btn btn-primary" id="addCustomEventBtn" style="padding: 0 16px;" title="Thêm sự kiện">
+                                <i data-lucide="plus"></i>
+                            </button>
+                        </div>
+                        <div id="customEventsList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <!-- Dynamic custom events will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Export/Import Card (moved from Settings) -->
                     <div class="settings-card">
                         <h2>
                             <i data-lucide="database"></i>
-                            <span>Xuất & Nhập dữ liệu</span>
+                            <span>Xuất &amp; Nhập dữ liệu</span>
                         </h2>
                         <p class="settings-info">
                             Bạn có thể sao lưu dữ liệu dưới dạng tệp đã được mã hóa để cất trữ thủ công, hoặc xuất định dạng Excel để xem và chỉnh sửa trực tiếp.
@@ -596,15 +557,107 @@
                             </div>
                             
                             <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px;">
-                                <label class="form-label" style="margin-bottom: 8px; display: block; font-weight: 600; color: #ef4444;">Xóa sạch dữ liệu</label>
+                                <label class="form-label" style="margin-bottom: 8px; display: block; font-weight: 600; color: #ef4444;">Xóa tất cả dữ liệu thu chi</label>
                                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
                                     Xóa sạch toàn bộ ghi chép thu chi đối ngoại trên thiết bị này. Lưu ý: Nếu bạn có liên kết tài khoản Supabase, dữ liệu trên đám mây cũng sẽ bị xóa sạch sau khi đồng bộ.
                                 </p>
                                 <button class="btn w-full" id="clearAllDataBtn" style="background-color: #ef4444; color: white; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: var(--btn-radius);">
                                     <i data-lucide="trash-2"></i>
-                                    <span>Xóa sạch toàn bộ ghi chép</span>
+                                    <span>Xóa tất cả dữ liệu thu chi</span>
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tab-panel" id="tab-settings" style="display: none;">
+                <div class="settings-grid">
+                    <!-- Supabase Sync Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="cloud-lightning"></i>
+                            <span>Cấu hình Đồng bộ Supabase</span>
+                        </h2>
+                        <div id="supabaseConfigView">
+                            <!-- Dynamically showing details -->
+                        </div>
+                    </div>
+
+                    <!-- Theme Settings Card (Mobile only) -->
+                    <div class="settings-card mobile-only-settings-card">
+                        <h2>
+                            <i data-lucide="palette"></i>
+                            <span>Giao diện ứng dụng</span>
+                        </h2>
+                        <p class="settings-info">
+                            Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
+                        </p>
+                        <button class="btn btn-outline w-full theme-toggle-btn-trigger" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
+                            <i data-lucide="sun" class="theme-icon"></i>
+                            <span class="theme-text">Giao diện sáng</span>
+                        </button>
+                    </div>
+
+                    <!-- Security / Master Password Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="key-round"></i>
+                            <span>Mật khẩu chính (Master Password)</span>
+                        </h2>
+                        <p class="settings-info">
+                            Dùng để mã hóa dữ liệu cục bộ trong trình duyệt của bạn trước khi đưa lên máy chủ. Bạn phải lưu trữ mật khẩu này thật kỹ. Nếu mất, dữ liệu của bạn sẽ không bao giờ được phục hồi.
+                        </p>
+                        <button class="btn btn-primary w-full" id="changePasswordBtn">
+                            <i data-lucide="refresh-cw"></i>
+                            <span>Đổi Master Password</span>
+                        </button>
+                    </div>
+
+                    <!-- Feature Customization Card (only fund toggle stays) -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="sliders"></i>
+                            <span>Tùy chỉnh chức năng</span>
+                        </h2>
+                        <p class="settings-info">
+                            Bật hoặc tắt các tính năng bổ sung theo nhu cầu sử dụng của bạn.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị thẻ "Quỹ gia đình" ở trang chủ chính</span>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="checkbox" id="toggleShowFamilyFundCard" class="status-checkbox">
+                                    <span class="status-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Backup/Sync All Data Card -->
+                    <div class="settings-card">
+                        <h2>
+                            <i data-lucide="hard-drive-download"></i>
+                            <span>Sao lưu / Đồng bộ toàn bộ dữ liệu</span>
+                        </h2>
+                        <p class="settings-info">
+                            Tạo bản sao lưu đầy đủ (Thu chi, Quỹ gia đình, Hồ sơ y tế) dưới dạng file mã hóa để cất giữ an toàn hoặc chuyển thiết bị.
+                        </p>
+                        <div id="lastBackupInfo" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px; padding: 8px 12px; background: rgba(16, 185, 129, 0.06); border-radius: 8px; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--accent-emerald);"></i>
+                            <span id="lastBackupText">Chưa có bản sao lưu nào</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn btn-primary w-full" id="fullBackupBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px;">
+                                <i data-lucide="download-cloud"></i>
+                                <span>Sao lưu toàn bộ dữ liệu</span>
+                            </button>
+                            <input type="file" id="fullRestoreFileInput" accept=".json" style="display:none">
+                            <button class="btn btn-outline w-full" id="fullRestoreBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px;">
+                                <i data-lucide="upload-cloud"></i>
+                                <span>Phục hồi từ bản sao lưu</span>
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -988,7 +1041,7 @@
                         <!-- Block 1: Link Spouses -->
                         <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
                             <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="users" style="color: var(--accent-blue);"></i> Liên kết tài khoản Vợ/Chồng</h4>
-                            <p class="health-card-desc" style="margin: 4px 0 0 0; font-size: 0.82rem;">Nhập email của Vợ/Chồng để chia sẻ quyền xem và xuất báo cáo Quỹ gia đình của bạn.</p>
+                            <p class="health-card-desc" id="spouseLinkDescription" style="margin: 4px 0 0 0; font-size: 0.82rem;">Nhập email của Vợ/Chồng để chia sẻ quyền xem và xuất báo cáo Quỹ gia đình của bạn.</p>
                             
                             <!-- Form when not viewing shared fund -->
                             <form id="fundSpouseEmailForm" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
@@ -1030,7 +1083,8 @@
                         </div>
 
                         <!-- Block 2: Export Data -->
-                        <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
+                        <!-- id for JS visibility control -->
+                        <div class="fund-card" id="mgmtExportExcelBlock" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
                             <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="sheet" style="color: #10b981;"></i> Xuất dữ liệu Google Sheet</h4>
                             <p class="health-card-desc" style="margin: 4px 0 0 0; font-size: 0.82rem;">Tải dữ liệu Quỹ gia đình dưới dạng file Excel (.xlsx) để nhập trực tiếp vào Google Sheets.</p>
                             <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-end; margin-top: 12px;">
@@ -1042,7 +1096,7 @@
                         </div>
 
                         <!-- Block 3: Auto Sync Google Sheets Webhook -->
-                        <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
+                        <div class="fund-card" id="mgmtGoogleSheetsBlock" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
                             <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="refresh-cw" style="color: #4f46e5;"></i> Tự động đồng bộ Google Sheets</h4>
                             <p class="health-card-desc" style="margin: 4px 0 0 0; font-size: 0.82rem;">Đồng bộ thời gian thực mỗi khi có giao dịch mới thông qua Google Apps Script Webhook.</p>
                             <form id="fundGoogleSheetsForm" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
@@ -1353,7 +1407,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.1.03" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.1.04" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2860,7 +2914,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.03"></script>
-    <script type="module" src="src/core/app.js?v=4.1.03"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.04"></script>
+    <script type="module" src="src/core/app.js?v=4.1.04"></script>
 </body>
 </html>

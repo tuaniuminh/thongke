@@ -961,10 +961,29 @@ body.light-mode .data-table tbody tr:hover {
     gap: 8px;
 }
 
-@media (max-width: 576px) {
+.backup-button-row button {
+    padding: 8px 4px;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.backup-button-row button span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
     .backup-button-row {
         grid-template-columns: 1fr;
         gap: 8px;
+    }
+    .backup-button-row button {
+        padding: 10px 16px;
+        font-size: 0.875rem;
     }
 }
 

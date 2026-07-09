@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.03';
-import { decrypt } from '../../core/crypto.js?v=4.1.03';
-import * as sync from '../../core/sync.js?v=4.1.03';
+} from '../../core/app.js?v=4.1.04';
+import { decrypt } from '../../core/crypto.js?v=4.1.04';
+import * as sync from '../../core/sync.js?v=4.1.04';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -1081,13 +1081,13 @@ function renderTransactionList() {
         }
 
         const deleteButton = state.viewingSharedFund ? '' : `
-            <button class="tx-action-delete" onclick="deleteFundTransaction('${tx.id}')" title="Xóa giao dịch">
+            <button class="tx-action-delete" data-tx-id="${tx.id}" onclick="event.stopPropagation(); deleteFundTransaction('${tx.id}')" title="Xóa giao dịch" style="display: none;">
                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
             </button>
         `;
 
         return `
-            <div class="fund-tx-item">
+            <div class="fund-tx-item" onclick="toggleFundTxDelete(this)" style="cursor: pointer;">
                 <div class="tx-left">
                     <div class="tx-badge ${badgeClass}">
                         <i data-lucide="${badgeIcon}" style="width: 18px; height: 18px;"></i>
@@ -1111,6 +1111,19 @@ function renderTransactionList() {
 
     lucide.createIcons();
 }
+
+// Toggle delete button visibility on fund transaction click
+window.toggleFundTxDelete = function(el) {
+    // Hide all other delete buttons first
+    document.querySelectorAll('.fund-tx-item .tx-action-delete').forEach(btn => {
+        btn.style.display = 'none';
+    });
+    // Toggle the clicked item's delete button
+    const deleteBtn = el.querySelector('.tx-action-delete');
+    if (deleteBtn) {
+        deleteBtn.style.display = deleteBtn.style.display === 'none' ? 'inline-flex' : 'none';
+    }
+};
 
 // Handler: Add Contribution
 async function handleContributionSubmit(e) {
@@ -1507,9 +1520,20 @@ export function renderManagementTab() {
         if (spouseLinkOwnerName) {
             spouseLinkOwnerName.innerText = state.ownerNickname || state.sharedFundOwnerEmail;
         }
+        // Ẩn mô tả liên kết cho thành viên đã tham gia
+        const spouseDesc = document.getElementById('spouseLinkDescription');
+        if (spouseDesc) spouseDesc.style.display = 'none';
+        // Ẩn xuất Excel và Google Sheets cho thành viên
+        const exportBlock = document.getElementById('mgmtExportExcelBlock');
+        if (exportBlock) exportBlock.style.display = 'none';
     } else {
         if (spouseEmailForm) spouseEmailForm.style.display = 'flex';
         if (spouseLinkSharedView) spouseLinkSharedView.style.display = 'none';
+        // Hiển thị lại mô tả và xuất cho chủ quỹ
+        const spouseDesc = document.getElementById('spouseLinkDescription');
+        if (spouseDesc) spouseDesc.style.display = 'block';
+        const exportBlock = document.getElementById('mgmtExportExcelBlock');
+        if (exportBlock) exportBlock.style.display = 'flex';
 
         const emailInput = document.getElementById('spouseEmailInput');
         const roleInput = document.getElementById('spouseRoleInput');

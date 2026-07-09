@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.03';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.03';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.03';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.04';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.04';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.04';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.03';
-import * as sync from './sync.js?v=4.1.03';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.03';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.04';
+import * as sync from './sync.js?v=4.1.04';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.04';
 
-const APP_VERSION = '4.1.03';
+const APP_VERSION = '4.1.04';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -114,6 +114,7 @@ let state = {
     sentPage: 1,
     sentLimit: 10,
     sentEditMode: false,
+    lastFullBackupDate: '',
 
     // Blood Pressure tracking (Omron HEM-7361T)
     bloodPressureRecords: [],
@@ -1549,7 +1550,9 @@ const tabHashMapping = {
     'nhat-ky-quy': 'fund-history',
     'fund-history': 'fund-history',
     'quan-ly-quy': 'fund-management',
-    'fund-management': 'fund-management'
+    'fund-management': 'fund-management',
+    'quan-ly-thu-chi': 'tc-management',
+    'tc-management': 'tc-management'
 };
 
 const tabIdToHash = {
@@ -1561,7 +1564,8 @@ const tabIdToHash = {
     'health': 'hosoyte',
     'fund': 'quy-gia-dinh',
     'fund-history': 'nhat-ky-quy',
-    'fund-management': 'quan-ly-quy'
+    'fund-management': 'quan-ly-quy',
+    'tc-management': 'quan-ly-thu-chi'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -1701,6 +1705,7 @@ function switchTab(tabId, updateHash = true) {
         title.innerText = 'Cài đặt';
         subtitle.innerText = 'Cấu hình bảo mật, đồng bộ dữ liệu và sao lưu';
         renderSettings();
+        updateLastBackupDisplay();
     } else if (tabId === 'health') {
         title.innerText = 'Hồ sơ y tế';
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
@@ -1719,6 +1724,10 @@ function switchTab(tabId, updateHash = true) {
         title.innerText = 'Quản lý Quỹ';
         subtitle.innerText = 'Cài đặt liên kết Vợ/Chồng, tự động đồng bộ Google Sheets và quản lý các quỹ';
         renderManagementTab();
+    } else if (tabId === 'tc-management') {
+        title.innerText = 'Quản lý';
+        subtitle.innerText = 'Tùy chỉnh chức năng, quản lý sự kiện và xuất nhập dữ liệu';
+        renderTcManagement();
     }
     
     if (updateHash) {
@@ -1729,7 +1738,7 @@ function switchTab(tabId, updateHash = true) {
     // Toggle Quick Add button based on active tab
     const quickAddBtn = document.getElementById('quickAddBtn');
     if (quickAddBtn) {
-        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
+        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management' || tabId === 'tc-management') {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';
@@ -2327,6 +2336,19 @@ async function initializeApp() {
     
     // Bind change password button
     document.getElementById('changePasswordBtn').addEventListener('click', handleChangePassword);
+    
+    // Full Backup listeners
+    const fullBackupBtn = document.getElementById('fullBackupBtn');
+    if (fullBackupBtn) fullBackupBtn.addEventListener('click', handleFullBackup);
+    const fullRestoreBtn = document.getElementById('fullRestoreBtn');
+    if (fullRestoreBtn) fullRestoreBtn.addEventListener('click', () => {
+        document.getElementById('fullRestoreFileInput').click();
+    });
+    const fullRestoreFileInput = document.getElementById('fullRestoreFileInput');
+    if (fullRestoreFileInput) fullRestoreFileInput.addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFullRestore(e.target.files[0]);
+        e.target.value = '';
+    });
     
     // Bind navigation tab clicks
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -2930,11 +2952,162 @@ document.addEventListener('touchmove', (e) => {
 
 
 
+// Render TC Management tab (sync checkboxes)
+function renderTcManagement() {
+    const toggleImportNotes = document.getElementById('toggleImportNotesOption');
+    if (toggleImportNotes) {
+        toggleImportNotes.checked = !!state.showImportNotesOption;
+    }
+    const toggleMobileTable = document.getElementById('toggleMobileTableView');
+    if (toggleMobileTable) {
+        toggleMobileTable.checked = state.mobileViewMode === 'table';
+    }
+    // Re-render custom events list
+    renderCustomEventsSettingsList();
+    lucide.createIcons();
+}
+
+// Full Backup - Export all data
+async function handleFullBackup() {
+    if (!state.masterPassword) {
+        showToast('Vui lòng đăng nhập trước khi sao lưu.', 'warning');
+        return;
+    }
+    try {
+        const backupData = {
+            type: 'familife_full_backup',
+            version: APP_VERSION,
+            date: new Date().toISOString(),
+            receivedGifts: state.receivedGifts,
+            sentGifts: state.sentGifts,
+            medicalRecords: state.medicalRecords,
+            bloodPressureRecords: state.bloodPressureRecords || [],
+            familyProfiles: state.familyProfiles,
+            familyFunds: state.familyFunds,
+            fundTransactions: state.fundTransactions,
+            customEventTypes: state.customEventTypes,
+            geminiApiKey: state.geminiApiKey,
+            showImportNotesOption: state.showImportNotesOption,
+            showFamilyFundCard: state.showFamilyFundCard,
+            mobileViewMode: state.mobileViewMode,
+            selectedHealthProfileId: state.selectedHealthProfileId,
+            activeChartFundIds: state.activeChartFundIds,
+            spouseEmail: state.spouseEmail,
+            ownerNickname: state.ownerNickname,
+            spouseRole: state.spouseRole,
+            googleSheetsWebhook: state.googleSheetsWebhook,
+            lastAiAnalysis: state.lastAiAnalysis,
+            lastAiAnalysisDate: state.lastAiAnalysisDate,
+            lastBpAnalysis: state.lastBpAnalysis,
+            lastBpAnalysisDate: state.lastBpAnalysisDate
+        };
+        const jsonStr = JSON.stringify(backupData);
+        const encrypted = await encrypt(jsonStr, state.masterPassword);
+        const blob = new Blob([JSON.stringify({ encrypted_full_backup: encrypted })], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.download = `FamiLife_FullBackup_${dateStr}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        state.lastFullBackupDate = new Date().toISOString();
+        await saveLocalState();
+        updateLastBackupDisplay();
+        showToast('Đã sao lưu toàn bộ dữ liệu thành công!', 'success');
+    } catch (err) {
+        console.error('Full backup failed:', err);
+        showToast('Sao lưu thất bại: ' + err.message, 'error');
+    }
+}
+
+// Full Restore
+async function handleFullRestore(file) {
+    if (!state.masterPassword) {
+        showToast('Vui lòng đăng nhập trước khi phục hồi.', 'warning');
+        return;
+    }
+    try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!parsed.encrypted_full_backup) {
+            showToast('File không phải bản sao lưu toàn bộ hợp lệ.', 'error');
+            return;
+        }
+        const decrypted = await decrypt(parsed.encrypted_full_backup, state.masterPassword);
+        const data = JSON.parse(decrypted);
+        if (data.type !== 'familife_full_backup') {
+            showToast('File không đúng định dạng sao lưu FamiLife.', 'error');
+            return;
+        }
+        if (!confirm('Phục hồi sẽ GHI ĐÈ toàn bộ dữ liệu hiện tại. Bạn có chắc chắn?')) return;
+        
+        // Restore data
+        if (data.receivedGifts) { state.receivedGifts = data.receivedGifts; state.receivedPage = 1; }
+        if (data.sentGifts) { state.sentGifts = data.sentGifts; state.sentPage = 1; }
+        if (data.medicalRecords) state.medicalRecords = data.medicalRecords;
+        if (data.bloodPressureRecords) state.bloodPressureRecords = data.bloodPressureRecords;
+        if (data.familyProfiles) state.familyProfiles = data.familyProfiles;
+        if (data.familyFunds) state.familyFunds = data.familyFunds;
+        if (data.fundTransactions) state.fundTransactions = data.fundTransactions;
+        if (data.customEventTypes) state.customEventTypes = data.customEventTypes;
+        if (data.geminiApiKey) state.geminiApiKey = data.geminiApiKey;
+        if (data.showImportNotesOption !== undefined) state.showImportNotesOption = data.showImportNotesOption;
+        if (data.showFamilyFundCard !== undefined) state.showFamilyFundCard = data.showFamilyFundCard;
+        if (data.mobileViewMode) state.mobileViewMode = data.mobileViewMode;
+        if (data.selectedHealthProfileId) state.selectedHealthProfileId = data.selectedHealthProfileId;
+        if (data.activeChartFundIds) state.activeChartFundIds = data.activeChartFundIds;
+        if (data.spouseEmail !== undefined) state.spouseEmail = data.spouseEmail;
+        if (data.ownerNickname !== undefined) state.ownerNickname = data.ownerNickname;
+        if (data.spouseRole) state.spouseRole = data.spouseRole;
+        if (data.googleSheetsWebhook !== undefined) state.googleSheetsWebhook = data.googleSheetsWebhook;
+        if (data.lastAiAnalysis !== undefined) state.lastAiAnalysis = data.lastAiAnalysis;
+        if (data.lastAiAnalysisDate !== undefined) state.lastAiAnalysisDate = data.lastAiAnalysisDate;
+        if (data.lastBpAnalysis !== undefined) state.lastBpAnalysis = data.lastBpAnalysis;
+        if (data.lastBpAnalysisDate !== undefined) state.lastBpAnalysisDate = data.lastBpAnalysisDate;
+        
+        // Update timestamps
+        const now = new Date().toISOString();
+        state.medicalRecordsUpdated = now;
+        state.bloodPressureRecordsUpdated = now;
+        state.familyProfilesUpdated = now;
+        state.familyFundsUpdated = now;
+        state.fundTransactionsUpdated = now;
+        state.customEventTypesUpdated = now;
+        
+        await saveLocalState();
+        performSync(true);
+        showToast(`Đã phục hồi thành công từ bản sao lưu (v${data.version || '?'})!`, 'success');
+        
+        // Reload current tab
+        switchTab(state.activeTab || 'dashboard');
+    } catch (err) {
+        console.error('Full restore failed:', err);
+        showToast('Phục hồi thất bại. Kiểm tra lại mật khẩu hoặc file backup.', 'error');
+    }
+}
+
+function updateLastBackupDisplay() {
+    const el = document.getElementById('lastBackupText');
+    if (el) {
+        if (state.lastFullBackupDate) {
+            const d = new Date(state.lastFullBackupDate);
+            el.textContent = `Lần sao lưu gần nhất: ${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+        } else {
+            el.textContent = 'Chưa có bản sao lưu nào';
+        }
+    }
+}
+
+window.renderTcManagement = renderTcManagement;
+
 export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 
     checkLoginStatus, renderDashboardSyncBanner, updateHomeWeather, 
     updateHomeLunar, compareRecordsByRecent, renderAll,
-    generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey
+    generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
+    handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
