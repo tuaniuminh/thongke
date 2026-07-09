@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.07';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.07';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.07';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.08';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.08';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.08';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.07';
-import * as sync from './sync.js?v=4.1.07';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.07';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.08';
+import * as sync from './sync.js?v=4.1.08';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.08';
 
-const APP_VERSION = '4.1.07';
+const APP_VERSION = '4.1.08';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1790,6 +1790,9 @@ async function checkLoginStatus() {
         updateUserBadge();
         renderSettings();
         if (user) {
+            if (typeof window.checkForSharedFamilyFund === 'function') {
+                await window.checkForSharedFamilyFund();
+            }
             // Auto sync in background on load
             performSync(true);
         }

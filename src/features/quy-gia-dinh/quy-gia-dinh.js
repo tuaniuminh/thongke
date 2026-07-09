@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.07';
-import { decrypt } from '../../core/crypto.js?v=4.1.07';
-import * as sync from '../../core/sync.js?v=4.1.07';
+} from '../../core/app.js?v=4.1.08';
+import { decrypt } from '../../core/crypto.js?v=4.1.08';
+import * as sync from '../../core/sync.js?v=4.1.08';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -311,7 +311,7 @@ export function calculateFundBalances() {
 export async function checkForSharedFamilyFund() {
     const supabaseClient = sync.getSupabase();
     if (!state.user || !supabaseClient) {
-        state.viewingSharedFund = false;
+        // Do not reset state.viewingSharedFund to false while user session is loading
         return;
     }
 
@@ -424,6 +424,15 @@ export async function checkForSharedFamilyFund() {
                             console.log("[E2EE Debug] Case B: spouse_email matched but no valid fundKey decrypted yet.");
                             state.spouseFundInvitePending = true;
                             state.spouseFundInviteOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
+                            state.sharedFundSourceRow = {
+                                user_id: row.user_id,
+                                encrypted_data: row.encrypted_data,
+                                encrypted_personal: parsed.encrypted_personal,
+                                fund_shared_keys: parsed.fund_shared_keys,
+                                owner_email: parsed.owner_email,
+                                spouse_email: parsed.spouse_email,
+                                google_sheets_webhook: parsed.google_sheets_webhook
+                            };
                             if (typeof window.updateHomeLayoutUI === 'function') {
                                 window.updateHomeLayoutUI();
                             }
@@ -1510,21 +1519,24 @@ function handleEmailInputClick() {
 
 // Render management tab elements (Linked to tab-fund-management view)
 export function renderManagementTab() {
-    // 1. Hide/Show Add Custom Fund Block
-    const addFundBlock = document.getElementById('mgmtAddCustomFundBlock');
+    const isJoined = state.viewingSharedFund || state.familyFundInviteStatus === 'accepted';
     if (addFundBlock) {
-        addFundBlock.style.display = state.viewingSharedFund ? 'none' : 'flex';
+        addFundBlock.style.display = isJoined ? 'none' : 'flex';
     }
 
     const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
     const spouseLinkSharedView = document.getElementById('spouseLinkSharedView');
     const spouseLinkOwnerName = document.getElementById('spouseLinkOwnerName');
 
-    if (state.viewingSharedFund) {
+    if (isJoined) {
         if (spouseEmailForm) spouseEmailForm.style.display = 'none';
         if (spouseLinkSharedView) spouseLinkSharedView.style.display = 'flex';
         if (spouseLinkOwnerName) {
-            spouseLinkOwnerName.innerText = state.ownerNickname || state.sharedFundOwnerEmail;
+            let ownerText = state.ownerNickname || state.sharedFundOwnerEmail;
+            if (!state.viewingSharedFund) {
+                ownerText += " (Đang chờ đối tác đồng bộ khóa...)";
+            }
+            spouseLinkOwnerName.innerText = ownerText;
         }
         // Ẩn mô tả liên kết cho thành viên đã tham gia
         const spouseDesc = document.getElementById('spouseLinkDescription');
