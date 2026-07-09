@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.00';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.00';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.00';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.01';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.01';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.01';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.00';
-import * as sync from './sync.js?v=4.1.00';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.00';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.01';
+import * as sync from './sync.js?v=4.1.01';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.01';
 
-const APP_VERSION = '4.1.00';
+const APP_VERSION = '4.1.01';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1832,7 +1832,6 @@ async function handleUnlockSubmit(e) {
                 // Connect to Supabase if configured and run sync
                 const config = getSupabaseConfig();
                 if (config.url && config.key) {
-                    sync.initSupabase(config.url, config.key);
                     checkLoginStatus();
                 }
             }, 350);
@@ -2029,7 +2028,6 @@ async function handleUnlockKeypadPress(val) {
                 
                 const config = getSupabaseConfig();
                 if (config.url && config.key) {
-                    sync.initSupabase(config.url, config.key);
                     checkLoginStatus();
                 }
                 
@@ -2074,6 +2072,12 @@ function handleUnlockClear() {
 async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
+
+    // Khởi tạo Supabase sớm để khôi phục session auth trong background
+    const config = getSupabaseConfig();
+    if (config.url && config.key) {
+        sync.initSupabase(config.url, config.key);
+    }
 
     // === Auto-inject APP_VERSION into all UI elements — no need to hardcode in HTML ===
     // Version badge on home page (top-right): shows "Ver X.X.X PRO"
@@ -2129,7 +2133,6 @@ async function initializeApp() {
                 
                 const config = getSupabaseConfig();
                 if (config.url && config.key) {
-                    sync.initSupabase(config.url, config.key);
                     checkLoginStatus();
                 }
             } else {
