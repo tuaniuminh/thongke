@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.98';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.98';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.98';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.99';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.99';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.99';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.98';
-import * as sync from './sync.js?v=4.0.98';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.98';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.99';
+import * as sync from './sync.js?v=4.0.99';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.99';
 
-const APP_VERSION = '4.0.98';
+const APP_VERSION = '4.0.99';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -612,6 +612,12 @@ async function fetchSpousePublicKey(email) {
 
 // Auto-sync function
 async function performSync(silent = false) {
+    if (localStorage.getItem('supabase_disabled') === 'true') return;
+    if (!state.masterPassword) {
+        console.warn("[Sync] Chặn đồng bộ do Master Password chưa được thiết lập.");
+        return;
+    }
+
     if (state.viewingSharedFund) {
         if (!state.sharedFundSourceRow || !state.sharedFundSourceRow.user_id) {
             console.error("No shared fund source metadata found.");
@@ -1000,7 +1006,23 @@ async function performSync(silent = false) {
                 mergedFundTransactions = state.fundTransactions; // Already merged via LWW above
             } catch (decErr) {
                 console.error("Remote decryption failed:", decErr);
-                throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
+                const forceOverwrite = await window.showConfirm(
+                    "Không thể giải mã dữ liệu trên máy chủ (có thể do lỗi phiên bản cũ làm lệch mã hóa hoặc mật khẩu khác biệt).\n\n" +
+                    "Bạn có muốn GHI ĐÈ dữ liệu từ thiết bị này lên máy chủ để khôi phục trạng thái đồng bộ không?\n" +
+                    "- Chọn 'Đồng ý': Dữ liệu cục bộ (đúng) của bạn sẽ ghi đè lên đám mây và cập nhật mật khẩu hiện tại.\n" +
+                    "- Chọn 'Hủy': Dừng đồng bộ để bạn tự sao lưu hoặc kiểm tra lại."
+                );
+                if (forceOverwrite) {
+                    mergedReceived = [...state.receivedGifts];
+                    mergedSent = [...state.sentGifts];
+                    mergedMedical = [...(state.medicalRecords || [])];
+                    mergedBP = [...(state.bloodPressureRecords || [])];
+                    mergedBodyComp = [...(state.bodyCompositionRecords || [])];
+                    mergedFamilyFunds = [...(state.familyFunds || [])];
+                    mergedFundTransactions = [...(state.fundTransactions || [])];
+                } else {
+                    throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
+                }
             }
         }
         
