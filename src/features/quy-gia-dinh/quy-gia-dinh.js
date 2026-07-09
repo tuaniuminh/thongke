@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.92';
-import { decrypt } from '../../core/crypto.js?v=4.0.92';
-import * as sync from '../../core/sync.js?v=4.0.92';
+} from '../../core/app.js?v=4.0.93';
+import { decrypt } from '../../core/crypto.js?v=4.0.93';
+import * as sync from '../../core/sync.js?v=4.0.93';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -455,7 +455,7 @@ export async function renderFundDashboard() {
     if (banner && bannerText) {
         if (state.viewingSharedFund) {
             banner.style.display = 'flex';
-            const displayName = state.ownerNickname ? `${state.ownerNickname} (${state.sharedFundOwnerEmail})` : state.sharedFundOwnerEmail;
+            const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
             bannerText.innerText = `Đang xem Quỹ gia đình được chia sẻ từ: ${displayName} (Bạn có thể đóng góp & chi tiêu từ quỹ này)`;
         } else {
             banner.style.display = 'none';

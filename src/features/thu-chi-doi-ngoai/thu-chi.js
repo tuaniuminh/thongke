@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.92';
-import * as sync from '../../core/sync.js?v=4.0.92';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.92';
+} from '../../core/app.js?v=4.0.93';
+import * as sync from '../../core/sync.js?v=4.0.93';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.93';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1043,7 +1043,7 @@ function updateHomeLayoutUI() {
         if (state.viewingSharedFund && state.sharedFundOwnerEmail) {
             const inviteStatus = state.familyFundInviteStatus;
             if (!inviteStatus) {
-                const displayName = state.ownerNickname ? `${state.ownerNickname} (${state.sharedFundOwnerEmail})` : state.sharedFundOwnerEmail;
+                const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
                 inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${displayName}`;
                 inviteCard.style.display = 'flex';
                 if (btnAccept) btnAccept.style.display = 'inline-block';
@@ -1084,7 +1084,7 @@ function updateHomeLayoutUI() {
                 }
             }
         } else if (state.spouseFundInvitePending && state.spouseFundInviteOwnerEmail) {
-            const displayName = state.ownerNickname ? `${state.ownerNickname} (${state.spouseFundInviteOwnerEmail})` : state.spouseFundInviteOwnerEmail;
+            const displayName = state.ownerNickname ? state.ownerNickname : state.spouseFundInviteOwnerEmail;
             inviteText.innerText = `Đối tác (${displayName}) muốn chia sẻ Quỹ gia đình với bạn. Vui lòng bảo đối tác mở ứng dụng FamiLife trên thiết bị của họ một lần để tự động kích hoạt liên kết!`;
             inviteCard.style.display = 'flex';
             if (btnAccept) btnAccept.style.display = 'none';
