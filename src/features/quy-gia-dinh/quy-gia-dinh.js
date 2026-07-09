@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.05';
-import { decrypt } from '../../core/crypto.js?v=4.1.05';
-import * as sync from '../../core/sync.js?v=4.1.05';
+} from '../../core/app.js?v=4.1.06';
+import { decrypt } from '../../core/crypto.js?v=4.1.06';
+import * as sync from '../../core/sync.js?v=4.1.06';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -137,6 +137,12 @@ export function initFundBindings() {
     const exportExcelBtn = document.getElementById('btnExportFundExcel');
     if (exportExcelBtn) {
         exportExcelBtn.addEventListener('click', handleExportFundExcel);
+    }
+
+    // Diagnostics button
+    const diagBtn = document.getElementById('btnRunDiagnostics');
+    if (diagBtn) {
+        diagBtn.addEventListener('click', runFundDiagnostics);
     }
 
     // Google Sheets webhook form
@@ -1523,17 +1529,12 @@ export function renderManagementTab() {
         // Ẩn mô tả liên kết cho thành viên đã tham gia
         const spouseDesc = document.getElementById('spouseLinkDescription');
         if (spouseDesc) spouseDesc.style.display = 'none';
-        // Ẩn xuất Excel và Google Sheets cho thành viên
-        const exportBlock = document.getElementById('mgmtExportExcelBlock');
-        if (exportBlock) exportBlock.style.display = 'none';
     } else {
         if (spouseEmailForm) spouseEmailForm.style.display = 'flex';
         if (spouseLinkSharedView) spouseLinkSharedView.style.display = 'none';
         // Hiển thị lại mô tả và xuất cho chủ quỹ
         const spouseDesc = document.getElementById('spouseLinkDescription');
         if (spouseDesc) spouseDesc.style.display = 'block';
-        const exportBlock = document.getElementById('mgmtExportExcelBlock');
-        if (exportBlock) exportBlock.style.display = 'flex';
 
         const emailInput = document.getElementById('spouseEmailInput');
         const roleInput = document.getElementById('spouseRoleInput');
@@ -1634,6 +1635,28 @@ export function renderManagementTab() {
             </div>
         `;
     }).join('');
+
+    // 4. Populate diagnostics local state fields
+    const diagRole = document.getElementById('diagRole');
+    if (diagRole) {
+        diagRole.textContent = state.viewingSharedFund ? 'Thành viên (Vợ/Chồng)' : 'Chủ nhóm (Người tạo)';
+    }
+    const diagSpouseStatus = document.getElementById('diagSpouseStatus');
+    if (diagSpouseStatus) {
+        if (state.viewingSharedFund) {
+            diagSpouseStatus.textContent = state.familyFundInviteStatus || 'Chưa liên kết';
+        } else {
+            diagSpouseStatus.textContent = state.spouseStatus || 'Chưa liên kết';
+        }
+    }
+    const diagRsaKey = document.getElementById('diagRsaKey');
+    if (diagRsaKey) {
+        diagRsaKey.textContent = state.asymmetricPublicKey ? 'Đã tạo (Hợp lệ)' : 'Chưa tạo';
+    }
+    const diagFundKey = document.getElementById('diagFundKey');
+    if (diagFundKey) {
+        diagFundKey.textContent = state.fundSymmetricKey ? 'Đã tạo (Hợp lệ)' : 'Chưa tạo';
+    }
 
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
@@ -2180,4 +2203,215 @@ export function renderMonthlyFundChart() {
 export function renderFundHistoryTab() {
     populateFundSelects();
     renderTransactionList();
+}
+
+// Run E2EE and Connection Diagnostics
+async function runFundDiagnostics() {
+    const logsEl = document.getElementById('diagLogs');
+    if (!logsEl) return;
+    
+    logsEl.style.display = 'block';
+    logsEl.innerHTML = '';
+    
+    function log(msg, type = 'info') {
+        const span = document.createElement('div');
+        span.style.marginBottom = '4px';
+        if (type === 'error') {
+            span.style.color = '#ef4444';
+            span.innerHTML = `❌ ${msg}`;
+        } else if (type === 'success') {
+            span.style.color = '#4ade80';
+            span.innerHTML = `✅ ${msg}`;
+        } else if (type === 'warn') {
+            span.style.color = '#fbbf24';
+            span.innerHTML = `⚠️ ${msg}`;
+        } else {
+            span.style.color = '#a3e635';
+            span.innerHTML = `⚙️ ${msg}`;
+        }
+        logsEl.appendChild(span);
+        logsEl.scrollTop = logsEl.scrollHeight;
+    }
+    
+    log("Khởi động chẩn đoán kết nối bảo mật...");
+    
+    const supabaseClient = sync.getSupabase();
+    if (!supabaseClient) {
+        log("Supabase client chưa được khởi tạo! Vui lòng vào Cài đặt để cấu hình.", "error");
+        log("CHẨN ĐOÁN: Bạn chưa điền URL/Anon Key kết nối Supabase, hãy vào Cài đặt thiết lập để sử dụng.", "warn");
+        return;
+    }
+    
+    const user = state.user;
+    if (!user) {
+        log("Bạn chưa đăng nhập Supabase! Vui lòng vào Cài đặt và thực hiện đăng nhập.", "error");
+        log("CHẨN ĐOÁN: Cần đăng nhập tài khoản đám mây để kiểm tra liên kết.", "warn");
+        return;
+    }
+    
+    log(`Đang chạy với tài khoản: ${user.email}`, "info");
+    
+    try {
+        log("Đang tải dữ liệu đồng bộ thô từ đám mây (Supabase)...");
+        const { data: myRecord, error: fetchErr } = await supabaseClient
+            .from('gift_sync')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+            
+        if (fetchErr) {
+            log(`Không thể tải dữ liệu của bạn: ${fetchErr.message}`, "error");
+            return;
+        }
+        
+        if (!myRecord) {
+            log("Chưa tìm thấy dòng dữ liệu đồng bộ nào của bạn trên máy chủ. Bạn cần nhấn 'Đồng bộ ngay' trong Cài đặt một lần.", "warn");
+        } else {
+            log("Đã tìm thấy dòng dữ liệu đồng bộ của bạn trên máy chủ.", "success");
+            try {
+                const parsed = JSON.parse(myRecord.encrypted_data);
+                log(`-> Kiểu gói tin trên Cloud: ${parsed.is_hybrid ? 'Hybrid E2EE' : 'Không mã hóa E2EE'}`, "info");
+                log(`-> Email đối tác liên kết lưu trên Cloud: ${parsed.spouse_email || 'Chưa thiết lập'}`, "info");
+                log(`-> Trạng thái đối tác (vỏ ngoài) trên Cloud: ${parsed.spouse_status || 'Trống'}`, "info");
+            } catch (pErr) {
+                log("Không thể đọc định dạng dữ liệu vỏ ngoài trên Cloud.", "error");
+            }
+        }
+        
+        // Diagnosing husband (owner) scenario
+        if (!state.viewingSharedFund) {
+            log("Chẩn đoán theo kịch bản: CHỦ NHÓM QUỸ (Chồng/Người mời)", "info");
+            
+            const partnerEmail = state.spouseEmail;
+            if (!partnerEmail) {
+                log("Bạn chưa nhập email Vợ/Chồng để gửi lời mời.", "warn");
+                log("CHẨN ĐOÁN: Vui lòng nhập email Vợ/Chồng ở khung bên trái và bấm Gửi lời mời.", "warn");
+                return;
+            }
+            
+            log(`Đối tác đã mời: ${partnerEmail}. Đang tìm khóa công khai của đối tác...`);
+            
+            const { data: partnerRecords, error: partnerErr } = await supabaseClient
+                .from('gift_sync')
+                .select('encrypted_data, public_key')
+                .ilike('user_email', partnerEmail.trim());
+                
+            if (partnerErr) {
+                log(`Lỗi khi tìm tài khoản đối tác: ${partnerErr.message}`, "error");
+                return;
+            }
+            
+            if (!partnerRecords || partnerRecords.length === 0) {
+                log(`Không tìm thấy tài khoản đối tác (${partnerEmail}) trên máy chủ. Đối tác cần đăng nhập và đồng bộ app FamiLife trước.`, "error");
+                log(`CHẨN ĐOÁN: Yêu cầu đối tác đăng nhập app bằng email ${partnerEmail} và kết nối Supabase thành công.`, "warn");
+                return;
+            }
+            
+            log(`Tìm thấy tài khoản đối tác trên máy chủ.`, "success");
+            const partnerRow = partnerRecords[0];
+            const partnerPubKey = partnerRow.public_key;
+            
+            if (!partnerPubKey) {
+                log(`Đối tác đã đăng nhập nhưng chưa tạo Cặp khóa bảo mật RSA.`, "error");
+                log("CHẨN ĐOÁN: Yêu cầu đối tác mở ứng dụng FamiLife trên máy của họ một lần để tự động kích hoạt tạo khóa bảo mật.", "warn");
+                return;
+            }
+            log(`Đã tìm thấy khóa công khai của đối tác.`, "success");
+            
+            // Check shared keys
+            if (myRecord) {
+                try {
+                    const parsed = JSON.parse(myRecord.encrypted_data);
+                    const sharedKeys = parsed.fund_shared_keys || {};
+                    const normPartnerEmail = partnerEmail.toLowerCase().trim();
+                    const hasKey = !!sharedKeys[normPartnerEmail];
+                    
+                    if (hasKey) {
+                        log(`Khóa Quỹ chung đã được mã hóa chia sẻ cho đối tác thành công.`, "success");
+                        
+                        if (parsed.spouse_status === 'accepted') {
+                            log("Đối tác đã chấp nhận trên Cloud.", "success");
+                            log("CHẨN ĐOÁN: Mọi thiết lập E2EE hoàn toàn bình thường. Nếu UI vẫn chưa cập nhật, hãy nhấn 'Đồng bộ ngay' trong Cài đặt ở máy Chồng để nạp dữ liệu mới nhất.", "success");
+                        } else {
+                            log(`Trạng thái lời mời hiện tại là: ${parsed.spouse_status || 'pending'} (Chờ duyệt)`, "warn");
+                            log("CHẨN ĐOÁN: Đang chờ đối tác bấm nút 'Tham gia' từ banner lời mời ở màn hình chính phía máy đối tác. Hãy chắc chắn đối tác đã mở app và chấp nhận lời mời.", "warn");
+                        }
+                    } else {
+                        log(`Chưa chia sẻ khóa Quỹ cho đối tác.`, "warn");
+                        log("CHẨN ĐOÁN: Người chồng cần nhấn 'Đồng bộ ngay' trong Cài đặt để tự động mã hóa khóa Quỹ gửi sang cho đối tác.", "warn");
+                    }
+                } catch (e) {
+                    log("Lỗi phân tích gói tin chia sẻ khóa.", "error");
+                }
+            } else {
+                log("CHẨN ĐOÁN: Hãy đồng bộ dữ liệu ít nhất một lần để khởi tạo Quỹ chung và chia sẻ.", "warn");
+            }
+        }
+        // Diagnosing wife (joined member) scenario
+        else {
+            log("Chẩn đoán theo kịch bản: THÀNH VIÊN THAM GIA (Vợ/Khách)", "info");
+            
+            const ownerEmail = state.sharedFundOwnerEmail;
+            if (!ownerEmail) {
+                log("Không tìm thấy thông tin email chủ quỹ.", "error");
+                return;
+            }
+            
+            log(`Chủ quỹ: ${ownerEmail}. Đang kiểm tra dữ liệu của chủ quỹ...`);
+            
+            const { data: ownerRecords, error: ownerErr } = await supabaseClient
+                .from('gift_sync')
+                .select('*')
+                .ilike('user_email', ownerEmail.trim());
+                
+            if (ownerErr) {
+                log(`Lỗi tải dữ liệu chủ quỹ: ${ownerErr.message}`, "error");
+                return;
+            }
+            
+            if (!ownerRecords || ownerRecords.length === 0) {
+                log("Không tìm thấy dòng dữ liệu của chủ quỹ trên máy chủ.", "error");
+                return;
+            }
+            
+            const ownerRow = ownerRecords[0];
+            log("Tải dữ liệu chủ quỹ thành công.", "success");
+            
+            try {
+                const parsed = JSON.parse(ownerRow.encrypted_data);
+                const spouseEmailOnCloud = (parsed.spouse_email || '').toLowerCase().trim();
+                const myEmail = user.email.toLowerCase().trim();
+                
+                if (spouseEmailOnCloud !== myEmail) {
+                    log(`Chủ quỹ đang liên kết với email khác trên Cloud: ${parsed.spouse_email}`, "error");
+                    log(`CHẨN ĐOÁN: Yêu cầu Chồng hủy liên kết và mời lại chính xác địa chỉ email của bạn (${user.email}).`, "warn");
+                    return;
+                }
+                
+                log("Email của bạn khớp hoàn toàn với lời mời của Chồng trên máy chủ.", "success");
+                
+                const sharedKeys = parsed.fund_shared_keys || {};
+                const hasMyKey = !!sharedKeys[myEmail];
+                
+                if (hasMyKey) {
+                    log("Chủ quỹ đã chia sẻ khóa giải mã Quỹ cho bạn.", "success");
+                    log(`Trạng thái lời mời của bạn ghi nhận bên Chồng: ${parsed.spouse_status}`, "info");
+                    
+                    if (state.familyFundInviteStatus === 'accepted') {
+                        log("Trạng thái lời mời ở máy bạn đã được chấp nhận cục bộ.", "success");
+                        log("CHẨN ĐOÁN: Liên kết hoạt động bình thường. Bạn có quyền xem và nhập giao dịch vào Quỹ chung.", "success");
+                    } else {
+                        log("CHẨN ĐOÁN: Bạn cần bấm nút 'Tham gia' từ Banner lời mời xuất hiện ở trang chủ.", "warn");
+                    }
+                } else {
+                    log("Chủ quỹ chưa tạo khóa chia sẻ dành cho bạn.", "error");
+                    log("CHẨN ĐOÁN: Yêu cầu người Chồng mở ứng dụng FamiLife và bấm 'Đồng bộ ngay' trong Cài đặt để tạo khóa chia sẻ cho bạn.", "warn");
+                }
+            } catch (err) {
+                log("Lỗi phân tích dữ liệu của chủ quỹ.", "error");
+            }
+        }
+    } catch (gErr) {
+        log(`Quá trình chẩn đoán gặp lỗi ngoại lệ: ${gErr.message}`, "error");
+    }
 }
