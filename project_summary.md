@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.89** |
+| **Phiên bản hiện tại** | **v4.0.90** |
+| **v4.0.90** | ✅ **Sửa lỗi lặp thông báo hủy liên kết trên máy Vợ & lỗi đồng bộ xóa email trên máy Chồng khi Vợ thoát nhóm:** Cập nhật logic dọn dẹp state và lưu xuống localStorage trên máy Vợ khi liên kết bị hủy, ngăn chặn vòng lặp thông báo. Đồng thời tích hợp cơ chế gán `spouse_status = 'left'` khi Vợ thoát nhóm giúp máy Chồng tự động phát hiện, thực hiện auto-unlink và đồng bộ sạch lên Supabase mà không bị chặn bởi chính sách RLS. |
 | **v4.0.89** | ✅ **Tự động đồng bộ trạng thái hủy liên kết cho cả hai phía:** Cập nhật hàm thoát nhóm `handleLeaveSpouseFund` của người Vợ. Khi Vợ thoát nhóm, máy của Vợ sẽ gửi yêu cầu cập nhật (UPDATE) lên Supabase để xóa email liên kết `spouse_email` và public key tương ứng trong dòng dữ liệu của Chồng. Nhờ đó, người Chồng sẽ nhận biết được ngay lập tức ở lần đồng bộ tiếp theo. |
 | **v4.0.88** | ✅ **Khắc phục lỗi thoát nhóm gia đình tự động bị kéo vào lại:** Bổ sung logic kiểm tra trạng thái lời mời (`familyFundInviteStatus === 'declined'`) trong hàm quét ghép đôi `checkForSharedFamilyFund`. Khi người Vợ chủ động thoát nhóm gia đình, trạng thái này sẽ chặn việc tự động liên kết lại mỗi khi tải lại trang, giúp duy trì dứt điểm trạng thái thoát nhóm. |
 | **v4.0.87** | ✅ **Sửa lỗi dọn dẹp bộ nhớ đệm khi hủy liên kết:** Thiết lập logic dọn dẹp bộ nhớ đệm (clear state) trên thiết bị của Vợ ngay khi Chồng thực hiện hủy liên kết (Unlink). Đồng thời, tự động giải mã và nạp lại dữ liệu cá nhân của Vợ (`loadLocalState`) từ localStorage để đưa ứng dụng của Vợ trở lại giao diện cá nhân bình thường, tránh lỗi hiển thị số dư cũ của Chồng. |
@@ -113,6 +114,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 
 | Phiên bản | Tính năng |
 |-----------|-----------|
+| v4.0.90 | ✅ Sửa lỗi lặp thông báo hủy liên kết trên máy Vợ và lỗi không xóa email liên kết trên máy Chồng khi Vợ thoát nhóm gia đình. |
 | v4.0.10 | ✅ Tối ưu giọng đọc AI (nâng giọng đọc Natural/Google, tốc độ 0.9); Thêm tùy chọn Phân tích chỉ số Huyết áp. |
 | **v4.0.18** | ✅ **Tái cấu trúc (Refactoring) toàn diện:** Bóc tách file `app.js` (8000 dòng) thành các file module riêng biệt trong thư mục `src/features/` (Y tế, Thu chi). Khắc phục lỗi Import và cấu trúc lại thư mục dự án gọn gàng. |
 | **v4.0.19** | ✅ **Bóc tách Thời tiết:** Di dời logic xử lý Open-Meteo API sang `src/features/thoi-tiet/thoi-tiet.js` để sẵn sàng nâng cấp. |

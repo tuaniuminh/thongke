@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.89';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.89';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.89';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.90';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.90';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.90';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.89';
-import * as sync from './sync.js?v=4.0.89';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.89';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.90';
+import * as sync from './sync.js?v=4.0.90';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.90';
 
-const APP_VERSION = '4.0.89';
+const APP_VERSION = '4.0.90';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -609,6 +609,24 @@ async function performSync(silent = false) {
                         const decryptedPersonal = await decrypt(parsedObj.encrypted_personal, state.masterPassword);
                         remoteData = JSON.parse(decryptedPersonal);
                         
+                        // Check if spouse has left
+                        if (parsedObj.spouse_status === 'left') {
+                            console.log("[E2EE Debug] Spouse has left the fund. Performing auto-unlink.");
+                            parsedObj.spouse_email = '';
+                            parsedObj.spouse_role = 'wife';
+                            parsedObj.owner_nickname = '';
+                            if (remoteData) {
+                                remoteData.spouseEmail = '';
+                                remoteData.spouseRole = 'wife';
+                                remoteData.ownerNickname = '';
+                            }
+                            state.spouseEmail = '';
+                            state.spouseRole = 'wife';
+                            state.ownerNickname = '';
+                            state.familyFundsUpdated = new Date().toISOString();
+                            showToast("Đối tác đã thoát khỏi Quỹ gia đình. Liên kết đã được hủy.", "warning");
+                        }
+                        
                         // Get Fund Key directly from decrypted personal data or fallback to private key decryption
                         let fundKey = remoteData.fundSymmetricKey || state.fundSymmetricKey;
                         
@@ -898,7 +916,14 @@ async function performSync(silent = false) {
             bodyCompositionRecordsUpdated: state.bodyCompositionRecordsUpdated || '',
             asymmetricPublicKey: state.asymmetricPublicKey || '',
             asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted || '',
-            fundSymmetricKey: state.fundSymmetricKey || ''
+            fundSymmetricKey: state.fundSymmetricKey || '',
+            spouseEmail: state.spouseEmail || '',
+            googleSheetsWebhook: state.googleSheetsWebhook || '',
+            familyFundInviteStatus: state.familyFundInviteStatus || '',
+            spouseRole: state.spouseRole || 'wife',
+            ownerNickname: state.ownerNickname || '',
+            viewingSharedFund: !!state.viewingSharedFund,
+            sharedFundOwnerEmail: state.sharedFundOwnerEmail || ''
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 

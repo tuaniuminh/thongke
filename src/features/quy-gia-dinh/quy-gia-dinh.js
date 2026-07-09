@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.89';
-import { decrypt } from '../../core/crypto.js?v=4.0.89';
-import * as sync from '../../core/sync.js?v=4.0.89';
+} from '../../core/app.js?v=4.0.90';
+import { decrypt } from '../../core/crypto.js?v=4.0.90';
+import * as sync from '../../core/sync.js?v=4.0.90';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -337,6 +337,7 @@ export async function checkForSharedFamilyFund() {
                             state.fundSymmetricKey = fundKey;
                             state.sharedFundSourceRow = {
                                 user_id: row.user_id,
+                                encrypted_data: row.encrypted_data,
                                 encrypted_personal: parsed.encrypted_personal,
                                 fund_shared_keys: parsed.fund_shared_keys,
                                 owner_email: parsed.owner_email,
@@ -380,16 +381,17 @@ export async function checkForSharedFamilyFund() {
         }
         
         if (state.viewingSharedFund || state.sharedFundOwnerEmail) {
-            state.viewingSharedFund = false;
-            state.sharedFundOwnerEmail = '';
-            state.familyFunds = [];
-            state.fundTransactions = [];
-            state.fundSymmetricKey = '';
-            state.familyFundInviteStatus = '';
-            state.sharedFundSourceRow = null;
             if (state.masterPassword) {
                 await loadLocalState(state.masterPassword);
             }
+            state.viewingSharedFund = false;
+            state.sharedFundOwnerEmail = '';
+            state.familyFunds = state.familyFunds || [];
+            state.fundTransactions = state.fundTransactions || [];
+            state.fundSymmetricKey = '';
+            state.familyFundInviteStatus = '';
+            state.sharedFundSourceRow = null;
+            await saveLocalState();
             showToast("Liên kết Quỹ gia đình đã bị hủy bởi đối tác. Quay về quỹ cá nhân.");
         }
         
@@ -400,16 +402,17 @@ export async function checkForSharedFamilyFund() {
     } catch (e) {
         console.error("Error checking shared family fund:", e);
         if (state.viewingSharedFund || state.sharedFundOwnerEmail) {
-            state.viewingSharedFund = false;
-            state.sharedFundOwnerEmail = '';
-            state.familyFunds = [];
-            state.fundTransactions = [];
-            state.fundSymmetricKey = '';
-            state.familyFundInviteStatus = '';
-            state.sharedFundSourceRow = null;
             if (state.masterPassword) {
                 await loadLocalState(state.masterPassword);
             }
+            state.viewingSharedFund = false;
+            state.sharedFundOwnerEmail = '';
+            state.familyFunds = state.familyFunds || [];
+            state.fundTransactions = state.fundTransactions || [];
+            state.fundSymmetricKey = '';
+            state.familyFundInviteStatus = '';
+            state.sharedFundSourceRow = null;
+            await saveLocalState();
         }
         state.viewingSharedFund = false;
         if (typeof window.updateHomeLayoutUI === 'function') {
@@ -1575,13 +1578,8 @@ async function handleLeaveSpouseFund() {
         try {
             const parsed = JSON.parse(state.sharedFundSourceRow.encrypted_data);
             if (parsed && parsed.is_hybrid) {
-                parsed.spouse_email = '';
-                parsed.spouse_role = 'wife';
-                parsed.owner_nickname = '';
-                if (parsed.fund_shared_keys) {
-                    const myEmail = state.user.email.toLowerCase().trim();
-                    delete parsed.fund_shared_keys[myEmail];
-                }
+                // Giữ nguyên spouse_email và fund_shared_keys để không vi phạm chính sách RLS UPDATE WITH CHECK của Supabase
+                parsed.spouse_status = 'left';
                 
                 const updatedPayload = JSON.stringify(parsed);
                 const supabaseClient = sync.getSupabase();
