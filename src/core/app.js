@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.06';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.06';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.06';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.07';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.07';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.07';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.06';
-import * as sync from './sync.js?v=4.1.06';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.06';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.07';
+import * as sync from './sync.js?v=4.1.07';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.07';
 
-const APP_VERSION = '4.1.06';
+const APP_VERSION = '4.1.07';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -443,7 +443,8 @@ async function saveLocalState() {
         spouseRole: state.spouseRole || 'wife',
         ownerNickname: state.ownerNickname || '',
         viewingSharedFund: !!state.viewingSharedFund,
-        sharedFundOwnerEmail: state.sharedFundOwnerEmail || ''
+        sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
+        lastFullBackupDate: state.lastFullBackupDate || ''
     });
     
     try {
@@ -502,6 +503,7 @@ export async function loadLocalState(password) {
         state.ownerNickname = '';
         state.viewingSharedFund = false;
         state.sharedFundOwnerEmail = '';
+        state.lastFullBackupDate = '';
         return true;
     }
     
@@ -551,6 +553,7 @@ export async function loadLocalState(password) {
         state.ownerNickname = data.ownerNickname || '';
         state.viewingSharedFund = data.viewingSharedFund || false;
         state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
+        state.lastFullBackupDate = data.lastFullBackupDate || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -676,6 +679,7 @@ async function performSync(silent = false) {
                 spouse_email: originalParsed.spouse_email,
                 spouse_role: originalParsed.spouse_role || 'wife',
                 owner_nickname: originalParsed.owner_nickname || '',
+                spouse_status: originalParsed.spouse_status || 'accepted',
                 google_sheets_webhook: originalParsed.google_sheets_webhook || '',
                 family_funds_updated: new Date().toISOString(),
                 fund_transactions_updated: new Date().toISOString()
@@ -882,6 +886,7 @@ async function performSync(silent = false) {
                     state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
                     state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
                     state.spouseStatus = remoteData.spouseStatus || '';
+                    state.lastFullBackupDate = remoteData.lastFullBackupDate || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -913,6 +918,13 @@ async function performSync(silent = false) {
                     if (!state.asymmetricPublicKey && remoteData.asymmetricPublicKey) {
                         state.asymmetricPublicKey = remoteData.asymmetricPublicKey;
                         state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted;
+                    }
+
+                    // Merge lastFullBackupDate (LWW)
+                    if (remoteData.lastFullBackupDate) {
+                        if (!state.lastFullBackupDate || new Date(remoteData.lastFullBackupDate) > new Date(state.lastFullBackupDate)) {
+                            state.lastFullBackupDate = remoteData.lastFullBackupDate;
+                        }
                     }
 
                     // Merge customEventTypes using LWW (Last Write Wins)
@@ -1102,7 +1114,8 @@ async function performSync(silent = false) {
             ownerNickname: state.ownerNickname || '',
             spouseStatus: state.spouseStatus || '',
             viewingSharedFund: !!state.viewingSharedFund,
-            sharedFundOwnerEmail: state.sharedFundOwnerEmail || ''
+            sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
+            lastFullBackupDate: state.lastFullBackupDate || ''
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 
