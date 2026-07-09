@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.08';
-import { decrypt } from '../../core/crypto.js?v=4.1.08';
-import * as sync from '../../core/sync.js?v=4.1.08';
+} from '../../core/app.js?v=4.1.09';
+import { decrypt } from '../../core/crypto.js?v=4.1.09';
+import * as sync from '../../core/sync.js?v=4.1.09';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -1520,6 +1520,7 @@ function handleEmailInputClick() {
 // Render management tab elements (Linked to tab-fund-management view)
 export function renderManagementTab() {
     const isJoined = state.viewingSharedFund || state.familyFundInviteStatus === 'accepted';
+    const addFundBlock = document.getElementById('mgmtAddCustomFundBlock');
     if (addFundBlock) {
         addFundBlock.style.display = isJoined ? 'none' : 'flex';
     }
