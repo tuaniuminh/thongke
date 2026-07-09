@@ -39,11 +39,11 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.94">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.0.95">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.94">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.94">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.0.95">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.0.95">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -65,7 +65,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.0.94" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.0.95" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -116,6 +116,12 @@
                         <span>Tổng quan</span>
                     </a>
                 </li>
+                <li class="nav-item" data-nav="fund-history" style="display: none;">
+                    <a class="nav-link" data-tab="fund-history">
+                        <i data-lucide="scroll"></i>
+                        <span>Nhật ký</span>
+                    </a>
+                </li>
                 <li class="nav-item" data-nav="fund-management" style="display: none;">
                     <a class="nav-link" data-tab="fund-management">
                         <i data-lucide="settings"></i>
@@ -145,7 +151,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.0.94" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.0.95" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -868,23 +874,53 @@
                             </div>
                         </div>
 
-                        <!-- Transaction History Card (right) -->
-                        <div class="fund-transactions-card">
-                            <div class="card-header-actions">
+                        <!-- Monthly Cashflow Column Chart (right) -->
+                        <div class="fund-chart-card" id="fundMonthlyChartCard" style="margin: 0; min-height: 350px;">
+                            <div class="card-header-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px;">
                                 <div>
-                                    <h4 class="health-card-title" style="margin: 0;">Nhật ký quỹ gia đình</h4>
-                                    <p class="health-card-desc" style="margin: 4px 0 0 0;">Lịch sử thay đổi và giao dịch quỹ</p>
+                                    <h4 class="health-card-title" style="margin: 0;">Thu chi theo tháng</h4>
+                                    <p class="health-card-desc" style="margin: 4px 0 0 0;">Biểu đồ so sánh tổng thu và chi theo tháng</p>
                                 </div>
-                                <select id="filterFundSelect" class="filter-fund-select">
-                                    <option value="all">Tất cả giao dịch</option>
+                                <select id="chartSelectFund" class="filter-fund-select" style="max-width: 150px; font-size: 0.8rem; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                                    <option value="all">Tất cả quỹ</option>
                                     <option value="fund-main">Quỹ chính</option>
                                     <option value="fund-spending">Quỹ chi tiêu</option>
                                     <option value="fund-investment">Quỹ đầu tư</option>
                                 </select>
                             </div>
-                            <div class="fund-transaction-list" id="fundTransactionList">
-                                <!-- Populated dynamically -->
+                            <div class="fund-chart-container" style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="monthlyFundChartCanvas"></canvas>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Family Fund Tab: History (Nhật ký) -->
+            <section class="tab-panel" id="tab-fund-history" style="display: none;">
+                <div class="fund-dashboard" style="padding: 0;">
+                    <div class="fund-transactions-card" style="width: 100%; box-sizing: border-box; margin: 0; padding: 20px;">
+                        <div class="card-header-actions" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                            <div>
+                                <h4 class="health-card-title" style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;"><i data-lucide="scroll" style="color: var(--accent-blue);"></i> Nhật ký giao dịch quỹ</h4>
+                                <p class="health-card-desc" style="margin: 4px 0 0 0;">Lịch sử đóng góp, chi tiêu và trích chuyển quỹ gia đình</p>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <select id="filterFundSelect" class="filter-fund-select" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                                    <option value="all">Tất cả các quỹ</option>
+                                    <option value="fund-main">Quỹ chính</option>
+                                    <option value="fund-spending">Quỹ chi tiêu</option>
+                                    <option value="fund-investment">Quỹ đầu tư</option>
+                                </select>
+                                <select id="filterMemberSelect" class="filter-fund-select" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                                    <option value="all">Tất cả thành viên</option>
+                                    <option value="husband">Chồng</option>
+                                    <option value="wife">Vợ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fund-transaction-list" id="fundTransactionList" style="max-height: 600px; overflow-y: auto;">
+                            <!-- Populated dynamically -->
                         </div>
                     </div>
                 </div>
@@ -937,9 +973,13 @@
                                         <input type="text" id="ownerNicknameInput" class="form-input" placeholder="Ví dụ: Chồng yêu" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 8px 12px; color: var(--text-primary);">
                                     </div>
                                 </div>
+                                <div id="spouseInviteStatusText" style="display: none; font-size: 0.8rem; color: #f87171; font-weight: 500; margin-top: 4px; text-align: center;">
+                                    Đối tác đã từ chối lời mời.
+                                </div>
                                 <div style="display: flex; gap: 10px; margin-top: auto;">
-                                    <button type="button" id="btnUnlinkSpouse" class="btn btn-outline" style="flex: 1; padding: 10px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; display: none;">Xóa liên kết</button>
-                                    <button type="submit" id="btnSaveSpouseLink" class="btn btn-primary" style="flex: 2; padding: 10px;">Lưu liên kết</button>
+                                    <button type="button" id="btnUnlinkSpouse" class="btn btn-outline" style="flex: 1; padding: 10px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; display: none;">Hủy</button>
+                                    <button type="button" id="btnReinviteSpouse" class="btn btn-outline" style="flex: 1; padding: 10px; border-color: var(--accent-blue); color: var(--accent-blue); display: none;">Mời lại</button>
+                                    <button type="submit" id="btnSaveSpouseLink" class="btn btn-primary" style="flex: 2; padding: 10px;">Gửi lời mời</button>
                                 </div>
                             </form>
 
@@ -1274,7 +1314,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.0.94" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.0.95" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2756,7 +2796,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.94"></script>
-    <script type="module" src="src/core/app.js?v=4.0.94"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.0.95"></script>
+    <script type="module" src="src/core/app.js?v=4.0.95"></script>
 </body>
 </html>

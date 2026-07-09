@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.94';
-import { decrypt } from '../../core/crypto.js?v=4.0.94';
-import * as sync from '../../core/sync.js?v=4.0.94';
+} from '../../core/app.js?v=4.0.95';
+import { decrypt } from '../../core/crypto.js?v=4.0.95';
+import * as sync from '../../core/sync.js?v=4.0.95';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -79,6 +79,21 @@ export function initFundBindings() {
         });
     }
 
+    const filterMemberSelect = document.getElementById('filterMemberSelect');
+    if (filterMemberSelect) {
+        filterMemberSelect.addEventListener('change', () => {
+            renderTransactionList();
+        });
+    }
+
+    // Chart select fund monthly change
+    const chartSelectFund = document.getElementById('chartSelectFund');
+    if (chartSelectFund) {
+        chartSelectFund.addEventListener('change', () => {
+            renderMonthlyFundChart();
+        });
+    }
+
     // Link spouse email form
     const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
     if (spouseEmailForm) {
@@ -88,6 +103,11 @@ export function initFundBindings() {
     const unlinkSpouseBtn = document.getElementById('btnUnlinkSpouse');
     if (unlinkSpouseBtn) {
         unlinkSpouseBtn.addEventListener('click', handleUnlinkSpouse);
+    }
+
+    const reinviteSpouseBtn = document.getElementById('btnReinviteSpouse');
+    if (reinviteSpouseBtn) {
+        reinviteSpouseBtn.addEventListener('click', handleReinviteSpouse);
     }
 
     const leaveSpouseBtn = document.getElementById('btnLeaveSpouseFund');
@@ -120,6 +140,8 @@ export function initFundBindings() {
     }
 
     window.checkForSharedFamilyFund = checkForSharedFamilyFund;
+    window.renderFundHistoryTab = renderFundHistoryTab;
+    window.renderMonthlyFundChart = renderMonthlyFundChart;
 }
 
 // Format input as money
@@ -374,6 +396,9 @@ export async function checkForSharedFamilyFund() {
                                     spouse_email: parsed.spouse_email,
                                     google_sheets_webhook: parsed.google_sheets_webhook
                                 };
+                                if (typeof window.updateHomeLayoutUI === 'function') {
+                                    window.updateHomeLayoutUI();
+                                }
                                 return;
                             }
                         } else {
@@ -381,6 +406,9 @@ export async function checkForSharedFamilyFund() {
                             console.log("[E2EE Debug] Case B: spouse_email matched but no valid fundKey decrypted yet.");
                             state.spouseFundInvitePending = true;
                             state.spouseFundInviteOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
+                            if (typeof window.updateHomeLayoutUI === 'function') {
+                                window.updateHomeLayoutUI();
+                            }
                         }
                     }
                 } else {
@@ -415,6 +443,9 @@ export async function checkForSharedFamilyFund() {
                         } else {
                             state.viewingSharedFund = false;
                             state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                            if (typeof window.updateHomeLayoutUI === 'function') {
+                                window.updateHomeLayoutUI();
+                            }
                             return;
                         }
                     }
@@ -494,6 +525,9 @@ export async function renderFundDashboard() {
 
     // 5. Render selected Fund's details Inflow/Outflow charts
     renderFundDetailsCharts();
+
+    // 5b. Render monthly column chart
+    renderMonthlyFundChart();
 
     // 6. Populate members list in Contribution Form
     populateMemberSelects();
@@ -674,6 +708,28 @@ function populateFundSelects() {
     if (investFundSelect) {
         const investableFunds = funds.filter(f => f.type === 'investment');
         investFundSelect.innerHTML = investableFunds.map(f => `<option value="${f.id}">${escapeHTML(f.name)}</option>`).join('');
+    }
+
+    const filterFundSelect = document.getElementById('filterFundSelect');
+    if (filterFundSelect) {
+        const currentVal = filterFundSelect.value;
+        filterFundSelect.innerHTML = `<option value="all">Tất cả các quỹ</option>` + funds.map(f => `<option value="${f.id}">${escapeHTML(f.name)}</option>`).join('');
+        if (currentVal && Array.from(filterFundSelect.options).some(opt => opt.value === currentVal)) {
+            filterFundSelect.value = currentVal;
+        } else {
+            filterFundSelect.value = 'all';
+        }
+    }
+
+    const chartSelectFund = document.getElementById('chartSelectFund');
+    if (chartSelectFund) {
+        const currentVal = chartSelectFund.value;
+        chartSelectFund.innerHTML = `<option value="all">Tất cả quỹ</option>` + funds.map(f => `<option value="${f.id}">${escapeHTML(f.name)}</option>`).join('');
+        if (currentVal && Array.from(chartSelectFund.options).some(opt => opt.value === currentVal)) {
+            chartSelectFund.value = currentVal;
+        } else {
+            chartSelectFund.value = 'all';
+        }
     }
 }
 
@@ -889,11 +945,20 @@ function renderTransactionList() {
     if (!listContainer) return;
 
     const filterVal = document.getElementById('filterFundSelect')?.value || 'all';
+    const filterMember = document.getElementById('filterMemberSelect')?.value || 'all';
     
     let txs = (state.fundTransactions || []).filter(t => !t.deleted_at);
 
     if (filterVal !== 'all') {
         txs = txs.filter(t => t.fundId === filterVal || t.fromFundId === filterVal || t.toFundId === filterVal);
+    }
+
+    if (filterMember !== 'all') {
+        if (filterMember === 'husband') {
+            txs = txs.filter(t => t.memberId === 'p-husband');
+        } else if (filterMember === 'wife') {
+            txs = txs.filter(t => t.memberId === 'p-wife');
+        }
     }
 
     txs.sort((a, b) => {
@@ -1405,7 +1470,9 @@ export function renderManagementTab() {
         const roleInput = document.getElementById('spouseRoleInput');
         const nicknameInput = document.getElementById('ownerNicknameInput');
         const unlinkBtn = document.getElementById('btnUnlinkSpouse');
+        const reinviteBtn = document.getElementById('btnReinviteSpouse');
         const saveBtn = document.getElementById('btnSaveSpouseLink');
+        const statusText = document.getElementById('spouseInviteStatusText');
 
         if (emailInput) {
             emailInput.value = state.spouseEmail || '';
@@ -1419,11 +1486,21 @@ export function renderManagementTab() {
             nicknameInput.value = state.ownerNickname || '';
             nicknameInput.disabled = !!state.spouseEmail;
         }
-        if (unlinkBtn) {
-            unlinkBtn.style.display = state.spouseEmail ? 'inline-block' : 'none';
-        }
-        if (saveBtn) {
-            saveBtn.style.display = state.spouseEmail ? 'none' : 'inline-block';
+        
+        if (state.spouseEmail && state.spouseStatus === 'declined') {
+            if (statusText) statusText.style.display = 'block';
+            if (reinviteBtn) reinviteBtn.style.display = 'inline-block';
+            if (unlinkBtn) unlinkBtn.style.display = 'inline-block';
+            if (saveBtn) saveBtn.style.display = 'none';
+        } else {
+            if (statusText) statusText.style.display = 'none';
+            if (reinviteBtn) reinviteBtn.style.display = 'none';
+            if (unlinkBtn) {
+                unlinkBtn.style.display = state.spouseEmail ? 'inline-block' : 'none';
+            }
+            if (saveBtn) {
+                saveBtn.style.display = state.spouseEmail ? 'none' : 'inline-block';
+            }
         }
     }
 
@@ -1597,10 +1674,24 @@ async function handleUnlinkSpouse() {
     state.spouseEmail = '';
     state.spouseRole = 'wife';
     state.ownerNickname = '';
+    state.spouseStatus = '';
     state.familyFundsUpdated = new Date().toISOString();
 
     await saveLocalState();
     showToast("Đã xóa liên kết tài khoản Vợ/Chồng!");
+    renderManagementTab();
+    performSync(true);
+}
+
+// Reinvite Spouse
+async function handleReinviteSpouse() {
+    if (!state.spouseEmail) return;
+    
+    state.spouseStatus = '';
+    state.familyFundsUpdated = new Date().toISOString();
+    
+    await saveLocalState();
+    showToast("Đã gửi lại lời mời mới!");
     renderManagementTab();
     performSync(true);
 }
@@ -1659,7 +1750,7 @@ async function handleLeaveSpouseFund() {
     showToast("Đã thoát khỏi nhóm gia đình thành công!");
     
     if (typeof window.switchTab === 'function') {
-        window.switchTab('dashboard');
+        window.switchTab('fund');
     }
     
     performSync(true);
@@ -1839,4 +1930,152 @@ function handleExportFundExcel() {
         console.error("Export Excel failed:", e);
         showToast("Lỗi khi xuất file Excel!", "error");
     }
+}
+
+// Render Monthly Fund cashflow column chart (Bar Chart)
+let monthlyFundChartInstance = null;
+
+export function renderMonthlyFundChart() {
+    const canvas = document.getElementById('monthlyFundChartCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Destroy existing instance if any
+    if (monthlyFundChartInstance) {
+        monthlyFundChartInstance.destroy();
+    }
+
+    const fundId = document.getElementById('chartSelectFund')?.value || 'all';
+
+    // 1. Get last 6 months (chronological order)
+    const months = [];
+    const date = new Date();
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
+        months.push({
+            year: d.getFullYear(),
+            month: d.getMonth() + 1, // 1-indexed
+            label: `T${d.getMonth() + 1}/${d.getFullYear()}`
+        });
+    }
+
+    // 2. Filter transactions for the selected fund
+    let txs = (state.fundTransactions || []).filter(t => !t.deleted_at);
+    if (fundId !== 'all') {
+        txs = txs.filter(t => t.fundId === fundId || t.fromFundId === fundId || t.toFundId === fundId);
+    }
+
+    // 3. Calculate monthly inflow and outflow
+    const inflows = new Array(6).fill(0);
+    const outflows = new Array(6).fill(0);
+
+    txs.forEach(tx => {
+        const txDate = new Date(tx.date);
+        const txYear = txDate.getFullYear();
+        const txMonth = txDate.getMonth() + 1;
+
+        // Find match in our 6 months list
+        const mIdx = months.findIndex(m => m.year === txYear && m.month === txMonth);
+        if (mIdx === -1) return; // Outside our range
+
+        const amount = Math.abs(tx.amount || 0);
+
+        if (tx.type === 'contribution' || tx.type === 'external_income') {
+            inflows[mIdx] += amount;
+        } 
+        else if (tx.type === 'spending') {
+            outflows[mIdx] += amount;
+        } 
+        else if (tx.type === 'investment_change') {
+            if (tx.amount >= 0) {
+                inflows[mIdx] += amount;
+            } else {
+                outflows[mIdx] += amount;
+            }
+        } 
+        else if (tx.type === 'transfer') {
+            if (fundId !== 'all') {
+                if (tx.toFundId === fundId) {
+                    inflows[mIdx] += amount;
+                } else if (tx.fromFundId === fundId) {
+                    outflows[mIdx] += amount;
+                }
+            }
+        }
+    });
+
+    // 4. Render chart
+    monthlyFundChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months.map(m => m.label),
+            datasets: [
+                {
+                    label: 'Tổng thu',
+                    data: inflows,
+                    backgroundColor: '#10b981',
+                    borderRadius: 4,
+                    barThickness: 12
+                },
+                {
+                    label: 'Tổng chi',
+                    data: outflows,
+                    backgroundColor: '#ef4444',
+                    borderRadius: 4,
+                    barThickness: 12
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: state.theme === 'dark' ? '#9ca3af' : '#4b5563',
+                        font: { size: 10 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.dataset.label}: ${formatVND(context.raw)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: state.theme === 'dark' ? '#9ca3af' : '#4b5563',
+                        font: { size: 10 }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: state.theme === 'dark' ? '#1f2937' : '#e5e7eb'
+                    },
+                    ticks: {
+                        color: state.theme === 'dark' ? '#9ca3af' : '#4b5563',
+                        font: { size: 10 },
+                        callback: function(value) {
+                            if (value >= 1000000) return (value / 1000000) + 'M';
+                            if (value >= 1000) return (value / 1000) + 'K';
+                            return value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Render Fund History (Nhật ký) Tab
+export function renderFundHistoryTab() {
+    populateFundSelects();
+    renderTransactionList();
 }

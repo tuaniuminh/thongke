@@ -3,7 +3,7 @@ import {
     APP_VERSION, formatDate, escapeHTML, formatVND, generateId,
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
-    compareRecordsByRecent, renderAll
+    compareRecordsByRecent, renderAll, updateSidebarNavVisibility, updateMobileNavbar
 } from '../../core/app.js?v=4.0.94';
 import * as sync from '../../core/sync.js?v=4.0.94';
 import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.94';
@@ -1069,6 +1069,30 @@ function updateHomeLayoutUI() {
             
             if (btnDecline) {
                 btnDecline.onclick = async () => {
+                    // Update decline status to partner's row on Supabase
+                    if (state.sharedFundSourceRow && state.sharedFundSourceRow.user_id) {
+                        try {
+                            const parsed = JSON.parse(state.sharedFundSourceRow.encrypted_data);
+                            if (parsed && parsed.is_hybrid) {
+                                parsed.spouse_status = 'declined';
+                                const updatedPayload = JSON.stringify(parsed);
+                                const supabaseClient = sync.getSupabase();
+                                if (supabaseClient) {
+                                    await supabaseClient
+                                        .from('gift_sync')
+                                        .update({
+                                            encrypted_data: updatedPayload,
+                                            updated_at: new Date().toISOString()
+                                        })
+                                        .eq('user_id', state.sharedFundSourceRow.user_id);
+                                    console.log("[E2EE Debug] Notified spouse of decline status.");
+                                }
+                            }
+                        } catch (updateErr) {
+                            console.error("Failed to notify spouse of decline:", updateErr);
+                        }
+                    }
+
                     state.familyFundInviteStatus = 'declined';
                     state.familyFundInviteStatusUpdated = new Date().toISOString();
                     state.sharedFundOwnerEmail = '';
@@ -1125,7 +1149,7 @@ function updateSidebarNavVisibility(tabId) {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
-        } else if (tabId === 'fund') {
+        } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
             sidebarLogoText.innerText = 'Quỹ gia đình';
         } else {
             sidebarLogoText.innerText = 'FamiLife';
@@ -1141,6 +1165,7 @@ function updateSidebarNavVisibility(tabId) {
         financePortal: document.querySelector('[data-nav="finance-portal"]'),
         health: document.querySelector('[data-nav="health"]'),
         fund: document.querySelector('[data-nav="fund"]'),
+        fundHistory: document.querySelector('[data-nav="fund-history"]'),
         fundManagement: document.querySelector('[data-nav="fund-management"]')
     };
 
@@ -1156,6 +1181,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
     } else if (tabId === 'settings') {
         // Khi vào Cài đặt: ẩn toàn bộ nav Thu Chi đối ngoại trên desktop sidebar
@@ -1164,6 +1190,7 @@ function updateSidebarNavVisibility(tabId) {
         
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
         if (navItems.received) navItems.received.style.display = 'none';
@@ -1179,10 +1206,12 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
-    } else if (tabId === 'fund' || tabId === 'fund-management') {
+    } else if (tabId === 'fund' || tabId === 'fund-management' || tabId === 'fund-history') {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
 
@@ -1199,12 +1228,13 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.settings) navItems.settings.style.display = 'block';
         if (navItems.health) navItems.health.style.display = 'block';
         if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
     }
     
     // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in (disabled to allow offline access)
-    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundManagement'];
+    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundHistory', 'fundManagement'];
     lockableNavKeys.forEach(key => {
         const item = navItems[key];
         if (item) {
@@ -1279,7 +1309,7 @@ function updateMobileNavbar(tabId) {
                 </button>
             </div>
         `;
-    } else if (tabId === 'fund' || tabId === 'fund-management') {
+    } else if (tabId === 'fund' || tabId === 'fund-management' || tabId === 'fund-history') {
         mobileNavbar.classList.add('two-line');
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');
@@ -1305,6 +1335,9 @@ function updateMobileNavbar(tabId) {
             <div class="mobile-navbar-right" id="mobileNavbarNav">
                 <button class="nav-icon-btn text-only ${tabId === 'fund' ? 'active' : ''}" onclick="switchTab('fund')" title="Tổng quan">
                     Tổng quan
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'fund-history' ? 'active' : ''}" onclick="switchTab('fund-history')" title="Nhật ký">
+                    Nhật ký
                 </button>
                 <button class="nav-icon-btn text-only ${tabId === 'fund-management' ? 'active' : ''}" onclick="switchTab('fund-management')" title="Quản lý">
                     Quản lý

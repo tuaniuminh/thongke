@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.94';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.94';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.94';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.95';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.95';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.95';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.94';
-import * as sync from './sync.js?v=4.0.94';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.94';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.95';
+import * as sync from './sync.js?v=4.0.95';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.95';
 
-const APP_VERSION = '4.0.94';
+const APP_VERSION = '4.0.95';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -736,6 +736,7 @@ async function performSync(silent = false) {
                     state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
                     state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
+                    state.spouseStatus = remoteData.spouseStatus || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -851,6 +852,7 @@ async function performSync(silent = false) {
                         state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
                         state.spouseRole = remoteData.spouseRole || 'wife';
                         state.ownerNickname = remoteData.ownerNickname || '';
+                        state.spouseStatus = remoteData.spouseStatus || '';
                         state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
                     }
                     // Merge fundTransactions using LWW
@@ -937,6 +939,7 @@ async function performSync(silent = false) {
             familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
             spouseRole: state.spouseRole || 'wife',
             ownerNickname: state.ownerNickname || '',
+            spouseStatus: state.spouseStatus || '',
             viewingSharedFund: !!state.viewingSharedFund,
             sharedFundOwnerEmail: state.sharedFundOwnerEmail || ''
         });
@@ -991,6 +994,7 @@ async function performSync(silent = false) {
             spouse_email: state.spouseEmail || '',
             spouse_role: state.spouseRole || 'wife',
             owner_nickname: state.ownerNickname || '',
+            spouse_status: state.spouseStatus || '',
             google_sheets_webhook: state.googleSheetsWebhook || '',
             family_funds_updated: state.familyFundsUpdated || '',
             fund_transactions_updated: state.fundTransactionsUpdated || ''
@@ -1394,6 +1398,8 @@ const tabHashMapping = {
     'health': 'health',
     'quy-gia-dinh': 'fund',
     'fund': 'fund',
+    'nhat-ky-quy': 'fund-history',
+    'fund-history': 'fund-history',
     'quan-ly-quy': 'fund-management',
     'fund-management': 'fund-management'
 };
@@ -1406,6 +1412,7 @@ const tabIdToHash = {
     'settings': 'caidat',
     'health': 'hosoyte',
     'fund': 'quy-gia-dinh',
+    'fund-history': 'nhat-ky-quy',
     'fund-management': 'quan-ly-quy'
 };
 
@@ -1554,6 +1561,12 @@ function switchTab(tabId, updateHash = true) {
         title.innerText = 'Tổng quan Quỹ';
         subtitle.innerText = 'Theo dõi đóng góp của hai vợ chồng, quản lý các quỹ chi tiêu và đầu tư';
         renderFundDashboard();
+    } else if (tabId === 'fund-history') {
+        title.innerText = 'Nhật ký Quỹ';
+        subtitle.innerText = 'Xem và lọc lịch sử giao dịch, đóng góp và chi tiêu của Quỹ gia đình';
+        if (typeof window.renderFundHistoryTab === 'function') {
+            window.renderFundHistoryTab();
+        }
     } else if (tabId === 'fund-management') {
         title.innerText = 'Quản lý Quỹ';
         subtitle.innerText = 'Cài đặt liên kết Vợ/Chồng, tự động đồng bộ Google Sheets và quản lý các quỹ';
@@ -1568,7 +1581,7 @@ function switchTab(tabId, updateHash = true) {
     // Toggle Quick Add button based on active tab
     const quickAddBtn = document.getElementById('quickAddBtn');
     if (quickAddBtn) {
-        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-management') {
+        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';
