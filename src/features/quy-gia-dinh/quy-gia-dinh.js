@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.84';
-import { decrypt } from '../../core/crypto.js?v=4.0.84';
-import * as sync from '../../core/sync.js?v=4.0.84';
+} from '../../core/app.js?v=4.0.86';
+import { decrypt } from '../../core/crypto.js?v=4.0.86';
+import * as sync from '../../core/sync.js?v=4.0.86';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -83,6 +83,16 @@ export function initFundBindings() {
     const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
     if (spouseEmailForm) {
         spouseEmailForm.addEventListener('submit', handleSpouseEmailSubmit);
+    }
+
+    const unlinkSpouseBtn = document.getElementById('btnUnlinkSpouse');
+    if (unlinkSpouseBtn) {
+        unlinkSpouseBtn.addEventListener('click', handleUnlinkSpouse);
+    }
+
+    const leaveSpouseBtn = document.getElementById('btnLeaveSpouseFund');
+    if (leaveSpouseBtn) {
+        leaveSpouseBtn.addEventListener('click', handleLeaveSpouseFund);
     }
 
     // Add custom fund form
@@ -294,6 +304,8 @@ export async function checkForSharedFamilyFund() {
                 if (parsed && parsed.is_hybrid) {
                     if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {
                         console.log("[E2EE Debug] Match found for spouse_email!");
+                        state.spouseRole = parsed.spouse_role || 'wife';
+                        state.ownerNickname = parsed.owner_nickname || '';
                         let fundKey = '';
                         if (state.asymmetricPrivateKeyEncrypted) {
                             const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
@@ -386,7 +398,8 @@ export async function renderFundDashboard() {
     if (banner && bannerText) {
         if (state.viewingSharedFund) {
             banner.style.display = 'flex';
-            bannerText.innerText = `Đang xem Quỹ gia đình được chia sẻ từ: ${state.sharedFundOwnerEmail} (Bạn có thể đóng góp & chi tiêu từ quỹ này)`;
+            const displayName = state.ownerNickname ? `${state.ownerNickname} (${state.sharedFundOwnerEmail})` : state.sharedFundOwnerEmail;
+            bannerText.innerText = `Đang xem Quỹ gia đình được chia sẻ từ: ${displayName} (Bạn có thể đóng góp & chi tiêu từ quỹ này)`;
         } else {
             banner.style.display = 'none';
         }
@@ -533,6 +546,21 @@ function populateMemberSelects() {
     contribMemberSelect.innerHTML = members
         .map(m => `<option value="${m.id}">${escapeHTML(m.name)}</option>`)
         .join('');
+
+    let currentUserRole = 'husband';
+    if (state.viewingSharedFund) {
+        currentUserRole = state.spouseRole || 'wife';
+    } else if (state.spouseEmail) {
+        currentUserRole = state.spouseRole === 'husband' ? 'wife' : 'husband';
+    }
+
+    if (currentUserRole === 'wife') {
+        contribMemberSelect.value = 'p-wife';
+        contribMemberSelect.disabled = true;
+    } else {
+        contribMemberSelect.value = 'p-husband';
+        contribMemberSelect.disabled = false;
+    }
 }
 
 // Populate Fund selectors
@@ -850,7 +878,7 @@ function renderTransactionList() {
             badgeIcon = 'arrow-up-right';
             amountClass = 'minus';
             amountPrefix = '-';
-            txTitle = `Chi tiêu từ Quỹ`;
+            txTitle = `${memberName} chi tiêu từ Quỹ`;
             txMeta = `<span>Trừ: ${escapeHTML(fund ? fund.name : '')}</span>`;
         } 
         else if (tx.type === 'investment_change') {
@@ -866,7 +894,7 @@ function renderTransactionList() {
             badgeClass = 'transfer';
             badgeIcon = 'arrow-left-right';
             amountClass = 'neutral';
-            txTitle = `Trích chuyển Quỹ nội bộ`;
+            txTitle = `${memberName} trích chuyển Quỹ nội bộ`;
             txMeta = `<span>Từ: ${escapeHTML(fromFund ? fromFund.name : '')} &rarr; Đến: ${escapeHTML(toFund ? toFund.name : '')}</span>`;
         }
 
@@ -984,12 +1012,20 @@ async function handleTransferSubmit(e) {
         }
     }
 
+    let memberId = 'p-husband';
+    if (state.viewingSharedFund) {
+        memberId = state.spouseRole === 'husband' ? 'p-husband' : 'p-wife';
+    } else if (state.spouseEmail) {
+        memberId = state.spouseRole === 'husband' ? 'p-wife' : 'p-husband';
+    }
+
     const tx = {
         id: 'fund-tx-' + generateId(),
         fromFundId: fromFundId,
         toFundId: toFundId,
         type: 'transfer',
         amount: amount,
+        memberId: memberId,
         date: date,
         notes: notes,
         created_at: new Date().toISOString(),
@@ -1034,7 +1070,12 @@ async function handleSpendingSubmit(e) {
         return;
     }
 
-    const memberId = state.viewingSharedFund ? 'p-wife' : 'p-husband';
+    let memberId = 'p-husband';
+    if (state.viewingSharedFund) {
+        memberId = state.spouseRole === 'husband' ? 'p-husband' : 'p-wife';
+    } else if (state.spouseEmail) {
+        memberId = state.spouseRole === 'husband' ? 'p-wife' : 'p-husband';
+    }
 
     const tx = {
         id: 'fund-tx-' + generateId(),
@@ -1259,10 +1300,50 @@ window.openFundActionModal = function(action, targetFundId = '') {
 
 // Render management tab elements (Linked to tab-fund-management view)
 export function renderManagementTab() {
-    // 1. Spouse email
-    const emailInput = document.getElementById('spouseEmailInput');
-    if (emailInput) {
-        emailInput.value = state.spouseEmail || '';
+    // 1. Hide/Show Add Custom Fund Block
+    const addFundBlock = document.getElementById('mgmtAddCustomFundBlock');
+    if (addFundBlock) {
+        addFundBlock.style.display = state.viewingSharedFund ? 'none' : 'flex';
+    }
+
+    const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
+    const spouseLinkSharedView = document.getElementById('spouseLinkSharedView');
+    const spouseLinkOwnerName = document.getElementById('spouseLinkOwnerName');
+
+    if (state.viewingSharedFund) {
+        if (spouseEmailForm) spouseEmailForm.style.display = 'none';
+        if (spouseLinkSharedView) spouseLinkSharedView.style.display = 'flex';
+        if (spouseLinkOwnerName) {
+            spouseLinkOwnerName.innerText = state.ownerNickname || state.sharedFundOwnerEmail;
+        }
+    } else {
+        if (spouseEmailForm) spouseEmailForm.style.display = 'flex';
+        if (spouseLinkSharedView) spouseLinkSharedView.style.display = 'none';
+
+        const emailInput = document.getElementById('spouseEmailInput');
+        const roleInput = document.getElementById('spouseRoleInput');
+        const nicknameInput = document.getElementById('ownerNicknameInput');
+        const unlinkBtn = document.getElementById('btnUnlinkSpouse');
+        const saveBtn = document.getElementById('btnSaveSpouseLink');
+
+        if (emailInput) {
+            emailInput.value = state.spouseEmail || '';
+            emailInput.disabled = !!state.spouseEmail;
+        }
+        if (roleInput) {
+            roleInput.value = state.spouseRole || 'wife';
+            roleInput.disabled = !!state.spouseEmail;
+        }
+        if (nicknameInput) {
+            nicknameInput.value = state.ownerNickname || '';
+            nicknameInput.disabled = !!state.spouseEmail;
+        }
+        if (unlinkBtn) {
+            unlinkBtn.style.display = state.spouseEmail ? 'inline-block' : 'none';
+        }
+        if (saveBtn) {
+            saveBtn.style.display = state.spouseEmail ? 'none' : 'inline-block';
+        }
     }
 
     // 2. Google Sheets Webhook Url
@@ -1411,11 +1492,69 @@ async function handleSpouseEmailSubmit(e) {
     }
 
     const email = document.getElementById('spouseEmailInput').value.trim();
+    const role = document.getElementById('spouseRoleInput')?.value || 'wife';
+    const nickname = document.getElementById('ownerNicknameInput')?.value.trim() || '';
+
     state.spouseEmail = email;
+    state.spouseRole = role;
+    state.ownerNickname = nickname;
     state.familyFundsUpdated = new Date().toISOString();
 
     await saveLocalState();
     showToast("Đã lưu email liên kết thành công!");
+    renderManagementTab();
+    performSync(true);
+}
+
+// Unlink Spouse (Owner's action)
+async function handleUnlinkSpouse() {
+    if (state.viewingSharedFund) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa liên kết tài khoản Vợ/Chồng này? Dữ liệu Quỹ gia đình sẽ không còn được chia sẻ với họ.")) {
+        return;
+    }
+
+    state.spouseEmail = '';
+    state.spouseRole = 'wife';
+    state.ownerNickname = '';
+    state.familyFundsUpdated = new Date().toISOString();
+
+    await saveLocalState();
+    showToast("Đã xóa liên kết tài khoản Vợ/Chồng!");
+    renderManagementTab();
+    performSync(true);
+}
+
+// Leave Spouse Fund (Spouse's action)
+async function handleLeaveSpouseFund() {
+    if (!state.viewingSharedFund) return;
+    
+    const confirmPassword = prompt("Để thoát khỏi nhóm gia đình, vui lòng xác nhận mật khẩu Master:");
+    if (confirmPassword === null) return;
+    
+    if (confirmPassword !== state.masterPassword) {
+        showToast("Mật khẩu Master không chính xác. Hủy bỏ thoát nhóm!", "error");
+        return;
+    }
+
+    // Reset all shared states
+    state.viewingSharedFund = false;
+    state.sharedFundOwnerEmail = '';
+    state.spouseEmail = '';
+    state.spouseRole = 'wife';
+    state.ownerNickname = '';
+    state.familyFunds = [];
+    state.fundTransactions = [];
+    state.fundSymmetricKey = '';
+    state.familyFundInviteStatus = 'declined';
+    state.sharedFundSourceRow = null;
+
+    await saveLocalState();
+    showToast("Đã thoát khỏi nhóm gia đình thành công!");
+    
+    if (typeof window.switchTab === 'function') {
+        window.switchTab('dashboard');
+    }
+    
     performSync(true);
 }
 

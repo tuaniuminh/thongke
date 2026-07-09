@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.84';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.84';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.84';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.86';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.86';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.86';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.84';
-import * as sync from './sync.js?v=4.0.84';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.84';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.86';
+import * as sync from './sync.js?v=4.0.86';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.86';
 
-const APP_VERSION = '4.0.84';
+const APP_VERSION = '4.0.86';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -91,7 +91,10 @@ let state = {
     fundTransactions: [],
     fundTransactionsUpdated: '',
     activeTab: 'dashboard',
-    theme: 'dark',
+    theme: 'light',
+    familyFundInviteStatus: '',
+    spouseRole: 'wife',
+    ownerNickname: '',
     mobileViewMode: 'cards',
     user: null,
     
@@ -306,7 +309,12 @@ async function saveLocalState() {
         asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted || '',
         fundSymmetricKey: state.fundSymmetricKey || '',
         spouseEmail: state.spouseEmail || '',
-        googleSheetsWebhook: state.googleSheetsWebhook || ''
+        googleSheetsWebhook: state.googleSheetsWebhook || '',
+        familyFundInviteStatus: state.familyFundInviteStatus || '',
+        spouseRole: state.spouseRole || 'wife',
+        ownerNickname: state.ownerNickname || '',
+        viewingSharedFund: !!state.viewingSharedFund,
+        sharedFundOwnerEmail: state.sharedFundOwnerEmail || ''
     });
     
     try {
@@ -359,6 +367,11 @@ async function loadLocalState(password) {
         state.fundSymmetricKey = '';
         state.spouseEmail = '';
         state.googleSheetsWebhook = '';
+        state.familyFundInviteStatus = '';
+        state.spouseRole = 'wife';
+        state.ownerNickname = '';
+        state.viewingSharedFund = false;
+        state.sharedFundOwnerEmail = '';
         return true;
     }
     
@@ -402,6 +415,11 @@ async function loadLocalState(password) {
         state.fundSymmetricKey = data.fundSymmetricKey || '';
         state.spouseEmail = data.spouseEmail || '';
         state.googleSheetsWebhook = data.googleSheetsWebhook || '';
+        state.familyFundInviteStatus = data.familyFundInviteStatus || '';
+        state.spouseRole = data.spouseRole || 'wife';
+        state.ownerNickname = data.ownerNickname || '';
+        state.viewingSharedFund = data.viewingSharedFund || false;
+        state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -519,6 +537,8 @@ async function performSync(silent = false) {
                 fund_shared_keys: originalParsed.fund_shared_keys,
                 owner_email: originalParsed.owner_email,
                 spouse_email: originalParsed.spouse_email,
+                spouse_role: originalParsed.spouse_role || 'wife',
+                owner_nickname: originalParsed.owner_nickname || '',
                 google_sheets_webhook: originalParsed.google_sheets_webhook || '',
                 family_funds_updated: new Date().toISOString(),
                 fund_transactions_updated: new Date().toISOString()
@@ -631,6 +651,8 @@ async function performSync(silent = false) {
                         
                         remoteData.spouseEmail = parsedObj.spouse_email || '';
                         remoteData.googleSheetsWebhook = parsedObj.google_sheets_webhook || '';
+                        remoteData.spouseRole = parsedObj.spouse_role || 'wife';
+                        remoteData.ownerNickname = parsedObj.owner_nickname || '';
                     }
                 } catch (jsonErr) {
                     // Fallback below
@@ -795,6 +817,8 @@ async function performSync(silent = false) {
                         state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                         state.spouseEmail = remoteData.spouseEmail || '';
                         state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
+                        state.spouseRole = remoteData.spouseRole || 'wife';
+                        state.ownerNickname = remoteData.ownerNickname || '';
                         state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
                     }
                     // Merge fundTransactions using LWW
@@ -925,6 +949,8 @@ async function performSync(silent = false) {
             fund_shared_keys: fundSharedKeys,
             owner_email: user.email,
             spouse_email: state.spouseEmail || '',
+            spouse_role: state.spouseRole || 'wife',
+            owner_nickname: state.ownerNickname || '',
             google_sheets_webhook: state.googleSheetsWebhook || '',
             family_funds_updated: state.familyFundsUpdated || '',
             fund_transactions_updated: state.fundTransactionsUpdated || ''
@@ -2266,7 +2292,7 @@ async function initializeApp() {
             }
         }
         // 2. If we are on the Setup Wizard PIN screen
-        else if (setupWizardOverlay && setupWizardOverlay.style.display !== 'none') {
+        else if (setupWizardOverlay && setupWizardOverlay.style.display !== 'none' && document.getElementById('wizardPinModeView') && document.getElementById('wizardPinModeView').style.display !== 'none') {
             if (e.key >= '0' && e.key <= '9') {
                 e.preventDefault();
                 handleWizardKeypadPress(e.key);

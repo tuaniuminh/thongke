@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.84';
-import * as sync from '../../core/sync.js?v=4.0.84';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.84';
+} from '../../core/app.js?v=4.0.86';
+import * as sync from '../../core/sync.js?v=4.0.86';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.86';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1041,16 +1041,17 @@ function updateHomeLayoutUI() {
     
     if (inviteCard && inviteText) {
         if (state.viewingSharedFund && state.sharedFundOwnerEmail) {
-            const inviteStatus = localStorage.getItem('family_fund_invite_' + state.sharedFundOwnerEmail);
+            const inviteStatus = state.familyFundInviteStatus;
             if (!inviteStatus) {
-                inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${state.sharedFundOwnerEmail}`;
+                const displayName = state.ownerNickname ? `${state.ownerNickname} (${state.sharedFundOwnerEmail})` : state.sharedFundOwnerEmail;
+                inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${displayName}`;
                 inviteCard.style.display = 'flex';
                 if (btnAccept) btnAccept.style.display = 'inline-block';
                 if (btnDecline) btnDecline.style.display = 'inline-block';
                 
                 if (btnAccept) {
                     btnAccept.onclick = async () => {
-                        localStorage.setItem('family_fund_invite_' + state.sharedFundOwnerEmail, 'accepted');
+                        state.familyFundInviteStatus = 'accepted';
                         state.showFamilyFundCard = true;
                         state.showFamilyFundCardUpdated = new Date().toISOString();
                         
@@ -1064,8 +1065,10 @@ function updateHomeLayoutUI() {
                 }
                 
                 if (btnDecline) {
-                    btnDecline.onclick = () => {
-                        localStorage.setItem('family_fund_invite_' + state.sharedFundOwnerEmail, 'declined');
+                    btnDecline.onclick = async () => {
+                        state.familyFundInviteStatus = 'declined';
+                        await saveLocalState();
+                        performSync(true);
                         inviteCard.style.display = 'none';
                         showToast("Đã từ chối lời mời.");
                         updateHomeLayoutUI();
@@ -1080,7 +1083,8 @@ function updateHomeLayoutUI() {
                 }
             }
         } else if (state.spouseFundInvitePending && state.spouseFundInviteOwnerEmail) {
-            inviteText.innerText = `Đối tác (${state.spouseFundInviteOwnerEmail}) muốn chia sẻ Quỹ gia đình với bạn. Vui lòng bảo đối tác mở ứng dụng FamiLife trên thiết bị của họ một lần để tự động kích hoạt liên kết!`;
+            const displayName = state.ownerNickname ? `${state.ownerNickname} (${state.spouseFundInviteOwnerEmail})` : state.spouseFundInviteOwnerEmail;
+            inviteText.innerText = `Đối tác (${displayName}) muốn chia sẻ Quỹ gia đình với bạn. Vui lòng bảo đối tác mở ứng dụng FamiLife trên thiết bị của họ một lần để tự động kích hoạt liên kết!`;
             inviteCard.style.display = 'flex';
             if (btnAccept) btnAccept.style.display = 'none';
             if (btnDecline) btnDecline.style.display = 'none';
