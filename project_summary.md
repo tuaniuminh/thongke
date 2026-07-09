@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.88** |
+| **Phiên bản hiện tại** | **v4.0.89** |
+| **v4.0.89** | ✅ **Tự động đồng bộ trạng thái hủy liên kết cho cả hai phía:** Cập nhật hàm thoát nhóm `handleLeaveSpouseFund` của người Vợ. Khi Vợ thoát nhóm, máy của Vợ sẽ gửi yêu cầu cập nhật (UPDATE) lên Supabase để xóa email liên kết `spouse_email` và public key tương ứng trong dòng dữ liệu của Chồng. Nhờ đó, người Chồng sẽ nhận biết được ngay lập tức ở lần đồng bộ tiếp theo. |
 | **v4.0.88** | ✅ **Khắc phục lỗi thoát nhóm gia đình tự động bị kéo vào lại:** Bổ sung logic kiểm tra trạng thái lời mời (`familyFundInviteStatus === 'declined'`) trong hàm quét ghép đôi `checkForSharedFamilyFund`. Khi người Vợ chủ động thoát nhóm gia đình, trạng thái này sẽ chặn việc tự động liên kết lại mỗi khi tải lại trang, giúp duy trì dứt điểm trạng thái thoát nhóm. |
 | **v4.0.87** | ✅ **Sửa lỗi dọn dẹp bộ nhớ đệm khi hủy liên kết:** Thiết lập logic dọn dẹp bộ nhớ đệm (clear state) trên thiết bị của Vợ ngay khi Chồng thực hiện hủy liên kết (Unlink). Đồng thời, tự động giải mã và nạp lại dữ liệu cá nhân của Vợ (`loadLocalState`) từ localStorage để đưa ứng dụng của Vợ trở lại giao diện cá nhân bình thường, tránh lỗi hiển thị số dư cũ của Chồng. |
 | **v4.0.86** | ✅ **Cho phép Chồng nhập đóng góp hộ Vợ:** Cấu hình lại ô chọn Thành viên đóng góp. Tài khoản của Vợ mặc định là Vợ và bị khóa để tránh nhập nhầm, trong khi tài khoản của Chồng hiển thị cả hai lựa chọn Chồng/Vợ (mở khóa) để Chồng có thể nhập hộ đóng góp của Vợ khi cần thiết. |

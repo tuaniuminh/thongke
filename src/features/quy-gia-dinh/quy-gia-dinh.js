@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.88';
-import { decrypt } from '../../core/crypto.js?v=4.0.88';
-import * as sync from '../../core/sync.js?v=4.0.88';
+} from '../../core/app.js?v=4.0.89';
+import { decrypt } from '../../core/crypto.js?v=4.0.89';
+import * as sync from '../../core/sync.js?v=4.0.89';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -1568,6 +1568,36 @@ async function handleLeaveSpouseFund() {
     if (confirmPassword !== state.masterPassword) {
         showToast("Mật khẩu Master không chính xác. Hủy bỏ thoát nhóm!", "error");
         return;
+    }
+
+    // Try to update husband's row on Supabase to notify him
+    if (state.sharedFundSourceRow && state.sharedFundSourceRow.user_id) {
+        try {
+            const parsed = JSON.parse(state.sharedFundSourceRow.encrypted_data);
+            if (parsed && parsed.is_hybrid) {
+                parsed.spouse_email = '';
+                parsed.spouse_role = 'wife';
+                parsed.owner_nickname = '';
+                if (parsed.fund_shared_keys) {
+                    const myEmail = state.user.email.toLowerCase().trim();
+                    delete parsed.fund_shared_keys[myEmail];
+                }
+                
+                const updatedPayload = JSON.stringify(parsed);
+                const supabaseClient = sync.getSupabase();
+                if (supabaseClient) {
+                    await supabaseClient
+                        .from('gift_sync')
+                        .update({
+                            encrypted_data: updatedPayload,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('user_id', state.sharedFundSourceRow.user_id);
+                }
+            }
+        } catch (updateErr) {
+            console.error("Failed to notify husband of leaving group:", updateErr);
+        }
     }
 
     // Reset all shared states
