@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.0.87** |
+| **Phiên bản hiện tại** | **v4.0.88** |
+| **v4.0.88** | ✅ **Khắc phục lỗi thoát nhóm gia đình tự động bị kéo vào lại:** Bổ sung logic kiểm tra trạng thái lời mời (`familyFundInviteStatus === 'declined'`) trong hàm quét ghép đôi `checkForSharedFamilyFund`. Khi người Vợ chủ động thoát nhóm gia đình, trạng thái này sẽ chặn việc tự động liên kết lại mỗi khi tải lại trang, giúp duy trì dứt điểm trạng thái thoát nhóm. |
 | **v4.0.87** | ✅ **Sửa lỗi dọn dẹp bộ nhớ đệm khi hủy liên kết:** Thiết lập logic dọn dẹp bộ nhớ đệm (clear state) trên thiết bị của Vợ ngay khi Chồng thực hiện hủy liên kết (Unlink). Đồng thời, tự động giải mã và nạp lại dữ liệu cá nhân của Vợ (`loadLocalState`) từ localStorage để đưa ứng dụng của Vợ trở lại giao diện cá nhân bình thường, tránh lỗi hiển thị số dư cũ của Chồng. |
 | **v4.0.86** | ✅ **Cho phép Chồng nhập đóng góp hộ Vợ:** Cấu hình lại ô chọn Thành viên đóng góp. Tài khoản của Vợ mặc định là Vợ và bị khóa để tránh nhập nhầm, trong khi tài khoản của Chồng hiển thị cả hai lựa chọn Chồng/Vợ (mở khóa) để Chồng có thể nhập hộ đóng góp của Vợ khi cần thiết. |
 | **v4.0.85** | ✅ **Nâng cấp liên kết Quỹ gia đình & Sửa lỗi PIN/Mật khẩu:** Sửa lỗi gõ số/xóa khó khăn trên ô nhập Master Password text. Đồng bộ hóa E2EE các trường trạng thái `familyFundInviteStatus`, `spouseRole`, `ownerNickname`, `viewingSharedFund` và `sharedFundOwnerEmail` chéo thiết bị (sửa dứt điểm lỗi mất giao dịch ở máy vợ). Thêm tính năng Hủy liên kết (Unlink) cho tài khoản chồng và Thoát nhóm (Leave group) cần xác nhận mật khẩu Master cho tài khoản vợ. Giao diện sáng làm mặc định ở lần đầu truy cập, chuyển card "Thêm Quỹ chi tiêu sinh hoạt khác" lên đầu trong Quản lý và ẩn đối với người vợ, hiển thị biệt danh của người mời trên banner lời mời và card header, hiển thị rõ vai trò thành viên cụ thể (Chồng/Vợ) trong tất cả nhật ký giao dịch (chi tiêu, đóng đóng, trích chuyển). |
@@ -165,6 +166,38 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | **v4.0.70** | ✅ **Logo PWA mới:** Cập nhật logo cài ngoài Desktop (PWA) `icon-light-pwa.png` bằng hình ảnh mới được người dùng cung cấp (đã xử lý loại bỏ nền caro xám trắng giả trong suốt, thay bằng nền trong suốt thật sự bên ngoài viền xanh bo góc, phóng to sát viền và resize chuẩn 512x512), nâng cấp phiên bản v4.0.70. |
 | **v4.0.71** | ✅ **Phân hệ Quỹ Gia Đình:** Phát triển tính năng Quỹ gia đình cho phép theo dõi đóng góp hàng tháng của vợ chồng, quản lý các quỹ nhỏ (Chi tiêu, Đầu tư), vẽ biểu đồ tròn trực quan tỷ lệ đóng góp (Chart.js), theo dõi lịch sử nhật ký giao dịch, và tự động mã hóa local & đồng bộ đám mây (Supabase), nâng cấp phiên bản v4.0.71. |
 | **v4.0.72** | ✅ **Nâng cấp Quỹ Gia Đình:** Thêm tab "Quản lý", liên kết email vợ chồng, thêm/xóa quỹ tùy chỉnh, xuất Excel, hiển thị đúng tên thành viên trong nhật ký giao dịch, sửa lỗi đè logo trên điện thoại di động và sửa lỗi đứng hình modal hành động quỹ. |
+
+---
+
+## 🛢 Cấu trúc Cơ sở dữ liệu & Chính sách RLS (Supabase)
+
+Bảng `gift_sync` trên Supabase được cấu hình Row Level Security (RLS) để cho phép trao đổi khóa bất đối xứng và đồng bộ Quỹ gia đình E2EE giữa 2 vợ chồng:
+
+```sql
+-- 1. Bảng lưu trữ đồng bộ: public.gift_sync
+-- Gồm các cột: user_id (UUID, khóa chính), encrypted_data (TEXT), updated_at (TIMESTAMPTZ), user_email (TEXT), public_key (TEXT)
+
+-- 2. Chính sách ĐỌC dữ liệu (SELECT): Cho phép mọi tài khoản đã đăng nhập đọc dòng của nhau để lấy khóa công khai ghép đôi
+drop policy if exists "Allow select for everyone" on public.gift_sync;
+create policy "Allow select for everyone" on public.gift_sync
+    for select using (true);
+
+-- 3. Chính sách CẬP NHẬT dữ liệu (UPDATE): Cho phép chủ sở hữu hoặc đối tác (Vợ/Chồng) được phân quyền cập nhật dòng Quỹ gia đình E2EE chung
+drop policy if exists "Allow update if owner or spouse" on public.gift_sync;
+create policy "Allow update if owner or spouse" on public.gift_sync
+    for update using (
+        auth.uid() = user_id 
+        or lower(encrypted_data::jsonb->>'spouse_email') = lower(auth.jwt()->>'email')
+    );
+
+-- 4. Chính sách CHÈN dữ liệu (INSERT / UPSERT): Đảm bảo người dùng hoặc đối tác (Vợ/Chồng) có quyền ghi khi thực hiện Upsert giao dịch
+drop policy if exists "Allow insert if owner or spouse" on public.gift_sync;
+create policy "Allow insert if owner or spouse" on public.gift_sync
+    for insert with check (
+        auth.uid() = user_id 
+        or lower(encrypted_data::jsonb->>'spouse_email') = lower(auth.jwt()->>'email')
+    );
+```
 
 ---
 

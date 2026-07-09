@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.87';
-import { decrypt } from '../../core/crypto.js?v=4.0.87';
-import * as sync from '../../core/sync.js?v=4.0.87';
+} from '../../core/app.js?v=4.0.88';
+import { decrypt } from '../../core/crypto.js?v=4.0.88';
+import * as sync from '../../core/sync.js?v=4.0.88';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -303,6 +303,10 @@ export async function checkForSharedFamilyFund() {
                 
                 if (parsed && parsed.is_hybrid) {
                     if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {
+                        if (state.familyFundInviteStatus === 'declined') {
+                            console.log("[E2EE Debug] Spouse has declined/left this shared fund. Skipping.");
+                            continue;
+                        }
                         console.log("[E2EE Debug] Match found for spouse_email!");
                         state.spouseRole = parsed.spouse_role || 'wife';
                         state.ownerNickname = parsed.owner_nickname || '';
@@ -356,6 +360,10 @@ export async function checkForSharedFamilyFund() {
                     const legacyParsed = JSON.parse(decrypted);
 
                     if (legacyParsed.spouseEmail && legacyParsed.spouseEmail.toLowerCase().trim() === myEmail) {
+                        if (state.familyFundInviteStatus === 'declined') {
+                            console.log("[E2EE Debug] Spouse has declined/left legacy shared fund. Skipping.");
+                            continue;
+                        }
                         state.familyFunds = legacyParsed.familyFunds || [];
                         state.fundTransactions = legacyParsed.fundTransactions || [];
                         state.viewingSharedFund = true;
