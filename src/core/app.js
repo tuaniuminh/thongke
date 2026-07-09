@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.91';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.91';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.91';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.92';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.92';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.92';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.91';
-import * as sync from './sync.js?v=4.0.91';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.91';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.92';
+import * as sync from './sync.js?v=4.0.92';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.92';
 
-const APP_VERSION = '4.0.91';
+const APP_VERSION = '4.0.92';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -93,6 +93,7 @@ let state = {
     activeTab: 'dashboard',
     theme: 'light',
     familyFundInviteStatus: '',
+    familyFundInviteStatusUpdated: '',
     spouseRole: 'wife',
     ownerNickname: '',
     mobileViewMode: 'cards',
@@ -311,6 +312,7 @@ async function saveLocalState() {
         spouseEmail: state.spouseEmail || '',
         googleSheetsWebhook: state.googleSheetsWebhook || '',
         familyFundInviteStatus: state.familyFundInviteStatus || '',
+        familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
         spouseRole: state.spouseRole || 'wife',
         ownerNickname: state.ownerNickname || '',
         viewingSharedFund: !!state.viewingSharedFund,
@@ -368,6 +370,7 @@ export async function loadLocalState(password) {
         state.spouseEmail = '';
         state.googleSheetsWebhook = '';
         state.familyFundInviteStatus = '';
+        state.familyFundInviteStatusUpdated = '';
         state.spouseRole = 'wife';
         state.ownerNickname = '';
         state.viewingSharedFund = false;
@@ -416,6 +419,7 @@ export async function loadLocalState(password) {
         state.spouseEmail = data.spouseEmail || '';
         state.googleSheetsWebhook = data.googleSheetsWebhook || '';
         state.familyFundInviteStatus = data.familyFundInviteStatus || '';
+        state.familyFundInviteStatusUpdated = data.familyFundInviteStatusUpdated || '';
         state.spouseRole = data.spouseRole || 'wife';
         state.ownerNickname = data.ownerNickname || '';
         state.viewingSharedFund = data.viewingSharedFund || false;
@@ -730,6 +734,8 @@ async function performSync(silent = false) {
                     state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                     state.fundTransactions = remoteData.fundTransactions || [];
                     state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                    state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
+                    state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -804,6 +810,14 @@ async function performSync(silent = false) {
                     }
                     if (remoteData.selectedSpeechRate) {
                         state.selectedSpeechRate = remoteData.selectedSpeechRate;
+                    }
+
+                    // Merge familyFundInviteStatus using LWW
+                    const localInviteTime = state.familyFundInviteStatusUpdated ? new Date(state.familyFundInviteStatusUpdated).getTime() : 0;
+                    const remoteInviteTime = remoteData.familyFundInviteStatusUpdated ? new Date(remoteData.familyFundInviteStatusUpdated).getTime() : 0;
+                    if (remoteInviteTime > localInviteTime) {
+                        state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
+                        state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
                     }
 
                     // Merge familyProfiles using LWW
@@ -920,6 +934,7 @@ async function performSync(silent = false) {
             spouseEmail: state.spouseEmail || '',
             googleSheetsWebhook: state.googleSheetsWebhook || '',
             familyFundInviteStatus: state.familyFundInviteStatus || '',
+            familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
             spouseRole: state.spouseRole || 'wife',
             ownerNickname: state.ownerNickname || '',
             viewingSharedFund: !!state.viewingSharedFund,

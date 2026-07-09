@@ -102,7 +102,7 @@ export async function getSyncData() {
     return data;
 }
 
-import { state } from './app.js?v=4.0.91';
+import { state } from './app.js?v=4.0.92';
 
 // Save encrypted data to gift_sync table (insert or update)
 export async function saveSyncData(encryptedData) {

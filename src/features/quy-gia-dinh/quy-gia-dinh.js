@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.91';
-import { decrypt } from '../../core/crypto.js?v=4.0.91';
-import * as sync from '../../core/sync.js?v=4.0.91';
+} from '../../core/app.js?v=4.0.92';
+import { decrypt } from '../../core/crypto.js?v=4.0.92';
+import * as sync from '../../core/sync.js?v=4.0.92';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -303,9 +303,19 @@ export async function checkForSharedFamilyFund() {
                 
                 if (parsed && parsed.is_hybrid) {
                     if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {
+                        const inviteTime = state.familyFundInviteStatusUpdated ? new Date(state.familyFundInviteStatusUpdated).getTime() : 0;
+                        const rowTime = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+                        
                         if (state.familyFundInviteStatus === 'declined') {
-                            console.log("[E2EE Debug] Spouse has declined/left this shared fund. Skipping.");
-                            continue;
+                            if (rowTime > inviteTime) {
+                                console.log("[E2EE Debug] Found new invitation updated after decline/leave. Resetting status.");
+                                state.familyFundInviteStatus = '';
+                                state.familyFundInviteStatusUpdated = new Date().toISOString();
+                                await saveLocalState();
+                            } else {
+                                console.log("[E2EE Debug] Spouse has declined/left this shared fund. Skipping.");
+                                continue;
+                            }
                         }
                         console.log("[E2EE Debug] Match found for spouse_email!");
                         state.spouseRole = parsed.spouse_role || 'wife';
@@ -361,9 +371,19 @@ export async function checkForSharedFamilyFund() {
                     const legacyParsed = JSON.parse(decrypted);
 
                     if (legacyParsed.spouseEmail && legacyParsed.spouseEmail.toLowerCase().trim() === myEmail) {
+                        const inviteTime = state.familyFundInviteStatusUpdated ? new Date(state.familyFundInviteStatusUpdated).getTime() : 0;
+                        const rowTime = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+                        
                         if (state.familyFundInviteStatus === 'declined') {
-                            console.log("[E2EE Debug] Spouse has declined/left legacy shared fund. Skipping.");
-                            continue;
+                            if (rowTime > inviteTime) {
+                                console.log("[E2EE Debug] Found new legacy invitation updated after decline/leave. Resetting status.");
+                                state.familyFundInviteStatus = '';
+                                state.familyFundInviteStatusUpdated = new Date().toISOString();
+                                await saveLocalState();
+                            } else {
+                                console.log("[E2EE Debug] Spouse has declined/left legacy shared fund. Skipping.");
+                                continue;
+                            }
                         }
                         state.familyFunds = legacyParsed.familyFunds || [];
                         state.fundTransactions = legacyParsed.fundTransactions || [];
@@ -1608,6 +1628,7 @@ async function handleLeaveSpouseFund() {
     state.fundTransactions = [];
     state.fundSymmetricKey = '';
     state.familyFundInviteStatus = 'declined';
+    state.familyFundInviteStatusUpdated = new Date().toISOString();
     state.sharedFundSourceRow = null;
 
     await saveLocalState();

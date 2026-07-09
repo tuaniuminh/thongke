@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.91';
-import * as sync from '../../core/sync.js?v=4.0.91';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.91';
+} from '../../core/app.js?v=4.0.92';
+import * as sync from '../../core/sync.js?v=4.0.92';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.92';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1067,6 +1067,7 @@ function updateHomeLayoutUI() {
                 if (btnDecline) {
                     btnDecline.onclick = async () => {
                         state.familyFundInviteStatus = 'declined';
+                        state.familyFundInviteStatusUpdated = new Date().toISOString();
                         await saveLocalState();
                         performSync(true);
                         inviteCard.style.display = 'none';
