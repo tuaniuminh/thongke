@@ -3,10 +3,10 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
-    decryptWithPrivateKey
-} from '../../core/app.js?v=4.0.86';
-import { decrypt } from '../../core/crypto.js?v=4.0.86';
-import * as sync from '../../core/sync.js?v=4.0.86';
+    decryptWithPrivateKey, loadLocalState
+} from '../../core/app.js?v=4.0.87';
+import { decrypt } from '../../core/crypto.js?v=4.0.87';
+import * as sync from '../../core/sync.js?v=4.0.87';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -371,12 +371,38 @@ export async function checkForSharedFamilyFund() {
             }
         }
         
+        if (state.viewingSharedFund || state.sharedFundOwnerEmail) {
+            state.viewingSharedFund = false;
+            state.sharedFundOwnerEmail = '';
+            state.familyFunds = [];
+            state.fundTransactions = [];
+            state.fundSymmetricKey = '';
+            state.familyFundInviteStatus = '';
+            state.sharedFundSourceRow = null;
+            if (state.masterPassword) {
+                await loadLocalState(state.masterPassword);
+            }
+            showToast("Liên kết Quỹ gia đình đã bị hủy bởi đối tác. Quay về quỹ cá nhân.");
+        }
+        
         state.viewingSharedFund = false;
         if (typeof window.updateHomeLayoutUI === 'function') {
             window.updateHomeLayoutUI();
         }
     } catch (e) {
         console.error("Error checking shared family fund:", e);
+        if (state.viewingSharedFund || state.sharedFundOwnerEmail) {
+            state.viewingSharedFund = false;
+            state.sharedFundOwnerEmail = '';
+            state.familyFunds = [];
+            state.fundTransactions = [];
+            state.fundSymmetricKey = '';
+            state.familyFundInviteStatus = '';
+            state.sharedFundSourceRow = null;
+            if (state.masterPassword) {
+                await loadLocalState(state.masterPassword);
+            }
+        }
         state.viewingSharedFund = false;
         if (typeof window.updateHomeLayoutUI === 'function') {
             window.updateHomeLayoutUI();
