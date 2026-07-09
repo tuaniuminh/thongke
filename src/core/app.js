@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.02';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.02';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.02';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.03';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.03';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.03';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.02';
-import * as sync from './sync.js?v=4.1.02';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.02';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.03';
+import * as sync from './sync.js?v=4.1.03';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.03';
 
-const APP_VERSION = '4.1.02';
+const APP_VERSION = '4.1.03';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -195,7 +195,7 @@ function showToast(message, type = 'success') {
     `;
     
     container.appendChild(toast);
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
     
     setTimeout(() => {
         toast.style.opacity = '0';
@@ -361,7 +361,7 @@ function showUpdateNotification(newVersion) {
     });
     
     container.appendChild(toast);
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 // Check for App Version Updates from version.json
@@ -1203,7 +1203,7 @@ function renderAll() {
     updateImportNotesOptionUI();
     updateFamilyFundCardUI();
     handleHashRoute();
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 function renderEventDropdowns() {
@@ -1491,7 +1491,7 @@ function updateThemeUI() {
     if (mobileLogo) mobileLogo.src = logoSrc;
     if (homeLogo) homeLogo.src = logoSrc;
 
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 // Mobile View Mode handling
@@ -1740,7 +1740,7 @@ function switchTab(tabId, updateHash = true) {
 
     // Close mobile menu if open
     document.getElementById('sidebar').classList.remove('mobile-open');
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 // --- App Launch / Initial setups ---
@@ -2518,7 +2518,7 @@ async function initializeApp() {
     initFundBindings();
 
     // Initialize Lucide Icons
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 
     // Bind Manual Check Update buttons
     document.querySelectorAll('.manual-check-update-btn').forEach(btn => {
@@ -2820,7 +2820,7 @@ function renderDashboardSyncBanner() {
         }
     }
     
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 // ==========================================================================

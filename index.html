@@ -39,11 +39,11 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.02">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.03">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.02">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.02">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.03">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.03">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -59,13 +59,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
+    <!-- Global JS Error and Cache Buster Widget -->
+    <div id="js-global-error-badge" style="display: none; position: fixed; top: 0; left: 0; width: 100%; background-color: #f97316; color: #ffffff; padding: 12px; z-index: 999999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 0.85rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); line-height: 1.4;">
+        <span id="js-global-error-text">Phát hiện mã nguồn cũ bị lỗi.</span>
+        <button onclick="window.location.reload(true);" style="margin-left: 10px; background-color: #ffffff; color: #f97316; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; outline: none; transition: opacity 0.2s;">
+            Nạp Lại Ngay (Xóa Cache)
+        </button>
+    </div>
+
+    <script>
+        // Bẫy lỗi toàn cục để hiện lỗi lên badge giải cứu
+        window.addEventListener('error', function(e) {
+            const badge = document.getElementById('js-global-error-badge');
+            const text = document.getElementById('js-global-error-text');
+            if (badge && text) {
+                badge.style.display = 'block';
+                badge.style.backgroundColor = '#ef4444'; // Đỏ nếu là lỗi crash thực sự
+                text.innerHTML = '<b>Lỗi hoạt động:</b> ' + e.message + ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')';
+            }
+        });
+        
+        // Tự động gán theme sáng mặc định ngay lập tức để tránh nhấp nháy tối
+        (function() {
+            const savedTheme = localStorage.getItem('gift_ledger_theme');
+            const theme = savedTheme || 'light';
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                document.documentElement.style.colorScheme = 'light';
+            }
+        })();
+    </script>
+
     <!-- App Layout -->
     <div class="app-container" id="appLayout" style="display: none;">
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.1.02" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.1.03" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -151,7 +182,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.1.02" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.1.03" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1322,7 +1353,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.1.02" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.1.03" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2829,7 +2860,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.02"></script>
-    <script type="module" src="src/core/app.js?v=4.1.02"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.03"></script>
+    <script type="module" src="src/core/app.js?v=4.1.03"></script>
 </body>
 </html>
