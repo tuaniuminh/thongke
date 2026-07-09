@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.93';
-import * as sync from '../../core/sync.js?v=4.0.93';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.93';
+} from '../../core/app.js?v=4.0.94';
+import * as sync from '../../core/sync.js?v=4.0.94';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.94';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1040,48 +1040,48 @@ function updateHomeLayoutUI() {
     const btnDecline = document.getElementById('btnDeclineSpouseFund');
     
     if (inviteCard && inviteText) {
-        if (state.viewingSharedFund && state.sharedFundOwnerEmail) {
-            const inviteStatus = state.familyFundInviteStatus;
-            if (!inviteStatus) {
-                const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
-                inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${displayName}`;
-                inviteCard.style.display = 'flex';
-                if (btnAccept) btnAccept.style.display = 'inline-block';
-                if (btnDecline) btnDecline.style.display = 'inline-block';
-                
-                if (btnAccept) {
-                    btnAccept.onclick = async () => {
-                        state.familyFundInviteStatus = 'accepted';
-                        state.showFamilyFundCard = true;
-                        state.showFamilyFundCardUpdated = new Date().toISOString();
-                        
-                        await saveLocalState();
-                        performSync(true);
-                        
-                        inviteCard.style.display = 'none';
-                        showToast("Đã chấp nhận lời mời tham gia quỹ chung!");
-                        updateHomeLayoutUI();
-                    };
-                }
-                
-                if (btnDecline) {
-                    btnDecline.onclick = async () => {
-                        state.familyFundInviteStatus = 'declined';
-                        state.familyFundInviteStatusUpdated = new Date().toISOString();
-                        await saveLocalState();
-                        performSync(true);
-                        inviteCard.style.display = 'none';
-                        showToast("Đã từ chối lời mời.");
-                        updateHomeLayoutUI();
-                    };
-                }
-            } else {
-                inviteCard.style.display = 'none';
-                if (inviteStatus === 'accepted' && !state.showFamilyFundCard) {
+        const inviteStatus = state.familyFundInviteStatus;
+        if (!state.viewingSharedFund && state.sharedFundOwnerEmail && !inviteStatus) {
+            const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
+            inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${displayName}`;
+            inviteCard.style.display = 'flex';
+            if (btnAccept) btnAccept.style.display = 'inline-block';
+            if (btnDecline) btnDecline.style.display = 'inline-block';
+            
+            if (btnAccept) {
+                btnAccept.onclick = async () => {
+                    state.familyFundInviteStatus = 'accepted';
                     state.showFamilyFundCard = true;
                     state.showFamilyFundCardUpdated = new Date().toISOString();
-                    if (cardFund) cardFund.style.display = 'flex';
-                }
+                    
+                    await saveLocalState();
+                    performSync(true);
+                    
+                    inviteCard.style.display = 'none';
+                    showToast("Đã chấp nhận lời mời tham gia quỹ chung!");
+                    
+                    if (typeof window.checkForSharedFamilyFund === 'function') {
+                        await window.checkForSharedFamilyFund();
+                    }
+                    updateHomeLayoutUI();
+                };
+            }
+            
+            if (btnDecline) {
+                btnDecline.onclick = async () => {
+                    state.familyFundInviteStatus = 'declined';
+                    state.familyFundInviteStatusUpdated = new Date().toISOString();
+                    state.sharedFundOwnerEmail = '';
+                    state.fundSymmetricKey = '';
+                    state.sharedFundSourceRow = null;
+                    
+                    await saveLocalState();
+                    performSync(true);
+                    
+                    inviteCard.style.display = 'none';
+                    showToast("Đã từ chối lời mời.");
+                    updateHomeLayoutUI();
+                };
             }
         } else if (state.spouseFundInvitePending && state.spouseFundInviteOwnerEmail) {
             const displayName = state.ownerNickname ? state.ownerNickname : state.spouseFundInviteOwnerEmail;
@@ -1091,6 +1091,11 @@ function updateHomeLayoutUI() {
             if (btnDecline) btnDecline.style.display = 'none';
         } else {
             inviteCard.style.display = 'none';
+            if (inviteStatus === 'accepted' && !state.showFamilyFundCard) {
+                state.showFamilyFundCard = true;
+                state.showFamilyFundCardUpdated = new Date().toISOString();
+                if (cardFund) cardFund.style.display = 'flex';
+            }
         }
     }
 

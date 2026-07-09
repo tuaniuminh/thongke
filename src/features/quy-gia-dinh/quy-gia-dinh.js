@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.93';
-import { decrypt } from '../../core/crypto.js?v=4.0.93';
-import * as sync from '../../core/sync.js?v=4.0.93';
+} from '../../core/app.js?v=4.0.94';
+import { decrypt } from '../../core/crypto.js?v=4.0.94';
+import * as sync from '../../core/sync.js?v=4.0.94';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -118,6 +118,8 @@ export function initFundBindings() {
     if (editForm) {
         editForm.addEventListener('submit', handleFundEditSubmit);
     }
+
+    window.checkForSharedFamilyFund = checkForSharedFamilyFund;
 }
 
 // Format input as money
@@ -337,27 +339,43 @@ export async function checkForSharedFamilyFund() {
                         
                         if (fundKey && parsed.encrypted_fund) {
                             state.spouseFundInvitePending = false;
-                            const decryptedFund = await decrypt(parsed.encrypted_fund, fundKey);
-                            const fundData = JSON.parse(decryptedFund);
-                            state.familyFunds = fundData.familyFunds || [];
-                            state.fundTransactions = fundData.fundTransactions || [];
-                            state.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
-                            state.viewingSharedFund = true;
-                            state.sharedFundOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
-                            state.fundSymmetricKey = fundKey;
-                            state.sharedFundSourceRow = {
-                                user_id: row.user_id,
-                                encrypted_data: row.encrypted_data,
-                                encrypted_personal: parsed.encrypted_personal,
-                                fund_shared_keys: parsed.fund_shared_keys,
-                                owner_email: parsed.owner_email,
-                                spouse_email: parsed.spouse_email,
-                                google_sheets_webhook: parsed.google_sheets_webhook
-                            };
-                            if (typeof window.updateHomeLayoutUI === 'function') {
-                                window.updateHomeLayoutUI();
+                            if (state.familyFundInviteStatus === 'accepted') {
+                                const decryptedFund = await decrypt(parsed.encrypted_fund, fundKey);
+                                const fundData = JSON.parse(decryptedFund);
+                                state.familyFunds = fundData.familyFunds || [];
+                                state.fundTransactions = fundData.fundTransactions || [];
+                                state.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
+                                state.viewingSharedFund = true;
+                                state.sharedFundOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
+                                state.fundSymmetricKey = fundKey;
+                                state.sharedFundSourceRow = {
+                                    user_id: row.user_id,
+                                    encrypted_data: row.encrypted_data,
+                                    encrypted_personal: parsed.encrypted_personal,
+                                    fund_shared_keys: parsed.fund_shared_keys,
+                                    owner_email: parsed.owner_email,
+                                    spouse_email: parsed.spouse_email,
+                                    google_sheets_webhook: parsed.google_sheets_webhook
+                                };
+                                if (typeof window.updateHomeLayoutUI === 'function') {
+                                    window.updateHomeLayoutUI();
+                                }
+                                return;
+                            } else {
+                                state.viewingSharedFund = false;
+                                state.sharedFundOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
+                                state.fundSymmetricKey = fundKey;
+                                state.sharedFundSourceRow = {
+                                    user_id: row.user_id,
+                                    encrypted_data: row.encrypted_data,
+                                    encrypted_personal: parsed.encrypted_personal,
+                                    fund_shared_keys: parsed.fund_shared_keys,
+                                    owner_email: parsed.owner_email,
+                                    spouse_email: parsed.spouse_email,
+                                    google_sheets_webhook: parsed.google_sheets_webhook
+                                };
+                                return;
                             }
-                            return;
                         } else {
                             // Case B: Husband has shared with us, but hasn't encrypted the key using our new public key yet
                             console.log("[E2EE Debug] Case B: spouse_email matched but no valid fundKey decrypted yet.");
@@ -385,14 +403,20 @@ export async function checkForSharedFamilyFund() {
                                 continue;
                             }
                         }
-                        state.familyFunds = legacyParsed.familyFunds || [];
-                        state.fundTransactions = legacyParsed.fundTransactions || [];
-                        state.viewingSharedFund = true;
-                        state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
-                        if (typeof window.updateHomeLayoutUI === 'function') {
-                            window.updateHomeLayoutUI();
+                        if (state.familyFundInviteStatus === 'accepted') {
+                            state.familyFunds = legacyParsed.familyFunds || [];
+                            state.fundTransactions = legacyParsed.fundTransactions || [];
+                            state.viewingSharedFund = true;
+                            state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                            if (typeof window.updateHomeLayoutUI === 'function') {
+                                window.updateHomeLayoutUI();
+                            }
+                            return;
+                        } else {
+                            state.viewingSharedFund = false;
+                            state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                            return;
                         }
-                        return;
                     }
                 }
             } catch (decErr) {
