@@ -762,6 +762,18 @@ async function performSync(silent = false) {
                             state.ownerNickname = '';
                             state.familyFundsUpdated = new Date().toISOString();
                             showToast("Đối tác đã thoát khỏi Quỹ gia đình. Liên kết đã được hủy.", "warning");
+                        } else if (parsedObj.spouse_status && remoteData && parsedObj.spouse_status !== remoteData.spouseStatus) {
+                            console.log(`[E2EE Debug] Spouse status changed from remote envelope: ${parsedObj.spouse_status}`);
+                            remoteData.spouseStatus = parsedObj.spouse_status;
+                            state.spouseStatus = parsedObj.spouse_status;
+                            
+                            // If accepted, also auto-update showFamilyFundCard to true
+                            if (parsedObj.spouse_status === 'accepted' && !state.showFamilyFundCard) {
+                                state.showFamilyFundCard = true;
+                                state.showFamilyFundCardUpdated = new Date().toISOString();
+                                remoteData.showFamilyFundCard = true;
+                                remoteData.showFamilyFundCardUpdated = state.showFamilyFundCardUpdated;
+                            }
                         }
                         
                         // Get Fund Key directly from decrypted personal data or fallback to private key decryption
@@ -1200,6 +1212,7 @@ function renderAll() {
     renderSettings();
     renderHealthDashboard();
     renderFundDashboard();
+    renderManagementTab();
     updateThemeUI();
     updateImportNotesOptionUI();
     updateFamilyFundCardUI();
