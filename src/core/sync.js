@@ -1,21 +1,38 @@
 // sync.js - Supabase integration for synchronization
 
 let supabase = null;
+let currentUrl = null;
+let currentKey = null;
 
 // Initialize Supabase client
 export function initSupabase(url, key) {
     if (!url || !key) {
         supabase = null;
+        currentUrl = null;
+        currentKey = null;
         return null;
+    }
+    // Tránh khởi tạo nhiều instance trùng lặp GoTrueClient nếu URL và Key không đổi
+    if (supabase && url === currentUrl && key === currentKey) {
+        return supabase;
     }
     try {
         // Import createClient from ESM CDN dynamically or rely on global/module import
         // To be safe and fast, we use the standard createClient from the ESM CDN
         supabase = window.supabase ? window.supabase.createClient(url, key) : null;
+        if (supabase) {
+            currentUrl = url;
+            currentKey = key;
+        } else {
+            currentUrl = null;
+            currentKey = null;
+        }
         return supabase;
     } catch (e) {
         console.error("Failed to initialize Supabase:", e);
         supabase = null;
+        currentUrl = null;
+        currentKey = null;
         return null;
     }
 }
@@ -85,7 +102,7 @@ export async function getSyncData() {
     return data;
 }
 
-import { state } from './app.js?v=4.0.90';
+import { state } from './app.js?v=4.0.91';
 
 // Save encrypted data to gift_sync table (insert or update)
 export async function saveSyncData(encryptedData) {
