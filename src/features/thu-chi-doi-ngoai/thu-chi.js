@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.97';
-import * as sync from '../../core/sync.js?v=4.0.97';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.97';
+} from '../../core/app.js?v=4.0.98';
+import * as sync from '../../core/sync.js?v=4.0.98';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.98';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -383,7 +383,7 @@ window.deleteReceivedRecord = async function(id) {
         showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
         return;
     }
-    if (!confirm("Bạn có chắc chắn muốn xóa ghi chép này?")) return;
+    if (!await window.showConfirm("Bạn có chắc chắn muốn xóa ghi chép này?")) return;
     
     const index = state.receivedGifts.findIndex(g => g.id === id);
     if (index === -1) return;
@@ -640,7 +640,7 @@ window.deleteSentRecord = async function(id) {
         showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
         return;
     }
-    if (!confirm("Bạn có chắc chắn muốn xóa ghi chép này?")) return;
+    if (!await window.showConfirm("Bạn có chắc chắn muốn xóa ghi chép này?")) return;
     
     const index = state.sentGifts.findIndex(g => g.id === id);
     if (index === -1) return;
@@ -1051,6 +1051,7 @@ function updateHomeLayoutUI() {
             if (btnAccept) {
                 btnAccept.onclick = async () => {
                     state.familyFundInviteStatus = 'accepted';
+                    state.familyFundInviteStatusUpdated = new Date().toISOString();
                     state.showFamilyFundCard = true;
                     state.showFamilyFundCardUpdated = new Date().toISOString();
                     
@@ -1413,8 +1414,8 @@ function handleSaveSupabaseConfig(e) {
 }
 
 // Disconnect/Wipe Supabase credentials
-function disconnectSupabase() {
-    if (!confirm("Bạn có chắc chắn muốn hủy liên kết Supabase? Việc này sẽ dừng đồng bộ hóa, dữ liệu cục bộ của bạn vẫn được giữ nguyên.")) return;
+async function disconnectSupabase() {
+    if (!await window.showConfirm("Bạn có chắc chắn muốn hủy liên kết Supabase? Việc này sẽ dừng đồng bộ hóa, dữ liệu cục bộ của bạn vẫn được giữ nguyên.")) return;
     
     localStorage.removeItem('supabase_url');
     localStorage.removeItem('supabase_key');
@@ -2017,16 +2018,16 @@ function handleImportFile(e) {
                 if (importedSent.length > 0) msg += `\n- ${importedSent.length} dòng Tiền tôi mừng`;
                 msg += "\n\nBạn có chắc chắn muốn nhập dữ liệu này vào ứng dụng không?";
                 
-                if (!confirm(msg)) {
+                if (!await window.showConfirm(msg)) {
                     document.getElementById('importFileInput').value = '';
                     return;
                 }
                 
-                const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu từ file Excel vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP (giữ nguyên dữ liệu cũ, chỉ thêm dữ liệu mới).\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                const merge = await window.showConfirm("Bạn có muốn GỘP (Merge) dữ liệu từ file Excel vào dữ liệu hiện tại không?\n\n- Chọn 'Đồng ý' để GỘP (giữ nguyên dữ liệu cũ, chỉ thêm dữ liệu mới).\n- Chọn 'Hủy' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
                 
                 let action = 'merge';
                 if (!merge) {
-                    const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có chắc chắn muốn GHI ĐÈ (thay thế hoàn toàn) dữ liệu hiện tại bằng dữ liệu mới không?\n\n- Chọn 'OK' để GHI ĐÈ (Dữ liệu cũ trên thiết bị sẽ bị XÓA HOÀN TOÀN).\n- Chọn 'Cancel' để HỦY BỎ (Không thực hiện nhập dữ liệu nữa, giữ nguyên dữ liệu hiện tại).");
+                    const overwrite = await window.showConfirm("Bạn đã chọn không gộp dữ liệu. Bạn có chắc chắn muốn GHI ĐÈ (thay thế hoàn toàn) dữ liệu hiện tại bằng dữ liệu mới không?\n\n- Chọn 'Đồng ý' để GHI ĐÈ (Dữ liệu cũ trên thiết bị sẽ bị XÓA HOÀN TOÀN).\n- Chọn 'Hủy' để HỦY BỎ (Không thực hiện nhập dữ liệu nữa, giữ nguyên dữ liệu hiện tại).");
                     if (overwrite) {
                         action = 'overwrite';
                     } else {
@@ -2091,16 +2092,16 @@ function handleImportFile(e) {
                 else if (backupType === 'sent') msgJson += ` (Chỉ chứa dữ liệu 'Tiền tôi mừng')`;
                 msgJson += "\n\nBạn có chắc chắn muốn nhập dữ liệu này vào ứng dụng không?";
                 
-                if (!confirm(msgJson)) {
+                if (!await window.showConfirm(msgJson)) {
                     document.getElementById('importFileInput').value = '';
                     return;
                 }
                 
                 if (backupType === 'received') {
-                    const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP phần 'Tiền tôi nhận'.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                    const merge = await window.showConfirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'Đồng ý' để GỘP phần 'Tiền tôi nhận'.\n- Chọn 'Hủy' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
                     let action = 'merge';
                     if (!merge) {
-                        const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ phần 'Tiền tôi nhận' bằng dữ liệu mới không (giữ nguyên phần 'Tiền tôi mừng')?\n\n- Chọn 'OK' để GHI ĐÈ (Dữ liệu 'Tiền tôi nhận' cũ sẽ bị XÓA).\n- Chọn 'Cancel' để HỦY BỎ.");
+                        const overwrite = await window.showConfirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ phần 'Tiền tôi nhận' bằng dữ liệu mới không (giữ nguyên phần 'Tiền tôi mừng')?\n\n- Chọn 'Đồng ý' để GHI ĐÈ (Dữ liệu 'Tiền tôi nhận' cũ sẽ bị XÓA).\n- Chọn 'Hủy' để HỦY BỎ.");
                         if (overwrite) {
                             action = 'overwrite';
                         } else {
@@ -2115,10 +2116,10 @@ function handleImportFile(e) {
                         state.lastResetTime = new Date().toISOString();
                     }
                 } else if (backupType === 'sent') {
-                    const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP phần 'Tiền tôi mừng'.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                    const merge = await window.showConfirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'Đồng ý' để GỘP phần 'Tiền tôi mừng'.\n- Chọn 'Hủy' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
                     let action = 'merge';
                     if (!merge) {
-                        const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ phần 'Tiền tôi mừng' bằng dữ liệu mới không (giữ nguyên phần 'Tiền tôi nhận')?\n\n- Chọn 'OK' để GHI ĐÈ (Dữ liệu 'Tiền tôi mừng' cũ sẽ bị XÓA).\n- Chọn 'Cancel' để HỦY BỎ.");
+                        const overwrite = await window.showConfirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ phần 'Tiền tôi mừng' bằng dữ liệu mới không (giữ nguyên phần 'Tiền tôi nhận')?\n\n- Chọn 'Đồng ý' để GHI ĐÈ (Dữ liệu 'Tiền tôi mừng' cũ sẽ bị XÓA).\n- Chọn 'Hủy' để HỦY BỎ.");
                         if (overwrite) {
                             action = 'overwrite';
                         } else {
@@ -2133,10 +2134,10 @@ function handleImportFile(e) {
                         state.lastResetTime = new Date().toISOString();
                     }
                 } else {
-                    const merge = confirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'OK' để GỘP cả hai phần.\n- Chọn 'Cancel' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
+                    const merge = await window.showConfirm("Bạn có muốn GỘP (Merge) dữ liệu mới vào dữ liệu hiện tại không?\n\n- Chọn 'Đồng ý' để GỘP cả hai phần.\n- Chọn 'Hủy' để mở thêm lựa chọn Ghi đè hoặc Hủy bỏ.");
                     let action = 'merge';
                     if (!merge) {
-                        const overwrite = confirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ hoàn toàn tất cả dữ liệu hiện tại bằng dữ liệu mới không?\n\n- Chọn 'OK' để GHI ĐÈ (Toàn bộ dữ liệu cũ sẽ bị XÓA).\n- Chọn 'Cancel' để HỦY BỎ.");
+                        const overwrite = await window.showConfirm("Bạn đã chọn không gộp dữ liệu. Bạn có muốn GHI ĐÈ hoàn toàn tất cả dữ liệu hiện tại bằng dữ liệu mới không?\n\n- Chọn 'Đồng ý' để GHI ĐÈ (Toàn bộ dữ liệu cũ sẽ bị XÓA).\n- Chọn 'Hủy' để HỦY BỎ.");
                         if (overwrite) {
                             action = 'overwrite';
                         } else {

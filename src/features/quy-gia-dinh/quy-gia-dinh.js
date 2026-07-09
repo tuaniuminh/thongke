@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.0.97';
-import { decrypt } from '../../core/crypto.js?v=4.0.97';
-import * as sync from '../../core/sync.js?v=4.0.97';
+} from '../../core/app.js?v=4.0.98';
+import { decrypt } from '../../core/crypto.js?v=4.0.98';
+import * as sync from '../../core/sync.js?v=4.0.98';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -93,6 +93,12 @@ export function initFundBindings() {
             renderMonthlyFundChart();
         });
     }
+    const chartSelectYear = document.getElementById('chartSelectYear');
+    if (chartSelectYear) {
+        chartSelectYear.addEventListener('change', () => {
+            renderMonthlyFundChart();
+        });
+    }
 
     // Link spouse email form
     const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
@@ -113,6 +119,12 @@ export function initFundBindings() {
     const leaveSpouseBtn = document.getElementById('btnLeaveSpouseFund');
     if (leaveSpouseBtn) {
         leaveSpouseBtn.addEventListener('click', handleLeaveSpouseFund);
+    }
+
+    const emailInput = document.getElementById('spouseEmailInput');
+    if (emailInput) {
+        emailInput.removeEventListener('click', handleEmailInputClick);
+        emailInput.addEventListener('click', handleEmailInputClick);
     }
 
     // Add custom fund form
@@ -556,9 +568,11 @@ function renderFundCards() {
                 <button class="btn-fund-action" onclick="openFundActionModal('contribution')" style="--accent-color: #10b981;">
                     <i data-lucide="arrow-down-left"></i> Đóng góp
                 </button>
+                ${!state.viewingSharedFund ? `
                 <button class="btn-fund-action" onclick="openFundActionModal('transfer', '${fund.id}')">
                     <i data-lucide="arrow-left-right"></i> Trích quỹ
                 </button>
+                ` : ''}
             `;
         } else if (fund.type === 'spending') {
             themeClass = 'spending-fund';
@@ -575,9 +589,11 @@ function renderFundCards() {
                 <button class="btn-fund-action" onclick="openFundActionModal('spending', '${fund.id}')" style="--accent-color: #ef4444;">
                     <i data-lucide="arrow-up-right"></i> Chi tiêu
                 </button>
+                ${!state.viewingSharedFund ? `
                 <button class="btn-fund-action" onclick="openFundActionModal('transfer', '${fund.id}')">
                     <i data-lucide="arrow-left-right"></i> Chuyển tiền
                 </button>
+                ` : ''}
             `;
         } else if (fund.type === 'investment') {
             themeClass = 'investment-fund';
@@ -591,12 +607,14 @@ function renderFundCards() {
             
             buttonsHtml = `
                 ${contributionButton}
+                ${!state.viewingSharedFund ? `
                 <button class="btn-fund-action" onclick="openFundActionModal('invest', '${fund.id}')" style="--accent-color: #f59e0b;">
                     <i data-lucide="trending-up"></i> Chốt lãi/lỗ
                 </button>
                 <button class="btn-fund-action" onclick="openFundActionModal('transfer', '${fund.id}')">
                     <i data-lucide="arrow-left-right"></i> Chuyển tiền
                 </button>
+                ` : ''}
             `;
         } else {
             themeClass = 'custom-fund';
@@ -613,9 +631,11 @@ function renderFundCards() {
                 <button class="btn-fund-action" onclick="openFundActionModal('spending', '${fund.id}')" style="--accent-color: #ef4444;">
                     <i data-lucide="arrow-up-right"></i> Chi tiêu
                 </button>
+                ${!state.viewingSharedFund ? `
                 <button class="btn-fund-action" onclick="openFundActionModal('transfer', '${fund.id}')">
                     <i data-lucide="arrow-left-right"></i> Chuyển tiền
                 </button>
+                ` : ''}
             `;
         }
 
@@ -729,6 +749,22 @@ function populateFundSelects() {
             chartSelectFund.value = currentVal;
         } else {
             chartSelectFund.value = 'all';
+        }
+    }
+
+    const chartSelectYear = document.getElementById('chartSelectYear');
+    if (chartSelectYear) {
+        const currentYear = new Date().getFullYear();
+        let options = '';
+        for (let y = currentYear; y >= 2024; y--) {
+            options += `<option value="${y}">Năm ${y}</option>`;
+        }
+        const savedYear = chartSelectYear.value;
+        chartSelectYear.innerHTML = options;
+        if (savedYear && Array.from(chartSelectYear.options).some(opt => opt.value === savedYear)) {
+            chartSelectYear.value = savedYear;
+        } else {
+            chartSelectYear.value = currentYear.toString();
         }
     }
 }
@@ -1153,7 +1189,7 @@ async function handleTransferSubmit(e) {
     calculateFundBalances();
     const fromFund = state.familyFunds.find(f => f.id === fromFundId);
     if (fromFund && fromFund.balance < amount) {
-        if (!confirm(`Quỹ nguồn không đủ số dư (Hiện có: ${formatVND(fromFund.balance)}). Bạn vẫn muốn chuyển âm?`)) {
+        if (!await window.showConfirm(`Quỹ nguồn không đủ số dư (Hiện có: ${formatVND(fromFund.balance)}). Bạn vẫn muốn chuyển âm?`)) {
             return;
         }
     }
@@ -1370,7 +1406,7 @@ window.deleteFundTransaction = async function(id) {
         return;
     }
 
-    if (!confirm("Bạn có chắc chắn muốn xóa giao dịch này? Số dư các quỹ sẽ tự động tính toán lại.")) return;
+    if (!await window.showConfirm("Bạn có chắc chắn muốn xóa giao dịch này? Số dư các quỹ sẽ tự động tính toán lại.")) return;
 
     const index = (state.fundTransactions || []).findIndex(t => t.id === id);
     if (index === -1) return;
@@ -1444,6 +1480,15 @@ window.openFundActionModal = function(action, targetFundId = '') {
     }
 };
 
+function handleEmailInputClick() {
+    if (state.spouseEmail && state.spouseStatus === 'accepted') {
+        const unlinkBtn = document.getElementById('btnUnlinkSpouse');
+        if (unlinkBtn) {
+            unlinkBtn.style.display = unlinkBtn.style.display === 'none' ? 'inline-block' : 'none';
+        }
+    }
+}
+
 // Render management tab elements (Linked to tab-fund-management view)
 export function renderManagementTab() {
     // 1. Hide/Show Add Custom Fund Block
@@ -1487,6 +1532,28 @@ export function renderManagementTab() {
             nicknameInput.disabled = !!state.spouseEmail;
         }
         
+        const statusBadge = document.getElementById('spouseInviteStatusBadge');
+        if (state.spouseEmail) {
+            if (statusBadge) {
+                statusBadge.style.display = 'inline-block';
+                let statusText = 'Đang chờ duyệt';
+                let badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: #fbbf24;';
+                
+                if (state.spouseStatus === 'accepted') {
+                    statusText = 'Đã chấp nhận';
+                    badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399;';
+                } else if (state.spouseStatus === 'declined') {
+                    statusText = 'Đã từ chối';
+                    badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #f87171;';
+                }
+                
+                statusBadge.innerText = statusText;
+                statusBadge.style.cssText = `font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 12px; ${badgeStyle}`;
+            }
+        } else {
+            if (statusBadge) statusBadge.style.display = 'none';
+        }
+
         if (state.spouseEmail && state.spouseStatus === 'declined') {
             if (statusText) statusText.style.display = 'block';
             if (reinviteBtn) reinviteBtn.style.display = 'inline-block';
@@ -1496,7 +1563,8 @@ export function renderManagementTab() {
             if (statusText) statusText.style.display = 'none';
             if (reinviteBtn) reinviteBtn.style.display = 'none';
             if (unlinkBtn) {
-                unlinkBtn.style.display = state.spouseEmail ? 'inline-block' : 'none';
+                // Nếu đã accepted thì ẩn nút Hủy theo mặc định, cần click email mới hiển thị
+                unlinkBtn.style.display = (state.spouseEmail && state.spouseStatus !== 'accepted') ? 'inline-block' : 'none';
             }
             if (saveBtn) {
                 saveBtn.style.display = state.spouseEmail ? 'none' : 'inline-block';
@@ -1505,6 +1573,10 @@ export function renderManagementTab() {
     }
 
     // 2. Google Sheets Webhook Url
+    const sheetsBlock = document.getElementById('mgmtGoogleSheetsBlock');
+    if (sheetsBlock) {
+        sheetsBlock.style.display = state.viewingSharedFund ? 'none' : 'flex';
+    }
     const sheetsInput = document.getElementById('googleSheetsWebhookInput');
     if (sheetsInput) {
         sheetsInput.value = state.googleSheetsWebhook || '';
@@ -1667,7 +1739,7 @@ async function handleSpouseEmailSubmit(e) {
 // Unlink Spouse (Owner's action)
 async function handleUnlinkSpouse() {
     if (state.viewingSharedFund) return;
-    if (!confirm("Bạn có chắc chắn muốn xóa liên kết tài khoản Vợ/Chồng này? Dữ liệu Quỹ gia đình sẽ không còn được chia sẻ với họ.")) {
+    if (!await window.showConfirm("Bạn có chắc chắn muốn xóa liên kết tài khoản Vợ/Chồng này? Dữ liệu Quỹ gia đình sẽ không còn được chia sẻ với họ.")) {
         return;
     }
 
@@ -1700,7 +1772,7 @@ async function handleReinviteSpouse() {
 async function handleLeaveSpouseFund() {
     if (!state.viewingSharedFund) return;
     
-    const confirmPassword = prompt("Để thoát khỏi nhóm gia đình, vui lòng xác nhận mật khẩu Master:");
+    const confirmPassword = await window.showPrompt("Để thoát khỏi nhóm gia đình, vui lòng xác nhận mật khẩu Master:");
     if (confirmPassword === null) return;
     
     if (confirmPassword !== state.masterPassword) {
@@ -1837,7 +1909,7 @@ async function deleteCustomFund(fundId) {
         return;
     }
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa quỹ "${fund.name}"?`)) return;
+    if (!await window.showConfirm(`Bạn có chắc chắn muốn xóa quỹ "${fund.name}"?`)) return;
 
     state.familyFunds = state.familyFunds.filter(f => f.id !== fundId);
     state.familyFundsUpdated = new Date().toISOString();
@@ -1948,59 +2020,58 @@ export function renderMonthlyFundChart() {
     }
 
     const fundId = document.getElementById('chartSelectFund')?.value || 'all';
+    const yearSelect = document.getElementById('chartSelectYear');
+    const selectedYear = yearSelect ? parseInt(yearSelect.value) : new Date().getFullYear();
 
-    // 1. Get last 6 months (chronological order)
+    // 1. Get 12 months for the selected year
     const months = [];
-    const date = new Date();
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
+    for (let i = 1; i <= 12; i++) {
         months.push({
-            year: d.getFullYear(),
-            month: d.getMonth() + 1, // 1-indexed
-            label: `T${d.getMonth() + 1}/${d.getFullYear()}`
+            year: selectedYear,
+            month: i,
+            label: `T${i}`
         });
     }
 
-    // 2. Filter transactions for the selected fund
+    // 2. Filter transactions for the selected fund and year
     let txs = (state.fundTransactions || []).filter(t => !t.deleted_at);
     if (fundId !== 'all') {
         txs = txs.filter(t => t.fundId === fundId || t.fromFundId === fundId || t.toFundId === fundId);
     }
+    txs = txs.filter(t => {
+        const txDate = new Date(t.date);
+        return txDate.getFullYear() === selectedYear;
+    });
 
     // 3. Calculate monthly inflow and outflow
-    const inflows = new Array(6).fill(0);
-    const outflows = new Array(6).fill(0);
+    const inflows = new Array(12).fill(0);
+    const outflows = new Array(12).fill(0);
 
     txs.forEach(tx => {
         const txDate = new Date(tx.date);
-        const txYear = txDate.getFullYear();
         const txMonth = txDate.getMonth() + 1;
-
-        // Find match in our 6 months list
-        const mIdx = months.findIndex(m => m.year === txYear && m.month === txMonth);
-        if (mIdx === -1) return; // Outside our range
 
         const amount = Math.abs(tx.amount || 0);
 
         if (tx.type === 'contribution' || tx.type === 'external_income') {
-            inflows[mIdx] += amount;
+            inflows[txMonth - 1] += amount;
         } 
         else if (tx.type === 'spending') {
-            outflows[mIdx] += amount;
+            outflows[txMonth - 1] += amount;
         } 
         else if (tx.type === 'investment_change') {
             if (tx.amount >= 0) {
-                inflows[mIdx] += amount;
+                inflows[txMonth - 1] += amount;
             } else {
-                outflows[mIdx] += amount;
+                outflows[txMonth - 1] += amount;
             }
         } 
         else if (tx.type === 'transfer') {
             if (fundId !== 'all') {
                 if (tx.toFundId === fundId) {
-                    inflows[mIdx] += amount;
+                    inflows[txMonth - 1] += amount;
                 } else if (tx.fromFundId === fundId) {
-                    outflows[mIdx] += amount;
+                    outflows[txMonth - 1] += amount;
                 }
             }
         }
@@ -2017,14 +2088,14 @@ export function renderMonthlyFundChart() {
                     data: inflows,
                     backgroundColor: '#10b981',
                     borderRadius: 4,
-                    barThickness: 12
+                    barThickness: 8
                 },
                 {
                     label: 'Tổng chi',
                     data: outflows,
                     backgroundColor: '#ef4444',
                     borderRadius: 4,
-                    barThickness: 12
+                    barThickness: 8
                 }
             ]
         },
@@ -2053,6 +2124,13 @@ export function renderMonthlyFundChart() {
                     ticks: {
                         color: state.theme === 'dark' ? '#9ca3af' : '#4b5563',
                         font: { size: 10 }
+                    },
+                    title: {
+                        display: true,
+                        text: `Năm ${selectedYear} ➔`,
+                        color: state.theme === 'dark' ? '#9ca3af' : '#4b5563',
+                        font: { size: 10, weight: 'bold' },
+                        align: 'end'
                     }
                 },
                 y: {

@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.97';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.97';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.97';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.0.98';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.0.98';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.0.98';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.97';
-import * as sync from './sync.js?v=4.0.97';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.97';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.0.98';
+import * as sync from './sync.js?v=4.0.98';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.0.98';
 
-const APP_VERSION = '4.0.97';
+const APP_VERSION = '4.0.98';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -203,6 +203,132 @@ function showToast(message, type = 'success') {
         setTimeout(() => toast.remove(), 300);
     }, 4000);
 }
+
+// Custom Alert Dialog Modal helper
+window.showAlert = function(message, title = "Thông báo") {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customDialogModal');
+        const titleEl = document.getElementById('customDialogTitle');
+        const msgEl = document.getElementById('customDialogMessage');
+        const inputContainer = document.getElementById('customDialogInputContainer');
+        const btnCancel = document.getElementById('btnCustomDialogCancel');
+        const btnConfirm = document.getElementById('btnCustomDialogConfirm');
+        const iconContainer = document.getElementById('customDialogIconContainer');
+        const icon = document.getElementById('customDialogIcon');
+
+        if (!modal) {
+            alert(message);
+            resolve();
+            return;
+        }
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+        inputContainer.style.display = 'none';
+        btnCancel.style.display = 'none';
+        btnConfirm.innerText = "Đồng ý";
+        
+        iconContainer.style.background = 'rgba(59, 130, 246, 0.1)';
+        iconContainer.style.color = 'var(--accent-blue)';
+        icon.setAttribute('data-lucide', 'info');
+        if (window.lucide) window.lucide.createIcons();
+
+        modal.style.display = 'flex';
+
+        btnConfirm.onclick = () => {
+            modal.style.display = 'none';
+            resolve();
+        };
+    });
+};
+
+// Custom Confirm Dialog Modal helper
+window.showConfirm = function(message, title = "Xác nhận") {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customDialogModal');
+        const titleEl = document.getElementById('customDialogTitle');
+        const msgEl = document.getElementById('customDialogMessage');
+        const inputContainer = document.getElementById('customDialogInputContainer');
+        const btnCancel = document.getElementById('btnCustomDialogCancel');
+        const btnConfirm = document.getElementById('btnCustomDialogConfirm');
+        const iconContainer = document.getElementById('customDialogIconContainer');
+        const icon = document.getElementById('customDialogIcon');
+
+        if (!modal) {
+            resolve(confirm(message));
+            return;
+        }
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+        inputContainer.style.display = 'none';
+        btnCancel.style.display = 'inline-block';
+        btnConfirm.innerText = "Đồng ý";
+
+        iconContainer.style.background = 'rgba(245, 158, 11, 0.15)';
+        iconContainer.style.color = 'var(--accent-amber)';
+        icon.setAttribute('data-lucide', 'help-circle');
+        if (window.lucide) window.lucide.createIcons();
+
+        modal.style.display = 'flex';
+
+        btnConfirm.onclick = () => {
+            modal.style.display = 'none';
+            resolve(true);
+        };
+
+        btnCancel.onclick = () => {
+            modal.style.display = 'none';
+            resolve(false);
+        };
+    });
+};
+
+// Custom Prompt Dialog Modal helper
+window.showPrompt = function(message, defaultValue = "", title = "Nhập thông tin") {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customDialogModal');
+        const titleEl = document.getElementById('customDialogTitle');
+        const msgEl = document.getElementById('customDialogMessage');
+        const inputContainer = document.getElementById('customDialogInputContainer');
+        const inputEl = document.getElementById('customDialogInput');
+        const btnCancel = document.getElementById('btnCustomDialogCancel');
+        const btnConfirm = document.getElementById('btnCustomDialogConfirm');
+        const iconContainer = document.getElementById('customDialogIconContainer');
+        const icon = document.getElementById('customDialogIcon');
+
+        if (!modal) {
+            resolve(prompt(message, defaultValue));
+            return;
+        }
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+        inputContainer.style.display = 'block';
+        inputEl.value = defaultValue;
+        btnCancel.style.display = 'inline-block';
+        btnConfirm.innerText = "Xác nhận";
+
+        iconContainer.style.background = 'rgba(16, 185, 129, 0.15)';
+        iconContainer.style.color = 'var(--accent-emerald)';
+        icon.setAttribute('data-lucide', 'edit-3');
+        if (window.lucide) window.lucide.createIcons();
+
+        modal.style.display = 'flex';
+        inputEl.focus();
+
+        btnConfirm.onclick = () => {
+            const val = inputEl.value;
+            modal.style.display = 'none';
+            resolve(val);
+        };
+
+        btnCancel.onclick = () => {
+            modal.style.display = 'none';
+            resolve(null);
+        };
+    });
+};
 
 // Show Update Notification (Persistent Toast with Action)
 function showUpdateNotification(newVersion) {
@@ -1006,7 +1132,7 @@ async function performSync(silent = false) {
         localStorage.setItem('last_sync_time', new Date().toISOString());
         renderAll();
         updateSyncIndicator('synced');
-        showToast("Đồng bộ dữ liệu thành công!");
+        if (!silent) showToast("Đồng bộ dữ liệu thành công!");
 
     } catch (e) {
         console.error("Sync error:", e);
@@ -1263,7 +1389,7 @@ async function deleteCustomEventType(name) {
         showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
         return;
     }
-    if (!confirm(`Bạn có chắc chắn muốn xóa loại sự kiện "${name}" khỏi danh sách?`)) {
+    if (!await window.showConfirm(`Bạn có chắc chắn muốn xóa loại sự kiện "${name}" khỏi danh sách?`)) {
         return;
     }
     
@@ -1699,7 +1825,7 @@ async function handleUnlockSubmit(e) {
 
 // Change Master Password flow
 window.handleChangePassword = async function() {
-    const oldPassword = prompt("Nhập Master Password (hoặc mã PIN) hiện tại:");
+    const oldPassword = await window.showPrompt("Nhập Master Password (hoặc mã PIN) hiện tại:");
     if (!oldPassword) return;
     
     // Verify old password by decrypting local storage
@@ -1713,14 +1839,14 @@ window.handleChangePassword = async function() {
         return;
     }
     
-    const newPassword = prompt("Nhập mã PIN mới (yêu cầu đúng 6 chữ số):");
+    const newPassword = await window.showPrompt("Nhập mã PIN mới (yêu cầu đúng 6 chữ số):");
     if (!newPassword) return;
     if (!/^\d{6}$/.test(newPassword)) {
         showToast("Mã PIN mới phải đúng 6 chữ số!", "error");
         return;
     }
     
-    const confirmNew = prompt("Xác nhận mã PIN mới:");
+    const confirmNew = await window.showPrompt("Xác nhận mã PIN mới:");
     if (newPassword !== confirmNew) {
         showToast("Xác nhận mã PIN không trùng khớp!", "error");
         return;
@@ -1924,6 +2050,9 @@ function handleUnlockClear() {
 
 
 async function initializeApp() {
+    if (window.__famiLifeInitialized) return;
+    window.__famiLifeInitialized = true;
+
     // === Auto-inject APP_VERSION into all UI elements — no need to hardcode in HTML ===
     // Version badge on home page (top-right): shows "Ver X.X.X PRO"
     const homeVersionBadgeSpan = document.querySelector('#homeVersionBadge .wizard-version-badge');
@@ -1972,7 +2101,6 @@ async function initializeApp() {
                 autoUnlocked = true;
                 
                 enterApp();
-                showToast("Tự động mở khóa thành công!");
                 
                 const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
                 if (rememberCheckbox) rememberCheckbox.checked = true;
@@ -2288,13 +2416,13 @@ async function initializeApp() {
     const clearAllDataBtn = document.getElementById('clearAllDataBtn');
     if (clearAllDataBtn) {
         clearAllDataBtn.addEventListener('click', async () => {
-            const confirmPin = prompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu thu chi đối ngoại trên ứng dụng FamiLife của thiết bị này (Dữ liệu hồ sơ y tế vẫn được giữ nguyên)!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
+            const confirmPin = await window.showPrompt("CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu thu chi đối ngoại trên ứng dụng FamiLife của thiết bị này (Dữ liệu hồ sơ y tế vẫn được giữ nguyên)!\n\nHành động này không thể hoàn tác.\nNếu bạn chắc chắn muốn xóa, hãy nhập đúng mã PIN mở khóa hiện tại để xác nhận:");
             if (confirmPin === null) {
                 return; // Cancelled
             }
             
             if (confirmPin === state.masterPassword) {
-                const doubleConfirm = confirm("XÁC NHẬN CUỐI CÙNG: Bạn có thực sự chắc chắn muốn xóa toàn bộ dữ liệu thu chi đối ngoại?\n(Dữ liệu trên Supabase Cloud cũng sẽ bị xóa sạch sau khi đồng bộ)");
+                const doubleConfirm = await window.showConfirm("XÁC NHẬN CUỐI CÙNG: Bạn có thực sự chắc chắn muốn xóa toàn bộ dữ liệu thu chi đối ngoại?\n(Dữ liệu trên Supabase Cloud cũng sẽ bị xóa sạch sau khi đồng bộ)");
                 if (!doubleConfirm) return;
                 
                 state.receivedGifts = [];
