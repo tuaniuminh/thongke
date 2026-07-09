@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.0.99';
-import * as sync from '../../core/sync.js?v=4.0.99';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.0.99';
+} from '../../core/app.js?v=4.1.00';
+import * as sync from '../../core/sync.js?v=4.1.00';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.00';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -960,6 +960,17 @@ function renderSettings() {
     
     // Sync UI badge status
     updateUserBadge();
+
+    // Đồng bộ trạng thái checkbox Cài đặt
+    const toggleFundCard = document.getElementById('toggleShowFamilyFundCard');
+    if (toggleFundCard) {
+        toggleFundCard.checked = !!state.showFamilyFundCard;
+    }
+    const toggleMobileTable = document.getElementById('toggleMobileTableView');
+    if (toggleMobileTable) {
+        toggleMobileTable.checked = state.mobileViewMode === 'table';
+    }
+
     lucide.createIcons();
 }
 
