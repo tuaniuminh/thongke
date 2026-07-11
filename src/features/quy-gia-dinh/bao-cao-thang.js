@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.28';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.28';
+} from '../../core/app.js?v=4.1.29';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.29';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -124,7 +124,11 @@ export function generateMonthlyReport() {
     
     currentReportMonth = month;
     currentReportYear = year;
-    aiInsightText = ''; // Reset AI text when selecting new month
+
+    // Khôi phục nhận xét AI đã lưu cho tháng này (nếu có)
+    const aiCacheKey = `aiInsight_${year}_${month}`;
+    const savedAi = localStorage.getItem(aiCacheKey);
+    aiInsightText = savedAi || '';
 
     // Lọc giao dịch bằng cách phân tích chuỗi ngày độc lập múi giờ
     const activeTx = (state.fundTransactions || []).filter(t => !t.deleted_at);
@@ -345,6 +349,11 @@ Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy tr
 
         const insight = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
         aiInsightText = insight.trim();
+
+        // Lưu nhận xét vào localStorage để không bị mất khi tải lại trang
+        const aiCacheKey = `aiInsight_${currentReportYear}_${currentReportMonth}`;
+        localStorage.setItem(aiCacheKey, aiInsightText);
+
         renderReportHtml();
         showToast("Đã phân tích báo cáo thành công!", "success");
     } catch (err) {
