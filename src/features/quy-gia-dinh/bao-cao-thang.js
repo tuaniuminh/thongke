@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.23';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.23';
+} from '../../core/app.js?v=4.1.24';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.24';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -24,6 +24,50 @@ function getMemberName(memberId) {
     }
 }
 
+// Timezone-independent date parser
+function parseTxDate(dateStr) {
+    if (!dateStr) return { year: NaN, month: NaN, day: NaN };
+    
+    // If it's an ISO string or has 'T', take the date part first
+    const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    
+    // Try split by '-' (YYYY-MM-DD)
+    if (datePart.includes('-')) {
+        const parts = datePart.split('-');
+        return {
+            year: parseInt(parts[0]),
+            month: parseInt(parts[1]),
+            day: parseInt(parts[2])
+        };
+    }
+    
+    // Try split by '/' (DD/MM/YYYY or YYYY/MM/DD)
+    if (datePart.includes('/')) {
+        const parts = datePart.split('/');
+        if (parts[0].length === 4) { // YYYY/MM/DD
+            return {
+                year: parseInt(parts[0]),
+                month: parseInt(parts[1]),
+                day: parseInt(parts[2])
+            };
+        } else { // DD/MM/YYYY
+            return {
+                year: parseInt(parts[2]),
+                month: parseInt(parts[1]),
+                day: parseInt(parts[0])
+            };
+        }
+    }
+    
+    // Fallback to standard JS Date (local time)
+    const d = new Date(dateStr);
+    return {
+        year: d.getFullYear(),
+        month: d.getMonth() + 1,
+        day: d.getDate()
+    };
+}
+
 // Open Monthly Report Modal
 export function openMonthlyReportModal() {
     const reportSelectYear = document.getElementById('reportSelectYear');
@@ -34,9 +78,9 @@ export function openMonthlyReportModal() {
         // Quét tất cả các năm từ giao dịch quỹ
         (state.fundTransactions || []).forEach(t => {
             if (t.date && !t.deleted_at) {
-                const y = new Date(t.date).getFullYear();
-                if (!isNaN(y)) {
-                    yearsSet.add(y);
+                const parsed = parseTxDate(t.date);
+                if (!isNaN(parsed.year)) {
+                    yearsSet.add(parsed.year);
                 }
             }
         });
@@ -49,15 +93,10 @@ export function openMonthlyReportModal() {
         reportSelectYear.innerHTML = options;
     }
 
-    // Thiết lập tháng và năm mặc định là tháng trước
+    // Thiết lập tháng và năm mặc định là tháng hiện tại
     const now = new Date();
-    let defaultMonth = now.getMonth(); // 0-indexed (Month trước = currentMonth - 1)
+    let defaultMonth = now.getMonth() + 1; // 1-indexed (Tháng hiện tại)
     let defaultYear = now.getFullYear();
-    
-    if (defaultMonth === 0) { // Nếu đang là Tháng 1, mặc định hiển thị báo cáo Tháng 12 năm ngoái
-        defaultMonth = 12;
-        defaultYear -= 1;
-    }
 
     const selectMonthEl = document.getElementById('reportSelectMonth');
     if (selectMonthEl) selectMonthEl.value = defaultMonth.toString();
@@ -87,11 +126,11 @@ export function generateMonthlyReport() {
     currentReportYear = year;
     aiInsightText = ''; // Reset AI text when selecting new month
 
-    // Lọc giao dịch
+    // Lọc giao dịch bằng cách phân tích chuỗi ngày độc lập múi giờ
     const activeTx = (state.fundTransactions || []).filter(t => !t.deleted_at);
     const monthTx = activeTx.filter(t => {
-        const d = new Date(t.date);
-        return (d.getMonth() + 1) === month && d.getFullYear() === year;
+        const parsed = parseTxDate(t.date);
+        return parsed.month === month && parsed.year === year;
     });
 
     // 1. Tính toán Thu - Chi
@@ -160,7 +199,8 @@ function renderReportHtml() {
     let spendingsHtml = '';
     if (data.spendings.length > 0) {
         spendingsHtml = data.spendings.map(s => {
-            const dateStr = new Date(s.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            const parsed = parseTxDate(s.date);
+            const dateStr = !isNaN(parsed.day) ? `${parsed.day.toString().padStart(2, '0')}/${parsed.month.toString().padStart(2, '0')}` : '';
             const mName = getMemberName(s.memberId);
             return `
                 <tr>
@@ -502,7 +542,8 @@ window.downloadReportAsImage = function() {
 
     if (data.spendings.length > 0) {
         data.spendings.forEach(s => {
-            const dateStr = new Date(s.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            const parsed = parseTxDate(s.date);
+            const dateStr = !isNaN(parsed.day) ? `${parsed.day.toString().padStart(2, '0')}/${parsed.month.toString().padStart(2, '0')}` : '';
             ctx.fillStyle = '#334155';
             ctx.font = '13px Arial, sans-serif';
             ctx.textAlign = 'left';
