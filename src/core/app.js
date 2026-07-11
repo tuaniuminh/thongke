@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.34';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.34';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.34';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.34';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.35';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.35';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.35';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.35';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.34';
-import * as sync from './sync.js?v=4.1.34';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.34';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.35';
+import * as sync from './sync.js?v=4.1.35';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.35';
 
-const APP_VERSION = '4.1.34';
+const APP_VERSION = '4.1.35';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2871,7 +2871,7 @@ function escapeHTML(str) {
 // Trả về ngày hiện tại theo múi giờ địa phương dạng YYYY-MM-DD
 // Dùng thay cho new Date().toISOString().split('T')[0] vốn trả về ngày UTC
 // (trước 7h sáng VN sẽ hiển thị sai ngày hôm qua)
-export function getLocalDateString() {
+function getLocalDateString() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
