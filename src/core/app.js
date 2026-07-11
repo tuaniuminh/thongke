@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.10';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.10';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.10';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.11';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.11';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.11';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.10';
-import * as sync from './sync.js?v=4.1.10';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.10';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.11';
+import * as sync from './sync.js?v=4.1.11';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.11';
 
-const APP_VERSION = '4.1.10';
+const APP_VERSION = '4.1.11';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -444,7 +444,8 @@ async function saveLocalState() {
         ownerNickname: state.ownerNickname || '',
         viewingSharedFund: !!state.viewingSharedFund,
         sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
-        lastFullBackupDate: state.lastFullBackupDate || ''
+        lastFullBackupDate: state.lastFullBackupDate || '',
+        activeChartFundIds: state.activeChartFundIds || ['fund-main']
     });
     
     try {
@@ -504,6 +505,7 @@ export async function loadLocalState(password) {
         state.viewingSharedFund = false;
         state.sharedFundOwnerEmail = '';
         state.lastFullBackupDate = '';
+        state.activeChartFundIds = ['fund-main'];
         return true;
     }
     
@@ -554,6 +556,7 @@ export async function loadLocalState(password) {
         state.viewingSharedFund = data.viewingSharedFund || false;
         state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
         state.lastFullBackupDate = data.lastFullBackupDate || '';
+        state.activeChartFundIds = data.activeChartFundIds || ['fund-main'];
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -887,6 +890,7 @@ async function performSync(silent = false) {
                     state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
                     state.spouseStatus = remoteData.spouseStatus || '';
                     state.lastFullBackupDate = remoteData.lastFullBackupDate || '';
+                    state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -1115,7 +1119,8 @@ async function performSync(silent = false) {
             spouseStatus: state.spouseStatus || '',
             viewingSharedFund: !!state.viewingSharedFund,
             sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
-            lastFullBackupDate: state.lastFullBackupDate || ''
+            lastFullBackupDate: state.lastFullBackupDate || '',
+            activeChartFundIds: state.activeChartFundIds || ['fund-main']
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 
