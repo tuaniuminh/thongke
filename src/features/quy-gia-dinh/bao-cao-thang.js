@@ -1,10 +1,10 @@
 // src/features/quy-gia-dinh/bao-cao-thang.js - Monthly Financial Report Logic
 
 import { 
-    state, saveLocalState, showToast,
+    state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.29';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.29';
+} from '../../core/app.js?v=4.1.30';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.30';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -125,10 +125,11 @@ export function generateMonthlyReport() {
     currentReportMonth = month;
     currentReportYear = year;
 
-    // Khôi phục nhận xét AI đã lưu cho tháng này (nếu có)
-    const aiCacheKey = `aiInsight_${year}_${month}`;
-    const savedAi = localStorage.getItem(aiCacheKey);
-    aiInsightText = savedAi || '';
+    // Khôi phục nhận xét AI: ưu tiên từ state (đồng bộ đa thiết bị), fallback localStorage
+    const aiCacheKey = `${year}_${month}`;
+    const stateAi = (state.reportAiInsights || {})[aiCacheKey] || '';
+    const localAi = localStorage.getItem(`aiInsight_${aiCacheKey}`) || '';
+    aiInsightText = stateAi || localAi;
 
     // Lọc giao dịch bằng cách phân tích chuỗi ngày độc lập múi giờ
     const activeTx = (state.fundTransactions || []).filter(t => !t.deleted_at);
@@ -347,15 +348,21 @@ Yêu cầu nhận xét:
 Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy trả về văn bản tiếng Việt tự nhiên và trôi chảy.
 `;
 
-        const insight = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
+        const insight = await callGeminiTextAPI(prompt, 'gemini-3.5-flash');
         aiInsightText = insight.trim();
 
-        // Lưu nhận xét vào localStorage để không bị mất khi tải lại trang
-        const aiCacheKey = `aiInsight_${currentReportYear}_${currentReportMonth}`;
-        localStorage.setItem(aiCacheKey, aiInsightText);
+        // Lưu nhận xét vào state để đồng bộ Supabase (đa thiết bị)
+        const aiCacheKey = `${currentReportYear}_${currentReportMonth}`;
+        if (!state.reportAiInsights) state.reportAiInsights = {};
+        state.reportAiInsights[aiCacheKey] = aiInsightText;
+        // Cũng lưu localStorage làm fallback offline
+        localStorage.setItem(`aiInsight_${aiCacheKey}`, aiInsightText);
+        // Đồng bộ lên Supabase
+        await saveLocalState();
+        performSync(false);
 
         renderReportHtml();
-        showToast("Đã phân tích báo cáo thành công!", "success");
+        showToast("Đã phân tích và đồng bộ báo cáo thành công!", "success");
     } catch (err) {
         console.error("Gemini API Error for report:", err);
         showToast("Không thể kết nối Gemini API: " + err.message, "danger");

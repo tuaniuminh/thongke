@@ -102,10 +102,10 @@ export async function getSyncData() {
     return data;
 }
 
-import { state } from './app.js?v=4.1.29';
 
 // Save encrypted data to gift_sync table (insert or update)
-export async function saveSyncData(encryptedData) {
+// publicKey: optional RSA public key string to publish (prevents circular import of state)
+export async function saveSyncData(encryptedData, publicKey = null) {
     if (!supabase) throw new Error("Chưa cấu hình kết nối Supabase");
     const user = await getCurrentUser();
     if (!user) throw new Error("Người dùng chưa đăng nhập");
@@ -118,7 +118,7 @@ export async function saveSyncData(encryptedData) {
             encrypted_data: encryptedData,
             updated_at: new Date().toISOString(),
             user_email: user.email,
-            public_key: state.asymmetricPublicKey || null
+            public_key: publicKey
         });
 
     if (error) {

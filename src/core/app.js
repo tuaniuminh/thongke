@@ -2,16 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.29';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.29';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.29';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.29';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.31';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.31';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.31';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.31';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.29';
-import * as sync from './sync.js?v=4.1.29';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.29';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.31';
+import * as sync from './sync.js?v=4.1.31';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.31';
 
-const APP_VERSION = '4.1.29';
+const APP_VERSION = '4.1.31';
+
+// Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
+const DEBUG_E2EE = false;
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -192,10 +195,13 @@ function showToast(message, type = 'success') {
     if (type === 'error') iconName = 'alert-triangle';
     if (type === 'warning') iconName = 'alert-circle';
     
-    toast.innerHTML = `
-        <i data-lucide="${iconName}"></i>
-        <span>${message}</span>
-    `;
+    // Dùng DOM API thay vì innerHTML để tránh XSS từ error messages bên ngoài
+    const _toastIcon = document.createElement('i');
+    _toastIcon.setAttribute('data-lucide', iconName);
+    const _toastSpan = document.createElement('span');
+    _toastSpan.textContent = message;
+    toast.appendChild(_toastIcon);
+    toast.appendChild(_toastSpan);
     
     container.appendChild(toast);
     if (window.lucide) window.lucide.createIcons();
@@ -448,7 +454,8 @@ async function saveLocalState() {
         viewingSharedFund: !!state.viewingSharedFund,
         sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
         lastFullBackupDate: state.lastFullBackupDate || '',
-        activeChartFundIds: state.activeChartFundIds || ['fund-main']
+        activeChartFundIds: state.activeChartFundIds || ['fund-main'],
+        reportAiInsights: state.reportAiInsights || {}
     });
     
     try {
@@ -510,6 +517,7 @@ export async function loadLocalState(password) {
         state.sharedFundOwnerEmail = '';
         state.lastFullBackupDate = '';
         state.activeChartFundIds = ['fund-main'];
+        state.reportAiInsights = {};
         return true;
     }
     
@@ -562,6 +570,7 @@ export async function loadLocalState(password) {
         state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
         state.lastFullBackupDate = data.lastFullBackupDate || '';
         state.activeChartFundIds = data.activeChartFundIds || ['fund-main'];
+        state.reportAiInsights = data.reportAiInsights || {};
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -600,7 +609,7 @@ async function fetchSpousePublicKey(email) {
     const supabaseClient = sync.getSupabase();
     if (!supabaseClient || !email) return null;
     try {
-        console.log("[E2EE Debug] fetchSpousePublicKey searching for:", email);
+        if (DEBUG_E2EE) console.log("[E2EE Debug] fetchSpousePublicKey searching for:", email);
         const { data, error } = await supabaseClient
             .from('gift_sync')
             .select('public_key, user_email, user_id')
@@ -611,10 +620,10 @@ async function fetchSpousePublicKey(email) {
             return null;
         }
         if (!data) {
-            console.warn("[E2EE Debug] No public key row found for:", email);
+            if (DEBUG_E2EE) console.warn("[E2EE Debug] No public key row found for:", email);
             return null;
         }
-        console.log("[E2EE Debug] Found public key for:", email, "key:", !!data.public_key);
+        if (DEBUG_E2EE) console.log("[E2EE Debug] Found public key for:", email, "key:", !!data.public_key);
         return data.public_key;
     } catch (e) {
         console.error("Failed to fetch spouse public key:", e);
@@ -760,7 +769,7 @@ async function performSync(silent = false) {
                         
                         // Check if spouse has left
                         if (parsedObj.spouse_status === 'left') {
-                            console.log("[E2EE Debug] Spouse has left the fund. Performing auto-unlink.");
+                            if (DEBUG_E2EE) console.log("[E2EE Debug] Spouse has left the fund. Performing auto-unlink.");
                             parsedObj.spouse_email = '';
                             parsedObj.spouse_role = 'wife';
                             parsedObj.owner_nickname = '';
@@ -775,7 +784,8 @@ async function performSync(silent = false) {
                             state.familyFundsUpdated = new Date().toISOString();
                             showToast("Đối tác đã thoát khỏi Quỹ gia đình. Liên kết đã được hủy.", "warning");
                         } else if (parsedObj.spouse_status && remoteData && parsedObj.spouse_status !== remoteData.spouseStatus) {
-                            console.log(`[E2EE Debug] Spouse status changed from remote envelope: ${parsedObj.spouse_status}`);
+                            if (DEBUG_E2EE) console.log(`[E2EE Debug] Spouse status changed from remote envelope: ${parsedObj.spouse_status}`);
+
                             remoteData.spouseStatus = parsedObj.spouse_status;
                             state.spouseStatus = parsedObj.spouse_status;
                             
@@ -1028,6 +1038,10 @@ async function performSync(silent = false) {
                         state.fundTransactions = remoteData.fundTransactions || [];
                         state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     }
+                    // Merge reportAiInsights — local thắng theo từng key (tháng), remote bổ sung các key còn thiếu
+                    if (remoteData.reportAiInsights && typeof remoteData.reportAiInsights === 'object') {
+                        state.reportAiInsights = Object.assign({}, remoteData.reportAiInsights, state.reportAiInsights || {});
+                    }
                 }
                 
                 // 3. Merge lists
@@ -1125,13 +1139,16 @@ async function performSync(silent = false) {
             viewingSharedFund: !!state.viewingSharedFund,
             sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
             lastFullBackupDate: state.lastFullBackupDate || '',
-            activeChartFundIds: state.activeChartFundIds || ['fund-main']
+            activeChartFundIds: state.activeChartFundIds || ['fund-main'],
+            reportAiInsights: state.reportAiInsights || {}
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 
         // 5b. Encrypt Family Fund data with Fund Key
         if (!state.fundSymmetricKey) {
-            state.fundSymmetricKey = generateId() + generateId();
+            // Dùng crypto.getRandomValues để đảm bảo entropy 256-bit thực sự ngẫu nhiên
+            const _fkRaw = window.crypto.getRandomValues(new Uint8Array(32));
+            state.fundSymmetricKey = Array.from(_fkRaw).map(b => b.toString(16).padStart(2, '0')).join('');
             await saveLocalState();
         }
         
@@ -1184,7 +1201,7 @@ async function performSync(silent = false) {
             fund_transactions_updated: state.fundTransactionsUpdated || ''
         });
 
-        await sync.saveSyncData(hybridPayload);
+        await sync.saveSyncData(hybridPayload, state.asymmetricPublicKey || null);
         
         // 6. Refresh UI
         localStorage.setItem('last_sync_time', new Date().toISOString());
@@ -1862,6 +1879,17 @@ async function handleWizardSubmit(e) {
 // Handle Unlock form submit
 async function handleUnlockSubmit(e) {
     e.preventDefault();
+
+    // Kiểm tra khóa tạm thời do nhập sai quá nhiều lần
+    const _lockStatus = checkPinLockout();
+    if (_lockStatus.locked) {
+        const _waitMsg = _lockStatus.remainSec >= 60
+            ? `${Math.ceil(_lockStatus.remainSec / 60)} phút`
+            : `${_lockStatus.remainSec} giây`;
+        showToast(`Ứng dụng bị khóa tạm thời. Vui lòng đợi ${_waitMsg}.`, 'error');
+        return;
+    }
+
     const password = document.getElementById('unlockPassword').value;
     
     const unlockBtn = e.target.querySelector('button');
@@ -1873,6 +1901,7 @@ async function handleUnlockSubmit(e) {
         const success = await loadLocalState(password);
         
         if (success) {
+            clearPinFailData(); // Xóa bộ đếm lỗi khi mở khóa thành công
             state.masterPassword = password;
             
             // Ghi nhớ mở khóa
@@ -1896,7 +1925,16 @@ async function handleUnlockSubmit(e) {
             }, 350);
 
         } else {
-            showToast("Sai Master Password! Không thể giải mã dữ liệu.", "error");
+            const _failCount = recordPinFailure();
+            const _lockAfter = checkPinLockout();
+            if (_lockAfter.locked) {
+                const _wm = _lockAfter.remainSec >= 60
+                    ? `${Math.ceil(_lockAfter.remainSec / 60)} phút`
+                    : `${_lockAfter.remainSec} giây`;
+                showToast(`Sai mật khẩu lần thứ ${_failCount}. Khóa trong ${_wm}.`, 'error');
+            } else {
+                showToast("Sai Master Password! Không thể giải mã dữ liệu.", "error");
+            }
             unlockBtn.innerText = 'Mở khóa ứng dụng';
             unlockBtn.disabled = false;
         }
@@ -1942,25 +1980,52 @@ window.handleChangePassword = async function() {
         localStorage.setItem('gift_ledger_remembered_pin', newPassword);
     }
     
-    // If Supabase synced, upload the new encrypted state to Supabase
+    // Đồng bộ toàn bộ dữ liệu lên Supabase với mật khẩu mới (thay vì chỉ 2 trường)
     if (sync.isConfigured() && state.user) {
         try {
-            const payload = JSON.stringify({
-                receivedGifts: state.receivedGifts,
-                sentGifts: state.sentGifts
-            });
-            const newEncrypted = await encrypt(payload, newPassword);
-            await sync.saveSyncData(newEncrypted);
-            showToast("Đã thay đổi Master Password trên trình duyệt & đồng bộ lên máy chủ!");
+            await performSync(true);
+            showToast("Đã thay đổi Master Password và đồng bộ toàn bộ dữ liệu lên máy chủ!");
         } catch (syncErr) {
             console.error(syncErr);
-            showToast("Thay đổi mật khẩu cục bộ thành công, nhưng đồng bộ lên máy chủ lỗi. Vui lòng nhấn Đồng bộ lại.", "warning");
+            showToast("Thay đổi mật khẩu cục bộ thành công, nhưng đồng bộ lỗi. Vui lòng nhấn Đồng bộ để thử lại.", "warning");
         }
     } else {
-        showToast("Thay đổi Master Password cục bộ thành công!");
+        showToast("Đã thay đổi Master Password cục bộ thành công!");
     }
 };
 
+
+// --- Brute-force PIN Protection Helpers ---
+// Bảo vệ chống bruteforce: khóa tạm thời sau nhiều lần nhập sai PIN/mật khẩu
+
+function getPinFailCount() {
+    return parseInt(localStorage.getItem('pin_fail_count') || '0', 10);
+}
+function recordPinFailure() {
+    const count = getPinFailCount() + 1;
+    localStorage.setItem('pin_fail_count', String(count));
+    // Chính sách khóa: lần 4 → 30s, lần 5 → 5 phút, lần 6+ → 15 phút
+    const LOCKOUT_MAP = { 4: 30, 5: 300 };
+    const delaySec = LOCKOUT_MAP[count] !== undefined ? LOCKOUT_MAP[count] : (count > 5 ? 900 : 0);
+    if (delaySec > 0) {
+        localStorage.setItem('pin_lockout_until', String(Date.now() + delaySec * 1000));
+    }
+    return count;
+}
+function checkPinLockout() {
+    const until = parseInt(localStorage.getItem('pin_lockout_until') || '0', 10);
+    if (!until) return { locked: false };
+    const remainSec = Math.ceil((until - Date.now()) / 1000);
+    if (remainSec <= 0) {
+        localStorage.removeItem('pin_lockout_until');
+        return { locked: false };
+    }
+    return { locked: true, remainSec };
+}
+function clearPinFailData() {
+    localStorage.removeItem('pin_fail_count');
+    localStorage.removeItem('pin_lockout_until');
+}
 
 // --- T9 PIN Pad Helpers & Logics ---
 
@@ -2061,6 +2126,17 @@ async function handleWizardKeypadPress(val) {
 }
 
 async function handleUnlockKeypadPress(val) {
+    // Kiểm tra khóa tạm thời do nhập sai quá nhiều lần
+    const _lockStatus = checkPinLockout();
+    if (_lockStatus.locked) {
+        const _waitMsg = _lockStatus.remainSec >= 60
+            ? `${Math.ceil(_lockStatus.remainSec / 60)} phút`
+            : `${_lockStatus.remainSec} giây`;
+        shakeCard('unlockCard');
+        showToast(`Ứng dụng bị khóa tạm thời. Vui lòng đợi ${_waitMsg}.`, 'error');
+        return;
+    }
+
     if (unlockPinBuffer.length >= 6) return;
     unlockPinBuffer += val;
     updatePasscodeDots('unlockPasscodeDots', unlockPinBuffer.length);
@@ -2071,6 +2147,7 @@ async function handleUnlockKeypadPress(val) {
         setTimeout(async () => {
             const success = await loadLocalState(pin);
             if (success) {
+                clearPinFailData(); // Xóa bộ đếm lỗi khi mở khóa thành công
                 state.masterPassword = pin;
                 
                 // Ghi nhớ mở khóa
@@ -2094,7 +2171,16 @@ async function handleUnlockKeypadPress(val) {
                 updatePasscodeDots('unlockPasscodeDots', 0);
             } else {
                 shakeCard('unlockCard');
-                showToast("Sai mã PIN! Vui lòng thử lại.", "error");
+                const _failCount = recordPinFailure();
+                const _lockAfter = checkPinLockout();
+                if (_lockAfter.locked) {
+                    const _wm = _lockAfter.remainSec >= 60
+                        ? `${Math.ceil(_lockAfter.remainSec / 60)} phút`
+                        : `${_lockAfter.remainSec} giây`;
+                    showToast(`Sai mã PIN lần thứ ${_failCount}. Khóa trong ${_wm}.`, 'error');
+                } else {
+                    showToast("Sai mã PIN! Vui lòng thử lại.", "error");
+                }
                 
                 unlockPinBuffer = "";
                 updatePasscodeDots('unlockPasscodeDots', 0);
@@ -2347,8 +2433,20 @@ async function initializeApp() {
         unlockPasswordInput.addEventListener('input', async () => {
             const val = unlockPasswordInput.value;
             if (val.length === 6) {
+                // Kiểm tra lockout trước khi auto-thử
+                const _lockStatus = checkPinLockout();
+                if (_lockStatus.locked) {
+                    const _waitMsg = _lockStatus.remainSec >= 60
+                        ? `${Math.ceil(_lockStatus.remainSec / 60)} phút`
+                        : `${_lockStatus.remainSec} giây`;
+                    showToast(`Ứng dụng bị khóa tạm thời. Vui lòng đợi ${_waitMsg}.`, 'error');
+                    unlockPasswordInput.value = "";
+                    return;
+                }
+
                 const success = await loadLocalState(val);
                 if (success) {
+                    clearPinFailData(); // Xóa bộ đếm lỗi khi mở khóa thành công
                     state.masterPassword = val;
                     
                     // Ghi nhớ mở khóa
@@ -2372,6 +2470,7 @@ async function initializeApp() {
                         unlockPasswordInput.value = "";
                     }, 350);
                 }
+                // Lưu ý: Không ghi nhận thất bại ở đây vì password có thể dài hơn 6 ký tự
             }
         });
     }
@@ -3092,7 +3191,7 @@ async function handleFullRestore(file) {
             showToast('File không đúng định dạng sao lưu FamiLife.', 'error');
             return;
         }
-        if (!confirm('Phục hồi sẽ GHI ĐÈ toàn bộ dữ liệu hiện tại. Bạn có chắc chắn?')) return;
+        if (!await window.showConfirm('Phục hồi sẽ GHI ĐÈ toàn bộ dữ liệu hiện tại. Bạn có chắc chắn?', 'Xác nhận Phục hồi')) return;
         
         // Restore data
         if (data.receivedGifts) { state.receivedGifts = data.receivedGifts; state.receivedPage = 1; }
