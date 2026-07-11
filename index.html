@@ -39,11 +39,12 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.13">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.14">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.13">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.13">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.14">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.14">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.14">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -96,7 +97,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.1.13" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.1.14" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -188,7 +189,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.1.13" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.1.14" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -923,6 +924,22 @@
                     <span id="sharedFundBannerText">Đang xem Quỹ gia đình chia sẻ...</span>
                 </div>
 
+                <!-- Monthly Financial Report Auto Notification Banner -->
+                <div id="monthlyReportBanner" class="sync-banner" style="display: none; margin-bottom: 16px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; padding: 12px; border-radius: 12px; font-weight: 500; font-size: 0.88rem; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="award" style="width: 16px; height: 16px; flex-shrink: 0; color: #10b981;"></i>
+                        <span id="monthlyReportBannerText">Báo cáo tài chính tháng trước đã sẵn sàng!</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="openMonthlyReportModal()" style="padding: 6px 12px; font-size: 0.8rem; background: #10b981; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Xem ngay</button>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 14px; gap: 8px;">
+                    <button class="btn btn-outline" onclick="openMonthlyReportModal()" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 8px 14px; cursor: pointer;">
+                        <i data-lucide="file-bar-chart-2" style="width: 16px; height: 16px; color: var(--accent-blue);"></i>
+                        <span>Báo cáo tháng</span>
+                    </button>
+                </div>
+
                 <div class="fund-dashboard">
                     <!-- Top Balance Cards -->
                     <div class="fund-balance-grid">
@@ -1314,6 +1331,61 @@
                 </div>
             </div>
 
+            <!-- Modal: Báo cáo tháng -->
+            <div class="modal-overlay health-theme-overlay" id="fundMonthlyReportModal">
+                <div class="modal-container health-modal-container" style="width: 650px; max-width: 95%;">
+                    <div class="modal-header health-modal-header">
+                        <h3 class="health-modal-title">
+                            <i data-lucide="file-bar-chart-2" style="color: var(--accent-blue);"></i>
+                            <span>Báo cáo tài chính tháng</span>
+                        </h3>
+                        <button type="button" class="close-btn" onclick="closeModal('fundMonthlyReportModal')">&times;</button>
+                    </div>
+                    <div class="health-modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+                        <!-- Select Month and Year -->
+                        <div style="display: flex; gap: 12px; align-items: center; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; flex-wrap: wrap;">
+                            <span style="font-weight: 500; font-size: 0.9rem;">Tháng báo cáo:</span>
+                            <select id="reportSelectMonth" class="form-control health-input" style="max-width: 110px; font-size: 0.85rem; padding: 6px 12px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); border-radius: 6px;">
+                                <option value="1">Tháng 1</option>
+                                <option value="2">Tháng 2</option>
+                                <option value="3">Tháng 3</option>
+                                <option value="4">Tháng 4</option>
+                                <option value="5">Tháng 5</option>
+                                <option value="6">Tháng 6</option>
+                                <option value="7">Tháng 7</option>
+                                <option value="8">Tháng 8</option>
+                                <option value="9">Tháng 9</option>
+                                <option value="10">Tháng 10</option>
+                                <option value="11">Tháng 11</option>
+                                <option value="12">Tháng 12</option>
+                            </select>
+                            <select id="reportSelectYear" class="form-control health-input" style="max-width: 100px; font-size: 0.85rem; padding: 6px 12px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); border-radius: 6px;">
+                                <!-- Dynamically populated -->
+                            </select>
+                            <button type="button" class="btn btn-primary" onclick="generateMonthlyReport()" style="padding: 0 16px; font-size: 0.85rem; height: 36px; display: flex; align-items: center; gap: 6px; background: var(--accent-color); color:#fff; border:none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Xem báo cáo
+                            </button>
+                        </div>
+
+                        <!-- Report Card Content Container -->
+                        <div id="monthlyReportCardContent" class="report-card-print" style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; color: var(--text-primary); position: relative; min-height: 200px;">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; background: var(--bg-card); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn btn-outline" id="btnReportDownloadPng" onclick="downloadReportAsImage()" style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); cursor: pointer;">
+                                <i data-lucide="image" style="width: 16px; height: 16px; color: #10b981;"></i> Tải ảnh (PNG)
+                            </button>
+                            <button type="button" class="btn btn-outline" id="btnReportSendWebhook" onclick="sendReportToWebhook()" style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); cursor: pointer;">
+                                <i data-lucide="send" style="width: 16px; height: 16px; color: var(--accent-blue);"></i> Gửi Webhook
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('fundMonthlyReportModal')" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); cursor: pointer;">Đóng</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 4. Modal: Chốt đầu tư lãi/lỗ -->
             <div class="modal-overlay health-theme-overlay" id="fundInvestModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
@@ -1441,7 +1513,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.1.13" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.1.14" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2948,7 +3020,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.13"></script>
-    <script type="module" src="src/core/app.js?v=4.1.13"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.14"></script>
+    <script type="module" src="src/core/app.js?v=4.1.14"></script>
 </body>
 </html>
