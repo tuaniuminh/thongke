@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.09';
-import { decrypt } from '../../core/crypto.js?v=4.1.09';
-import * as sync from '../../core/sync.js?v=4.1.09';
+} from '../../core/app.js?v=4.1.10';
+import { decrypt } from '../../core/crypto.js?v=4.1.10';
+import * as sync from '../../core/sync.js?v=4.1.10';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -341,7 +341,6 @@ export async function checkForSharedFamilyFund() {
 
             try {
                 const parsed = JSON.parse(row.encrypted_data);
-                console.log("[E2EE Debug] Processing remote row from:", parsed.owner_email || row.user_email, "shared with spouse:", parsed.spouse_email);
                 
                 if (parsed && parsed.is_hybrid) {
                     if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {

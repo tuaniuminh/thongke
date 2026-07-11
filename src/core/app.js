@@ -2,15 +2,15 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.09';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.09';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.09';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.10';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.10';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.10';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.09';
-import * as sync from './sync.js?v=4.1.09';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.09';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.10';
+import * as sync from './sync.js?v=4.1.10';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.10';
 
-const APP_VERSION = '4.1.09';
+const APP_VERSION = '4.1.10';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -705,8 +705,8 @@ async function performSync(silent = false) {
         } catch (e) {
             console.error("Shared fund sync error:", e);
             if (!silent) showToast("Lỗi đồng bộ lên quỹ chung: " + e.message, "danger");
+            return;
         }
-        return;
     }
 
     if (!sync.isConfigured()) {
