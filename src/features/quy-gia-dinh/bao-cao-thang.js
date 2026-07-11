@@ -328,36 +328,36 @@ window.downloadReportAsImage = function() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 1. Draw Background (Slate Dark Theme Gradient)
+    // 1. Draw Background (Light Theme Slate/Gray Gradient)
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, '#0f172a');
-    grad.addColorStop(1, '#020617');
+    grad.addColorStop(0, '#f8fafc');
+    grad.addColorStop(1, '#f1f5f9');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Draw Top Header Accent Bar (Accent blue/cyan)
+    // 2. Draw Top Header Accent Bar
     ctx.fillStyle = '#0284c9';
     ctx.fillRect(0, 0, canvas.width, 10);
 
-    // 3. Draw Header Title
-    ctx.fillStyle = '#ffffff';
+    // 3. Draw Header Title (Dark Navy)
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 24px Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('BÁO CÁO TÀI CHÍNH GIA ĐÌNH', canvas.width / 2, 60);
 
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#475569';
     ctx.font = '600 16px Arial, sans-serif';
     ctx.fillText(`Tháng ${currentReportMonth} / Năm ${currentReportYear}`, canvas.width / 2, 90);
 
-    // Header separator line
-    ctx.strokeStyle = '#334155';
+    // Header separator line (Light Gray)
+    ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(60, 115);
     ctx.lineTo(canvas.width - 60, 115);
     ctx.stroke();
 
-    // 4. Draw 3 Stat Cards (Thu, Chi, Thặng Dư)
+    // 4. Draw 3 Stat Cards (White background with thin borders)
     const cardWidth = 180;
     const cardHeight = 100;
     const gap = 20;
@@ -374,8 +374,10 @@ window.downloadReportAsImage = function() {
         const x = startX + idx * (cardWidth + gap);
         const y = startY;
 
-        // Draw Card Background
-        ctx.fillStyle = '#1e293b';
+        // Draw Card Background (Pure White)
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {
             ctx.roundRect(x, y, cardWidth, cardHeight, 10);
@@ -383,6 +385,7 @@ window.downloadReportAsImage = function() {
             ctx.rect(x, y, cardWidth, cardHeight);
         }
         ctx.fill();
+        ctx.stroke();
 
         // Draw Border Left Accent line
         ctx.fillStyle = c.borderLeft;
@@ -394,8 +397,8 @@ window.downloadReportAsImage = function() {
         }
         ctx.fill();
 
-        // Write Card Label
-        ctx.fillStyle = '#94a3b8';
+        // Write Card Label (Cool Gray)
+        ctx.fillStyle = '#64748b';
         ctx.font = 'bold 11px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(c.label, x + cardWidth / 2, y + 35);
@@ -406,23 +409,24 @@ window.downloadReportAsImage = function() {
         ctx.fillText(c.value, x + cardWidth / 2, y + 70);
     });
 
-    // 5. Draw Section: Contributions
+    // 5. Draw Section: Contributions (Dark Text)
     let currentY = startY + cardHeight + 50;
-    ctx.fillStyle = '#f8fafc';
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 16px Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Đóng góp của hai vợ chồng', 60, currentY);
 
     // Separator line
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(60, currentY + 12);
     ctx.lineTo(canvas.width - 60, currentY + 12);
     ctx.stroke();
 
     currentY += 40;
-    // Box for values
-    ctx.fillStyle = '#1e293b';
+    // Box for values (White with border)
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
         ctx.roundRect(60, currentY - 20, canvas.width - 120, 50, 8);
@@ -430,12 +434,13 @@ window.downloadReportAsImage = function() {
         ctx.rect(60, currentY - 20, canvas.width - 120, 50);
     }
     ctx.fill();
+    ctx.stroke();
 
     const totalContrib = data.husbandContrib + data.wifeContrib;
     const husbandPercent = totalContrib > 0 ? Math.round((data.husbandContrib / totalContrib) * 100) : 50;
     const wifePercent = totalContrib > 0 ? Math.round((data.wifeContrib / totalContrib) * 100) : 50;
 
-    ctx.fillStyle = '#e2e8f0';
+    ctx.fillStyle = '#334155';
     ctx.font = '14px Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(`Chồng đóng góp: ${formatVND(data.husbandContrib)} (${husbandPercent}%)`, 80, currentY + 10);
@@ -444,12 +449,13 @@ window.downloadReportAsImage = function() {
 
     // 6. Draw Section: Largest spendings
     currentY += 70;
-    ctx.fillStyle = '#f8fafc';
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 16px Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Các khoản chi tiêu lớn nhất trong tháng', 60, currentY);
 
     // Separator line
+    ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(60, currentY + 12);
     ctx.lineTo(canvas.width - 60, currentY + 12);
@@ -457,7 +463,7 @@ window.downloadReportAsImage = function() {
 
     currentY += 40;
     // Table Header
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#64748b';
     ctx.font = 'bold 13px Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Ngày', 60, currentY);
@@ -465,7 +471,7 @@ window.downloadReportAsImage = function() {
     ctx.textAlign = 'right';
     ctx.fillText('Số tiền', canvas.width - 60, currentY);
 
-    ctx.strokeStyle = '#1e293b';
+    ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(60, currentY + 10);
@@ -477,7 +483,7 @@ window.downloadReportAsImage = function() {
     if (data.spendings.length > 0) {
         data.spendings.forEach(s => {
             const dateStr = new Date(s.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-            ctx.fillStyle = '#e2e8f0';
+            ctx.fillStyle = '#334155';
             ctx.font = '13px Arial, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(dateStr, 60, currentY);
@@ -488,7 +494,7 @@ window.downloadReportAsImage = function() {
             ctx.textAlign = 'right';
             ctx.fillText(`-${formatVND(s.amount)}`, canvas.width - 60, currentY);
 
-            ctx.strokeStyle = '#1e293b';
+            ctx.strokeStyle = '#f1f5f9';
             ctx.beginPath();
             ctx.moveTo(60, currentY + 10);
             ctx.lineTo(canvas.width - 60, currentY + 10);
@@ -497,7 +503,7 @@ window.downloadReportAsImage = function() {
             currentY += 32;
         });
     } else {
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = '#64748b';
         ctx.font = 'italic 13px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('Không có chi tiêu nào trong tháng.', canvas.width / 2, currentY + 10);
@@ -506,12 +512,12 @@ window.downloadReportAsImage = function() {
 
     // 7. Draw Section: AI Insights (if available)
     currentY += 20;
-    ctx.fillStyle = '#f8fafc';
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 16px Arial, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('AI nhận xét thông minh', 60, currentY);
 
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(60, currentY + 12);
     ctx.lineTo(canvas.width - 60, currentY + 12);
@@ -519,10 +525,10 @@ window.downloadReportAsImage = function() {
 
     currentY += 35;
     
-    // Draw AI card box
+    // Draw AI card box (Soft purple background)
     const aiText = aiInsightText || 'Báo cáo chưa kích hoạt chế độ AI nhận xét.';
-    ctx.fillStyle = aiInsightText ? 'rgba(168, 85, 247, 0.08)' : '#1e293b';
-    ctx.strokeStyle = aiInsightText ? 'rgba(168, 85, 247, 0.2)' : '#334155';
+    ctx.fillStyle = aiInsightText ? 'rgba(168, 85, 247, 0.04)' : '#ffffff';
+    ctx.strokeStyle = aiInsightText ? 'rgba(168, 85, 247, 0.15)' : '#e2e8f0';
     ctx.lineWidth = 1;
 
     const boxHeight = 180;
@@ -535,15 +541,15 @@ window.downloadReportAsImage = function() {
     ctx.fill();
     ctx.stroke();
 
-    // Write text inside AI box
-    ctx.fillStyle = '#e2e8f0';
+    // Write text inside AI box (charcoal / deep purple color)
+    ctx.fillStyle = aiInsightText ? '#4a1d96' : '#64748b';
     ctx.font = 'italic 13px Arial, sans-serif';
     ctx.textAlign = 'left';
     
     wrapText(ctx, aiText, 80, currentY + 30, canvas.width - 160, 20);
 
     // 8. Draw Footer
-    ctx.fillStyle = '#475569';
+    ctx.fillStyle = '#64748b';
     ctx.font = '11px Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Được tạo tự động bởi FamiLife App – Hệ thống Quỹ Gia Đình', canvas.width / 2, canvas.height - 40);
