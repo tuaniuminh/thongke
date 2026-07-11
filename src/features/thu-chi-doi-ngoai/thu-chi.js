@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.36';
-import * as sync from '../../core/sync.js?v=4.1.36';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.36';
+} from '../../core/app.js?v=4.1.37';
+import * as sync from '../../core/sync.js?v=4.1.37';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.37';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -965,6 +965,10 @@ function renderSettings() {
     const toggleFundCard = document.getElementById('toggleShowFamilyFundCard');
     if (toggleFundCard) {
         toggleFundCard.checked = !!state.showFamilyFundCard;
+    }
+    const toggleDebugConsoleCheck = document.getElementById('toggleDebugConsole');
+    if (toggleDebugConsoleCheck) {
+        toggleDebugConsoleCheck.checked = localStorage.getItem('gift_ledger_debug_console_enabled') !== 'false';
     }
     const toggleMobileTable = document.getElementById('toggleMobileTableView');
     if (toggleMobileTable) {

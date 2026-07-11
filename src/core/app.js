@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.36';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.36';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.36';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.36';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.37';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.37';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.37';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.37';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.36';
-import * as sync from './sync.js?v=4.1.36';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.36';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.37';
+import * as sync from './sync.js?v=4.1.37';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.37';
 
-const APP_VERSION = '4.1.36';
+const APP_VERSION = '4.1.37';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2578,6 +2578,17 @@ async function initializeApp() {
             if (sync.isConfigured() && await sync.getCurrentUser()) {
                 performSync(true);
             }
+        });
+    }
+
+    const toggleDebugConsole = document.getElementById('toggleDebugConsole');
+    if (toggleDebugConsole) {
+        toggleDebugConsole.addEventListener('change', (e) => {
+            localStorage.setItem('gift_ledger_debug_console_enabled', e.target.checked ? 'true' : 'false');
+            if (typeof window.updateDebugBadge === 'function') {
+                window.updateDebugBadge();
+            }
+            showToast(e.target.checked ? "Đã bật bảng gỡ lỗi trên màn hình" : "Đã tắt bảng gỡ lỗi trên màn hình");
         });
     }
 

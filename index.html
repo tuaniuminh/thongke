@@ -39,12 +39,12 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.36">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.37">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.36">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.36">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.36">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.37">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.37">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.37">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -69,15 +69,114 @@
     </div>
 
     <script>
-        // Bẫy lỗi toàn cục để hiện lỗi lên badge giải cứu
-        window.addEventListener('error', function(e) {
-            const badge = document.getElementById('js-global-error-badge');
-            const text = document.getElementById('js-global-error-text');
-            if (badge && text) {
-                badge.style.display = 'block';
-                badge.style.backgroundColor = '#ef4444'; // Đỏ nếu là lỗi crash thực sự
-                text.innerHTML = '<b>Lỗi hoạt động:</b> ' + e.message + ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')';
+        // Logger engine toàn cục để bắt lỗi và hiển thị lên màn hình
+        window.__famiLifeLogs = [];
+        window.__famiLifeErrorCount = 0;
+        
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        function getDebugConsoleEnabled() {
+            return localStorage.getItem('gift_ledger_debug_console_enabled') !== 'false';
+        }
+        
+        function appendToScreenConsole(level, args) {
+            if (!getDebugConsoleEnabled()) return;
+            const message = Array.from(args).map(arg => {
+                if (typeof arg === 'object') {
+                    try { return JSON.stringify(arg); } catch { return String(arg); }
+                }
+                return String(arg);
+            }).join(' ');
+            
+            const logObj = {
+                time: new Date().toLocaleTimeString('vi-VN'),
+                level: level,
+                message: message
+            };
+            window.__famiLifeLogs.push(logObj);
+            if (level === 'error') {
+                window.__famiLifeErrorCount++;
             }
+            
+            // Cập nhật giao diện nếu đã render xong
+            const consoleBody = document.getElementById('debugConsoleBody');
+            if (consoleBody) {
+                const item = document.createElement('div');
+                item.className = `debug-log-item level-${level}`;
+                item.innerHTML = `<span class="time">[${logObj.time}]</span> ${escapeHTML(message)}`;
+                consoleBody.appendChild(item);
+                consoleBody.scrollTop = consoleBody.scrollHeight;
+                
+                // Update badge count
+                updateDebugBadge();
+            }
+        }
+        
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;',
+                "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
+        }
+        
+        window.updateDebugBadge = function() {
+            const badge = document.getElementById('debugConsoleBadge');
+            const toggleBtn = document.getElementById('debugConsoleToggleBtn');
+            const panel = document.getElementById('debugConsolePanel');
+            
+            if (!getDebugConsoleEnabled()) {
+                if (toggleBtn) toggleBtn.style.display = 'none';
+                if (panel) panel.classList.remove('active');
+                return;
+            }
+            
+            if (toggleBtn) toggleBtn.style.display = 'flex';
+            if (badge) {
+                if (window.__famiLifeErrorCount > 0) {
+                    badge.textContent = window.__famiLifeErrorCount;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        
+        console.log = function() {
+            appendToScreenConsole('log', arguments);
+            originalLog.apply(console, arguments);
+        };
+        console.warn = function() {
+            appendToScreenConsole('warn', arguments);
+            originalWarn.apply(console, arguments);
+        };
+        console.error = function() {
+            appendToScreenConsole('error', arguments);
+            originalError.apply(console, arguments);
+        };
+        
+        // Bẫy lỗi toàn cục để hiện lỗi lên badge giải cứu và debug console
+        window.addEventListener('error', function(e) {
+            // Hiển thị lên cứu hộ banner
+            const rescueBadge = document.getElementById('js-global-error-badge');
+            const rescueText = document.getElementById('js-global-error-text');
+            if (rescueBadge && rescueText) {
+                rescueBadge.style.display = 'block';
+                rescueBadge.style.backgroundColor = '#ef4444';
+                rescueText.innerHTML = '<b>Lỗi hoạt động:</b> ' + e.message + ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')';
+            }
+            
+            // Hiển thị lên Debug console
+            const errMsg = e.filename 
+                ? `${e.message} tại ${e.filename.split('/').pop()}:${e.lineno}`
+                : e.message;
+            appendToScreenConsole('error', [errMsg]);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            const errMsg = `Unhandled Promise Rejection: ${e.reason}`;
+            appendToScreenConsole('error', [errMsg]);
         });
         
         // Tự động gán theme sáng mặc định ngay lập tức để tránh nhấp nháy tối
@@ -637,6 +736,13 @@
                                 <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị thẻ "Quỹ gia đình" ở trang chủ chính</span>
                                 <div style="display: flex; align-items: center;">
                                     <input type="checkbox" id="toggleShowFamilyFundCard" class="status-checkbox">
+                                    <span class="status-slider"></span>
+                                </div>
+                            </label>
+                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị bảng điều khiển gỡ lỗi (Debug Console) trên màn hình</span>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="checkbox" id="toggleDebugConsole" class="status-checkbox">
                                     <span class="status-slider"></span>
                                 </div>
                             </label>
@@ -3022,9 +3128,37 @@
     <!-- Toast container for notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- On-Screen Debug Console -->
+    <div id="debugConsoleToggleBtn" class="debug-console-toggle-btn" style="display: none;">
+        <i data-lucide="bug"></i>
+        <span id="debugConsoleBadge" class="badge" style="display: none;">0</span>
+    </div>
+    
+    <div id="debugConsolePanel" class="debug-console-panel">
+        <div class="debug-console-header">
+            <div class="debug-console-title">
+                <i data-lucide="bug" style="width: 16px; height: 16px; color: #f43f5e;"></i>
+                <span>FamiLife Debug Console</span>
+            </div>
+            <div class="debug-console-actions">
+                <button id="clearDebugConsoleBtn" class="debug-console-btn">
+                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    <span>Xóa log</span>
+                </button>
+                <button id="closeDebugConsoleBtn" class="debug-console-btn btn-close">
+                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    <span>Đóng</span>
+                </button>
+            </div>
+        </div>
+        <div id="debugConsoleBody" class="debug-console-body">
+            <!-- Logs will be inserted here dynamically -->
+        </div>
+    </div>
+
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.36"></script>
-    <script type="module" src="src/core/app.js?v=4.1.36"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.37"></script>
+    <script type="module" src="src/core/app.js?v=4.1.37"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
@@ -3035,6 +3169,55 @@
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
         }
+    </script>
+
+    <!-- Bind Debug Console Panel Click Handlers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('debugConsoleToggleBtn');
+            const panel = document.getElementById('debugConsolePanel');
+            const closeBtn = document.getElementById('closeDebugConsoleBtn');
+            const clearBtn = document.getElementById('clearDebugConsoleBtn');
+            const consoleBody = document.getElementById('debugConsoleBody');
+            
+            if (toggleBtn && panel) {
+                toggleBtn.addEventListener('click', () => {
+                    panel.classList.toggle('active');
+                    // Render existing logs when opening
+                    if (panel.classList.contains('active')) {
+                        consoleBody.innerHTML = '';
+                        window.__famiLifeLogs.forEach(log => {
+                            const item = document.createElement('div');
+                            item.className = `debug-log-item level-${log.level}`;
+                            item.innerHTML = `<span class="time">[${log.time}]</span> ${escapeHTML(log.message)}`;
+                            consoleBody.appendChild(item);
+                        });
+                        consoleBody.scrollTop = consoleBody.scrollHeight;
+                        // Reset error badge count when opened
+                        window.__famiLifeErrorCount = 0;
+                        updateDebugBadge();
+                    }
+                });
+            }
+            
+            if (closeBtn && panel) {
+                closeBtn.addEventListener('click', () => {
+                    panel.classList.remove('active');
+                });
+            }
+            
+            if (clearBtn && consoleBody) {
+                clearBtn.addEventListener('click', () => {
+                    consoleBody.innerHTML = '';
+                    window.__famiLifeLogs = [];
+                    window.__famiLifeErrorCount = 0;
+                    updateDebugBadge();
+                });
+            }
+            
+            // Initial badge update
+            updateDebugBadge();
+        });
     </script>
 </body>
 </html>
