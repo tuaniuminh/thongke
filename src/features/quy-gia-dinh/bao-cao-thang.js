@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.25';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.25';
+} from '../../core/app.js?v=4.1.26';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.26';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -206,19 +206,12 @@ function renderReportHtml() {
         spendingsHtml = data.spendings.map(s => {
             const parsed = parseTxDate(s.date);
             const dateStr = !isNaN(parsed.day) ? `${parsed.day.toString().padStart(2, '0')}/${parsed.month.toString().padStart(2, '0')}` : '';
-            const mName = getMemberName(s.memberId);
             const isHusband = s.memberId === 'p-husband';
-            // Husband = blue tones, Wife = pink/rose tones
             const rowBg = isHusband ? 'rgba(59,130,246,0.06)' : 'rgba(236,72,153,0.06)';
-            const badgeColor = isHusband ? '#3b82f6' : '#ec4899';
-            const badgeBg = isHusband ? 'rgba(59,130,246,0.12)' : 'rgba(236,72,153,0.12)';
             return `
                 <tr style="background: ${rowBg};">
                     <td style="padding: 8px 10px; font-size: 0.82rem; color: var(--text-muted);">${dateStr}</td>
-                    <td style="padding: 8px 10px;">
-                        ${escapeHTML(s.notes || 'Chi tiêu')}
-                        <span style="display:inline-block; margin-left:6px; font-size:0.7rem; font-weight:700; color:${badgeColor}; background:${badgeBg}; border-radius:4px; padding:1px 6px;">${escapeHTML(mName)}</span>
-                    </td>
+                    <td style="padding: 8px 10px;">${escapeHTML(s.notes || 'Chi tiêu')}</td>
                     <td style="padding: 8px 10px; text-align: right; color: #ef4444; font-weight: 600;">-${formatVND(s.amount)}</td>
                 </tr>
             `;
@@ -280,14 +273,19 @@ function renderReportHtml() {
         </div>
 
         <!-- All Spendings -->
-        <div class="report-section-title">
-            <i data-lucide="trending-down" style="width: 16px; height: 16px; color: #ef4444;"></i>
-            <span>Các khoản chi tiêu trong tháng</span>
-        </div>
-        <!-- Legend -->
-        <div style="display:flex; gap:10px; margin-bottom:8px; font-size:0.75rem;">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3b82f6;"></span> Chồng</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#ec4899;"></span> Vợ</span>
+        <div class="report-section-title" style="justify-content: space-between; align-items: center;">
+            <span style="display:flex; align-items:center; gap:6px;">
+                <i data-lucide="trending-down" style="width: 16px; height: 16px; color: #ef4444;"></i>
+                <span>Các khoản chi tiêu trong tháng</span>
+            </span>
+            <span style="display:flex; align-items:center; gap:10px; font-size:0.75rem; color:var(--text-muted);">
+                <span style="display:flex;align-items:center;gap:4px;">
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3b82f6;"></span>Chồng
+                </span>
+                <span style="display:flex;align-items:center;gap:4px;">
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#ec4899;"></span>Vợ
+                </span>
+            </span>
         </div>
         <table class="report-details-table" style="margin-bottom: 16px;">
             <thead>
