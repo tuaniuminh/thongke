@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.24';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.24';
+} from '../../core/app.js?v=4.1.25';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.25';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -163,11 +163,16 @@ export function generateMonthlyReport() {
 
     const surplus = totalInflow - totalOutflow;
 
-    // 2. Phân tích Chi tiêu lớn nhất
+    // 2. Danh sách toàn bộ chi tiêu trong tháng, sắp xếp theo ngày
     const spendings = monthTx
         .filter(tx => tx.type === 'spending')
-        .sort((a, b) => Math.abs(b.amount || 0) - Math.abs(a.amount || 0))
-        .slice(0, 5);
+        .sort((a, b) => {
+            const pA = parseTxDate(a.date);
+            const pB = parseTxDate(b.date);
+            const dA = pA.year * 10000 + pA.month * 100 + pA.day;
+            const dB = pB.year * 10000 + pB.month * 100 + pB.day;
+            return dA - dB;
+        });
 
     currentReportData = {
         totalInflow,
@@ -202,10 +207,18 @@ function renderReportHtml() {
             const parsed = parseTxDate(s.date);
             const dateStr = !isNaN(parsed.day) ? `${parsed.day.toString().padStart(2, '0')}/${parsed.month.toString().padStart(2, '0')}` : '';
             const mName = getMemberName(s.memberId);
+            const isHusband = s.memberId === 'p-husband';
+            // Husband = blue tones, Wife = pink/rose tones
+            const rowBg = isHusband ? 'rgba(59,130,246,0.06)' : 'rgba(236,72,153,0.06)';
+            const badgeColor = isHusband ? '#3b82f6' : '#ec4899';
+            const badgeBg = isHusband ? 'rgba(59,130,246,0.12)' : 'rgba(236,72,153,0.12)';
             return `
-                <tr>
-                    <td style="padding: 8px 10px;">${dateStr}</td>
-                    <td style="padding: 8px 10px;">${escapeHTML(s.notes || 'Chi tiêu')} <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">(${escapeHTML(mName)})</span></td>
+                <tr style="background: ${rowBg};">
+                    <td style="padding: 8px 10px; font-size: 0.82rem; color: var(--text-muted);">${dateStr}</td>
+                    <td style="padding: 8px 10px;">
+                        ${escapeHTML(s.notes || 'Chi tiêu')}
+                        <span style="display:inline-block; margin-left:6px; font-size:0.7rem; font-weight:700; color:${badgeColor}; background:${badgeBg}; border-radius:4px; padding:1px 6px;">${escapeHTML(mName)}</span>
+                    </td>
                     <td style="padding: 8px 10px; text-align: right; color: #ef4444; font-weight: 600;">-${formatVND(s.amount)}</td>
                 </tr>
             `;
@@ -266,10 +279,15 @@ function renderReportHtml() {
             <span>Vợ đóng góp: <strong>${formatVND(data.wifeContrib)} (${wifePercent}%)</strong></span>
         </div>
 
-        <!-- Largest Spendings -->
+        <!-- All Spendings -->
         <div class="report-section-title">
             <i data-lucide="trending-down" style="width: 16px; height: 16px; color: #ef4444;"></i>
-            <span>Các khoản chi tiêu lớn nhất trong tháng</span>
+            <span>Các khoản chi tiêu trong tháng</span>
+        </div>
+        <!-- Legend -->
+        <div style="display:flex; gap:10px; margin-bottom:8px; font-size:0.75rem;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3b82f6;"></span> Chồng</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#ec4899;"></span> Vợ</span>
         </div>
         <table class="report-details-table" style="margin-bottom: 16px;">
             <thead>
@@ -318,7 +336,7 @@ Hãy đóng vai là một Chuyên gia hoạch định tài chính gia đình th�
 - Thặng dư tháng này: ${data.surplus >= 0 ? '+' : '-'}${formatVND(Math.abs(data.surplus))}
 - Chồng đóng góp: ${formatVND(data.husbandContrib)}
 - Vợ đóng góp: ${formatVND(data.wifeContrib)}
-- Danh sách khoản chi lớn nhất: ${data.spendings.map(s => `${s.notes} (${getMemberName(s.memberId)} chi: -${formatVND(s.amount)})`).join(', ') || 'Không có chi tiêu nào'}
+- Danh sách chi tiêu trong tháng: ${data.spendings.map(s => `${s.notes} (${getMemberName(s.memberId)} chi: -${formatVND(s.amount)})`).join(', ') || 'Không có chi tiêu nào'}
 
 Yêu cầu nhận xét:
 1. Đánh giá tính cân đối giữa thu và chi (gia đình tích lũy tốt hay chi tiêu quá đà).
@@ -512,7 +530,7 @@ window.downloadReportAsImage = function() {
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 16px Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Các khoản chi tiêu lớn nhất trong tháng', 60, currentY);
+    ctx.fillText('Các khoản chi tiêu trong tháng', 60, currentY);
 
     // Separator line
     ctx.strokeStyle = '#e2e8f0';
@@ -544,27 +562,55 @@ window.downloadReportAsImage = function() {
         data.spendings.forEach(s => {
             const parsed = parseTxDate(s.date);
             const dateStr = !isNaN(parsed.day) ? `${parsed.day.toString().padStart(2, '0')}/${parsed.month.toString().padStart(2, '0')}` : '';
-            ctx.fillStyle = '#334155';
-            ctx.font = '13px Arial, sans-serif';
+            const isHusband = s.memberId === 'p-husband';
+
+            // Row background stripe by member
+            ctx.fillStyle = isHusband ? 'rgba(59,130,246,0.07)' : 'rgba(236,72,153,0.07)';
+            ctx.fillRect(55, currentY - 14, virtualWidth - 110, 28);
+
+            // Date
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px Arial, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(dateStr, 60, currentY);
 
+            // Notes
             let notes = s.notes || 'Chi tiêu';
-            if (notes.length > 25) {
-                notes = notes.slice(0, 23) + '...';
+            if (notes.length > 22) {
+                notes = notes.slice(0, 20) + '...';
             }
-            const displayNotes = `${notes} (${getMemberName(s.memberId)})`;
-            ctx.fillText(displayNotes, 150, currentY);
-            
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '13px Arial, sans-serif';
+            ctx.fillText(notes, 150, currentY);
+
+            // Member badge (colored pill)
+            const memberColor = isHusband ? '#3b82f6' : '#ec4899';
+            const memberLabel = getMemberName(s.memberId);
+            const badgeX = 150 + ctx.measureText(notes).width + 8;
+            ctx.fillStyle = isHusband ? 'rgba(59,130,246,0.15)' : 'rgba(236,72,153,0.15)';
+            const badgeW = ctx.measureText(memberLabel).width + 10;
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+                ctx.roundRect(badgeX, currentY - 10, badgeW, 15, 4);
+            } else {
+                ctx.rect(badgeX, currentY - 10, badgeW, 15);
+            }
+            ctx.fill();
+            ctx.fillStyle = memberColor;
+            ctx.font = 'bold 11px Arial, sans-serif';
+            ctx.fillText(memberLabel, badgeX + 5, currentY);
+
+            // Amount
             ctx.fillStyle = '#ef4444';
             ctx.font = 'bold 13px Arial, sans-serif';
             ctx.textAlign = 'right';
             ctx.fillText(`-${formatVND(s.amount)}`, virtualWidth - 60, currentY);
 
-            ctx.strokeStyle = '#f1f5f9';
+            ctx.strokeStyle = '#e8eef4';
+            ctx.lineWidth = 0.5;
             ctx.beginPath();
-            ctx.moveTo(60, currentY + 10);
-            ctx.lineTo(virtualWidth - 60, currentY + 10);
+            ctx.moveTo(60, currentY + 12);
+            ctx.lineTo(virtualWidth - 60, currentY + 12);
             ctx.stroke();
 
             currentY += 32;
@@ -661,7 +707,7 @@ window.sendReportToWebhook = async function() {
 - Chồng đóng góp: ${formatVND(data.husbandContrib)} (${husbandPercent}%)
 - Vợ đóng góp: ${formatVND(data.wifeContrib)} (${wifePercent}%)
 
-📉 *Các khoản chi lớn nhất:*
+📉 *Các khoản chi tiêu trong tháng:*
 ${spendingsStr}
 
 ${aiInsightText ? `💡 *AI nhận xét:* \n_${aiInsightText}_` : ''}
