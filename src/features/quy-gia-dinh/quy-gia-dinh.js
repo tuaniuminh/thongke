@@ -3,18 +3,10 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
-    decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.33';
-import { decrypt } from '../../core/crypto.js?v=4.1.33';
-import * as sync from '../../core/sync.js?v=4.1.33';
-
-// Trả về ngày hiện tại theo múi giờ địa phương (YYYY-MM-DD)
-// Dùng thay cho new Date().toISOString().split('T')[0] vốn trả về ngày UTC
-// (lúc trước 7h sáng giờ Việt Nam sẽ bị hiển thị sai 1 ngày)
-function getLocalDateString() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+    decryptWithPrivateKey, loadLocalState, getLocalDateString
+} from '../../core/app.js?v=4.1.34';
+import { decrypt } from '../../core/crypto.js?v=4.1.34';
+import * as sync from '../../core/sync.js?v=4.1.34';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};

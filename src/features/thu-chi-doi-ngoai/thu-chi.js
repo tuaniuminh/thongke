@@ -3,10 +3,10 @@ import {
     APP_VERSION, formatDate, escapeHTML, formatVND, generateId,
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
-    compareRecordsByRecent, renderAll
-} from '../../core/app.js?v=4.1.30';
-import * as sync from '../../core/sync.js?v=4.1.30';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.30';
+    compareRecordsByRecent, renderAll, getLocalDateString
+} from '../../core/app.js?v=4.1.34';
+import * as sync from '../../core/sync.js?v=4.1.34';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.34';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -2287,7 +2287,7 @@ function setupModalListeners() {
         // Reset received form
         document.getElementById('receivedForm').reset();
         document.getElementById('receivedId').value = '';
-        document.getElementById('recDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('recDate').value = getLocalDateString();
         document.getElementById('recStatus').checked = false;
         document.getElementById('recStatusLabel').innerText = 'Chưa đi mừng cưới lại họ';
         updateRecTypeCustomVisibility();
@@ -2310,7 +2310,7 @@ function setupModalListeners() {
         // Reset sent form
         document.getElementById('sentForm').reset();
         document.getElementById('sentId').value = '';
-        document.getElementById('sentDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('sentDate').value = getLocalDateString();
         updateSentTypeCustomVisibility();
         
         // Reset gold fields

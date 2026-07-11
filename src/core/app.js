@@ -1,17 +1,17 @@
-﻿import { 
+import { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.33';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.33';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.33';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.33';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.34';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.34';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.34';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.34';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.33';
-import * as sync from './sync.js?v=4.1.33';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.33';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.34';
+import * as sync from './sync.js?v=4.1.34';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.34';
 
-const APP_VERSION = '4.1.33';
+const APP_VERSION = '4.1.34';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2868,6 +2868,14 @@ function escapeHTML(str) {
     );
 }
 
+// Trả về ngày hiện tại theo múi giờ địa phương dạng YYYY-MM-DD
+// Dùng thay cho new Date().toISOString().split('T')[0] vốn trả về ngày UTC
+// (trước 7h sáng VN sẽ hiển thị sai ngày hôm qua)
+export function getLocalDateString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function formatDate(dateStr) {
     if (!dateStr) return '-';
     try {
@@ -3253,7 +3261,7 @@ function updateLastBackupDisplay() {
 
 window.renderTcManagement = renderTcManagement;
 
-export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML };
+export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 

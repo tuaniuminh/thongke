@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
-    APP_VERSION, formatDate, escapeHTML
-} from '../../core/app.js?v=4.1.30';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.30';
+    APP_VERSION, formatDate, escapeHTML, getLocalDateString
+} from '../../core/app.js?v=4.1.34';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.34';
 
 let healthTrendChartInstance = null;
 
@@ -1622,7 +1622,7 @@ Bạn bắt buộc phải trả về một đối tượng JSON thuộc một tr
   "systolic": <số nguyên, ví dụ: 120>,
   "diastolic": <số nguyên, ví dụ: 80>,
   "pulse": <số nguyên hoặc null nếu không có, ví dụ: 72>,
-  "date": "<ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy hãy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
+  "date": "<ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy hãy lấy ngày hiện tại: ${getLocalDateString()}>",
   "notes": "<nhận xét ngắn gọn về kết quả đo huyết áp của người dùng bằng tiếng Việt>"
 }
 
@@ -1631,7 +1631,7 @@ Bạn bắt buộc phải trả về một đối tượng JSON thuộc một tr
   "isBloodPressure": false,
   "isBodyComposition": true,
   "device": "<Tên thiết bị đo, ví dụ: Accuniq BC380, InBody 270>",
-  "date": "<Ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
+  "date": "<Ngày đo định dạng YYYY-MM-DD, nếu không tìm thấy lấy ngày hiện tại: ${getLocalDateString()}>",
   "time": "<Giờ đo định dạng HH:MM, nếu không tìm thấy để trống>",
   "notes": "<Nhận xét ngắn gọn về thể trạng của người dùng bằng tiếng Việt>",
   "indicators": {
@@ -1703,7 +1703,7 @@ Bạn bắt buộc phải trả về một đối tượng JSON thuộc một tr
   "title": "<Tên xét nghiệm hoặc tiêu đề hồ sơ y tế, ví dụ: Xét nghiệm máu tổng quát>",
   "type": "<Phân loại xét nghiệm, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'other'>",
   "facility": "<Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện. Nếu không tìm thấy, để trống>",
-  "date": "<Ngày xét nghiệm định dạng YYYY-MM-DD. Nếu không tìm thấy, lấy ngày hiện tại: ${new Date().toISOString().split('T')[0]}>",
+  "date": "<Ngày xét nghiệm định dạng YYYY-MM-DD. Nếu không tìm thấy, lấy ngày hiện tại: ${getLocalDateString()}>",
   "indicators": [
     {
       "name": "<Tên chỉ số xét nghiệm, ví dụ: Glucose, Cholesterol, SGOT, SGPT, Bạch cầu...>",
@@ -1809,7 +1809,7 @@ function openHealthEditModal(recordId = null, initialData = null) {
     document.getElementById('healthRecordId').value = recordId || '';
     document.getElementById('healthEditTitle').value = '';
     document.getElementById('healthEditType').value = 'blood_test';
-    document.getElementById('healthEditDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('healthEditDate').value = getLocalDateString();
     document.getElementById('healthEditFacility').value = '';
     document.getElementById('healthEditNotes').value = '';
     document.getElementById('healthIndicatorsEditRows').innerHTML = '';
@@ -1826,7 +1826,7 @@ function openHealthEditModal(recordId = null, initialData = null) {
         if (record) {
             document.getElementById('healthEditTitle').value = record.title || '';
             document.getElementById('healthEditType').value = record.type || 'blood_test';
-            document.getElementById('healthEditDate').value = record.date || new Date().toISOString().split('T')[0];
+            document.getElementById('healthEditDate').value = record.date || getLocalDateString();
             document.getElementById('healthEditFacility').value = record.facility || '';
             document.getElementById('healthEditNotes').value = record.notes || '';
             if (editProfileSelect) {
@@ -1843,7 +1843,7 @@ function openHealthEditModal(recordId = null, initialData = null) {
         if (initialData) {
             document.getElementById('healthEditTitle').value = initialData.title || '';
             document.getElementById('healthEditType').value = initialData.type || 'blood_test';
-            document.getElementById('healthEditDate').value = initialData.date || new Date().toISOString().split('T')[0];
+            document.getElementById('healthEditDate').value = initialData.date || getLocalDateString();
             document.getElementById('healthEditFacility').value = initialData.facility || '';
             document.getElementById('healthEditNotes').value = initialData.notes || '';
             
@@ -3565,7 +3565,7 @@ function openBpModal(recordId = null) {
         defaultSession = 'other';
     }
 
-    document.getElementById('bpDate').value = now.toISOString().split('T')[0];
+    document.getElementById('bpDate').value = getLocalDateString();
     document.getElementById('bpTime').value = `${hours}:${minutes}`;
     document.getElementById('bpRecordId').value = '';
     document.getElementById('bpSystolic').value = '';
@@ -3623,7 +3623,7 @@ async function handleBpFormSubmit(e) {
         diastolic: dia,
         pulse: parseInt(document.getElementById('bpPulse').value) || null,
         session: document.getElementById('bpSession').value,
-        date: document.getElementById('bpDate').value || new Date().toISOString().split('T')[0],
+        date: document.getElementById('bpDate').value || getLocalDateString(),
         time: document.getElementById('bpTime').value || null,
         notes: document.getElementById('bpNotes').value.trim(),
         updated_at: now
@@ -3839,7 +3839,7 @@ function openBodyCompModal(recordId = null, scannedData = null) {
     const timeInput = document.getElementById('bodyCompTime');
     const now = new Date();
     
-    if (dateInput) dateInput.value = now.toISOString().split('T')[0];
+    if (dateInput) dateInput.value = getLocalDateString();
     if (timeInput) {
         const hh = String(now.getHours()).padStart(2, '0');
         const mm = String(now.getMinutes()).padStart(2, '0');
@@ -3989,7 +3989,7 @@ async function saveBodyCompRecord(e) {
     const recordId = document.getElementById('bodyCompRecordId').value || '';
     const profileId = document.getElementById('bodyCompProfileSelect').value || 'p-self';
     const device = document.getElementById('bodyCompDevice').value.trim() || null;
-    const date = document.getElementById('bodyCompDate').value || new Date().toISOString().split('T')[0];
+    const date = document.getElementById('bodyCompDate').value || getLocalDateString();
     const time = document.getElementById('bodyCompTime').value || '';
     const notes = document.getElementById('bodyCompNotes').value.trim() || null;
 
