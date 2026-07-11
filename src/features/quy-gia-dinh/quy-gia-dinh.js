@@ -4,9 +4,17 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.30';
-import { decrypt } from '../../core/crypto.js?v=4.1.30';
-import * as sync from '../../core/sync.js?v=4.1.30';
+} from '../../core/app.js?v=4.1.33';
+import { decrypt } from '../../core/crypto.js?v=4.1.33';
+import * as sync from '../../core/sync.js?v=4.1.33';
+
+// Trả về ngày hiện tại theo múi giờ địa phương (YYYY-MM-DD)
+// Dùng thay cho new Date().toISOString().split('T')[0] vốn trả về ngày UTC
+// (lúc trước 7h sáng giờ Việt Nam sẽ bị hiển thị sai 1 ngày)
+function getLocalDateString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -1171,7 +1179,7 @@ async function handleContributionSubmit(e) {
     }
 
     const memberId = document.getElementById('contribMember').value;
-    const date = document.getElementById('contribDate').value || new Date().toISOString().split('T')[0];
+    const date = document.getElementById('contribDate').value || getLocalDateString();
     const notes = document.getElementById('contribNotes').value.trim();
 
     const tx = {
@@ -1216,7 +1224,7 @@ async function handleTransferSubmit(e) {
     const fromFundId = document.getElementById('transferFromFund').value;
     const toFundId = document.getElementById('transferToFund').value;
     const amount = parseMoneyInput(document.getElementById('transferAmount').value);
-    const date = document.getElementById('transferDate').value || new Date().toISOString().split('T')[0];
+    const date = document.getElementById('transferDate').value || getLocalDateString();
     const notes = document.getElementById('transferNotes').value.trim();
 
     if (fromFundId === toFundId) {
@@ -1287,7 +1295,7 @@ async function handleSpendingSubmit(e) {
 
     const fundId = document.getElementById('spendingFundSelect').value;
     const amount = parseMoneyInput(document.getElementById('spendingAmount').value);
-    const date = document.getElementById('spendingDate').value || new Date().toISOString().split('T')[0];
+    const date = document.getElementById('spendingDate').value || getLocalDateString();
     const notes = document.getElementById('spendingNotes').value.trim();
 
     if (amount <= 0) {
@@ -1399,7 +1407,7 @@ async function handleInvestSubmit(e) {
     const fundId = document.getElementById('investFundSelect').value;
     const type = document.getElementById('investTypeSelect').value;
     let amount = parseMoneyInput(document.getElementById('investAmount').value);
-    const date = document.getElementById('investDate').value || new Date().toISOString().split('T')[0];
+    const date = document.getElementById('investDate').value || getLocalDateString();
     const notes = document.getElementById('investNotes').value.trim();
 
     if (amount <= 0) {
@@ -1482,7 +1490,7 @@ window.openFundActionModal = function(action, targetFundId = '') {
     }
 
     if (action === 'contribution') {
-        document.getElementById('contribDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('contribDate').value = getLocalDateString();
         if (targetFundId) {
             const selectEl = document.getElementById('contribFundSelect');
             if (selectEl) selectEl.value = targetFundId;
@@ -1490,14 +1498,14 @@ window.openFundActionModal = function(action, targetFundId = '') {
         document.getElementById('fundContributionModal').classList.add('active');
     } 
     else if (action === 'transfer') {
-        document.getElementById('transferDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('transferDate').value = getLocalDateString();
         if (targetFundId) {
             document.getElementById('transferFromFund').value = targetFundId;
         }
         document.getElementById('fundTransferModal').classList.add('active');
     } 
     else if (action === 'spending') {
-        document.getElementById('spendingDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('spendingDate').value = getLocalDateString();
         if (targetFundId) {
             document.getElementById('spendingFundSelect').value = targetFundId;
         }
@@ -1515,7 +1523,7 @@ window.openFundActionModal = function(action, targetFundId = '') {
         document.getElementById('fundSpendingModal').classList.add('active');
     } 
     else if (action === 'invest') {
-        document.getElementById('investDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('investDate').value = getLocalDateString();
         if (targetFundId) {
             document.getElementById('investFundSelect').value = targetFundId;
         }

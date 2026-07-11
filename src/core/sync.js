@@ -5,20 +5,35 @@ let currentUrl = null;
 let currentKey = null;
 
 // Initialize Supabase client
+// Dùng window-level singleton để tránh tạo nhiều GoTrueClient instances
+// kể cả khi module bị re-execute sau khi Service Worker kích hoạt
 export function initSupabase(url, key) {
     if (!url || !key) {
         supabase = null;
         currentUrl = null;
         currentKey = null;
+        window.__famiLifeSupabase = null;
+        window.__famiLifeSupabaseUrl = null;
+        window.__famiLifeSupabaseKey = null;
         return null;
     }
-    // Tránh khởi tạo nhiều instance trùng lặp GoTrueClient nếu URL và Key không đổi
+
+    // Phục hồi từ window singleton nếu module vừa bị reset (sau SW activation)
+    if (window.__famiLifeSupabase &&
+        window.__famiLifeSupabaseUrl === url &&
+        window.__famiLifeSupabaseKey === key) {
+        supabase = window.__famiLifeSupabase;
+        currentUrl = url;
+        currentKey = key;
+        return supabase;
+    }
+
+    // Kiểm tra module-level cache (fast path cho lần gọi thứ 2 trở đi)
     if (supabase && url === currentUrl && key === currentKey) {
         return supabase;
     }
+
     try {
-        // Import createClient from ESM CDN dynamically or rely on global/module import
-        // To be safe and fast, we use the standard createClient from the ESM CDN
         supabase = window.supabase ? window.supabase.createClient(url, key, {
             auth: {
                 storageKey: 'familife_supabase_auth',
@@ -29,6 +44,10 @@ export function initSupabase(url, key) {
         if (supabase) {
             currentUrl = url;
             currentKey = key;
+            // Lưu lên window để tồn tại xuyên suốt module re-execution
+            window.__famiLifeSupabase = supabase;
+            window.__famiLifeSupabaseUrl = url;
+            window.__famiLifeSupabaseKey = key;
         } else {
             currentUrl = null;
             currentKey = null;
