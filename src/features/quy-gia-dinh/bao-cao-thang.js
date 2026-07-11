@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.27';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.27';
+} from '../../core/app.js?v=4.1.28';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.28';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -385,14 +385,63 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     return currentY;
 }
 
+// Measure total height that wrapText would occupy (without drawing)
+function measureWrappedTextHeight(ctx, text, maxWidth, lineHeight) {
+    const paragraphs = text.split('\n');
+    let totalHeight = 0;
+    
+    paragraphs.forEach(para => {
+        const words = para.split(' ');
+        let line = '';
+        let linesInPara = 1;
+        
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+                line = words[n] + ' ';
+                linesInPara++;
+            } else {
+                line = testLine;
+            }
+        }
+        totalHeight += linesInPara * lineHeight + 4; // +4 for paragraph gap
+    });
+    return totalHeight;
+}
+
 // Draw and Download Report as PNG Image (HTML5 Canvas E2EE)
 window.downloadReportAsImage = function() {
     if (!currentReportData) return;
     const data = currentReportData;
 
-    const scale = 3.0; // 3x scale for Ultra HD / Retina resolution (2160 x 2880)
+    const scale = 3.0; // 3x scale for Ultra HD / Retina resolution
     const virtualWidth = 720;
-    const virtualHeight = 960;
+
+    // --- Pre-measure AI text height to calculate dynamic canvas height ---
+    const aiText = aiInsightText || 'Báo cáo chưa kích hoạt chế độ AI nhận xét.';
+    const aiLineHeight = 20;
+    const aiMaxWidth = virtualWidth - 160; // same as used in wrapText call
+
+    // Temporary canvas to measure text
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.font = 'italic 13px Arial, sans-serif';
+    const aiTextHeight = measureWrappedTextHeight(tempCtx, aiText, aiMaxWidth, aiLineHeight);
+
+    // Base layout height: header + stats + contributions + spendings + AI section header + footer
+    // Estimate spendings rows height: each row ~32px + header ~80px
+    const spendingsRowHeight = 32;
+    const spendingsHeaderHeight = 80;
+    const estimatedSpendingsHeight = spendingsHeaderHeight + (data.spendings.length * spendingsRowHeight);
+
+    // AI box: top padding (30) + text + bottom padding (20)
+    const aiBoxHeight = Math.max(80, aiTextHeight + 50);
+
+    // Base content (everything except spendings and AI box)
+    const baseHeight = 400; // header, stats, contributions, section titles, footer
+    const footerHeight = 80;
+
+    const virtualHeight = baseHeight + estimatedSpendingsHeight + aiBoxHeight + footerHeight;
 
     // Create Canvas in memory
     const canvas = document.createElement('canvas');
@@ -636,18 +685,18 @@ window.downloadReportAsImage = function() {
 
     currentY += 35;
     
-    // Draw AI card box (Soft purple background)
-    const aiText = aiInsightText || 'Báo cáo chưa kích hoạt chế độ AI nhận xét.';
+    // Draw AI card box with dynamic height based on actual text content
+    const aiTextLocal = aiInsightText || 'Báo cáo chưa kích hoạt chế độ AI nhận xét.';
     ctx.fillStyle = aiInsightText ? 'rgba(168, 85, 247, 0.04)' : '#ffffff';
     ctx.strokeStyle = aiInsightText ? 'rgba(168, 85, 247, 0.15)' : '#e2e8f0';
     ctx.lineWidth = 1;
 
-    const boxHeight = 180;
+    // aiBoxHeight was pre-computed at the top of the function
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(60, currentY, virtualWidth - 120, boxHeight, 10);
+        ctx.roundRect(60, currentY, virtualWidth - 120, aiBoxHeight, 10);
     } else {
-        ctx.rect(60, currentY, virtualWidth - 120, boxHeight);
+        ctx.rect(60, currentY, virtualWidth - 120, aiBoxHeight);
     }
     ctx.fill();
     ctx.stroke();
@@ -657,13 +706,14 @@ window.downloadReportAsImage = function() {
     ctx.font = 'italic 13px Arial, sans-serif';
     ctx.textAlign = 'left';
     
-    wrapText(ctx, aiText, 80, currentY + 30, virtualWidth - 160, 20);
+    wrapText(ctx, aiTextLocal, 80, currentY + 30, virtualWidth - 160, 20);
 
-    // 8. Draw Footer
+    // 8. Draw Footer (always below the AI box with padding)
+    const footerY = currentY + aiBoxHeight + 40;
     ctx.fillStyle = '#64748b';
     ctx.font = '11px Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Được tạo tự động bởi FamiLife App – Hệ thống Quỹ Gia Đình', virtualWidth / 2, virtualHeight - 40);
+    ctx.fillText('Được tạo tự động bởi FamiLife App – Hệ thống Quỹ Gia Đình', virtualWidth / 2, footerY);
 
     // Download image
     const dataUrl = canvas.toDataURL('image/png');
