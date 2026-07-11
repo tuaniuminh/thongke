@@ -19,7 +19,13 @@ export function initSupabase(url, key) {
     try {
         // Import createClient from ESM CDN dynamically or rely on global/module import
         // To be safe and fast, we use the standard createClient from the ESM CDN
-        supabase = window.supabase ? window.supabase.createClient(url, key) : null;
+        supabase = window.supabase ? window.supabase.createClient(url, key, {
+            auth: {
+                storageKey: 'familife_supabase_auth',
+                persistSession: true,
+                autoRefreshToken: true,
+            }
+        }) : null;
         if (supabase) {
             currentUrl = url;
             currentKey = key;
