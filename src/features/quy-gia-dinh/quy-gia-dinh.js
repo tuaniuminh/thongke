@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.12';
-import { decrypt } from '../../core/crypto.js?v=4.1.12';
-import * as sync from '../../core/sync.js?v=4.1.12';
+} from '../../core/app.js?v=4.1.13';
+import { decrypt } from '../../core/crypto.js?v=4.1.13';
+import * as sync from '../../core/sync.js?v=4.1.13';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -767,10 +767,24 @@ function populateFundSelects() {
     const chartSelectYear = document.getElementById('chartSelectYear');
     if (chartSelectYear) {
         const currentYear = new Date().getFullYear();
+        const yearsSet = new Set([currentYear, 2024, 2025, 2026]);
+        
+        // Thu thập tất cả các năm từ giao dịch quỹ thực tế
+        (state.fundTransactions || []).forEach(t => {
+            if (t.date && !t.deleted_at) {
+                const y = new Date(t.date).getFullYear();
+                if (!isNaN(y)) {
+                    yearsSet.add(y);
+                }
+            }
+        });
+        
+        const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
         let options = '';
-        for (let y = currentYear; y >= 2024; y--) {
+        sortedYears.forEach(y => {
             options += `<option value="${y}">Năm ${y}</option>`;
-        }
+        });
+        
         const savedYear = chartSelectYear.value;
         chartSelectYear.innerHTML = options;
         if (savedYear && Array.from(chartSelectYear.options).some(opt => opt.value === savedYear)) {
