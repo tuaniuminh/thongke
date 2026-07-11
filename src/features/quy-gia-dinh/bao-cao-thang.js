@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.20';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.20';
+} from '../../core/app.js?v=4.1.21';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.21';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -321,47 +321,54 @@ window.downloadReportAsImage = function() {
     if (!currentReportData) return;
     const data = currentReportData;
 
+    const scale = 3.0; // 3x scale for Ultra HD / Retina resolution (2160 x 2880)
+    const virtualWidth = 720;
+    const virtualHeight = 960;
+
     // Create Canvas in memory
     const canvas = document.createElement('canvas');
-    canvas.width = 720;
-    canvas.height = 960;
+    canvas.width = virtualWidth * scale;
+    canvas.height = virtualHeight * scale;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Scale drawing context so all coordinate values stay identical
+    ctx.scale(scale, scale);
+
     // 1. Draw Background (Light Theme Slate/Gray Gradient)
-    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const grad = ctx.createLinearGradient(0, 0, 0, virtualHeight);
     grad.addColorStop(0, '#f8fafc');
     grad.addColorStop(1, '#f1f5f9');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, virtualWidth, virtualHeight);
 
     // 2. Draw Top Header Accent Bar
     ctx.fillStyle = '#0284c9';
-    ctx.fillRect(0, 0, canvas.width, 10);
+    ctx.fillRect(0, 0, virtualWidth, 10);
 
     // 3. Draw Header Title (Dark Navy)
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 24px Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('BÁO CÁO TÀI CHÍNH GIA ĐÌNH', canvas.width / 2, 60);
+    ctx.fillText('BÁO CÁO TÀI CHÍNH GIA ĐÌNH', virtualWidth / 2, 60);
 
     ctx.fillStyle = '#475569';
     ctx.font = '600 16px Arial, sans-serif';
-    ctx.fillText(`Tháng ${currentReportMonth} / Năm ${currentReportYear}`, canvas.width / 2, 90);
+    ctx.fillText(`Tháng ${currentReportMonth} / Năm ${currentReportYear}`, virtualWidth / 2, 90);
 
     // Header separator line (Light Gray)
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(60, 115);
-    ctx.lineTo(canvas.width - 60, 115);
+    ctx.lineTo(virtualWidth - 60, 115);
     ctx.stroke();
 
     // 4. Draw 3 Stat Cards (White background with thin borders)
     const cardWidth = 180;
     const cardHeight = 100;
     const gap = 20;
-    const startX = (canvas.width - (cardWidth * 3 + gap * 2)) / 2;
+    const startX = (virtualWidth - (cardWidth * 3 + gap * 2)) / 2;
     const startY = 140;
 
     const cards = [
@@ -420,7 +427,7 @@ window.downloadReportAsImage = function() {
     ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(60, currentY + 12);
-    ctx.lineTo(canvas.width - 60, currentY + 12);
+    ctx.lineTo(virtualWidth - 60, currentY + 12);
     ctx.stroke();
 
     currentY += 40;
@@ -429,9 +436,9 @@ window.downloadReportAsImage = function() {
     ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(60, currentY - 20, canvas.width - 120, 50, 8);
+        ctx.roundRect(60, currentY - 20, virtualWidth - 120, 50, 8);
     } else {
-        ctx.rect(60, currentY - 20, canvas.width - 120, 50);
+        ctx.rect(60, currentY - 20, virtualWidth - 120, 50);
     }
     ctx.fill();
     ctx.stroke();
@@ -445,7 +452,7 @@ window.downloadReportAsImage = function() {
     ctx.textAlign = 'left';
     ctx.fillText(`Chồng đóng góp: ${formatVND(data.husbandContrib)} (${husbandPercent}%)`, 80, currentY + 10);
     ctx.textAlign = 'right';
-    ctx.fillText(`Vợ đóng góp: ${formatVND(data.wifeContrib)} (${wifePercent}%)`, canvas.width - 80, currentY + 10);
+    ctx.fillText(`Vợ đóng góp: ${formatVND(data.wifeContrib)} (${wifePercent}%)`, virtualWidth - 80, currentY + 10);
 
     // 6. Draw Section: Largest spendings
     currentY += 70;
@@ -458,7 +465,7 @@ window.downloadReportAsImage = function() {
     ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(60, currentY + 12);
-    ctx.lineTo(canvas.width - 60, currentY + 12);
+    ctx.lineTo(virtualWidth - 60, currentY + 12);
     ctx.stroke();
 
     currentY += 40;
@@ -469,13 +476,13 @@ window.downloadReportAsImage = function() {
     ctx.fillText('Ngày', 60, currentY);
     ctx.fillText('Nội dung chi tiêu', 150, currentY);
     ctx.textAlign = 'right';
-    ctx.fillText('Số tiền', canvas.width - 60, currentY);
+    ctx.fillText('Số tiền', virtualWidth - 60, currentY);
 
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(60, currentY + 10);
-    ctx.lineTo(canvas.width - 60, currentY + 10);
+    ctx.lineTo(virtualWidth - 60, currentY + 10);
     ctx.stroke();
 
     currentY += 32;
@@ -492,12 +499,12 @@ window.downloadReportAsImage = function() {
             ctx.fillStyle = '#ef4444';
             ctx.font = 'bold 13px Arial, sans-serif';
             ctx.textAlign = 'right';
-            ctx.fillText(`-${formatVND(s.amount)}`, canvas.width - 60, currentY);
+            ctx.fillText(`-${formatVND(s.amount)}`, virtualWidth - 60, currentY);
 
             ctx.strokeStyle = '#f1f5f9';
             ctx.beginPath();
             ctx.moveTo(60, currentY + 10);
-            ctx.lineTo(canvas.width - 60, currentY + 10);
+            ctx.lineTo(virtualWidth - 60, currentY + 10);
             ctx.stroke();
 
             currentY += 32;
@@ -506,7 +513,7 @@ window.downloadReportAsImage = function() {
         ctx.fillStyle = '#64748b';
         ctx.font = 'italic 13px Arial, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Không có chi tiêu nào trong tháng.', canvas.width / 2, currentY + 10);
+        ctx.fillText('Không có chi tiêu nào trong tháng.', virtualWidth / 2, currentY + 10);
         currentY += 40;
     }
 
@@ -520,7 +527,7 @@ window.downloadReportAsImage = function() {
     ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(60, currentY + 12);
-    ctx.lineTo(canvas.width - 60, currentY + 12);
+    ctx.lineTo(virtualWidth - 60, currentY + 12);
     ctx.stroke();
 
     currentY += 35;
@@ -534,9 +541,9 @@ window.downloadReportAsImage = function() {
     const boxHeight = 180;
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(60, currentY, canvas.width - 120, boxHeight, 10);
+        ctx.roundRect(60, currentY, virtualWidth - 120, boxHeight, 10);
     } else {
-        ctx.rect(60, currentY, canvas.width - 120, boxHeight);
+        ctx.rect(60, currentY, virtualWidth - 120, boxHeight);
     }
     ctx.fill();
     ctx.stroke();
@@ -546,13 +553,13 @@ window.downloadReportAsImage = function() {
     ctx.font = 'italic 13px Arial, sans-serif';
     ctx.textAlign = 'left';
     
-    wrapText(ctx, aiText, 80, currentY + 30, canvas.width - 160, 20);
+    wrapText(ctx, aiText, 80, currentY + 30, virtualWidth - 160, 20);
 
     // 8. Draw Footer
     ctx.fillStyle = '#64748b';
     ctx.font = '11px Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Được tạo tự động bởi FamiLife App – Hệ thống Quỹ Gia Đình', canvas.width / 2, canvas.height - 40);
+    ctx.fillText('Được tạo tự động bởi FamiLife App – Hệ thống Quỹ Gia Đình', virtualWidth / 2, virtualHeight - 40);
 
     // Download image
     const dataUrl = canvas.toDataURL('image/png');
