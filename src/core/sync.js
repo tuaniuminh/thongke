@@ -34,13 +34,7 @@ export function initSupabase(url, key) {
     }
 
     try {
-        supabase = window.supabase ? window.supabase.createClient(url, key, {
-            auth: {
-                storageKey: 'familife_supabase_auth',
-                persistSession: true,
-                autoRefreshToken: true,
-            }
-        }) : null;
+        supabase = window.supabase ? window.supabase.createClient(url, key) : null;
         if (supabase) {
             currentUrl = url;
             currentKey = key;
