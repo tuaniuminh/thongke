@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.18';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.18';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.18';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.18';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.19';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.19';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.19';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.19';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.18';
-import * as sync from './sync.js?v=4.1.18';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.18';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.19';
+import * as sync from './sync.js?v=4.1.19';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.19';
 
-const APP_VERSION = '4.1.18';
+const APP_VERSION = '4.1.19';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -1775,6 +1775,16 @@ function switchTab(tabId, updateHash = true) {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';
+        }
+    }
+    
+    // Toggle Shared Fund Header Card based on active tab and state
+    const headerCard = document.getElementById('sharedFundHeaderCard');
+    if (headerCard) {
+        if (tabId === 'fund' && state.viewingSharedFund) {
+            headerCard.style.display = 'flex';
+        } else {
+            headerCard.style.display = 'none';
         }
     }
     

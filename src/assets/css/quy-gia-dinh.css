@@ -500,3 +500,39 @@
 .switch-control input:checked + .slider-round::before {
     transform: translateX(20px);
 }
+
+/* Shared Fund Header Card (Top Right) styling */
+.shared-fund-header-card {
+    background: rgba(2, 132, 199, 0.08);
+    border: 1px solid rgba(2, 132, 199, 0.2);
+    border-radius: 12px;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 320px;
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.shared-fund-card-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+.shared-fund-card-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .shared-fund-header-card {
+        margin-top: 8px;
+        max-width: 100%;
+        width: 100%;
+    }
+}

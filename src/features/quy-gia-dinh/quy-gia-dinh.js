@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.18';
-import { decrypt } from '../../core/crypto.js?v=4.1.18';
-import * as sync from '../../core/sync.js?v=4.1.18';
+} from '../../core/app.js?v=4.1.19';
+import { decrypt } from '../../core/crypto.js?v=4.1.19';
+import * as sync from '../../core/sync.js?v=4.1.19';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -530,16 +530,20 @@ export async function renderFundDashboard() {
     // 1. Calculate balances dynamically
     calculateFundBalances();
 
-    // 2. Render Shared Banner
+    // 2. Render Shared Banner & Header Card
     const banner = document.getElementById('sharedFundBanner');
-    const bannerText = document.getElementById('sharedFundBannerText');
-    if (banner && bannerText) {
+    if (banner) banner.style.display = 'none'; // Keep old banner hidden
+
+    const headerCard = document.getElementById('sharedFundHeaderCard');
+    const headerCardTitleText = document.getElementById('sharedFundHeaderCardTitleText');
+    if (headerCard && headerCardTitleText) {
         if (state.viewingSharedFund) {
-            banner.style.display = 'flex';
+            headerCard.style.display = 'flex';
             const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
-            bannerText.innerText = `Đang xem Quỹ gia đình được chia sẻ từ: ${displayName} (Bạn có thể đóng góp & chi tiêu từ quỹ này)`;
+            headerCardTitleText.innerText = `Quỹ chung gia đình của ${displayName}`;
+            lucide.createIcons();
         } else {
-            banner.style.display = 'none';
+            headerCard.style.display = 'none';
         }
     }
 
