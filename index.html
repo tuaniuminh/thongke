@@ -39,12 +39,12 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.16">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.17">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.16">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.16">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.16">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.17">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.17">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.17">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -97,7 +97,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.1.16" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.1.17" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -189,7 +189,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.1.16" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.1.17" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -948,35 +948,27 @@
 
                     <!-- Chart and Transactions Row -->
                     <div class="fund-analytics-row">
-                        <!-- Charts Column (left) -->
-                        <div class="fund-charts-column" style="display: flex; flex-direction: column; gap: 20px;">
-                            <!-- Chart Card 1: Contributions -->
-                            <div class="fund-chart-card" style="margin: 0; width: 100%;">
-                                <h4 class="health-card-title">Tỷ lệ đóng góp gia đình</h4>
-                                <p class="health-card-desc" id="fundTotalContributionText" style="font-weight: 600; color: var(--text-primary); margin-top: 4px;">Tổng tích lũy đóng góp: 0đ</p>
-                                <div class="fund-chart-container" style="position: relative; height: 260px; width: 100%;">
-                                    <canvas id="fundContributionChartCanvas"></canvas>
-                                </div>
-                                <div class="chart-legend-custom">
-                                    <div class="legend-item">
-                                        <span><span class="legend-color" style="background: #0284c7;"></span>Chồng đóng góp:</span>
-                                        <span id="chartHusbandText" style="font-weight: 700;">0đ (50%)</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <span><span class="legend-color" style="background: #ef4444;"></span>Vợ đóng góp:</span>
-                                        <span id="chartWifeText" style="font-weight: 700;">0đ (50%)</span>
-                                    </div>
-                                </div>
+                        <!-- Chart Card 1: Contributions -->
+                        <div class="fund-chart-card" style="margin: 0; width: 100%;">
+                            <h4 class="health-card-title">Tỷ lệ đóng góp gia đình</h4>
+                            <p class="health-card-desc" id="fundTotalContributionText" style="font-weight: 600; color: var(--text-primary); margin-top: 4px;">Tổng tích lũy đóng góp: 0đ</p>
+                            <div class="fund-chart-container" style="position: relative; height: 260px; width: 100%;">
+                                <canvas id="fundContributionChartCanvas"></canvas>
                             </div>
-
-                            <!-- Dynamic Cashflow Charts Container -->
-                            <div id="fundDynamicChartsContainer" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
-                                <!-- Rendered dynamically by JS -->
+                            <div class="chart-legend-custom">
+                                <div class="legend-item">
+                                    <span><span class="legend-color" style="background: #0284c7;"></span>Chồng đóng góp:</span>
+                                    <span id="chartHusbandText" style="font-weight: 700;">0đ (50%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span><span class="legend-color" style="background: #ef4444;"></span>Vợ đóng góp:</span>
+                                    <span id="chartWifeText" style="font-weight: 700;">0đ (50%)</span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Monthly Cashflow Column Chart (right) -->
-                        <div class="fund-chart-card" id="fundMonthlyChartCard" style="margin: 0; min-height: 350px;">
+                        <div class="fund-chart-card" id="fundMonthlyChartCard" style="margin: 0;">
                             <div class="card-header-actions" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px;">
                                 <div>
                                     <h4 class="health-card-title" style="margin: 0;">Thu chi theo tháng</h4>
@@ -998,6 +990,11 @@
                                 <canvas id="monthlyFundChartCanvas"></canvas>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Dynamic Cashflow Charts Container (Placed below for better responsive wrapping) -->
+                    <div id="fundDynamicChartsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; margin-top: 20px;">
+                        <!-- Rendered dynamically by JS -->
                     </div>
                 </div>
             </section>
@@ -1513,7 +1510,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.1.16" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.1.17" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -3020,7 +3017,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.16"></script>
-    <script type="module" src="src/core/app.js?v=4.1.16"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.17"></script>
+    <script type="module" src="src/core/app.js?v=4.1.17"></script>
 </body>
 </html>
