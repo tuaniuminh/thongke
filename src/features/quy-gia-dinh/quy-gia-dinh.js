@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState
-} from '../../core/app.js?v=4.1.11';
-import { decrypt } from '../../core/crypto.js?v=4.1.11';
-import * as sync from '../../core/sync.js?v=4.1.11';
+} from '../../core/app.js?v=4.1.12';
+import { decrypt } from '../../core/crypto.js?v=4.1.12';
+import * as sync from '../../core/sync.js?v=4.1.12';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -546,14 +546,12 @@ export async function renderFundDashboard() {
     // 3. Render Fund Cards Dynamically (Hiding delete buttons here!)
     renderFundCards();
 
-    // 4. Render Contribution Chart (Chồng vs Vợ)
-    renderContributionChart();
-
-    // 5. Render selected Fund's details Inflow/Outflow charts
-    renderFundDetailsCharts();
-
-    // 5b. Render monthly column chart
-    renderMonthlyFundChart();
+    // 4. Render Charts (Wrapped in a setTimeout to allow DOM reflow for correct width calculations)
+    setTimeout(() => {
+        renderContributionChart();
+        renderFundDetailsCharts();
+        renderMonthlyFundChart();
+    }, 50);
 
     // 6. Populate members list in Contribution Form
     populateMemberSelects();
@@ -927,7 +925,7 @@ function renderFundDetailsCharts() {
         cardDiv.innerHTML = `
             <h4 class="health-card-title">Dòng tiền: ${escapeHTML(fund.name)}</h4>
             <p class="health-card-desc">Tỷ lệ nạp vào vs chi ra của quỹ</p>
-            <div class="fund-chart-container">
+            <div class="fund-chart-container" style="position: relative; height: 220px; width: 100%;">
                 <canvas id="canvas-chart-${fund.id}"></canvas>
             </div>
             <div class="chart-legend-custom" style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
