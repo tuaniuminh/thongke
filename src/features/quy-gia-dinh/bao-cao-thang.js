@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.21';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.21';
+} from '../../core/app.js?v=4.1.22';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.22';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;

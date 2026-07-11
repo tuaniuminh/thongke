@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.21';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.21';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.21';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.21';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.22';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.22';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.22';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.22';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.21';
-import * as sync from './sync.js?v=4.1.21';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.21';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.22';
+import * as sync from './sync.js?v=4.1.22';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.22';
 
-const APP_VERSION = '4.1.21';
+const APP_VERSION = '4.1.22';
 
 // --- Supabase Config via GitHub Build (Secrets Injection) ---
 const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
@@ -97,6 +97,7 @@ let state = {
     familyFundInviteStatusUpdated: '',
     spouseRole: 'wife',
     ownerNickname: '',
+    spouseStatus: '',
     mobileViewMode: 'cards',
     user: null,
     
@@ -443,6 +444,7 @@ async function saveLocalState() {
         familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
         spouseRole: state.spouseRole || 'wife',
         ownerNickname: state.ownerNickname || '',
+        spouseStatus: state.spouseStatus || '',
         viewingSharedFund: !!state.viewingSharedFund,
         sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
         lastFullBackupDate: state.lastFullBackupDate || '',
@@ -503,6 +505,7 @@ export async function loadLocalState(password) {
         state.familyFundInviteStatusUpdated = '';
         state.spouseRole = 'wife';
         state.ownerNickname = '';
+        state.spouseStatus = '';
         state.viewingSharedFund = false;
         state.sharedFundOwnerEmail = '';
         state.lastFullBackupDate = '';
@@ -554,6 +557,7 @@ export async function loadLocalState(password) {
         state.familyFundInviteStatusUpdated = data.familyFundInviteStatusUpdated || '';
         state.spouseRole = data.spouseRole || 'wife';
         state.ownerNickname = data.ownerNickname || '';
+        state.spouseStatus = data.spouseStatus || '';
         state.viewingSharedFund = data.viewingSharedFund || false;
         state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
         state.lastFullBackupDate = data.lastFullBackupDate || '';
@@ -3041,6 +3045,7 @@ async function handleFullBackup() {
             spouseEmail: state.spouseEmail,
             ownerNickname: state.ownerNickname,
             spouseRole: state.spouseRole,
+            spouseStatus: state.spouseStatus,
             googleSheetsWebhook: state.googleSheetsWebhook,
             lastAiAnalysis: state.lastAiAnalysis,
             lastAiAnalysisDate: state.lastAiAnalysisDate,
@@ -3107,6 +3112,7 @@ async function handleFullRestore(file) {
         if (data.spouseEmail !== undefined) state.spouseEmail = data.spouseEmail;
         if (data.ownerNickname !== undefined) state.ownerNickname = data.ownerNickname;
         if (data.spouseRole) state.spouseRole = data.spouseRole;
+        if (data.spouseStatus !== undefined) state.spouseStatus = data.spouseStatus;
         if (data.googleSheetsWebhook !== undefined) state.googleSheetsWebhook = data.googleSheetsWebhook;
         if (data.lastAiAnalysis !== undefined) state.lastAiAnalysis = data.lastAiAnalysis;
         if (data.lastAiAnalysisDate !== undefined) state.lastAiAnalysisDate = data.lastAiAnalysisDate;
