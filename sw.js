@@ -1,9 +1,9 @@
-// sw.js — FamiLife Service Worker v4.1.31
-// Chiến lược: Network-first cho JS/CSS/HTML (luôn nhận code mới)
-//             Cache-first cho ảnh (giảm tải mạng)
-//             Bỏ qua hoàn toàn API calls bên ngoài (Supabase, Gemini, CDN)
+// sw.js — FamiLife Service Worker v4.1.39
+// Chiến lược: Network-first cho JS/CSS/HTML nội bộ (luôn nhận code mới)
+//             Cache-first cho ảnh và CDN static libraries (Supabase, Chart.js, Lucide...) để tải cực nhanh & offline
+//             Bỏ qua hoàn toàn các API calls động bên ngoài (Supabase API, Gemini API, Weather API)
 
-const CACHE_NAME = 'familife-cache-v4.1.31';
+const CACHE_NAME = 'familife-cache-v4.1.39';
 
 // App shell — danh sách tài nguyên cần cache ngay khi install
 const SHELL_ASSETS = [
@@ -19,17 +19,12 @@ const SHELL_ASSETS = [
     './src/assets/images/icon-light-pwa.png',
 ];
 
-// Tên miền bên ngoài cần bỏ qua (không cache API calls)
-const SKIP_DOMAINS = [
+// Các API endpoints động bên ngoài cần bỏ qua (phải gọi mạng thật, không cache)
+const BYPASS_API_DOMAINS = [
     'supabase.co',
     'supabase.in',
     'generativelanguage.googleapis.com',
     'open-meteo.com',
-    'cdn.jsdelivr.net',
-    'unpkg.com',
-    'cdnjs.cloudflare.com',
-    'fonts.googleapis.com',
-    'fonts.gstatic.com',
 ];
 
 // ─── Install: cache app shell ────────────────────────────────────────────────
@@ -70,16 +65,17 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Bỏ qua API calls bên ngoài (Supabase, Gemini, CDN thư viện, v.v.)
-    if (SKIP_DOMAINS.some((domain) => url.hostname.includes(domain))) return;
+    // Bỏ qua các API endpoints bên ngoài (Supabase API, Gemini API, Weather API)
+    if (BYPASS_API_DOMAINS.some((domain) => url.hostname.includes(domain))) return;
 
     // Bỏ qua chrome-extension và other non-http
     if (!url.protocol.startsWith('http')) return;
 
     const isImage = /\.(png|jpg|jpeg|svg|ico|webp|gif)(\?.*)?$/i.test(url.pathname);
+    const isCDN = ['cdn.jsdelivr.net', 'unpkg.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'].some(domain => url.hostname.includes(domain));
 
-    if (isImage) {
-        // ── Cache-first cho ảnh (ít thay đổi, tiết kiệm băng thông) ──
+    if (isImage || isCDN) {
+        // ── Cache-first cho ảnh và thư viện CDN (ít thay đổi, tải cực nhanh, offline-first) ──
         event.respondWith(
             caches.match(event.request).then((cached) => {
                 if (cached) return cached;
@@ -93,7 +89,7 @@ self.addEventListener('fetch', (event) => {
             })
         );
     } else {
-        // ── Network-first cho JS/CSS/HTML (luôn lấy bản mới nhất) ──
+        // ── Network-first cho JS/CSS/HTML nội bộ (luôn lấy bản mới nhất) ──
         event.respondWith(
             fetch(event.request)
                 .then((response) => {

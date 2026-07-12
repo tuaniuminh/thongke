@@ -4059,7 +4059,7 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
 .debug-console-toggle-btn {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     background: rgba(15, 23, 42, 0.9);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4074,6 +4074,11 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
     z-index: 10000;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     transition: all 0.2s ease;
+}
+@media (max-width: 768px) {
+    .debug-console-toggle-btn {
+        display: none !important;
+    }
 }
 .debug-console-toggle-btn:hover {
     transform: scale(1.08);
