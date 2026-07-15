@@ -66,6 +66,22 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.arrowIcon}>chevron-right</Text>
           </TouchableOpacity>
 
+          {/* Card 3: Quỹ Gia Đình */}
+          <TouchableOpacity 
+            style={styles.card} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('FamilyFundDashboard')}
+          >
+            <View style={[styles.cardIconWrapper, { backgroundColor: '#d1fae5' }]}>
+              <Text style={styles.cardIcon}>💸</Text>
+            </View>
+            <View style={styles.cardTextContent}>
+              <Text style={styles.cardTitle}>Quỹ gia đình</Text>
+              <Text style={styles.cardDesc}>Quản lý tiền đóng góp, chi tiêu, đầu tư và số dư của các tài khoản quỹ chung</Text>
+            </View>
+            <Text style={styles.arrowIcon}>chevron-right</Text>
+          </TouchableOpacity>
+
         </View>
 
         {/* Version info footer */}

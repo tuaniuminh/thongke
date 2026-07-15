@@ -14,6 +14,8 @@ import BloodPressureList from './src/features/ho-so-y-te/BloodPressureList';
 import BloodPressureForm from './src/features/ho-so-y-te/BloodPressureForm';
 import BodyCompositionList from './src/features/ho-so-y-te/BodyCompositionList';
 import BodyCompositionForm from './src/features/ho-so-y-te/BodyCompositionForm';
+import FamilyFundDashboard from './src/features/quy-gia-dinh/FamilyFundDashboard';
+import FundTransactionForm from './src/features/quy-gia-dinh/FundTransactionForm';
 import { AppProvider } from './src/core/AppContext';
 
 const Stack = createNativeStackNavigator();
@@ -43,6 +45,8 @@ export default function App() {
             <Stack.Screen name="BloodPressureForm" component={BloodPressureForm} />
             <Stack.Screen name="BodyCompositionList" component={BodyCompositionList} />
             <Stack.Screen name="BodyCompositionForm" component={BodyCompositionForm} />
+            <Stack.Screen name="FamilyFundDashboard" component={FamilyFundDashboard} />
+            <Stack.Screen name="FundTransactionForm" component={FundTransactionForm} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
