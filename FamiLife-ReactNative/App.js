@@ -17,6 +17,7 @@ import BodyCompositionForm from './src/features/ho-so-y-te/BodyCompositionForm';
 import FamilyFundDashboard from './src/features/quy-gia-dinh/FamilyFundDashboard';
 import FundTransactionForm from './src/features/quy-gia-dinh/FundTransactionForm';
 import MonthlyReportScreen from './src/features/quy-gia-dinh/MonthlyReportScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import { AppProvider } from './src/core/AppContext';
 
 const Stack = createNativeStackNavigator();
@@ -49,6 +50,7 @@ export default function App() {
             <Stack.Screen name="FamilyFundDashboard" component={FamilyFundDashboard} />
             <Stack.Screen name="FundTransactionForm" component={FundTransactionForm} />
             <Stack.Screen name="MonthlyReportScreen" component={MonthlyReportScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

@@ -1,10 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { convertSolar2Lunar } from '../utils/lunar';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
+  const [lunarDateText, setLunarDateText] = useState('Lịch âm: --/--');
+  const [weatherText, setWeatherText] = useState('--°C - Tải...');
+
+  useEffect(() => {
+    // 1. Calculate Lunar Date
+    const today = new Date();
+    const dd = today.getDate();
+    const mm = today.getMonth() + 1;
+    const yyyy = today.getFullYear();
+    const lunar = convertSolar2Lunar(dd, mm, yyyy);
+    if (lunar) {
+      const monthStr = String(lunar.lMonth).padStart(2, '0');
+      const dayStr = String(lunar.lDay).padStart(2, '0');
+      setLunarDateText(`Lịch âm: ${dayStr}/${monthStr} (${lunar.gzYear})`);
+    }
+
+    // 2. Fetch Hanoi weather data
+    const fetchWeather = async () => {
+      try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=21.0285&longitude=105.8542&current=temperature_2m,weather_code');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.current) {
+            const temp = Math.round(data.current.temperature_2m);
+            const code = data.current.weather_code;
+            let desc = 'Nhiều mây';
+
+            if (code === 0) desc = 'Trời quang';
+            else if (code >= 1 && code <= 3) desc = 'Mây rải rác';
+            else if (code === 45 || code === 48) desc = 'Sương mù';
+            else if (code >= 51 && code <= 55) desc = 'Mưa phùn';
+            else if (code >= 61 && code <= 65) desc = 'Mưa';
+            else if (code >= 80 && code <= 82) desc = 'Mưa rào';
+            else if (code >= 95 && code <= 99) desc = 'Dông bão';
+
+            setWeatherText(`${temp}°C - ${desc}`);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch Hanoi weather:', err);
+        setWeatherText('Ngoại tuyến');
+      }
+    };
+
+    fetchWeather();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
@@ -12,10 +60,10 @@ export default function HomeScreen({ navigation }) {
         {/* Header Widgets Area */}
         <View style={styles.widgetsRow}>
           <View style={styles.widget}>
-            <Text style={styles.widgetLabel}>Lịch âm: 02/06/2026</Text>
+            <Text style={styles.widgetLabel}>{lunarDateText}</Text>
           </View>
           <View style={styles.widget}>
-            <Text style={styles.widgetLabel}>33°C - Nhiều mây</Text>
+            <Text style={styles.widgetLabel}>🌡️ {weatherText}</Text>
           </View>
         </View>
 
@@ -78,6 +126,22 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.cardTextContent}>
               <Text style={styles.cardTitle}>Quỹ gia đình</Text>
               <Text style={styles.cardDesc}>Quản lý tiền đóng góp, chi tiêu, đầu tư và số dư của các tài khoản quỹ chung</Text>
+            </View>
+            <Text style={styles.arrowIcon}>chevron-right</Text>
+          </TouchableOpacity>
+
+          {/* Card 4: Cài Đặt */}
+          <TouchableOpacity 
+            style={styles.card} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Settings')}
+          >
+            <View style={[styles.cardIconWrapper, { backgroundColor: '#f1f5f9' }]}>
+              <Text style={styles.cardIcon}>⚙️</Text>
+            </View>
+            <View style={styles.cardTextContent}>
+              <Text style={styles.cardTitle}>Cấu hình & Cài đặt</Text>
+              <Text style={styles.cardDesc}>Đăng ký API Key Gemini, liên kết email vợ chồng và quản lý thành viên gia đình</Text>
             </View>
             <Text style={styles.arrowIcon}>chevron-right</Text>
           </TouchableOpacity>
