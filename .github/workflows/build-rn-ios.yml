@@ -25,7 +25,7 @@ jobs:
       - name: Run Expo Prebuild (No Install)
         run: |
           cd FamiLife-ReactNative
-          npx expo prebuild --platform ios --no-install
+          npx expo prebuild --platform ios --no-install --non-interactive
 
       - name: Install CocoaPods
         run: |
