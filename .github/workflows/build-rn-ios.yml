@@ -27,10 +27,10 @@ jobs:
           cd FamiLife-ReactNative
           npx expo prebuild --platform ios --no-install --non-interactive
 
-      - name: Install CocoaPods
+      - name: Install CocoaPods via Expo pod-install
         run: |
-          cd FamiLife-ReactNative/ios
-          pod install
+          cd FamiLife-ReactNative
+          npx pod-install
 
       - name: List Workspace Schemes (Debug)
         run: |
