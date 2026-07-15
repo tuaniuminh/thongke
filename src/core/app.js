@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.58';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.58';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.58';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.58';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.59';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.59';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.59';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.59';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.58';
-import * as sync from './sync.js?v=4.1.58';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.58';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.59';
+import * as sync from './sync.js?v=4.1.59';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.59';
 
-const APP_VERSION = '4.1.58';
+const APP_VERSION = '4.1.59';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1736,6 +1736,17 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
             panel.style.display = 'none';
         }
     });
+
+    // Toggle main layouts based on active tab to support pushState route changes
+    const appLayout = document.getElementById('appLayout');
+    const homeLayout = document.getElementById('homeLayout');
+    if (tabId === 'home' || tabId === 'trangchu') {
+        if (appLayout) appLayout.style.display = 'none';
+        if (homeLayout) homeLayout.style.display = 'flex';
+    } else {
+        if (appLayout) appLayout.style.display = 'flex';
+        if (homeLayout) homeLayout.style.display = 'none';
+    }
     
     // Toggle sticky class on sidebar for desktop when in health tab
     const sidebar = document.querySelector('.sidebar');
