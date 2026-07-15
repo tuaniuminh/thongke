@@ -4187,31 +4187,38 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
 
 /* iOS Safe Area Overrides */
 body.ios-device .version-badge-btn {
+    top: 64px !important;
     top: calc(20px + env(safe-area-inset-top, 44px)) !important;
 }
 @media (max-width: 576px) {
     body.ios-device .version-badge-btn {
+        top: 56px !important;
         top: calc(12px + env(safe-area-inset-top, 44px)) !important;
     }
 }
 
 body.ios-device .home-settings-btn {
+    top: 109px !important;
     top: calc(65px + env(safe-area-inset-top, 44px)) !important;
 }
 @media (max-width: 576px) {
     body.ios-device .home-settings-btn {
+        top: 94px !important;
         top: calc(50px + env(safe-area-inset-top, 44px)) !important;
     }
     body.ios-device .home-settings-btn.not-logged-in {
+        top: 94px !important;
         top: calc(50px + env(safe-area-inset-top, 44px)) !important;
     }
 }
 
 body.ios-device .home-widgets-container {
+    top: 64px !important;
     top: calc(20px + env(safe-area-inset-top, 44px)) !important;
 }
 @media (max-width: 576px) {
     body.ios-device .home-widgets-container {
+        top: 56px !important;
         top: calc(12px + env(safe-area-inset-top, 44px)) !important;
     }
 }
