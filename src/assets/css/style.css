@@ -73,6 +73,8 @@ body.light-mode {
 
 html, body {
     touch-action: manipulation;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 body {
@@ -84,17 +86,23 @@ body {
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Scrollbar Style - Hidden globally on all elements to match native application aesthetics on all platforms */
-*::-webkit-scrollbar,
+/* Scrollbar Style */
 ::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
-/* Enable smooth momentum inertia scrolling on iOS for the main page and all scrollable containers */
-html,
-body,
+/* Enable smooth momentum inertia scrolling on iOS for all scrollable containers */
 .home-layout,
 .main-content,
 .modal-card,
@@ -3140,7 +3148,7 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
     background-image: radial-gradient(circle at top right, rgba(13, 148, 136, 0.05), transparent 40%),
                       radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.03), transparent 40%);
     padding: 2rem 1rem;
-    overflow-y: auto;
+    overflow-y: visible;
 }
 
 .home-container {
