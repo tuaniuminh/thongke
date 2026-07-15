@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.59';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.59';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.59';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.59';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.61';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.61';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.61';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.61';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.59';
-import * as sync from './sync.js?v=4.1.59';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.59';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.61';
+import * as sync from './sync.js?v=4.1.61';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.61';
 
-const APP_VERSION = '4.1.59';
+const APP_VERSION = '4.1.61';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2242,17 +2242,11 @@ async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
 
-    // Detect iOS/Capacitor environment and add class to body + inject dynamic styles to bypass WKWebView stylesheet cache
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-                        (navigator.userAgent.includes('Macintosh') && 'ontouchend' in document) ||
-                        (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
-                        window.location.protocol === 'capacitor:' || 
-                        window.location.protocol === 'file:' ||
-                        ((window.location.hostname === 'localhost' || window.location.hostname === '') && 
-                         ('ontouchstart' in window || navigator.maxTouchPoints > 0));
+    // Detect iOS/Capacitor native environment vs. web PWA
+    const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
+                        window.location.protocol === 'capacitor:';
 
-    if (isIOSDevice) {
+    if (isIOSNative) {
         document.body.classList.add('ios-device');
         
         const iosStyle = document.createElement('style');

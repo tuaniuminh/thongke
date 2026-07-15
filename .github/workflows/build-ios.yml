@@ -1,4 +1,4 @@
-name: Build iOS IPA (Ad-Hoc for TrollStore)
+name: Build iOS IPA
 
 on:
   push:
@@ -70,7 +70,7 @@ jobs:
                      COMPILER_INDEX_STORE_ENABLE=NO \
                      clean build
 
-      - name: Ad-Hoc Sign App Bundle
+      - name: Sign App Bundle
         run: |
           codesign --force --sign - --deep --entitlements ios-build-entitlements.plist build/Build/Products/Release-iphoneos/App.app
 
