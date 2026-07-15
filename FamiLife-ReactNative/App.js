@@ -8,6 +8,7 @@ import FeatureScreen from './src/screens/FeatureScreen';
 import ThuChiDashboard from './src/features/thu-chi-doi-ngoai/ThuChiDashboard';
 import ReceivedList from './src/features/thu-chi-doi-ngoai/ReceivedList';
 import SentList from './src/features/thu-chi-doi-ngoai/SentList';
+import GiftForm from './src/features/thu-chi-doi-ngoai/GiftForm';
 import { AppProvider } from './src/core/AppContext';
 
 const Stack = createNativeStackNavigator();
@@ -31,6 +32,7 @@ export default function App() {
             <Stack.Screen name="ThuChiDashboard" component={ThuChiDashboard} />
             <Stack.Screen name="ReceivedList" component={ReceivedList} />
             <Stack.Screen name="SentList" component={SentList} />
+            <Stack.Screen name="GiftForm" component={GiftForm} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

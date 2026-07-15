@@ -90,7 +90,10 @@ export default function ReceivedList({ navigation }) {
 
         {/* Placeholder for Edit/Delete */}
         <View style={styles.rightActions}>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity 
+            style={styles.editBtn}
+            onPress={() => navigation.navigate('GiftForm', { mode: 'edit', type: 'received', giftId: item.id })}
+          >
             <Text style={styles.actionIconText}>✏️</Text>
           </TouchableOpacity>
         </View>
@@ -107,7 +110,10 @@ export default function ReceivedList({ navigation }) {
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Tiền tôi nhận</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => {}}>
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={() => navigation.navigate('GiftForm', { mode: 'create', type: 'received' })}
+        >
           <Text style={styles.addButtonText}>+ Thêm</Text>
         </TouchableOpacity>
       </View>

@@ -76,7 +76,10 @@ export default function SentList({ navigation }) {
       <View style={styles.giftActions}>
         <View style={styles.placeholderLabel} />
         <View style={styles.rightActions}>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity 
+            style={styles.editBtn}
+            onPress={() => navigation.navigate('GiftForm', { mode: 'edit', type: 'sent', giftId: item.id })}
+          >
             <Text style={styles.actionIconText}>✏️</Text>
           </TouchableOpacity>
         </View>
@@ -93,7 +96,10 @@ export default function SentList({ navigation }) {
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Tiền tôi mừng</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => {}}>
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={() => navigation.navigate('GiftForm', { mode: 'create', type: 'sent' })}
+        >
           <Text style={styles.addButtonText}>+ Thêm</Text>
         </TouchableOpacity>
       </View>
