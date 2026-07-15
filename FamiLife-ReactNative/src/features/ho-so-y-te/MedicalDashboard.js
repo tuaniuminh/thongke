@@ -32,7 +32,10 @@ export default function MedicalDashboard({ navigation }) {
           <Text style={styles.backButtonText}>← Trang chủ</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Hồ Sơ Sức Khỏe</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => {}}>
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={() => navigation.navigate('MedicalRecordForm', { mode: 'create', profileId: selectedHealthProfileId })}
+        >
           <Text style={styles.addButtonText}>+ Hồ sơ</Text>
         </TouchableOpacity>
       </View>
@@ -166,7 +169,11 @@ export default function MedicalDashboard({ navigation }) {
       </TouchableOpacity>
 
       {/* Medical Records List */}
-      <View style={styles.recordsSection}>
+      <TouchableOpacity 
+        style={styles.recordsSection} 
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('MedicalRecordList')}
+      >
         <Text style={styles.sectionTitle}>Hồ sơ khám bệnh ({activeRecords.length})</Text>
         
         {activeRecords.length === 0 ? (
@@ -174,7 +181,7 @@ export default function MedicalDashboard({ navigation }) {
         ) : (
           <View style={styles.recordsList}>
             {activeRecords.map((rec, idx) => (
-              <TouchableOpacity key={rec.id} style={styles.recordItem} activeOpacity={0.7}>
+              <View key={rec.id} style={styles.recordItem}>
                 <View style={styles.recordHeader}>
                   <Text style={styles.recordName}>{rec.diagnose || 'Khám sức khỏe'}</Text>
                   <Text style={styles.recordMember}>{getProfileName(rec.profile_id, familyProfiles)}</Text>
@@ -182,11 +189,11 @@ export default function MedicalDashboard({ navigation }) {
                 <Text style={styles.recordHospital}>🏥 {rec.hospital || 'Tự khám / Nơi khác'}</Text>
                 <Text style={styles.recordDate}>📅 Ngày khám: {new Date(rec.date).toLocaleDateString('vi-VN')}</Text>
                 {rec.notes ? <Text style={styles.recordNotes} numberOfLines={1}>{rec.notes}</Text> : null}
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         )}
-      </View>
+      </TouchableOpacity>
 
     </ScrollView>
   );
