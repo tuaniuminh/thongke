@@ -2,3 +2,9 @@ project_summary.md
 push.bat
 fix.py
 .agents/
+node_modules/
+www/
+ios/
+assets/
+Payload/
+*.ipa

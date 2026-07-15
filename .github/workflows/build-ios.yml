@@ -1,0 +1,89 @@
+name: Build iOS IPA (Ad-Hoc for TrollStore)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject Supabase Secrets
+        run: |
+          URL_VAL="${{ secrets.VITE_SUPABASE_URL }}"
+          if [ -z "$URL_VAL" ]; then
+            URL_VAL="${{ vars.VITE_SUPABASE_URL }}"
+          fi
+
+          KEY_VAL="${{ secrets.VITE_SUPABASE_ANON_KEY }}"
+          if [ -z "$KEY_VAL" ]; then
+            KEY_VAL="${{ vars.VITE_SUPABASE_ANON_KEY }}"
+          fi
+
+          # Replace VITE_SUPABASE_URL_PLACEHOLDER and VITE_SUPABASE_ANON_KEY_PLACEHOLDER in src/core/app.js
+          sed -i "" "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" src/core/app.js
+          sed -i "" "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" src/core/app.js
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Prepare Web Assets
+        run: npm run prepare-dist
+
+      - name: Add and Sync iOS Platform
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Prepare Assets for Icon Generation
+        run: |
+          mkdir -p assets
+          cp icon-512.png assets/icon.png
+          cp icon-512.png assets/icon-only.png
+          cp icon-512.png assets/splash.png
+          cp icon-512.png assets/splash-only.png
+
+      - name: Generate App Icons
+        run: npm run generate-assets
+
+      - name: Sync App Version to Xcode
+        run: python3 update-xcode-version.py
+
+      - name: Build Xcode Project
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace \
+                     -scheme App \
+                     -configuration Release \
+                     -sdk iphoneos \
+                     -derivedDataPath build \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     COMPILER_INDEX_STORE_ENABLE=NO \
+                     clean build
+
+      - name: Ad-Hoc Sign App Bundle
+        run: |
+          codesign --force --sign - --deep --entitlements ios-build-entitlements.plist build/Build/Products/Release-iphoneos/App.app
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -r App.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FamiLife-iOS-AdHoc
+          path: App.ipa
+          if-no-files-found: error
