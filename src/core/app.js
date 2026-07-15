@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.49';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.49';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.49';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.49';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.50';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.50';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.50';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.50';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.49';
-import * as sync from './sync.js?v=4.1.49';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.49';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.50';
+import * as sync from './sync.js?v=4.1.50';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.50';
 
-const APP_VERSION = '4.1.49';
+const APP_VERSION = '4.1.50';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2289,23 +2289,33 @@ async function initializeApp() {
     let currentPanel = null;
     let prevPanel = null;
     let prevTabId = null;
+    let swipeTargetType = 'tab'; // 'tab' hoặc 'home'
     
     document.addEventListener('touchstart', (e) => {
-        // Chỉ bắt đầu vuốt từ sát mép trái (X < 35px)
+        const appLayout = document.getElementById('appLayout');
+        if (!appLayout || appLayout.style.display === 'none') return;
+        
+        // Chỉ bắt đầu vuốt từ sát mép trái (X < 45px - tăng vùng nhạy cảm mép để dễ chạm hơn)
         const startX = e.touches[0].clientX;
         const startY = e.touches[0].clientY;
         
-        if (startX < 35 && state.tabHistory && state.tabHistory.length > 0) {
+        if (startX < 45) {
             touchStartX = startX;
             touchStartY = startY;
             isSwiping = false;
             
-            // Lấy ID của tab trước đó
-            prevTabId = state.tabHistory[state.tabHistory.length - 1];
-            
-            // Lấy các element panel tương ứng
-            currentPanel = document.getElementById(`tab-${state.activeTab}`);
-            prevPanel = document.getElementById(`tab-${prevTabId}`);
+            // Kiểm tra lịch sử tab con
+            if (state.tabHistory && state.tabHistory.length > 0) {
+                swipeTargetType = 'tab';
+                prevTabId = state.tabHistory[state.tabHistory.length - 1];
+                currentPanel = document.getElementById(`tab-${state.activeTab}`);
+                prevPanel = document.getElementById(`tab-${prevTabId}`);
+            } else {
+                swipeTargetType = 'home';
+                prevTabId = 'trangchu';
+                currentPanel = appLayout;
+                prevPanel = document.getElementById('homeLayout');
+            }
         }
     }, { passive: true });
 
@@ -2321,41 +2331,57 @@ async function initializeApp() {
         if (!isSwiping && diffX > 10 && diffY < diffX * 0.5) {
             isSwiping = true;
             
-            // Thiết lập trạng thái ban đầu cho animation xếp chồng
-            const mainContent = document.querySelector('.main-content');
-            if (mainContent) {
-                mainContent.style.position = 'relative';
-                mainContent.style.overflowX = 'hidden';
+            if (swipeTargetType === 'tab') {
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.style.position = 'relative';
+                    mainContent.style.overflowX = 'hidden';
+                }
+                
+                prevPanel.style.display = 'block';
+                prevPanel.style.position = 'absolute';
+                prevPanel.style.top = '0';
+                prevPanel.style.left = '0';
+                prevPanel.style.width = '100%';
+                prevPanel.style.zIndex = '1';
+                prevPanel.style.opacity = '0.9';
+                prevPanel.style.transform = 'translateX(-20%)';
+                
+                currentPanel.style.position = 'absolute';
+                currentPanel.style.top = '0';
+                currentPanel.style.left = '0';
+                currentPanel.style.width = '100%';
+                currentPanel.style.zIndex = '2';
+                currentPanel.style.boxShadow = '-5px 0 15px rgba(0,0,0,0.15)';
+            } else {
+                // Thiết lập trạng thái xếp chồng appLayout lên trên homeLayout để chuẩn bị trượt về Trang chủ
+                prevPanel.style.display = 'flex';
+                prevPanel.style.position = 'absolute';
+                prevPanel.style.top = '0';
+                prevPanel.style.left = '0';
+                prevPanel.style.width = '100%';
+                prevPanel.style.height = '100%';
+                prevPanel.style.zIndex = '1';
+                prevPanel.style.opacity = '0.9';
+                prevPanel.style.transform = 'translateX(-20%)';
+                
+                currentPanel.style.position = 'absolute';
+                currentPanel.style.top = '0';
+                currentPanel.style.left = '0';
+                currentPanel.style.width = '100%';
+                currentPanel.style.height = '100%';
+                currentPanel.style.zIndex = '2';
+                currentPanel.style.boxShadow = '-5px 0 15px rgba(0,0,0,0.15)';
             }
-            
-            // Hiển thị panel trước đó ở bên dưới
-            prevPanel.style.display = 'block';
-            prevPanel.style.position = 'absolute';
-            prevPanel.style.top = '0';
-            prevPanel.style.left = '0';
-            prevPanel.style.width = '100%';
-            prevPanel.style.zIndex = '1';
-            prevPanel.style.opacity = '0.9';
-            prevPanel.style.transform = 'translateX(-20%)'; // Parallax effect nhẹ
-            
-            // Cấu hình panel hiện tại ở trên
-            currentPanel.style.position = 'absolute';
-            currentPanel.style.top = '0';
-            currentPanel.style.left = '0';
-            currentPanel.style.width = '100%';
-            currentPanel.style.zIndex = '2';
-            currentPanel.style.boxShadow = '-5px 0 15px rgba(0,0,0,0.15)';
         }
         
         if (isSwiping && diffX > 0) {
-            // Dịch chuyển panel hiện tại theo ngón tay
             currentPanel.style.transform = `translateX(${diffX}px)`;
             
-            // Parallax dịch chuyển panel phía dưới
             const progress = diffX / window.innerWidth;
-            const prevOffset = -20 + progress * 20; // Từ -20% tiến dần về 0%
+            const prevOffset = -20 + progress * 20;
             prevPanel.style.transform = `translateX(${prevOffset}%)`;
-            prevPanel.style.opacity = 0.9 + progress * 0.1; // Độ sáng tăng dần lên 1
+            prevPanel.style.opacity = 0.9 + progress * 0.1;
         }
     }, { passive: true });
 
@@ -2371,11 +2397,9 @@ async function initializeApp() {
         const diffX = touchEndX - touchStartX;
         const screenWidth = window.innerWidth;
         
-        // Quyết định quay lại nếu vuốt quá 30% màn hình
         const shouldGoBack = diffX > screenWidth * 0.3;
         
         if (shouldGoBack) {
-            // Chạy animation trượt hẳn trang cũ sang phải
             currentPanel.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.8, 0.25, 1)';
             currentPanel.style.transform = `translateX(${screenWidth}px)`;
             
@@ -2383,18 +2407,21 @@ async function initializeApp() {
             prevPanel.style.transform = 'translateX(0)';
             
             setTimeout(() => {
-                // Hoàn tất chuyển tab thật trong code
-                if (state.tabHistory && state.tabHistory.length > 0) {
-                    state.tabHistory.pop();
+                if (swipeTargetType === 'tab') {
+                    if (state.tabHistory && state.tabHistory.length > 0) {
+                        state.tabHistory.pop();
+                    }
+                    switchTab(prevTabId, true, false);
+                    resetPanelsStyle(currentPanel, prevPanel);
+                } else {
+                    // Quay về trang chủ
+                    window.location.hash = 'trangchu';
+                    resetAppLayoutStyle(currentPanel, prevPanel);
                 }
-                switchTab(prevTabId, true, false);
-                
-                resetPanelsStyle(currentPanel, prevPanel);
                 currentPanel = null;
                 prevPanel = null;
             }, 200);
         } else {
-            // Chạy animation trượt trang cũ quay lại vị trí ban đầu
             currentPanel.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.8, 0.25, 1)';
             currentPanel.style.transform = 'translateX(0)';
             
@@ -2403,7 +2430,11 @@ async function initializeApp() {
             
             setTimeout(() => {
                 prevPanel.style.display = 'none';
-                resetPanelsStyle(currentPanel, prevPanel);
+                if (swipeTargetType === 'tab') {
+                    resetPanelsStyle(currentPanel, prevPanel);
+                } else {
+                    resetAppLayoutStyle(currentPanel, prevPanel);
+                }
                 currentPanel = null;
                 prevPanel = null;
             }, 200);
@@ -2433,6 +2464,31 @@ async function initializeApp() {
             p2.style.top = '';
             p2.style.left = '';
             p2.style.width = '';
+            p2.style.zIndex = '';
+            p2.style.transform = '';
+            p2.style.transition = '';
+            p2.style.opacity = '';
+        }
+    }
+
+    function resetAppLayoutStyle(p1, p2) {
+        if (p1) {
+            p1.style.position = '';
+            p1.style.top = '';
+            p1.style.left = '';
+            p1.style.width = '';
+            p1.style.height = '';
+            p1.style.zIndex = '';
+            p1.style.transform = '';
+            p1.style.transition = '';
+            p1.style.boxShadow = '';
+        }
+        if (p2) {
+            p2.style.position = '';
+            p2.style.top = '';
+            p2.style.left = '';
+            p2.style.width = '';
+            p2.style.height = '';
             p2.style.zIndex = '';
             p2.style.transform = '';
             p2.style.transition = '';
@@ -3503,6 +3559,7 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 
 
 
