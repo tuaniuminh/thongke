@@ -2,5 +2,8 @@
   "appId": "vn.familife.thongke",
   "appName": "FamiLife",
   "webDir": "www",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "ios": {
+    "allowsBackForwardNavigationGestures": true
+  }
 }

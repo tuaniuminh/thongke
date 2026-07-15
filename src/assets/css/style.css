@@ -3370,7 +3370,7 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
 /* Version Badge Button (PRO Version) */
 .version-badge-btn {
     position: absolute;
-    top: 20px;
+    top: calc(20px + env(safe-area-inset-top));
     right: 20px;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
@@ -3413,7 +3413,7 @@ body.light-mode .version-badge-btn {
 
 @media (max-width: 576px) {
     .version-badge-btn {
-        top: 12px;
+        top: calc(12px + env(safe-area-inset-top));
         right: 12px;
         padding: 6px 12px;
         font-size: 0.75rem;
@@ -3587,7 +3587,7 @@ body.light-mode .version-badge-btn {
 /* Home Page Settings Button (Glassmorphism style below version badge) */
 .home-settings-btn {
     position: absolute;
-    top: 65px;
+    top: calc(65px + env(safe-area-inset-top));
     right: 20px;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
@@ -3656,7 +3656,7 @@ body.light-mode .home-settings-btn {
 
 @media (max-width: 576px) {
     .home-settings-btn {
-        top: 50px;
+        top: calc(50px + env(safe-area-inset-top));
         right: 12px;
         width: 34px;
         height: 34px;
@@ -3689,7 +3689,7 @@ body.light-mode .home-settings-btn {
 /* Home Page Widgets Container */
 .home-widgets-container {
     position: absolute;
-    top: 20px;
+    top: calc(20px + env(safe-area-inset-top));
     left: 20px;
     display: flex;
     flex-direction: column;
@@ -3749,7 +3749,7 @@ body.light-mode .home-widget-box {
 
 @media (max-width: 576px) {
     .home-widgets-container {
-        top: 12px;
+        top: calc(12px + env(safe-area-inset-top));
         left: 12px;
         gap: 6px;
     }
@@ -3928,7 +3928,7 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
 /* Responsive updates for not-logged-in button */
 @media (max-width: 576px) {
     .home-settings-btn.not-logged-in {
-        top: 50px !important;
+        top: calc(50px + env(safe-area-inset-top)) !important;
         right: 12px !important;
         height: 34px !important;
         padding: 0 12px !important;

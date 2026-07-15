@@ -76,13 +76,15 @@ jobs:
 
       - name: Package IPA
         run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
           mkdir -p Payload
           cp -r build/Build/Products/Release-iphoneos/App.app Payload/
-          zip -r App.ipa Payload
+          zip -r "FamiLife_v${VERSION}.ipa" Payload
+          echo "IPA_NAME=FamiLife_v${VERSION}.ipa" >> $GITHUB_ENV
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FamiLife-iOS-AdHoc
-          path: App.ipa
+          path: ${{ env.IPA_NAME }}
           if-no-files-found: error

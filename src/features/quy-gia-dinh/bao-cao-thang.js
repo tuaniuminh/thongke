@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.1.40';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.40';
+} from '../../core/app.js?v=4.1.41';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.1.41';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -850,3 +850,4 @@ export async function checkNewMonthNotification() {
 // Attach export functions to window for onclick bindings
 window.openMonthlyReportModal = openMonthlyReportModal;
 window.generateMonthlyReport = generateMonthlyReport;
+
