@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.45';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.45';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.45';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.45';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.46';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.46';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.46';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.46';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.45';
-import * as sync from './sync.js?v=4.1.45';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.45';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.46';
+import * as sync from './sync.js?v=4.1.46';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.46';
 
-const APP_VERSION = '4.1.45';
+const APP_VERSION = '4.1.46';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2230,7 +2230,10 @@ async function initializeApp() {
                         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
                         (navigator.userAgent.includes('Macintosh') && 'ontouchend' in document) ||
                         (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
-                        window.location.protocol === 'capacitor:';
+                        window.location.protocol === 'capacitor:' || 
+                        window.location.protocol === 'file:' ||
+                        ((window.location.hostname === 'localhost' || window.location.hostname === '') && 
+                         ('ontouchstart' in window || navigator.maxTouchPoints > 0));
 
     if (isIOSDevice) {
         document.body.classList.add('ios-device');
@@ -2239,36 +2242,29 @@ async function initializeApp() {
         iosStyle.textContent = `
             body.ios-device .version-badge-btn {
                 top: 64px !important;
-                top: calc(20px + env(safe-area-inset-top, 44px)) !important;
             }
             @media (max-width: 576px) {
                 body.ios-device .version-badge-btn {
                     top: 56px !important;
-                    top: calc(12px + env(safe-area-inset-top, 44px)) !important;
                 }
             }
             body.ios-device .home-settings-btn {
                 top: 109px !important;
-                top: calc(65px + env(safe-area-inset-top, 44px)) !important;
             }
             @media (max-width: 576px) {
                 body.ios-device .home-settings-btn {
                     top: 94px !important;
-                    top: calc(50px + env(safe-area-inset-top, 44px)) !important;
                 }
                 body.ios-device .home-settings-btn.not-logged-in {
                     top: 94px !important;
-                    top: calc(50px + env(safe-area-inset-top, 44px)) !important;
                 }
             }
             body.ios-device .home-widgets-container {
                 top: 64px !important;
-                top: calc(20px + env(safe-area-inset-top, 44px)) !important;
             }
             @media (max-width: 576px) {
                 body.ios-device .home-widgets-container {
                     top: 56px !important;
-                    top: calc(12px + env(safe-area-inset-top, 44px)) !important;
                 }
             }
             .tab-panel {
@@ -3364,6 +3360,7 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 
 
 
