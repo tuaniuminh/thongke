@@ -403,6 +403,8 @@ body.light-mode .nav-link:hover {
     padding: 1.75rem;
     margin-bottom: 2rem;
     transition: border-color var(--transition-normal);
+    /* Đảm bảo card không bao giờ cờ về 0 khi tbody rỗng */
+    min-height: 120px;
 }
 
 /* Dashboard Summary Cards */
@@ -1216,6 +1218,8 @@ body.light-mode .data-table tbody tr:hover {
     .main-content {
         margin-left: 0;
         padding: calc(1.25rem + env(safe-area-inset-top)) 1rem 1.25rem;
+        /* Đảm bảo content area luôn chiếm đủ chiều cao, tránh layout shift khi ít data */
+        min-height: 100vh;
     }
     
     .top-header {
@@ -3439,6 +3443,11 @@ body.light-mode .version-badge-btn {
         z-index: 900;
         margin: -1.25rem -1rem 1.25rem -1rem; /* Offset main-content padding */
         padding-top: calc(10px + env(safe-area-inset-top));
+        /* Chống layout shift khi navbar chuyển giữa 1 dòng và 2 dòng */
+        transition: height 0.22s ease, padding 0.22s ease;
+        overflow: hidden;
+        will-change: height;
+        min-height: 54px;
     }
 
     body.light-mode .mobile-navbar {
@@ -3450,6 +3459,8 @@ body.light-mode .version-badge-btn {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+        /* Giữ padding-bottom nhất quán để tránh layout shift */
+        padding-bottom: 10px;
     }
 
     .mobile-navbar.two-line .mobile-navbar-left {
@@ -3623,6 +3634,55 @@ body.light-mode .home-settings-btn {
 
 .home-settings-btn:active {
     transform: translateY(0);
+}
+
+/* Nút cài đặt PWA — ẩn trên mặc định, chỉ hiện khi beforeinstallprompt có sẵn */
+.home-pwa-install-btn {
+    position: absolute;
+    top: calc(65px + env(safe-area-inset-top));
+    right: 68px; /* Bên trái nút settings */
+    background: rgba(13, 148, 136, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(13, 148, 136, 0.3);
+    color: var(--primary-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: none; /* JS sẽ bật flex khi có prompt */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.25);
+    z-index: 10;
+    animation: pulse-teal 2s ease-in-out infinite;
+}
+
+body.light-mode .home-pwa-install-btn {
+    background: rgba(13, 148, 136, 0.1);
+    border: 1px solid rgba(13, 148, 136, 0.25);
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.15);
+}
+
+.home-pwa-install-btn:hover {
+    background: rgba(13, 148, 136, 0.2);
+    box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
+    transform: translateY(-2px) scale(1.08);
+}
+
+.home-pwa-install-btn:active {
+    transform: translateY(0) scale(1);
+}
+
+.home-pwa-install-btn i {
+    width: 18px;
+    height: 18px;
+}
+
+@keyframes pulse-teal {
+    0%, 100% { box-shadow: 0 4px 20px rgba(13, 148, 136, 0.25); }
+    50% { box-shadow: 0 4px 28px rgba(13, 148, 136, 0.5), 0 0 0 4px rgba(13, 148, 136, 0.1); }
 }
 
 .mobile-home-btn {

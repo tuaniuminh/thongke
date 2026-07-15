@@ -39,12 +39,12 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.56">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.57">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.56">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.56">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.56">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.57">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.57">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.57">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -1616,6 +1616,10 @@
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
             <span class="wizard-version-badge"></span>
         </button>
+        <!-- Nút Cài đặt ứng dụng PWA (chỉ hiện khi trình duyệt hỗ trợ beforeinstallprompt) -->
+        <button class="home-pwa-install-btn" id="homePwaInstallBtn" title="Cài đặt ứng dụng" style="display: none;">
+            <i data-lucide="download"></i>
+        </button>
         <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
             <i data-lucide="settings"></i>
         </button>
@@ -1646,19 +1650,6 @@
             </div>
             
             <div class="home-grid">
-                <!-- Card 1: Cấu hình dữ liệu -->
-                <a href="#caidat" class="home-card card-settings">
-                    <div class="home-card-icon">
-                        <i data-lucide="database"></i>
-                    </div>
-                    <div class="home-card-content">
-                        <h3>Đồng bộ & Cấu hình</h3>
-                        <p>Cấu hình dữ liệu cục bộ, liên kết tài khoản Cloud Supabase và quản lý bảo mật</p>
-                    </div>
-                    <div class="home-card-arrow">
-                        <i data-lucide="chevron-right"></i>
-                    </div>
-                </a>
                 
                 <!-- Card 2: Thu chi đối ngoại -->
                 <a href="#tongquan" class="home-card card-finance" id="homeCardFinance">
@@ -3157,8 +3148,8 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.56"></script>
-    <script type="module" src="src/core/app.js?v=4.1.56"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.57"></script>
+    <script type="module" src="src/core/app.js?v=4.1.57"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
@@ -3169,6 +3160,40 @@
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
         }
+    </script>
+
+    <!-- PWA Install Prompt Handler -->
+    <script>
+        let __pwaInstallPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            __pwaInstallPrompt = e;
+            // Chỉ hiện nút cài đặt khi đang ở trang chủ
+            const btn = document.getElementById('homePwaInstallBtn');
+            if (btn) btn.style.display = 'flex';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            __pwaInstallPrompt = null;
+            const btn = document.getElementById('homePwaInstallBtn');
+            if (btn) btn.style.display = 'none';
+            console.log('[PWA] App installed successfully.');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const installBtn = document.getElementById('homePwaInstallBtn');
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (!__pwaInstallPrompt) return;
+                    __pwaInstallPrompt.prompt();
+                    const { outcome } = await __pwaInstallPrompt.userChoice;
+                    console.log('[PWA] Install outcome:', outcome);
+                    __pwaInstallPrompt = null;
+                    installBtn.style.display = 'none';
+                });
+            }
+        });
     </script>
 
     <!-- Bind Debug Console Panel Click Handlers -->

@@ -998,35 +998,8 @@ function updateUserBadge() {
 
 function updateHomeLayoutUI() {
     const isLoggedIn = state.user !== null;
-    const cardSettings = document.querySelector('.home-card.card-settings');
     const settingsBtn = document.getElementById('homeSettingsBtn');
     const cardFund = document.getElementById('homeCardFund');
-
-    // --- Card "Đồng bộ & Cấu hình" / "Đăng nhập tài khoản" ---
-    if (cardSettings) {
-        cardSettings.style.display = 'flex';
-        cardSettings.style.removeProperty('display'); // Remove any !important overrides
-        
-        const titleEl = cardSettings.querySelector('.home-card-content h3');
-        const descEl = cardSettings.querySelector('.home-card-content p');
-        const iconWrapper = cardSettings.querySelector('.home-card-icon');
-        
-        if (!isLoggedIn) {
-            cardSettings.classList.add('not-logged-in-card');
-            if (titleEl) titleEl.innerText = 'Đăng nhập & Cấu hình';
-            if (descEl) descEl.innerText = 'Đăng nhập/Đăng ký tài khoản để tự động đồng bộ dữ liệu đám mây Supabase';
-            if (iconWrapper) iconWrapper.innerHTML = '<i data-lucide="log-in"></i>';
-        } else {
-            cardSettings.classList.remove('not-logged-in-card');
-            if (titleEl) titleEl.innerText = 'Đồng bộ & Cấu hình';
-            if (descEl) descEl.innerText = `Đã liên kết: ${state.user.email}. Quản lý bảo mật, sao lưu và đồng bộ dữ liệu`;
-            if (iconWrapper) iconWrapper.innerHTML = '<i data-lucide="database"></i>';
-        }
-        
-        if (typeof lucide !== 'undefined' && lucide.createIcons) {
-            lucide.createIcons();
-        }
-    }
 
     // --- Card "Quỹ gia đình" ---
     if (cardFund) {
@@ -1037,10 +1010,8 @@ function updateHomeLayoutUI() {
         }
     }
 
-    // --- Khóa / Mở khóa tất cả các card khác một cách tổng quát ---
+    // --- Khóa / Mở khóa tất cả các card một cách tổng quát ---
     document.querySelectorAll('.home-card').forEach(card => {
-        if (card === cardSettings) return;
-
         // Lưu giữ href ban đầu nếu chưa có
         if (!card.hasAttribute('data-original-href')) {
             const href = card.getAttribute('href');
@@ -1056,6 +1027,7 @@ function updateHomeLayoutUI() {
         }
         card.onclick = null;
     });
+
 
     // --- Nút homeSettingsBtn: hiển thị chữ "Đăng nhập" có viền vàng nổi bật khi chưa đăng nhập ---
     if (settingsBtn) {
