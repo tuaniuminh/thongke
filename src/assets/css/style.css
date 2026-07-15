@@ -84,7 +84,8 @@ body {
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Scrollbar Style - Hidden globally to match native application aesthetics on all platforms */
+/* Scrollbar Style - Hidden globally on all elements to match native application aesthetics on all platforms */
+*::-webkit-scrollbar,
 ::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
