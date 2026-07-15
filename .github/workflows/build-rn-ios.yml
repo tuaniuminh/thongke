@@ -22,10 +22,20 @@ jobs:
           cd FamiLife-ReactNative
           npm install
 
-      - name: Run Expo Prebuild
+      - name: Run Expo Prebuild (No Install)
         run: |
           cd FamiLife-ReactNative
-          npx expo prebuild --platform ios
+          npx expo prebuild --platform ios --no-install
+
+      - name: Install CocoaPods
+        run: |
+          cd FamiLife-ReactNative/ios
+          pod install
+
+      - name: List Workspace Schemes (Debug)
+        run: |
+          cd FamiLife-ReactNative
+          xcodebuild -list -workspace ios/FamiLife.xcworkspace
 
       - name: Build Xcode Project
         run: |
