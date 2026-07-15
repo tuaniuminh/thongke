@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.48';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.48';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.48';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.48';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.49';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.49';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.49';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.49';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.48';
-import * as sync from './sync.js?v=4.1.48';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.48';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.49';
+import * as sync from './sync.js?v=4.1.49';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.49';
 
-const APP_VERSION = '4.1.48';
+const APP_VERSION = '4.1.49';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2282,28 +2282,163 @@ async function initializeApp() {
         document.head.appendChild(iosStyle);
     }
 
-    // Swipe gesture for back navigation on iOS/Android (Tuned Sensitivity)
+    // Swipe gesture for interactive back navigation on iOS/Android
     let touchStartX = 0;
     let touchStartY = 0;
+    let isSwiping = false;
+    let currentPanel = null;
+    let prevPanel = null;
+    let prevTabId = null;
+    
     document.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+        // Chỉ bắt đầu vuốt từ sát mép trái (X < 35px)
+        const startX = e.touches[0].clientX;
+        const startY = e.touches[0].clientY;
+        
+        if (startX < 35 && state.tabHistory && state.tabHistory.length > 0) {
+            touchStartX = startX;
+            touchStartY = startY;
+            isSwiping = false;
+            
+            // Lấy ID của tab trước đó
+            prevTabId = state.tabHistory[state.tabHistory.length - 1];
+            
+            // Lấy các element panel tương ứng
+            currentPanel = document.getElementById(`tab-${state.activeTab}`);
+            prevPanel = document.getElementById(`tab-${prevTabId}`);
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!currentPanel || !prevPanel) return;
+        
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const diffX = currentX - touchStartX;
+        const diffY = Math.abs(currentY - touchStartY);
+        
+        // Nhận diện vuốt ngang (diffX > 10px và góc vuốt ngang chiếm ưu thế)
+        if (!isSwiping && diffX > 10 && diffY < diffX * 0.5) {
+            isSwiping = true;
+            
+            // Thiết lập trạng thái ban đầu cho animation xếp chồng
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.style.position = 'relative';
+                mainContent.style.overflowX = 'hidden';
+            }
+            
+            // Hiển thị panel trước đó ở bên dưới
+            prevPanel.style.display = 'block';
+            prevPanel.style.position = 'absolute';
+            prevPanel.style.top = '0';
+            prevPanel.style.left = '0';
+            prevPanel.style.width = '100%';
+            prevPanel.style.zIndex = '1';
+            prevPanel.style.opacity = '0.9';
+            prevPanel.style.transform = 'translateX(-20%)'; // Parallax effect nhẹ
+            
+            // Cấu hình panel hiện tại ở trên
+            currentPanel.style.position = 'absolute';
+            currentPanel.style.top = '0';
+            currentPanel.style.left = '0';
+            currentPanel.style.width = '100%';
+            currentPanel.style.zIndex = '2';
+            currentPanel.style.boxShadow = '-5px 0 15px rgba(0,0,0,0.15)';
+        }
+        
+        if (isSwiping && diffX > 0) {
+            // Dịch chuyển panel hiện tại theo ngón tay
+            currentPanel.style.transform = `translateX(${diffX}px)`;
+            
+            // Parallax dịch chuyển panel phía dưới
+            const progress = diffX / window.innerWidth;
+            const prevOffset = -20 + progress * 20; // Từ -20% tiến dần về 0%
+            prevPanel.style.transform = `translateX(${prevOffset}%)`;
+            prevPanel.style.opacity = 0.9 + progress * 0.1; // Độ sáng tăng dần lên 1
+        }
     }, { passive: true });
 
     document.addEventListener('touchend', (e) => {
+        if (!isSwiping || !currentPanel || !prevPanel) {
+            currentPanel = null;
+            prevPanel = null;
+            return;
+        }
+        
+        isSwiping = false;
         const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
         const diffX = touchEndX - touchStartX;
-        const diffY = Math.abs(touchEndY - touchStartY);
-
-        // Tuned: start X < 45px, swipe diff X > 50px, vertical displacement Y < 50px
-        if (touchStartX < 45 && diffX > 50 && diffY < 50) {
-            if (state.tabHistory && state.tabHistory.length > 0) {
-                const prevTab = state.tabHistory.pop();
-                switchTab(prevTab, true, false);
-            }
+        const screenWidth = window.innerWidth;
+        
+        // Quyết định quay lại nếu vuốt quá 30% màn hình
+        const shouldGoBack = diffX > screenWidth * 0.3;
+        
+        if (shouldGoBack) {
+            // Chạy animation trượt hẳn trang cũ sang phải
+            currentPanel.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.8, 0.25, 1)';
+            currentPanel.style.transform = `translateX(${screenWidth}px)`;
+            
+            prevPanel.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.8, 0.25, 1)';
+            prevPanel.style.transform = 'translateX(0)';
+            
+            setTimeout(() => {
+                // Hoàn tất chuyển tab thật trong code
+                if (state.tabHistory && state.tabHistory.length > 0) {
+                    state.tabHistory.pop();
+                }
+                switchTab(prevTabId, true, false);
+                
+                resetPanelsStyle(currentPanel, prevPanel);
+                currentPanel = null;
+                prevPanel = null;
+            }, 200);
+        } else {
+            // Chạy animation trượt trang cũ quay lại vị trí ban đầu
+            currentPanel.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.8, 0.25, 1)';
+            currentPanel.style.transform = 'translateX(0)';
+            
+            prevPanel.style.transition = 'transform 0.2s cubic-bezier(0.1, 0.8, 0.25, 1)';
+            prevPanel.style.transform = 'translateX(-20%)';
+            
+            setTimeout(() => {
+                prevPanel.style.display = 'none';
+                resetPanelsStyle(currentPanel, prevPanel);
+                currentPanel = null;
+                prevPanel = null;
+            }, 200);
         }
     }, { passive: true });
+
+    function resetPanelsStyle(p1, p2) {
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.position = '';
+            mainContent.style.overflowX = '';
+        }
+        
+        if (p1) {
+            p1.style.position = '';
+            p1.style.top = '';
+            p1.style.left = '';
+            p1.style.width = '';
+            p1.style.zIndex = '';
+            p1.style.transform = '';
+            p1.style.transition = '';
+            p1.style.boxShadow = '';
+        }
+        
+        if (p2) {
+            p2.style.position = '';
+            p2.style.top = '';
+            p2.style.left = '';
+            p2.style.width = '';
+            p2.style.zIndex = '';
+            p2.style.transform = '';
+            p2.style.transition = '';
+            p2.style.opacity = '';
+        }
+    }
 
     // Khởi tạo Supabase sớm để khôi phục session auth trong background
     const config = getSupabaseConfig();
@@ -3368,6 +3503,7 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 
 
 
