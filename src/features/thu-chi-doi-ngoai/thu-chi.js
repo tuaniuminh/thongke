@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.55';
-import * as sync from '../../core/sync.js?v=4.1.55';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.55';
+} from '../../core/app.js?v=4.1.56';
+import * as sync from '../../core/sync.js?v=4.1.56';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.56';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -975,7 +975,9 @@ function renderSettings() {
         toggleMobileTable.checked = state.mobileViewMode === 'table';
     }
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+    }
 }
 
 function updateUserBadge() {
@@ -1001,9 +1003,29 @@ function updateHomeLayoutUI() {
     const cardFund = document.getElementById('homeCardFund');
 
     // --- Card "Đồng bộ & Cấu hình" / "Đăng nhập tài khoản" ---
-    // Target v4.0.40: Always hide cardSettings on homepage
     if (cardSettings) {
-        cardSettings.style.setProperty('display', 'none', 'important');
+        cardSettings.style.display = 'flex';
+        cardSettings.style.removeProperty('display'); // Remove any !important overrides
+        
+        const titleEl = cardSettings.querySelector('.home-card-content h3');
+        const descEl = cardSettings.querySelector('.home-card-content p');
+        const iconWrapper = cardSettings.querySelector('.home-card-icon');
+        
+        if (!isLoggedIn) {
+            cardSettings.classList.add('not-logged-in-card');
+            if (titleEl) titleEl.innerText = 'Đăng nhập & Cấu hình';
+            if (descEl) descEl.innerText = 'Đăng nhập/Đăng ký tài khoản để tự động đồng bộ dữ liệu đám mây Supabase';
+            if (iconWrapper) iconWrapper.innerHTML = '<i data-lucide="log-in"></i>';
+        } else {
+            cardSettings.classList.remove('not-logged-in-card');
+            if (titleEl) titleEl.innerText = 'Đồng bộ & Cấu hình';
+            if (descEl) descEl.innerText = `Đã liên kết: ${state.user.email}. Quản lý bảo mật, sao lưu và đồng bộ dữ liệu`;
+            if (iconWrapper) iconWrapper.innerHTML = '<i data-lucide="database"></i>';
+        }
+        
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
+        }
     }
 
     // --- Card "Quỹ gia đình" ---
@@ -2889,6 +2911,7 @@ export {
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
 };
+
 
 
 
