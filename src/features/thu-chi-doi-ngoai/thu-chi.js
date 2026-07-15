@@ -4,9 +4,9 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.46';
-import * as sync from '../../core/sync.js?v=4.1.46';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.46';
+} from '../../core/app.js?v=4.1.47';
+import * as sync from '../../core/sync.js?v=4.1.47';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.47';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -2889,6 +2889,7 @@ export {
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
 };
+
 
 
 
