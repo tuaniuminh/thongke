@@ -121,7 +121,7 @@ export default function MedicalDashboard({ navigation }) {
         </TouchableOpacity>
 
         {/* Body Comp Summary Card */}
-        <TouchableOpacity style={styles.vitalCard} activeOpacity={0.8} onPress={() => {}}>
+        <TouchableOpacity style={styles.vitalCard} activeOpacity={0.8} onPress={() => navigation.navigate('BodyCompositionList')}>
           <View style={styles.vitalHeader}>
             <Text style={styles.vitalTitle}>⚖️ Thể trạng & Cân nặng</Text>
             <Text style={styles.vitalArrow}>chevron-right</Text>

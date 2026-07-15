@@ -12,6 +12,8 @@ import GiftForm from './src/features/thu-chi-doi-ngoai/GiftForm';
 import MedicalDashboard from './src/features/ho-so-y-te/MedicalDashboard';
 import BloodPressureList from './src/features/ho-so-y-te/BloodPressureList';
 import BloodPressureForm from './src/features/ho-so-y-te/BloodPressureForm';
+import BodyCompositionList from './src/features/ho-so-y-te/BodyCompositionList';
+import BodyCompositionForm from './src/features/ho-so-y-te/BodyCompositionForm';
 import { AppProvider } from './src/core/AppContext';
 
 const Stack = createNativeStackNavigator();
@@ -39,6 +41,8 @@ export default function App() {
             <Stack.Screen name="MedicalDashboard" component={MedicalDashboard} />
             <Stack.Screen name="BloodPressureList" component={BloodPressureList} />
             <Stack.Screen name="BloodPressureForm" component={BloodPressureForm} />
+            <Stack.Screen name="BodyCompositionList" component={BodyCompositionList} />
+            <Stack.Screen name="BodyCompositionForm" component={BodyCompositionForm} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
