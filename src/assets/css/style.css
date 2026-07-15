@@ -100,6 +100,24 @@ body {
     background: var(--text-muted);
 }
 
+/* Hide scrollbars globally on mobile/tablet viewports (PWA/IPA) to match native app aesthetic */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+}
+
+/* Enable smooth momentum inertia scrolling on iOS for all scrollable panels */
+.home-layout,
+.modal-card,
+.health-modal-body,
+.health-modal-container,
+.debug-console-body {
+    -webkit-overflow-scrolling: touch;
+}
+
 /* Layout Wrapper */
 .app-container {
     display: flex;
