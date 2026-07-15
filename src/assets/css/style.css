@@ -4184,3 +4184,34 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
 .debug-log-item.level-error {
     color: #ef4444;
 }
+
+/* iOS Safe Area Overrides */
+body.ios-device .version-badge-btn {
+    top: calc(20px + env(safe-area-inset-top, 44px)) !important;
+}
+@media (max-width: 576px) {
+    body.ios-device .version-badge-btn {
+        top: calc(12px + env(safe-area-inset-top, 44px)) !important;
+    }
+}
+
+body.ios-device .home-settings-btn {
+    top: calc(65px + env(safe-area-inset-top, 44px)) !important;
+}
+@media (max-width: 576px) {
+    body.ios-device .home-settings-btn {
+        top: calc(50px + env(safe-area-inset-top, 44px)) !important;
+    }
+    body.ios-device .home-settings-btn.not-logged-in {
+        top: calc(50px + env(safe-area-inset-top, 44px)) !important;
+    }
+}
+
+body.ios-device .home-widgets-container {
+    top: calc(20px + env(safe-area-inset-top, 44px)) !important;
+}
+@media (max-width: 576px) {
+    body.ios-device .home-widgets-container {
+        top: calc(12px + env(safe-area-inset-top, 44px)) !important;
+    }
+}

@@ -1,17 +1,19 @@
 {
   "name": "familife-thongke",
-  "version": "4.1.41",
+  "version": "4.1.42",
   "description": "FamiLife - Thu Chi & Sức Khỏe Gia Đình",
   "main": "index.html",
   "scripts": {
     "prepare-dist": "node prepare-dist.js",
     "cap:sync": "cap sync",
-    "generate-assets": "npx @capacitor/assets generate --ios"
+    "generate-assets": "npx @capacitor/assets generate --ios",
+    "generate-assets-android": "npx @capacitor/assets generate --android"
   },
   "dependencies": {
     "@capacitor/cli": "^6.1.2",
     "@capacitor/core": "^6.1.2",
-    "@capacitor/ios": "^6.1.2"
+    "@capacitor/ios": "^6.1.2",
+    "@capacitor/android": "^6.1.2"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5"

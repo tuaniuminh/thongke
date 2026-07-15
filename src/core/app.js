@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.41';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.41';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.41';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.41';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.42';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.42';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.42';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.42';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.41';
-import * as sync from './sync.js?v=4.1.41';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.41';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.42';
+import * as sync from './sync.js?v=4.1.42';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.42';
 
-const APP_VERSION = '4.1.41';
+const APP_VERSION = '4.1.42';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -95,6 +95,7 @@ let state = {
     fundTransactions: [],
     fundTransactionsUpdated: '',
     activeTab: 'dashboard',
+    tabHistory: [],
     theme: 'light',
     familyFundInviteStatus: '',
     familyFundInviteStatusUpdated: '',
@@ -1708,7 +1709,13 @@ function handleHashRoute() {
 }
 
 // Switch main navigation tabs
-function switchTab(tabId, updateHash = true) {
+function switchTab(tabId, updateHash = true, pushHistory = true) {
+    const currentTab = state.activeTab;
+    if (pushHistory && currentTab && currentTab !== tabId) {
+        if (!state.tabHistory) state.tabHistory = [];
+        state.tabHistory.push(currentTab);
+        if (state.tabHistory.length > 10) state.tabHistory.shift();
+    }
     state.activeTab = tabId;
     
     // Update active class on nav links
@@ -2217,6 +2224,36 @@ function handleUnlockClear() {
 async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
+
+    // Detect iOS and add class to body
+    if ((window.Capacitor && window.Capacitor.getPlatform() === 'ios') || 
+        (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream)) {
+        document.body.classList.add('ios-device');
+    }
+
+    // Swipe gesture for back navigation on iOS/Android
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = Math.abs(touchEndY - touchStartY);
+
+        // Check if swipe started from the left edge (X < 40px) and moved right (> 80px)
+        // and did not scroll vertically too much (diffY < 40px)
+        if (touchStartX < 40 && diffX > 80 && diffY < 40) {
+            if (state.tabHistory && state.tabHistory.length > 0) {
+                const prevTab = state.tabHistory.pop();
+                switchTab(prevTab, true, false);
+            }
+        }
+    }, { passive: true });
 
     // Khởi tạo Supabase sớm để khôi phục session auth trong background
     const config = getSupabaseConfig();
@@ -3281,4 +3318,5 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 

@@ -1,0 +1,81 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject Supabase Secrets
+        run: |
+          URL_VAL="${{ secrets.VITE_SUPABASE_URL }}"
+          if [ -z "$URL_VAL" ]; then
+            URL_VAL="${{ vars.VITE_SUPABASE_URL }}"
+          fi
+
+          KEY_VAL="${{ secrets.VITE_SUPABASE_ANON_KEY }}"
+          if [ -z "$KEY_VAL" ]; then
+            KEY_VAL="${{ vars.VITE_SUPABASE_ANON_KEY }}"
+          fi
+
+          # Replace VITE_SUPABASE_URL_PLACEHOLDER and VITE_SUPABASE_ANON_KEY_PLACEHOLDER in src/core/app.js
+          sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" src/core/app.js
+          sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" src/core/app.js
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Prepare Web Assets
+        run: npm run prepare-dist
+
+      - name: Add and Sync Android Platform
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Prepare Assets for Icon Generation
+        run: |
+          mkdir -p assets
+          cp icon-512.png assets/icon.png
+          cp icon-512.png assets/icon-only.png
+          cp icon-512.png assets/splash.png
+          cp icon-512.png assets/splash-only.png
+
+      - name: Generate App Icons
+        run: npm run generate-assets-android
+
+      - name: Build Android Debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Package and Rename APK
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
+          cp android/app/build/outputs/apk/debug/app-debug.apk "FamiLife_v${VERSION}.apk"
+          echo "APK_NAME=FamiLife_v${VERSION}.apk" >> $GITHUB_ENV
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FamiLife-Android-Debug
+          path: ${{ env.APK_NAME }}
+          if-no-files-found: error
