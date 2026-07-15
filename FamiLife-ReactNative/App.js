@@ -9,6 +9,9 @@ import ThuChiDashboard from './src/features/thu-chi-doi-ngoai/ThuChiDashboard';
 import ReceivedList from './src/features/thu-chi-doi-ngoai/ReceivedList';
 import SentList from './src/features/thu-chi-doi-ngoai/SentList';
 import GiftForm from './src/features/thu-chi-doi-ngoai/GiftForm';
+import MedicalDashboard from './src/features/ho-so-y-te/MedicalDashboard';
+import BloodPressureList from './src/features/ho-so-y-te/BloodPressureList';
+import BloodPressureForm from './src/features/ho-so-y-te/BloodPressureForm';
 import { AppProvider } from './src/core/AppContext';
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +36,9 @@ export default function App() {
             <Stack.Screen name="ReceivedList" component={ReceivedList} />
             <Stack.Screen name="SentList" component={SentList} />
             <Stack.Screen name="GiftForm" component={GiftForm} />
+            <Stack.Screen name="MedicalDashboard" component={MedicalDashboard} />
+            <Stack.Screen name="BloodPressureList" component={BloodPressureList} />
+            <Stack.Screen name="BloodPressureForm" component={BloodPressureForm} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

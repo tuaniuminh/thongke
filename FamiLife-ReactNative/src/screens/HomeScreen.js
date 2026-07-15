@@ -54,7 +54,7 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity 
             style={styles.card} 
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('Feature', { title: 'Hồ sơ y tế', desc: 'Theo dõi chỉ số sức khỏe, lịch sử y khoa của thành viên và phân tích bằng trợ lý AI' })}
+            onPress={() => navigation.navigate('MedicalDashboard')}
           >
             <View style={[styles.cardIconWrapper, { backgroundColor: '#e0f2fe' }]}>
               <Text style={styles.cardIcon}>🏥</Text>
