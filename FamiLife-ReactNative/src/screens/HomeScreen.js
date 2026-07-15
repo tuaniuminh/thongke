@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { convertSolar2Lunar } from '../utils/lunar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -71,11 +72,12 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.heroSection}>
           <View style={styles.logoWrapper}>
             <View style={styles.logoBox}>
-              {/* Fallback box styling for logo */}
-              <Text style={styles.logoHeart}>❤️</Text>
+              <MaterialCommunityIcons name="heart-pulse" size={46} color="#0ea5e9" />
             </View>
           </View>
-          <Text style={styles.appTitle}>FamiLife</Text>
+          <Text style={styles.appTitle}>
+            Fami<Text style={{ color: '#0ea5e9' }}>Life</Text>
+          </Text>
           <Text style={styles.appSubtitle}>Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</Text>
         </View>
 
@@ -88,14 +90,14 @@ export default function HomeScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('ThuChiDashboard')}
           >
-            <View style={[styles.cardIconWrapper, { backgroundColor: '#fef3c7' }]}>
-              <Text style={styles.cardIcon}>💰</Text>
+            <View style={[styles.cardIconWrapper, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
+              <MaterialCommunityIcons name="hand-coin" size={24} color="#f59e0b" />
             </View>
             <View style={styles.cardTextContent}>
               <Text style={styles.cardTitle}>Thu chi đối ngoại</Text>
               <Text style={styles.cardDesc}>Quản lý tiền đi mừng hiếu hỷ, thăm hỏi, quà cáp và thống kê quan hệ gia đình</Text>
             </View>
-            <Text style={styles.arrowIcon}>chevron-right</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#64748b" />
           </TouchableOpacity>
 
           {/* Card 2: Y Tế */}
@@ -104,14 +106,14 @@ export default function HomeScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('MedicalDashboard')}
           >
-            <View style={[styles.cardIconWrapper, { backgroundColor: '#e0f2fe' }]}>
-              <Text style={styles.cardIcon}>🏥</Text>
+            <View style={[styles.cardIconWrapper, { backgroundColor: 'rgba(244, 63, 94, 0.1)' }]}>
+              <MaterialCommunityIcons name="activity" size={24} color="#f43f5e" />
             </View>
             <View style={styles.cardTextContent}>
               <Text style={styles.cardTitle}>Hồ sơ y tế</Text>
               <Text style={styles.cardDesc}>Theo dõi chỉ số sức khỏe, lịch sử y khoa của thành viên và phân tích bằng trợ lý AI</Text>
             </View>
-            <Text style={styles.arrowIcon}>chevron-right</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#64748b" />
           </TouchableOpacity>
 
           {/* Card 3: Quỹ Gia Đình */}
@@ -120,14 +122,14 @@ export default function HomeScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('FamilyFundDashboard')}
           >
-            <View style={[styles.cardIconWrapper, { backgroundColor: '#d1fae5' }]}>
-              <Text style={styles.cardIcon}>💸</Text>
+            <View style={[styles.cardIconWrapper, { backgroundColor: 'rgba(14, 165, 233, 0.1)' }]}>
+              <MaterialCommunityIcons name="wallet" size={24} color="#0ea5e9" />
             </View>
             <View style={styles.cardTextContent}>
               <Text style={styles.cardTitle}>Quỹ gia đình</Text>
               <Text style={styles.cardDesc}>Quản lý tiền đóng góp, chi tiêu, đầu tư và số dư của các tài khoản quỹ chung</Text>
             </View>
-            <Text style={styles.arrowIcon}>chevron-right</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#64748b" />
           </TouchableOpacity>
 
           {/* Card 4: Cài Đặt */}
@@ -136,14 +138,14 @@ export default function HomeScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Settings')}
           >
-            <View style={[styles.cardIconWrapper, { backgroundColor: '#f1f5f9' }]}>
-              <Text style={styles.cardIcon}>⚙️</Text>
+            <View style={[styles.cardIconWrapper, { backgroundColor: 'rgba(100, 116, 139, 0.15)' }]}>
+              <MaterialCommunityIcons name="database" size={24} color="#94a3b8" />
             </View>
             <View style={styles.cardTextContent}>
               <Text style={styles.cardTitle}>Cấu hình & Cài đặt</Text>
               <Text style={styles.cardDesc}>Đăng ký API Key Gemini, liên kết email vợ chồng và quản lý thành viên gia đình</Text>
             </View>
-            <Text style={styles.arrowIcon}>chevron-right</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="#64748b" />
           </TouchableOpacity>
 
         </View>
@@ -159,7 +161,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#090d16',
   },
   scrollContainer: {
     alignItems: 'center',
@@ -174,22 +176,17 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   widget: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   widgetLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#475569',
+    color: '#f8fafc',
   },
   heroSection: {
     alignItems: 'center',
@@ -197,19 +194,19 @@ const styles = StyleSheet.create({
   },
   logoWrapper: {
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#0ea5e9',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 15,
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
     elevation: 8,
   },
   logoBox: {
     width: 80,
     height: 80,
     borderRadius: 22,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f1626',
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -219,13 +216,13 @@ const styles = StyleSheet.create({
   appTitle: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#0f172a',
+    color: '#f8fafc',
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   appSubtitle: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#94a3b8',
     textAlign: 'center',
     paddingHorizontal: 30,
     lineHeight: 20,
@@ -237,16 +234,16 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(15, 22, 38, 0.7)',
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#090d16',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 4,
   },
   cardIconWrapper: {
     width: 50,
@@ -265,24 +262,24 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#f8fafc',
     marginBottom: 4,
   },
   cardDesc: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#94a3b8',
     lineHeight: 18,
   },
   arrowIcon: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#94a3b8',
+    color: '#64748b',
     marginLeft: 8,
   },
   versionText: {
     marginTop: 40,
     fontSize: 11,
     fontWeight: '500',
-    color: '#94a3b8',
+    color: '#64748b',
   },
 });
