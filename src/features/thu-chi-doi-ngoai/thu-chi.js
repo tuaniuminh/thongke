@@ -1580,12 +1580,13 @@ async function handleExportEncrypted(type = 'all') {
     
     try {
         const encrypted = await encrypt(payload, state.masterPassword);
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        const backupObj = {
             encrypted_payload: encrypted,
             app_id: "hieu_hy_gift_ledger",
             backup_type: type,
             exported_at: new Date().toISOString()
-        }));
+        };
+        const fileContent = JSON.stringify(backupObj);
         
         let filename = `hieu_hy_backup_tat_ca_${new Date().toISOString().slice(0, 10)}.json`;
         if (type === 'received') {
@@ -1593,13 +1594,37 @@ async function handleExportEncrypted(type = 'all') {
         } else if (type === 'sent') {
             filename = `hieu_hy_backup_tien_mung_${new Date().toISOString().slice(0, 10)}.json`;
         }
+
+        // Try using Web Share API for iOS (IPA & PWA)
+        const file = new File([fileContent], filename, { type: 'application/json' });
+        let shared = false;
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Xuất file dữ liệu FamiLife',
+                    text: 'File sao lưu dữ liệu hiếu hỷ đã mã hóa'
+                });
+                shared = true;
+            } catch (err) {
+                console.warn('[Share] Export sharing cancelled or failed:', err);
+                if (err.name === 'AbortError') {
+                    // User explicitly cancelled, stop execution
+                    return;
+                }
+            }
+        }
+
+        if (!shared) {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(fileContent);
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", filename);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
         
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", filename);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
         showToast("Đã xuất file Backup đã mã hóa!");
     } catch (e) {
         showToast("Mã hóa để xuất file thất bại!", "error");

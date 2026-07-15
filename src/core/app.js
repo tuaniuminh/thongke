@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.61';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.61';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.61';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.61';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.63';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.63';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.63';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.63';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.61';
-import * as sync from './sync.js?v=4.1.61';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.61';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.63';
+import * as sync from './sync.js?v=4.1.63';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.63';
 
-const APP_VERSION = '4.1.61';
+const APP_VERSION = '4.1.63';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2302,14 +2302,9 @@ async function initializeApp() {
         sync.initSupabase(config.url, config.key);
     }
 
-    // === Auto-inject APP_VERSION into all UI elements — no need to hardcode in HTML ===
     // Version badge on home page (top-right): shows "Ver X.X.X PRO"
     const homeVersionBadgeSpan = document.querySelector('#homeVersionBadge .wizard-version-badge');
     if (homeVersionBadgeSpan) homeVersionBadgeSpan.textContent = `Ver ${APP_VERSION} PRO`;
-    // Version badges inside Setup Wizard (PIN & Keyboard): shows "vX.X.X"
-    document.querySelectorAll('#setupOverlay .wizard-version-badge').forEach(el => {
-        el.textContent = `v${APP_VERSION}`;
-    });
     // Sidebar logo icon & home hero logo: cache-bust with APP_VERSION & select dynamic based on theme
     const currentLogoSrcInit = state.theme === 'light' 
         ? `src/assets/images/icon-light.png?v=${APP_VERSION}` 
@@ -3250,14 +3245,40 @@ async function handleFullBackup() {
         };
         const jsonStr = JSON.stringify(backupData);
         const encrypted = await encrypt(jsonStr, state.masterPassword);
-        const blob = new Blob([JSON.stringify({ encrypted_full_backup: encrypted })], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
+        const backupContent = JSON.stringify({ encrypted_full_backup: encrypted });
         const dateStr = new Date().toISOString().slice(0, 10);
-        a.download = `FamiLife_FullBackup_${dateStr}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const fileName = `FamiLife_FullBackup_${dateStr}.json`;
+
+        // Try using Web Share API for iOS (IPA & PWA) to let the user save to Files or share via other apps
+        const file = new File([backupContent], fileName, { type: 'application/json' });
+        let shared = false;
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Sao lưu dữ liệu FamiLife',
+                    text: 'File sao lưu toàn bộ dữ liệu FamiLife đã mã hóa'
+                });
+                shared = true;
+            } catch (err) {
+                console.warn('[Share] Full backup sharing cancelled or failed:', err);
+                if (err.name === 'AbortError') {
+                    // User cancelled, abort without falling back
+                    return;
+                }
+            }
+        }
+
+        // Fallback to traditional download on desktop/non-compatible environments
+        if (!shared) {
+            const blob = new Blob([backupContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
         
         state.lastFullBackupDate = new Date().toISOString();
         await saveLocalState();

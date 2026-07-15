@@ -426,7 +426,7 @@ function measureWrappedTextHeight(ctx, text, maxWidth, lineHeight) {
 }
 
 // Draw and Download Report as PNG Image (HTML5 Canvas E2EE)
-window.downloadReportAsImage = function() {
+window.downloadReportAsImage = async function() {
     if (!currentReportData) return;
     const data = currentReportData;
 
@@ -731,12 +731,40 @@ window.downloadReportAsImage = function() {
     ctx.textAlign = 'center';
     ctx.fillText('Được tạo tự động bởi FamiLife App – Hệ thống Quỹ Gia Đình', virtualWidth / 2, footerY);
 
-    // Download image
+    // Export report image
     const dataUrl = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = `FamiLife_BaoCao_Thang${currentReportMonth}_${currentReportYear}.png`;
-    a.click();
+    const filename = `FamiLife_BaoCao_Thang${currentReportMonth}_${currentReportYear}.png`;
+    let shared = false;
+
+    if (navigator.canShare) {
+        try {
+            const res = await fetch(dataUrl);
+            const blob = await res.blob();
+            const file = new File([blob], filename, { type: 'image/png' });
+            
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'Báo cáo Quỹ Gia Đình FamiLife',
+                    text: `Ảnh báo cáo Quỹ Gia Đình tháng ${currentReportMonth}/${currentReportYear}`
+                });
+                shared = true;
+            }
+        } catch (err) {
+            console.warn('[Share] Report image sharing cancelled or failed:', err);
+            if (err.name === 'AbortError') {
+                return;
+            }
+        }
+    }
+
+    if (!shared) {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = filename;
+        a.click();
+    }
+    
     showToast("Đã xuất ảnh báo cáo thành công!", "success");
 };
 
