@@ -84,38 +84,23 @@ body {
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Scrollbar Style */
+/* Scrollbar Style - Hidden globally to match native application aesthetics on all platforms */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-track {
-    background: var(--bg-primary);
-}
-::-webkit-scrollbar-thumb {
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
-/* Hide scrollbars globally on mobile/tablet viewports (PWA/IPA) to match native app aesthetic */
-@media (max-width: 768px) {
-    ::-webkit-scrollbar {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
-}
-
-/* Enable smooth momentum inertia scrolling on iOS for all scrollable panels */
+/* Enable smooth momentum inertia scrolling on iOS for the main page and all scrollable containers */
+html,
+body,
 .home-layout,
+.main-content,
 .modal-card,
 .health-modal-body,
 .health-modal-container,
 .debug-console-body {
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 /* Layout Wrapper */
