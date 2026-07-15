@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.52';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.52';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.52';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.52';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.53';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.53';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.53';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.53';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.52';
-import * as sync from './sync.js?v=4.1.52';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.52';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.53';
+import * as sync from './sync.js?v=4.1.53';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.53';
 
-const APP_VERSION = '4.1.52';
+const APP_VERSION = '4.1.53';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -1793,7 +1793,12 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     
     if (updateHash) {
         const hash = tabIdToHash[tabId] || tabId;
-        window.location.hash = hash;
+        if (window.history && window.history.pushState) {
+            const finalHash = hash.startsWith('#') ? hash : '#' + hash;
+            window.history.pushState({ tabId: tabId }, '', finalHash);
+        } else {
+            window.location.hash = hash;
+        }
     }
     
     // Toggle Quick Add button based on active tab
@@ -3348,6 +3353,7 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 
 
 

@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.1.52';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.52';
+} from '../../core/app.js?v=4.1.53';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.53';
 
 let healthTrendChartInstance = null;
 
@@ -4660,6 +4660,7 @@ function updateIndicatorProgress() {
 
 
 export { initHealthBindings, renderHealthDashboard, updateProfileDropdowns, callGeminiTextAPI };
+
 
 
 
