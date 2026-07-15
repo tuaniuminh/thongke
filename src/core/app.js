@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.47';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.47';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.47';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.47';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.48';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.48';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.48';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.48';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.47';
-import * as sync from './sync.js?v=4.1.47';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.47';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.48';
+import * as sync from './sync.js?v=4.1.48';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.48';
 
-const APP_VERSION = '4.1.47';
+const APP_VERSION = '4.1.48';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2272,6 +2272,9 @@ async function initializeApp() {
                     padding-top: 154px !important;
                 }
             }
+            body.ios-device .mobile-navbar {
+                padding-top: 54px !important;
+            }
             .tab-panel {
                 animation: fadeIn 0.18s ease-in-out !important;
             }
@@ -3365,6 +3368,7 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 
 
 
