@@ -30,5 +30,34 @@ def update_version():
 
     print(f"Xcode project versions updated to {version} successfully.")
 
+def enable_swipe_gesture():
+    view_controller_path = 'ios/App/App/ViewController.swift'
+    
+    if not os.path.exists(view_controller_path):
+        print(f"{view_controller_path} not found!")
+        return
+        
+    swift_content = """import UIKit
+import Capacitor
+
+class ViewController: CAPBridgeViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Enable native back-forward navigation gestures
+        self.webView?.allowsBackForwardNavigationGestures = true
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.webView?.allowsBackForwardNavigationGestures = true
+    }
+}
+"""
+    with open(view_controller_path, 'w', encoding='utf-8') as f:
+        f.write(swift_content)
+        
+    print("ViewController.swift updated to enable native back-forward gestures.")
+
 if __name__ == '__main__':
     update_version()
+    enable_swipe_gesture()
