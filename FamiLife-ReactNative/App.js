@@ -6,6 +6,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/screens/HomeScreen';
 import FeatureScreen from './src/screens/FeatureScreen';
 import ThuChiDashboard from './src/features/thu-chi-doi-ngoai/ThuChiDashboard';
+import ReceivedList from './src/features/thu-chi-doi-ngoai/ReceivedList';
+import SentList from './src/features/thu-chi-doi-ngoai/SentList';
 import { AppProvider } from './src/core/AppContext';
 
 const Stack = createNativeStackNavigator();
@@ -27,6 +29,8 @@ export default function App() {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Feature" component={FeatureScreen} />
             <Stack.Screen name="ThuChiDashboard" component={ThuChiDashboard} />
+            <Stack.Screen name="ReceivedList" component={ReceivedList} />
+            <Stack.Screen name="SentList" component={SentList} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
