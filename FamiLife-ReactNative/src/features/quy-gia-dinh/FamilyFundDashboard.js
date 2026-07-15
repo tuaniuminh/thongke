@@ -128,6 +128,15 @@ export default function FamilyFundDashboard({ navigation }) {
         <Text style={styles.balanceVal}>{formatVND(totalBalance)}</Text>
       </View>
 
+      {/* Quick report view */}
+      <TouchableOpacity 
+        style={styles.reportRowBtn} 
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('MonthlyReportScreen')}
+      >
+        <Text style={styles.reportRowBtnText}>📊 Xem báo cáo tài chính tháng này</Text>
+      </TouchableOpacity>
+
       {/* Funds Grid */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -473,5 +482,20 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#f1f5f9',
     paddingTop: 6,
+  },
+  reportRowBtn: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  reportRowBtnText: {
+    fontSize: 13,
+    fontWeight: '750',
+    color: '#0f766e',
   },
 });
