@@ -3,6 +3,10 @@
   "appName": "FamiLife",
   "webDir": "www",
   "bundledWebRuntime": false,
+  "server": {
+    "iosScheme": "http",
+    "hostname": "localhost"
+  },
   "ios": {
     "allowsBackForwardNavigationGestures": true
   }
