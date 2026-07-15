@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity 
             style={styles.card} 
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('Feature', { title: 'Thu Chi Đối Ngoại', desc: 'Quản lý tiền đi mừng hiếu hỷ, thăm hỏi và thống kê quan hệ gia đình' })}
+            onPress={() => navigation.navigate('ThuChiDashboard')}
           >
             <View style={[styles.cardIconWrapper, { backgroundColor: '#fef3c7' }]}>
               <Text style={styles.cardIcon}>💰</Text>
