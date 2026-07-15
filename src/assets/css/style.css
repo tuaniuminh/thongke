@@ -73,8 +73,6 @@ body.light-mode {
 
 html, body {
     touch-action: manipulation;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
 }
 
 body {
@@ -102,9 +100,7 @@ body {
     background: var(--text-muted);
 }
 
-/* Enable smooth momentum inertia scrolling on iOS for all scrollable containers */
-.home-layout,
-.main-content,
+/* Enable smooth momentum inertia scrolling on iOS for internally scrollable panels */
 .modal-card,
 .health-modal-body,
 .health-modal-container,
