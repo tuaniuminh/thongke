@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.43';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.43';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.43';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.43';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.44';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.44';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.44';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.44';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.43';
-import * as sync from './sync.js?v=4.1.43';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.43';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.44';
+import * as sync from './sync.js?v=4.1.44';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.44';
 
-const APP_VERSION = '4.1.43';
+const APP_VERSION = '4.1.44';
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
 const DEBUG_E2EE = false;
@@ -2225,13 +2225,55 @@ async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
 
-    // Detect iOS and add class to body
+    // Detect iOS and add class to body + inject dynamic styles to bypass WKWebView stylesheet cache
     if ((window.Capacitor && window.Capacitor.getPlatform() === 'ios') || 
         (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream)) {
         document.body.classList.add('ios-device');
+        
+        const iosStyle = document.createElement('style');
+        iosStyle.textContent = `
+            body.ios-device .version-badge-btn {
+                top: 64px !important;
+                top: calc(20px + env(safe-area-inset-top, 44px)) !important;
+            }
+            @media (max-width: 576px) {
+                body.ios-device .version-badge-btn {
+                    top: 56px !important;
+                    top: calc(12px + env(safe-area-inset-top, 44px)) !important;
+                }
+            }
+            body.ios-device .home-settings-btn {
+                top: 109px !important;
+                top: calc(65px + env(safe-area-inset-top, 44px)) !important;
+            }
+            @media (max-width: 576px) {
+                body.ios-device .home-settings-btn {
+                    top: 94px !important;
+                    top: calc(50px + env(safe-area-inset-top, 44px)) !important;
+                }
+                body.ios-device .home-settings-btn.not-logged-in {
+                    top: 94px !important;
+                    top: calc(50px + env(safe-area-inset-top, 44px)) !important;
+                }
+            }
+            body.ios-device .home-widgets-container {
+                top: 64px !important;
+                top: calc(20px + env(safe-area-inset-top, 44px)) !important;
+            }
+            @media (max-width: 576px) {
+                body.ios-device .home-widgets-container {
+                    top: 56px !important;
+                    top: calc(12px + env(safe-area-inset-top, 44px)) !important;
+                }
+            }
+            .tab-panel {
+                animation: fadeIn 0.18s ease-in-out !important;
+            }
+        `;
+        document.head.appendChild(iosStyle);
     }
 
-    // Swipe gesture for back navigation on iOS/Android
+    // Swipe gesture for back navigation on iOS/Android (Tuned Sensitivity)
     let touchStartX = 0;
     let touchStartY = 0;
     document.addEventListener('touchstart', (e) => {
@@ -2245,9 +2287,8 @@ async function initializeApp() {
         const diffX = touchEndX - touchStartX;
         const diffY = Math.abs(touchEndY - touchStartY);
 
-        // Check if swipe started from the left edge (X < 40px) and moved right (> 80px)
-        // and did not scroll vertically too much (diffY < 40px)
-        if (touchStartX < 40 && diffX > 80 && diffY < 40) {
+        // Tuned: start X < 45px, swipe diff X > 50px, vertical displacement Y < 50px
+        if (touchStartX < 45 && diffX > 50 && diffY < 50) {
             if (state.tabHistory && state.tabHistory.length > 0) {
                 const prevTab = state.tabHistory.pop();
                 switchTab(prevTab, true, false);
@@ -3318,6 +3359,7 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
 
 
 

@@ -81,10 +81,11 @@ jobs:
           cp -r build/Build/Products/Release-iphoneos/App.app Payload/
           zip -r "FamiLife_v${VERSION}.ipa" Payload
           echo "IPA_NAME=FamiLife_v${VERSION}.ipa" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FamiLife-iOS-AdHoc
+          name: FamiLife-iOS_v${{ env.VERSION }}
           path: ${{ env.IPA_NAME }}
           if-no-files-found: error
