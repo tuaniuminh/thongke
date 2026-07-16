@@ -76,7 +76,7 @@ body {
     color: var(--text-primary);
     font-family: var(--font-body);
     min-height: calc(100vh + 1px);
-    overflow-x: hidden;
+    overflow-x: clip;
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
@@ -3104,21 +3104,7 @@ select.health-select-sm {
     }
 }
 
-/* Prevent html/body scroll when any modal or overlay is active */
-html:has(div[id*="Modal"].active),
-html:has(div[id*="Modal"][style*="display: flex"]),
-html:has(div[id*="Modal"][style*="display: block"]),
-html:has(div[id*="Overlay"].active),
-html:has(div[id*="Overlay"][style*="display: flex"]),
-html:has(div[id*="Overlay"][style*="display: block"]),
-body:has(div[id*="Modal"].active),
-body:has(div[id*="Modal"][style*="display: flex"]),
-body:has(div[id*="Modal"][style*="display: block"]),
-body:has(div[id*="Overlay"].active),
-body:has(div[id*="Overlay"][style*="display: flex"]),
-body:has(div[id*="Overlay"][style*="display: block"]) {
-    overflow: hidden !important;
-}
+/* Prevent html/body scroll handled dynamically by JS to avoid native iOS bounce blockage */
 
 /* Manual update check button hover styling */
 .manual-check-update-btn:hover {
@@ -3881,19 +3867,7 @@ body.light-mode .home-widget-box {
     }
 }
 
-/* Prevent background scrolling when modal is open (Pure CSS layout-reactive scroll locking) */
-html:has(.modal-overlay[style*="display: flex"]),
-html:has(.modal-overlay[style*="display: block"]),
-html:has(.modal-overlay[style*="display:flex"]),
-html:has(.modal-overlay[style*="display:block"]),
-html:has(.modal-overlay.active),
-body:has(.modal-overlay[style*="display: flex"]),
-body:has(.modal-overlay[style*="display: block"]),
-body:has(.modal-overlay[style*="display:flex"]),
-body:has(.modal-overlay[style*="display:block"]),
-body:has(.modal-overlay.active) {
-    overflow: hidden !important;
-}
+/* Background scroll prevention handled by JS */
 
 
 

@@ -8,7 +8,6 @@
     "hostname": "localhost"
   },
   "ios": {
-    "allowsBackForwardNavigationGestures": true,
-    "alwaysBounceVertical": true
+    "allowsBackForwardNavigationGestures": true
   }
 }

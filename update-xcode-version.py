@@ -45,11 +45,19 @@ class ViewController: CAPBridgeViewController {
         super.viewDidLoad()
         // Enable native back-forward navigation gestures
         self.webView?.allowsBackForwardNavigationGestures = true
+        
+        // Force native vertical elastic scroll bounce
+        self.webView?.scrollView.bounces = true
+        self.webView?.scrollView.alwaysBounceVertical = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.webView?.allowsBackForwardNavigationGestures = true
+        
+        // Force native vertical elastic scroll bounce
+        self.webView?.scrollView.bounces = true
+        self.webView?.scrollView.alwaysBounceVertical = true
     }
 }
 """
