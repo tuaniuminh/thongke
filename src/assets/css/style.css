@@ -71,10 +71,6 @@ body.light-mode {
     box-sizing: border-box;
 }
 
-html, body {
-    touch-action: manipulation;
-}
-
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
