@@ -4146,11 +4146,6 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     transition: all 0.2s ease;
 }
-@media (max-width: 768px) {
-    .debug-console-toggle-btn {
-        display: none !important;
-    }
-}
 .debug-console-toggle-btn:hover {
     transform: scale(1.08);
     background: rgba(244, 63, 94, 0.15);

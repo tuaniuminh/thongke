@@ -906,17 +906,12 @@ function renderSettings() {
                             <button type="button" class="btn btn-secondary" id="btnSyncRegister" style="width: 100%;">Đăng ký mới</button>
                         </div>
                     </form>
-                    <button class="btn btn-outline w-full" id="disconnectSupabaseBtn" style="margin-top:8px;">
-                        <i data-lucide="link-2-off"></i>
-                        <span>Hủy liên kết</span>
-                    </button>
                 </div>
             `;
             
             // Add listeners dynamically
             document.getElementById('syncLoginForm').addEventListener('submit', handleSyncLogin);
             document.getElementById('btnSyncRegister').addEventListener('click', handleSyncRegister);
-            document.getElementById('disconnectSupabaseBtn').addEventListener('click', disconnectSupabase);
         } else {
             // Logged in!
             syncView.innerHTML = `
@@ -933,22 +928,15 @@ function renderSettings() {
                         <i data-lucide="refresh-cw"></i>
                         <span>Đồng bộ ngay bây giờ</span>
                     </button>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <button class="btn btn-outline w-full" id="syncSignOutBtn" style="font-size: 0.85rem; padding: 10px 6px;">
-                            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
-                            <span>Đăng xuất</span>
-                        </button>
-                        <button class="btn btn-outline btn-danger w-full" id="disconnectSupabaseBtn" style="font-size: 0.85rem; padding: 10px 6px;">
-                            <i data-lucide="link-2-off" style="width: 14px; height: 14px;"></i>
-                            <span>Hủy liên kết</span>
-                        </button>
-                    </div>
+                    <button class="btn btn-outline w-full" id="syncSignOutBtn" style="font-size: 0.85rem; padding: 10px 6px;">
+                        <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                        <span>Đăng xuất</span>
+                    </button>
                 </div>
             `;
             
             document.getElementById('manualSyncBtn').addEventListener('click', () => performSync(false));
             document.getElementById('syncSignOutBtn').addEventListener('click', handleSyncSignOut);
-            document.getElementById('disconnectSupabaseBtn').addEventListener('click', disconnectSupabase);
         }
     }
     
@@ -1468,19 +1456,7 @@ function handleSaveSupabaseConfig(e) {
     }
 }
 
-// Disconnect/Wipe Supabase credentials
-async function disconnectSupabase() {
-    if (!await window.showConfirm("Bạn có chắc chắn muốn hủy liên kết Supabase? Việc này sẽ dừng đồng bộ hóa, dữ liệu cục bộ của bạn vẫn được giữ nguyên.")) return;
-    
-    localStorage.removeItem('supabase_url');
-    localStorage.removeItem('supabase_key');
-    localStorage.setItem('supabase_disabled', 'true');
-    sync.initSupabase(null, null); // Wipe client
-    state.user = null;
-    updateUserBadge();
-    showToast("Đã ngắt kết nối với Supabase Cloud.");
-    renderSettings();
-}
+
 
 
 // Handle login submission
