@@ -75,7 +75,7 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-body);
-    min-height: 100vh;
+    min-height: calc(100vh + 1px);
     overflow-x: hidden;
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
