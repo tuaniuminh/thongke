@@ -1221,7 +1221,7 @@ body.light-mode .data-table tbody tr:hover {
     
     .main-content {
         margin-left: 0;
-        padding: calc(1.25rem + env(safe-area-inset-top)) 1rem 1.25rem;
+        padding: calc(1.25rem + env(safe-area-inset-top)) 1rem 8rem;
         /* Đảm bảo content area luôn chiếm đủ chiều cao, tránh layout shift khi ít data */
         min-height: 100vh;
     }
@@ -3141,6 +3141,11 @@ body:has(div[id*="Overlay"][style*="display: block"]) {
                       radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.03), transparent 40%);
     padding: 2rem 1rem;
     overflow-y: visible;
+}
+@media (max-width: 768px) {
+    .home-layout {
+        padding: 2rem 1rem 8rem 1rem;
+    }
 }
 
 .home-container {
