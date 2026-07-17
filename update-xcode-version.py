@@ -30,60 +30,104 @@ def update_version():
 
     print(f"Xcode project versions updated to {version} successfully.")
 
-def enable_swipe_gesture():
-    view_controller_path = None
+def configure_ios_swizzler():
+    app_delegate_path = None
     for root, dirs, files in os.walk('ios'):
         for file in files:
-            if file == 'ViewController.swift':
-                view_controller_path = os.path.join(root, file)
+            if file == 'AppDelegate.swift':
+                app_delegate_path = os.path.join(root, file)
                 break
-        if view_controller_path:
+        if app_delegate_path:
             break
             
-    if not view_controller_path:
-        print("ERROR: ViewController.swift was not found in the 'ios' directory!")
+    if not app_delegate_path:
+        print("ERROR: AppDelegate.swift was not found in the 'ios' directory!")
         import sys
         sys.exit(1)
         
-    swift_content = """import UIKit
-import Capacitor
-import WebKit
-
-class ViewController: CAPBridgeViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        configureWebView()
-    }
-    
-    override func capacitorDidLoad() {
-        super.capacitorDidLoad()
-        configureWebView()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        configureWebView()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        configureWebView()
+    with open(app_delegate_path, 'r', encoding='utf-8') as f:
+        content = f.read()
         
-        // Force bounce after delays to override any Capacitor startup resets
-        for delay in [0.5, 1.0, 2.0, 3.0, 5.0, 8.0] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                self?.configureWebView()
+    # Check if already injected
+    if 'swizzleViewDidAppear' in content:
+        print("AppDelegate.swift already contains swizzler configuration.")
+        return
+        
+    # Add imports if missing
+    if 'import WebKit' not in content:
+        content = content.replace('import Capacitor', 'import Capacitor\nimport WebKit')
+        
+    # Inject swizzler trigger inside didFinishLaunchingWithOptions
+    target_func = 'func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {'
+    replacement_func = target_func + '\n        _ = AppDelegate.swizzleViewDidAppear'
+    
+    if target_func in content:
+        content = content.replace(target_func, replacement_func)
+    else:
+        print("ERROR: didFinishLaunchingWithOptions function not found in AppDelegate.swift!")
+        import sys
+        sys.exit(1)
+        
+    # Append the swizzler static property inside AppDelegate class body
+    class_marker = 'class AppDelegate: UIResponder, UIApplicationDelegate {'
+    swizzler_static_property = class_marker + """
+    static let swizzleViewDidAppear: Void = {
+        let originalSelector = #selector(UIViewController.viewDidAppear(_:))
+        let swizzledSelector = #selector(UIViewController.swizzled_viewDidAppear(_:))
+        
+        guard let originalMethod = class_getInstanceMethod(UIViewController.self, originalSelector),
+              let swizzledMethod = class_getInstanceMethod(UIViewController.self, swizzledSelector) else {
+            return
+        }
+        
+        method_exchangeImplementations(originalMethod, swizzledMethod)
+    }()
+"""
+    if class_marker in content:
+        content = content.replace(class_marker, swizzler_static_property)
+    else:
+        # Try without UIResponder in case it differs
+        class_marker_alt = 'class AppDelegate: UIApplicationDelegate {'
+        if class_marker_alt in content:
+            content = content.replace(class_marker_alt, class_marker_alt + """
+    static let swizzleViewDidAppear: Void = {
+        let originalSelector = #selector(UIViewController.viewDidAppear(_:))
+        let swizzledSelector = #selector(UIViewController.swizzled_viewDidAppear(_:))
+        
+        guard let originalMethod = class_getInstanceMethod(UIViewController.self, originalSelector),
+              let swizzledMethod = class_getInstanceMethod(UIViewController.self, swizzledSelector) else {
+            return
+        }
+        
+        method_exchangeImplementations(originalMethod, swizzledMethod)
+    }()
+""")
+        else:
+            print("ERROR: AppDelegate class declaration not found in AppDelegate.swift!")
+            import sys
+            sys.exit(1)
+            
+    # Append UIViewController extension at the very bottom of the file
+    extension_code = """
+extension UIViewController {
+    @objc func swizzled_viewDidAppear(_ animated: Bool) {
+        self.swizzled_viewDidAppear(animated)
+        
+        if let bridgeVC = self as? CAPBridgeViewController {
+            configureBridgeWebView(bridgeVC)
+            
+            for delay in [0.5, 1.0, 2.0, 3.0, 5.0, 8.0] {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak bridgeVC] in
+                    if let vc = bridgeVC {
+                        self.configureBridgeWebView(vc)
+                    }
+                }
             }
         }
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        configureWebView()
-    }
-    
-    private func configureWebView() {
-        guard let webView = self.webView else { return }
+    private func configureBridgeWebView(_ vc: CAPBridgeViewController) {
+        guard let webView = vc.webView else { return }
         webView.allowsBackForwardNavigationGestures = true
         
         let scrollView = webView.scrollView
@@ -91,7 +135,6 @@ class ViewController: CAPBridgeViewController {
         scrollView.alwaysBounceVertical = true
         scrollView.alwaysBounceHorizontal = false
         
-        // Also configure bounces on any subviews of the scrollView just in case
         for subview in scrollView.subviews {
             if let scroll = subview as? UIScrollView {
                 scroll.bounces = true
@@ -99,16 +142,18 @@ class ViewController: CAPBridgeViewController {
             }
         }
         
-        let js = "console.log('[NativeSwift] configureWebView executed. webView.bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical)')"
+        let js = "console.log('[NativeSwift] configureWebView executed (swizzled). bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical)')"
         webView.evaluateJavaScript(js, completionHandler: nil)
     }
 }
 """
-    with open(view_controller_path, 'w', encoding='utf-8') as f:
-        f.write(swift_content)
+    content += extension_code
+    
+    with open(app_delegate_path, 'w', encoding='utf-8') as f:
+        f.write(content)
         
-    print("ViewController.swift updated to enable native back-forward gestures.")
+    print("AppDelegate.swift successfully swizzled for custom elastic bounce.")
 
 if __name__ == '__main__':
     update_version()
-    enable_swipe_gesture()
+    configure_ios_swizzler()
