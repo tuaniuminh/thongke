@@ -183,6 +183,25 @@ extension UIViewController {
             }
         }
         
+        // Configure default background colors INSTANTLY based on iOS System Theme
+        // This ensures the bounce area matches the theme from the very first millisecond
+        if #available(iOS 13.0, *) {
+            let isSystemDark = vc.traitCollection.userInterfaceStyle == .dark
+            let startColor = isSystemDark ? 
+                UIColor(red: 9/255.0, green: 13/255.0, blue: 22/255.0, alpha: 1.0) : // #090d16
+                UIColor(red: 243/255.0, green: 244/255.0, blue: 246/255.0, alpha: 1.0) // #f3f4f6
+            
+            webView.isOpaque = false
+            webView.backgroundColor = UIColor.clear
+            scrollView.backgroundColor = UIColor.clear
+            vc.view.backgroundColor = startColor
+        } else {
+            webView.isOpaque = false
+            webView.backgroundColor = UIColor.clear
+            scrollView.backgroundColor = UIColor.clear
+            vc.view.backgroundColor = UIColor.white
+        }
+        
         let js = "console.log('[NativeSwift] configureWebView executed (swizzled). bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical)')"
         webView.evaluateJavaScript(js, completionHandler: nil)
     }
