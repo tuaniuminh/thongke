@@ -1417,12 +1417,7 @@ function updateMobileNavbar(tabId) {
                     Tiền tôi Mừng
                 </button>
                 <button class="nav-icon-btn text-only ${tabId === 'tc-management' ? 'active' : ''}" onclick="switchTab('tc-management')" title="Quản lý" style="display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px;">
-                    <svg viewBox="0 0 100 100" width="16" height="16" stroke="currentColor" stroke-width="7.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
-                        <path d="M 50,12 L 50,22 M 50,78 L 50,88 M 12,50 L 22,50 M 78,50 L 88,50 M 23,23 L 30,30 M 70,70 L 77,77 M 23,77 L 30,70 M 70,23 L 77,30" stroke-width="9" />
-                        <circle cx="50" cy="50" r="28" />
-                        <path d="M 52,52 L 76,76" stroke-width="9" />
-                        <path d="M 37,37 A 11.3 11.3 0 1 0 53,53 L 49,49 A 5.7 5.7 0 0 0 41,41 Z" stroke-width="8.5" />
-                    </svg>
+                    <i data-lucide="sliders" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
         `;
