@@ -191,7 +191,7 @@ async function deleteFamilyProfile(id) {
     const profile = (state.familyProfiles || []).find(p => p.id === id);
     if (!profile) return;
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa thành viên "${profile.name}"? Tất cả hồ sơ y tế liên kết với thành viên này cũng sẽ bị xóa.`)) {
+    if (!await window.showConfirm(`Bạn có chắc chắn muốn xóa thành viên "${profile.name}"? Tất cả hồ sơ y tế liên kết với thành viên này cũng sẽ bị xóa.`)) {
         return;
     }
 
@@ -399,7 +399,7 @@ async function handleMemberBackupImportFile(e) {
             const importedProfile = decryptedPayload.profile;
 
             const confirmMsg = `Bạn có chắc chắn muốn nhập dữ liệu sức khỏe của "${importedProfile.name}" vào hồ sơ của "${profile.name}"?\n(Bao gồm: ${importedRecords.length} kết quả xét nghiệm và ${importedBpRecords.length} lịch sử huyết áp. Dữ liệu cũ vẫn được giữ nguyên)`;
-            if (!confirm(confirmMsg)) return;
+            if (!await window.showConfirm(confirmMsg)) return;
 
             const nowIso = new Date().toISOString();
 
@@ -457,7 +457,7 @@ async function handleMemberBackupImportFile(e) {
             }
 
             if (importedProfile.lastAiAnalysis) {
-                const overwriteAi = confirm(`Tệp sao lưu có chứa báo cáo phân tích sức khỏe bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
+                const overwriteAi = await window.showConfirm(`Tệp sao lưu có chứa báo cáo phân tích sức khỏe bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
                 if (overwriteAi) {
                     profile.lastAiAnalysis = importedProfile.lastAiAnalysis;
                     profile.lastAiAnalysisDate = importedProfile.lastAiAnalysisDate || nowIso;
@@ -466,7 +466,7 @@ async function handleMemberBackupImportFile(e) {
                 }
             }
             if (importedProfile.lastBpAnalysis) {
-                const overwriteBp = confirm(`Tệp sao lưu có chứa báo cáo phân tích huyết áp bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
+                const overwriteBp = await window.showConfirm(`Tệp sao lưu có chứa báo cáo phân tích huyết áp bằng AI của "${importedProfile.name}". Bạn có muốn nhập báo cáo này vào hồ sơ của "${profile.name}" không?`);
                 if (overwriteBp) {
                     profile.lastBpAnalysis = importedProfile.lastBpAnalysis;
                     profile.lastBpAnalysisDate = importedProfile.lastBpAnalysisDate || nowIso;
@@ -1996,7 +1996,7 @@ window.deleteMedicalRecord = async function(id) {
         showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
         return;
     }
-    if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ y tế này?")) return;
+    if (!await window.showConfirm("Bạn có chắc chắn muốn xóa hồ sơ y tế này?")) return;
     
     const index = state.medicalRecords.findIndex(r => r.id === id);
     if (index === -1) return;
@@ -3674,7 +3674,7 @@ async function deleteBpRecord(recordId) {
         showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
         return;
     }
-    if (!confirm('Xóa chỉ số huyết áp này?')) return;
+    if (!await window.showConfirm('Xóa chỉ số huyết áp này?')) return;
     
     const index = (state.bloodPressureRecords || []).findIndex(r => r.id === recordId);
     if (index === -1) return;
@@ -4116,7 +4116,7 @@ async function deleteBodyCompRecord(recordId) {
         showToast("Vui lòng đăng nhập tài khoản để xóa thông tin", "warning");
         return;
     }
-    if (!confirm('Xóa bản ghi chỉ số cơ thể này?')) return;
+    if (!await window.showConfirm('Xóa bản ghi chỉ số cơ thể này?')) return;
     
     const index = (state.bodyCompositionRecords || []).findIndex(r => r.id === recordId);
     if (index === -1) return;
