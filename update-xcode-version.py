@@ -123,6 +123,47 @@ extension UIViewController {
                     }
                 }
             }
+            
+            // Periodically check and sync background color (covers theme changes)
+            Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak bridgeVC] timer in
+                guard let vc = bridgeVC, let webView = vc.webView else {
+                    timer.invalidate()
+                    return
+                }
+                
+                webView.evaluateJavaScript("window.getComputedStyle(document.body).backgroundColor") { [weak vc, weak webView] (value, error) in
+                    guard let vc = vc, let webView = webView, let colorStr = value as? String else { return }
+                    
+                    func parseRGBColor(_ colorStr: String) -> UIColor? {
+                        let cleanStr = colorStr.replacingOccurrences(of: " ", with: "")
+                        if cleanStr.hasPrefix("rgb(") {
+                            let components = cleanStr.replacingOccurrences(of: "rgb(", with: "").replacingOccurrences(of: ")", with: "").components(separatedBy: ",")
+                            if components.count >= 3,
+                               let r = Float(components[0]),
+                               let g = Float(components[1]),
+                               let b = Float(components[2]) {
+                                return UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: 1.0)
+                            }
+                        } else if cleanStr.hasPrefix("rgba(") {
+                            let components = cleanStr.replacingOccurrences(of: "rgba(", with: "").replacingOccurrences(of: ")", with: "").components(separatedBy: ",")
+                            if components.count >= 4,
+                               let r = Float(components[0]),
+                               let g = Float(components[1]),
+                               let b = Float(components[2]),
+                               let a = Float(components[3]) {
+                                return UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: CGFloat(a))
+                            }
+                        }
+                        return nil
+                    }
+                    
+                    if let color = parseRGBColor(colorStr) {
+                        webView.backgroundColor = color
+                        webView.scrollView.backgroundColor = color
+                        vc.view.backgroundColor = color
+                    }
+                }
+            }
         }
     }
     
