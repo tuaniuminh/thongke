@@ -39,12 +39,12 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.90">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.91">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.90">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.90">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.90">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.91">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.91">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.91">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -196,7 +196,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.1.90" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.1.91" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -288,7 +288,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.1.90" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.1.91" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1626,7 +1626,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.1.90" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.1.91" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2217,11 +2217,11 @@
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
                         <div>
-                            <span class="info-label">Ngày khám:</span>
+                            <span class="info-label" id="healthDetailDateLabel">Ngày khám:</span>
                             <span id="healthDetailDate" class="info-value">-</span>
                         </div>
-                        <div>
-                            <span class="info-label">Nơi khám:</span>
+                        <div id="healthDetailFacilityWrapper">
+                            <span class="info-label" id="healthDetailFacilityLabel">Nơi khám:</span>
                             <span id="healthDetailFacility" class="info-value">-</span>
                         </div>
                     </div>
@@ -2237,7 +2237,24 @@
                     </div>
                 </div>
 
-                <div class="health-detail-indicators-section" style="margin-top: 20px;">
+                <!-- Deworming Detail Section -->
+                <div class="health-detail-deworming-section" id="healthDetailDewormingSection" style="display: none; margin-top: 16px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--btn-radius); border: 1px solid var(--border-color);">
+                    <h5 class="section-title-sm" style="margin-bottom: 8px; color: var(--health-accent); display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                        <i data-lucide="pill" style="width: 16px; height: 16px;"></i> Lịch trình uống thuốc tẩy giun
+                    </h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <span class="info-label">Loại thuốc đã uống:</span>
+                            <span id="healthDetailMedicine" class="info-value" style="font-weight: 600; color: var(--text-color);">-</span>
+                        </div>
+                        <div>
+                            <span class="info-label">Ngày uống tiếp theo:</span>
+                            <span id="healthDetailNextDose" class="info-value" style="font-weight: 600; color: #10b981;">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="health-detail-indicators-section" id="healthDetailIndicatorsSection" style="margin-top: 20px;">
                     <h5 class="section-title-sm">Kết quả xét nghiệm & Chỉ số</h5>
                     <div class="table-responsive health-table-wrapper" style="margin-top: 8px;">
                         <table class="data-table health-table">
@@ -2310,12 +2327,31 @@
                     </div>
                     <div class="health-form-grid">
                         <div class="form-group">
-                            <label class="form-label health-form-label" for="healthEditDate">Ngày xét nghiệm / Khám</label>
+                            <label class="form-label health-form-label" for="healthEditDate" id="healthEditDateLabel">Ngày xét nghiệm / Khám</label>
                             <input type="date" id="healthEditDate" class="form-control health-input" required>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label health-form-label" for="healthEditFacility">Bệnh viện / Phòng khám</label>
+                        <div class="form-group" id="healthEditFacilityGroup">
+                            <label class="form-label health-form-label" for="healthEditFacility" id="healthEditFacilityLabel">Bệnh viện / Phòng khám</label>
                             <input type="text" id="healthEditFacility" class="form-control health-input" placeholder="Ví dụ: Bệnh viện Bạch Mai">
+                        </div>
+                    </div>
+
+                    <!-- Deworming Custom Fields -->
+                    <div class="health-form-grid" id="dewormingFields" style="display: none; grid-template-columns: 1.5fr 1fr 1.5fr; gap: 16px; margin-top: 12px;">
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditMedicine">Tên loại thuốc</label>
+                            <input type="text" id="healthEditMedicine" class="form-control health-input" placeholder="Ví dụ: Fugacar, Mebendazol">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditNextDoseMonths">Lần uống tiếp theo</label>
+                            <select id="healthEditNextDoseMonths" class="form-control health-input">
+                                <option value="4">Sau 4 tháng</option>
+                                <option value="6" selected>Sau 6 tháng</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditNextDoseDate">Ngày uống tiếp theo</label>
+                            <input type="date" id="healthEditNextDoseDate" class="form-control health-input" readonly style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted);">
                         </div>
                     </div>
 
@@ -2340,7 +2376,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-top: 16px;">
+                    <div class="form-group" id="healthEditNotesGroup" style="margin-top: 16px;">
                         <label class="form-label health-form-label" for="healthEditNotes">Kết luận của bác sĩ / Ghi chú chung</label>
                         <textarea id="healthEditNotes" class="form-control health-input" style="height: 60px; min-height: 60px;" placeholder="Nhập chẩn đoán hoặc lời khuyên của bác sĩ..."></textarea>
                     </div>
@@ -3152,8 +3188,8 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.90"></script>
-    <script type="module" src="src/core/app.js?v=4.1.90"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.91"></script>
+    <script type="module" src="src/core/app.js?v=4.1.91"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>

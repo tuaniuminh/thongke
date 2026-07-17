@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.1.90';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.90';
+} from '../../core/app.js?v=4.1.91';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.91';
 
 let healthTrendChartInstance = null;
 
@@ -1788,17 +1788,61 @@ Lưu ý quan trọng:
     throw lastError || new Error("Tất cả các mô hình Gemini đều quá tải hoặc thất bại.");
 }
 
+function calculateNextDoseDate() {
+    const dateVal = document.getElementById('healthEditDate').value;
+    const monthsVal = parseInt(document.getElementById('healthEditNextDoseMonths').value) || 6;
+    const nextDoseInput = document.getElementById('healthEditNextDoseDate');
+    if (!dateVal || !nextDoseInput) return;
+
+    const date = new Date(dateVal);
+    date.setMonth(date.getMonth() + monthsVal);
+    
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    nextDoseInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
 function updateHealthFormFields() {
     const type = document.getElementById('healthEditType').value;
     const titleGroup = document.getElementById('healthEditTitle').closest('.form-group');
     const titleContainer = titleGroup.parentNode; // .health-form-grid
-    const facilityGroup = document.getElementById('healthEditFacility').closest('.form-group');
-    const facilityContainer = facilityGroup.parentNode; // .health-form-grid
+    const facilityGroup = document.getElementById('healthEditFacilityGroup');
+    const facilityContainer = facilityGroup ? facilityGroup.parentNode : null; // .health-form-grid
     const indicatorsContainer = document.querySelector('.health-edit-indicators-container');
     const titleInput = document.getElementById('healthEditTitle');
     const facilityInput = document.getElementById('healthEditFacility');
-    const facilityLabel = facilityGroup.querySelector('label');
+    const facilityLabel = document.getElementById('healthEditFacilityLabel');
     const indicatorsRowsContainer = document.getElementById('healthIndicatorsEditRows');
+    const dewormingFields = document.getElementById('dewormingFields');
+    const notesGroup = document.getElementById('healthEditNotesGroup');
+    const dateLabel = document.getElementById('healthEditDateLabel');
+
+    // 1. Cập nhật nhãn Ngày
+    if (dateLabel) {
+        if (type === 'deworming') {
+            dateLabel.textContent = 'Ngày uống thuốc';
+        } else if (type === 'dental_scaling') {
+            dateLabel.textContent = 'Ngày lấy cao răng';
+        } else {
+            dateLabel.textContent = 'Ngày xét nghiệm / Khám';
+        }
+    }
+
+    // 2. Xử lý ẩn/hiện trường kết luận bác sĩ (Notes)
+    if (notesGroup) {
+        notesGroup.style.display = type === 'deworming' ? 'none' : 'block';
+    }
+
+    // 3. Xử lý ẩn/hiện các trường tuỳ chỉnh cho tẩy giun
+    if (dewormingFields) {
+        if (type === 'deworming') {
+            dewormingFields.style.display = 'grid';
+            calculateNextDoseDate(); // Tự động tính toán ngày uống tiếp theo
+        } else {
+            dewormingFields.style.display = 'none';
+        }
+    }
 
     if (type === 'deworming' || type === 'dental_scaling') {
         // Tự động điền tên hồ sơ và ẩn đi
@@ -1819,14 +1863,16 @@ function updateHealthFormFields() {
         if (type === 'deworming') {
             // Uống thuốc tẩy giun: không cần nhập nơi thực hiện
             facilityInput.value = '';
-            facilityGroup.style.display = 'none';
+            if (facilityGroup) facilityGroup.style.display = 'none';
             if (facilityContainer) {
                 facilityContainer.style.gridTemplateColumns = '1fr';
             }
         } else {
             // Lấy cao răng: hiển thị nơi thực hiện nhưng đổi nhãn cho thân thiện
-            facilityGroup.style.display = 'block';
-            facilityLabel.textContent = 'Phòng khám Nha khoa';
+            if (facilityGroup) facilityGroup.style.display = 'block';
+            if (facilityLabel) {
+                facilityLabel.textContent = 'Phòng khám Nha khoa';
+            }
             facilityInput.placeholder = 'Ví dụ: Nha khoa Kim';
             if (facilityContainer) {
                 facilityContainer.style.gridTemplateColumns = '1fr 1fr';
@@ -1839,8 +1885,10 @@ function updateHealthFormFields() {
             titleContainer.style.gridTemplateColumns = '1.5fr 1fr 1fr';
         }
 
-        facilityGroup.style.display = 'block';
-        facilityLabel.textContent = 'Bệnh viện / Phòng khám';
+        if (facilityGroup) facilityGroup.style.display = 'block';
+        if (facilityLabel) {
+            facilityLabel.textContent = 'Bệnh viện / Phòng khám';
+        }
         facilityInput.placeholder = 'Ví dụ: Bệnh viện Bạch Mai';
         if (facilityContainer) {
             facilityContainer.style.gridTemplateColumns = '1fr 1fr';
@@ -1884,6 +1932,9 @@ function openHealthEditModal(recordId = null, initialData = null) {
     document.getElementById('healthEditFacility').value = '';
     document.getElementById('healthEditNotes').value = '';
     document.getElementById('healthIndicatorsEditRows').innerHTML = '';
+    document.getElementById('healthEditMedicine').value = '';
+    document.getElementById('healthEditNextDoseMonths').value = '6';
+    document.getElementById('healthEditNextDoseDate').value = '';
     
     // Pre-select active family member filter if not 'all'
     if (editProfileSelect) {
@@ -1900,6 +1951,9 @@ function openHealthEditModal(recordId = null, initialData = null) {
             document.getElementById('healthEditDate').value = record.date || getLocalDateString();
             document.getElementById('healthEditFacility').value = record.facility || '';
             document.getElementById('healthEditNotes').value = record.notes || '';
+            document.getElementById('healthEditMedicine').value = record.medicineName || '';
+            document.getElementById('healthEditNextDoseMonths').value = record.nextDoseMonths || '6';
+            document.getElementById('healthEditNextDoseDate').value = record.nextDoseDate || '';
             if (editProfileSelect) {
                 editProfileSelect.value = record.profileId || 'p-self';
             }
@@ -1997,6 +2051,10 @@ async function saveMedicalRecord(event) {
     const facility = document.getElementById('healthEditFacility').value.trim();
     const notes = document.getElementById('healthEditNotes').value.trim();
     
+    const medicineName = document.getElementById('healthEditMedicine').value.trim();
+    const nextDoseMonths = parseInt(document.getElementById('healthEditNextDoseMonths').value) || 6;
+    const nextDoseDate = document.getElementById('healthEditNextDoseDate').value;
+    
     const indicatorRows = document.querySelectorAll('#healthIndicatorsEditRows .health-indicators-edit-row');
     const indicators = [];
     
@@ -2026,6 +2084,9 @@ async function saveMedicalRecord(event) {
                 facility,
                 notes,
                 indicators,
+                medicineName: type === 'deworming' ? medicineName : undefined,
+                nextDoseMonths: type === 'deworming' ? nextDoseMonths : undefined,
+                nextDoseDate: type === 'deworming' ? nextDoseDate : undefined,
                 updated_at: nowIso
             };
         }
@@ -2039,6 +2100,9 @@ async function saveMedicalRecord(event) {
             facility,
             notes,
             indicators,
+            medicineName: type === 'deworming' ? medicineName : undefined,
+            nextDoseMonths: type === 'deworming' ? nextDoseMonths : undefined,
+            nextDoseDate: type === 'deworming' ? nextDoseDate : undefined,
             created_at: nowIso,
             updated_at: nowIso
         };
@@ -2114,6 +2178,54 @@ function openHealthDetail(id) {
     document.getElementById('healthDetailFacility').innerText = record.facility || '-';
     document.getElementById('healthDetailTypeBadge').innerText = getHealthTypeLabel(record.type);
     
+    // Toggle Date label and Facility visibility based on type
+    const dateLabel = document.getElementById('healthDetailDateLabel');
+    if (dateLabel) {
+        if (record.type === 'deworming') {
+            dateLabel.innerText = 'Ngày uống thuốc:';
+        } else if (record.type === 'dental_scaling') {
+            dateLabel.innerText = 'Ngày lấy cao răng:';
+        } else {
+            dateLabel.innerText = 'Ngày khám:';
+        }
+    }
+
+    const facilityWrapper = document.getElementById('healthDetailFacilityWrapper');
+    const facilityLabel = document.getElementById('healthDetailFacilityLabel');
+    if (facilityWrapper) {
+        if (record.type === 'deworming') {
+            facilityWrapper.style.display = 'none';
+        } else {
+            facilityWrapper.style.display = 'block';
+            if (facilityLabel) {
+                facilityLabel.innerText = record.type === 'dental_scaling' ? 'Nha khoa:' : 'Nơi khám:';
+            }
+        }
+    }
+
+    // Toggle Deworming Detail Section
+    const dewormingSection = document.getElementById('healthDetailDewormingSection');
+    if (dewormingSection) {
+        if (record.type === 'deworming') {
+            dewormingSection.style.display = 'block';
+            document.getElementById('healthDetailMedicine').innerText = record.medicineName || 'Không rõ';
+            document.getElementById('healthDetailNextDose').innerText = record.nextDoseDate ? formatDate(record.nextDoseDate) : 'Không rõ';
+        } else {
+            dewormingSection.style.display = 'none';
+        }
+    }
+
+    // Hide indicators and notes sections for deworming/dental
+    const indicatorsSection = document.getElementById('healthDetailIndicatorsSection');
+    if (indicatorsSection) {
+        indicatorsSection.style.display = (record.type === 'deworming' || record.type === 'dental_scaling') ? 'none' : 'block';
+    }
+    
+    const notesSection = document.querySelector('.health-detail-notes-section');
+    if (notesSection) {
+        notesSection.style.display = record.type === 'deworming' ? 'none' : 'block';
+    }
+
     const profileBadge = document.getElementById('healthDetailProfileBadge');
     if (profileBadge) {
         profileBadge.innerText = getProfileName(record.profileId);
@@ -4538,6 +4650,15 @@ function initHealthEventListeners() {
     if (healthEditType) {
         healthEditType.addEventListener('change', updateHealthFormFields);
     }
+
+    // Listen to date changes and next dose month changes to calculate next deworming date
+    document.getElementById('healthEditDate')?.addEventListener('change', () => {
+        if (healthEditType && healthEditType.value === 'deworming') {
+            calculateNextDoseDate();
+        }
+    });
+
+    document.getElementById('healthEditNextDoseMonths')?.addEventListener('change', calculateNextDoseDate);
 
     // PDF export button
     const pdfBtn = document.getElementById('exportHealthPdfBtn');
