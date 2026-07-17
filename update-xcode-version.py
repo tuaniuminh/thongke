@@ -124,45 +124,69 @@ extension UIViewController {
                 }
             }
             
-            // Periodically check and sync background color (covers theme changes)
-            Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak bridgeVC] timer in
+            // 1. Run a fast theme sync timer (every 100ms for 3 seconds)
+            // This captures the correct CSS background color immediately at startup
+            var fastRunCount = 0
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak bridgeVC] timer in
                 guard let vc = bridgeVC, let webView = vc.webView else {
                     timer.invalidate()
                     return
                 }
                 
-                webView.evaluateJavaScript("window.getComputedStyle(document.body).backgroundColor") { [weak vc, weak webView] (value, error) in
-                    guard let vc = vc, let webView = webView, let colorStr = value as? String else { return }
-                    
-                    func parseRGBColor(_ colorStr: String) -> UIColor? {
-                        let cleanStr = colorStr.replacingOccurrences(of: " ", with: "")
-                        if cleanStr.hasPrefix("rgb(") {
-                            let components = cleanStr.replacingOccurrences(of: "rgb(", with: "").replacingOccurrences(of: ")", with: "").components(separatedBy: ",")
-                            if components.count >= 3,
-                               let r = Float(components[0]),
-                               let g = Float(components[1]),
-                               let b = Float(components[2]) {
-                                return UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: 1.0)
-                            }
-                        } else if cleanStr.hasPrefix("rgba(") {
-                            let components = cleanStr.replacingOccurrences(of: "rgba(", with: "").replacingOccurrences(of: ")", with: "").components(separatedBy: ",")
-                            if components.count >= 4,
-                               let r = Float(components[0]),
-                               let g = Float(components[1]),
-                               let b = Float(components[2]),
-                               let a = Float(components[3]) {
-                                return UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: CGFloat(a))
-                            }
-                        }
-                        return nil
+                fastRunCount += 1
+                if fastRunCount > 30 {
+                    timer.invalidate()
+                    // 2. Fall back to a slow periodic sync (every 2.0s) for manual theme toggles
+                    self.startSlowThemeSync(vc)
+                }
+                
+                self.syncThemeColor(vc: vc, webView: webView)
+            }
+        }
+    }
+    
+    private func startSlowThemeSync(_ vc: CAPBridgeViewController) {
+        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak vc] timer in
+            guard let bridgeVC = vc, let webView = bridgeVC.webView else {
+                timer.invalidate()
+                return
+            }
+            self.syncThemeColor(vc: bridgeVC, webView: webView)
+        }
+    }
+    
+    private func syncThemeColor(vc: CAPBridgeViewController, webView: WKWebView) {
+        webView.evaluateJavaScript("window.getComputedStyle(document.body).backgroundColor") { [weak vc, weak webView] (value, error) in
+            guard let vc = vc, let webView = webView, let colorStr = value as? String else { return }
+            
+            func parseRGBColor(_ colorStr: String) -> UIColor? {
+                let cleanStr = colorStr.replacingOccurrences(of: " ", with: "")
+                if cleanStr.hasPrefix("rgb(") {
+                    let components = cleanStr.replacingOccurrences(of: "rgb(", with: "").replacingOccurrences(of: ")", with: "").components(separatedBy: ",")
+                    if components.count >= 3,
+                       let r = Float(components[0]),
+                       let g = Float(components[1]),
+                       let b = Float(components[2]) {
+                        return UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: 1.0)
                     }
-                    
-                    if let color = parseRGBColor(colorStr) {
-                        webView.backgroundColor = color
-                        webView.scrollView.backgroundColor = color
-                        vc.view.backgroundColor = color
+                } else if cleanStr.hasPrefix("rgba(") {
+                    let components = cleanStr.replacingOccurrences(of: "rgba(", with: "").replacingOccurrences(of: ")", with: "").components(separatedBy: ",")
+                    if components.count >= 4,
+                       let r = Float(components[0]),
+                       let g = Float(components[1]),
+                       let b = Float(components[2]),
+                       let a = Float(components[3]) {
+                        return UIColor(red: CGFloat(r/255.0), green: CGFloat(g/255.0), blue: CGFloat(b/255.0), alpha: CGFloat(a))
                     }
                 }
+                return nil
+            }
+            
+            if let color = parseRGBColor(colorStr) {
+                webView.isOpaque = true
+                webView.backgroundColor = color
+                webView.scrollView.backgroundColor = color
+                vc.view.backgroundColor = color
             }
         }
     }
@@ -181,25 +205,6 @@ extension UIViewController {
                 scroll.bounces = true
                 scroll.alwaysBounceVertical = true
             }
-        }
-        
-        // Configure default background colors INSTANTLY based on iOS System Theme
-        // This ensures the bounce area matches the theme from the very first millisecond
-        if #available(iOS 13.0, *) {
-            let isSystemDark = vc.traitCollection.userInterfaceStyle == .dark
-            let startColor = isSystemDark ? 
-                UIColor(red: 9/255.0, green: 13/255.0, blue: 22/255.0, alpha: 1.0) : // #090d16
-                UIColor(red: 243/255.0, green: 244/255.0, blue: 246/255.0, alpha: 1.0) // #f3f4f6
-            
-            webView.isOpaque = false
-            webView.backgroundColor = UIColor.clear
-            scrollView.backgroundColor = UIColor.clear
-            vc.view.backgroundColor = startColor
-        } else {
-            webView.isOpaque = false
-            webView.backgroundColor = UIColor.clear
-            scrollView.backgroundColor = UIColor.clear
-            vc.view.backgroundColor = UIColor.white
         }
         
         let js = "console.log('[NativeSwift] configureWebView executed (swizzled). bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical)')"
