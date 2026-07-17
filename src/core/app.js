@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.91';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.91';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.91';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.91';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.92';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.92';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.92';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.92';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.91';
-import * as sync from './sync.js?v=4.1.91';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.91';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.92';
+import * as sync from './sync.js?v=4.1.92';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.92';
 
-const APP_VERSION = '4.1.91';
+const APP_VERSION = '4.1.92';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3411,32 +3411,61 @@ function logScrollDiagnostics() {
     console.log(`[ScrollDiag] window.innerHeight: ${window.innerHeight}px`);
     console.log(`[ScrollDiag] screen.height: ${window.screen.height}px`);
     
-    // HTML / Body
+    // 1. Measure actual browser scrollbar dimensions dynamically
+    try {
+        const testDiv = document.createElement('div');
+        testDiv.style.visibility = 'hidden';
+        testDiv.style.overflow = 'scroll';
+        testDiv.style.width = '100px';
+        testDiv.style.height = '100px';
+        testDiv.style.position = 'absolute';
+        testDiv.style.top = '-9999px';
+        document.body.appendChild(testDiv);
+        
+        const innerDiv = document.createElement('div');
+        innerDiv.style.width = '100%';
+        innerDiv.style.height = '200px';
+        testDiv.appendChild(innerDiv);
+        
+        const scrollbarWidth = testDiv.offsetWidth - testDiv.clientWidth;
+        const scrollbarHeight = testDiv.offsetHeight - testDiv.clientHeight;
+        document.body.removeChild(testDiv);
+        
+        console.log(`[ScrollDiag] Measured scrollbar dimension - Width: ${scrollbarWidth}px, Height: ${scrollbarHeight}px`);
+        if (scrollbarWidth > 0 || scrollbarHeight > 0) {
+            console.warn(`[ScrollDiag] WARNING: Scrollbars are NOT hidden! Computed scrollbar size is non-zero. Check if CSS overriding occurred.`);
+        } else {
+            console.log(`[ScrollDiag] SUCCESS: Scrollbars are successfully hidden globally (computed size is 0px).`);
+        }
+    } catch (err) {
+        console.error("[ScrollDiag] Failed to perform scrollbar dimension test:", err);
+    }
+    
+    // 2. HTML / Body
     const htmlStyle = window.getComputedStyle(document.documentElement);
     const bodyStyle = window.getComputedStyle(document.body);
     console.log(`[ScrollDiag] html style: overflow=${htmlStyle.overflow}, overflowY=${htmlStyle.overflowY}, height=${htmlStyle.height}, minHeight=${htmlStyle.minHeight}`);
     console.log(`[ScrollDiag] body style: overflow=${bodyStyle.overflow}, overflowY=${bodyStyle.overflowY}, overflowX=${bodyStyle.overflowX}, height=${bodyStyle.height}, minHeight=${bodyStyle.minHeight}, touchAction=${bodyStyle.touchAction}`);
     
-    // Main containers
-    const homeLayout = document.getElementById('homeLayout');
-    if (homeLayout) {
-        const style = window.getComputedStyle(homeLayout);
-        console.log(`[ScrollDiag] homeLayout style: display=${style.display}, height=${style.height}, minHeight=${style.minHeight}, overflowY=${style.overflowY}`);
-    }
-    
-    const appLayout = document.getElementById('appLayout');
-    if (appLayout) {
-        const style = window.getComputedStyle(appLayout);
-        console.log(`[ScrollDiag] appLayout style: display=${style.display}, height=${style.height}, minHeight=${style.minHeight}, overflowY=${style.overflowY}`);
-    }
-    
-    const mainContent = document.querySelector('.main-content');
-    if (mainContent) {
-        const style = window.getComputedStyle(mainContent);
-        console.log(`[ScrollDiag] mainContent style: height=${style.height}, minHeight=${style.minHeight}, overflowY=${style.overflowY}`);
-    }
+    // 3. Inspect main containers and scrollable targets
+    const scrollableSelectors = [
+        '#homeLayout', '#appLayout', '.main-content', '.tab-content', '.modal-body', 
+        '.home-container', '.relationship-tab-content', '.health-dashboard-wrapper'
+    ];
+    scrollableSelectors.forEach(selector => {
+        const el = document.querySelector(selector);
+        if (el) {
+            const style = window.getComputedStyle(el);
+            const isScrollableY = el.scrollHeight > el.clientHeight;
+            const isScrollableX = el.scrollWidth > el.clientWidth;
+            console.log(`[ScrollDiag] Element [${selector}]: ` +
+                `scrollHeight=${el.scrollHeight}px, clientHeight=${el.clientHeight}px (scrollableY=${isScrollableY}), ` +
+                `scrollWidth=${el.scrollWidth}px, clientWidth=${el.clientWidth}px (scrollableX=${isScrollableX}), ` +
+                `overflowY=${style.overflowY}, overflowX=${style.overflowX}`);
+        }
+    });
 
-    // Checking active overlays
+    // 4. Checking active overlays
     const overlays = document.querySelectorAll('.modal-overlay, .setup-overlay');
     overlays.forEach(overlay => {
         const style = window.getComputedStyle(overlay);
