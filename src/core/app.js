@@ -83,6 +83,12 @@ let state = {
     showFamilyFundCardUpdated: '',
     showLoveWidget: true,
     showLoveWidgetUpdated: '',
+    weLoveSicknessLogs: [],
+    weLoveSicknessLogsUpdated: '',
+    weLoveReminders: [],
+    weLoveRemindersUpdated: '',
+    weLoveVisitLogs: [],
+    weLoveVisitLogsUpdated: '',
     customEventTypes: [],
     customEventTypesUpdated: '',
     familyFunds: [],
@@ -445,6 +451,12 @@ async function saveLocalState() {
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
         showLoveWidget: state.showLoveWidget !== false,
         showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
+        weLoveSicknessLogs: state.weLoveSicknessLogs || [],
+        weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
+        weLoveReminders: state.weLoveReminders || [],
+        weLoveRemindersUpdated: state.weLoveRemindersUpdated || '',
+        weLoveVisitLogs: state.weLoveVisitLogs || [],
+        weLoveVisitLogsUpdated: state.weLoveVisitLogsUpdated || '',
         customEventTypes: state.customEventTypes || [],
         customEventTypesUpdated: state.customEventTypesUpdated || '',
         bloodPressureRecords: state.bloodPressureRecords || [],
@@ -509,6 +521,12 @@ export async function loadLocalState(password) {
         state.showFamilyFundCardUpdated = '';
         state.showLoveWidget = true;
         state.showLoveWidgetUpdated = '';
+        state.weLoveSicknessLogs = [];
+        state.weLoveSicknessLogsUpdated = '';
+        state.weLoveReminders = [];
+        state.weLoveRemindersUpdated = '';
+        state.weLoveVisitLogs = [];
+        state.weLoveVisitLogsUpdated = '';
         state.customEventTypes = [];
         state.customEventTypesUpdated = '';
         state.bloodPressureRecords = [];
@@ -564,6 +582,12 @@ export async function loadLocalState(password) {
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
         state.showLoveWidget = data.showLoveWidget !== false;
         state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
+        state.weLoveSicknessLogs = data.weLoveSicknessLogs || [];
+        state.weLoveSicknessLogsUpdated = data.weLoveSicknessLogsUpdated || '';
+        state.weLoveReminders = data.weLoveReminders || [];
+        state.weLoveRemindersUpdated = data.weLoveRemindersUpdated || '';
+        state.weLoveVisitLogs = data.weLoveVisitLogs || [];
+        state.weLoveVisitLogsUpdated = data.weLoveVisitLogsUpdated || '';
         state.customEventTypes = data.customEventTypes || [];
         state.customEventTypesUpdated = data.customEventTypesUpdated || '';
         state.bloodPressureRecords = data.bloodPressureRecords || [];
@@ -892,6 +916,12 @@ async function performSync(silent = false) {
                     state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
                     state.showLoveWidget = remoteData.showLoveWidget !== false;
                     state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
+                    state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
+                    state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
+                    state.weLoveReminders = remoteData.weLoveReminders || [];
+                    state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
+                    state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
+                    state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
                     state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
                     state.asymmetricPublicKey = remoteData.asymmetricPublicKey || '';
                     state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted || '';
@@ -957,6 +987,30 @@ async function performSync(silent = false) {
                     if (remoteLoveWidgetTime > localLoveWidgetTime) {
                         state.showLoveWidget = remoteData.showLoveWidget !== false;
                         state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
+                    }
+
+                    // Merge WeLove Sickness Logs
+                    const localSicknessTime = state.weLoveSicknessLogsUpdated ? new Date(state.weLoveSicknessLogsUpdated).getTime() : 0;
+                    const remoteSicknessTime = remoteData.weLoveSicknessLogsUpdated ? new Date(remoteData.weLoveSicknessLogsUpdated).getTime() : 0;
+                    if (remoteSicknessTime > localSicknessTime) {
+                        state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
+                        state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
+                    }
+
+                    // Merge WeLove Reminders
+                    const localRemindersTime = state.weLoveRemindersUpdated ? new Date(state.weLoveRemindersUpdated).getTime() : 0;
+                    const remoteRemindersTime = remoteData.weLoveRemindersUpdated ? new Date(remoteData.weLoveRemindersUpdated).getTime() : 0;
+                    if (remoteRemindersTime > localRemindersTime) {
+                        state.weLoveReminders = remoteData.weLoveReminders || [];
+                        state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
+                    }
+
+                    // Merge WeLove Visit Logs
+                    const localVisitsTime = state.weLoveVisitLogsUpdated ? new Date(state.weLoveVisitLogsUpdated).getTime() : 0;
+                    const remoteVisitsTime = remoteData.weLoveVisitLogsUpdated ? new Date(remoteData.weLoveVisitLogsUpdated).getTime() : 0;
+                    if (remoteVisitsTime > localVisitsTime) {
+                        state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
+                        state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
                     }
 
                     // Recover key fields from remote if they are missing locally but exist remotely
@@ -1149,6 +1203,12 @@ async function performSync(silent = false) {
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
             showLoveWidget: state.showLoveWidget !== false,
             showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
+            weLoveSicknessLogs: state.weLoveSicknessLogs || [],
+            weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
+            weLoveReminders: state.weLoveReminders || [],
+            weLoveRemindersUpdated: state.weLoveRemindersUpdated || '',
+            weLoveVisitLogs: state.weLoveVisitLogs || [],
+            weLoveVisitLogsUpdated: state.weLoveVisitLogsUpdated || '',
             customEventTypes: state.customEventTypes || [],
             customEventTypesUpdated: state.customEventTypesUpdated || '',
             familyProfiles: state.familyProfiles || [],

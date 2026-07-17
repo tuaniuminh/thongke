@@ -56,15 +56,12 @@ let floatingHeartsIntervalId = null;
 let checkRemindersIntervalId = null;
 let remoteRefreshIntervalId = null;
 
-// Sickness logs and reminders loaded data
+// UI variables
 let sicknessLogs = [];
 let reminders = [];
 let visitLogs = [];
 let selectedFilterYear = 'Tất cả';
 let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin'
-let dbSyncError = null;
-let isWeLoveLocalOnly = false;
-let isLoadingData = false;
 
 // Audio Instance getter
 function getAudioInstance() {
@@ -133,95 +130,6 @@ function initMediaSession() {
             aud.pause();
         });
     }
-}
-
-// Database Helpers
-async function getSupabaseRSVPs() {
-    const supabase = sync.getSupabase();
-    if (!supabase) return null;
-    const { data, error } = await supabase
-        .from('tuanminh_wedding_rsvps')
-        .select('*')
-        .eq('wedding_id', 'default')
-        .order('created_at', { ascending: false });
-    if (error) {
-        console.error("Failed to query Supabase RSVPs:", error);
-        throw error;
-    }
-    return data || [];
-}
-
-async function saveSupabaseRSVP(rsvp) {
-    const supabase = sync.getSupabase();
-    if (!supabase) return null;
-    const payload = {
-        wedding_id: 'default',
-        guest_name: rsvp.guest_name,
-        status: rsvp.status,
-        guest_count: parseInt(rsvp.guest_count || 0),
-        side: rsvp.side || 'both',
-        wish: rsvp.wish || '',
-        created_at: rsvp.created_at || new Date().toISOString()
-    };
-    if (rsvp.id) payload.id = rsvp.id;
-
-    const { data, error } = await supabase
-        .from('tuanminh_wedding_rsvps')
-        .upsert(payload)
-        .select()
-        .single();
-    if (error) {
-        console.error("Failed to save Supabase RSVP:", error);
-        throw error;
-    }
-    return data;
-}
-
-async function deleteSupabaseRSVP(id) {
-    const supabase = sync.getSupabase();
-    if (!supabase) return null;
-    const { error } = await supabase
-        .from('tuanminh_wedding_rsvps')
-        .delete()
-        .eq('id', id);
-    if (error) {
-        console.error("Failed to delete Supabase RSVP:", error);
-        throw error;
-    }
-    return true;
-}
-
-function getLocalRSVPs() {
-    return JSON.parse(localStorage.getItem('tm_wedding_rsvps') || '[]');
-}
-
-function saveLocalRSVP(rsvp) {
-    const rsvps = getLocalRSVPs();
-    const newRsvp = {
-        id: rsvp.id || Math.random().toString(36).substring(2, 10),
-        wedding_id: 'default',
-        guest_name: rsvp.guest_name,
-        status: rsvp.status,
-        guest_count: parseInt(rsvp.guest_count || 0),
-        side: rsvp.side || 'both',
-        wish: rsvp.wish || '',
-        created_at: rsvp.created_at || new Date().toISOString()
-    };
-    const idx = rsvp.id ? rsvps.findIndex(r => r.id === rsvp.id) : -1;
-    if (idx >= 0) {
-        rsvps[idx] = newRsvp;
-    } else {
-        rsvps.unshift(newRsvp);
-    }
-    localStorage.setItem('tm_wedding_rsvps', JSON.stringify(rsvps));
-    return newRsvp;
-}
-
-function deleteLocalRSVP(id) {
-    const rsvps = getLocalRSVPs();
-    const filtered = rsvps.filter(r => r.id !== id);
-    localStorage.setItem('tm_wedding_rsvps', JSON.stringify(filtered));
-    return true;
 }
 
 // User agent parser helper
@@ -371,6 +279,7 @@ function nextLoveQuote() {
     }, 250);
 }
 
+// Slide quote functions
 function prevLoveQuote() {
     if (isTransitioningQuote) return;
     const wrapper = document.querySelector('.quote-text-wrapper');
@@ -431,192 +340,65 @@ function triggerSystemNotification(title, body) {
 // Check scheduled reminders in background
 function checkScheduledReminders() {
     const now = new Date();
-    const dueReminders = reminders.filter(r => {
-        if (r.isSent) return false;
+    let hasUpdates = false;
+
+    if (!state.weLoveReminders) state.weLoveReminders = [];
+
+    state.weLoveReminders.forEach((r) => {
+        if (r.isSent) return;
         const schedTime = new Date(r.scheduledTime);
-        return schedTime <= now;
-    });
-
-    if (dueReminders.length === 0) return;
-
-    dueReminders.forEach(async (reminder) => {
-        triggerSystemNotification(reminder.title, reminder.message);
-        reminder.isSent = true;
-        
-        try {
-            if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                await saveSupabaseRSVP({
-                    id: reminder.id,
-                    guest_name: reminder.title,
-                    status: 'scheduled_reminder',
-                    guest_count: 1, // marked sent
-                    side: reminder.scheduledTime,
-                    wish: reminder.message,
-                    created_at: reminder.createdAt
-                });
-            } else {
-                saveLocalRSVP({
-                    id: reminder.id,
-                    guest_name: reminder.title,
-                    status: 'scheduled_reminder',
-                    guest_count: 1,
-                    side: reminder.scheduledTime,
-                    wish: reminder.message,
-                    created_at: reminder.createdAt
-                });
-            }
-        } catch (err) {
-            console.error("Error updating sent status on database:", err);
+        if (schedTime <= now) {
+            triggerSystemNotification(r.title, r.message);
+            r.isSent = true;
+            hasUpdates = true;
         }
     });
 
-    // Re-render reminders timeline if currently viewing admin tab
-    if (weLoveCurrentSubView === 'admin') {
-        renderRemindersList();
+    if (hasUpdates) {
+        state.weLoveRemindersUpdated = new Date().toISOString();
+        saveLocalState().then(() => {
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+        });
+        
+        reminders = state.weLoveReminders || [];
+        if (weLoveCurrentSubView === 'admin') {
+            renderRemindersList();
+        }
     }
 }
 
 // Fetch WeLove data
 export async function fetchWeLoveData() {
-    if (isLoadingData) return;
-    isLoadingData = true;
-    dbSyncError = null;
-
-    try {
-        let rsvps = [];
-        if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-            try {
-                rsvps = await getSupabaseRSVPs();
-            } catch (e) {
-                if (e.code === 'PGRST205' || (e.message && 'tuanminh_wedding_rsvps' in e.message) || (e.message && e.message.includes('tuanminh_wedding_rsvps'))) {
-                    isWeLoveLocalOnly = true;
-                    dbSyncError = null;
-                    console.log("WeLove switched to Local-Only mode: tuanminh_wedding_rsvps table is missing in personal Supabase database.");
-                } else {
-                    dbSyncError = e.message || 'Lỗi kết nối';
-                }
-                rsvps = getLocalRSVPs();
-            }
-        } else {
-            rsvps = getLocalRSVPs();
-        }
-
-        // 1. Process Sickness Logs
-        const sicknessList = rsvps
-            .filter(r => r.status === 'sickness_log')
-            .map(r => ({
-                id: r.id,
-                date: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-                symptomType: r.guest_name,
-                notes: r.wish,
-                icon: r.side || '🤒'
-            }));
-
-        const isInitialized = rsvps.some(r => r.status === 'sickness_log_initialized');
-        
-        if (sicknessList.length === 0 && !isInitialized) {
-            // Seed default sickness logs if database is empty
-            const seedLogs = [
-                { guest_name: 'Sốt đau đầu nhẹ', status: 'sickness_log', guest_count: 0, side: '🌡️', wish: 'Thời tiết giao mùa nóng lạnh thất thường dẫn đến sốt đau đầu. Anh đã chuẩn bị sẵn nước gừng ấm rồi đó.', created_at: '2026-04-05T00:00:00.000Z' },
-                { guest_name: 'Cảm lạnh đi mưa', status: 'sickness_log', guest_count: 0, side: '🤧', wish: 'Đi chơi Valentine dính mưa phùn lạnh mà không chịu mặc thêm áo khoác dày. Phạt bé tự giác giữ ấm nha!', created_at: '2026-02-14T00:00:00.000Z' },
-                { guest_name: 'Viêm họng ho khan', status: 'sickness_log', guest_count: 0, side: '😷', wish: 'Nói nhiều và uống nước đá lạnh đợt đầu đông quá nha! Lần sau phải uống trà gừng bảo vệ cổ họng nghe chưa.', created_at: '2025-11-20T00:00:00.000Z' },
-                { guest_name: 'Kiệt sức mệt mỏi', status: 'sickness_log', guest_count: 0, side: '😴', wish: 'Áp lực học tập/công việc nhiều dẫn đến kiệt sức. Anh luôn bên cạnh và ôm bé thật chặt nhé! ❤️', created_at: '2025-09-15T00:00:00.000Z' }
-            ];
-
-            const initialSeedFlag = {
-                guest_name: 'Sổ Tay Sức Khỏe',
-                status: 'sickness_log_initialized',
-                guest_count: 0,
-                side: '🩺',
-                wish: 'Hệ thống sổ tay sức khỏe đã được khởi tạo lần đầu thành công.'
-            };
-
-            if ((sync.isConfigured() && !isWeLoveLocalOnly) && !dbSyncError) {
-                await saveSupabaseRSVP(initialSeedFlag);
-                for (const item of seedLogs) {
-                    await saveSupabaseRSVP(item);
-                }
-                const refreshed = await getSupabaseRSVPs();
-                sicknessLogs = refreshed
-                    .filter(r => r.status === 'sickness_log')
-                    .map(r => ({
-                        id: r.id,
-                        date: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-                        symptomType: r.guest_name,
-                        notes: r.wish,
-                        icon: r.side || '🤒'
-                    }));
-            } else {
-                saveLocalRSVP(initialSeedFlag);
-                seedLogs.forEach(item => saveLocalRSVP(item));
-                sicknessLogs = getLocalRSVPs()
-                    .filter(r => r.status === 'sickness_log')
-                    .map(r => ({
-                        id: r.id,
-                        date: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-                        symptomType: r.guest_name,
-                        notes: r.wish,
-                        icon: r.side || '🤒'
-                    }));
-            }
-        } else {
-            // Clean up duplicates
-            const uniqueMap = new Map();
-            const dups = [];
-            sicknessList.forEach(log => {
-                const key = `${log.symptomType}-${log.notes}-${log.date}`;
-                if (uniqueMap.has(key)) {
-                    dups.push(log.id);
-                } else {
-                    uniqueMap.set(key, log);
-                }
-            });
-
-            sicknessLogs = Array.from(uniqueMap.values());
-            
-            // Clean duplicates silently
-            if (dups.length > 0) {
-                dups.forEach(id => {
-                    if ((sync.isConfigured() && !isWeLoveLocalOnly) && !dbSyncError) {
-                        deleteSupabaseRSVP(id).catch(e => {});
-                    } else {
-                        deleteLocalRSVP(id);
-                    }
-                });
-            }
-        }
-        sicknessLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        // 2. Process Reminders
-        reminders = rsvps
-            .filter(r => r.status === 'scheduled_reminder')
-            .map(r => ({
-                id: r.id,
-                title: r.guest_name,
-                message: r.wish,
-                scheduledTime: r.side,
-                isSent: parseInt(r.guest_count || 0) === 1,
-                createdAt: r.created_at
-            }));
-        reminders.sort((a, b) => new Date(b.scheduledTime) - new Date(a.scheduledTime));
-
-        // 3. Process Visit Logs
-        visitLogs = rsvps
-            .filter(r => r.status === 'member_visit')
-            .map(r => ({
-                id: r.id,
-                email: r.guest_name,
-                timestamp: r.created_at || new Date().toISOString(),
-                deviceInfo: parseDeviceFromUA(r.wish)
-            }));
-
-    } catch (err) {
-        console.error("Error loading WeLove data:", err);
-        dbSyncError = err.message || 'Lỗi hệ thống';
-    } finally {
-        isLoadingData = false;
-        updateSyncStatusBadge();
+    // 1. Process Sickness Logs
+    if (!state.weLoveSicknessLogs || state.weLoveSicknessLogs.length === 0) {
+        // Seed default sickness logs if empty
+        const seedLogs = [
+            { id: 'sick-1', date: '2026-04-05', symptomType: 'Sốt đau đầu nhẹ', notes: 'Thời tiết giao mùa nóng lạnh thất thường dẫn đến sốt đau đầu. Anh đã chuẩn bị sẵn nước gừng ấm rồi đó.', icon: '🌡️' },
+            { id: 'sick-2', date: '2026-02-14', symptomType: 'Cảm lạnh đi mưa', notes: 'Đi chơi Valentine dính mưa phùn lạnh mà không chịu mặc thêm áo khoác dày. Phạt bé tự giác giữ ấm nha!', icon: '🤧' },
+            { id: 'sick-3', date: '2025-11-20', symptomType: 'Viêm họng ho khan', notes: 'Nói nhiều và uống nước đá lạnh đợt đầu đông quá nha! Lần sau phải uống trà gừng bảo vệ cổ họng nghe chưa.', icon: '😷' },
+            { id: 'sick-4', date: '2025-09-15', symptomType: 'Kiệt sức mệt mỏi', notes: 'Áp lực học tập/công việc nhiều dẫn đến kiệt sức. Anh luôn bên cạnh và ôm bé thật chặt nhé! ❤️', icon: '😴' }
+        ];
+        state.weLoveSicknessLogs = seedLogs;
+        state.weLoveSicknessLogsUpdated = new Date().toISOString();
+        await saveLocalState();
     }
+
+    sicknessLogs = state.weLoveSicknessLogs || [];
+    sicknessLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // 2. Process Reminders
+    if (!state.weLoveReminders) state.weLoveReminders = [];
+    reminders = state.weLoveReminders || [];
+    reminders.sort((a, b) => new Date(b.scheduledTime) - new Date(a.scheduledTime));
+
+    // 3. Process Visit Logs
+    if (!state.weLoveVisitLogs) state.weLoveVisitLogs = [];
+    visitLogs = state.weLoveVisitLogs || [];
+    visitLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    updateSyncStatusBadge();
 }
 
 // Log a visit by the current logged in user (if they are the guest/spouse)
@@ -625,32 +407,26 @@ export async function logSpouseVisit() {
     if (!user) return;
     
     // Only log if the logged in user is the spouse (not owner)
-    // To identify couple roles: owner email is stored in state.ownerEmail (or state.user.email)
     const isOwner = state.ownerEmail === user.email || (state.user && state.user.email === user.email && !state.spouseEmail);
     if (!isOwner) {
         const visitLogged = sessionStorage.getItem('we_love_visit_logged');
         if (!visitLogged) {
             sessionStorage.setItem('we_love_visit_logged', 'true');
-            try {
-                if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                    await saveSupabaseRSVP({
-                        guest_name: user.email,
-                        status: 'member_visit',
-                        guest_count: 1,
-                        side: 'both',
-                        wish: navigator.userAgent || 'Web Browser'
-                    });
-                } else {
-                    saveLocalRSVP({
-                        guest_name: user.email,
-                        status: 'member_visit',
-                        guest_count: 1,
-                        side: 'both',
-                        wish: navigator.userAgent || 'Web Browser'
-                    });
-                }
-            } catch (err) {
-                console.warn("Could not save visit log:", err);
+            
+            const newVisit = {
+                id: Math.random().toString(36).substring(2, 10),
+                email: user.email,
+                timestamp: new Date().toISOString(),
+                deviceInfo: parseDeviceFromUA(navigator.userAgent || 'Web Browser')
+            };
+            
+            if (!state.weLoveVisitLogs) state.weLoveVisitLogs = [];
+            state.weLoveVisitLogs.unshift(newVisit);
+            state.weLoveVisitLogsUpdated = new Date().toISOString();
+            await saveLocalState();
+            
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
             }
         }
     }
@@ -670,7 +446,7 @@ function setupAutoRefreshTimers() {
             renderRemindersList();
             renderVisitLogs();
         }
-    }, 90000); // refresh every 1.5 minutes
+    }, 60000); // refresh every 1 minute
 }
 
 // Update the db sync status badge
@@ -678,29 +454,17 @@ function updateSyncStatusBadge() {
     const badge = document.getElementById('weLoveSyncBadge');
     if (!badge) return;
 
-    if (isWeLoveLocalOnly) {
-        badge.className = 'health-sync-badge';
-        badge.innerHTML = `
-            <span class="sync-dot offline"></span>
-            <span class="sync-text" title="CSDL cá nhân chưa tạo bảng WeLove, tự động chuyển về chế độ bộ nhớ thiết bị.">Bộ nhớ thiết bị (Local-Only)</span>
-        `;
-    } else if (dbSyncError) {
-        badge.className = 'health-sync-badge error';
-        badge.innerHTML = `
-            <span class="sync-dot error"></span>
-            <span class="sync-text" title="Lỗi: ${dbSyncError}. Đang dùng bộ nhớ cục bộ.">Lỗi: ${dbSyncError}</span>
-        `;
-    } else if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
+    if (sync.isConfigured() && state.user) {
         badge.className = 'health-sync-badge';
         badge.innerHTML = `
             <span class="sync-dot online"></span>
-            <span class="sync-text">Đồng bộ đám mây (Cloud)</span>
+            <span class="sync-text">Mã hóa đồng bộ đám mây (Cloud)</span>
         `;
     } else {
         badge.className = 'health-sync-badge';
         badge.innerHTML = `
             <span class="sync-dot offline"></span>
-            <span class="sync-text" title="Đang dùng bộ nhớ trình duyệt">Bộ nhớ thiết bị (Local)</span>
+            <span class="sync-text" title="Lưu trữ ngoại tuyến trên thiết bị này">Bộ nhớ thiết bị (Local)</span>
         `;
     }
 }
@@ -756,12 +520,6 @@ function renderSicknessHistory() {
         }
     }
 
-    // Render timeline list
-    if (isLoadingData && sicknessLogs.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: var(--text-secondary); font-style: italic; margin: 2rem 0;">🔄 Đang đồng bộ hóa dữ liệu đám mây...</p>`;
-        return;
-    }
-
     if (filtered.length === 0) {
         container.innerHTML = `<p style="text-align: center; color: var(--text-secondary); font-style: italic; margin: 2rem 0;">Chưa có ghi nhận đợt ốm nào ${selectedFilterYear === 'Tất cả' ? 'qua các năm' : `trong năm ${selectedFilterYear}`}. Em iu luôn khỏe mạnh và rạng rỡ! 🌸</p>`;
         return;
@@ -792,18 +550,17 @@ function renderSicknessHistory() {
             const id = e.currentTarget.getAttribute('data-id');
             const confirmDelete = await window.showConfirm("Anh có chắc chắn muốn xóa đợt ghi nhận ốm này không? ❤️");
             if (confirmDelete) {
-                try {
-                    if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                        await deleteSupabaseRSVP(id);
-                    } else {
-                        deleteLocalRSVP(id);
-                    }
-                    sicknessLogs = sicknessLogs.filter(log => log.id !== id);
-                    renderSicknessHistory();
-                    showToast("Đã xóa đợt ghi nhận ốm");
-                } catch (err) {
-                    showToast("Lỗi khi xóa ghi nhận: " + err.message);
+                state.weLoveSicknessLogs = state.weLoveSicknessLogs.filter(log => log.id !== id);
+                state.weLoveSicknessLogsUpdated = new Date().toISOString();
+                await saveLocalState();
+                
+                if (sync.isConfigured() && state.user) {
+                    performSync(true);
                 }
+                
+                sicknessLogs = state.weLoveSicknessLogs;
+                renderSicknessHistory();
+                showToast("Đã xóa đợt ghi nhận ốm");
             }
         });
     });
@@ -851,18 +608,17 @@ function renderRemindersList() {
             const id = e.currentTarget.getAttribute('data-id');
             const confirmDelete = await window.showConfirm("Anh có chắc chắn muốn hủy lịch nhắc này không? ⏰");
             if (confirmDelete) {
-                try {
-                    if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                        await deleteSupabaseRSVP(id);
-                    } else {
-                        deleteLocalRSVP(id);
-                    }
-                    reminders = reminders.filter(r => r.id !== id);
-                    renderRemindersList();
-                    showToast("Đã hủy lịch nhắc");
-                } catch (err) {
-                    showToast("Lỗi khi hủy lịch nhắc: " + err.message);
+                state.weLoveReminders = state.weLoveReminders.filter(r => r.id !== id);
+                state.weLoveRemindersUpdated = new Date().toISOString();
+                await saveLocalState();
+                
+                if (sync.isConfigured() && state.user) {
+                    performSync(true);
                 }
+                
+                reminders = state.weLoveReminders;
+                renderRemindersList();
+                showToast("Đã hủy lịch nhắc");
             }
         });
     });
@@ -1017,10 +773,8 @@ export async function renderWeLoveDashboard() {
 
     calculateLoveDays();
 
-    // Check if the user can edit WeLove data
-    // In FamiLife, both husband and wife are authorized couples and can edit.
-    // If not logged in (local mode), anyone can edit as well.
-    const isLocal = !(sync.isConfigured() && !isWeLoveLocalOnly) || !state.user;
+    // Check if the user can edit WeLove data (Husband and wife both have access)
+    const isLocal = !sync.isConfigured() || !state.user;
     const canEdit = isLocal || state.user !== null;
 
     tabContainer.innerHTML = `
@@ -1134,7 +888,7 @@ export async function renderWeLoveDashboard() {
                     </div>
 
                     <!-- Quotes board -->
-                    <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhấp nút hoặc vuốt câu nói để chuyển câu">
+                    <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhập nút hoặc vuốt câu nói để chuyển câu">
                         <button class="quote-nav-btn prev" id="btnWeLovePrevQuote">‹</button>
                         <div class="quote-text-wrapper">
                             <div class="quote-chinese">${LOVE_QUOTES[currentQuoteIdx].cn}</div>
@@ -1309,19 +1063,6 @@ function bindMemoryEvents() {
                     'WeLove - Lời Yêu Thương', 
                     'Gửi ngàn lời yêu thương và cái ôm ấm áp đến em iu Ngô Minh! Chúc em một ngày ngập tràn hạnh phúc! ❤️'
                 );
-                
-                // Attempt to register Push Subscription to Supabase database
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.ready.then(reg => {
-                        if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                            // Register to Supabase via sync module helper (direct push subscribe)
-                            try {
-                                const email = state.user?.email || 'unknown';
-                                sync.getSupabase().db.subscribeToPush(reg, email).catch(err => {});
-                            } catch (err) {}
-                        }
-                    });
-                }
             };
 
             if (Notification.permission === 'granted') {
@@ -1474,40 +1215,28 @@ function bindMemoryEvents() {
             else if (symLower.includes('đau đầu') || symLower.includes('nhức đầu') || symLower.includes('đầu') || symLower.includes('chóng mặt') || symLower.includes('choáng')) emoji = '🧠';
             else if (symLower.includes('bụng') || symLower.includes('dạ dày') || symLower.includes('bao tử') || symLower.includes('tiêu hóa') || symLower.includes('luộm nhuộm')) emoji = '🤢';
 
-            const newRsvp = {
-                guest_name: symptom,
-                status: 'sickness_log',
-                guest_count: 0,
-                side: emoji,
-                wish: notes || 'Giữ gìn sức khỏe nhé em iu!',
-                created_at: new Date(date + 'T12:00:00').toISOString()
+            const newLog = {
+                id: Math.random().toString(36).substring(2, 10),
+                date: date,
+                symptomType: symptom,
+                notes: notes || 'Giữ gìn sức khỏe nhé em iu!',
+                icon: emoji
             };
 
-            try {
-                let saved = null;
-                if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                    saved = await saveSupabaseRSVP(newRsvp);
-                } else {
-                    saved = saveLocalRSVP(newRsvp);
-                }
-
-                if (saved) {
-                    sicknessLogs.unshift({
-                        id: saved.id,
-                        date: date,
-                        symptomType: saved.guest_name,
-                        notes: saved.wish,
-                        icon: saved.side
-                    });
-                    sicknessLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    renderSicknessHistory();
-                    modalOverlay.style.display = 'none';
-                    showToast("Đã ghi nhận đợt ốm thành công ❤️");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Lỗi lưu trữ dữ liệu sức khỏe lên server: " + err.message);
+            if (!state.weLoveSicknessLogs) state.weLoveSicknessLogs = [];
+            state.weLoveSicknessLogs.unshift(newLog);
+            state.weLoveSicknessLogsUpdated = new Date().toISOString();
+            await saveLocalState();
+            
+            // Sync to cloud if configured
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
             }
+
+            sicknessLogs = state.weLoveSicknessLogs;
+            renderSicknessHistory();
+            modalOverlay.style.display = 'none';
+            showToast("Đã ghi nhận đợt ốm thành công ❤️");
         });
     }
 }
@@ -1531,43 +1260,32 @@ function bindAdminEvents() {
             const scheduledTimeIso = new Date(timeVal).toISOString();
 
             const newReminder = {
-                guest_name: title,
-                status: 'scheduled_reminder',
-                guest_count: 0, // not sent
-                side: scheduledTimeIso,
-                wish: message,
-                created_at: new Date().toISOString()
+                id: Math.random().toString(36).substring(2, 10),
+                title: title,
+                message: message,
+                scheduledTime: scheduledTimeIso,
+                isSent: false,
+                createdAt: new Date().toISOString()
             };
 
-            try {
-                let saved = null;
-                if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                    saved = await saveSupabaseRSVP(newReminder);
-                } else {
-                    saved = saveLocalRSVP(newReminder);
-                }
+            if (!state.weLoveReminders) state.weLoveReminders = [];
+            state.weLoveReminders.unshift(newReminder);
+            state.weLoveRemindersUpdated = new Date().toISOString();
+            await saveLocalState();
 
-                if (saved) {
-                    reminders.unshift({
-                        id: saved.id,
-                        title: saved.guest_name,
-                        message: saved.wish,
-                        scheduledTime: saved.side,
-                        isSent: false,
-                        createdAt: saved.created_at
-                    });
-                    reminders.sort((a, b) => new Date(b.scheduledTime) - new Date(a.scheduledTime));
-                    renderRemindersList();
-                    
-                    remTimeInput.value = '';
-                    remTitleInput.value = '';
-                    remMessageInput.value = '';
-                    
-                    showToast("Lên lịch nhắc nhở thành công ⏰");
-                }
-            } catch (err) {
-                alert("Không thể lưu lịch nhắc: " + err.message);
+            // Sync to cloud if configured
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
             }
+
+            reminders = state.weLoveReminders;
+            renderRemindersList();
+            
+            remTimeInput.value = '';
+            remTitleInput.value = '';
+            remMessageInput.value = '';
+            
+            showToast("Lên lịch nhắc nhở thành công ⏰");
         });
     }
 }
@@ -1576,18 +1294,4 @@ function bindAdminEvents() {
 export function initWeLoveBindings() {
     // Calculate and populate home widgets on load
     updateHomeLoveWidget();
-
-    // Auto register service worker subscription check on load if permission is granted
-    if ('Notification' in window && Notification.permission === 'granted') {
-        const timer = setTimeout(() => {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(reg => {
-                    if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
-                        const email = state.user?.email || 'unknown';
-                        sync.getSupabase().db?.subscribeToPush(reg, email).catch(e => {});
-                    }
-                });
-            }
-        }, 3000);
-    }
 }
