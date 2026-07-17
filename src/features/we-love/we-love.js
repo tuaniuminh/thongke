@@ -63,6 +63,7 @@ let visitLogs = [];
 let selectedFilterYear = 'Tất cả';
 let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin'
 let dbSyncError = null;
+let isWeLoveLocalOnly = false;
 let isLoadingData = false;
 
 // Audio Instance getter
@@ -443,7 +444,7 @@ function checkScheduledReminders() {
         reminder.isSent = true;
         
         try {
-            if (sync.isConfigured()) {
+            if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                 await saveSupabaseRSVP({
                     id: reminder.id,
                     guest_name: reminder.title,
@@ -483,11 +484,17 @@ export async function fetchWeLoveData() {
 
     try {
         let rsvps = [];
-        if (sync.isConfigured()) {
+        if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
             try {
                 rsvps = await getSupabaseRSVPs();
             } catch (e) {
-                dbSyncError = e.message || 'Lỗi kết nối';
+                if (e.code === 'PGRST205' || (e.message && 'tuanminh_wedding_rsvps' in e.message) || (e.message && e.message.includes('tuanminh_wedding_rsvps'))) {
+                    isWeLoveLocalOnly = true;
+                    dbSyncError = null;
+                    console.log("WeLove switched to Local-Only mode: tuanminh_wedding_rsvps table is missing in personal Supabase database.");
+                } else {
+                    dbSyncError = e.message || 'Lỗi kết nối';
+                }
                 rsvps = getLocalRSVPs();
             }
         } else {
@@ -524,7 +531,7 @@ export async function fetchWeLoveData() {
                 wish: 'Hệ thống sổ tay sức khỏe đã được khởi tạo lần đầu thành công.'
             };
 
-            if (sync.isConfigured() && !dbSyncError) {
+            if ((sync.isConfigured() && !isWeLoveLocalOnly) && !dbSyncError) {
                 await saveSupabaseRSVP(initialSeedFlag);
                 for (const item of seedLogs) {
                     await saveSupabaseRSVP(item);
@@ -570,7 +577,7 @@ export async function fetchWeLoveData() {
             // Clean duplicates silently
             if (dups.length > 0) {
                 dups.forEach(id => {
-                    if (sync.isConfigured() && !dbSyncError) {
+                    if ((sync.isConfigured() && !isWeLoveLocalOnly) && !dbSyncError) {
                         deleteSupabaseRSVP(id).catch(e => {});
                     } else {
                         deleteLocalRSVP(id);
@@ -625,7 +632,7 @@ export async function logSpouseVisit() {
         if (!visitLogged) {
             sessionStorage.setItem('we_love_visit_logged', 'true');
             try {
-                if (sync.isConfigured()) {
+                if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                     await saveSupabaseRSVP({
                         guest_name: user.email,
                         status: 'member_visit',
@@ -671,13 +678,19 @@ function updateSyncStatusBadge() {
     const badge = document.getElementById('weLoveSyncBadge');
     if (!badge) return;
 
-    if (dbSyncError) {
+    if (isWeLoveLocalOnly) {
+        badge.className = 'health-sync-badge';
+        badge.innerHTML = `
+            <span class="sync-dot offline"></span>
+            <span class="sync-text" title="CSDL cá nhân chưa tạo bảng WeLove, tự động chuyển về chế độ bộ nhớ thiết bị.">Bộ nhớ thiết bị (Local-Only)</span>
+        `;
+    } else if (dbSyncError) {
         badge.className = 'health-sync-badge error';
         badge.innerHTML = `
             <span class="sync-dot error"></span>
             <span class="sync-text" title="Lỗi: ${dbSyncError}. Đang dùng bộ nhớ cục bộ.">Lỗi: ${dbSyncError}</span>
         `;
-    } else if (sync.isConfigured()) {
+    } else if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
         badge.className = 'health-sync-badge';
         badge.innerHTML = `
             <span class="sync-dot online"></span>
@@ -780,7 +793,7 @@ function renderSicknessHistory() {
             const confirmDelete = await window.showConfirm("Anh có chắc chắn muốn xóa đợt ghi nhận ốm này không? ❤️");
             if (confirmDelete) {
                 try {
-                    if (sync.isConfigured()) {
+                    if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                         await deleteSupabaseRSVP(id);
                     } else {
                         deleteLocalRSVP(id);
@@ -839,7 +852,7 @@ function renderRemindersList() {
             const confirmDelete = await window.showConfirm("Anh có chắc chắn muốn hủy lịch nhắc này không? ⏰");
             if (confirmDelete) {
                 try {
-                    if (sync.isConfigured()) {
+                    if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                         await deleteSupabaseRSVP(id);
                     } else {
                         deleteLocalRSVP(id);
@@ -1007,7 +1020,7 @@ export async function renderWeLoveDashboard() {
     // Check if the user can edit WeLove data
     // In FamiLife, both husband and wife are authorized couples and can edit.
     // If not logged in (local mode), anyone can edit as well.
-    const isLocal = !sync.isConfigured() || !state.user;
+    const isLocal = !(sync.isConfigured() && !isWeLoveLocalOnly) || !state.user;
     const canEdit = isLocal || state.user !== null;
 
     tabContainer.innerHTML = `
@@ -1300,7 +1313,7 @@ function bindMemoryEvents() {
                 // Attempt to register Push Subscription to Supabase database
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.ready.then(reg => {
-                        if (sync.isConfigured()) {
+                        if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                             // Register to Supabase via sync module helper (direct push subscribe)
                             try {
                                 const email = state.user?.email || 'unknown';
@@ -1472,7 +1485,7 @@ function bindMemoryEvents() {
 
             try {
                 let saved = null;
-                if (sync.isConfigured()) {
+                if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                     saved = await saveSupabaseRSVP(newRsvp);
                 } else {
                     saved = saveLocalRSVP(newRsvp);
@@ -1528,7 +1541,7 @@ function bindAdminEvents() {
 
             try {
                 let saved = null;
-                if (sync.isConfigured()) {
+                if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                     saved = await saveSupabaseRSVP(newReminder);
                 } else {
                     saved = saveLocalRSVP(newReminder);
@@ -1569,7 +1582,7 @@ export function initWeLoveBindings() {
         const timer = setTimeout(() => {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.ready.then(reg => {
-                    if (sync.isConfigured()) {
+                    if ((sync.isConfigured() && !isWeLoveLocalOnly)) {
                         const email = state.user?.email || 'unknown';
                         sync.getSupabase().db?.subscribeToPush(reg, email).catch(e => {});
                     }
