@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.1.89';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.89';
+} from '../../core/app.js?v=4.1.90';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.90';
 
 let healthTrendChartInstance = null;
 
@@ -1788,6 +1788,75 @@ Lưu ý quan trọng:
     throw lastError || new Error("Tất cả các mô hình Gemini đều quá tải hoặc thất bại.");
 }
 
+function updateHealthFormFields() {
+    const type = document.getElementById('healthEditType').value;
+    const titleGroup = document.getElementById('healthEditTitle').closest('.form-group');
+    const titleContainer = titleGroup.parentNode; // .health-form-grid
+    const facilityGroup = document.getElementById('healthEditFacility').closest('.form-group');
+    const facilityContainer = facilityGroup.parentNode; // .health-form-grid
+    const indicatorsContainer = document.querySelector('.health-edit-indicators-container');
+    const titleInput = document.getElementById('healthEditTitle');
+    const facilityInput = document.getElementById('healthEditFacility');
+    const facilityLabel = facilityGroup.querySelector('label');
+    const indicatorsRowsContainer = document.getElementById('healthIndicatorsEditRows');
+
+    if (type === 'deworming' || type === 'dental_scaling') {
+        // Tự động điền tên hồ sơ và ẩn đi
+        titleInput.value = type === 'deworming' ? 'Uống thuốc tẩy giun' : 'Lấy cao răng';
+        titleGroup.style.display = 'none';
+        if (titleContainer) {
+            titleContainer.style.gridTemplateColumns = '1fr 1fr';
+        }
+
+        // Ẩn danh sách chỉ số xét nghiệm và xóa các dòng indicators để tránh lỗi validate HTML5
+        if (indicatorsContainer) {
+            indicatorsContainer.style.display = 'none';
+        }
+        if (indicatorsRowsContainer) {
+            indicatorsRowsContainer.innerHTML = '';
+        }
+
+        if (type === 'deworming') {
+            // Uống thuốc tẩy giun: không cần nhập nơi thực hiện
+            facilityInput.value = '';
+            facilityGroup.style.display = 'none';
+            if (facilityContainer) {
+                facilityContainer.style.gridTemplateColumns = '1fr';
+            }
+        } else {
+            // Lấy cao răng: hiển thị nơi thực hiện nhưng đổi nhãn cho thân thiện
+            facilityGroup.style.display = 'block';
+            facilityLabel.textContent = 'Phòng khám Nha khoa';
+            facilityInput.placeholder = 'Ví dụ: Nha khoa Kim';
+            if (facilityContainer) {
+                facilityContainer.style.gridTemplateColumns = '1fr 1fr';
+            }
+        }
+    } else {
+        // Các xét nghiệm thông thường: hiển thị đầy đủ
+        titleGroup.style.display = 'block';
+        if (titleContainer) {
+            titleContainer.style.gridTemplateColumns = '1.5fr 1fr 1fr';
+        }
+
+        facilityGroup.style.display = 'block';
+        facilityLabel.textContent = 'Bệnh viện / Phòng khám';
+        facilityInput.placeholder = 'Ví dụ: Bệnh viện Bạch Mai';
+        if (facilityContainer) {
+            facilityContainer.style.gridTemplateColumns = '1fr 1fr';
+        }
+
+        if (indicatorsContainer) {
+            indicatorsContainer.style.display = 'block';
+        }
+        
+        // Nếu chuyển về dạng xét nghiệm thông thường mà chưa có dòng nhập chỉ số nào, chèn 1 dòng trống
+        if (indicatorsRowsContainer && indicatorsRowsContainer.children.length === 0) {
+            addIndicatorEditRow();
+        }
+    }
+}
+
 function openHealthEditModal(recordId = null, initialData = null) {
     if (!state.user) {
         showToast("Vui lòng đăng nhập tài khoản để thêm/sửa thông tin", "warning");
@@ -1858,6 +1927,7 @@ function openHealthEditModal(recordId = null, initialData = null) {
         }
     }
     
+    updateHealthFormFields();
     editModal.style.display = 'flex';
 }
 
@@ -4461,6 +4531,12 @@ function initHealthEventListeners() {
             // Reset input để có thể chụp lại ảnh mới lần sau
             e.target.value = '';
         });
+    }
+
+    // Listen to changes in medical record type select to hide/show fields
+    const healthEditType = document.getElementById('healthEditType');
+    if (healthEditType) {
+        healthEditType.addEventListener('change', updateHealthFormFields);
     }
 
     // PDF export button
