@@ -3,18 +3,18 @@ import re
 import os
 
 def update_version():
-    package_json_path = 'package.json'
+    version_json_path = 'version.json'
     pbxproj_path = 'ios/App/App.xcodeproj/project.pbxproj'
 
-    if not os.path.exists(package_json_path):
-        print("package.json not found!")
+    if not os.path.exists(version_json_path):
+        print("version.json not found!")
         return
 
     if not os.path.exists(pbxproj_path):
         print(f"{pbxproj_path} not found! Run cap add ios first.")
         return
 
-    with open(package_json_path, 'r', encoding='utf-8') as f:
+    with open(version_json_path, 'r', encoding='utf-8') as f:
         pkg = json.load(f)
     version = pkg.get('version', '1.0.0')
 
@@ -229,27 +229,39 @@ def configure_ios_permissions():
     with open(info_plist_path, 'r', encoding='utf-8') as f:
         content = f.read()
         
-    # Check if already injected
-    if 'NSCameraUsageDescription' in content:
-        print("Camera permissions already exist in Info.plist.")
-        return
-        
-    permissions = """
+    # 1. Add Camera & Photo Library permissions if not exists
+    if 'NSCameraUsageDescription' not in content:
+        permissions = """
 \t<key>NSCameraUsageDescription</key>
 \t<string>FamiLife cần truy cập camera để chụp ảnh kết quả xét nghiệm và máy đo huyết áp.</string>
 \t<key>NSPhotoLibraryUsageDescription</key>
 \t<string>FamiLife cần truy cập thư viện ảnh để bạn chọn ảnh kết quả y tế và huyết áp.</string>
 \t<key>NSPhotoLibraryAddUsageDescription</key>
 \t<string>FamiLife cần truy cập thư viện ảnh để lưu ảnh kết quả y tế và huyết áp.</string>"""
+        if '<dict>' in content:
+            content = content.replace('<dict>', '<dict>' + permissions, 1)
+            print("Camera & Photo Library permissions successfully added to Info.plist.")
 
-    # Insert permissions inside the first <dict> tag
-    if '<dict>' in content:
-        content = content.replace('<dict>', '<dict>' + permissions, 1)
-        with open(info_plist_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print("Camera & Photo Library permissions successfully added to Info.plist.")
-    else:
-        print("ERROR: <dict> tag not found in Info.plist!")
+    # 2. Force localization of native elements (like camera interface) to Vietnamese
+    content = re.sub(
+        r'<key>CFBundleDevelopmentRegion</key>\s*<string>[^<]+</string>',
+        '<key>CFBundleDevelopmentRegion</key>\n\t<string>vi</string>',
+        content
+    )
+
+    # 3. Add CFBundleLocalizations array if not exists to let iOS know we support Vietnamese
+    if 'CFBundleLocalizations' not in content:
+        localizations = """
+\t<key>CFBundleLocalizations</key>
+\t<array>
+\t\t<string>vi</string>
+\t</array>"""
+        if '<dict>' in content:
+            content = content.replace('<dict>', '<dict>' + localizations, 1)
+            print("Vietnamese localizations array added to Info.plist.")
+
+    with open(info_plist_path, 'w', encoding='utf-8') as f:
+        f.write(content)
 
 if __name__ == '__main__':
     update_version()

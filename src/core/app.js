@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.87';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.87';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.87';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.87';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.89';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.89';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.89';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.89';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.87';
-import * as sync from './sync.js?v=4.1.87';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.87';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.89';
+import * as sync from './sync.js?v=4.1.89';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.89';
 
-const APP_VERSION = '4.1.87';
+const APP_VERSION = '4.1.89';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1719,9 +1719,6 @@ function handleHashRoute() {
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
     const currentTab = state.activeTab;
-    if (currentTab !== tabId) {
-        triggerHapticFeedback('light');
-    }
     if (pushHistory && currentTab && currentTab !== tabId) {
         if (!state.tabHistory) state.tabHistory = [];
         state.tabHistory.push(currentTab);
@@ -3484,6 +3481,15 @@ async function triggerHapticFeedback(type = 'light') {
         }
     }
 }
+
+// Lắng nghe click toàn cục để rung phản hồi xúc giác cho mọi nút bấm (Haptic Feedback)
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button, a, .btn, .health-btn, .keypad-btn, .nav-icon-btn, .nav-link, .action-btn, [role="button"]');
+    if (btn) {
+        if (btn.disabled || btn.classList.contains('disabled')) return;
+        triggerHapticFeedback('light');
+    }
+});
 
 export { logScrollDiagnostics, triggerHapticFeedback };
 

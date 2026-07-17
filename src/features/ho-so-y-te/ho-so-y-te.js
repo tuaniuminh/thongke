@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.1.87';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.87';
+} from '../../core/app.js?v=4.1.89';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.89';
 
 let healthTrendChartInstance = null;
 
@@ -1088,6 +1088,8 @@ function getHealthTypeLabel(type) {
         case 'blood_test': return 'Xét nghiệm máu';
         case 'urine_test': return 'Xét nghiệm nước tiểu';
         case 'ultrasound': return 'Siêu âm';
+        case 'deworming': return 'Uống thuốc tẩy giun';
+        case 'dental_scaling': return 'Lấy cao răng';
         case 'other':
         default: return 'Khác';
     }
@@ -1701,7 +1703,7 @@ Bạn bắt buộc phải trả về một đối tượng JSON thuộc một tr
   "isBloodPressure": false,
   "isBodyComposition": false,
   "title": "<Tên xét nghiệm hoặc tiêu đề hồ sơ y tế, ví dụ: Xét nghiệm máu tổng quát>",
-  "type": "<Phân loại xét nghiệm, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'other'>",
+  "type": "<Phân loại xét nghiệm, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'deworming', 'dental_scaling', 'other'>",
   "facility": "<Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện. Nếu không tìm thấy, để trống>",
   "date": "<Ngày xét nghiệm định dạng YYYY-MM-DD. Nếu không tìm thấy, lấy ngày hiện tại: ${getLocalDateString()}>",
   "indicators": [
