@@ -219,6 +219,39 @@ extension UIViewController {
         
     print("AppDelegate.swift successfully swizzled for custom elastic bounce.")
 
+
+def configure_ios_permissions():
+    info_plist_path = 'ios/App/App/Info.plist'
+    if not os.path.exists(info_plist_path):
+        print(f"{info_plist_path} not found! Run cap add ios first.")
+        return
+        
+    with open(info_plist_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    # Check if already injected
+    if 'NSCameraUsageDescription' in content:
+        print("Camera permissions already exist in Info.plist.")
+        return
+        
+    permissions = """
+\t<key>NSCameraUsageDescription</key>
+\t<string>FamiLife cần truy cập camera để chụp ảnh kết quả xét nghiệm và máy đo huyết áp.</string>
+\t<key>NSPhotoLibraryUsageDescription</key>
+\t<string>FamiLife cần truy cập thư viện ảnh để bạn chọn ảnh kết quả y tế và huyết áp.</string>
+\t<key>NSPhotoLibraryAddUsageDescription</key>
+\t<string>FamiLife cần truy cập thư viện ảnh để lưu ảnh kết quả y tế và huyết áp.</string>"""
+
+    # Insert permissions inside the first <dict> tag
+    if '<dict>' in content:
+        content = content.replace('<dict>', '<dict>' + permissions, 1)
+        with open(info_plist_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print("Camera & Photo Library permissions successfully added to Info.plist.")
+    else:
+        print("ERROR: <dict> tag not found in Info.plist!")
+
 if __name__ == '__main__':
     update_version()
     configure_ios_swizzler()
+    configure_ios_permissions()

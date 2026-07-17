@@ -3467,10 +3467,19 @@ body.light-mode .version-badge-btn {
     .mobile-navbar.two-line .mobile-navbar-right {
         width: 100%;
         max-width: 100%;
-        justify-content: space-around;
+        justify-content: flex-start;
         border-top: 1px solid var(--border-color);
         padding-top: 8px;
         gap: 8px;
+    }
+
+    .mobile-navbar.two-line .mobile-navbar-right .nav-icon-btn.text-only {
+        flex: 1 1 0px;
+        justify-content: center;
+    }
+
+    .mobile-navbar.two-line .mobile-navbar-right .nav-icon-btn:not(.text-only) {
+        flex: 0 0 auto;
     }
 
     .mobile-navbar-left {
@@ -4022,16 +4031,24 @@ body.light-mode .home-settings-btn.not-logged-in:hover {
 .health-collapsible-card .health-record-actions {
     display: flex !important;
     opacity: 0;
-    max-width: 0;
+    max-height: 0;
     overflow: hidden;
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
+    border-top: 1px dashed transparent;
+    padding-top: 0;
+    margin-top: 0;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
 }
 .health-collapsible-card.active .health-record-actions {
     opacity: 1;
-    max-width: 120px;
+    max-height: 50px;
     pointer-events: auto;
-    margin-left: 8px;
+    border-top-color: var(--border-color);
+    padding-top: 8px;
+    margin-top: 4px;
 }
 
 /* Custom responsive layout for body composition cards on desktop */

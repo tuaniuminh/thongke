@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.1.56';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.56';
+} from '../../core/app.js?v=4.1.86';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.86';
 
 let healthTrendChartInstance = null;
 
@@ -3510,27 +3510,29 @@ function renderBloodPressureSection() {
         const cls = getBpClassification(r.systolic, r.diastolic);
         const sessionLabel = r.session === 'morning' ? '🌅 Sáng' : (r.session === 'evening' ? '🌙 Tối' : '🕐 Khác');
         return `
-        <div class="health-collapsible-card" onclick="toggleCollapsibleCard(this, event)" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${cls.color};">
-            <div style="text-align: center; min-width: 56px;">
-                <div style="font-size: 1.3rem; font-weight: 800; color: ${cls.color}; line-height: 1;">${r.systolic}</div>
-                <div style="font-size: 0.65rem; color: var(--text-muted); margin: 1px 0;">───</div>
-                <div style="font-size: 1.1rem; font-weight: 700; color: ${cls.color}; line-height: 1;">${r.diastolic}</div>
-                <div style="font-size: 0.6rem; color: var(--text-muted);">mmHg</div>
-            </div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;">
-                    <span style="font-size: 0.72rem; background: ${cls.bg}; color: ${cls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">${cls.label}</span>
-                    <span style="font-size: 0.72rem; color: var(--text-muted);">${sessionLabel}</span>
-                    ${r.pulse ? `<span style="font-size: 0.72rem; color: var(--text-muted);">💓 ${r.pulse} bpm</span>` : ''}
+        <div class="health-collapsible-card" onclick="toggleCollapsibleCard(this, event)" style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${cls.color};">
+            <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                <div style="text-align: center; min-width: 56px;">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: ${cls.color}; line-height: 1;">${r.systolic}</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); margin: 1px 0;">───</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: ${cls.color}; line-height: 1;">${r.diastolic}</div>
+                    <div style="font-size: 0.6rem; color: var(--text-muted);">mmHg</div>
                 </div>
-                <div style="font-size: 0.78rem; color: var(--text-secondary);">${formatDate(r.date)}${r.time ? ` lúc ${r.time}` : ''}${r.notes ? ` · ${r.notes}` : ''}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;">
+                        <span style="font-size: 0.72rem; background: ${cls.bg}; color: ${cls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">${cls.label}</span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">${sessionLabel}</span>
+                        ${r.pulse ? `<span style="font-size: 0.72rem; color: var(--text-muted);">💓 ${r.pulse} bpm</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary);">${formatDate(r.date)}${r.time ? ` lúc ${r.time}` : ''}${r.notes ? ` · ${r.notes}` : ''}</div>
+                </div>
             </div>
-            <div class="health-record-actions" style="display: flex; gap: 6px; flex-shrink: 0;">
-                <button onclick="openBpModal('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
-                    <i data-lucide="pencil" style="width: 13px; height: 13px;"></i>
+            <div class="health-record-actions">
+                <button onclick="openBpModal('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 12px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600;" title="Sửa">
+                    <i data-lucide="pencil" style="width: 13px; height: 13px;"></i> Sửa
                 </button>
-                <button onclick="deleteBpRecord('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 8px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
-                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+                <button onclick="deleteBpRecord('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 12px; cursor: pointer; color: #ef4444; display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600;" title="Xóa">
+                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Xóa
                 </button>
             </div>
         </div>`;
@@ -3756,61 +3758,59 @@ function renderBodyCompSection() {
         
         return `
         <div class="health-collapsible-card" onclick="toggleCollapsibleCard(this, event)" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; border-left: 4px solid ${pbfCls.color || '#10b981'};">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; width: 100%;">
-                <div style="min-width: 0; flex: 1; display: flex; flex-direction: column;">
-                    <!-- Top Tags Row -->
-                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
-                        <span style="font-size: 0.72rem; background: ${pbfCls.bg}; color: ${pbfCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">PBF: ${r.pctFat ? r.pctFat + '%' : 'n/a'} (${pbfCls.label})</span>
-                        ${r.visceralFat ? `<span style="font-size: 0.72rem; background: ${vflCls.bg}; color: ${vflCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">VFL: Lvl ${r.visceralFat}</span>` : ''}
-                        ${r.score ? `<span style="font-size: 0.72rem; background: rgba(16,185,129,0.08); color: #10b981; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Điểm: ${r.score}</span>` : ''}
-                    </div>
-
-                    <!-- Metadata Row (Device, Date, Time) -->
-                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center;">
-                        ${r.device ? `<span style="white-space: nowrap; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">📟 ${escapeHTML(r.device)}</span>` : ''}
-                        ${r.device ? `<span style="color: var(--border-color);">|</span>` : ''}
-                        <span style="white-space: nowrap; display: flex; align-items: center; gap: 4px;">📅 ${formatDate(r.date)}</span>
-                        ${r.time ? `<span style="white-space: nowrap;">lúc ${r.time}</span>` : ''}
-                    </div>
-
-                    <!-- Main Values Layout (Responsive: 1 row on desktop, split columns on mobile) -->
-                    <div class="body-comp-summary-layout" style="display: flex; gap: 16px; margin-bottom: 4px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
-                        <!-- Left Column: Weight -->
-                        <div class="body-comp-col weight-col" style="flex: 1; min-width: 0;">
-                            <div class="metric-label" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Cân nặng</div>
-                            <div class="metric-value" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">${r.weight} <span class="metric-unit" style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">kg</span></div>
-                        </div>
-                        <!-- Divider line -->
-                        <div class="body-comp-divider divider-1" style="width: 1px; background: var(--border-color); align-self: stretch;"></div>
-                        <!-- Right Column: Muscle & Fat -->
-                        <div class="body-comp-col stats-col" style="flex: 1.4; min-width: 0; display: flex; flex-direction: column; gap: 2px; justify-content: center;">
-                            ${r.muscleMass ? `
-                            <div class="stat-item muscle-item" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
-                                <span class="stat-label" style="color: var(--text-muted);">Cơ xương:</span>
-                                <span class="stat-value" style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.muscleMass} <span class="stat-unit" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">kg</span></span>
-                            </div>` : ''}
-                            ${r.fatMass ? `
-                            <div class="stat-item fat-item" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
-                                <span class="stat-label" style="color: var(--text-muted);">Mỡ:</span>
-                                <span class="stat-value" style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.fatMass} <span class="stat-unit" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">kg</span></span>
-                            </div>` : ''}
-                        </div>
-                    </div>
-
-                    <!-- Notes/Advice Box -->
-                    ${r.notes ? `
-                    <div style="font-size: 0.78rem; color: var(--text-secondary); background: var(--bg-primary); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #10b981; margin-top: 6px; line-height: 1.45; word-break: break-word;">
-                        ${escapeHTML(r.notes)}
-                    </div>` : ''}
+            <div style="min-width: 0; width: 100%; display: flex; flex-direction: column;">
+                <!-- Top Tags Row -->
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
+                    <span style="font-size: 0.72rem; background: ${pbfCls.bg}; color: ${pbfCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">PBF: ${r.pctFat ? r.pctFat + '%' : 'n/a'} (${pbfCls.label})</span>
+                    ${r.visceralFat ? `<span style="font-size: 0.72rem; background: ${vflCls.bg}; color: ${vflCls.color}; padding: 2px 8px; border-radius: 20px; font-weight: 600;">VFL: Lvl ${r.visceralFat}</span>` : ''}
+                    ${r.score ? `<span style="font-size: 0.72rem; background: rgba(16,185,129,0.08); color: #10b981; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Điểm: ${r.score}</span>` : ''}
                 </div>
-                <div class="health-record-actions" style="display: flex; gap: 6px; flex-shrink: 0; align-items: center; height: 100%;">
-                    <button onclick="openBodyCompModal('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center;" title="Sửa">
-                        <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
-                    </button>
-                    <button onclick="deleteBodyCompRecord('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 9px; cursor: pointer; color: #ef4444; display: flex; align-items: center;" title="Xóa">
-                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                    </button>
+
+                <!-- Metadata Row (Device, Date, Time) -->
+                <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center;">
+                    ${r.device ? `<span style="white-space: nowrap; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">📟 ${escapeHTML(r.device)}</span>` : ''}
+                    ${r.device ? `<span style="color: var(--border-color);">|</span>` : ''}
+                    <span style="white-space: nowrap; display: flex; align-items: center; gap: 4px;">📅 ${formatDate(r.date)}</span>
+                    ${r.time ? `<span style="white-space: nowrap;">lúc ${r.time}</span>` : ''}
                 </div>
+
+                <!-- Main Values Layout (Responsive: 1 row on desktop, split columns on mobile) -->
+                <div class="body-comp-summary-layout" style="display: flex; gap: 16px; margin-bottom: 4px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                    <!-- Left Column: Weight -->
+                    <div class="body-comp-col weight-col" style="flex: 1; min-width: 0;">
+                        <div class="metric-label" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Cân nặng</div>
+                        <div class="metric-value" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">${r.weight} <span class="metric-unit" style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">kg</span></div>
+                    </div>
+                    <!-- Divider line -->
+                    <div class="body-comp-divider divider-1" style="width: 1px; background: var(--border-color); align-self: stretch;"></div>
+                    <!-- Right Column: Muscle & Fat -->
+                    <div class="body-comp-col stats-col" style="flex: 1.4; min-width: 0; display: flex; flex-direction: column; gap: 2px; justify-content: center;">
+                        ${r.muscleMass ? `
+                        <div class="stat-item muscle-item" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                            <span class="stat-label" style="color: var(--text-muted);">Cơ xương:</span>
+                            <span class="stat-value" style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.muscleMass} <span class="stat-unit" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">kg</span></span>
+                        </div>` : ''}
+                        ${r.fatMass ? `
+                        <div class="stat-item fat-item" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                            <span class="stat-label" style="color: var(--text-muted);">Mỡ:</span>
+                            <span class="stat-value" style="font-weight: 700; color: var(--text-primary); white-space: nowrap; margin-left: 6px;">${r.fatMass} <span class="stat-unit" style="font-size: 0.72rem; font-weight: 500; color: var(--text-muted);">kg</span></span>
+                        </div>` : ''}
+                    </div>
+                </div>
+
+                <!-- Notes/Advice Box -->
+                ${r.notes ? `
+                <div style="font-size: 0.78rem; color: var(--text-secondary); background: var(--bg-primary); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #10b981; margin-top: 6px; line-height: 1.45; word-break: break-word;">
+                    ${escapeHTML(r.notes)}
+                </div>` : ''}
+            </div>
+            <div class="health-record-actions">
+                <button onclick="openBodyCompModal('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 12px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600;" title="Sửa">
+                    <i data-lucide="pencil" style="width: 13px; height: 13px;"></i> Sửa
+                </button>
+                <button onclick="deleteBodyCompRecord('${r.id}'); event.stopPropagation();" style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 12px; cursor: pointer; color: #ef4444; display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600;" title="Xóa">
+                    <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Xóa
+                </button>
             </div>
         </div>`;
     }).join('');
