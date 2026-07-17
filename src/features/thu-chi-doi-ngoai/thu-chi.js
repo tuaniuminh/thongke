@@ -1671,7 +1671,7 @@ function applyExcelStyles(ws) {
     }
 }
 
-function handleExportExcel(type = 'all') {
+async function handleExportExcel(type = 'all') {
     const wb = XLSX.utils.book_new();
     
     let filename = `danh_sach_tong_hop_${new Date().toISOString().slice(0, 10)}.xlsx`;
@@ -1756,7 +1756,30 @@ function handleExportExcel(type = 'all') {
     }
     
     try {
-        XLSX.writeFile(wb, filename);
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const file = new File([blob], filename, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        let shared = false;
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Xuất file Excel FamiLife',
+                    text: 'Danh sách thu chi đối ngoại'
+                });
+                shared = true;
+            } catch (err) {
+                console.warn('[Share] Excel export cancelled or failed:', err);
+                if (err.name === 'AbortError') {
+                    return; // User cancelled
+                }
+            }
+        }
+        
+        if (!shared) {
+            XLSX.writeFile(wb, filename);
+        }
         showToast("Đã xuất file Excel (.xlsx) thành công!");
     } catch (err) {
         console.error(err);
