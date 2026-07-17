@@ -199,15 +199,19 @@ extension UIViewController {
         scrollView.bounces = true
         scrollView.alwaysBounceVertical = true
         scrollView.alwaysBounceHorizontal = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
         
         for subview in scrollView.subviews {
             if let scroll = subview as? UIScrollView {
                 scroll.bounces = true
                 scroll.alwaysBounceVertical = true
+                scroll.showsVerticalScrollIndicator = false
+                scroll.showsHorizontalScrollIndicator = false
             }
         }
         
-        let js = "console.log('[NativeSwift] configureWebView executed (swizzled). bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical)')"
+        let js = "console.log('[NativeSwift] configureWebView executed (swizzled). bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical), showsScrollIndicators=\\(scrollView.showsVerticalScrollIndicator)')"
         webView.evaluateJavaScript(js, completionHandler: nil)
     }
 }
