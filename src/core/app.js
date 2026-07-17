@@ -2,16 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.93';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.93';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.93';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.93';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.94';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.94';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.94';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.94';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.93';
-import * as sync from './sync.js?v=4.1.93';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.93';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.94';
+import * as sync from './sync.js?v=4.1.94';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.94';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.94';
 
-const APP_VERSION = '4.1.93';
+const APP_VERSION = '4.1.94';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -80,6 +81,8 @@ let state = {
     showImportNotesOptionUpdated: '',
     showFamilyFundCard: false,
     showFamilyFundCardUpdated: '',
+    showLoveWidget: true,
+    showLoveWidgetUpdated: '',
     customEventTypes: [],
     customEventTypesUpdated: '',
     familyFunds: [],
@@ -440,6 +443,8 @@ async function saveLocalState() {
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
         showFamilyFundCard: !!state.showFamilyFundCard,
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
+        showLoveWidget: state.showLoveWidget !== false,
+        showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
         customEventTypes: state.customEventTypes || [],
         customEventTypesUpdated: state.customEventTypesUpdated || '',
         bloodPressureRecords: state.bloodPressureRecords || [],
@@ -502,6 +507,8 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = '';
         state.showFamilyFundCard = false;
         state.showFamilyFundCardUpdated = '';
+        state.showLoveWidget = true;
+        state.showLoveWidgetUpdated = '';
         state.customEventTypes = [];
         state.customEventTypesUpdated = '';
         state.bloodPressureRecords = [];
@@ -555,6 +562,8 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
         state.showFamilyFundCard = !!data.showFamilyFundCard;
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
+        state.showLoveWidget = data.showLoveWidget !== false;
+        state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
         state.customEventTypes = data.customEventTypes || [];
         state.customEventTypesUpdated = data.customEventTypesUpdated || '';
         state.bloodPressureRecords = data.bloodPressureRecords || [];
@@ -881,6 +890,8 @@ async function performSync(silent = false) {
                     state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
                     state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                     state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                    state.showLoveWidget = remoteData.showLoveWidget !== false;
+                    state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
                     state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
                     state.asymmetricPublicKey = remoteData.asymmetricPublicKey || '';
                     state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted || '';
@@ -937,6 +948,15 @@ async function performSync(silent = false) {
                     if (remoteFundCardTime > localFundCardTime) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                    }
+
+                    // Merge showLoveWidget using LWW (Last Write Wins)
+                    const localLoveWidgetTime = state.showLoveWidgetUpdated ? new Date(state.showLoveWidgetUpdated).getTime() : 0;
+                    const remoteLoveWidgetTime = remoteData.showLoveWidgetUpdated ? new Date(remoteData.showLoveWidgetUpdated).getTime() : 0;
+                    
+                    if (remoteLoveWidgetTime > localLoveWidgetTime) {
+                        state.showLoveWidget = remoteData.showLoveWidget !== false;
+                        state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
                     }
 
                     // Recover key fields from remote if they are missing locally but exist remotely
@@ -1127,6 +1147,8 @@ async function performSync(silent = false) {
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
             showFamilyFundCard: !!state.showFamilyFundCard,
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
+            showLoveWidget: state.showLoveWidget !== false,
+            showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
             customEventTypes: state.customEventTypes || [],
             customEventTypesUpdated: state.customEventTypesUpdated || '',
             familyProfiles: state.familyProfiles || [],
@@ -1266,6 +1288,8 @@ function renderAll() {
     updateThemeUI();
     updateImportNotesOptionUI();
     updateFamilyFundCardUI();
+    initWeLoveBindings();
+    updateHomeLoveWidget();
     handleHashRoute();
     if (window.lucide) window.lucide.createIcons();
 }
@@ -1615,7 +1639,9 @@ const tabHashMapping = {
     'quan-ly-quy': 'fund-management',
     'fund-management': 'fund-management',
     'quan-ly-thu-chi': 'tc-management',
-    'tc-management': 'tc-management'
+    'tc-management': 'tc-management',
+    'gockyniem': 'welove',
+    'welove': 'welove'
 };
 
 const tabIdToHash = {
@@ -1628,7 +1654,8 @@ const tabIdToHash = {
     'fund': 'quy-gia-dinh',
     'fund-history': 'nhat-ky-quy',
     'fund-management': 'quan-ly-quy',
-    'tc-management': 'quan-ly-thu-chi'
+    'tc-management': 'quan-ly-thu-chi',
+    'welove': 'gockyniem'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -1790,6 +1817,10 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = 'Hồ sơ y tế';
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
         renderHealthDashboard();
+    } else if (tabId === 'welove') {
+        title.innerText = 'Góc kỷ niệm';
+        subtitle.innerText = 'Nơi đếm ngày bên nhau và theo dõi sức khỏe của em iu Ngô Minh';
+        renderWeLoveDashboard();
     } else if (tabId === 'fund') {
         title.innerText = 'Tổng quan Quỹ';
         subtitle.innerText = 'Theo dõi đóng góp của hai vợ chồng, quản lý các quỹ chi tiêu và đầu tư';
@@ -1823,7 +1854,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     // Toggle Quick Add button based on active tab
     const quickAddBtn = document.getElementById('quickAddBtn');
     if (quickAddBtn) {
-        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management' || tabId === 'tc-management') {
+        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management' || tabId === 'tc-management' || tabId === 'welove') {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';
@@ -2655,6 +2686,21 @@ async function initializeApp() {
             state.showFamilyFundCardUpdated = new Date().toISOString();
             await saveLocalState();
             updateFamilyFundCardUI();
+            
+            // Sync setting to other devices if configured
+            if (sync.isConfigured() && await sync.getCurrentUser()) {
+                performSync(true);
+            }
+        });
+    }
+
+    const toggleShowLoveWidget = document.getElementById('toggleShowLoveWidget');
+    if (toggleShowLoveWidget) {
+        toggleShowLoveWidget.addEventListener('change', async (e) => {
+            state.showLoveWidget = e.target.checked;
+            state.showLoveWidgetUpdated = new Date().toISOString();
+            await saveLocalState();
+            updateLoveWidgetUI();
             
             // Sync setting to other devices if configured
             if (sync.isConfigured() && await sync.getCurrentUser()) {

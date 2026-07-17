@@ -1,9 +1,9 @@
-// sw.js — FamiLife Service Worker v4.1.85
+// sw.js — FamiLife Service Worker v4.1.94
 // Chiến lược: Network-first cho JS/CSS/HTML nội bộ (luôn nhận code mới)
 //             Cache-first cho ảnh và CDN static libraries (Supabase, Chart.js, Lucide...) để tải cực nhanh & offline
 //             Bỏ qua hoàn toàn các API calls động bên ngoài (Supabase API, Gemini API, Weather API)
 
-const CACHE_NAME = 'familife-cache-v4.1.85';
+const CACHE_NAME = 'familife-cache-v4.1.94';
 
 // App shell — danh sách tài nguyên cần cache ngay khi install
 const SHELL_ASSETS = [
@@ -14,9 +14,12 @@ const SHELL_ASSETS = [
     './src/assets/css/style.css',
     './src/assets/css/quy-gia-dinh.css',
     './src/assets/css/bao-cao-thang.css',
+    './src/assets/css/we-love.css',
     './src/assets/images/icon.png',
     './src/assets/images/icon-light.png',
     './src/assets/images/icon-light-pwa.png',
+    './logo_pwa_small.png',
+    './mot-doi.mp3'
 ];
 
 // Các API endpoints động bên ngoài cần bỏ qua (phải gọi mạng thật, không cache)
@@ -112,4 +115,53 @@ self.addEventListener('fetch', (event) => {
                 })
         );
     }
+});
+
+// ─── Push Notifications: Nhận thông báo yêu thương từ đám mây ─────────────────
+self.addEventListener('push', (event) => {
+    let payload = { title: 'WeLove', body: 'Lời nhắn gửi từ nửa kia của bạn! ❤️' };
+    
+    if (event.data) {
+        try {
+            // Check if JSON payload
+            payload = event.data.json();
+        } catch {
+            // Text fallback
+            payload = { title: 'WeLove', body: event.data.text() };
+        }
+    }
+    
+    const options = {
+        body: payload.body || payload.message || 'Bạn có một lời nhắc nhở yêu thương mới! ❤️',
+        icon: './logo_pwa_small.png',
+        badge: './logo_pwa_small.png',
+        vibrate: [100, 50, 100],
+        data: payload
+    };
+    
+    event.waitUntil(
+        self.registration.showNotification(payload.title || 'WeLove', options)
+    );
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    
+    // Focus or open FamiLife app on click
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then((clientList) => {
+            for (const client of clientList) {
+                if (client.url.includes(self.location.origin) && 'focus' in client) {
+                    // Navigate to WeLove tab directly
+                    if ('navigate' in client) {
+                        client.navigate('./#gockyniem');
+                    }
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow('./#gockyniem');
+            }
+        })
+    );
 });

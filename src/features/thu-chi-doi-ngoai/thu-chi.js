@@ -4,9 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.93';
-import * as sync from '../../core/sync.js?v=4.1.93';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.93';
+} from '../../core/app.js?v=4.1.94';
+import * as sync from '../../core/sync.js?v=4.1.94';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.94';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.94';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -954,6 +955,10 @@ function renderSettings() {
     if (toggleFundCard) {
         toggleFundCard.checked = !!state.showFamilyFundCard;
     }
+    const toggleShowLoveWidget = document.getElementById('toggleShowLoveWidget');
+    if (toggleShowLoveWidget) {
+        toggleShowLoveWidget.checked = state.showLoveWidget !== false;
+    }
     const toggleDebugConsoleCheck = document.getElementById('toggleDebugConsole');
     if (toggleDebugConsoleCheck) {
         toggleDebugConsoleCheck.checked = localStorage.getItem('gift_ledger_debug_console_enabled') !== 'false';
@@ -988,6 +993,10 @@ function updateHomeLayoutUI() {
     const isLoggedIn = state.user !== null;
     const settingsBtn = document.getElementById('homeSettingsBtn');
     const cardFund = document.getElementById('homeCardFund');
+    
+    if (typeof updateLoveWidgetUI === 'function') {
+        updateLoveWidgetUI();
+    }
 
     // --- Card "Quỹ gia đình" ---
     if (cardFund) {

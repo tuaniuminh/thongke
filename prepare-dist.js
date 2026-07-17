@@ -30,7 +30,7 @@ if (fs.existsSync(destDir)) {
 fs.mkdirSync(destDir, { recursive: true });
 
 // Copy root files
-const filesToCopy = ['index.html', 'manifest.json', 'sw.js', '404.html', 'version.json'];
+const filesToCopy = ['index.html', 'manifest.json', 'sw.js', '404.html', 'version.json', 'logo_pwa_small.png', 'mot-doi.mp3'];
 filesToCopy.forEach(file => {
   if (fs.existsSync(file)) {
     fs.copyFileSync(file, path.join(destDir, file));
