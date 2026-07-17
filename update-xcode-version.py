@@ -39,25 +39,53 @@ def enable_swipe_gesture():
         
     swift_content = """import UIKit
 import Capacitor
+import WebKit
 
 class ViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Enable native back-forward navigation gestures
-        self.webView?.allowsBackForwardNavigationGestures = true
-        
-        // Force native vertical elastic scroll bounce
-        self.webView?.scrollView.bounces = true
-        self.webView?.scrollView.alwaysBounceVertical = true
+        configureWebView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.webView?.allowsBackForwardNavigationGestures = true
+        configureWebView()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        configureWebView()
         
-        // Force native vertical elastic scroll bounce
-        self.webView?.scrollView.bounces = true
-        self.webView?.scrollView.alwaysBounceVertical = true
+        // Force bounce after delay to override any Capacitor startup resets
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.configureWebView()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            self?.configureWebView()
+        }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        configureWebView()
+    }
+    
+    private func configureWebView() {
+        guard let webView = self.webView else { return }
+        webView.allowsBackForwardNavigationGestures = true
+        
+        let scrollView = webView.scrollView
+        scrollView.bounces = true
+        scrollView.alwaysBounceVertical = true
+        scrollView.alwaysBounceHorizontal = false
+        
+        // Also configure bounces on any subviews of the scrollView just in case
+        for subview in scrollView.subviews {
+            if let scroll = subview as? UIScrollView {
+                scroll.bounces = true
+                scroll.alwaysBounceVertical = true
+            }
+        }
     }
 }
 """
