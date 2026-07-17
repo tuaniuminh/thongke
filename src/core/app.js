@@ -2,16 +2,16 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.74';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.74';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.74';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.74';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.75';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.75';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.75';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.75';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.74';
-import * as sync from './sync.js?v=4.1.74';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.74';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.75';
+import * as sync from './sync.js?v=4.1.75';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.75';
 
-const APP_VERSION = '4.1.74';
+const APP_VERSION = '4.1.75';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2805,6 +2805,9 @@ async function initializeApp() {
             checkAppVersion();
         }
     });
+    
+    // Log scroll diagnostics at startup
+    logScrollDiagnostics();
 }
 
 if (document.readyState === 'loading') {
@@ -3142,10 +3145,20 @@ function updateHomeLunar() {
 window.updateHomeWeather = updateHomeWeather;
 window.updateHomeLunar = updateHomeLunar;
 
-// iOS Safari background scroll prevention
+// iOS Safari background scroll prevention & diagnostic touch logging
 let touchStartY = 0;
+let lastDiagTime = 0;
+
 document.addEventListener('touchstart', (e) => {
     touchStartY = e.touches[0].clientY;
+    
+    // Periodically log touchstart details to debug console (throttled to once every 2 seconds)
+    const now = Date.now();
+    if (now - lastDiagTime > 2000) {
+        lastDiagTime = now;
+        const activeOverlay = document.querySelector('.modal-overlay.active, .modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"]');
+        console.log(`[ScrollDiag] Touchstart Target: ${e.target.tagName}#${e.target.id}.${e.target.className}. ActiveOverlay detected: ${activeOverlay ? activeOverlay.id || activeOverlay.className : 'None'}`);
+    }
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
@@ -3166,6 +3179,7 @@ document.addEventListener('touchmove', (e) => {
         }
         
         if (!scrollable) {
+            console.log(`[ScrollDiag] Prevented touchmove: No scrollable container inside ${activeOverlay.id || activeOverlay.className} for target ${e.target.tagName}#${e.target.id}`);
             e.preventDefault();
             return;
         }
@@ -3178,12 +3192,14 @@ document.addEventListener('touchmove', (e) => {
 
         // If at top and scrolling down, block scrolling!
         if (scrollTop === 0 && deltaY > 0) {
+            console.log(`[ScrollDiag] Prevented touchmove: Scrollable ${scrollable.id || scrollable.className} is at top, swiping down`);
             e.preventDefault();
             return;
         }
 
         // If at bottom and scrolling up, block scrolling!
         if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1.5 && deltaY < 0) {
+            console.log(`[ScrollDiag] Prevented touchmove: Scrollable ${scrollable.id || scrollable.className} is at bottom, swiping up`);
             e.preventDefault();
             return;
         }
@@ -3380,6 +3396,49 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
+function logScrollDiagnostics() {
+    console.log("[ScrollDiag] --- STARTUP DIAGNOSTICS ---");
+    console.log(`[ScrollDiag] window.innerHeight: ${window.innerHeight}px`);
+    console.log(`[ScrollDiag] screen.height: ${window.screen.height}px`);
+    
+    // HTML / Body
+    const htmlStyle = window.getComputedStyle(document.documentElement);
+    const bodyStyle = window.getComputedStyle(document.body);
+    console.log(`[ScrollDiag] html style: overflow=${htmlStyle.overflow}, overflowY=${htmlStyle.overflowY}, height=${htmlStyle.height}, minHeight=${htmlStyle.minHeight}`);
+    console.log(`[ScrollDiag] body style: overflow=${bodyStyle.overflow}, overflowY=${bodyStyle.overflowY}, overflowX=${bodyStyle.overflowX}, height=${bodyStyle.height}, minHeight=${bodyStyle.minHeight}, touchAction=${bodyStyle.touchAction}`);
+    
+    // Main containers
+    const homeLayout = document.getElementById('homeLayout');
+    if (homeLayout) {
+        const style = window.getComputedStyle(homeLayout);
+        console.log(`[ScrollDiag] homeLayout style: display=${style.display}, height=${style.height}, minHeight=${style.minHeight}, overflowY=${style.overflowY}`);
+    }
+    
+    const appLayout = document.getElementById('appLayout');
+    if (appLayout) {
+        const style = window.getComputedStyle(appLayout);
+        console.log(`[ScrollDiag] appLayout style: display=${style.display}, height=${style.height}, minHeight=${style.minHeight}, overflowY=${style.overflowY}`);
+    }
+    
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        const style = window.getComputedStyle(mainContent);
+        console.log(`[ScrollDiag] mainContent style: height=${style.height}, minHeight=${style.minHeight}, overflowY=${style.overflowY}`);
+    }
+
+    // Checking active overlays
+    const overlays = document.querySelectorAll('.modal-overlay, .setup-overlay');
+    overlays.forEach(overlay => {
+        const style = window.getComputedStyle(overlay);
+        if (style.display !== 'none' && style.visibility !== 'hidden') {
+            console.log(`[ScrollDiag] Active/Visible overlay detected: ${overlay.tagName}#${overlay.id}.${overlay.className} (display: ${style.display})`);
+        }
+    });
+    console.log("[ScrollDiag] ----------------------------");
+}
+
+export { logScrollDiagnostics };
 
 
 
