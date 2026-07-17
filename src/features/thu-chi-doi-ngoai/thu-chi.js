@@ -1416,8 +1416,8 @@ function updateMobileNavbar(tabId) {
                 <button class="nav-icon-btn text-only ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi Mừng">
                     Tiền tôi Mừng
                 </button>
-                <button class="nav-icon-btn text-only ${tabId === 'tc-management' ? 'active' : ''}" onclick="switchTab('tc-management')" title="Quản lý">
-                    Quản lý
+                <button class="nav-icon-btn text-only ${tabId === 'tc-management' ? 'active' : ''}" onclick="switchTab('tc-management')" title="Quản lý" style="display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px;">
+                    <i data-lucide="sliders" style="width: 15px; height: 15px;"></i>
                 </button>
             </div>
         `;
