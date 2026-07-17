@@ -31,11 +31,19 @@ def update_version():
     print(f"Xcode project versions updated to {version} successfully.")
 
 def enable_swipe_gesture():
-    view_controller_path = 'ios/App/App/ViewController.swift'
-    
-    if not os.path.exists(view_controller_path):
-        print(f"{view_controller_path} not found!")
-        return
+    view_controller_path = None
+    for root, dirs, files in os.walk('ios'):
+        for file in files:
+            if file == 'ViewController.swift':
+                view_controller_path = os.path.join(root, file)
+                break
+        if view_controller_path:
+            break
+            
+    if not view_controller_path:
+        print("ERROR: ViewController.swift was not found in the 'ios' directory!")
+        import sys
+        sys.exit(1)
         
     swift_content = """import UIKit
 import Capacitor
@@ -44,6 +52,11 @@ import WebKit
 class ViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureWebView()
+    }
+    
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
         configureWebView()
     }
     
@@ -56,12 +69,11 @@ class ViewController: CAPBridgeViewController {
         super.viewDidAppear(animated)
         configureWebView()
         
-        // Force bounce after delay to override any Capacitor startup resets
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.configureWebView()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
-            self?.configureWebView()
+        // Force bounce after delays to override any Capacitor startup resets
+        for delay in [0.5, 1.0, 2.0, 3.0, 5.0, 8.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.configureWebView()
+            }
         }
     }
     
@@ -86,6 +98,9 @@ class ViewController: CAPBridgeViewController {
                 scroll.alwaysBounceVertical = true
             }
         }
+        
+        let js = "console.log('[NativeSwift] configureWebView executed. webView.bounces=\\(scrollView.bounces), alwaysBounceVertical=\\(scrollView.alwaysBounceVertical)')"
+        webView.evaluateJavaScript(js, completionHandler: nil)
     }
 }
 """
