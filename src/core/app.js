@@ -189,6 +189,13 @@ function compareRecordsByRecent(a, b) {
 
 // Show Toast Notifications
 function showToast(message, type = 'success') {
+    if (type === 'success') {
+        triggerHapticFeedback('success');
+    } else if (type === 'error') {
+        triggerHapticFeedback('error');
+    } else if (type === 'warning') {
+        triggerHapticFeedback('warning');
+    }
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -1712,6 +1719,9 @@ function handleHashRoute() {
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
     const currentTab = state.activeTab;
+    if (currentTab !== tabId) {
+        triggerHapticFeedback('light');
+    }
     if (pushHistory && currentTab && currentTab !== tabId) {
         if (!state.tabHistory) state.tabHistory = [];
         state.tabHistory.push(currentTab);
@@ -2058,6 +2068,7 @@ function bindKeypadButton(btn, callback) {
     btn.addEventListener('touchstart', (e) => {
         touched = true;
         e.preventDefault();
+        triggerHapticFeedback('light');
         callback();
     }, { passive: false });
     btn.addEventListener('mousedown', (e) => {
@@ -2067,6 +2078,7 @@ function bindKeypadButton(btn, callback) {
             return;
         }
         e.preventDefault();
+        triggerHapticFeedback('light');
         callback();
     });
 }
@@ -3387,7 +3399,7 @@ function updateLastBackupDisplay() {
 
 window.renderTcManagement = renderTcManagement;
 
-export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString };
+export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, triggerHapticFeedback };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 
@@ -3438,7 +3450,42 @@ function logScrollDiagnostics() {
     console.log("[ScrollDiag] ----------------------------");
 }
 
-export { logScrollDiagnostics };
+async function triggerHapticFeedback(type = 'light') {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+        try {
+            const Haptics = window.Capacitor.Plugins.Haptics;
+            if (type === 'light') {
+                await Haptics.impact({ style: 'LIGHT' });
+            } else if (type === 'medium') {
+                await Haptics.impact({ style: 'MEDIUM' });
+            } else if (type === 'warning') {
+                await Haptics.notification({ type: 'WARNING' });
+            } else if (type === 'error') {
+                await Haptics.notification({ type: 'ERROR' });
+            } else if (type === 'success') {
+                await Haptics.notification({ type: 'SUCCESS' });
+            }
+            return;
+        } catch (e) {
+            console.warn('Capacitor Haptics error:', e);
+        }
+    }
+    if (navigator.vibrate) {
+        if (type === 'light') {
+            navigator.vibrate(10);
+        } else if (type === 'medium') {
+            navigator.vibrate(20);
+        } else if (type === 'warning') {
+            navigator.vibrate([40, 50, 40]);
+        } else if (type === 'error') {
+            navigator.vibrate([50, 50, 50, 50]);
+        } else if (type === 'success') {
+            navigator.vibrate([20, 30, 20]);
+        }
+    }
+}
+
+export { logScrollDiagnostics, triggerHapticFeedback };
 
 
 

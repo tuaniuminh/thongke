@@ -76,7 +76,7 @@ jobs:
 
       - name: Package IPA
         run: |
-          VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
+          VERSION=$(python3 -c "import json; print(json.load(open('version.json'))['version'])")
           mkdir -p Payload
           cp -r build/Build/Products/Release-iphoneos/App.app Payload/
           zip -r "FamiLife_v${VERSION}.ipa" Payload

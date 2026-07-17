@@ -69,7 +69,7 @@ jobs:
 
       - name: Package and Rename APK
         run: |
-          VERSION=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
+          VERSION=$(python3 -c "import json; print(json.load(open('version.json'))['version'])")
           cp android/app/build/outputs/apk/debug/app-debug.apk "FamiLife_v${VERSION}.apk"
           echo "APK_NAME=FamiLife_v${VERSION}.apk" >> $GITHUB_ENV
 
