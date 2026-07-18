@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.06';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.06';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.06';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.06';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.07';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.07';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.07';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.07';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.06';
-import * as sync from './sync.js?v=4.2.06';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.06';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.06';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.07';
+import * as sync from './sync.js?v=4.2.07';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.07';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.07';
 
-const APP_VERSION = '4.2.06';
+const APP_VERSION = '4.2.07';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1678,6 +1678,24 @@ function updateFamilyFundCardUI() {
     }
 }
 
+// Dynamic theme-color meta manager to support iOS black-translucent status bar removal
+function updateThemeColorMeta(color) {
+    let themeMeta = document.getElementById('themeColorMeta');
+    if (color === 'remove') {
+        if (themeMeta) {
+            themeMeta.remove();
+        }
+    } else {
+        if (!themeMeta) {
+            themeMeta = document.createElement('meta');
+            themeMeta.id = 'themeColorMeta';
+            themeMeta.name = 'theme-color';
+            document.head.appendChild(themeMeta);
+        }
+        themeMeta.setAttribute('content', color);
+    }
+}
+
 // Theme handling
 function toggleTheme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
@@ -1689,7 +1707,6 @@ function updateThemeUI() {
     const body = document.body;
     const icons = document.querySelectorAll('.theme-icon');
     const texts = document.querySelectorAll('.theme-text');
-    const themeMeta = document.getElementById('themeColorMeta');
     
     if (state.theme === 'light') {
         body.classList.add('light-mode');
@@ -1697,19 +1714,17 @@ function updateThemeUI() {
         document.documentElement.style.colorScheme = 'light';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'moon'));
         texts.forEach(text => text.innerText = 'Giao diện tối');
-        if (themeMeta) themeMeta.setAttribute('content', '#f3f4f6');
+        updateThemeColorMeta('#f3f4f6');
     } else {
         body.classList.remove('light-mode');
         document.documentElement.style.colorScheme = 'dark';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'sun'));
         texts.forEach(text => text.innerText = 'Giao diện sáng');
-        if (themeMeta) {
-            const activeT = state.activeTab;
-            if (activeT === 'welove' || activeT === 'welove-admin' || activeT === 'welove-settings') {
-                themeMeta.setAttribute('content', 'transparent');
-            } else {
-                themeMeta.setAttribute('content', '#090d16');
-            }
+        const activeT = state.activeTab;
+        if (activeT === 'welove' || activeT === 'welove-admin' || activeT === 'welove-settings') {
+            updateThemeColorMeta('remove');
+        } else {
+            updateThemeColorMeta('#090d16');
         }
     }
 
@@ -2026,17 +2041,14 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     }
     
     // Update mobile status bar theme color dynamically to match immersive pages
-    const themeMeta = document.getElementById('themeColorMeta');
-    if (themeMeta) {
-        if (state.theme === 'dark') {
-            if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
-                themeMeta.setAttribute('content', 'transparent');
-            } else {
-                themeMeta.setAttribute('content', '#090d16');
-            }
+    if (state.theme === 'dark') {
+        if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+            updateThemeColorMeta('remove');
         } else {
-            themeMeta.setAttribute('content', '#f3f4f6');
+            updateThemeColorMeta('#090d16');
         }
+    } else {
+        updateThemeColorMeta('#f3f4f6');
     }
 
     // Toggle Shared Fund Header Card based on active tab and state
