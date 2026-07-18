@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.1.98';
-import * as sync from '../../core/sync.js?v=4.1.98';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.98';
+} from '../../core/app.js?v=4.1.99';
+import * as sync from '../../core/sync.js?v=4.1.99';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.99';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.98');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.99');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.1.98';
+        const logoPath = './logo_pwa_small.png?v=4.1.99';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -347,7 +347,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.1.98';
+    const logoPath = './logo_pwa_small.png?v=4.1.99';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -794,11 +794,25 @@ export async function renderWeLoveDashboard() {
     const tabContainer = document.getElementById('tab-welove');
     if (!tabContainer) return;
 
-    // Force settings subview if start date is not configured yet (first time)
-    if (!state.weLoveStartDate) {
+    // Map activeTab route directly to sub-view state
+    if (state.activeTab === 'welove-admin') {
+        weLoveCurrentSubView = 'admin';
+    } else if (state.activeTab === 'welove-settings') {
         weLoveCurrentSubView = 'settings';
+    } else {
+        weLoveCurrentSubView = 'memory';
     }
     window.weLoveCurrentSubView = weLoveCurrentSubView;
+
+    // Force settings subview if start date is not configured yet (first time)
+    if (!state.weLoveStartDate && state.activeTab !== 'welove-settings') {
+        setTimeout(() => {
+            if (typeof window.switchTab === 'function') {
+                window.switchTab('welove-settings');
+            }
+        }, 0);
+        return;
+    }
 
     calculateLoveDays();
 
@@ -1436,8 +1450,9 @@ function bindSettingsEvents() {
 
             showToast("Đã thiết lập góc tình yêu thành công! ❤️");
             
-            weLoveCurrentSubView = 'memory';
-            renderWeLoveDashboard();
+            if (typeof window.switchTab === 'function') {
+                window.switchTab('welove');
+            }
         });
     }
 
@@ -1489,14 +1504,21 @@ function bindSettingsEvents() {
     }
 }
 
-// Global hook for mobile subview switching
+// Global hook for mobile/desktop subview switching mapped to routing tabs
 window.switchWeLoveSubView = function(subView) {
     if (!state.weLoveStartDate && subView !== 'settings') {
         showToast("Vui lòng cấu hình ngày bắt đầu yêu trước nhé! ❤️", "warning");
         return;
     }
-    weLoveCurrentSubView = subView;
-    renderWeLoveDashboard();
+    const tabMap = {
+        'memory': 'welove',
+        'admin': 'welove-admin',
+        'settings': 'welove-settings'
+    };
+    const targetTab = tabMap[subView];
+    if (typeof window.switchTab === 'function') {
+        window.switchTab(targetTab);
+    }
 };
 
 // Global initialization bindings

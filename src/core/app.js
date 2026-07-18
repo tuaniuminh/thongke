@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.98';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.98';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.98';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.98';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.99';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.99';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.99';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.99';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.98';
-import * as sync from './sync.js?v=4.1.98';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.98';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.98';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.99';
+import * as sync from './sync.js?v=4.1.99';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.99';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.99';
 
-const APP_VERSION = '4.1.98';
+const APP_VERSION = '4.1.99';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1895,7 +1895,8 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     
     // Update active class on nav links
     document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('data-tab') === tabId) {
+        const linkTab = link.getAttribute('data-tab');
+        if (linkTab === tabId) {
             link.classList.add('active');
         } else {
             link.classList.remove('active');
@@ -1904,7 +1905,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     
     // Show/Hide Panels
     document.querySelectorAll('.tab-panel').forEach(panel => {
-        if (panel.id === `tab-${tabId}`) {
+        if (panel.id === `tab-${tabId}` || (panel.id === 'tab-welove' && (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings'))) {
             panel.style.display = 'block';
         } else {
             panel.style.display = 'none';
@@ -1961,6 +1962,14 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = 'WeLove';
         subtitle.innerText = 'Nơi đếm ngày bên nhau và lưu giữ khoảnh khắc yêu thương';
         renderWeLoveDashboard();
+    } else if (tabId === 'welove-admin') {
+        title.innerText = 'WeLove';
+        subtitle.innerText = 'Nơi đếm ngày bên nhau và lưu giữ khoảnh khắc yêu thương';
+        renderWeLoveDashboard();
+    } else if (tabId === 'welove-settings') {
+        title.innerText = 'WeLove';
+        subtitle.innerText = 'Cấu hình biệt danh, ngày kỷ niệm và bạn tình';
+        renderWeLoveDashboard();
     } else if (tabId === 'fund') {
         title.innerText = 'Tổng quan Quỹ';
         subtitle.innerText = 'Theo dõi đóng góp của hai vợ chồng, quản lý các quỹ chi tiêu và đầu tư';
@@ -1994,7 +2003,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     // Toggle WeLove desktop tabs based on active tab
     const headerWeLoveTabs = document.getElementById('headerWeLoveTabs');
     if (headerWeLoveTabs) {
-        if (tabId === 'welove') {
+        if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
             headerWeLoveTabs.style.display = 'flex';
         } else {
             headerWeLoveTabs.style.display = 'none';
@@ -2004,7 +2013,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     // Toggle Quick Add button based on active tab
     const quickAddBtn = document.getElementById('quickAddBtn');
     if (quickAddBtn) {
-        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management' || tabId === 'tc-management' || tabId === 'welove') {
+        if (tabId === 'health' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management' || tabId === 'tc-management' || tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
             quickAddBtn.style.display = 'none';
         } else {
             quickAddBtn.style.display = '';
