@@ -1173,11 +1173,11 @@ body.light-mode.active-tab-welove-settings::before {
   pointer-events: none;
 }
 
-/* Set solid background color on body for light theme WeLove to match start of light gradient */
+/* Set body to transparent in light theme to let body::before gradient show through (matches dark theme formula) */
 body.light-mode.active-tab-welove,
 body.light-mode.active-tab-welove-admin,
 body.light-mode.active-tab-welove-settings {
-  background: #fff1f2 !important;
+  background: transparent !important;
 }
 
 /* Apply light theme variables to .memory-page in light mode */
