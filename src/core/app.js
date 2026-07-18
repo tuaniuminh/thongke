@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.35';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.35';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.35';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.35';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.36';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.36';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.36';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.36';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.35';
-import * as sync from './sync.js?v=4.2.35';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.35';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.35';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.36';
+import * as sync from './sync.js?v=4.2.36';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.36';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.36';
 
-const APP_VERSION = '4.2.35';
+const APP_VERSION = '4.2.36';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3480,6 +3480,12 @@ window.runLayoutDiagnostics = function() {
     console.log(`[LayoutDiag] html classList: "${document.documentElement.className}"`);
     console.log(`[LayoutDiag] body classList: "${document.body.className}"`);
 
+    // Log active stylesheet href links to verify Cache-Busting
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    links.forEach(link => {
+        console.log(`[LayoutDiag] Loaded stylesheet: ${link.getAttribute('href')}`);
+    });
+
     // Computed styles of layout wrappers
     const elementsToMeasure = {
         'html': document.documentElement,
@@ -3488,7 +3494,10 @@ window.runLayoutDiagnostics = function() {
         '.main-content': document.querySelector('.main-content'),
         '#mobileNavbar': document.getElementById('mobileNavbar'),
         '#tab-welove': document.getElementById('tab-welove'),
-        '.memory-page': document.querySelector('.memory-page')
+        '.memory-page': document.querySelector('.memory-page'),
+        '#homeLayout': document.getElementById('homeLayout'),
+        '.home-container': document.querySelector('.home-container'),
+        '#homeWidgetsContainer': document.getElementById('homeWidgetsContainer')
     };
 
     for (const [selector, el] of Object.entries(elementsToMeasure)) {
@@ -3497,11 +3506,15 @@ window.runLayoutDiagnostics = function() {
             continue;
         }
         const style = window.getComputedStyle(el);
+        // Safely extract background-image background-attachment
+        const bgImg = style.backgroundImage || 'none';
+        const bgAttach = style.backgroundAttachment || 'scroll';
         console.log(`[LayoutDiag] Element [${selector}]: ` +
             `display=${style.display}, ` +
             `position=${style.position}, ` +
             `background-color="${style.backgroundColor}", ` +
-            `background-image="${style.backgroundImage ? style.backgroundImage.substring(0, 40) + '...' : 'none'}", ` +
+            `background-image="${bgImg.length > 50 ? bgImg.substring(0, 50) + '...' : bgImg}", ` +
+            `background-attachment="${bgAttach}", ` +
             `padding="${style.padding}", ` +
             `margin="${style.margin}", ` +
             `height=${el.offsetHeight || el.clientHeight}px, ` +
