@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.03';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.03';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.03';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.03';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.04';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.04';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.04';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.04';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.03';
-import * as sync from './sync.js?v=4.2.03';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.03';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.03';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.04';
+import * as sync from './sync.js?v=4.2.04';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.04';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.04';
 
-const APP_VERSION = '4.2.03';
+const APP_VERSION = '4.2.04';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1703,7 +1703,14 @@ function updateThemeUI() {
         document.documentElement.style.colorScheme = 'dark';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'sun'));
         texts.forEach(text => text.innerText = 'Giao diện sáng');
-        if (themeMeta) themeMeta.setAttribute('content', '#090d16');
+        if (themeMeta) {
+            const activeT = state.activeTab;
+            if (activeT === 'welove' || activeT === 'welove-admin' || activeT === 'welove-settings') {
+                themeMeta.setAttribute('content', '#1e1b4b');
+            } else {
+                themeMeta.setAttribute('content', '#090d16');
+            }
+        }
     }
 
     // Swap logos based on theme
@@ -2016,6 +2023,20 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         }
     }
     
+    // Update mobile status bar theme color dynamically to match immersive pages
+    const themeMeta = document.getElementById('themeColorMeta');
+    if (themeMeta) {
+        if (state.theme === 'dark') {
+            if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+                themeMeta.setAttribute('content', '#1e1b4b');
+            } else {
+                themeMeta.setAttribute('content', '#090d16');
+            }
+        } else {
+            themeMeta.setAttribute('content', '#f3f4f6');
+        }
+    }
+
     // Toggle Shared Fund Header Card based on active tab and state
     const headerCard = document.getElementById('sharedFundHeaderCard');
     if (headerCard) {
