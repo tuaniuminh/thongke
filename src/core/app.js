@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.05';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.05';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.05';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.05';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.06';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.06';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.06';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.06';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.05';
-import * as sync from './sync.js?v=4.2.05';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.05';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.05';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.06';
+import * as sync from './sync.js?v=4.2.06';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.06';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.06';
 
-const APP_VERSION = '4.2.05';
+const APP_VERSION = '4.2.06';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1706,7 +1706,7 @@ function updateThemeUI() {
         if (themeMeta) {
             const activeT = state.activeTab;
             if (activeT === 'welove' || activeT === 'welove-admin' || activeT === 'welove-settings') {
-                themeMeta.setAttribute('content', '#1e1b4b');
+                themeMeta.setAttribute('content', 'transparent');
             } else {
                 themeMeta.setAttribute('content', '#090d16');
             }
@@ -2030,7 +2030,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     if (themeMeta) {
         if (state.theme === 'dark') {
             if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
-                themeMeta.setAttribute('content', '#1e1b4b');
+                themeMeta.setAttribute('content', 'transparent');
             } else {
                 themeMeta.setAttribute('content', '#090d16');
             }
