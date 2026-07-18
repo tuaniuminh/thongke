@@ -1081,7 +1081,10 @@ body:not(.light-mode) .memory-page {
 }
 
 
-/* Immersive full-screen dark theme gradient overlay for WeLove */
+/* Immersive full-screen dark theme gradient overlay for WeLove (applied to html & body to fix rubber-band scrolling) */
+html:not(.light-mode).active-tab-welove,
+html:not(.light-mode).active-tab-welove-admin,
+html:not(.light-mode).active-tab-welove-settings,
 body:not(.light-mode).active-tab-welove,
 body:not(.light-mode).active-tab-welove-admin,
 body:not(.light-mode).active-tab-welove-settings {
