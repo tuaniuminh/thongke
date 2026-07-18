@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.15';
-import * as sync from '../../core/sync.js?v=4.2.15';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.15';
+} from '../../core/app.js?v=4.2.16';
+import * as sync from '../../core/sync.js?v=4.2.16';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.16';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.15');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.16');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.15';
+        const logoPath = './logo_pwa_small.png?v=4.2.16';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -358,7 +358,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.15';
+    const logoPath = './logo_pwa_small.png?v=4.2.16';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -568,24 +568,49 @@ function renderSicknessHistory() {
         const parts = log.date.split('-');
         const dateFormatted = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : log.date;
         return `
-            <div class="welove-log-item">
+            <div class="welove-log-item" style="cursor: pointer; position: relative;">
                 <div class="welove-log-icon">${log.icon || '🤧'}</div>
-                <div class="welove-log-content">
+                <div class="welove-log-content" style="width: 100%;">
                     <div class="welove-log-header">
                         <span class="welove-log-type">${escapeHTML(log.symptomType)}</span>
                         <span class="welove-log-date">${dateFormatted}</span>
                     </div>
                     <p class="welove-log-notes">${escapeHTML(log.notes)}</p>
+                    
+                    <!-- Action row, visible only when expanded by tap/click -->
+                    <div class="welove-log-actions" style="margin-top: 10px; display: none; justify-content: flex-end;">
+                        <button class="welove-btn welove-btn-danger btn-delete-sickness" data-id="${log.id}" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; font-weight: bold; background: #ef4444; border: none; color: white; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);">
+                            🗑️ Xóa ghi nhận này
+                        </button>
+                    </div>
                 </div>
-                <button class="welove-delete-btn btn-delete-sickness" data-id="${log.id}" title="Xóa ghi nhận này">
-                    🗑️
-                </button>
             </div>
         `;
     }).join('');
 
+    // Toggle expand log actions
+    container.querySelectorAll('.welove-log-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            // Ignore click inside the delete button
+            if (e.target.closest('.btn-delete-sickness')) return;
+            
+            const actionsRow = item.querySelector('.welove-log-actions');
+            if (actionsRow) {
+                const isHidden = actionsRow.style.display === 'none';
+                
+                // Hide all other open action rows first for clean UX
+                container.querySelectorAll('.welove-log-actions').forEach(row => {
+                    row.style.display = 'none';
+                });
+                
+                actionsRow.style.display = isHidden ? 'flex' : 'none';
+            }
+        });
+    });
+
     container.querySelectorAll('.btn-delete-sickness').forEach(btn => {
         btn.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Stop click from triggering parent toggle
             const id = e.currentTarget.getAttribute('data-id');
             const confirmDelete = await window.showConfirm("Anh có chắc chắn muốn xóa đợt ghi nhận ốm này không? ❤️");
             if (confirmDelete) {
@@ -972,6 +997,26 @@ export async function renderWeLoveDashboard() {
                                 Lưu Cấu Hình 💾
                             </button>
                         </form>
+                    </div>
+
+                    <!-- Đồng bộ từ App gốc -->
+                    <div class="welove-card" style="width: 100%; margin-top: 0;">
+                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                            <span style="font-size: 1.8rem;">📥</span>
+                            <h3 class="welove-title">Đồng bộ dữ liệu từ App gốc</h3>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.4; text-align: left;">
+                            Nhập trực tiếp ngày kỷ niệm, lịch sử các đợt ốm và danh sách lịch nhắc nhở từ cơ sở dữ liệu Supabase của ứng dụng WeLove gốc.
+                        </p>
+                        
+                        <div style="background: rgba(244, 63, 94, 0.05); border: 1px dashed rgba(244, 63, 94, 0.2); padding: 12px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.82rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
+                            <strong>ℹ️ Công nghệ sao lưu:</strong> Ứng dụng gốc lưu trữ trực tiếp dưới dạng dữ liệu quan hệ (PostgreSQL) trên Supabase. Khi nhấn nút này, FamiLife sẽ trực tiếp truy vấn các bảng <code>tuanminh_wedding_config</code> và <code>tuanminh_wedding_rsvps</code> để tải dữ liệu về máy.
+                        </div>
+
+                        <button type="button" class="welove-btn welove-btn-secondary" id="btnWeLoveImportFromOriginal" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-color: rgba(244, 63, 94, 0.4); color: #e11d48; background: transparent; cursor: pointer;">
+                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                            <span>Bắt đầu đồng bộ từ App gốc</span>
+                        </button>
                     </div>
                 </div>
             ` : `
