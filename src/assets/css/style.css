@@ -82,8 +82,8 @@ html.light-mode, body.light-mode {
     box-sizing: border-box;
 }
 
-/* Global pseudo-element for hardware-accelerated viewport gradient (fixes iOS Safari background-attachment: fixed bugs) */
-body::before {
+/* Show global radial-gradient only on Home tab to prevent color banding/mismatch on other views */
+body.active-tab-home::before {
     content: "";
     position: fixed;
     top: 0;
