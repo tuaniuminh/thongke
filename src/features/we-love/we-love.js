@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.1.96';
-import * as sync from '../../core/sync.js?v=4.1.96';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.96';
+} from '../../core/app.js?v=4.1.97';
+import * as sync from '../../core/sync.js?v=4.1.97';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.97';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.96');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.97');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.1.96';
+        const logoPath = './logo_pwa_small.png?v=4.1.97';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -214,6 +214,15 @@ export function updateLoveWidgetUI() {
     if (widget) {
         const show = state.showLoveWidget !== false;
         widget.style.display = show ? 'flex' : 'none';
+        
+        const namesEl = widget.querySelector('.love-names');
+        if (namesEl) {
+            if (state.weLoveName1 && state.weLoveName2) {
+                namesEl.innerHTML = `${escapeHTML(state.weLoveName1)} <span class="heart-beat">❤️</span> ${escapeHTML(state.weLoveName2)}`;
+            } else {
+                namesEl.innerHTML = `WeLove`;
+            }
+        }
     }
 }
 
@@ -338,7 +347,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.1.96';
+    const logoPath = './logo_pwa_small.png?v=4.1.97';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -806,7 +815,7 @@ export async function renderWeLoveDashboard() {
 
             <!-- Switch View Button -->
             ${canEdit ? `
-                <div style="margin-bottom: 1.5rem; z-index: 10; display: flex; gap: 8px; flex-wrap: wrap;">
+                <div class="welove-subview-tabs">
                     <button class="btn ${weLoveCurrentSubView === 'memory' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveMemoryView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;" ${!state.weLoveStartDate ? 'disabled title="Vui lòng thiết lập ngày bắt đầu yêu trước!"' : ''}>
                         ❤️ Kỷ niệm
                     </button>
@@ -965,8 +974,8 @@ export async function renderWeLoveDashboard() {
                     <button class="notification-test-btn" id="weLoveNotificationTest" title="Thử nghiệm thông báo yêu thương">🔔</button>
 
                     <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
-                    <h2 class="memory-title">Góc Tình Yêu</h2>
-                    <p class="memory-subtitle">${escapeHTML(state.weLoveName1 || 'Anh')} ❤️ ${escapeHTML(state.weLoveName2 || 'Em')} - Góc nhỏ yêu thương đếm ngày bên nhau</p>
+                    <h2 class="memory-title">Kỷ Niệm Tình Yêu</h2>
+                    <p class="memory-subtitle">${escapeHTML(state.weLoveName1 || 'Anh')} ❤️ ${escapeHTML(state.weLoveName2 || 'Em')} - Hành trình gieo bình yên, hái hạnh phúc</p>
                     
                     <div class="days-counter-box">
                         <div class="days-number" id="weLoveDaysCountVal">${state.weLoveStartDate ? loveDaysCount : '?'}</div>
@@ -1123,6 +1132,46 @@ export async function renderWeLoveDashboard() {
 
     // Sync sidebar & mobile navbar display
     updateSidebarNavVisibility('welove');
+
+    // Update desktop header WeLove tabs active state
+    const headerTabs = document.getElementById('headerWeLoveTabs');
+    if (headerTabs) {
+        headerTabs.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        });
+        const activeBtnIdMap = {
+            'memory': 'btnHeaderWeLoveMemory',
+            'admin': 'btnHeaderWeLoveAdmin',
+            'settings': 'btnHeaderWeLoveSettings'
+        };
+        const activeBtn = document.getElementById(activeBtnIdMap[weLoveCurrentSubView]);
+        if (activeBtn) {
+            activeBtn.classList.remove('btn-secondary');
+            activeBtn.classList.add('btn-primary');
+        }
+        
+        // Disable tabs on desktop header if date is not configured yet
+        const btnMem = document.getElementById('btnHeaderWeLoveMemory');
+        const btnAdm = document.getElementById('btnHeaderWeLoveAdmin');
+        if (btnMem && btnAdm) {
+            if (!state.weLoveStartDate) {
+                btnMem.disabled = true;
+                btnMem.title = "Vui lòng thiết lập ngày bắt đầu yêu trước!";
+                btnMem.style.opacity = '0.5';
+                btnAdm.disabled = true;
+                btnAdm.title = "Vui lòng thiết lập ngày bắt đầu yêu trước!";
+                btnAdm.style.opacity = '0.5';
+            } else {
+                btnMem.disabled = false;
+                btnMem.title = '';
+                btnMem.style.removeProperty('opacity');
+                btnAdm.disabled = false;
+                btnAdm.title = '';
+                btnAdm.style.removeProperty('opacity');
+            }
+        }
+    }
 
     // Set up auto refreshes
     setupAutoRefreshTimers();

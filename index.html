@@ -39,13 +39,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.96">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.1.97">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.96">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.96">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.96">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.1.96">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.1.97">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.1.97">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.1.97">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.1.97">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -197,7 +197,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.1.96" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.1.97" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -295,7 +295,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.1.96" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.1.97" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -317,6 +317,11 @@
                 </div>
                 <div class="header-actions">
                     <!-- Shared Fund Header Card (Top Right) -->
+                    <div class="header-welove-tabs" id="headerWeLoveTabs" style="display: none; gap: 8px; margin-right: 8px;">
+                        <button class="btn btn-secondary text-only" onclick="window.switchWeLoveSubView('memory')" id="btnHeaderWeLoveMemory">Kỷ niệm</button>
+                        <button class="btn btn-secondary text-only" onclick="window.switchWeLoveSubView('admin')" id="btnHeaderWeLoveAdmin">Lịch nhắc</button>
+                        <button class="btn btn-secondary text-only" onclick="window.switchWeLoveSubView('settings')" id="btnHeaderWeLoveSettings">Quản lý</button>
+                    </div>
                     <div id="sharedFundHeaderCard" class="shared-fund-header-card" style="display: none;">
                         <div class="shared-fund-card-title">
                             <i data-lucide="users" style="width: 14px; height: 14px; color: var(--accent-blue);"></i>
@@ -1644,7 +1649,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.1.96" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.1.97" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1679,7 +1684,7 @@
                         <span class="days-lbl">Ngày bên nhau</span>
                     </div>
                 </div>
-                <div class="love-names">Linh Tuấn <span class="heart-beat">❤️</span> Ngô Minh</div>
+                <div class="love-names" id="homeLoveWidgetNames">WeLove</div>
             </div>
             
             <!-- Spouse Fund Invitation Card -->
@@ -3238,9 +3243,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.96"></script>
-    <script type="module" src="src/core/app.js?v=4.1.96"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.1.96"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.1.97"></script>
+    <script type="module" src="src/core/app.js?v=4.1.97"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.1.97"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>

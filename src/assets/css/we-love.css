@@ -1044,3 +1044,18 @@
     font-size: 0.8rem;
   }
 }
+
+
+/* Subview selection tabs: visible on desktop, hidden on mobile */
+.welove-subview-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  z-index: 10;
+}
+@media (max-width: 768px) {
+  .welove-subview-tabs {
+    display: none !important;
+  }
+}
