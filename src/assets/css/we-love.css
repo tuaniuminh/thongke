@@ -1214,7 +1214,7 @@ body.light-mode.active-tab-welove-settings .main-content {
 /* --- Home Page Mini Love Widget Styles --- */
 .home-top-right-group {
     position: absolute;
-    top: calc(65px + env(safe-area-inset-top));
+    top: calc(20px + env(safe-area-inset-top));
     right: 20px;
     display: flex;
     align-items: center;
@@ -1279,4 +1279,9 @@ body.dark-mode .home-love-mini-widget:hover {
     28% { transform: scale(1); }
     42% { transform: scale(1.2); }
     70% { transform: scale(1); }
+}
+
+/* Position override for version badge to align top-right actions at top: 20px */
+.version-badge-btn {
+    top: calc(65px + env(safe-area-inset-top)) !important;
 }
