@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.16';
-import * as sync from '../../core/sync.js?v=4.2.16';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.16';
+} from '../../core/app.js?v=4.2.17';
+import * as sync from '../../core/sync.js?v=4.2.17';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.17';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.16');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.17');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.16';
+        const logoPath = './logo_pwa_small.png?v=4.2.17';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -155,12 +155,15 @@ function parseDeviceFromUA(ua) {
     return `${device} (${browser} - ${os})`;
 }
 
-// Format YYYY-MM-DD to DD/MM/YYYY
+// Format YYYY-MM-DD to "Ngày DD tháng MM năm YYYY"
 function formatDateDisplay(dateStr) {
     if (!dateStr) return '';
     const parts = dateStr.split('-');
     if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const day = parseInt(parts[2], 10);
+        const month = parseInt(parts[1], 10);
+        const year = parts[0];
+        return `Ngày ${day} tháng ${month} năm ${year}`;
     }
     return dateStr;
 }
@@ -358,7 +361,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.16';
+    const logoPath = './logo_pwa_small.png?v=4.2.17';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -944,11 +947,11 @@ export async function renderWeLoveDashboard() {
                         <form id="weLoveConfigForm" style="text-align: left; margin-bottom: 2.5rem;">
                             <!-- 1. Điền tên 2 bạn -->
                             <div class="welove-form-group">
-                                <label class="welove-form-label">👤 Biệt danh / Tên của bạn:</label>
+                                <label class="welove-form-label">👤 Tên của bạn:</label>
                                 <input type="text" class="welove-input" id="weLoveName1Input" placeholder="Ví dụ: Linh Tuấn" value="${state.weLoveName1 || ''}" required>
                             </div>
                             <div class="welove-form-group">
-                                <label class="welove-form-label">👤 Biệt danh / Tên của nửa kia:</label>
+                                <label class="welove-form-label">👤 Tên nửa kia:</label>
                                 <input type="text" class="welove-input" id="weLoveName2Input" placeholder="Ví dụ: Ngô Minh" value="${state.weLoveName2 || ''}" required>
                             </div>
 
@@ -999,24 +1002,46 @@ export async function renderWeLoveDashboard() {
                         </form>
                     </div>
 
-                    <!-- Đồng bộ từ App gốc -->
+                    <!-- Sao lưu & Đồng bộ Sổ tay sức khỏe -->
                     <div class="welove-card" style="width: 100%; margin-top: 0;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                            <span style="font-size: 1.8rem;">📥</span>
-                            <h3 class="welove-title">Đồng bộ dữ liệu từ App gốc</h3>
+                            <span style="font-size: 1.8rem;">🔄</span>
+                            <h3 class="welove-title">Sao lưu & Đồng bộ Sổ tay sức khỏe</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.4; text-align: left;">
-                            Nhập trực tiếp ngày kỷ niệm, lịch sử các đợt ốm và danh sách lịch nhắc nhở từ cơ sở dữ liệu Supabase của ứng dụng WeLove gốc.
+                            Quản lý sao lưu, xuất nhập tệp tin JSON hoặc đồng bộ dữ liệu sức khỏe của em yêu lên hệ thống đám mây bảo mật.
                         </p>
                         
                         <div style="background: rgba(244, 63, 94, 0.05); border: 1px dashed rgba(244, 63, 94, 0.2); padding: 12px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.82rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
-                            <strong>ℹ️ Công nghệ sao lưu:</strong> Ứng dụng gốc lưu trữ trực tiếp dưới dạng dữ liệu quan hệ (PostgreSQL) trên Supabase. Khi nhấn nút này, FamiLife sẽ trực tiếp truy vấn các bảng <code>tuanminh_wedding_config</code> và <code>tuanminh_wedding_rsvps</code> để tải dữ liệu về máy.
+                            <strong>🛡️ Công nghệ bảo mật:</strong> Dữ liệu trên mây của FamiLife được <strong>mã hóa đối xứng đầu cuối (End-to-End Encrypted)</strong> bằng mật khẩu chính (Master Password) trước khi tải lên để đảm bảo tính riêng tư tuyệt đối.
                         </div>
 
-                        <button type="button" class="welove-btn welove-btn-secondary" id="btnWeLoveImportFromOriginal" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-color: rgba(244, 63, 94, 0.4); color: #e11d48; background: transparent; cursor: pointer;">
-                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
-                            <span>Bắt đầu đồng bộ từ App gốc</span>
-                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                            <!-- Button 1: Đồng bộ từ App gốc -->
+                            <button type="button" class="welove-btn" id="btnWeLoveImportFromOriginal" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border: 1px solid rgba(244, 63, 94, 0.3); color: #e11d48; background: transparent; cursor: pointer; border-radius: 12px; padding: 10px 16px;">
+                                <i data-lucide="download-cloud" style="width: 16px; height: 16px;"></i>
+                                <span>Nhập dữ liệu từ App gốc (WeLove)</span>
+                            </button>
+
+                            <!-- Row for File backup/restore -->
+                            <div style="display: flex; gap: 12px; width: 100%;">
+                                <button type="button" class="welove-btn" id="btnWeLoveExportBackup" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; border: 1px solid var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; font-size: 0.85rem; border-radius: 12px; padding: 10px 12px;">
+                                    <i data-lucide="upload" style="width: 14px; height: 14px;"></i>
+                                    <span>Xuất File sao lưu</span>
+                                </button>
+                                <button type="button" class="welove-btn" id="btnWeLoveImportBackup" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; border: 1px solid var(--border-color); color: var(--text-primary); background: transparent; cursor: pointer; font-size: 0.85rem; border-radius: 12px; padding: 10px 12px;" onclick="document.getElementById('weLoveRestoreFileInput').click()">
+                                    <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                                    <span>Nhập File sao lưu</span>
+                                </button>
+                                <input type="file" id="weLoveRestoreFileInput" style="display: none;" accept=".json">
+                            </div>
+
+                            <!-- Button 4: Đồng bộ đám mây FamiLife -->
+                            <button type="button" class="welove-btn welove-btn-primary" id="btnWeLoveSyncCloud" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; cursor: pointer; border-radius: 12px; padding: 10px 16px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: white;">
+                                <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                                <span>Đồng bộ ngay lên mây FamiLife</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             ` : `
@@ -1514,6 +1539,259 @@ function bindSettingsEvents() {
 
                 showToast("Đã hủy kết nối.");
                 renderWeLoveDashboard();
+            }
+        });
+    }
+
+    // --- Sổ Tay Sức Khỏe Backup & Sync Event Listeners ---
+
+    // 1. Nhập từ App gốc (WeLove Supabase PostgreSQL)
+    const btnImportFromOriginal = document.getElementById('btnWeLoveImportFromOriginal');
+    if (btnImportFromOriginal) {
+        btnImportFromOriginal.addEventListener('click', async () => {
+            if (!sync.isConfigured()) {
+                showToast("Vui lòng cấu hình kết nối Supabase Cloud trong mục Cài đặt trước! ⚙️", "warning");
+                return;
+            }
+            
+            const sb = sync.getSupabase();
+            if (!sb) {
+                showToast("Lỗi kết nối Supabase Client. Vui lòng kiểm tra lại cấu hình! ⚙️", "error");
+                return;
+            }
+            
+            const confirmImport = await window.showConfirm("Bạn có chắc chắn muốn nhập dữ liệu từ App gốc? Quá trình này sẽ gộp dữ liệu cũ vào FamiLife. ❤️");
+            if (!confirmImport) return;
+            
+            const originalText = btnImportFromOriginal.innerHTML;
+            btnImportFromOriginal.disabled = true;
+            btnImportFromOriginal.innerHTML = '<span>⏳ Đang đồng bộ...</span>';
+            
+            try {
+                // Fetch config
+                const { data: config, error: configError } = await sb
+                    .from('tuanminh_wedding_config')
+                    .select('*')
+                    .eq('id', 'default')
+                    .maybeSingle();
+                    
+                if (configError) throw configError;
+                
+                if (config) {
+                    state.weLoveName1 = config.groom_name || state.weLoveName1;
+                    state.weLoveName2 = config.bride_name || state.weLoveName2;
+                    if (config.wedding_date) {
+                        state.weLoveStartDate = config.wedding_date.split('T')[0];
+                        state.weLoveStartDateUpdated = new Date().toISOString();
+                    }
+                }
+                
+                // Fetch RSVPs
+                const { data: rsvps, error: rsvpsError } = await sb
+                    .from('tuanminh_wedding_rsvps')
+                    .select('*')
+                    .eq('wedding_id', 'default');
+                    
+                if (rsvpsError) throw rsvpsError;
+                
+                let sicknessCount = 0;
+                let reminderCount = 0;
+                
+                if (rsvps && rsvps.length > 0) {
+                    // Sickness logs
+                    const existingSicknessIds = new Set((state.weLoveSicknessLogs || []).map(l => l.id));
+                    const importedSickness = rsvps
+                        .filter(r => r.status === 'sickness_log')
+                        .map(r => ({
+                            id: r.id,
+                            date: r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                            symptomType: r.guest_name,
+                            notes: r.wish,
+                            icon: r.side || '🤒'
+                        }));
+                        
+                    const sicknessLogsMerged = [...(state.weLoveSicknessLogs || [])];
+                    importedSickness.forEach(log => {
+                        if (!existingSicknessIds.has(log.id)) {
+                            sicknessLogsMerged.push(log);
+                            sicknessCount++;
+                        }
+                    });
+                    state.weLoveSicknessLogs = sicknessLogsMerged;
+                    state.weLoveSicknessLogsUpdated = new Date().toISOString();
+                    
+                    // Reminders
+                    const existingReminderIds = new Set((state.weLoveReminders || []).map(rem => rem.id));
+                    const importedReminders = rsvps
+                        .filter(r => r.status === 'scheduled_reminder')
+                        .map(r => ({
+                            id: r.id,
+                            title: r.guest_name,
+                            message: r.wish,
+                            scheduledTime: r.side,
+                            isSent: r.guest_count === 1,
+                            createdAt: r.created_at
+                        }));
+                        
+                    const remindersMerged = [...(state.weLoveReminders || [])];
+                    importedReminders.forEach(rem => {
+                        if (!existingReminderIds.has(rem.id)) {
+                            remindersMerged.push(rem);
+                            reminderCount++;
+                        }
+                    });
+                    state.weLoveReminders = remindersMerged;
+                    state.weLoveRemindersUpdated = new Date().toISOString();
+                }
+                
+                await saveLocalState();
+                
+                if (sync.isConfigured() && state.user) {
+                    performSync(true);
+                }
+                
+                showToast(`Đồng bộ thành công! Nhập thêm ${sicknessCount} đợt ốm & ${reminderCount} lịch nhắc. ❤️`);
+                renderWeLoveDashboard();
+            } catch (err) {
+                console.error("Failed to sync from original app:", err);
+                showToast(`Lỗi đồng bộ: ${err.message || JSON.stringify(err)}`, "error");
+            } finally {
+                btnImportFromOriginal.disabled = false;
+                btnImportFromOriginal.innerHTML = originalText;
+            }
+        });
+    }
+
+    // 2. Xuất File Sao Lưu (JSON File download)
+    const btnExportBackup = document.getElementById('btnWeLoveExportBackup');
+    if (btnExportBackup) {
+        btnExportBackup.addEventListener('click', () => {
+            try {
+                const backupData = {
+                    type: 'welove_sickness_reminders_backup',
+                    version: '4.2.17',
+                    date: new Date().toISOString(),
+                    weLoveStartDate: state.weLoveStartDate,
+                    weLoveName1: state.weLoveName1,
+                    weLoveName2: state.weLoveName2,
+                    weLoveSicknessLogs: state.weLoveSicknessLogs || [],
+                    weLoveReminders: state.weLoveReminders || []
+                };
+                
+                const jsonStr = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sao_luu_so_tay_suc_khoe_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("Đã xuất file sao lưu thành công! 📤");
+            } catch (err) {
+                console.error("Failed to export sickness data:", err);
+                showToast("Lỗi xuất file sao lưu!", "error");
+            }
+        });
+    }
+
+    // 3. Nhập File Sao Lưu (JSON File upload)
+    const fileInput = document.getElementById('weLoveRestoreFileInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.type !== 'welove_sickness_reminders_backup') {
+                        showToast("File sao lưu không đúng định dạng Sổ tay sức khỏe! ❌", "error");
+                        return;
+                    }
+                    
+                    const confirmRestore = await window.showConfirm("Bạn có chắc muốn nhập dữ liệu từ file này? Dữ liệu cũ sẽ được gộp chung. ❤️");
+                    if (!confirmRestore) return;
+                    
+                    let sicknessCount = 0;
+                    let reminderCount = 0;
+                    
+                    // Merge sickness
+                    const existingSicknessIds = new Set((state.weLoveSicknessLogs || []).map(l => l.id));
+                    const sicknessLogsMerged = [...(state.weLoveSicknessLogs || [])];
+                    (data.weLoveSicknessLogs || []).forEach(log => {
+                        if (!existingSicknessIds.has(log.id)) {
+                            sicknessLogsMerged.push(log);
+                            sicknessCount++;
+                        }
+                    });
+                    state.weLoveSicknessLogs = sicknessLogsMerged;
+                    state.weLoveSicknessLogsUpdated = new Date().toISOString();
+                    
+                    // Merge reminders
+                    const existingReminderIds = new Set((state.weLoveReminders || []).map(r => r.id));
+                    const remindersMerged = [...(state.weLoveReminders || [])];
+                    (data.weLoveReminders || []).forEach(rem => {
+                        if (!existingReminderIds.has(rem.id)) {
+                            remindersMerged.push(rem);
+                            reminderCount++;
+                        }
+                    });
+                    state.weLoveReminders = remindersMerged;
+                    state.weLoveRemindersUpdated = new Date().toISOString();
+                    
+                    // Merge names & start date if empty
+                    if (data.weLoveStartDate && !state.weLoveStartDate) {
+                        state.weLoveStartDate = data.weLoveStartDate;
+                        state.weLoveStartDateUpdated = new Date().toISOString();
+                    }
+                    if (data.weLoveName1 && !state.weLoveName1) state.weLoveName1 = data.weLoveName1;
+                    if (data.weLoveName2 && !state.weLoveName2) state.weLoveName2 = data.weLoveName2;
+                    
+                    await saveLocalState();
+                    
+                    if (sync.isConfigured() && state.user) {
+                        performSync(true);
+                    }
+                    
+                    showToast(`Nhập thành công! Thêm ${sicknessCount} đợt ốm & ${reminderCount} lịch nhắc. ❤️`);
+                    renderWeLoveDashboard();
+                } catch (err) {
+                    console.error("Failed to restore sickness backup file:", err);
+                    showToast("Lỗi giải mã file sao lưu JSON!", "error");
+                }
+            };
+            reader.readAsText(file);
+            // Reset value so change listener triggers again for same file
+            fileInput.value = '';
+        });
+    }
+
+    // 4. Đồng bộ lên đám mây FamiLife
+    const btnSyncCloud = document.getElementById('btnWeLoveSyncCloud');
+    if (btnSyncCloud) {
+        btnSyncCloud.addEventListener('click', async () => {
+            if (!sync.isConfigured() || !state.user) {
+                showToast("Chưa đăng nhập đồng bộ FamiLife. Vui lòng kiểm tra ở mục Cài đặt chính! ⚙️", "warning");
+                return;
+            }
+            
+            const originalText = btnSyncCloud.innerHTML;
+            btnSyncCloud.disabled = true;
+            btnSyncCloud.innerHTML = '<span>⏳ Đang đồng bộ...</span>';
+            
+            try {
+                await performSync(true);
+                showToast("Đã đồng bộ hóa thành công với đám mây FamiLife! 🔄");
+                renderWeLoveDashboard();
+            } catch (err) {
+                console.error("Cloud sync failed:", err);
+                showToast("Lỗi đồng bộ đám mây!", "error");
+            } finally {
+                btnSyncCloud.disabled = false;
+                btnSyncCloud.innerHTML = originalText;
             }
         });
     }
