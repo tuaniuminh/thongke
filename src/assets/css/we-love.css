@@ -1109,20 +1109,33 @@ body:not(.light-mode).active-tab-welove-settings {
   background: transparent !important;
 }
 
-/* Make sidebar, top header, and mobile navbar transparent to show the full gradient */
-body:not(.light-mode).active-tab-welove .sidebar,
-body:not(.light-mode).active-tab-welove-admin .sidebar,
-body:not(.light-mode).active-tab-welove-settings .sidebar,
-body:not(.light-mode).active-tab-welove .mobile-navbar,
-body:not(.light-mode).active-tab-welove-admin .mobile-navbar,
-body:not(.light-mode).active-tab-welove-settings .mobile-navbar,
-body:not(.light-mode).active-tab-welove .top-header,
-body:not(.light-mode).active-tab-welove-admin .top-header,
-body:not(.light-mode).active-tab-welove-settings .top-header {
+/* Make sidebar, top header, and mobile navbar transparent in both dark and light modes to blend perfectly with gradient */
+body.active-tab-welove .sidebar,
+body.active-tab-welove-admin .sidebar,
+body.active-tab-welove-settings .sidebar,
+body.active-tab-welove .mobile-navbar,
+body.active-tab-welove-admin .mobile-navbar,
+body.active-tab-welove-settings .mobile-navbar,
+body.active-tab-welove .top-header,
+body.active-tab-welove-admin .top-header,
+body.active-tab-welove-settings .top-header {
   background: transparent !important;
   background-color: transparent !important;
   border-color: rgba(255, 255, 255, 0.05) !important;
   box-shadow: none !important;
+}
+
+/* In light mode WeLove, use a soft pink borders for the transparent navbar/header */
+body.light-mode.active-tab-welove .sidebar,
+body.light-mode.active-tab-welove-admin .sidebar,
+body.light-mode.active-tab-welove-settings .sidebar,
+body.light-mode.active-tab-welove .mobile-navbar,
+body.light-mode.active-tab-welove-admin .mobile-navbar,
+body.light-mode.active-tab-welove-settings .mobile-navbar,
+body.light-mode.active-tab-welove .top-header,
+body.light-mode.active-tab-welove-admin .top-header,
+body.light-mode.active-tab-welove-settings .top-header {
+  border-color: rgba(244, 63, 94, 0.12) !important;
 }
 
 /* Ensure main content panel has transparent background as well */
@@ -1152,17 +1165,11 @@ body.light-mode.active-tab-welove-settings::before {
   pointer-events: none;
 }
 
-/* In light theme, set root html background to match the top of WeLove light gradient to fix rubber-banding scroll */
-html.light-mode.active-tab-welove,
-html.light-mode.active-tab-welove-admin,
-html.light-mode.active-tab-welove-settings {
-  background: #fff1f2 !important;
-}
-
+/* Set solid background color on body for light theme WeLove to match start of light gradient */
 body.light-mode.active-tab-welove,
 body.light-mode.active-tab-welove-admin,
 body.light-mode.active-tab-welove-settings {
-  background: transparent !important;
+  background: #fff1f2 !important;
 }
 
 /* Apply light theme variables to .memory-page in light mode */
@@ -1183,22 +1190,7 @@ body.light-mode .memory-page {
   background: transparent !important;
 }
 
-/* Make headers/navbars in light mode show beautiful translucent pink glass style */
-body.light-mode.active-tab-welove .sidebar,
-body.light-mode.active-tab-welove-admin .sidebar,
-body.light-mode.active-tab-welove-settings .sidebar,
-body.light-mode.active-tab-welove .mobile-navbar,
-body.light-mode.active-tab-welove-admin .mobile-navbar,
-body.light-mode.active-tab-welove-settings .mobile-navbar,
-body.light-mode.active-tab-welove .top-header,
-body.light-mode.active-tab-welove-admin .top-header,
-body.light-mode.active-tab-welove-settings .top-header {
-  background: rgba(255, 255, 255, 0.65) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(244, 63, 94, 0.15) !important;
-  box-shadow: 0 10px 30px -10px rgba(244, 63, 94, 0.1) !important;
-}
+
 
 /* Ensure main content panel has transparent background as well in light mode */
 body.light-mode.active-tab-welove .main-content,
