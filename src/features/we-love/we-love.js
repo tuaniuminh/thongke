@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.01';
-import * as sync from '../../core/sync.js?v=4.2.01';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.01';
+} from '../../core/app.js?v=4.2.02';
+import * as sync from '../../core/sync.js?v=4.2.02';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.02';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.01');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.02');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.01';
+        const logoPath = './logo_pwa_small.png?v=4.2.02';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -258,7 +258,7 @@ function startFloatingHearts() {
     }, 2500);
 }
 
-// Screen click burst hearts
+// Screen click burst hearts (using PointerEvents for instant taps)
 function handleScreenClickBurst(e) {
     if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('.welove-modal-content')) return;
     
@@ -269,9 +269,20 @@ function handleScreenClickBurst(e) {
     heart.className = 'click-heart';
     heart.innerText = '💖';
     
+    // Support multi-touch client coordinates robustly
+    let posX = e.clientX;
+    let posY = e.clientY;
+    if (e.touches && e.touches[0]) {
+        posX = e.touches[0].clientX;
+        posY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches[0]) {
+        posX = e.changedTouches[0].clientX;
+        posY = e.changedTouches[0].clientY;
+    }
+    
     const size = Math.random() * 25 + 15;
-    heart.style.left = `${e.clientX}px`;
-    heart.style.top = `${e.clientY}px`;
+    heart.style.left = `${posX}px`;
+    heart.style.top = `${posY}px`;
     heart.style.fontSize = `${size}px`;
     
     document.body.appendChild(heart);
@@ -347,7 +358,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.01';
+    const logoPath = './logo_pwa_small.png?v=4.2.02';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1228,7 +1239,7 @@ function bindMemoryEvents() {
 
     const heartPulse = document.getElementById('weLovePulsingHeart');
     if (heartPulse) {
-        heartPulse.addEventListener('click', (e) => {
+        heartPulse.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
             showToast(`Gửi ngàn trái tim yêu thương gửi đến ${state.weLoveName2 || 'nửa kia'} xinh đẹp! 💕`);
         });
@@ -1236,7 +1247,7 @@ function bindMemoryEvents() {
 
     const weLovePage = document.getElementById('weLovePage');
     if (weLovePage) {
-        weLovePage.addEventListener('click', handleScreenClickBurst);
+        weLovePage.addEventListener('pointerdown', handleScreenClickBurst);
     }
 
     // Modal Form Trigger
