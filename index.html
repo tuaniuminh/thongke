@@ -39,13 +39,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.2.24">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.2.25">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.2.24">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.2.24">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.2.24">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.2.24">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.2.25">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.2.25">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.2.25">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.2.25">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -197,7 +197,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.2.24" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.2.25" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -307,7 +307,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.2.24" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.2.25" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1628,41 +1628,49 @@
 
     <!-- Home Landing Page Layout -->
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
-        <!-- Widget Lịch âm Việt Nam & Thời tiết Hà Nội -->
-        <div class="home-widgets-container" id="homeWidgetsContainer">
-            <div class="home-widget-box" id="homeLunarWidget">
-                <div class="widget-row" id="lunarRow">
-                    <span>Lịch âm: --/--/----</span>
+        <!-- Top bar containing widgets and buttons in a responsive layout -->
+        <div class="home-top-bar">
+            <!-- Left side: widgets -->
+            <div class="home-widgets-container" id="homeWidgetsContainer">
+                <div class="home-widget-box" id="homeLunarWidget">
+                    <div class="widget-row" id="lunarRow">
+                        <span>Lịch âm: --/--/----</span>
+                    </div>
+                </div>
+                <div class="home-widget-box" id="homeWeatherWidget">
+                    <div class="widget-row" id="weatherRow">
+                        <i data-lucide="cloud-sun"></i>
+                        <span class="weather-desktop">--°C tại Hà Nội</span>
+                        <span class="weather-mobile" style="display: none;">--°C - Đang tải...</span>
+                    </div>
+                </div>
+                <!-- WeLove Widget (Joined Hearts) as a left-aligned home widget box -->
+                <div class="home-widget-box home-love-left-widget" id="homeLoveWidget" onclick="switchTab('welove')" style="display: none; cursor: pointer; align-items: center; gap: 6px;" title="Kỷ Niệm Tình Yêu">
+                    <span class="mini-widget-heart">💕</span>
+                    <span class="mini-widget-days" id="homeLoveDays" style="font-weight: 700; font-size: 0.85rem;">--</span>
                 </div>
             </div>
-            <div class="home-widget-box" id="homeWeatherWidget">
-                <div class="widget-row" id="weatherRow">
-                    <i data-lucide="cloud-sun"></i>
-                    <span class="weather-desktop">--°C tại Hà Nội</span>
-                    <span class="weather-mobile" style="display: none;">--°C - Đang tải...</span>
+            
+            <!-- Right side: controls -->
+            <div class="home-controls-container">
+                <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
+                    <span class="wizard-version-badge"></span>
+                </button>
+                <div class="home-right-buttons-row">
+                    <!-- Nút Cài đặt ứng dụng PWA (chỉ hiện khi trình duyệt hỗ trợ beforeinstallprompt) -->
+                    <button class="home-pwa-install-btn" id="homePwaInstallBtn" title="Cài đặt ứng dụng" style="display: none;">
+                        <i data-lucide="download"></i>
+                    </button>
+                    <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
+                        <i data-lucide="settings"></i>
+                    </button>
                 </div>
-            </div>
-            <!-- WeLove Widget (Joined Hearts) as a left-aligned home widget box -->
-            <div class="home-widget-box home-love-left-widget" id="homeLoveWidget" onclick="switchTab('welove')" style="display: none; cursor: pointer; align-items: center; gap: 6px;" title="Kỷ Niệm Tình Yêu">
-                <span class="mini-widget-heart">💕</span>
-                <span class="mini-widget-days" id="homeLoveDays" style="font-weight: 700; font-size: 0.85rem;">--</span>
             </div>
         </div>
-        
-        <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
-            <span class="wizard-version-badge"></span>
-        </button>
-        <!-- Nút Cài đặt ứng dụng PWA (chỉ hiện khi trình duyệt hỗ trợ beforeinstallprompt) -->
-        <button class="home-pwa-install-btn" id="homePwaInstallBtn" title="Cài đặt ứng dụng" style="display: none;">
-            <i data-lucide="download"></i>
-        </button>
-        <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
-            <i data-lucide="settings"></i>
-        </button>
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.2.24" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.2.25" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -3210,9 +3218,13 @@
                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                     <span>Xóa log</span>
                 </button>
-                <button id="exportDebugConsoleBtn" class="debug-console-btn" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.2);">
-                    <i data-lucide="download" style="width: 14px; height: 14px;"></i>
-                    <span>Xuất log</span>
+                <button id="copyDebugConsoleBtn" class="debug-console-btn" style="background: rgba(14, 165, 233, 0.1); color: var(--accent-blue); border-color: rgba(14, 165, 233, 0.2);" title="Sao chép toàn bộ log vào clipboard">
+                    <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+                    <span>Sao chép</span>
+                </button>
+                <button id="exportDebugConsoleBtn" class="debug-console-btn" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.2);" title="Gửi/Chia sẻ file log">
+                    <i data-lucide="share-2" style="width: 14px; height: 14px;"></i>
+                    <span>Chia sẻ</span>
                 </button>
                 <button id="closeDebugConsoleBtn" class="debug-console-btn btn-close">
                     <i data-lucide="x" style="width: 14px; height: 14px;"></i>
@@ -3226,9 +3238,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.2.24"></script>
-    <script type="module" src="src/core/app.js?v=4.2.24"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.2.24"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.2.25"></script>
+    <script type="module" src="src/core/app.js?v=4.2.25"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.2.25"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
@@ -3319,6 +3331,34 @@
                     window.__famiLifeLogs = [];
                     window.__famiLifeErrorCount = 0;
                     updateDebugBadge();
+                });
+            }
+
+            const copyBtn = document.getElementById('copyDebugConsoleBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async () => {
+                    if (!window.__famiLifeLogs || window.__famiLifeLogs.length === 0) {
+                        alert("Không có dữ liệu log để sao chép!");
+                        return;
+                    }
+                    const logText = window.__famiLifeLogs.map(log => `[${log.time}] [${log.level.toUpperCase()}] ${log.message}`).join('\n');
+                    try {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(logText);
+                        } else {
+                            const textArea = document.createElement("textarea");
+                            textArea.value = logText;
+                            textArea.style.position = "fixed";
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                        }
+                        alert("Đã sao chép toàn bộ log vào bộ nhớ tạm! Bạn có thể dán (paste) để gửi đi.");
+                    } catch (err) {
+                        alert("Không thể sao chép log: " + err.message);
+                    }
                 });
             }
 
