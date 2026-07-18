@@ -3462,9 +3462,9 @@ body.light-mode .version-badge-btn {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: rgba(9, 13, 22, 0.85);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        background: var(--bg-primary);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         border-bottom: 1px solid var(--border-color);
         padding: 10px 14px;
         position: relative;
@@ -3479,7 +3479,7 @@ body.light-mode .version-badge-btn {
     }
 
     body.light-mode .mobile-navbar {
-        background: rgba(243, 244, 246, 0.85);
+        background: var(--bg-primary);
     }
 
     /* Two-line layout for Thu Chi Doi Ngoai */
