@@ -82,6 +82,11 @@ body.light-mode {
     box-sizing: border-box;
 }
 
+html {
+    background-color: var(--bg-primary);
+    transition: background-color var(--transition-normal);
+}
+
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
