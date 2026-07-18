@@ -1129,6 +1129,8 @@ body.active-tab-welove-settings .top-header {
   background-color: transparent !important;
   border-color: rgba(255, 255, 255, 0.05) !important;
   box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* In light mode WeLove, use a soft pink borders for the transparent navbar/header */
