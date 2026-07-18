@@ -39,13 +39,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.2.19">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.2.20">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.2.19">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.2.19">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.2.19">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.2.19">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.2.20">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.2.20">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.2.20">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.2.20">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -197,7 +197,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.2.19" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.2.20" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -307,7 +307,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.2.19" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.2.20" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1647,53 +1647,32 @@
         <button class="manual-check-update-btn version-badge-btn" id="homeVersionBadge" title="Kiểm tra cập nhật">
             <span class="wizard-version-badge"></span>
         </button>
-        <!-- Nút Cài đặt ứng dụng PWA (chỉ hiện khi trình duyệt hỗ trợ beforeinstallprompt) -->
-        <button class="home-pwa-install-btn" id="homePwaInstallBtn" title="Cài đặt ứng dụng" style="display: none;">
-            <i data-lucide="download"></i>
-        </button>
-        <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
-            <i data-lucide="settings"></i>
-        </button>
+        <!-- Group top-right actions to align WeLove mini widget with Settings button -->
+        <div class="home-top-right-group">
+            <!-- Small WeLove Widget Pill -->
+            <div class="home-love-mini-widget" id="homeLoveWidget" onclick="switchTab('welove')" style="display: none;" title="Kỷ Niệm Tình Yêu">
+                <span class="mini-widget-heart">❤️</span>
+                <span class="mini-widget-days" id="homeLoveDays">--</span>
+            </div>
+            
+            <!-- Nút Cài đặt ứng dụng PWA (chỉ hiện khi trình duyệt hỗ trợ beforeinstallprompt) -->
+            <button class="home-pwa-install-btn" id="homePwaInstallBtn" title="Cài đặt ứng dụng" style="display: none;">
+                <i data-lucide="download"></i>
+            </button>
+            <button class="home-settings-btn" id="homeSettingsBtn" onclick="switchTab('settings')" title="Cài đặt & Đồng bộ">
+                <i data-lucide="settings"></i>
+            </button>
+        </div>
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.2.19" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.2.20" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
             </header>
 
-            <!-- WeLove Widget (Joined Hearts) -->
-            <div class="home-love-widget" id="homeLoveWidget" onclick="switchTab('welove')" style="display: none;">
-                <div class="hearts-svg-wrapper">
-                    <svg class="double-heart-svg" viewBox="0 0 240 160">
-                        <defs>
-                            <linearGradient id="heartGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#ff4b6e" />
-                                <stop offset="100%" stop-color="#ff758c" />
-                            </linearGradient>
-                            <linearGradient id="heartGradRight" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#e83e8c" />
-                                <stop offset="100%" stop-color="#fd7e14" />
-                            </linearGradient>
-                            <filter id="heartGlow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="8" result="blur" />
-                                <feMerge>
-                                    <feMergeNode in="blur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        <path class="svg-heart heart-left" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" transform="translate(45, 20) scale(3.5)" fill="url(#heartGradLeft)" filter="url(#heartGlow)"></path>
-                        <path class="svg-heart heart-right" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" transform="translate(105, 30) scale(3.5) rotate(10 12 12)" fill="url(#heartGradRight)" filter="url(#heartGlow)"></path>
-                    </svg>
-                    <div class="heart-center-text">
-                        <span class="days-num" id="homeLoveDays">--</span>
-                        <span class="days-lbl">Ngày bên nhau</span>
-                    </div>
-                </div>
-                <div class="love-names" id="homeLoveWidgetNames">WeLove</div>
-            </div>
+
             
             <!-- Spouse Fund Invitation Card -->
             <div class="home-card" id="spouseFundInviteCard" style="display: none; flex-direction: column; gap: 14px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
@@ -3251,9 +3230,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.2.19"></script>
-    <script type="module" src="src/core/app.js?v=4.2.19"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.2.19"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.2.20"></script>
+    <script type="module" src="src/core/app.js?v=4.2.20"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.2.20"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
