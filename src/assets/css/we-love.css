@@ -1081,14 +1081,29 @@ body:not(.light-mode) .memory-page {
 }
 
 
-/* Immersive full-screen dark theme gradient overlay for WeLove (applied to html & body to fix rubber-band scrolling) */
-html:not(.light-mode).active-tab-welove,
-html:not(.light-mode).active-tab-welove-admin,
-html:not(.light-mode).active-tab-welove-settings,
-body:not(.light-mode).active-tab-welove,
-body:not(.light-mode).active-tab-welove-admin,
-body:not(.light-mode).active-tab-welove-settings {
+/* Immersive fixed viewport gradient background for WeLove (matches original app) */
+body:not(.light-mode).active-tab-welove::before,
+body:not(.light-mode).active-tab-welove-admin::before,
+body:not(.light-mode).active-tab-welove-settings::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c0519 100%) !important;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Make root html and body background transparent when WeLove is active to let body::before show through */
+html.active-tab-welove,
+html.active-tab-welove-admin,
+html.active-tab-welove-settings,
+body.active-tab-welove,
+body.active-tab-welove-admin,
+body.active-tab-welove-settings {
+  background: transparent !important;
 }
 
 /* Make sidebar, top header, and mobile navbar transparent to show the full gradient */
