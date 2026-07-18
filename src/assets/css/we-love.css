@@ -1285,3 +1285,25 @@ body.dark-mode .home-love-mini-widget:hover {
 .version-badge-btn {
     top: calc(65px + env(safe-area-inset-top)) !important;
 }
+
+/* --- Left Aligned Home Page Love Widget Styles --- */
+.home-love-left-widget {
+    display: none; /* JS will toggle flex or none */
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #e11d48;
+    transition: all 0.2s ease-in-out;
+}
+
+body.dark-mode .home-love-left-widget {
+    color: #fda4af;
+}
+
+.home-love-left-widget:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15);
+    border-color: rgba(244, 63, 94, 0.3);
+}
