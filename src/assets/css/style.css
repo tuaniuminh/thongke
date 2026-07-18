@@ -3346,7 +3346,7 @@ select.health-select-sm {
 @media (max-width: 576px) {
     .home-layout {
         align-items: flex-start !important;
-        padding-top: 110px !important;
+        padding-top: calc(120px + env(safe-area-inset-top, 0px)) !important;
     }
 
     .home-title {

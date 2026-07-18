@@ -1096,13 +1096,16 @@ body:not(.light-mode).active-tab-welove-settings::before {
   pointer-events: none;
 }
 
-/* Make root html and body background transparent when WeLove is active to let body::before show through */
-html.active-tab-welove,
-html.active-tab-welove-admin,
-html.active-tab-welove-settings,
-body.active-tab-welove,
-body.active-tab-welove-admin,
-body.active-tab-welove-settings {
+/* Make root html and body background transparent in dark theme to let body::before show through, but set html background to solid purple to fix rubber-band scroll black bars */
+html:not(.light-mode).active-tab-welove,
+html:not(.light-mode).active-tab-welove-admin,
+html:not(.light-mode).active-tab-welove-settings {
+  background: #1e1b4b !important;
+}
+
+body:not(.light-mode).active-tab-welove,
+body:not(.light-mode).active-tab-welove-admin,
+body:not(.light-mode).active-tab-welove-settings {
   background: transparent !important;
 }
 
