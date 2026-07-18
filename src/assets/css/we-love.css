@@ -1103,6 +1103,12 @@ html:not(.light-mode).active-tab-welove-settings {
   background: #1e1b4b !important;
 }
 
+html.light-mode.active-tab-welove,
+html.light-mode.active-tab-welove-admin,
+html.light-mode.active-tab-welove-settings {
+  background: #fff1f2 !important;
+}
+
 body:not(.light-mode).active-tab-welove,
 body:not(.light-mode).active-tab-welove-admin,
 body:not(.light-mode).active-tab-welove-settings {

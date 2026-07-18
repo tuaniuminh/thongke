@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.27';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.27';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.27';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.27';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.28';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.28';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.28';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.28';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.27';
-import * as sync from './sync.js?v=4.2.27';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.27';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.27';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.28';
+import * as sync from './sync.js?v=4.2.28';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.28';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.28';
 
-const APP_VERSION = '4.2.27';
+const APP_VERSION = '4.2.28';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1710,12 +1710,14 @@ function updateThemeUI() {
     
     if (state.theme === 'light') {
         body.classList.add('light-mode');
+        document.documentElement.classList.add('light-mode');
         // Fix: tell browser this is a light page — prevents Cốc Cốc / Chrome Force Dark Mode from inverting colors
         document.documentElement.style.colorScheme = 'light';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'moon'));
         texts.forEach(text => text.innerText = 'Giao diện tối');
     } else {
         body.classList.remove('light-mode');
+        document.documentElement.classList.remove('light-mode');
         document.documentElement.style.colorScheme = 'dark';
         icons.forEach(icon => icon.setAttribute('data-lucide', 'sun'));
         texts.forEach(text => text.innerText = 'Giao diện sáng');
