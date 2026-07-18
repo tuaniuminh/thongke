@@ -52,7 +52,7 @@
 }
 
 /* Light Mode Variables Override */
-body.light-mode {
+html.light-mode, body.light-mode {
     /* Tell browser: this is a light page — don't invert (fixes Cốc Cốc Force Dark Mode) */
     color-scheme: light;
 
