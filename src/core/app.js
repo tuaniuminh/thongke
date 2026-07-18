@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.07';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.07';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.07';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.07';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.08';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.08';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.08';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.08';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.07';
-import * as sync from './sync.js?v=4.2.07';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.07';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.07';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.08';
+import * as sync from './sync.js?v=4.2.08';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.08';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.08';
 
-const APP_VERSION = '4.2.07';
+const APP_VERSION = '4.2.08';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3453,6 +3453,59 @@ document.addEventListener('touchmove', (e) => {
 
 
 
+
+// Real-time layout debugger for WeLove immersive background status bars
+window.runLayoutDiagnostics = function() {
+    console.log("[LayoutDiag] --- RUNNING DIAGNOSTICS ---");
+    
+    // Viewport & screen measurements
+    console.log(`[LayoutDiag] Viewport: ${window.innerWidth}x${window.innerHeight}px`);
+    console.log(`[LayoutDiag] Screen: ${window.screen.width}x${window.screen.height}px`);
+    console.log(`[LayoutDiag] devicePixelRatio: ${window.devicePixelRatio}`);
+    
+    // Check Meta Tags
+    const themeMeta = document.getElementById('themeColorMeta');
+    console.log(`[LayoutDiag] theme-color meta tag in DOM: ${themeMeta ? 'YES (content="' + themeMeta.getAttribute('content') + '")' : 'NO (Removed!)'}`);
+    
+    const statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    console.log(`[LayoutDiag] status-bar-style meta tag: ${statusBarMeta ? 'YES (content="' + statusBarMeta.getAttribute('content') + '")' : 'NO'}`);
+    
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    console.log(`[LayoutDiag] viewport meta tag: ${viewportMeta ? 'YES (content="' + viewportMeta.getAttribute('content') + '")' : 'NO'}`);
+
+    // Classes on html & body
+    console.log(`[LayoutDiag] html classList: "${document.documentElement.className}"`);
+    console.log(`[LayoutDiag] body classList: "${document.body.className}"`);
+
+    // Computed styles of layout wrappers
+    const elementsToMeasure = {
+        'html': document.documentElement,
+        'body': document.body,
+        '#appLayout': document.getElementById('appLayout'),
+        '.main-content': document.querySelector('.main-content'),
+        '#mobileNavbar': document.getElementById('mobileNavbar'),
+        '#tab-welove': document.getElementById('tab-welove'),
+        '.memory-page': document.querySelector('.memory-page')
+    };
+
+    for (const [selector, el] of Object.entries(elementsToMeasure)) {
+        if (!el) {
+            console.log(`[LayoutDiag] Element [${selector}]: NOT FOUND`);
+            continue;
+        }
+        const style = window.getComputedStyle(el);
+        console.log(`[LayoutDiag] Element [${selector}]: ` +
+            `display=${style.display}, ` +
+            `position=${style.position}, ` +
+            `background-color="${style.backgroundColor}", ` +
+            `background-image="${style.backgroundImage ? style.backgroundImage.substring(0, 40) + '...' : 'none'}", ` +
+            `padding="${style.padding}", ` +
+            `margin="${style.margin}", ` +
+            `height=${el.offsetHeight || el.clientHeight}px, ` +
+            `scrollTop=${el.scrollTop}px`);
+    }
+    console.log("[LayoutDiag] --- DIAGNOSTICS COMPLETED ---");
+};
 
 // Render TC Management tab (sync checkboxes)
 function renderTcManagement() {
