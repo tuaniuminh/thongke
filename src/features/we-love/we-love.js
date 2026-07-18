@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.17';
-import * as sync from '../../core/sync.js?v=4.2.17';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.17';
+} from '../../core/app.js?v=4.2.19';
+import * as sync from '../../core/sync.js?v=4.2.19';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.19';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.17');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.19');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.17';
+        const logoPath = './logo_pwa_small.png?v=4.2.19';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -155,8 +155,18 @@ function parseDeviceFromUA(ua) {
     return `${device} (${browser} - ${os})`;
 }
 
-// Format YYYY-MM-DD to "Ngày DD tháng MM năm YYYY"
+// Format YYYY-MM-DD to DD/MM/YYYY
 function formatDateDisplay(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+}
+
+// Format YYYY-MM-DD to "Ngày DD tháng MM năm YYYY" for preview
+function formatDateDisplayWord(dateStr) {
     if (!dateStr) return '';
     const parts = dateStr.split('-');
     if (parts.length === 3) {
@@ -361,7 +371,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.17';
+    const logoPath = './logo_pwa_small.png?v=4.2.19';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -420,14 +430,8 @@ function checkScheduledReminders() {
 // Fetch WeLove data
 export async function fetchWeLoveData() {
     // 1. Process Sickness Logs
-    if (!state.weLoveSicknessLogs || state.weLoveSicknessLogs.length === 0) {
-        const seedLogs = [
-            { id: 'sick-1', date: '2026-04-05', symptomType: 'Sốt đau đầu nhẹ', notes: 'Thời tiết giao mùa nóng lạnh thất thường dẫn đến sốt đau đầu. Anh đã chuẩn bị sẵn nước gừng ấm rồi đó.', icon: '🌡️' },
-            { id: 'sick-2', date: '2026-02-14', symptomType: 'Cảm lạnh đi mưa', notes: 'Đi chơi Valentine dính mưa phùn lạnh mà không chịu mặc thêm áo khoác dày. Phạt bé tự giác giữ ấm nha!', icon: '🤧' },
-            { id: 'sick-3', date: '2025-11-20', symptomType: 'Viêm họng ho khan', notes: 'Nói nhiều và uống nước đá lạnh đợt đầu đông quá nha! Lần sau phải uống trà gừng bảo vệ cổ họng nghe chưa.', icon: '😷' },
-            { id: 'sick-4', date: '2025-09-15', symptomType: 'Kiệt sức mệt mỏi', notes: 'Áp lực học tập/công việc nhiều dẫn đến kiệt sức. Anh luôn bên cạnh và ôm bé thật chặt nhé! ❤️', icon: '😴' }
-        ];
-        state.weLoveSicknessLogs = seedLogs;
+    if (!state.weLoveSicknessLogs) {
+        state.weLoveSicknessLogs = [];
         state.weLoveSicknessLogsUpdated = new Date().toISOString();
         await saveLocalState();
     }
@@ -959,6 +963,9 @@ export async function renderWeLoveDashboard() {
                             <div class="welove-form-group">
                                 <label class="welove-form-label">📅 Ngày tình yêu bắt đầu:</label>
                                 <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || ''}" required>
+                                <div id="weLoveStartDatePreview" style="font-size: 0.8rem; color: var(--accent-rose); margin-top: 6px; font-weight: 600;">
+                                    ${state.weLoveStartDate ? `Ngày bắt đầu: ${formatDateDisplayWord(state.weLoveStartDate)}` : ''}
+                                </div>
                             </div>
 
                             <!-- 3. Bật tắt theo dõi lượt ốm -->
@@ -1546,6 +1553,20 @@ function bindSettingsEvents() {
     // --- Sổ Tay Sức Khỏe Backup & Sync Event Listeners ---
 
     // 1. Nhập từ App gốc (WeLove Supabase PostgreSQL)
+    if (startDateInput) {
+        startDateInput.addEventListener('input', (e) => {
+            const previewEl = document.getElementById('weLoveStartDatePreview');
+            if (previewEl) {
+                const val = e.target.value;
+                if (val) {
+                    previewEl.innerText = `Ngày bắt đầu: ${formatDateDisplayWord(val)}`;
+                } else {
+                    previewEl.innerText = '';
+                }
+            }
+        });
+    }
+
     const btnImportFromOriginal = document.getElementById('btnWeLoveImportFromOriginal');
     if (btnImportFromOriginal) {
         btnImportFromOriginal.addEventListener('click', async () => {
@@ -1669,7 +1690,7 @@ function bindSettingsEvents() {
             try {
                 const backupData = {
                     type: 'welove_sickness_reminders_backup',
-                    version: '4.2.17',
+                    version: '4.2.19',
                     date: new Date().toISOString(),
                     weLoveStartDate: state.weLoveStartDate,
                     weLoveName1: state.weLoveName1,
