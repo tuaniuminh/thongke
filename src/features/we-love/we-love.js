@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.1.97';
-import * as sync from '../../core/sync.js?v=4.1.97';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.97';
+} from '../../core/app.js?v=4.1.98';
+import * as sync from '../../core/sync.js?v=4.1.98';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.98';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.97');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.98');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.1.97';
+        const logoPath = './logo_pwa_small.png?v=4.1.98';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -347,7 +347,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.1.97';
+    const logoPath = './logo_pwa_small.png?v=4.1.98';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -813,20 +813,7 @@ export async function renderWeLoveDashboard() {
                 <span class="sync-dot offline"></span><span class="sync-text">Đang tải...</span>
             </div>
 
-            <!-- Switch View Button -->
-            ${canEdit ? `
-                <div class="welove-subview-tabs">
-                    <button class="btn ${weLoveCurrentSubView === 'memory' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveMemoryView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;" ${!state.weLoveStartDate ? 'disabled title="Vui lòng thiết lập ngày bắt đầu yêu trước!"' : ''}>
-                        ❤️ Kỷ niệm
-                    </button>
-                    <button class="btn ${weLoveCurrentSubView === 'admin' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveAdminView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;" ${!state.weLoveStartDate ? 'disabled title="Vui lòng thiết lập ngày bắt đầu yêu trước!"' : ''}>
-                        ⏰ Lịch nhắc & Nhật ký
-                    </button>
-                    <button class="btn ${weLoveCurrentSubView === 'settings' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveSettingsView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
-                        ⚙️ Thiết lập góc yêu
-                    </button>
-                </div>
-            ` : ''}
+
 
             ${weLoveCurrentSubView === 'admin' && canEdit ? `
                 <!-- ADMIN SUBVIEW -->
@@ -1092,28 +1079,7 @@ export async function renderWeLoveDashboard() {
     // Initialize media metadata
     initMediaSession();
 
-    // Bind sub-view selectors
-    const btnMemory = document.getElementById('btnWeLoveMemoryView');
-    const btnAdmin = document.getElementById('btnWeLoveAdminView');
-    const btnSettings = document.getElementById('btnWeLoveSettingsView');
-    if (btnMemory) {
-        btnMemory.addEventListener('click', () => {
-            weLoveCurrentSubView = 'memory';
-            renderWeLoveDashboard();
-        });
-    }
-    if (btnAdmin) {
-        btnAdmin.addEventListener('click', () => {
-            weLoveCurrentSubView = 'admin';
-            renderWeLoveDashboard();
-        });
-    }
-    if (btnSettings) {
-        btnSettings.addEventListener('click', () => {
-            weLoveCurrentSubView = 'settings';
-            renderWeLoveDashboard();
-        });
-    }
+
 
     // Load data and bind events
     await fetchWeLoveData();

@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.97';
-import * as sync from '../../core/sync.js?v=4.1.97';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.97';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.97';
+} from '../../core/app.js?v=4.1.98';
+import * as sync from '../../core/sync.js?v=4.1.98';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.98';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.98';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1179,7 +1179,7 @@ function updateSidebarNavVisibility(tabId) {
         if (tabId === 'health') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
         } else if (tabId === 'welove') {
-            sidebarLogoText.innerText = 'Góc tình yêu';
+            sidebarLogoText.innerText = 'WeLove';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
         } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
@@ -1435,7 +1435,7 @@ function updateMobileNavbar(tabId) {
                     <div class="mobile-navbar-logo">
                         <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
-                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Góc tình yêu</span>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">WeLove</span>
                 </div>
                 <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
