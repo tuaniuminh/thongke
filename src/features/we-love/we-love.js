@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.14';
-import * as sync from '../../core/sync.js?v=4.2.14';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.14';
+} from '../../core/app.js?v=4.2.15';
+import * as sync from '../../core/sync.js?v=4.2.15';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.15';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.14');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.15');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.14';
+        const logoPath = './logo_pwa_small.png?v=4.2.15';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -358,7 +358,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.14';
+    const logoPath = './logo_pwa_small.png?v=4.2.15';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -833,10 +833,7 @@ export async function renderWeLoveDashboard() {
 
     tabContainer.innerHTML = `
         <div class="memory-page" id="weLovePage">
-            <!-- Sync badge -->
-            <div class="welove-sync-badge" id="weLoveSyncBadge">
-                <span class="sync-dot offline"></span><span class="sync-text">Đang tải...</span>
-            </div>
+
 
 
 
