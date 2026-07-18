@@ -1,8 +1,8 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.1.94';
-import * as sync from '../../core/sync.js?v=4.1.94';
+} from '../../core/app.js?v=4.1.95';
+import * as sync from '../../core/sync.js?v=4.1.95';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -15,7 +15,7 @@ const LOVE_QUOTES = [
     vi: "Gặp được em là điều may mắn lớn nhất cuộc đời anh."
   },
   {
-    cn: "只要有你陪伴，每天 Premium 都是晴天。",
+    cn: "只要有你陪伴，每天 Premium 物理是晴天。",
     vi: "Chỉ cần có em bên cạnh, ngày nào cũng là ngày nắng ấm."
   },
   {
@@ -31,7 +31,7 @@ const LOVE_QUOTES = [
     vi: "Tình nếu dài lâu muôn thuở vững, tiếc gì giây phút cận kề nhau."
   },
   {
-    cn: "你 magneto 是生命中最好的礼物。",
+    cn: "你 magnet 是生命中最好的礼物。",
     vi: "Em là món quà tuyệt vời nhất mà cuộc sống đã ban tặng cho anh."
   }
 ];
@@ -61,12 +61,12 @@ let sicknessLogs = [];
 let reminders = [];
 let visitLogs = [];
 let selectedFilterYear = 'Tất cả';
-let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin'
+let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.94');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.95');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -108,7 +108,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.1.94';
+        const logoPath = './logo_pwa_small.png?v=4.1.95';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -154,17 +154,43 @@ function parseDeviceFromUA(ua) {
     return `${device} (${browser} - ${os})`;
 }
 
-// Calculate days in love (starting Sept 3rd, 2025 GMT+7)
+// Format YYYY-MM-DD to DD/MM/YYYY
+function formatDateDisplay(dateStr) {
+    if (!dateStr) return '03/09/2025';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+}
+
+// Calculate days in love
 export function calculateLoveDays() {
-    // 2025-09-02 17:00:00 UTC = 2025-09-03 00:00:00 GMT+7
-    const startMs = new Date('2025-09-02T17:00:00Z').getTime();
-    const startDayEpoch = Math.floor((startMs + 7 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+    const startDateStr = state.weLoveStartDate || '2025-09-03';
+    const parts = startDateStr.split('-');
+    if (parts.length !== 3) {
+        // Fallback to default Sept 3rd, 2025
+        const startMs = new Date('2025-09-02T17:00:00Z').getTime();
+        const startDayEpoch = Math.floor((startMs + 7 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+        const today = new Date();
+        const currentDayEpoch = Math.floor((today.getTime() + 7 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+        loveDaysCount = currentDayEpoch - startDayEpoch + 1;
+        return loveDaysCount;
+    }
+    
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1;
+    const day = parseInt(parts[2]);
+    
+    const startDateLocal = new Date(year, month, day, 0, 0, 0);
+    const startDayEpoch = Math.floor(startDateLocal.getTime() / (1000 * 60 * 60 * 24));
     
     const today = new Date();
-    const currentMs = today.getTime();
-    const currentDayEpoch = Math.floor((currentMs + 7 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+    const currentDayEpoch = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
     
     loveDaysCount = currentDayEpoch - startDayEpoch + 1;
+    if (loveDaysCount < 0) loveDaysCount = 0;
+    
     return loveDaysCount;
 }
 
@@ -185,7 +211,6 @@ export function updateLoveWidgetUI() {
     }
     const widget = document.getElementById('homeLoveWidget');
     if (widget) {
-        // Default show widget is true if showLoveWidget in state is true/undefined
         const show = state.showLoveWidget !== false;
         widget.style.display = show ? 'flex' : 'none';
     }
@@ -215,7 +240,6 @@ function startFloatingHearts() {
         
         page.appendChild(heart);
         
-        // Remove after animation completes
         setTimeout(() => {
             if (heart.parentNode === page) {
                 page.removeChild(heart);
@@ -226,6 +250,9 @@ function startFloatingHearts() {
 
 // Screen click burst hearts
 function handleScreenClickBurst(e) {
+    // Avoid click triggers on buttons/modals
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('.welove-modal-content')) return;
+    
     const page = document.querySelector('.memory-page');
     if (!page) return;
     
@@ -246,7 +273,6 @@ function handleScreenClickBurst(e) {
         }
     }, 1200);
 
-    // Autoplay audio on first user click if not paused
     const aud = getAudioInstance();
     if (aud && aud.paused && !userManuallyPausedAudio && !isAudioPlaying) {
         aud.play().catch(err => console.log("Autoplay click blocked:", err));
@@ -279,7 +305,6 @@ function nextLoveQuote() {
     }, 250);
 }
 
-// Slide quote functions
 function prevLoveQuote() {
     if (isTransitioningQuote) return;
     const wrapper = document.querySelector('.quote-text-wrapper');
@@ -313,7 +338,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.1.94';
+    const logoPath = './logo_pwa_small.png?v=4.1.95';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -442,7 +467,7 @@ function setupAutoRefreshTimers() {
         await fetchWeLoveData();
         if (weLoveCurrentSubView === 'memory') {
             renderSicknessHistory();
-        } else {
+        } else if (weLoveCurrentSubView === 'admin') {
             renderRemindersList();
             renderVisitLogs();
         }
@@ -455,13 +480,13 @@ function updateSyncStatusBadge() {
     if (!badge) return;
 
     if (sync.isConfigured() && state.user) {
-        badge.className = 'health-sync-badge';
+        badge.className = 'welove-sync-badge';
         badge.innerHTML = `
             <span class="sync-dot online"></span>
             <span class="sync-text">Mã hóa đồng bộ đám mây (Cloud)</span>
         `;
     } else {
-        badge.className = 'health-sync-badge';
+        badge.className = 'welove-sync-badge';
         badge.innerHTML = `
             <span class="sync-dot offline"></span>
             <span class="sync-text" title="Lưu trữ ngoại tuyến trên thiết bị này">Bộ nhớ thiết bị (Local)</span>
@@ -486,12 +511,12 @@ function renderSicknessHistory() {
     // Render filter pills
     if (filterPills) {
         filterPills.innerHTML = years.map(yr => `
-            <button class="health-year-pill ${selectedFilterYear === yr ? 'active' : ''}" data-year="${yr}">
+            <button class="welove-year-pill ${selectedFilterYear === yr ? 'active' : ''}" data-year="${yr}">
                 ${yr === 'Tất cả' ? '📅 Tất cả' : `✨ Năm ${yr}`}
             </button>
         `).join('');
         
-        filterPills.querySelectorAll('.health-year-pill').forEach(btn => {
+        filterPills.querySelectorAll('.welove-year-pill').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 selectedFilterYear = e.target.getAttribute('data-year');
                 renderSicknessHistory();
@@ -508,7 +533,7 @@ function renderSicknessHistory() {
 
     // Update alert
     if (warningMsg) {
-        warningMsg.className = `health-warning-msg ${filtered.length === 0 ? 'green' : filtered.length <= 3 ? 'yellow' : 'red'}`;
+        warningMsg.className = `welove-warning-msg ${filtered.length === 0 ? 'green' : filtered.length <= 3 ? 'yellow' : 'red'}`;
         if (filtered.length === 0) {
             warningMsg.innerHTML = selectedFilterYear === 'Tất cả' 
                 ? "Thật tuyệt vời! Em iu chưa từng bị ốm lần nào. Hãy tiếp tục giữ gìn phong độ và ăn ngủ khoa học nhé! 🥰"
@@ -529,16 +554,16 @@ function renderSicknessHistory() {
         const parts = log.date.split('-');
         const dateFormatted = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : log.date;
         return `
-            <div class="health-log-item">
-                <div class="health-log-icon">${log.icon || '🤧'}</div>
-                <div class="health-log-content">
-                    <div class="health-log-header">
-                        <span class="health-log-type">${escapeHTML(log.symptomType)}</span>
-                        <span class="health-log-date">${dateFormatted}</span>
+            <div class="welove-log-item">
+                <div class="welove-log-icon">${log.icon || '🤧'}</div>
+                <div class="welove-log-content">
+                    <div class="welove-log-header">
+                        <span class="welove-log-type">${escapeHTML(log.symptomType)}</span>
+                        <span class="welove-log-date">${dateFormatted}</span>
                     </div>
-                    <p class="health-log-notes">${escapeHTML(log.notes)}</p>
+                    <p class="welove-log-notes">${escapeHTML(log.notes)}</p>
                 </div>
-                <button class="health-delete-btn btn-delete-sickness" data-id="${log.id}" title="Xóa ghi nhận này">
+                <button class="welove-delete-btn btn-delete-sickness" data-id="${log.id}" title="Xóa ghi nhận này">
                     🗑️
                 </button>
             </div>
@@ -580,23 +605,23 @@ function renderRemindersList() {
         const schedDate = new Date(rem.scheduledTime);
         const formattedTime = schedDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + schedDate.toLocaleDateString('vi-VN');
         return `
-            <div class="health-log-item" style="padding: 1rem; min-height: auto; gap: 0.75rem;">
-                <div class="health-log-icon" style="width: 42px; height: 42px; font-size: 1.3rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+            <div class="welove-log-item" style="padding: 1rem; min-height: auto; gap: 0.75rem;">
+                <div class="welove-log-icon" style="width: 42px; height: 42px; font-size: 1.3rem; padding: 0; display: flex; align-items: center; justify-content: center;">
                     ${rem.isSent ? '✅' : '⏳'}
                 </div>
-                <div class="health-log-content" style="display: flex; flex-direction: column; gap: 2px;">
-                    <div class="health-log-header">
-                        <span class="health-log-type">${escapeHTML(rem.title)}</span>
-                        <span class="health-log-date" style="color: ${rem.isSent ? 'var(--accent-emerald)' : 'var(--accent-amber)'}">
+                <div class="welove-log-content" style="display: flex; flex-direction: column; gap: 2px;">
+                    <div class="welove-log-header">
+                        <span class="welove-log-type">${escapeHTML(rem.title)}</span>
+                        <span class="welove-log-date" style="color: ${rem.isSent ? 'var(--accent-emerald)' : 'var(--accent-amber)'}">
                             ${rem.isSent ? 'Đã gửi' : 'Chờ gửi'}
                         </span>
                     </div>
-                    <p class="health-log-notes" style="font-size: 0.85rem;">${escapeHTML(rem.message)}</p>
+                    <p class="welove-log-notes" style="font-size: 0.85rem;">${escapeHTML(rem.message)}</p>
                     <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 4px;">
                         📅 Hẹn lúc: ${formattedTime}
                     </span>
                 </div>
-                <button class="health-delete-btn btn-delete-reminder" data-id="${rem.id}" title="Hủy lịch nhắc này">
+                <button class="welove-delete-btn btn-delete-reminder" data-id="${rem.id}" title="Hủy lịch nhắc này">
                     🗑️
                 </button>
             </div>
@@ -630,11 +655,9 @@ function renderVisitLogs() {
     const logsContainer = document.getElementById('weLoveVisitLogsTimeline');
     if (!logsContainer) return;
 
-    // 1. Group stats
     const stats = {};
     visitLogs.forEach(log => {
         const dateObj = new Date(log.timestamp);
-        // local GMT+7 offset adjustment
         const ictMs = dateObj.getTime() + (7 * 60 * 60 * 1000);
         const ictDate = new Date(ictMs);
         
@@ -652,7 +675,6 @@ function renderVisitLogs() {
         stats[monthKey].days[dayKey] = (stats[monthKey].days[dayKey] || 0) + 1;
     });
 
-    // 2. Render quick counts in stats widgets
     if (statsContainer) {
         const totalVisits = visitLogs.length;
         
@@ -682,7 +704,6 @@ function renderVisitLogs() {
         `;
     }
 
-    // 3. Render visit calendar details
     let detailsHtml = '';
     if (visitLogs.length === 0) {
         detailsHtml = `<p style="color: var(--text-muted); font-size: 0.9rem; font-style: italic; text-align: center; padding: 1rem 0;">Chưa có dữ liệu truy cập 📭</p>`;
@@ -715,7 +736,6 @@ function renderVisitLogs() {
     const calendarSection = document.getElementById('weLoveVisitCalendarDetails');
     if (calendarSection) calendarSection.innerHTML = detailsHtml;
 
-    // 4. Render timeline of 10 recent visits
     if (visitLogs.length === 0) {
         logsContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-style: italic; padding: 2rem 0;">Chưa có lịch sử truy cập</p>`;
         return;
@@ -736,11 +756,11 @@ function renderVisitLogs() {
 
         const isMobile = log.deviceInfo.includes('Điện thoại');
         return `
-            <div class="health-log-item" style="padding: 0.8rem 1rem; margin-bottom: 0.5rem; min-height: auto; gap: 0.75rem;">
-                <div class="health-log-icon" style="width: 38px; height: 38px; font-size: 1.2rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+            <div class="welove-log-item" style="padding: 0.8rem 1rem; margin-bottom: 0.5rem; min-height: auto; gap: 0.75rem;">
+                <div class="welove-log-icon" style="width: 38px; height: 38px; font-size: 1.2rem; padding: 0; display: flex; align-items: center; justify-content: center;">
                     ${isMobile ? '📱' : '💻'}
                 </div>
-                <div class="health-log-content" style="display: flex; flex-direction: column; gap: 2px; width: 100%;">
+                <div class="welove-log-content" style="display: flex; flex-direction: column; gap: 2px; width: 100%;">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <span style="font-size: 0.85rem; font-weight: 700;">${dateStr} - ${timeStr}</span>
                         <span style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(log.email)}</span>
@@ -773,25 +793,28 @@ export async function renderWeLoveDashboard() {
 
     calculateLoveDays();
 
-    // Check if the user can edit WeLove data (Husband and wife both have access)
     const isLocal = !sync.isConfigured() || !state.user;
     const canEdit = isLocal || state.user !== null;
+    const showSickness = state.weLoveShowSickness !== false;
 
     tabContainer.innerHTML = `
         <div class="memory-page" id="weLovePage">
             <!-- Sync badge -->
-            <div class="health-sync-badge" id="weLoveSyncBadge">
+            <div class="welove-sync-badge" id="weLoveSyncBadge">
                 <span class="sync-dot offline"></span><span class="sync-text">Đang tải...</span>
             </div>
 
             <!-- Switch View Button -->
             ${canEdit ? `
-                <div style="margin-bottom: 1.5rem; z-index: 10; display: flex; gap: 8px;">
+                <div style="margin-bottom: 1.5rem; z-index: 10; display: flex; gap: 8px; flex-wrap: wrap;">
                     <button class="btn ${weLoveCurrentSubView === 'memory' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveMemoryView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
                         ❤️ Kỷ niệm
                     </button>
                     <button class="btn ${weLoveCurrentSubView === 'admin' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveAdminView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
                         ⏰ Lịch nhắc & Nhật ký
+                    </button>
+                    <button class="btn ${weLoveCurrentSubView === 'settings' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveSettingsView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
+                        ⚙️ Thiết lập góc yêu
                     </button>
                 </div>
             ` : ''}
@@ -801,29 +824,29 @@ export async function renderWeLoveDashboard() {
                 <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 0 auto; z-index: 5;">
                     
                     <!-- Lên lịch lời nhắc -->
-                    <div class="health-card" style="margin-top: 0; width: 100%;">
-                        <div class="health-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    <div class="welove-card" style="margin-top: 0; width: 100%;">
+                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                             <span style="font-size: 1.8rem;">⏰</span>
-                            <h3 class="health-title">Đặt Lịch Lời Nhắc Yêu Thương</h3>
+                            <h3 class="welove-title">Đặt Lịch Lời Nhắc Yêu Thương</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.4;">
                             Lên lịch gửi thông báo nhắc nhở tự động đến thiết bị của em iu Ngô Minh
                         </p>
 
                         <form id="weLoveAddReminderForm" style="text-align: left; margin-bottom: 2rem;">
-                            <div class="health-form-group">
-                                <label class="health-form-label">⏰ Thời gian gửi thông báo:</label>
-                                <input type="datetime-local" class="health-input" id="remTimeInput" required>
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">⏰ Thời gian gửi thông báo:</label>
+                                <input type="datetime-local" class="welove-input" id="remTimeInput" required>
                             </div>
-                            <div class="health-form-group">
-                                <label class="health-form-label">✍️ Tiêu đề thông báo:</label>
-                                <input type="text" class="health-input" id="remTitleInput" placeholder="Ví dụ: Lời nhắc từ anh Tuấn ❤️, Chú ý em iu ơi! 🥤" required>
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">✍️ Tiêu đề thông báo:</label>
+                                <input type="text" class="welove-input" id="remTitleInput" placeholder="Ví dụ: Lời nhắc từ anh Tuấn ❤️, Chú ý em iu ơi! 🥤" required>
                             </div>
-                            <div class="health-form-group">
-                                <label class="health-form-label">✍️ Nội dung lời nhắc:</label>
-                                <textarea class="health-textarea" id="remMessageInput" rows="3" placeholder="Nhập nội dung lời nhắn gửi đến em iu..." required></textarea>
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">✍️ Nội dung lời nhắc:</label>
+                                <textarea class="welove-textarea" id="remMessageInput" rows="3" placeholder="Nhập nội dung lời nhắn gửi đến em iu..." required></textarea>
                             </div>
-                            <button type="submit" class="health-btn health-btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                            <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%; margin-top: 0.5rem;">
                                 Lên lịch ngay ❤️
                             </button>
                         </form>
@@ -831,19 +854,19 @@ export async function renderWeLoveDashboard() {
                         <h4 style="font-size: 1rem; font-weight: 700; border-left: 4px solid var(--accent-rose); padding-left: 0.5rem; text-align: left; margin-bottom: 1rem;">
                             Danh sách lời nhắc đã lên lịch
                         </h4>
-                        <div class="health-timeline" id="weLoveRemindersTimeline" style="max-height: 300px;">
+                        <div class="welove-timeline" id="weLoveRemindersTimeline" style="max-height: 300px;">
                             <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
                         </div>
                     </div>
 
                     <!-- Nhật ký truy cập của em yêu -->
-                    <div class="health-card" style="margin-top: 0; width: 100%;">
-                        <div class="health-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    <div class="welove-card" style="margin-top: 0; width: 100%;">
+                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                             <span style="font-size: 1.8rem;">📊</span>
-                            <h3 class="health-title">Nhật Kỳ Truy Cập Của Em Iu</h3>
+                            <h3 class="welove-title">Nhật Ký Truy Cập Của Em Iu</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; font-weight: 600;">
-                            Đang theo dõi email: <span style="color: var(--accent-rose);">${state.spouseEmail || 'nửa kia'}</span>
+                            Đang theo dõi email: <span style="color: var(--accent-rose);">${state.spouseEmail || 'chưa liên kết'}</span>
                         </p>
 
                         <div class="stats-grid" id="weLoveVisitStats" style="margin-bottom: 2rem;">
@@ -860,11 +883,68 @@ export async function renderWeLoveDashboard() {
                         <h4 style="font-size: 1rem; font-weight: 700; border-left: 4px solid var(--accent-rose); padding-left: 0.5rem; text-align: left; margin-bottom: 1rem;">
                             Lịch sử 10 lần truy cập gần nhất
                         </h4>
-                        <div class="health-timeline" id="weLoveVisitLogsTimeline" style="max-height: 280px;">
+                        <div class="welove-timeline" id="weLoveVisitLogsTimeline" style="max-height: 280px;">
                             <!-- populated by JS -->
                         </div>
                     </div>
 
+                </div>
+            ` : weLoveCurrentSubView === 'settings' && canEdit ? `
+                <!-- CONFIG / SETTINGS SUBVIEW -->
+                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 0 auto; z-index: 5;">
+                    <div class="welove-card" style="margin-top: 0; width: 100%;">
+                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                            <span style="font-size: 1.8rem;">⚙️</span>
+                            <h3 class="welove-title">Cấu Hình Góc Tình Yêu</h3>
+                        </div>
+                        
+                        <form id="weLoveConfigForm" style="text-align: left; margin-bottom: 2.5rem;">
+                            <!-- 1. Ngày bắt đầu yêu nhau -->
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">📅 Ngày tình yêu bắt đầu:</label>
+                                <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || '2025-09-03'}" required>
+                            </div>
+
+                            <!-- 2. Bật tắt theo dõi lượt ốm -->
+                            <div class="welove-form-group" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                                <div>
+                                    <label class="welove-form-label" style="font-weight: 700; margin-bottom: 2px; display: block;">🩺 Theo dõi Sổ tay sức khỏe em yêu</label>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Ẩn hoặc hiện biểu đồ, lịch sử đợt ốm trong tab Kỷ niệm</span>
+                                </div>
+                                <label class="switch-toggle" style="margin-left: 10px;">
+                                    <input type="checkbox" id="weLoveShowSicknessInput" ${state.weLoveShowSickness !== false ? 'checked' : ''}>
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
+
+                            <!-- 3. Mời bạn tình tham gia -->
+                            <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+                                <label class="welove-form-label" style="font-weight: 700;">💞 Mời nửa kia tham gia cùng theo dõi:</label>
+                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Nhập email tài khoản FamiLife của nửa kia để chia sẻ tiến trình, đếm ngày yêu và nhật ký lượt truy cập.</p>
+                                
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="email" class="welove-input" id="weLovePartnerEmailInput" placeholder="nhap-email-ban-tinh@example.com" value="${state.spouseEmail || ''}" ${state.spouseEmail ? 'disabled' : ''} style="flex-grow: 1;">
+                                    ${state.spouseEmail ? `
+                                        <button type="button" class="btn btn-outline" id="btnWeLoveUnlinkPartner" style="border-color: #ef4444; color: #ef4444; font-size: 0.85rem; padding: 0 16px; white-space: nowrap; border-radius: 12px; font-weight: 700;">Hủy mời</button>
+                                    ` : `
+                                        <button type="button" class="btn btn-primary" id="btnWeLoveLinkPartner" style="font-size: 0.85rem; padding: 0 16px; white-space: nowrap; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: white; border-radius: 12px; font-weight: 700;">Mời kết nối</button>
+                                    `}
+                                </div>
+                                ${state.spouseEmail ? `
+                                    <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                                        <span>Trạng thái:</span>
+                                        <span class="badge" style="background: ${state.spouseStatus === 'accepted' ? 'var(--accent-emerald)' : 'var(--accent-amber)'}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem;">
+                                            ${state.spouseStatus === 'accepted' ? 'Đã liên kết' : 'Đang chờ duyệt'}
+                                        </span>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%;">
+                                Lưu Cấu Hình 💾
+                            </button>
+                        </form>
+                    </div>
                 </div>
             ` : `
                 <!-- STANDARD KỶ NIỆM SUBVIEW -->
@@ -884,11 +964,11 @@ export async function renderWeLoveDashboard() {
                     </div>
 
                     <div class="milestone-date">
-                        📅 Cột mốc khởi đầu: 03/09/2025
+                        📅 Cột mốc khởi đầu: ${formatDateDisplay(state.weLoveStartDate || '2025-09-03')}
                     </div>
 
                     <!-- Quotes board -->
-                    <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhập nút hoặc vuốt câu nói để chuyển câu">
+                    <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhấp nút hoặc vuốt câu nói để chuyển câu">
                         <button class="quote-nav-btn prev" id="btnWeLovePrevQuote">‹</button>
                         <div class="quote-text-wrapper">
                             <div class="quote-chinese">${LOVE_QUOTES[currentQuoteIdx].cn}</div>
@@ -898,88 +978,90 @@ export async function renderWeLoveDashboard() {
                     </div>
                 </div>
 
-                <!-- Sổ tay sức khỏe em iu -->
-                <div class="health-card">
-                    <div class="health-title-box">
-                        <span style="font-size: 1.8rem;">🩺</span>
-                        <h3 class="health-title">Sổ Tay Sức Khỏe Của Em Iu</h3>
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
-                        Thống kê đợt ốm qua các năm của em iu Ngô Minh và lời dặn dò yêu thương từ anh Tuấn đẹp trai
-                    </p>
-
-                    <!-- Years selector filter pills -->
-                    <div class="health-years-container" id="weLoveYearsFilter" style="margin-top: 1.5rem;">
-                        <!-- populated by JS -->
-                    </div>
-
-                    <!-- Sickness circle stats & alert -->
-                    <div class="health-summary-box">
-                        <div class="health-heart-circle">
-                            <span class="health-count-lbl">Tổng</span>
-                            <span class="health-count-num" id="weLoveSicknessCount">0</span>
-                            <span class="health-count-lbl">Lần Ốm</span>
+                <!-- Sổ tay sức khỏe em iu (Conditional show/hide) -->
+                ${showSickness ? `
+                    <div class="welove-card">
+                        <div class="welove-title-box">
+                            <span style="font-size: 1.8rem;">🩺</span>
+                            <h3 class="welove-title">Sổ Tay Sức Khỏe Của Em Iu</h3>
                         </div>
-                        <div class="health-warning-msg" id="weLoveHealthWarning">
-                            Đang tải...
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                            Thống kê đợt ốm qua các năm của em iu Ngô Minh và lời dặn dỗ yêu thương từ anh Tuấn đẹp trai
+                        </p>
+
+                        <!-- Years selector filter pills -->
+                        <div class="welove-years-container" id="weLoveYearsFilter" style="margin-top: 1.5rem;">
+                            <!-- populated by JS -->
+                        </div>
+
+                        <!-- Sickness circle stats & alert -->
+                        <div class="welove-summary-box">
+                            <div class="welove-heart-circle">
+                                <span class="welove-count-lbl">Tổng</span>
+                                <span class="welove-count-num" id="weLoveSicknessCount">0</span>
+                                <span class="welove-count-lbl">Lần Ốm</span>
+                            </div>
+                            <div class="welove-warning-msg" id="weLoveHealthWarning">
+                                Đang tải...
+                            </div>
+                        </div>
+
+                        <!-- Timeline Title & Add Btn -->
+                        <div class="welove-timeline-title">
+                            <span id="weLoveHistoryTitle">📅 Lịch Sử Các Đợt Ốm</span>
+                            ${canEdit ? `
+                                <button class="btn btn-primary" id="btnWeLoveAddSickness" style="margin-left: auto; font-size: 0.85rem; padding: 4px 12px; border-radius: 10px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.15);">
+                                    <span>Ghi nhận mới 📝</span>
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <!-- Timeline list -->
+                        <div class="welove-timeline" id="weLoveSicknessTimeline">
+                            <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
                         </div>
                     </div>
-
-                    <!-- Timeline Title & Add Btn -->
-                    <div class="health-timeline-title">
-                        <span id="weLoveHistoryTitle">📅 Lịch Sử Các Đợt Ốm</span>
-                        ${canEdit ? `
-                            <button class="btn btn-primary" id="btnWeLoveAddSickness" style="margin-left: auto; font-size: 0.85rem; padding: 4px 12px; border-radius: 10px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.15);">
-                                <span>Ghi nhận mới 📝</span>
-                            </button>
-                        ` : ''}
-                    </div>
-
-                    <!-- Timeline list -->
-                    <div class="health-timeline" id="weLoveSicknessTimeline">
-                        <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
-                    </div>
-                </div>
+                ` : ''}
             `}
         </div>
 
         <!-- ROMANTIC MODAL FORM (Only visible to Admin/Logged in) -->
-        <div class="health-modal-overlay" id="weLoveAddSicknessModal" style="display: none;">
-            <div class="health-modal-content">
-                <h4 class="health-modal-title">
+        <div class="welove-modal-overlay" id="weLoveAddSicknessModal" style="display: none;">
+            <div class="welove-modal-content">
+                <h4 class="welove-modal-title">
                     <span>🩺 Ghi Nhận Em Iu Bị Ốm</span>
                 </h4>
                 
                 <form id="weLoveAddSicknessForm">
-                    <div class="health-form-group">
-                        <label class="health-form-label">📅 Ngày bị ốm:</label>
-                        <input type="date" class="health-input" id="sickDateInput" required>
+                    <div class="welove-form-group">
+                        <label class="welove-form-label">📅 Ngày bị ốm:</label>
+                        <input type="date" class="welove-input" id="sickDateInput" required>
                     </div>
 
-                    <div class="health-form-group">
-                        <label class="health-form-label">🤒 Triệu chứng / Đợt ốm (tự ghi):</label>
-                        <input type="text" class="health-input" id="sickSymptomInput" placeholder="Ví dụ: Cảm sốt đi mưa, Đau họng ho khan, Sốt siêu vi..." required>
+                    <div class="welove-form-group">
+                        <label class="welove-form-label">🤒 Triệu chứng / Đợt ốm (tự ghi):</label>
+                        <input type="text" class="welove-input" id="sickSymptomInput" placeholder="Ví dụ: Cảm sốt đi mưa, Đau họng ho khan, Sốt siêu vi..." required>
                     </div>
 
-                    <div class="health-form-group">
-                        <label class="health-form-label">✍️ Chọn nhanh mẫu lời dặn dò nhanh:</label>
-                        <div class="health-templates-box">
+                    <div class="welove-form-group">
+                        <label class="welove-form-label">✍️ Chọn nhanh mẫu lời dặn dỗ nhanh:</label>
+                        <div class="welove-templates-box">
                             ${CARE_TEMPLATES.map(tmpl => `
-                                <div class="health-template-chip btn-select-template" data-text="${escapeHTML(tmpl)}">
+                                <div class="welove-template-chip btn-select-template" data-text="${escapeHTML(tmpl)}">
                                     ${escapeHTML(tmpl)}
                                 </div>
                             `).join('')}
                         </div>
 
-                        <label class="health-form-label">✍️ Hoặc tự điền lời dặn dò yêu thương:</label>
-                        <textarea class="health-textarea" id="sickNotesInput" rows="3" placeholder="Nhập lời dặn dò của bạn tại đây hoặc bấm chọn mẫu nhanh ở trên..." required></textarea>
+                        <label class="welove-form-label">✍️ Hoặc tự điền lời dặn dò yêu thương:</label>
+                        <textarea class="welove-textarea" id="sickNotesInput" rows="3" placeholder="Nhập lời dặn dò của bạn tại đây hoặc bấm chọn mẫu nhanh ở trên..." required></textarea>
                     </div>
 
-                    <div class="health-btn-group">
-                        <button type="button" class="health-btn health-btn-secondary" id="btnWeLoveCloseSicknessModal">
+                    <div class="welove-btn-group">
+                        <button type="button" class="welove-btn welove-btn-secondary" id="btnWeLoveCloseSicknessModal">
                             Hủy bỏ
                         </button>
-                        <button type="submit" class="health-btn health-btn-primary">
+                        <button type="submit" class="welove-btn welove-btn-primary">
                             Lưu Ghi Nhận ❤️
                         </button>
                     </div>
@@ -994,6 +1076,7 @@ export async function renderWeLoveDashboard() {
     // Bind sub-view selectors
     const btnMemory = document.getElementById('btnWeLoveMemoryView');
     const btnAdmin = document.getElementById('btnWeLoveAdminView');
+    const btnSettings = document.getElementById('btnWeLoveSettingsView');
     if (btnMemory) {
         btnMemory.addEventListener('click', () => {
             weLoveCurrentSubView = 'memory';
@@ -1006,18 +1089,26 @@ export async function renderWeLoveDashboard() {
             renderWeLoveDashboard();
         });
     }
+    if (btnSettings) {
+        btnSettings.addEventListener('click', () => {
+            weLoveCurrentSubView = 'settings';
+            renderWeLoveDashboard();
+        });
+    }
 
     // Load data and bind events
     await fetchWeLoveData();
-    updateAudioPlaybackState(); // Make sure play button icon matches current playing state
+    updateAudioPlaybackState();
 
     if (weLoveCurrentSubView === 'memory') {
         renderSicknessHistory();
         bindMemoryEvents();
-    } else {
+    } else if (weLoveCurrentSubView === 'admin') {
         renderRemindersList();
         renderVisitLogs();
         bindAdminEvents();
+    } else if (weLoveCurrentSubView === 'settings') {
+        bindSettingsEvents();
     }
 
     // Set up auto refreshes
@@ -1029,7 +1120,6 @@ export async function renderWeLoveDashboard() {
 
 // Bind events for standard view
 function bindMemoryEvents() {
-    // Music player
     const btnToggleMusic = document.getElementById('weLoveMusicToggle');
     if (btnToggleMusic) {
         btnToggleMusic.addEventListener('click', (e) => {
@@ -1048,7 +1138,6 @@ function bindMemoryEvents() {
         });
     }
 
-    // Notification permission bell
     const btnNotification = document.getElementById('weLoveNotificationTest');
     if (btnNotification) {
         btnNotification.addEventListener('click', (e) => {
@@ -1079,13 +1168,11 @@ function bindMemoryEvents() {
         });
     }
 
-    // Quotes Navigation Buttons
     const btnPrev = document.getElementById('btnWeLovePrevQuote');
     const btnNext = document.getElementById('btnWeLoveNextQuote');
     if (btnPrev) btnPrev.addEventListener('click', (e) => { e.stopPropagation(); prevLoveQuote(); });
     if (btnNext) btnNext.addEventListener('click', (e) => { e.stopPropagation(); nextLoveQuote(); });
 
-    // Quote swipe handling (touch devices)
     const quoteContainer = document.getElementById('weLoveQuoteContainer');
     if (quoteContainer) {
         let touchStartX = null;
@@ -1102,7 +1189,6 @@ function bindMemoryEvents() {
             if (!isSwiping || touchStartX === null) return;
             const curX = e.touches[0].clientX;
             const diffX = curX - touchStartX;
-            // elastic cap drag
             touchTranslation = Math.max(-130, Math.min(130, diffX));
             
             const wrapper = quoteContainer.querySelector('.quote-text-wrapper');
@@ -1136,7 +1222,6 @@ function bindMemoryEvents() {
         });
     }
 
-    // Pulsing heart surprises
     const heartPulse = document.getElementById('weLovePulsingHeart');
     if (heartPulse) {
         heartPulse.addEventListener('click', (e) => {
@@ -1145,7 +1230,6 @@ function bindMemoryEvents() {
         });
     }
 
-    // General screen click bubble hearts spawn
     const weLovePage = document.getElementById('weLovePage');
     if (weLovePage) {
         weLovePage.addEventListener('click', handleScreenClickBurst);
@@ -1179,13 +1263,12 @@ function bindMemoryEvents() {
         modalOverlay.addEventListener('click', () => {
             modalOverlay.style.display = 'none';
         });
-        const modalContent = modalOverlay.querySelector('.health-modal-content');
+        const modalContent = modalOverlay.querySelector('.welove-modal-content');
         if (modalContent) {
             modalContent.addEventListener('click', (e) => e.stopPropagation());
         }
     }
 
-    // Select templates chips click
     const chips = modalOverlay ? modalOverlay.querySelectorAll('.btn-select-template') : [];
     chips.forEach(chip => {
         chip.addEventListener('click', (e) => {
@@ -1195,7 +1278,6 @@ function bindMemoryEvents() {
         });
     });
 
-    // Form submit
     if (formAddSickness && modalOverlay) {
         formAddSickness.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1205,7 +1287,6 @@ function bindMemoryEvents() {
 
             if (!symptom) return;
 
-            // Compute cute emoji based on keyword
             let emoji = '🤒';
             const symLower = symptom.toLowerCase();
             if (symLower.includes('cảm') || symLower.includes('lạnh') || symLower.includes('cúm')) emoji = '🤧';
@@ -1228,7 +1309,6 @@ function bindMemoryEvents() {
             state.weLoveSicknessLogsUpdated = new Date().toISOString();
             await saveLocalState();
             
-            // Sync to cloud if configured
             if (sync.isConfigured() && state.user) {
                 performSync(true);
             }
@@ -1273,7 +1353,6 @@ function bindAdminEvents() {
             state.weLoveRemindersUpdated = new Date().toISOString();
             await saveLocalState();
 
-            // Sync to cloud if configured
             if (sync.isConfigured() && state.user) {
                 performSync(true);
             }
@@ -1290,8 +1369,93 @@ function bindAdminEvents() {
     }
 }
 
-// Global initialization bindings (ran on DOMContentLoaded in app.js)
+// Bind events for settings view
+function bindSettingsEvents() {
+    const formConfig = document.getElementById('weLoveConfigForm');
+    const startDateInput = document.getElementById('weLoveStartDateInput');
+    const showSicknessInput = document.getElementById('weLoveShowSicknessInput');
+    const btnLink = document.getElementById('btnWeLoveLinkPartner');
+    const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
+    const partnerEmailInput = document.getElementById('weLovePartnerEmailInput');
+
+    // 1. Submit config changes
+    if (formConfig) {
+        formConfig.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const startDate = startDateInput.value;
+            const showSickness = showSicknessInput.checked;
+
+            state.weLoveStartDate = startDate;
+            state.weLoveStartDateUpdated = new Date().toISOString();
+            
+            state.weLoveShowSickness = showSickness;
+            state.weLoveShowSicknessUpdated = new Date().toISOString();
+
+            await saveLocalState();
+            
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+
+            showToast("Đã cập nhật cấu hình WeLove! ❤️");
+            
+            // Redirect to standard view to see updates
+            weLoveCurrentSubView = 'memory';
+            renderWeLoveDashboard();
+        });
+    }
+
+    // 2. Link partner
+    if (btnLink && partnerEmailInput) {
+        btnLink.addEventListener('click', async () => {
+            const email = partnerEmailInput.value.trim().toLowerCase();
+            if (!email) {
+                showToast("Vui lòng nhập email của nửa kia!", "warning");
+                return;
+            }
+            if (state.user && email === state.user.email.toLowerCase().trim()) {
+                showToast("Không thể tự mời email chính mình!", "warning");
+                return;
+            }
+
+            state.spouseEmail = email;
+            state.spouseRole = 'wife'; // default role
+            state.spouseStatus = 'pending';
+            
+            await saveLocalState();
+            
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+
+            showToast("Đã gửi lời mời liên kết góc kỷ niệm! 💞");
+            renderWeLoveDashboard();
+        });
+    }
+
+    // 3. Unlink partner
+    if (btnUnlink) {
+        btnUnlink.addEventListener('click', async () => {
+            const confirmUnlink = await window.showConfirm("Bạn có chắc chắn muốn hủy liên kết với bạn tình hiện tại không? 🥺");
+            if (confirmUnlink) {
+                state.spouseEmail = '';
+                state.spouseStatus = '';
+                state.spouseRole = 'wife';
+                
+                await saveLocalState();
+                
+                if (sync.isConfigured() && state.user) {
+                    performSync(true);
+                }
+
+                showToast("Đã hủy kết nối bạn tình.");
+                renderWeLoveDashboard();
+            }
+        });
+    }
+}
+
+// Global initialization bindings
 export function initWeLoveBindings() {
-    // Calculate and populate home widgets on load
     updateHomeLoveWidget();
 }

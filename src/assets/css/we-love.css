@@ -427,7 +427,7 @@
 }
 
 /* Health Card styling */
-.health-card {
+.welove-card {
   width: 100%;
   max-width: 580px;
   background: var(--glass-bg);
@@ -444,12 +444,12 @@
   position: relative;
 }
 
-[data-theme='dark'] .health-card {
+[data-theme='dark'] .welove-card {
   background: rgba(30, 27, 75, 0.3);
 }
 
 /* Health Cloud Sync Status Badge */
-.health-sync-badge {
+.welove-sync-badge {
   position: absolute;
   top: 1rem;
   right: 1.5rem;
@@ -511,7 +511,7 @@
   100% { transform: scale(1.15); opacity: 1; }
 }
 
-.health-sync-badge.error {
+.welove-sync-badge.error {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.35);
   max-width: 250px;
@@ -521,7 +521,7 @@
 }
 
 @media (max-width: 480px) {
-  .health-sync-badge {
+  .welove-sync-badge {
     position: static;
     display: inline-flex;
     margin: 0 auto 0.75rem auto;
@@ -529,7 +529,7 @@
   }
 }
 
-.health-title-box {
+.welove-title-box {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -537,7 +537,7 @@
   margin-bottom: 0.5rem;
 }
 
-.health-title {
+.welove-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.8rem;
   font-weight: 800;
@@ -546,12 +546,12 @@
   text-shadow: 0 2px 10px rgba(225, 29, 72, 0.1);
 }
 
-[data-theme='dark'] .health-title {
+[data-theme='dark'] .welove-title {
   color: #fb7185;
 }
 
 /* Pulsing Health Indicator */
-.health-summary-box {
+.welove-summary-box {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -559,7 +559,7 @@
   margin: 2rem 0;
 }
 
-.health-heart-circle {
+.welove-heart-circle {
   width: 110px;
   height: 110px;
   border-radius: 50%;
@@ -574,7 +574,7 @@
   transition: all 0.3s ease;
 }
 
-[data-theme='dark'] .health-heart-circle {
+[data-theme='dark'] .welove-heart-circle {
   background: linear-gradient(135deg, #4c0519 0%, #881337 100%);
   border: 4px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 30px rgba(225, 29, 72, 0.4);
@@ -586,7 +586,7 @@
   100% { transform: scale(1); box-shadow: 0 8px 30px rgba(225, 29, 72, 0.2); }
 }
 
-.health-count-num {
+.welove-count-num {
   font-family: 'Outfit', sans-serif;
   font-size: 2.8rem;
   font-weight: 900;
@@ -594,11 +594,11 @@
   line-height: 1;
 }
 
-[data-theme='dark'] .health-count-num {
+[data-theme='dark'] .welove-count-num {
   color: #fca5a5;
 }
 
-.health-count-lbl {
+.welove-count-lbl {
   font-size: 0.75rem;
   font-weight: 700;
   color: #be123c;
@@ -606,11 +606,11 @@
   letter-spacing: 0.05em;
 }
 
-[data-theme='dark'] .health-count-lbl {
+[data-theme='dark'] .welove-count-lbl {
   color: #fda4af;
 }
 
-.health-warning-msg {
+.welove-warning-msg {
   font-size: 0.95rem;
   line-height: 1.6;
   font-weight: 600;
@@ -623,13 +623,13 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
-.health-warning-msg.green {
+.welove-warning-msg.green {
   border-color: #10b981;
 }
-.health-warning-msg.yellow {
+.welove-warning-msg.yellow {
   border-color: #f59e0b;
 }
-.health-warning-msg.red {
+.welove-warning-msg.red {
   border-color: #ef4444;
   animation: warningPulse 3s infinite alternate;
 }
@@ -640,7 +640,7 @@
 }
 
 /* Years filter pills */
-.health-years-container {
+.welove-years-container {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
@@ -652,7 +652,7 @@
   border: 1px solid var(--border-color);
 }
 
-.health-year-pill {
+.welove-year-pill {
   padding: 0.5rem 1.1rem;
   border-radius: 12px;
   font-size: 0.85rem;
@@ -664,19 +664,19 @@
   color: var(--text-secondary);
 }
 
-.health-year-pill:hover {
+.welove-year-pill:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.health-year-pill.active {
+.welove-year-pill.active {
   background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
   color: #fff;
   box-shadow: 0 4px 10px rgba(225, 29, 72, 0.15);
 }
 
 /* Timeline styling */
-.health-timeline-title {
+.welove-timeline-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -688,7 +688,7 @@
   gap: 0.5rem;
 }
 
-.health-timeline {
+.welove-timeline {
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -699,23 +699,23 @@
   margin-bottom: 1.5rem;
 }
 
-.health-timeline::-webkit-scrollbar {
+.welove-timeline::-webkit-scrollbar {
   width: 6px;
   display: block !important;
 }
-.health-timeline::-webkit-scrollbar-track {
+.welove-timeline::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.03);
   border-radius: 10px;
 }
-.health-timeline::-webkit-scrollbar-thumb {
+.welove-timeline::-webkit-scrollbar-thumb {
   background: rgba(225, 29, 72, 0.2);
   border-radius: 10px;
 }
-.health-timeline::-webkit-scrollbar-thumb:hover {
+.welove-timeline::-webkit-scrollbar-thumb:hover {
   background: rgba(225, 29, 72, 0.4);
 }
 
-.health-log-item {
+.welove-log-item {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
   border-radius: 20px;
@@ -727,13 +727,13 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
 }
 
-.health-log-item:hover {
+.welove-log-item:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(225, 29, 72, 0.08);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.health-log-icon {
+.welove-log-icon {
   font-size: 2rem;
   display: flex;
   align-items: center;
@@ -746,30 +746,30 @@
   flex-shrink: 0;
 }
 
-.health-log-content {
+.welove-log-content {
   flex-grow: 1;
 }
 
-.health-log-header {
+.welove-log-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.4rem;
 }
 
-.health-log-date {
+.welove-log-date {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-secondary);
 }
 
-.health-log-type {
+.welove-log-type {
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--text-primary);
 }
 
-.health-log-notes {
+.welove-log-notes {
   font-size: 0.9rem;
   line-height: 1.45;
   color: var(--text-secondary);
@@ -777,7 +777,7 @@
 }
 
 /* Delete Button */
-.health-delete-btn {
+.welove-delete-btn {
   background: transparent;
   border: none;
   color: #f43f5e;
@@ -792,14 +792,14 @@
   justify-content: center;
 }
 
-.health-delete-btn:hover {
+.welove-delete-btn:hover {
   opacity: 1;
   background: rgba(244, 63, 94, 0.1);
   transform: scale(1.1);
 }
 
 /* Romantic Modal */
-.health-modal-overlay {
+.welove-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -817,7 +817,7 @@
   overflow-y: auto;
 }
 
-.health-modal-content {
+.welove-modal-content {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 24px;
@@ -832,11 +832,11 @@
   overflow-y: auto;
 }
 
-.health-modal-content::-webkit-scrollbar {
+.welove-modal-content::-webkit-scrollbar {
   width: 4px;
   display: block !important;
 }
-.health-modal-content::-webkit-scrollbar-thumb {
+.welove-modal-content::-webkit-scrollbar-thumb {
   background: rgba(225, 29, 72, 0.15);
   border-radius: 10px;
 }
@@ -851,7 +851,7 @@
   to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-.health-modal-title {
+.welove-modal-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
@@ -862,24 +862,24 @@
   gap: 0.5rem;
 }
 
-[data-theme='dark'] .health-modal-title {
+[data-theme='dark'] .welove-modal-title {
   color: #fb7185;
 }
 
-.health-form-group {
+.welove-form-group {
   margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
 
-.health-form-label {
+.welove-form-label {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
-.health-input, .health-select, .health-textarea {
+.welove-input, .welove-select, .welove-textarea {
   width: 100%;
   padding: 0.75rem;
   border-radius: 12px;
@@ -891,20 +891,20 @@
   transition: all 0.25s ease;
 }
 
-.health-input:focus, .health-select:focus, .health-textarea:focus {
+.welove-input:focus, .welove-select:focus, .welove-textarea:focus {
   outline: none;
   border-color: #e11d48;
   box-shadow: 0 0 10px rgba(225, 29, 72, 0.15);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.health-btn-group {
+.welove-btn-group {
   display: flex;
   gap: 1rem;
   margin-top: 1.75rem;
 }
 
-.health-btn {
+.welove-btn {
   flex: 1;
   padding: 0.75rem;
   border-radius: 12px;
@@ -919,27 +919,27 @@
   gap: 0.4rem;
 }
 
-.health-btn-secondary {
+.welove-btn-secondary {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
 }
 
-.health-btn-secondary:hover {
+.welove-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.health-btn-primary {
+.welove-btn-primary {
   background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
   color: #fff;
   box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
 }
 
-.health-btn-primary:hover {
+.welove-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(225, 29, 72, 0.3);
 }
 
-.health-templates-box {
+.welove-templates-box {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -951,16 +951,16 @@
   border-radius: 8px;
   background: rgba(0,0,0,0.1);
 }
-.health-templates-box::-webkit-scrollbar {
+.welove-templates-box::-webkit-scrollbar {
   width: 4px;
   display: block !important;
 }
-.health-templates-box::-webkit-scrollbar-thumb {
+.welove-templates-box::-webkit-scrollbar-thumb {
   background: rgba(225, 29, 72, 0.2);
   border-radius: 10px;
 }
 
-.health-template-chip {
+.welove-template-chip {
   padding: 8px 12px;
   background: rgba(225, 29, 72, 0.05);
   border: 1px solid rgba(225, 29, 72, 0.1);
@@ -970,7 +970,7 @@
   color: var(--text-secondary);
   transition: all 0.2s;
 }
-.health-template-chip:hover {
+.welove-template-chip:hover {
   background: rgba(225, 29, 72, 0.12);
   color: var(--text-primary);
 }
@@ -1010,37 +1010,37 @@
   .quote-nav-btn {
     font-size: 1.2rem;
   }
-  .health-card {
+  .welove-card {
     border-radius: 20px;
     padding: 1.75rem 1.25rem;
     margin-top: 1.5rem;
   }
-  .health-title {
+  .welove-title {
     font-size: 1.4rem;
   }
-  .health-heart-circle {
+  .welove-heart-circle {
     width: 90px;
     height: 90px;
   }
-  .health-count-num {
+  .welove-count-num {
     font-size: 2.2rem;
   }
-  .health-warning-msg {
+  .welove-warning-msg {
     font-size: 0.85rem;
     padding: 1rem;
   }
-  .health-log-icon {
+  .welove-log-icon {
     font-size: 1.6rem;
     width: 42px;
     height: 42px;
   }
-  .health-log-type {
+  .welove-log-type {
     font-size: 0.85rem;
   }
-  .health-log-date {
+  .welove-log-date {
     font-size: 0.75rem;
   }
-  .health-log-notes {
+  .welove-log-notes {
     font-size: 0.8rem;
   }
 }

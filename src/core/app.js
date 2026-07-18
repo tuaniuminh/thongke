@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.94';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.94';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.94';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.94';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.95';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.95';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.95';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.95';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.94';
-import * as sync from './sync.js?v=4.1.94';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.94';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.94';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.95';
+import * as sync from './sync.js?v=4.1.95';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.95';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.95';
 
-const APP_VERSION = '4.1.94';
+const APP_VERSION = '4.1.95';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -83,6 +83,10 @@ let state = {
     showFamilyFundCardUpdated: '',
     showLoveWidget: true,
     showLoveWidgetUpdated: '',
+    weLoveStartDate: '2025-09-03',
+    weLoveStartDateUpdated: '',
+    weLoveShowSickness: true,
+    weLoveShowSicknessUpdated: '',
     weLoveSicknessLogs: [],
     weLoveSicknessLogsUpdated: '',
     weLoveReminders: [],
@@ -451,6 +455,10 @@ async function saveLocalState() {
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
         showLoveWidget: state.showLoveWidget !== false,
         showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
+        weLoveStartDate: state.weLoveStartDate || '2025-09-03',
+        weLoveStartDateUpdated: state.weLoveStartDateUpdated || '',
+        weLoveShowSickness: state.weLoveShowSickness !== false,
+        weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
         weLoveSicknessLogs: state.weLoveSicknessLogs || [],
         weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
         weLoveReminders: state.weLoveReminders || [],
@@ -521,6 +529,10 @@ export async function loadLocalState(password) {
         state.showFamilyFundCardUpdated = '';
         state.showLoveWidget = true;
         state.showLoveWidgetUpdated = '';
+        state.weLoveStartDate = '2025-09-03';
+        state.weLoveStartDateUpdated = '';
+        state.weLoveShowSickness = true;
+        state.weLoveShowSicknessUpdated = '';
         state.weLoveSicknessLogs = [];
         state.weLoveSicknessLogsUpdated = '';
         state.weLoveReminders = [];
@@ -582,6 +594,10 @@ export async function loadLocalState(password) {
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
         state.showLoveWidget = data.showLoveWidget !== false;
         state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
+        state.weLoveStartDate = data.weLoveStartDate || '2025-09-03';
+        state.weLoveStartDateUpdated = data.weLoveStartDateUpdated || '';
+        state.weLoveShowSickness = data.weLoveShowSickness !== false;
+        state.weLoveShowSicknessUpdated = data.weLoveShowSicknessUpdated || '';
         state.weLoveSicknessLogs = data.weLoveSicknessLogs || [];
         state.weLoveSicknessLogsUpdated = data.weLoveSicknessLogsUpdated || '';
         state.weLoveReminders = data.weLoveReminders || [];
@@ -916,6 +932,10 @@ async function performSync(silent = false) {
                     state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
                     state.showLoveWidget = remoteData.showLoveWidget !== false;
                     state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
+                    state.weLoveStartDate = remoteData.weLoveStartDate || '2025-09-03';
+                    state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                    state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
+                    state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
                     state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
                     state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
                     state.weLoveReminders = remoteData.weLoveReminders || [];
@@ -987,6 +1007,22 @@ async function performSync(silent = false) {
                     if (remoteLoveWidgetTime > localLoveWidgetTime) {
                         state.showLoveWidget = remoteData.showLoveWidget !== false;
                         state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
+                    }
+
+                    // Merge WeLove Start Date
+                    const localStartDateTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
+                    const remoteStartDateTime = remoteData.weLoveStartDateUpdated ? new Date(remoteData.weLoveStartDateUpdated).getTime() : 0;
+                    if (remoteStartDateTime > localStartDateTime) {
+                        state.weLoveStartDate = remoteData.weLoveStartDate || '2025-09-03';
+                        state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                    }
+
+                    // Merge WeLove Show Sickness
+                    const localShowSicknessTime = state.weLoveShowSicknessUpdated ? new Date(state.weLoveShowSicknessUpdated).getTime() : 0;
+                    const remoteShowSicknessTime = remoteData.weLoveShowSicknessUpdated ? new Date(remoteData.weLoveShowSicknessUpdated).getTime() : 0;
+                    if (remoteShowSicknessTime > localShowSicknessTime) {
+                        state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
+                        state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
                     }
 
                     // Merge WeLove Sickness Logs
@@ -1203,6 +1239,10 @@ async function performSync(silent = false) {
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
             showLoveWidget: state.showLoveWidget !== false,
             showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
+            weLoveStartDate: state.weLoveStartDate || '2025-09-03',
+            weLoveStartDateUpdated: state.weLoveStartDateUpdated || '',
+            weLoveShowSickness: state.weLoveShowSickness !== false,
+            weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
             weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
             weLoveReminders: state.weLoveReminders || [],

@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.94';
-import * as sync from '../../core/sync.js?v=4.1.94';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.94';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.94';
+} from '../../core/app.js?v=4.1.95';
+import * as sync from '../../core/sync.js?v=4.1.95';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.95';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.95';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1178,6 +1178,8 @@ function updateSidebarNavVisibility(tabId) {
     if (sidebarLogoText) {
         if (tabId === 'health') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
+        } else if (tabId === 'welove') {
+            sidebarLogoText.innerText = 'WeLove';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
         } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
@@ -1189,6 +1191,7 @@ function updateSidebarNavVisibility(tabId) {
 
     const navItems = {
         home: document.querySelector('[data-nav="home"]'),
+        welove: document.querySelector('[data-nav="welove"]'),
         dashboard: document.querySelector('[data-nav="dashboard"]'),
         received: document.querySelector('[data-nav="received"]'),
         sent: document.querySelector('[data-nav="sent"]'),
@@ -1205,6 +1208,21 @@ function updateSidebarNavVisibility(tabId) {
 
     if (tabId === 'health') {
         if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
+    } else if (tabId === 'welove') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
         
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
@@ -1220,6 +1238,7 @@ function updateSidebarNavVisibility(tabId) {
         // Khi vào Cài đặt: ẩn toàn bộ nav Thu Chi đối ngoại trên desktop sidebar
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
         
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
@@ -1237,6 +1256,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.sent) navItems.sent.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
         if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
         
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
@@ -1249,6 +1269,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
 
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
         if (navItems.received) navItems.received.style.display = 'none';
@@ -1263,6 +1284,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.sent) navItems.sent.style.display = 'block';
         if (navItems.settings) navItems.settings.style.display = 'block';
         if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
 
         if (navItems.health) navItems.health.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
@@ -1281,6 +1303,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
         if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.welove) navItems.welove.style.display = 'none';
     }
     
     // Target v4.0.40: Lock shortcuts in desktop navbar when not logged in (disabled to allow offline access)
