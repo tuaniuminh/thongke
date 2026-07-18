@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.02';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.02';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.02';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.02';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.03';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.03';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.03';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.03';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.02';
-import * as sync from './sync.js?v=4.2.02';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.02';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.02';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.03';
+import * as sync from './sync.js?v=4.2.03';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.03';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.03';
 
-const APP_VERSION = '4.2.02';
+const APP_VERSION = '4.2.03';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1885,6 +1885,10 @@ function handleHashRoute() {
 
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
+    // Update active tab class on body to allow layout-level CSS overrides (e.g. immersive backgrounds)
+    document.body.className = document.body.className.replace(/\bactive-tab-\S+/g, '').trim();
+    document.body.classList.add(`active-tab-${tabId}`);
+
     const currentTab = state.activeTab;
     if (pushHistory && currentTab && currentTab !== tabId) {
         if (!state.tabHistory) state.tabHistory = [];

@@ -1079,3 +1079,34 @@ body:not(.light-mode) .memory-page {
     display: none !important;
   }
 }
+
+
+/* Immersive full-screen dark theme gradient overlay for WeLove */
+body:not(.light-mode).active-tab-welove,
+body:not(.light-mode).active-tab-welove-admin,
+body:not(.light-mode).active-tab-welove-settings {
+  background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c0519 100%) !important;
+}
+
+/* Make sidebar, top header, and mobile navbar transparent to show the full gradient */
+body:not(.light-mode).active-tab-welove .sidebar,
+body:not(.light-mode).active-tab-welove-admin .sidebar,
+body:not(.light-mode).active-tab-welove-settings .sidebar,
+body:not(.light-mode).active-tab-welove .mobile-navbar,
+body:not(.light-mode).active-tab-welove-admin .mobile-navbar,
+body:not(.light-mode).active-tab-welove-settings .mobile-navbar,
+body:not(.light-mode).active-tab-welove .top-header,
+body:not(.light-mode).active-tab-welove-admin .top-header,
+body:not(.light-mode).active-tab-welove-settings .top-header {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: none !important;
+}
+
+/* Ensure main content panel has transparent background as well */
+body:not(.light-mode).active-tab-welove .main-content,
+body:not(.light-mode).active-tab-welove-admin .main-content,
+body:not(.light-mode).active-tab-welove-settings .main-content {
+  background: transparent !important;
+}
