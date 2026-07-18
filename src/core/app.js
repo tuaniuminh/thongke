@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.95';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.95';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.95';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.95';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.1.96';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.1.96';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.1.96';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.1.96';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.95';
-import * as sync from './sync.js?v=4.1.95';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.95';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.95';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.1.96';
+import * as sync from './sync.js?v=4.1.96';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.1.96';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.1.96';
 
-const APP_VERSION = '4.1.95';
+const APP_VERSION = '4.1.96';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -83,8 +83,12 @@ let state = {
     showFamilyFundCardUpdated: '',
     showLoveWidget: true,
     showLoveWidgetUpdated: '',
-    weLoveStartDate: '2025-09-03',
+    weLoveStartDate: '',
     weLoveStartDateUpdated: '',
+    weLoveName1: '',
+    weLoveName1Updated: '',
+    weLoveName2: '',
+    weLoveName2Updated: '',
     weLoveShowSickness: true,
     weLoveShowSicknessUpdated: '',
     weLoveSicknessLogs: [],
@@ -455,8 +459,12 @@ async function saveLocalState() {
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
         showLoveWidget: state.showLoveWidget !== false,
         showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
-        weLoveStartDate: state.weLoveStartDate || '2025-09-03',
+        weLoveStartDate: state.weLoveStartDate || '',
         weLoveStartDateUpdated: state.weLoveStartDateUpdated || '',
+        weLoveName1: state.weLoveName1 || '',
+        weLoveName1Updated: state.weLoveName1Updated || '',
+        weLoveName2: state.weLoveName2 || '',
+        weLoveName2Updated: state.weLoveName2Updated || '',
         weLoveShowSickness: state.weLoveShowSickness !== false,
         weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
         weLoveSicknessLogs: state.weLoveSicknessLogs || [],
@@ -529,8 +537,12 @@ export async function loadLocalState(password) {
         state.showFamilyFundCardUpdated = '';
         state.showLoveWidget = true;
         state.showLoveWidgetUpdated = '';
-        state.weLoveStartDate = '2025-09-03';
+        state.weLoveStartDate = '';
         state.weLoveStartDateUpdated = '';
+        state.weLoveName1 = '';
+        state.weLoveName1Updated = '';
+        state.weLoveName2 = '';
+        state.weLoveName2Updated = '';
         state.weLoveShowSickness = true;
         state.weLoveShowSicknessUpdated = '';
         state.weLoveSicknessLogs = [];
@@ -594,8 +606,12 @@ export async function loadLocalState(password) {
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
         state.showLoveWidget = data.showLoveWidget !== false;
         state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
-        state.weLoveStartDate = data.weLoveStartDate || '2025-09-03';
+        state.weLoveStartDate = data.weLoveStartDate || '';
         state.weLoveStartDateUpdated = data.weLoveStartDateUpdated || '';
+        state.weLoveName1 = data.weLoveName1 || '';
+        state.weLoveName1Updated = data.weLoveName1Updated || '';
+        state.weLoveName2 = data.weLoveName2 || '';
+        state.weLoveName2Updated = data.weLoveName2Updated || '';
         state.weLoveShowSickness = data.weLoveShowSickness !== false;
         state.weLoveShowSicknessUpdated = data.weLoveShowSicknessUpdated || '';
         state.weLoveSicknessLogs = data.weLoveSicknessLogs || [];
@@ -932,8 +948,12 @@ async function performSync(silent = false) {
                     state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
                     state.showLoveWidget = remoteData.showLoveWidget !== false;
                     state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
-                    state.weLoveStartDate = remoteData.weLoveStartDate || '2025-09-03';
+                    state.weLoveStartDate = remoteData.weLoveStartDate || '';
                     state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                    state.weLoveName1 = remoteData.weLoveName1 || '';
+                    state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
+                    state.weLoveName2 = remoteData.weLoveName2 || '';
+                    state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
                     state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
                     state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
                     state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
@@ -1013,8 +1033,24 @@ async function performSync(silent = false) {
                     const localStartDateTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
                     const remoteStartDateTime = remoteData.weLoveStartDateUpdated ? new Date(remoteData.weLoveStartDateUpdated).getTime() : 0;
                     if (remoteStartDateTime > localStartDateTime) {
-                        state.weLoveStartDate = remoteData.weLoveStartDate || '2025-09-03';
+                        state.weLoveStartDate = remoteData.weLoveStartDate || '';
                         state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                    }
+
+                    // Merge WeLove Name1
+                    const localName1Time = state.weLoveName1Updated ? new Date(state.weLoveName1Updated).getTime() : 0;
+                    const remoteName1Time = remoteData.weLoveName1Updated ? new Date(remoteData.weLoveName1Updated).getTime() : 0;
+                    if (remoteName1Time > localName1Time) {
+                        state.weLoveName1 = remoteData.weLoveName1 || '';
+                        state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
+                    }
+
+                    // Merge WeLove Name2
+                    const localName2Time = state.weLoveName2Updated ? new Date(state.weLoveName2Updated).getTime() : 0;
+                    const remoteName2Time = remoteData.weLoveName2Updated ? new Date(remoteData.weLoveName2Updated).getTime() : 0;
+                    if (remoteName2Time > localName2Time) {
+                        state.weLoveName2 = remoteData.weLoveName2 || '';
+                        state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
                     }
 
                     // Merge WeLove Show Sickness
@@ -1239,8 +1275,12 @@ async function performSync(silent = false) {
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
             showLoveWidget: state.showLoveWidget !== false,
             showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
-            weLoveStartDate: state.weLoveStartDate || '2025-09-03',
+            weLoveStartDate: state.weLoveStartDate || '',
             weLoveStartDateUpdated: state.weLoveStartDateUpdated || '',
+            weLoveName1: state.weLoveName1 || '',
+            weLoveName1Updated: state.weLoveName1Updated || '',
+            weLoveName2: state.weLoveName2 || '',
+            weLoveName2Updated: state.weLoveName2Updated || '',
             weLoveShowSickness: state.weLoveShowSickness !== false,
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
@@ -1918,8 +1958,8 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
         renderHealthDashboard();
     } else if (tabId === 'welove') {
-        title.innerText = 'Góc kỷ niệm';
-        subtitle.innerText = 'Nơi đếm ngày bên nhau và theo dõi sức khỏe của em iu Ngô Minh';
+        title.innerText = 'Góc tình yêu';
+        subtitle.innerText = 'Nơi đếm ngày bên nhau và lưu giữ khoảnh khắc yêu thương';
         renderWeLoveDashboard();
     } else if (tabId === 'fund') {
         title.innerText = 'Tổng quan Quỹ';

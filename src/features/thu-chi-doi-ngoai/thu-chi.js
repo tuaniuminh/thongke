@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.1.95';
-import * as sync from '../../core/sync.js?v=4.1.95';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.95';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.95';
+} from '../../core/app.js?v=4.1.96';
+import * as sync from '../../core/sync.js?v=4.1.96';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.1.96';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.1.96';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1179,7 +1179,7 @@ function updateSidebarNavVisibility(tabId) {
         if (tabId === 'health') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
         } else if (tabId === 'welove') {
-            sidebarLogoText.innerText = 'WeLove';
+            sidebarLogoText.innerText = 'Góc tình yêu';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
         } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
@@ -1413,6 +1413,43 @@ function updateMobileNavbar(tabId) {
                     Nhật ký
                 </button>
                 <button class="nav-icon-btn text-only ${tabId === 'fund-management' ? 'active' : ''}" onclick="switchTab('fund-management')" title="Quản lý">
+                    Quản lý
+                </button>
+            </div>
+        `;
+    } else if (tabId === 'welove') {
+        mobileNavbar.classList.add('two-line');
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+            
+        const curSubView = window.weLoveCurrentSubView || 'settings';
+
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div onclick="switchTab('welove')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Góc tình yêu</span>
+                </div>
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only ${curSubView === 'memory' ? 'active' : ''}" onclick="window.switchWeLoveSubView('memory')" title="Kỷ niệm" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
+                    Kỷ niệm
+                </button>
+                <button class="nav-icon-btn text-only ${curSubView === 'admin' ? 'active' : ''}" onclick="window.switchWeLoveSubView('admin')" title="Lịch nhắc" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
+                    Lịch nhắc
+                </button>
+                <button class="nav-icon-btn text-only ${curSubView === 'settings' ? 'active' : ''}" onclick="window.switchWeLoveSubView('settings')" title="Quản lý">
                     Quản lý
                 </button>
             </div>

@@ -1,8 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.1.95';
-import * as sync from '../../core/sync.js?v=4.1.95';
+} from '../../core/app.js?v=4.1.96';
+import * as sync from '../../core/sync.js?v=4.1.96';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.96';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -15,7 +16,7 @@ const LOVE_QUOTES = [
     vi: "Gặp được em là điều may mắn lớn nhất cuộc đời anh."
   },
   {
-    cn: "只要有你陪伴，每天 Premium 物理是晴天。",
+    cn: "只要有nước陪伴，每天 đều là晴天。",
     vi: "Chỉ cần có em bên cạnh, ngày nào cũng là ngày nắng ấm."
   },
   {
@@ -31,7 +32,7 @@ const LOVE_QUOTES = [
     vi: "Tình nếu dài lâu muôn thuở vững, tiếc gì giây phút cận kề nhau."
   },
   {
-    cn: "你 magnet 是生命中最好的礼物。",
+    cn: "你是我生命中最好的礼物。",
     vi: "Em là món quà tuyệt vời nhất mà cuộc sống đã ban tặng cho anh."
   }
 ];
@@ -66,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.95');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.96');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -108,13 +109,13 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.1.95';
+        const logoPath = './logo_pwa_small.png?v=4.1.96';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
             title: 'Một Đời',
-            artist: 'Linh Tuấn ❤️ Ngô Minh',
-            album: 'WeLove - Góc Kỷ Niệm',
+            artist: `${state.weLoveName1 || 'Anh'} ❤️ ${state.weLoveName2 || 'Em'}`,
+            album: 'WeLove - Góc Tình Yêu',
             artwork: [
                 { src: absoluteLogoUrl, sizes: '192x192', type: 'image/png' },
                 { src: absoluteLogoUrl, sizes: '256x256', type: 'image/png' },
@@ -156,7 +157,7 @@ function parseDeviceFromUA(ua) {
 
 // Format YYYY-MM-DD to DD/MM/YYYY
 function formatDateDisplay(dateStr) {
-    if (!dateStr) return '03/09/2025';
+    if (!dateStr) return '';
     const parts = dateStr.split('-');
     if (parts.length === 3) {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -166,15 +167,15 @@ function formatDateDisplay(dateStr) {
 
 // Calculate days in love
 export function calculateLoveDays() {
-    const startDateStr = state.weLoveStartDate || '2025-09-03';
+    const startDateStr = state.weLoveStartDate;
+    if (!startDateStr) {
+        loveDaysCount = 0;
+        return loveDaysCount;
+    }
+    
     const parts = startDateStr.split('-');
     if (parts.length !== 3) {
-        // Fallback to default Sept 3rd, 2025
-        const startMs = new Date('2025-09-02T17:00:00Z').getTime();
-        const startDayEpoch = Math.floor((startMs + 7 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
-        const today = new Date();
-        const currentDayEpoch = Math.floor((today.getTime() + 7 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
-        loveDaysCount = currentDayEpoch - startDayEpoch + 1;
+        loveDaysCount = 0;
         return loveDaysCount;
     }
     
@@ -199,7 +200,7 @@ export function updateHomeLoveWidget() {
     const days = calculateLoveDays();
     const homeLoveDays = document.getElementById('homeLoveDays');
     if (homeLoveDays) {
-        homeLoveDays.innerText = days;
+        homeLoveDays.innerText = state.weLoveStartDate ? days : '?';
     }
     updateLoveWidgetUI();
 }
@@ -250,7 +251,6 @@ function startFloatingHearts() {
 
 // Screen click burst hearts
 function handleScreenClickBurst(e) {
-    // Avoid click triggers on buttons/modals
     if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('.welove-modal-content')) return;
     
     const page = document.querySelector('.memory-page');
@@ -338,7 +338,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.1.95';
+    const logoPath = './logo_pwa_small.png?v=4.1.96';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -398,7 +398,6 @@ function checkScheduledReminders() {
 export async function fetchWeLoveData() {
     // 1. Process Sickness Logs
     if (!state.weLoveSicknessLogs || state.weLoveSicknessLogs.length === 0) {
-        // Seed default sickness logs if empty
         const seedLogs = [
             { id: 'sick-1', date: '2026-04-05', symptomType: 'Sốt đau đầu nhẹ', notes: 'Thời tiết giao mùa nóng lạnh thất thường dẫn đến sốt đau đầu. Anh đã chuẩn bị sẵn nước gừng ấm rồi đó.', icon: '🌡️' },
             { id: 'sick-2', date: '2026-02-14', symptomType: 'Cảm lạnh đi mưa', notes: 'Đi chơi Valentine dính mưa phùn lạnh mà không chịu mặc thêm áo khoác dày. Phạt bé tự giác giữ ấm nha!', icon: '🤧' },
@@ -431,7 +430,6 @@ export async function logSpouseVisit() {
     const user = await sync.getCurrentUser();
     if (!user) return;
     
-    // Only log if the logged in user is the spouse (not owner)
     const isOwner = state.ownerEmail === user.email || (state.user && state.user.email === user.email && !state.spouseEmail);
     if (!isOwner) {
         const visitLogged = sessionStorage.getItem('we_love_visit_logged');
@@ -503,12 +501,10 @@ function renderSicknessHistory() {
 
     if (!container) return;
 
-    // Filter by year
     const uniqueYears = Array.from(new Set(sicknessLogs.map(log => log.date.split('-')[0])));
     uniqueYears.sort((a, b) => b - a);
     const years = ['Tất cả', ...uniqueYears];
 
-    // Render filter pills
     if (filterPills) {
         filterPills.innerHTML = years.map(yr => `
             <button class="welove-year-pill ${selectedFilterYear === yr ? 'active' : ''}" data-year="${yr}">
@@ -528,10 +524,8 @@ function renderSicknessHistory() {
         ? sicknessLogs 
         : sicknessLogs.filter(log => log.date.startsWith(selectedFilterYear));
 
-    // Update count
     if (countNum) countNum.innerText = filtered.length;
 
-    // Update alert
     if (warningMsg) {
         warningMsg.className = `welove-warning-msg ${filtered.length === 0 ? 'green' : filtered.length <= 3 ? 'yellow' : 'red'}`;
         if (filtered.length === 0) {
@@ -791,6 +785,12 @@ export async function renderWeLoveDashboard() {
     const tabContainer = document.getElementById('tab-welove');
     if (!tabContainer) return;
 
+    // Force settings subview if start date is not configured yet (first time)
+    if (!state.weLoveStartDate) {
+        weLoveCurrentSubView = 'settings';
+    }
+    window.weLoveCurrentSubView = weLoveCurrentSubView;
+
     calculateLoveDays();
 
     const isLocal = !sync.isConfigured() || !state.user;
@@ -807,10 +807,10 @@ export async function renderWeLoveDashboard() {
             <!-- Switch View Button -->
             ${canEdit ? `
                 <div style="margin-bottom: 1.5rem; z-index: 10; display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn ${weLoveCurrentSubView === 'memory' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveMemoryView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
+                    <button class="btn ${weLoveCurrentSubView === 'memory' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveMemoryView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;" ${!state.weLoveStartDate ? 'disabled title="Vui lòng thiết lập ngày bắt đầu yêu trước!"' : ''}>
                         ❤️ Kỷ niệm
                     </button>
-                    <button class="btn ${weLoveCurrentSubView === 'admin' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveAdminView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
+                    <button class="btn ${weLoveCurrentSubView === 'admin' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveAdminView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;" ${!state.weLoveStartDate ? 'disabled title="Vui lòng thiết lập ngày bắt đầu yêu trước!"' : ''}>
                         ⏰ Lịch nhắc & Nhật ký
                     </button>
                     <button class="btn ${weLoveCurrentSubView === 'settings' ? 'btn-primary' : 'btn-secondary'}" id="btnWeLoveSettingsView" style="font-size: 0.85rem; padding: 6px 14px; border-radius: 50px;">
@@ -830,7 +830,7 @@ export async function renderWeLoveDashboard() {
                             <h3 class="welove-title">Đặt Lịch Lời Nhắc Yêu Thương</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.4;">
-                            Lên lịch gửi thông báo nhắc nhở tự động đến thiết bị của em iu Ngô Minh
+                            Lên lịch gửi thông báo nhắc nhở tự động đến thiết bị của nửa kia
                         </p>
 
                         <form id="weLoveAddReminderForm" style="text-align: left; margin-bottom: 2rem;">
@@ -844,7 +844,7 @@ export async function renderWeLoveDashboard() {
                             </div>
                             <div class="welove-form-group">
                                 <label class="welove-form-label">✍️ Nội dung lời nhắc:</label>
-                                <textarea class="welove-textarea" id="remMessageInput" rows="3" placeholder="Nhập nội dung lời nhắn gửi đến em iu..." required></textarea>
+                                <textarea class="welove-textarea" id="remMessageInput" rows="3" placeholder="Nhập nội dung lời nhắn..." required></textarea>
                             </div>
                             <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%; margin-top: 0.5rem;">
                                 Lên lịch ngay ❤️
@@ -863,7 +863,7 @@ export async function renderWeLoveDashboard() {
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                             <span style="font-size: 1.8rem;">📊</span>
-                            <h3 class="welove-title">Nhật Ký Truy Cập Của Em Iu</h3>
+                            <h3 class="welove-title">Nhật Ký Truy Cập Của Nửa Kia</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; font-weight: 600;">
                             Đang theo dõi email: <span style="color: var(--accent-rose);">${state.spouseEmail || 'chưa liên kết'}</span>
@@ -899,13 +899,23 @@ export async function renderWeLoveDashboard() {
                         </div>
                         
                         <form id="weLoveConfigForm" style="text-align: left; margin-bottom: 2.5rem;">
-                            <!-- 1. Ngày bắt đầu yêu nhau -->
+                            <!-- 1. Điền tên 2 bạn -->
                             <div class="welove-form-group">
-                                <label class="welove-form-label">📅 Ngày tình yêu bắt đầu:</label>
-                                <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || '2025-09-03'}" required>
+                                <label class="welove-form-label">👤 Biệt danh / Tên của bạn:</label>
+                                <input type="text" class="welove-input" id="weLoveName1Input" placeholder="Ví dụ: Linh Tuấn" value="${state.weLoveName1 || ''}" required>
+                            </div>
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">👤 Biệt danh / Tên của nửa kia:</label>
+                                <input type="text" class="welove-input" id="weLoveName2Input" placeholder="Ví dụ: Ngô Minh" value="${state.weLoveName2 || ''}" required>
                             </div>
 
-                            <!-- 2. Bật tắt theo dõi lượt ốm -->
+                            <!-- 2. Ngày bắt đầu yêu nhau -->
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">📅 Ngày tình yêu bắt đầu:</label>
+                                <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || ''}" required>
+                            </div>
+
+                            <!-- 3. Bật tắt theo dõi lượt ốm -->
                             <div class="welove-form-group" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
                                 <div>
                                     <label class="welove-form-label" style="font-weight: 700; margin-bottom: 2px; display: block;">🩺 Theo dõi Sổ tay sức khỏe em yêu</label>
@@ -917,7 +927,7 @@ export async function renderWeLoveDashboard() {
                                 </label>
                             </div>
 
-                            <!-- 3. Mời bạn tình tham gia -->
+                            <!-- 4. Mời bạn tình tham gia -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
                                 <label class="welove-form-label" style="font-weight: 700;">💞 Mời nửa kia tham gia cùng theo dõi:</label>
                                 <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Nhập email tài khoản FamiLife của nửa kia để chia sẻ tiến trình, đếm ngày yêu và nhật ký lượt truy cập.</p>
@@ -955,20 +965,20 @@ export async function renderWeLoveDashboard() {
                     <button class="notification-test-btn" id="weLoveNotificationTest" title="Thử nghiệm thông báo yêu thương">🔔</button>
 
                     <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
-                    <h2 class="memory-title">Kỷ Niệm Tình Yêu</h2>
-                    <p class="memory-subtitle">Linh Tuấn ❤️ Ngô Minh - Góc nhỏ yêu thương đếm ngày bên nhau</p>
+                    <h2 class="memory-title">Góc Tình Yêu</h2>
+                    <p class="memory-subtitle">${escapeHTML(state.weLoveName1 || 'Anh')} ❤️ ${escapeHTML(state.weLoveName2 || 'Em')} - Góc nhỏ yêu thương đếm ngày bên nhau</p>
                     
                     <div class="days-counter-box">
-                        <div class="days-number" id="weLoveDaysCountVal">${loveDaysCount}</div>
+                        <div class="days-number" id="weLoveDaysCountVal">${state.weLoveStartDate ? loveDaysCount : '?'}</div>
                         <div class="days-label">Ngày bên nhau</div>
                     </div>
 
-                    <div class="milestone-date">
-                        📅 Cột mốc khởi đầu: ${formatDateDisplay(state.weLoveStartDate || '2025-09-03')}
+                    <div class="milestone-date" style="${!state.weLoveStartDate ? 'color: var(--accent-rose); font-weight: 700;' : ''}">
+                        ${state.weLoveStartDate ? `📅 Cột mốc khởi đầu: ${formatDateDisplay(state.weLoveStartDate)}` : '⚠️ Chưa thiết lập ngày bắt đầu yêu. Vui lòng chọn trong phần Thiết lập!'}
                     </div>
 
                     <!-- Quotes board -->
-                    <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhấp nút hoặc vuốt câu nói để chuyển câu">
+                    <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhập nút hoặc vuốt câu nói để chuyển câu">
                         <button class="quote-nav-btn prev" id="btnWeLovePrevQuote">‹</button>
                         <div class="quote-text-wrapper">
                             <div class="quote-chinese">${LOVE_QUOTES[currentQuoteIdx].cn}</div>
@@ -986,7 +996,7 @@ export async function renderWeLoveDashboard() {
                             <h3 class="welove-title">Sổ Tay Sức Khỏe Của Em Iu</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
-                            Thống kê đợt ốm qua các năm của em iu Ngô Minh và lời dặn dỗ yêu thương từ anh Tuấn đẹp trai
+                            Thống kê đợt ốm qua các năm của em iu và lời dặn dỗ yêu thương từ anh đẹp trai
                         </p>
 
                         <!-- Years selector filter pills -->
@@ -1111,6 +1121,9 @@ export async function renderWeLoveDashboard() {
         bindSettingsEvents();
     }
 
+    // Sync sidebar & mobile navbar display
+    updateSidebarNavVisibility('welove');
+
     // Set up auto refreshes
     setupAutoRefreshTimers();
     
@@ -1150,7 +1163,7 @@ function bindMemoryEvents() {
             const triggerSub = () => {
                 triggerSystemNotification(
                     'WeLove - Lời Yêu Thương', 
-                    'Gửi ngàn lời yêu thương và cái ôm ấm áp đến em iu Ngô Minh! Chúc em một ngày ngập tràn hạnh phúc! ❤️'
+                    `Gửi ngàn lời yêu thương và cái ôm ấm áp đến ${state.weLoveName2 || 'nửa kia'}! Chúc một ngày ngập tràn hạnh phúc! ❤️`
                 );
             };
 
@@ -1226,7 +1239,7 @@ function bindMemoryEvents() {
     if (heartPulse) {
         heartPulse.addEventListener('click', (e) => {
             e.stopPropagation();
-            showToast("Gửi ngàn trái tim yêu thương gửi đến Ngô Minh xinh đẹp! 💕");
+            showToast(`Gửi ngàn trái tim yêu thương gửi đến ${state.weLoveName2 || 'nửa kia'} xinh đẹp! 💕`);
         });
     }
 
@@ -1372,18 +1385,27 @@ function bindAdminEvents() {
 // Bind events for settings view
 function bindSettingsEvents() {
     const formConfig = document.getElementById('weLoveConfigForm');
+    const name1Input = document.getElementById('weLoveName1Input');
+    const name2Input = document.getElementById('weLoveName2Input');
     const startDateInput = document.getElementById('weLoveStartDateInput');
     const showSicknessInput = document.getElementById('weLoveShowSicknessInput');
     const btnLink = document.getElementById('btnWeLoveLinkPartner');
     const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
     const partnerEmailInput = document.getElementById('weLovePartnerEmailInput');
 
-    // 1. Submit config changes
     if (formConfig) {
         formConfig.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const name1 = name1Input.value.trim();
+            const name2 = name2Input.value.trim();
             const startDate = startDateInput.value;
             const showSickness = showSicknessInput.checked;
+
+            state.weLoveName1 = name1;
+            state.weLoveName1Updated = new Date().toISOString();
+
+            state.weLoveName2 = name2;
+            state.weLoveName2Updated = new Date().toISOString();
 
             state.weLoveStartDate = startDate;
             state.weLoveStartDateUpdated = new Date().toISOString();
@@ -1397,15 +1419,13 @@ function bindSettingsEvents() {
                 performSync(true);
             }
 
-            showToast("Đã cập nhật cấu hình WeLove! ❤️");
+            showToast("Đã thiết lập góc tình yêu thành công! ❤️");
             
-            // Redirect to standard view to see updates
             weLoveCurrentSubView = 'memory';
             renderWeLoveDashboard();
         });
     }
 
-    // 2. Link partner
     if (btnLink && partnerEmailInput) {
         btnLink.addEventListener('click', async () => {
             const email = partnerEmailInput.value.trim().toLowerCase();
@@ -1419,7 +1439,7 @@ function bindSettingsEvents() {
             }
 
             state.spouseEmail = email;
-            state.spouseRole = 'wife'; // default role
+            state.spouseRole = 'wife';
             state.spouseStatus = 'pending';
             
             await saveLocalState();
@@ -1433,7 +1453,6 @@ function bindSettingsEvents() {
         });
     }
 
-    // 3. Unlink partner
     if (btnUnlink) {
         btnUnlink.addEventListener('click', async () => {
             const confirmUnlink = await window.showConfirm("Bạn có chắc chắn muốn hủy liên kết với bạn tình hiện tại không? 🥺");
@@ -1448,12 +1467,22 @@ function bindSettingsEvents() {
                     performSync(true);
                 }
 
-                showToast("Đã hủy kết nối bạn tình.");
+                showToast("Đã hủy kết nối.");
                 renderWeLoveDashboard();
             }
         });
     }
 }
+
+// Global hook for mobile subview switching
+window.switchWeLoveSubView = function(subView) {
+    if (!state.weLoveStartDate && subView !== 'settings') {
+        showToast("Vui lòng cấu hình ngày bắt đầu yêu trước nhé! ❤️", "warning");
+        return;
+    }
+    weLoveCurrentSubView = subView;
+    renderWeLoveDashboard();
+};
 
 // Global initialization bindings
 export function initWeLoveBindings() {
