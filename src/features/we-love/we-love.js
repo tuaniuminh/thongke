@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.1.99';
-import * as sync from '../../core/sync.js?v=4.1.99';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.1.99';
+} from '../../core/app.js?v=4.2.00';
+import * as sync from '../../core/sync.js?v=4.2.00';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.00';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.1.99');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.00');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.1.99';
+        const logoPath = './logo_pwa_small.png?v=4.2.00';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -347,7 +347,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.1.99';
+    const logoPath = './logo_pwa_small.png?v=4.2.00';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1113,45 +1113,7 @@ export async function renderWeLoveDashboard() {
     // Sync sidebar & mobile navbar display
     updateSidebarNavVisibility('welove');
 
-    // Update desktop header WeLove tabs active state
-    const headerTabs = document.getElementById('headerWeLoveTabs');
-    if (headerTabs) {
-        headerTabs.querySelectorAll('button').forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-secondary');
-        });
-        const activeBtnIdMap = {
-            'memory': 'btnHeaderWeLoveMemory',
-            'admin': 'btnHeaderWeLoveAdmin',
-            'settings': 'btnHeaderWeLoveSettings'
-        };
-        const activeBtn = document.getElementById(activeBtnIdMap[weLoveCurrentSubView]);
-        if (activeBtn) {
-            activeBtn.classList.remove('btn-secondary');
-            activeBtn.classList.add('btn-primary');
-        }
-        
-        // Disable tabs on desktop header if date is not configured yet
-        const btnMem = document.getElementById('btnHeaderWeLoveMemory');
-        const btnAdm = document.getElementById('btnHeaderWeLoveAdmin');
-        if (btnMem && btnAdm) {
-            if (!state.weLoveStartDate) {
-                btnMem.disabled = true;
-                btnMem.title = "Vui lòng thiết lập ngày bắt đầu yêu trước!";
-                btnMem.style.opacity = '0.5';
-                btnAdm.disabled = true;
-                btnAdm.title = "Vui lòng thiết lập ngày bắt đầu yêu trước!";
-                btnAdm.style.opacity = '0.5';
-            } else {
-                btnMem.disabled = false;
-                btnMem.title = '';
-                btnMem.style.removeProperty('opacity');
-                btnAdm.disabled = false;
-                btnAdm.title = '';
-                btnAdm.style.removeProperty('opacity');
-            }
-        }
-    }
+
 
     // Set up auto refreshes
     setupAutoRefreshTimers();
