@@ -3141,7 +3141,11 @@ select.health-select-sm {
 }
 @media (max-width: 768px) {
     .home-layout {
-        padding: calc(100px + env(safe-area-inset-top, 0px)) 1rem 8rem 1rem !important;
+        align-items: flex-start !important;
+        padding-top: calc(120px + env(safe-area-inset-top, 0px)) !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 8rem !important;
     }
 }
 
@@ -3448,7 +3452,7 @@ body.light-mode .version-badge-btn {
         padding: 10px 14px;
         position: relative;
         z-index: 900;
-        margin: -1.25rem -1rem 1.25rem -1rem; /* Offset main-content padding */
+        margin: calc(-1.25rem - env(safe-area-inset-top)) -1rem 1.25rem -1rem !important; /* Offset BOTH main-content padding and safe area top */
         padding-top: calc(10px + env(safe-area-inset-top));
         /* Chống layout shift khi navbar chuyển giữa 1 dòng và 2 dòng */
         transition: height 0.22s ease, padding 0.22s ease;
@@ -3742,7 +3746,7 @@ body.light-mode .home-pwa-install-btn {
 
     /* Adjust mobile-navbar margins to match main-content padding and eliminate horizontal scroll */
     .mobile-navbar {
-        margin: -1rem -0.4rem 1.25rem -0.4rem !important;
+        margin: calc(-1rem - env(safe-area-inset-top)) -0.4rem 1.25rem -0.4rem !important;
     }
 }
 
