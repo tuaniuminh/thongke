@@ -1131,3 +1131,78 @@ body:not(.light-mode).active-tab-welove-admin .main-content,
 body:not(.light-mode).active-tab-welove-settings .main-content {
   background: transparent !important;
 }
+
+
+/* ==========================================
+   WeLove Light Mode Styles (Original App Match)
+   ========================================== */
+
+/* Immersive fixed viewport gradient background for WeLove in light theme */
+body.light-mode.active-tab-welove::before,
+body.light-mode.active-tab-welove-admin::before,
+body.light-mode.active-tab-welove-settings::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fdf4ff 100%) !important;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* In light theme, set root html background to match the top of WeLove light gradient to fix rubber-banding scroll */
+html.light-mode.active-tab-welove,
+html.light-mode.active-tab-welove-admin,
+html.light-mode.active-tab-welove-settings {
+  background: #fff1f2 !important;
+}
+
+body.light-mode.active-tab-welove,
+body.light-mode.active-tab-welove-admin,
+body.light-mode.active-tab-welove-settings {
+  background: transparent !important;
+}
+
+/* Apply light theme variables to .memory-page in light mode */
+body.light-mode .memory-page {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-gradient: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fdf4ff 100%);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+  --border-color: #e2e8f0;
+  --border-focus: #6366f1;
+  
+  background: transparent !important;
+}
+
+/* Make headers/navbars in light mode show beautiful translucent pink glass style */
+body.light-mode.active-tab-welove .sidebar,
+body.light-mode.active-tab-welove-admin .sidebar,
+body.light-mode.active-tab-welove-settings .sidebar,
+body.light-mode.active-tab-welove .mobile-navbar,
+body.light-mode.active-tab-welove-admin .mobile-navbar,
+body.light-mode.active-tab-welove-settings .mobile-navbar,
+body.light-mode.active-tab-welove .top-header,
+body.light-mode.active-tab-welove-admin .top-header,
+body.light-mode.active-tab-welove-settings .top-header {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(244, 63, 94, 0.15) !important;
+  box-shadow: 0 10px 30px -10px rgba(244, 63, 94, 0.1) !important;
+}
+
+/* Ensure main content panel has transparent background as well in light mode */
+body.light-mode.active-tab-welove .main-content,
+body.light-mode.active-tab-welove-admin .main-content,
+body.light-mode.active-tab-welove-settings .main-content {
+  background: transparent !important;
+}
