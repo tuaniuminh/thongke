@@ -105,27 +105,26 @@ export async function decrypt(cipherText, password) {
 }
 
 // Generate Asymmetric RSA-OAEP Keypair
-// CVE-4 Fix (v4.2.86): Nâng key size từ 2048 lên 4096-bit để đảm bảo bảo mật dài hạn.
-// Lưu ý: keypair cũ (2048-bit) vẫn hoạt động bình thường do hash: "SHA-256" giữ nguyên.
-// Keypair mới chỉ được tạo khi người dùng thiết lập lần đầu hoặc reset thiết bị.
+// v4.2.87: Nâng lên 4096-bit + SHA-512 cho keypair mới.
+// Keypair cũ (2048-bit/SHA-256) vẫn hoạt động hoàn toàn — xem _detectRsaHash().
 export async function generateAsymmetricKeypair() {
     try {
         const keyPair = await window.crypto.subtle.generateKey(
             {
                 name: "RSA-OAEP",
-                modulusLength: 4096,          // Nâng từ 2048 → 4096-bit (NIST approved, secure 2030+)
+                modulusLength: 4096,   // 4096-bit (NIST approved, secure 2030+)
                 publicExponent: new Uint8Array([1, 0, 1]),
-                hash: "SHA-256"               // Giữ SHA-256 để tương thích với keypair cũ
+                hash: "SHA-512"        // SHA-512 cho keypair mới
             },
             true, // extractable
             ["encrypt", "decrypt"]
         );
         
-        const publicKeyJwk = await window.crypto.subtle.exportKey("jwk", keyPair.publicKey);
+        const publicKeyJwk  = await window.crypto.subtle.exportKey("jwk", keyPair.publicKey);
         const privateKeyJwk = await window.crypto.subtle.exportKey("jwk", keyPair.privateKey);
         
         return {
-            publicKey: JSON.stringify(publicKeyJwk),
+            publicKey:  JSON.stringify(publicKeyJwk),
             privateKey: JSON.stringify(privateKeyJwk)
         };
     } catch (e) {
@@ -134,17 +133,34 @@ export async function generateAsymmetricKeypair() {
     }
 }
 
+/**
+ * Phát hiện hash algorithm từ trường `alg` trong JWK.
+ * Điều này đảm bảo backward compatibility tuyệt đối:
+ *   - Keypair cũ (2048-bit): alg = "RSA-OAEP-256" → dùng SHA-256
+ *   - Keypair mới (4096-bit): alg = "RSA-OAEP-512" → dùng SHA-512
+ * Người dùng có backup từ phiên bản cũ KHÔNG bị ảnh hưởng.
+ */
+function _detectRsaHash(jwkObj) {
+    const alg = jwkObj.alg || '';
+    if (alg === 'RSA-OAEP-512') return 'SHA-512';
+    if (alg === 'RSA-OAEP-384') return 'SHA-384';
+    return 'SHA-256'; // fallback cho keypair cũ (RSA-OAEP-256 hoặc không có alg)
+}
+
 // Encrypt plain text using a JWK public key
+// Auto-detects SHA version from JWK → tương thích với mọi phiên bản keypair
 export async function encryptWithPublicKey(pubKeyJwkStr, plainText) {
     try {
+        const jwkObj = JSON.parse(pubKeyJwkStr);
+        const hash   = _detectRsaHash(jwkObj);
         const pubKey = await window.crypto.subtle.importKey(
             "jwk",
-            JSON.parse(pubKeyJwkStr),
-            { name: "RSA-OAEP", hash: "SHA-256" },
+            jwkObj,
+            { name: "RSA-OAEP", hash },
             false,
             ["encrypt"]
         );
-        const encoder = new TextEncoder();
+        const encoder  = new TextEncoder();
         const encrypted = await window.crypto.subtle.encrypt(
             { name: "RSA-OAEP" },
             pubKey,
@@ -158,17 +174,20 @@ export async function encryptWithPublicKey(pubKeyJwkStr, plainText) {
 }
 
 // Decrypt cipher text (hex) using a JWK private key
+// Auto-detects SHA version from JWK → tương thích với mọi phiên bản keypair
 export async function decryptWithPrivateKey(privKeyJwkStr, cipherTextHex) {
     try {
+        const jwkObj  = JSON.parse(privKeyJwkStr);
+        const hash    = _detectRsaHash(jwkObj);
         const privKey = await window.crypto.subtle.importKey(
             "jwk",
-            JSON.parse(privKeyJwkStr),
-            { name: "RSA-OAEP", hash: "SHA-256" },
+            jwkObj,
+            { name: "RSA-OAEP", hash },
             false,
             ["decrypt"]
         );
-        const cipherBuf = hexToBuf(cipherTextHex);
-        const decrypted = await window.crypto.subtle.decrypt(
+        const cipherBuf  = hexToBuf(cipherTextHex);
+        const decrypted  = await window.crypto.subtle.decrypt(
             { name: "RSA-OAEP" },
             privKey,
             cipherBuf
