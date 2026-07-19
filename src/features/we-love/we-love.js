@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.46';
-import * as sync from '../../core/sync.js?v=4.2.46';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.46';
+} from '../../core/app.js?v=4.2.47';
+import * as sync from '../../core/sync.js?v=4.2.47';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.47';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.46');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.47');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.46';
+        const logoPath = './logo_pwa_small.png?v=4.2.47';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -371,7 +371,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.46';
+    const logoPath = './logo_pwa_small.png?v=4.2.47';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -429,6 +429,11 @@ function checkScheduledReminders() {
 
 // Fetch WeLove data
 export async function fetchWeLoveData() {
+    // Tự động đồng bộ từ quỹ chung nếu có kết nối
+    if (typeof window.checkForSharedFamilyFund === 'function') {
+        await window.checkForSharedFamilyFund();
+    }
+
     // Tự động gán ownerEmail nếu trống
     if (!state.ownerEmail && state.user && state.user.email) {
         state.ownerEmail = state.user.email.toLowerCase().trim();

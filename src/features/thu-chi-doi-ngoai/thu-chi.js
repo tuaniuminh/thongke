@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.2.46';
-import * as sync from '../../core/sync.js?v=4.2.46';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.46';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.46';
+} from '../../core/app.js?v=4.2.47';
+import * as sync from '../../core/sync.js?v=4.2.47';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.47';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.47';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1049,7 +1049,7 @@ function updateHomeLayoutUI() {
         const inviteStatus = state.familyFundInviteStatus;
         if (!state.viewingSharedFund && state.sharedFundOwnerEmail && !inviteStatus) {
             const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
-            inviteText.innerText = `Bạn có lời mời tham gia vào Quỹ gia đình được chia sẻ từ: ${displayName}`;
+            inviteText.innerText = `Bạn có lời mời kết nối tài khoản (Quỹ chung & Góc kỷ niệm) từ: ${displayName}`;
             inviteCard.style.display = 'flex';
             if (btnAccept) btnAccept.style.display = 'inline-block';
             if (btnDecline) btnDecline.style.display = 'inline-block';
@@ -1089,7 +1089,7 @@ function updateHomeLayoutUI() {
                     performSync(true);
                     
                     inviteCard.style.display = 'none';
-                    showToast("Đã chấp nhận lời mời tham gia quỹ chung!");
+                    showToast("Đã chấp nhận kết nối tài khoản thành công! ❤️");
                     
                     if (typeof window.checkForSharedFamilyFund === 'function') {
                         await window.checkForSharedFamilyFund();

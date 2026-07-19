@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.46';
-import { decrypt } from '../../core/crypto.js?v=4.2.46';
-import * as sync from '../../core/sync.js?v=4.2.46';
+} from '../../core/app.js?v=4.2.47';
+import { decrypt } from '../../core/crypto.js?v=4.2.47';
+import * as sync from '../../core/sync.js?v=4.2.47';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -384,6 +384,72 @@ export async function checkForSharedFamilyFund() {
                                 state.familyFunds = fundData.familyFunds || [];
                                 state.fundTransactions = fundData.fundTransactions || [];
                                 state.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
+
+                                // Gộp dữ liệu Góc tình yêu (WeLove) từ Quỹ chung bằng Last Write Wins (LWW)
+                                if (fundData.weLoveStartDateUpdated) {
+                                    const localTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveStartDateUpdated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveStartDate = fundData.weLoveStartDate || '';
+                                        state.weLoveStartDateUpdated = fundData.weLoveStartDateUpdated;
+                                    }
+                                }
+                                if (fundData.weLoveName1Updated) {
+                                    const localTime = state.weLoveName1Updated ? new Date(state.weLoveName1Updated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveName1Updated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveName1 = fundData.weLoveName1 || '';
+                                        state.weLoveName1Updated = fundData.weLoveName1Updated;
+                                    }
+                                }
+                                if (fundData.weLoveName2Updated) {
+                                    const localTime = state.weLoveName2Updated ? new Date(state.weLoveName2Updated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveName2Updated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveName2 = fundData.weLoveName2 || '';
+                                        state.weLoveName2Updated = fundData.weLoveName2Updated;
+                                    }
+                                }
+                                if (fundData.weLoveShowSicknessUpdated) {
+                                    const localTime = state.weLoveShowSicknessUpdated ? new Date(state.weLoveShowSicknessUpdated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveShowSicknessUpdated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveShowSickness = fundData.weLoveShowSickness !== false;
+                                        state.weLoveShowSicknessUpdated = fundData.weLoveShowSicknessUpdated;
+                                    }
+                                }
+                                if (fundData.weLoveSicknessLogsUpdated) {
+                                    const localTime = state.weLoveSicknessLogsUpdated ? new Date(state.weLoveSicknessLogsUpdated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveSicknessLogsUpdated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveSicknessLogs = fundData.weLoveSicknessLogs || [];
+                                        state.weLoveSicknessLogsUpdated = fundData.weLoveSicknessLogsUpdated;
+                                    }
+                                }
+                                if (fundData.weLoveRemindersUpdated) {
+                                    const localTime = state.weLoveRemindersUpdated ? new Date(state.weLoveRemindersUpdated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveRemindersUpdated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveReminders = fundData.weLoveReminders || [];
+                                        state.weLoveRemindersUpdated = fundData.weLoveRemindersUpdated;
+                                    }
+                                }
+                                if (fundData.weLoveAutoplayUpdated) {
+                                    const localTime = state.weLoveAutoplayUpdated ? new Date(state.weLoveAutoplayUpdated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.weLoveAutoplayUpdated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.weLoveAutoplay = fundData.weLoveAutoplay === true;
+                                        state.weLoveAutoplayUpdated = fundData.weLoveAutoplayUpdated;
+                                    }
+                                }
+                                if (fundData.ownerEmailUpdated) {
+                                    const localTime = state.ownerEmailUpdated ? new Date(state.ownerEmailUpdated).getTime() : 0;
+                                    const remoteTime = new Date(fundData.ownerEmailUpdated).getTime();
+                                    if (remoteTime > localTime) {
+                                        state.ownerEmail = fundData.ownerEmail || '';
+                                        state.ownerEmailUpdated = fundData.ownerEmailUpdated;
+                                    }
+                                }
                                 state.viewingSharedFund = true;
                                 state.sharedFundOwnerEmail = parsed.owner_email || 'Chồng/Vợ';
                                 state.fundSymmetricKey = fundKey;

@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.46';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.46';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.46';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.46';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.47';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.47';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.47';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.47';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.46';
-import * as sync from './sync.js?v=4.2.46';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.46';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.46';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.47';
+import * as sync from './sync.js?v=4.2.47';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.47';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.47';
 
-const APP_VERSION = '4.2.46';
+const APP_VERSION = '4.2.47';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1341,7 +1341,23 @@ async function performSync(silent = false) {
             familyFundsUpdated: state.familyFundsUpdated || '',
             fundTransactions: state.fundTransactions || [],
             fundTransactionsUpdated: state.fundTransactionsUpdated || '',
-            activeChartFundIds: state.activeChartFundIds || ['fund-main']
+            activeChartFundIds: state.activeChartFundIds || ['fund-main'],
+            weLoveStartDate: state.weLoveStartDate || '',
+            weLoveStartDateUpdated: state.weLoveStartDateUpdated || '',
+            weLoveName1: state.weLoveName1 || '',
+            weLoveName1Updated: state.weLoveName1Updated || '',
+            weLoveName2: state.weLoveName2 || '',
+            weLoveName2Updated: state.weLoveName2Updated || '',
+            weLoveShowSickness: state.weLoveShowSickness !== false,
+            weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
+            weLoveSicknessLogs: state.weLoveSicknessLogs || [],
+            weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
+            weLoveReminders: state.weLoveReminders || [],
+            weLoveRemindersUpdated: state.weLoveRemindersUpdated || '',
+            weLoveAutoplay: state.weLoveAutoplay === true,
+            weLoveAutoplayUpdated: state.weLoveAutoplayUpdated || '',
+            ownerEmail: state.ownerEmail || '',
+            ownerEmailUpdated: state.ownerEmailUpdated || ''
         });
         const encryptedFund = await encrypt(fundPayload, state.fundSymmetricKey);
 
