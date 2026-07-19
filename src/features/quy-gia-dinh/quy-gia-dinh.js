@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.77';
-import { decrypt } from '../../core/crypto.js?v=4.2.77';
-import * as sync from '../../core/sync.js?v=4.2.77';
+} from '../../core/app.js?v=4.2.78';
+import { decrypt } from '../../core/crypto.js?v=4.2.78';
+import * as sync from '../../core/sync.js?v=4.2.78';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -315,10 +315,28 @@ export async function checkForSharedFamilyFund() {
         return;
     }
 
-    if (state.spouseEmail && state.spouseRole === 'husband') {
-        console.log("[E2EE Healing] Detected incorrect spouseRole 'husband'. Healing to 'wife'.");
-        state.spouseRole = 'wife';
-        saveLocalState();
+    if (state.user && state.user.email) {
+        const email = state.user.email.toLowerCase().trim();
+        if (email === 'tututu886686@gmail.com') {
+            // Thiết bị của Chồng (Owner/Admin)
+            if (state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundSourceRow !== null) {
+                console.log("[E2EE Healing] Healing Husband's role and state to Owner...");
+                state.viewingSharedFund = false;
+                state.spouseRole = 'wife';
+                state.sharedFundOwnerEmail = '';
+                state.sharedFundSourceRow = null;
+                saveLocalState();
+            }
+        } else if (email === 'krskrsy@gmail.com') {
+            // Thiết bị của Vợ (Guest/Spouse)
+            if (!state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundOwnerEmail !== 'tututu886686@gmail.com') {
+                console.log("[E2EE Healing] Healing Wife's role and state to Guest...");
+                state.viewingSharedFund = true;
+                state.spouseRole = 'wife';
+                state.sharedFundOwnerEmail = 'tututu886686@gmail.com';
+                saveLocalState();
+            }
+        }
     }
 
     try {
@@ -1827,25 +1845,21 @@ function handleEmailInputClick() {
 
 // Render management tab elements (Linked to tab-fund-management view)
 export function renderManagementTab() {
-    const isJoined = state.viewingSharedFund || state.familyFundInviteStatus === 'accepted';
+    const isGuest = state.viewingSharedFund;
     const addFundBlock = document.getElementById('mgmtAddCustomFundBlock');
     if (addFundBlock) {
-        addFundBlock.style.display = isJoined ? 'none' : 'flex';
+        addFundBlock.style.display = isGuest ? 'none' : 'flex';
     }
 
     const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
     const spouseLinkSharedView = document.getElementById('spouseLinkSharedView');
     const spouseLinkOwnerName = document.getElementById('spouseLinkOwnerName');
 
-    if (isJoined) {
+    if (isGuest) {
         if (spouseEmailForm) spouseEmailForm.style.display = 'none';
         if (spouseLinkSharedView) spouseLinkSharedView.style.display = 'flex';
         if (spouseLinkOwnerName) {
-            let ownerText = state.ownerNickname || state.sharedFundOwnerEmail;
-            if (!state.viewingSharedFund) {
-                ownerText += " (Đang chờ đối tác đồng bộ khóa...)";
-            }
-            spouseLinkOwnerName.innerText = ownerText;
+            spouseLinkOwnerName.innerText = state.ownerNickname || state.sharedFundOwnerEmail;
         }
         // Ẩn mô tả liên kết cho thành viên đã tham gia
         const spouseDesc = document.getElementById('spouseLinkDescription');
@@ -1882,18 +1896,18 @@ export function renderManagementTab() {
         if (state.spouseEmail) {
             if (statusBadge) {
                 statusBadge.style.display = 'inline-block';
-                let statusText = 'Đang chờ duyệt';
+                let statusValText = 'Đang chờ duyệt';
                 let badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: #fbbf24;';
                 
                 if (state.spouseStatus === 'accepted') {
-                    statusText = 'Đã chấp nhận';
+                    statusValText = 'Đã chấp nhận';
                     badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399;';
                 } else if (state.spouseStatus === 'declined') {
-                    statusText = 'Đã từ chối';
+                    statusValText = 'Đã từ chối';
                     badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #f87171;';
                 }
                 
-                statusBadge.innerText = statusText;
+                statusBadge.innerText = statusValText;
                 statusBadge.style.cssText = `font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 12px; ${badgeStyle}`;
             }
         } else {
@@ -1909,8 +1923,8 @@ export function renderManagementTab() {
             if (statusText) statusText.style.display = 'none';
             if (reinviteBtn) reinviteBtn.style.display = 'none';
             if (unlinkBtn) {
-                // Nếu đã accepted thì ẩn nút Hủy theo mặc định, cần click email mới hiển thị
-                unlinkBtn.style.display = (state.spouseEmail && state.spouseStatus !== 'accepted') ? 'inline-block' : 'none';
+                // Cho phép chủ quỹ luôn luôn thấy nút hủy liên kết nếu đã điền email
+                unlinkBtn.style.display = state.spouseEmail ? 'inline-block' : 'none';
             }
             if (saveBtn) {
                 saveBtn.style.display = state.spouseEmail ? 'none' : 'inline-block';
