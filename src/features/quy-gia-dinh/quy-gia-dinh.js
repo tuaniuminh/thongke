@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.48';
-import { decrypt } from '../../core/crypto.js?v=4.2.48';
-import * as sync from '../../core/sync.js?v=4.2.48';
+} from '../../core/app.js?v=4.2.49';
+import { decrypt } from '../../core/crypto.js?v=4.2.49';
+import * as sync from '../../core/sync.js?v=4.2.49';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -337,6 +337,53 @@ export async function checkForSharedFamilyFund() {
             if (row.user_id === state.user.id) {
                 console.log("[E2EE Debug] Skipping own row:", row.user_email || row.user_id);
                 continue; // Skip own data
+            }
+
+            // CASE C: Kiểm tra xem đây có phải là dòng của spouse (người được mình mời kết nối) để tự động chia sẻ khóa đối xứng
+            const rowEmail = (row.user_email || '').toLowerCase().trim();
+            if (state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim()) {
+                try {
+                    const parsed = JSON.parse(row.encrypted_data);
+                    if (parsed) {
+                        let spousePubKey = parsed.asymmetricPublicKey || '';
+                        
+                        // Nếu vợ đã cập nhật trạng thái chấp nhận kết nối
+                        const remoteSpouseStatus = parsed.familyFundInviteStatus || parsed.spouseStatus || '';
+                        if (remoteSpouseStatus === 'accepted' && state.spouseStatus !== 'accepted') {
+                            state.spouseStatus = 'accepted';
+                            state.spouseStatusUpdated = new Date().toISOString();
+                            await saveLocalState();
+                            console.log("[E2EE Debug] Spouse accepted invitation. Updating spouseStatus to accepted.");
+                        }
+                        
+                        // Kiểm tra xem ta đã mã hóa fundSymmetricKey cho vợ chưa
+                        const myHybridRow = data.find(r => r.user_id === state.user.id);
+                        let needsSyncForSpouse = false;
+                        if (myHybridRow) {
+                            try {
+                                const myParsed = JSON.parse(myHybridRow.encrypted_data);
+                                const spouseEmailKey = state.spouseEmail.toLowerCase().trim();
+                                if (myParsed && myParsed.fund_shared_keys) {
+                                    const hasKeyForSpouse = !!myParsed.fund_shared_keys[spouseEmailKey];
+                                    if (!hasKeyForSpouse && spousePubKey) {
+                                        needsSyncForSpouse = true;
+                                        console.log("[E2EE Debug] Spouse has public key but we haven't encrypted fund key for them yet. Triggering performSync.");
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+                        
+                        if (needsSyncForSpouse) {
+                            setTimeout(() => {
+                                if (typeof performSync === 'function') {
+                                    performSync(true);
+                                }
+                            }, 500);
+                        }
+                    }
+                } catch (e) {
+                    console.error("[E2EE Debug] Error checking spouse row:", e);
+                }
             }
 
             try {
