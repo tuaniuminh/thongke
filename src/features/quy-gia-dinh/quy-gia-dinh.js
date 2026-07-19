@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.83';
-import { decrypt } from '../../core/crypto.js?v=4.2.83';
-import * as sync from '../../core/sync.js?v=4.2.83';
+} from '../../core/app.js?v=4.2.84';
+import { decrypt } from '../../core/crypto.js?v=4.2.84';
+import * as sync from '../../core/sync.js?v=4.2.84';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -826,10 +826,9 @@ export async function renderFundDashboard() {
     const headerCard = document.getElementById('sharedFundHeaderCard');
     const headerCardTitleText = document.getElementById('sharedFundHeaderCardTitleText');
     if (headerCard && headerCardTitleText) {
-        if (state.viewingSharedFund) {
+        if (state.viewingSharedFund && state.activeTab === 'fund') {
             headerCard.style.display = 'flex';
-            const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
-            headerCardTitleText.innerText = `Quỹ chung gia đình của ${displayName}`;
+            headerCardTitleText.innerText = "Bạn đang tham gia quỹ chung gia đình";
             lucide.createIcons();
         } else {
             headerCard.style.display = 'none';
