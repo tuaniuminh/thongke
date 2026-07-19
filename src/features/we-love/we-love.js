@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.43';
-import * as sync from '../../core/sync.js?v=4.2.43';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.43';
+} from '../../core/app.js?v=4.2.44';
+import * as sync from '../../core/sync.js?v=4.2.44';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.44';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.43');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.44');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.43';
+        const logoPath = './logo_pwa_small.png?v=4.2.44';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -371,7 +371,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.43';
+    const logoPath = './logo_pwa_small.png?v=4.2.44';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -874,8 +874,12 @@ export async function renderWeLoveDashboard() {
     tabContainer.innerHTML = `
         <div class="memory-page" id="weLovePage">
 
-
-
+            <!-- Couple Names Header under Navbar -->
+            <div class="couple-names-header" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1.5rem; margin-top: 0.5rem; width: 100%; z-index: 5;">
+                <span class="partner-name" style="font-size: 1.6rem; font-weight: bold; color: var(--text-primary);">${escapeHTML(state.weLoveName1 || 'Anh')}</span>
+                <span class="pulsing-heart-red" style="font-size: 2.2rem; display: inline-block; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6)); line-height: 1;">❤️</span>
+                <span class="partner-name" style="font-size: 1.6rem; font-weight: bold; color: var(--text-primary);">${escapeHTML(state.weLoveName2 || 'Em')}</span>
+            </div>
 
             ${weLoveCurrentSubView === 'admin' && canEdit ? `
                 <!-- ADMIN SUBVIEW -->
@@ -1036,11 +1040,8 @@ export async function renderWeLoveDashboard() {
                     <button class="notification-test-btn" id="weLoveNotificationTest" title="Thử nghiệm thông báo yêu thương">🔔</button>
 
                     <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
-                    <div class="couple-names-header" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1.5rem; margin-top: 1.5rem;">
-                        <span class="partner-name" style="font-size: 1.6rem; font-weight: bold; color: var(--text-primary);">${escapeHTML(state.weLoveName1 || 'Anh')}</span>
-                        <span class="pulsing-heart-red" style="font-size: 2.2rem; display: inline-block; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6)); line-height: 1;">❤️</span>
-                        <span class="partner-name" style="font-size: 1.6rem; font-weight: bold; color: var(--text-primary);">${escapeHTML(state.weLoveName2 || 'Em')}</span>
-                    </div>
+                    <h2 class="memory-title">Kỷ Niệm Tình Yêu</h2>
+                    <p class="memory-subtitle">${escapeHTML(state.weLoveName1 || 'Anh')} ❤️ ${escapeHTML(state.weLoveName2 || 'Em')} - Hành trình gieo bình yên, hái hạnh phúc</p>
                     
                     <div class="days-counter-box">
                         <div class="days-number" id="weLoveDaysCountVal">${state.weLoveStartDate ? loveDaysCount : '?'}</div>
