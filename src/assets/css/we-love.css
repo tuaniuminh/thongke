@@ -1269,3 +1269,33 @@ body.dark-mode .home-love-left-widget {
   animation: heartBeatRed 1.2s infinite;
   display: inline-block;
 }
+
+/* Style cho Header tên cặp đôi */
+.couple-names-header {
+  perspective: 1000px;
+}
+
+.partner-name {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #e11d48 0%, #ec4899 50%, #f43f5e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(244, 63, 94, 0.15));
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+  cursor: default;
+}
+
+body.dark-mode .partner-name {
+  background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #fda4af 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(251, 113, 133, 0.3));
+}
+
+.partner-name:hover {
+  transform: translateY(-2px) scale(1.08);
+  filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.4));
+}
