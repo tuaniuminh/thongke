@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.78';
-import { decrypt } from '../../core/crypto.js?v=4.2.78';
-import * as sync from '../../core/sync.js?v=4.2.78';
+} from '../../core/app.js?v=4.2.79';
+import { decrypt } from '../../core/crypto.js?v=4.2.79';
+import * as sync from '../../core/sync.js?v=4.2.79';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -315,30 +315,6 @@ export async function checkForSharedFamilyFund() {
         return;
     }
 
-    if (state.user && state.user.email) {
-        const email = state.user.email.toLowerCase().trim();
-        if (email === 'tututu886686@gmail.com') {
-            // Thiết bị của Chồng (Owner/Admin)
-            if (state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundSourceRow !== null) {
-                console.log("[E2EE Healing] Healing Husband's role and state to Owner...");
-                state.viewingSharedFund = false;
-                state.spouseRole = 'wife';
-                state.sharedFundOwnerEmail = '';
-                state.sharedFundSourceRow = null;
-                saveLocalState();
-            }
-        } else if (email === 'krskrsy@gmail.com') {
-            // Thiết bị của Vợ (Guest/Spouse)
-            if (!state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundOwnerEmail !== 'tututu886686@gmail.com') {
-                console.log("[E2EE Healing] Healing Wife's role and state to Guest...");
-                state.viewingSharedFund = true;
-                state.spouseRole = 'wife';
-                state.sharedFundOwnerEmail = 'tututu886686@gmail.com';
-                saveLocalState();
-            }
-        }
-    }
-
     try {
         console.log("[E2EE Debug] Starting checkForSharedFamilyFund for user:", state.user.email);
         const { data, error } = await supabaseClient
@@ -356,6 +332,58 @@ export async function checkForSharedFamilyFund() {
 
         console.log("[E2EE Debug] Fetched rows count:", data.length);
         const myEmail = state.user.email.toLowerCase().trim();
+
+        // Tự động phục hồi vai trò bị ngược (generic healing logic)
+        let determinedAsGuest = false;
+        let determinedAsOwner = false;
+        let spouseRow = null;
+
+        if (state.spouseEmail) {
+            const partnerEmail = state.spouseEmail.toLowerCase().trim();
+            spouseRow = data.find(r => r.user_email && r.user_email.toLowerCase().trim() === partnerEmail);
+            if (spouseRow) {
+                try {
+                    let parsed = null;
+                    if (typeof spouseRow.encrypted_data === 'object' && spouseRow.encrypted_data !== null) {
+                        parsed = spouseRow.encrypted_data;
+                    } else {
+                        parsed = JSON.parse(spouseRow.encrypted_data);
+                    }
+
+                    if (parsed && parsed.is_hybrid) {
+                        const hasKeys = parsed.fund_shared_keys && Object.keys(parsed.fund_shared_keys).length > 0;
+                        if (hasKeys && parsed.fund_shared_keys[myEmail]) {
+                            // Đối phương có chia sẻ khóa cho mình -> Mình là Guest (Vợ)
+                            determinedAsGuest = true;
+                        } else {
+                            // Đối phương không chia sẻ khóa cho mình -> Mình là Owner (Chồng)
+                            determinedAsOwner = true;
+                        }
+                    }
+                } catch (e) {
+                    console.error("[E2EE Healing] Error parsing partner row:", e);
+                }
+            }
+        }
+
+        if (determinedAsGuest) {
+            if (!state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundOwnerEmail !== state.spouseEmail) {
+                console.log("[E2EE Healing] Automatically healed device as GUEST (Wife).");
+                state.viewingSharedFund = true;
+                state.spouseRole = 'wife';
+                state.sharedFundOwnerEmail = state.spouseEmail;
+                await saveLocalState();
+            }
+        } else if (determinedAsOwner) {
+            if (state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundSourceRow !== null) {
+                console.log("[E2EE Healing] Automatically healed device as OWNER (Husband).");
+                state.viewingSharedFund = false;
+                state.spouseRole = 'wife';
+                state.sharedFundOwnerEmail = '';
+                state.sharedFundSourceRow = null;
+                await saveLocalState();
+            }
+        }
 
         for (const row of data) {
             if (row.user_id === state.user.id) {

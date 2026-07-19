@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.2.78';
-import * as sync from '../../core/sync.js?v=4.2.78';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.78';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.78';
+} from '../../core/app.js?v=4.2.79';
+import * as sync from '../../core/sync.js?v=4.2.79';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.79';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.79';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1039,119 +1039,10 @@ function updateHomeLayoutUI() {
         }
     }
 
-    // --- Lời mời tham gia Quỹ gia đình ---
+    // --- Lời mời tham gia Quỹ gia đình --- (Đã tắt ở v4.2.79 vì đã có Mã ghép đôi WeLove ghép nối trực tiếp)
     const inviteCard = document.getElementById('spouseFundInviteCard');
-    const inviteText = document.getElementById('spouseFundInviteText');
-    const btnAccept = document.getElementById('btnAcceptSpouseFund');
-    const btnDecline = document.getElementById('btnDeclineSpouseFund');
-    
-    if (inviteCard && inviteText) {
-        const inviteStatus = state.familyFundInviteStatus;
-        if (!state.viewingSharedFund && state.sharedFundOwnerEmail && !inviteStatus) {
-            const displayName = state.ownerNickname ? state.ownerNickname : state.sharedFundOwnerEmail;
-            inviteText.innerText = `Bạn có lời mời kết nối tài khoản (Quỹ chung & Góc kỷ niệm) từ: ${displayName}`;
-            inviteCard.style.display = 'flex';
-            if (btnAccept) btnAccept.style.display = 'inline-block';
-            if (btnDecline) btnDecline.style.display = 'inline-block';
-            
-            if (btnAccept) {
-                btnAccept.onclick = async () => {
-                    state.familyFundInviteStatus = 'accepted';
-                    state.familyFundInviteStatusUpdated = new Date().toISOString();
-                    state.showFamilyFundCard = true;
-                    state.showFamilyFundCardUpdated = new Date().toISOString();
-                    
-                    // Notify owner of acceptance via Supabase
-                    if (state.sharedFundSourceRow && state.sharedFundSourceRow.user_id) {
-                        try {
-                            const parsed = JSON.parse(state.sharedFundSourceRow.encrypted_data);
-                            if (parsed && parsed.is_hybrid) {
-                                parsed.spouse_status = 'accepted';
-                                const updatedPayload = JSON.stringify(parsed);
-                                const supabaseClient = sync.getSupabase();
-                                if (supabaseClient) {
-                                    await supabaseClient
-                                        .from('gift_sync')
-                                        .update({
-                                            encrypted_data: updatedPayload,
-                                            updated_at: new Date().toISOString()
-                                        })
-                                        .eq('user_id', state.sharedFundSourceRow.user_id);
-                                    console.log("[E2EE Debug] Notified spouse of acceptance status.");
-                                }
-                            }
-                        } catch (updateErr) {
-                            console.error("Failed to notify spouse of acceptance:", updateErr);
-                        }
-                    }
-
-                    await saveLocalState();
-                    performSync(true);
-                    
-                    inviteCard.style.display = 'none';
-                    showToast("Đã chấp nhận kết nối tài khoản thành công! ❤️");
-                    
-                    if (typeof window.checkForSharedFamilyFund === 'function') {
-                        await window.checkForSharedFamilyFund();
-                    }
-                    updateHomeLayoutUI();
-                };
-            }
-            
-            if (btnDecline) {
-                btnDecline.onclick = async () => {
-                    // Update decline status to partner's row on Supabase
-                    if (state.sharedFundSourceRow && state.sharedFundSourceRow.user_id) {
-                        try {
-                            const parsed = JSON.parse(state.sharedFundSourceRow.encrypted_data);
-                            if (parsed && parsed.is_hybrid) {
-                                parsed.spouse_status = 'declined';
-                                const updatedPayload = JSON.stringify(parsed);
-                                const supabaseClient = sync.getSupabase();
-                                if (supabaseClient) {
-                                    await supabaseClient
-                                        .from('gift_sync')
-                                        .update({
-                                            encrypted_data: updatedPayload,
-                                            updated_at: new Date().toISOString()
-                                        })
-                                        .eq('user_id', state.sharedFundSourceRow.user_id);
-                                    console.log("[E2EE Debug] Notified spouse of decline status.");
-                                }
-                            }
-                        } catch (updateErr) {
-                            console.error("Failed to notify spouse of decline:", updateErr);
-                        }
-                    }
-
-                    state.familyFundInviteStatus = 'declined';
-                    state.familyFundInviteStatusUpdated = new Date().toISOString();
-                    state.sharedFundOwnerEmail = '';
-                    state.fundSymmetricKey = '';
-                    state.sharedFundSourceRow = null;
-                    
-                    await saveLocalState();
-                    performSync(true);
-                    
-                    inviteCard.style.display = 'none';
-                    showToast("Đã từ chối lời mời.");
-                    updateHomeLayoutUI();
-                };
-            }
-        } else if (state.spouseFundInvitePending && state.spouseFundInviteOwnerEmail) {
-            const displayName = state.ownerNickname ? state.ownerNickname : state.spouseFundInviteOwnerEmail;
-            inviteText.innerText = `Đối tác (${displayName}) muốn chia sẻ Quỹ gia đình với bạn. Vui lòng bảo đối tác mở ứng dụng FamiLife trên thiết bị của họ một lần để tự động kích hoạt liên kết!`;
-            inviteCard.style.display = 'flex';
-            if (btnAccept) btnAccept.style.display = 'none';
-            if (btnDecline) btnDecline.style.display = 'none';
-        } else {
-            inviteCard.style.display = 'none';
-            if (inviteStatus === 'accepted' && !state.showFamilyFundCard) {
-                state.showFamilyFundCard = true;
-                state.showFamilyFundCardUpdated = new Date().toISOString();
-                if (cardFund) cardFund.style.display = 'flex';
-            }
-        }
+    if (inviteCard) {
+        inviteCard.style.display = 'none';
     }
 
     if (typeof updateHomeWeather === 'function') {
