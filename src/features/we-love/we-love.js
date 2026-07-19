@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.49';
-import * as sync from '../../core/sync.js?v=4.2.49';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.49';
+} from '../../core/app.js?v=4.2.50';
+import * as sync from '../../core/sync.js?v=4.2.50';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.50';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.49');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.50');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.49';
+        const logoPath = './logo_pwa_small.png?v=4.2.50';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -371,7 +371,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.49';
+    const logoPath = './logo_pwa_small.png?v=4.2.50';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1007,27 +1007,58 @@ export async function renderWeLoveDashboard() {
                                 </label>
                             </div>
 
-                            <!-- 4. Mời bạn tình tham gia -->
+                            <!-- 4. Ghép đôi & Kết nối E2EE -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
-                                <label class="welove-form-label" style="font-weight: 700;">💞 Mời nửa kia tham gia cùng theo dõi:</label>
-                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Nhập email tài khoản FamiLife của nửa kia để chia sẻ tiến trình, đếm ngày yêu và nhật ký lượt truy cập.</p>
+                                <label class="welove-form-label" style="font-weight: 700;">💞 Kết nối ghép đôi với nửa kia:</label>
                                 
-                                <div style="display: flex; gap: 8px;">
-                                    <input type="email" class="welove-input" id="weLovePartnerEmailInput" placeholder="nhap-email-ban-tinh@example.com" value="${state.spouseEmail || ''}" ${state.spouseEmail ? 'disabled' : ''} style="flex-grow: 1;">
-                                    ${state.spouseEmail ? `
-                                        <button type="button" class="btn btn-outline" id="btnWeLoveUnlinkPartner" style="border-color: #ef4444; color: #ef4444; font-size: 0.85rem; padding: 0 16px; white-space: nowrap; border-radius: 12px; font-weight: 700;">Hủy mời</button>
-                                    ` : `
-                                        <button type="button" class="btn btn-primary" id="btnWeLoveLinkPartner" style="font-size: 0.85rem; padding: 0 16px; white-space: nowrap; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: white; border-radius: 12px; font-weight: 700;">Mời kết nối</button>
-                                    `}
-                                </div>
                                 ${state.spouseEmail ? `
-                                    <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
-                                        <span>Trạng thái:</span>
-                                        <span class="badge" style="background: ${state.spouseStatus === 'accepted' ? 'var(--accent-emerald)' : 'var(--accent-amber)'}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem;">
-                                            ${state.spouseStatus === 'accepted' ? 'Đã liên kết' : 'Đang chờ duyệt'}
-                                        </span>
+                                    <!-- GIAO DIỆN KHI ĐÃ GHÉP ĐÔI -->
+                                    <div style="background: var(--bg-secondary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                        <p style="font-size: 0.8rem; color: var(--text-primary); margin: 0 0 8px 0; font-weight: 600;">💞 Đang ghép đôi với:</p>
+                                        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                                            <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent-rose); word-break: break-all;">${state.spouseEmail}</span>
+                                            <button type="button" class="btn btn-outline" id="btnWeLoveUnlinkPartner" style="border-color: #ef4444; color: #ef4444; font-size: 0.75rem; padding: 4px 12px; height: 32px; white-space: nowrap; border-radius: 10px; font-weight: 700;">Hủy kết nối</button>
+                                        </div>
+                                        <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                                            <span>Trạng thái:</span>
+                                            <span class="badge" style="background: ${state.spouseStatus === 'accepted' ? 'var(--accent-emerald)' : 'var(--accent-amber)'}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem;">
+                                                ${state.spouseStatus === 'accepted' ? 'Đã liên kết' : 'Đang chờ đối phương'}
+                                            </span>
+                                        </div>
                                     </div>
-                                ` : ''}
+                                ` : `
+                                    <!-- GIAO DIỆN CHƯA GHÉP ĐÔI -->
+                                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                                        
+                                        <!-- CỘT 1: TẠO MÃ GHÉP ĐÔI -->
+                                        <div style="background: rgba(225, 29, 72, 0.03); padding: 12px; border-radius: 12px; border: 1px dashed var(--accent-rose);">
+                                            <p style="font-size: 0.8rem; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 700;">1. Tạo mã ghép đôi gửi nửa kia:</p>
+                                            <p style="font-size: 0.7rem; color: var(--text-secondary); margin: 0 0 10px 0;">Hệ thống sẽ sinh mã dùng chung giúp đối phương tự động giải mã dữ liệu của bạn ngay lập tức.</p>
+                                            
+                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                <button type="button" class="btn btn-primary" id="btnWeLoveGeneratePairingCode" style="font-size: 0.8rem; padding: 8px 16px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: white; border-radius: 10px; font-weight: 700; cursor: pointer;">Tạo mã ghép đôi</button>
+                                                
+                                                <div id="weLovePairingCodeDisplayContainer" style="display: none; align-items: center; gap: 8px; flex-grow: 1; justify-content: flex-end;">
+                                                    <span id="weLovePairingCodeVal" style="font-size: 1.1rem; font-weight: 800; letter-spacing: 1px; color: var(--accent-rose); background: var(--bg-secondary); padding: 4px 12px; border-radius: 8px; border: 1px solid var(--border-color);"></span>
+                                                    <button type="button" class="btn" id="btnWeLoveCopyPairingCode" style="font-size: 0.75rem; padding: 6px 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer;" title="Sao chép mã">📋 Copy</button>
+                                                </div>
+                                            </div>
+                                            <div id="weLovePairingCodeTimer" style="display: none; font-size: 0.7rem; color: var(--text-secondary); margin-top: 6px; text-align: right;"></div>
+                                        </div>
+
+                                        <!-- CỘT 2: NHẬP MÃ GHÉP ĐÔI -->
+                                        <div style="background: var(--bg-secondary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                            <p style="font-size: 0.8rem; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 700;">2. Hoặc nhập mã ghép đôi từ nửa kia:</p>
+                                            <p style="font-size: 0.7rem; color: var(--text-secondary); margin: 0 0 10px 0;">Nhập mã ghép đôi đối phương đã gửi cho bạn để hoàn thành kết nối 2 chiều.</p>
+                                            
+                                            <div style="display: flex; gap: 8px;">
+                                                <input type="text" class="welove-input" id="weLovePairingCodeInput" placeholder="Nhập mã (Ví dụ: 9527)" style="flex-grow: 1; padding: 6px 12px; font-size: 0.85rem; text-transform: uppercase; font-weight: 700; text-align: center; letter-spacing: 1px; border-radius: 10px;">
+                                                <button type="button" class="btn btn-primary" id="btnWeLoveSubmitPairingCode" style="font-size: 0.8rem; padding: 0 16px; background: #059669; border: none; color: white; border-radius: 10px; font-weight: 700; white-space: nowrap; cursor: pointer;">Ghép đôi</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                `}
                             </div>
 
                             <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%;">
@@ -1451,9 +1482,7 @@ function bindSettingsEvents() {
     const startDateInput = document.getElementById('weLoveStartDateInput');
     const showSicknessInput = document.getElementById('weLoveShowSicknessInput');
     const autoplayInput = document.getElementById('weLoveAutoplayInput');
-    const btnLink = document.getElementById('btnWeLoveLinkPartner');
     const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
-    const partnerEmailInput = document.getElementById('weLovePartnerEmailInput');
 
     if (startDateInput) {
         // Date placeholder trick: toggle input type dynamically
@@ -1512,30 +1541,185 @@ function bindSettingsEvents() {
         });
     }
 
-    if (btnLink && partnerEmailInput) {
-        btnLink.addEventListener('click', async () => {
-            const email = partnerEmailInput.value.trim().toLowerCase();
-            if (!email) {
-                showToast("Vui lòng nhập email của nửa kia!", "warning");
+    // Hẹn giờ đếm ngược mã ghép đôi
+    const pairingTimerEl = document.getElementById('weLovePairingCodeTimer');
+    const pairingDisplayContainer = document.getElementById('weLovePairingCodeDisplayContainer');
+    const pairingValEl = document.getElementById('weLovePairingCodeVal');
+    const btnGeneratePairing = document.getElementById('btnWeLoveGeneratePairingCode');
+
+    let pairingInterval = null;
+    const startPairingTimer = () => {
+        if (pairingInterval) clearInterval(pairingInterval);
+        if (!state.pairingCode || !state.pairingCodeExpired) return;
+
+        const updateTimer = () => {
+            const expireTime = new Date(state.pairingCodeExpired).getTime();
+            const now = Date.now();
+            const diff = expireTime - now;
+
+            if (diff <= 0) {
+                clearInterval(pairingInterval);
+                if (pairingTimerEl) pairingTimerEl.innerText = "Mã đã hết hạn!";
+                if (pairingValEl) pairingValEl.style.textDecoration = "line-through";
+                state.pairingCode = '';
+                state.pairingCodeExpired = '';
+                state.pairingFundKeyEncrypted = '';
+                saveLocalState();
+            } else {
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                if (pairingTimerEl) {
+                    pairingTimerEl.innerText = `Mã số hết hạn sau: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }
+        };
+
+        if (pairingDisplayContainer && pairingValEl && pairingTimerEl) {
+            pairingDisplayContainer.style.display = 'flex';
+            pairingValEl.innerText = state.pairingCode;
+            pairingValEl.style.textDecoration = 'none';
+            pairingTimerEl.style.display = 'block';
+            if (btnGeneratePairing) btnGeneratePairing.innerText = "Tạo mã mới";
+        }
+        updateTimer();
+        pairingInterval = setInterval(updateTimer, 1000);
+    };
+
+    // Khởi động đếm ngược nếu mã ghép đôi cũ vẫn còn hạn
+    if (state.pairingCode && state.pairingCodeExpired && new Date(state.pairingCodeExpired).getTime() > Date.now()) {
+        setTimeout(startPairingTimer, 100);
+    }
+
+    if (btnGeneratePairing) {
+        btnGeneratePairing.addEventListener('click', async () => {
+            if (!sync.isConfigured() || !state.user) {
+                showToast("Bạn cần cấu hình kết nối Supabase trong Cài Đặt trước mới có thể ghép đôi!", "warning");
                 return;
             }
-            if (state.user && email === state.user.email.toLowerCase().trim()) {
-                showToast("Không thể tự mời email chính mình!", "warning");
+            
+            const codeNum = Math.floor(100000 + Math.random() * 900000);
+            const pairingCode = `LOVE-${codeNum}`;
+
+            try {
+                if (!state.fundSymmetricKey) {
+                    const _fkRaw = window.crypto.getRandomValues(new Uint8Array(32));
+                    state.fundSymmetricKey = Array.from(_fkRaw).map(b => b.toString(16).padStart(2, '0')).join('');
+                    await saveLocalState();
+                }
+
+                const encryptedKey = await encrypt(state.fundSymmetricKey, pairingCode);
+
+                state.pairingCode = pairingCode;
+                state.pairingCodeExpired = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+                state.pairingFundKeyEncrypted = encryptedKey;
+
+                await saveLocalState();
+
+                showToast("Đang tải mã ghép đôi lên máy chủ...", "info");
+                await performSync(true);
+
+                startPairingTimer();
+                showToast("Đã tạo mã ghép đôi! Hãy gửi cho nửa kia nhé. ❤️");
+            } catch (err) {
+                console.error("Failed to generate pairing code:", err);
+                showToast("Không thể tạo mã ghép đôi: " + err.message, "error");
+            }
+        });
+    }
+
+    const btnCopyPairing = document.getElementById('btnWeLoveCopyPairingCode');
+    if (btnCopyPairing) {
+        btnCopyPairing.addEventListener('click', () => {
+            if (!state.pairingCode) return;
+            navigator.clipboard.writeText(state.pairingCode)
+                .then(() => showToast("Đã sao chép mã ghép đôi vào bộ nhớ tạm!"))
+                .catch(() => showToast("Không thể sao chép, hãy copy thủ công nhé."));
+        });
+    }
+
+    const btnSubmitPairing = document.getElementById('btnWeLoveSubmitPairingCode');
+    const pairingInput = document.getElementById('weLovePairingCodeInput');
+    if (btnSubmitPairing && pairingInput) {
+        btnSubmitPairing.addEventListener('click', async () => {
+            if (!sync.isConfigured() || !state.user) {
+                showToast("Bạn cần cấu hình kết nối Supabase trong Cài Đặt trước mới có thể ghép đôi!", "warning");
                 return;
             }
 
-            state.spouseEmail = email;
-            state.spouseRole = 'wife';
-            state.spouseStatus = 'pending';
-            
-            await saveLocalState();
-            
-            if (sync.isConfigured() && state.user) {
-                performSync(true);
+            const inputCode = pairingInput.value.trim().toUpperCase();
+            if (!inputCode.startsWith('LOVE-') || inputCode.length < 10) {
+                showToast("Mã ghép đôi không đúng định dạng! (Ví dụ: LOVE-123456)", "warning");
+                return;
             }
 
-            showToast("Đã gửi lời mời liên kết góc kỷ niệm! 💞");
-            renderWeLoveDashboard();
+            btnSubmitPairing.disabled = true;
+            btnSubmitPairing.innerText = "Đang kết nối...";
+
+            try {
+                showToast("Đang tìm kiếm mã ghép đôi trên máy chủ...", "info");
+                
+                const supabaseClient = sync.getSupabase();
+                const { data, error } = await supabaseClient
+                    .from('gift_sync')
+                    .select('user_id, encrypted_data, user_email, public_key')
+                    .like('encrypted_data', `%"pairing_code":"${inputCode}"%`)
+                    .maybeSingle();
+
+                if (error) {
+                    throw new Error("Lỗi kết nối máy chủ: " + error.message);
+                }
+
+                if (!data) {
+                    throw new Error("Không tìm thấy mã ghép đôi này hoặc mã đã bị hủy!");
+                }
+
+                const husbandEmail = (data.user_email || '').toLowerCase().trim();
+                if (husbandEmail === state.user.email.toLowerCase().trim()) {
+                    throw new Error("Bạn không thể tự ghép đôi với chính mình!");
+                }
+
+                const parsed = JSON.parse(data.encrypted_data);
+                if (!parsed || !parsed.pairing_code_expired || !parsed.pairing_fund_key_encrypted) {
+                    throw new Error("Mã ghép đôi không hợp lệ hoặc dữ liệu bị hỏng!");
+                }
+
+                if (new Date(parsed.pairing_code_expired).getTime() < Date.now()) {
+                    throw new Error("Mã ghép đôi đã hết hạn! Vui lòng nhờ đối phương tạo mã mới.");
+                }
+
+                showToast("Đang giải mã chìa khóa kết nối E2EE...", "info");
+                let decryptedFundKey = '';
+                try {
+                    decryptedFundKey = await decrypt(parsed.pairing_fund_key_encrypted, inputCode);
+                } catch (decErr) {
+                    throw new Error("Giải mã thất bại! Vui lòng kiểm tra lại mã số.");
+                }
+
+                if (!decryptedFundKey) {
+                    throw new Error("Mã ghép đôi không đúng hoặc khóa rỗng!");
+                }
+
+                state.fundSymmetricKey = decryptedFundKey;
+                state.spouseEmail = husbandEmail;
+                state.spouseStatus = 'accepted';
+                state.spouseRole = 'husband';
+                state.familyFundInviteStatus = 'accepted';
+                state.viewingSharedFund = true;
+                state.sharedFundOwnerEmail = husbandEmail;
+                
+                await saveLocalState();
+
+                showToast("Ghép đôi thành công! Đang tải và hòa trộn dữ liệu... ❤️");
+
+                await performSync(true);
+                renderWeLoveDashboard();
+            } catch (err) {
+                console.error("Pairing failed:", err);
+                showToast(err.message || "Ghép đôi thất bại!", "error");
+            } finally {
+                btnSubmitPairing.disabled = false;
+                btnSubmitPairing.innerText = "Ghép đôi";
+            }
         });
     }
 
@@ -1546,6 +1730,12 @@ function bindSettingsEvents() {
                 state.spouseEmail = '';
                 state.spouseStatus = '';
                 state.spouseRole = 'wife';
+                state.pairingCode = '';
+                state.pairingCodeExpired = '';
+                state.pairingFundKeyEncrypted = '';
+                state.familyFundInviteStatus = '';
+                state.viewingSharedFund = false;
+                state.sharedFundOwnerEmail = '';
                 
                 await saveLocalState();
                 

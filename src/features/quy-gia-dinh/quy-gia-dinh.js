@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.49';
-import { decrypt } from '../../core/crypto.js?v=4.2.49';
-import * as sync from '../../core/sync.js?v=4.2.49';
+} from '../../core/app.js?v=4.2.50';
+import { decrypt } from '../../core/crypto.js?v=4.2.50';
+import * as sync from '../../core/sync.js?v=4.2.50';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -383,6 +383,46 @@ export async function checkForSharedFamilyFund() {
                     }
                 } catch (e) {
                     console.error("[E2EE Debug] Error checking spouse row:", e);
+                }
+            }
+
+            // CASE D: Đối với người tạo mã ghép đôi (Admin), tự động nhận diện khi đối tác đã nhập mã và chấp nhận kết nối
+            if (!state.spouseEmail) {
+                try {
+                    const parsed = JSON.parse(row.encrypted_data);
+                    if (parsed && parsed.is_hybrid && parsed.spouse_email) {
+                        const remoteSpouseEmail = parsed.spouse_email.toLowerCase().trim();
+                        const remoteSpouseStatus = parsed.familyFundInviteStatus || parsed.spouseStatus || '';
+                        
+                        if (remoteSpouseEmail === myEmail && remoteSpouseStatus === 'accepted') {
+                            const spouseEmailVal = (row.user_email || '').toLowerCase().trim();
+                            console.log("[E2EE Debug] Detected partner accepted pairing. Connecting to:", spouseEmailVal);
+                            
+                            state.spouseEmail = spouseEmailVal;
+                            state.spouseStatus = 'accepted';
+                            state.spouseRole = 'husband'; // Mình là admin khởi tạo mã
+                            state.familyFundInviteStatus = 'accepted';
+                            state.spouseStatusUpdated = new Date().toISOString();
+                            
+                            await saveLocalState();
+                            
+                            // Thực hiện đồng bộ ngầm để chia sẻ khóa đối xứng và dữ liệu WeLove chung
+                            setTimeout(() => {
+                                if (typeof performSync === 'function') {
+                                    performSync(true);
+                                }
+                            }, 500);
+                            
+                            if (typeof window.updateHomeLayoutUI === 'function') {
+                                window.updateHomeLayoutUI();
+                            }
+                            if (typeof window.renderWeLoveDashboard === 'function') {
+                                window.renderWeLoveDashboard();
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("[E2EE Debug] Error in CASE D pairing detection:", e);
                 }
             }
 

@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.49';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.49';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.49';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.49';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.50';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.50';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.50';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.50';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.49';
-import * as sync from './sync.js?v=4.2.49';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.49';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.49';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.50';
+import * as sync from './sync.js?v=4.2.50';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.50';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.50';
 
-const APP_VERSION = '4.2.49';
+const APP_VERSION = '4.2.50';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1398,7 +1398,11 @@ async function performSync(silent = false) {
             spouse_status: state.spouseStatus || '',
             google_sheets_webhook: state.googleSheetsWebhook || '',
             family_funds_updated: state.familyFundsUpdated || '',
-            fund_transactions_updated: state.fundTransactionsUpdated || ''
+            fund_transactions_updated: state.fundTransactionsUpdated || '',
+            pairing_code: state.pairingCode || '',
+            pairing_code_expired: state.pairingCodeExpired || '',
+            pairing_fund_key_encrypted: state.pairingFundKeyEncrypted || '',
+            asymmetricPublicKey: state.asymmetricPublicKey || ''
         });
 
         await sync.saveSyncData(hybridPayload, state.asymmetricPublicKey || null);
