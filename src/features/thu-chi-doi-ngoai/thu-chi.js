@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.2.44';
-import * as sync from '../../core/sync.js?v=4.2.44';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.44';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.44';
+} from '../../core/app.js?v=4.2.45';
+import * as sync from '../../core/sync.js?v=4.2.45';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.45';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.45';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;

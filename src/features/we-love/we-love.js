@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.44';
-import * as sync from '../../core/sync.js?v=4.2.44';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.44';
+} from '../../core/app.js?v=4.2.45';
+import * as sync from '../../core/sync.js?v=4.2.45';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.45';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.44');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.45');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.44';
+        const logoPath = './logo_pwa_small.png?v=4.2.45';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -371,7 +371,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.44';
+    const logoPath = './logo_pwa_small.png?v=4.2.45';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1041,7 +1041,7 @@ export async function renderWeLoveDashboard() {
 
                     <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
                     <h2 class="memory-title">Kỷ Niệm Tình Yêu</h2>
-                    <p class="memory-subtitle">${escapeHTML(state.weLoveName1 || 'Anh')} ❤️ ${escapeHTML(state.weLoveName2 || 'Em')} - Hành trình gieo bình yên, hái hạnh phúc</p>
+                    <p class="memory-subtitle">Hành trình gieo bình yên, hái hạnh phúc</p>
                     
                     <div class="days-counter-box">
                         <div class="days-number" id="weLoveDaysCountVal">${state.weLoveStartDate ? loveDaysCount : '?'}</div>
