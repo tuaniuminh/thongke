@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.81';
-import { decrypt } from '../../core/crypto.js?v=4.2.81';
-import * as sync from '../../core/sync.js?v=4.2.81';
+} from '../../core/app.js?v=4.2.82';
+import { decrypt } from '../../core/crypto.js?v=4.2.82';
+import * as sync from '../../core/sync.js?v=4.2.82';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -332,66 +332,6 @@ export async function checkForSharedFamilyFund() {
 
         console.log("[E2EE Debug] Fetched rows count:", data.length);
         const myEmail = state.user.email.toLowerCase().trim();
-
-        // Tự động phục hồi vai trò bị ngược (generic healing logic)
-        let determinedAsGuest = false;
-        let determinedAsOwner = false;
-        let spouseRow = null;
-
-        if (state.spouseEmail) {
-            const partnerEmail = state.spouseEmail.toLowerCase().trim();
-            spouseRow = data.find(r => r.user_email && r.user_email.toLowerCase().trim() === partnerEmail);
-            if (spouseRow) {
-                try {
-                    let parsed = null;
-                    if (typeof spouseRow.encrypted_data === 'object' && spouseRow.encrypted_data !== null) {
-                        parsed = spouseRow.encrypted_data;
-                    } else {
-                        parsed = JSON.parse(spouseRow.encrypted_data);
-                    }
-
-                    if (parsed && parsed.is_hybrid) {
-                        if (parsed.spouse_role === 'husband') {
-                            // Đối phương tự nhận là Chồng (Admin) -> Mình là Guest (Vợ)
-                            determinedAsGuest = true;
-                        } else if (parsed.spouse_role === 'wife') {
-                            // Đối phương tự nhận là Vợ (Spouse) -> Mình là Owner (Chồng)
-                            determinedAsOwner = true;
-                        } else {
-                            // Fallback phòng hờ bản cũ chưa đồng bộ trường spouse_role
-                            const hasKeys = parsed.fund_shared_keys && Object.keys(parsed.fund_shared_keys).length > 0;
-                            if (hasKeys && parsed.fund_shared_keys[myEmail]) {
-                                determinedAsGuest = true;
-                            } else {
-                                determinedAsOwner = true;
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("[E2EE Healing] Error parsing partner row:", e);
-                }
-            }
-        }
-
-        if (determinedAsGuest) {
-            if (!state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundOwnerEmail !== state.spouseEmail) {
-                console.log("[E2EE Healing] Automatically healed device as GUEST (Wife).");
-                state.viewingSharedFund = true;
-                state.spouseRole = 'wife';
-                state.sharedFundOwnerEmail = state.spouseEmail;
-                await saveLocalState();
-            }
-        } else if (determinedAsOwner) {
-            if (state.viewingSharedFund || state.spouseRole !== 'husband' || state.sharedFundSourceRow !== null) {
-                console.log("[E2EE Healing] Automatically healed device as OWNER (Husband).");
-                state.viewingSharedFund = false;
-                state.spouseRole = 'husband';
-                state.sharedFundOwnerEmail = '';
-                state.sharedFundSourceRow = null;
-                await saveLocalState();
-            }
-        }
-
         for (const row of data) {
             if (row.user_id === state.user.id) {
                 console.log("[E2EE Debug] Skipping own row:", row.user_email || row.user_id);

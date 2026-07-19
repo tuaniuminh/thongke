@@ -39,13 +39,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.2.81">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.2.82">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.2.81">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.2.81">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.2.81">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.2.81">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.2.82">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.2.82">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.2.82">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.2.82">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -197,7 +197,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.2.81" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.2.82" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -307,7 +307,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.2.81" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.2.82" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1208,49 +1208,7 @@
                             </div>
                         </div>
 
-                        <!-- Block 1: Link Spouses -->
-                        <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px;">
-                            <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="users" style="color: var(--accent-blue);"></i> Liên kết tài khoản Vợ/Chồng</h4>
-                            <p class="health-card-desc" id="spouseLinkDescription" style="margin: 4px 0 0 0; font-size: 0.82rem;">Nhập email của Vợ/Chồng để chia sẻ quyền xem và xuất báo cáo Quỹ gia đình của bạn.</p>
-                            
-                            <!-- Form when not viewing shared fund -->
-                            <form id="fundSpouseEmailForm" style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
-                                <div class="form-group" style="margin: 0;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                        <label class="form-label" for="spouseEmailInput" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin: 0;">Email của Vợ/Chồng</label>
-                                        <span id="spouseInviteStatusBadge" class="status-badge" style="display: none; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;"></span>
-                                    </div>
-                                    <input type="email" id="spouseEmailInput" class="form-input" placeholder="Ví dụ: vo@example.com" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 8px 12px; color: var(--text-primary);" required>
-                                </div>
-                                <div class="health-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0;">
-                                    <div class="form-group" style="margin: 0;">
-                                        <label class="form-label" for="spouseRoleInput" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Vai trò đối tác</label>
-                                        <select id="spouseRoleInput" class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 8px 12px; color: var(--text-primary);">
-                                            <option value="wife">Vợ</option>
-                                            <option value="husband">Chồng</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" style="margin: 0;">
-                                        <label class="form-label" for="ownerNicknameInput" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Biệt danh của bạn</label>
-                                        <input type="text" id="ownerNicknameInput" class="form-input" placeholder="Ví dụ: Chồng yêu" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 8px 12px; color: var(--text-primary);">
-                                    </div>
-                                </div>
-                                <div id="spouseInviteStatusText" style="display: none; font-size: 0.8rem; color: #f87171; font-weight: 500; margin-top: 4px; text-align: center;">
-                                    Đối tác đã từ chối lời mời.
-                                </div>
-                                <div style="display: flex; gap: 10px; margin-top: auto;">
-                                    <button type="button" id="btnUnlinkSpouse" class="btn btn-outline" style="flex: 1; padding: 10px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; display: none;">Hủy</button>
-                                    <button type="button" id="btnReinviteSpouse" class="btn btn-outline" style="flex: 1; padding: 10px; border-color: var(--accent-blue); color: var(--accent-blue); display: none;">Mời lại</button>
-                                    <button type="submit" id="btnSaveSpouseLink" class="btn btn-primary" style="flex: 2; padding: 10px;">Gửi lời mời</button>
-                                </div>
-                            </form>
 
-                            <!-- View for shared fund guest (spouse) -->
-                            <div id="spouseLinkSharedView" style="display: none; flex-direction: column; gap: 10px; margin-top: 12px; flex-grow: 1;">
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Bạn đang tham gia nhóm gia đình của <strong><span id="spouseLinkOwnerName"></span></strong>.</p>
-                                <button type="button" id="btnLeaveSpouseFund" class="btn btn-outline" style="margin-top: auto; padding: 10px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; width: 100%;">Thoát khỏi nhóm gia đình</button>
-                            </div>
-                        </div>
 
                         <!-- Block 2: Export Data -->
                         <!-- id for JS visibility control -->
@@ -1278,39 +1236,7 @@
                             </form>
                         </div>
 
-                        <!-- Block 5: E2EE Diagnostics & Security -->
-                        <div class="fund-card" style="display: flex; flex-direction: column; gap: 8px; min-height: 250px; grid-column: span 1;">
-                            <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="shield-alert" style="color: var(--accent-rose);"></i> Chẩn đoán &amp; Bảo mật Quỹ
-                            </h4>
-                            <p class="health-card-desc" style="margin: 4px 0 0 0; font-size: 0.82rem;">Kiểm tra tình trạng liên kết, xem các khóa bảo mật và chẩn đoán kết nối đám mây thực tế.</p>
-                            
-                            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-secondary);">Vai trò hiện tại:</span>
-                                    <span id="diagRole" style="font-weight: 600;">--</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-secondary);">Trạng thái đối tác:</span>
-                                    <span id="diagSpouseStatus" style="font-weight: 600;">--</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-secondary);">Khóa RSA cá nhân:</span>
-                                    <span id="diagRsaKey" style="font-weight: 600;">--</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-secondary);">Khóa đối xứng Quỹ:</span>
-                                    <span id="diagFundKey" style="font-weight: 600;">--</span>
-                                </div>
-                            </div>
-                            
-                            <button type="button" id="btnRunDiagnostics" class="btn btn-outline" style="margin-top: auto; padding: 8px 12px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                                <i data-lucide="activity"></i> Kiểm tra Cloud &amp; Tìm lỗi
-                            </button>
-                            
-                            <div id="diagLogs" style="display: none; margin-top: 8px; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 0.72rem; padding: 8px; background: rgba(0,0,0,0.4); border-radius: 6px; color: #a3e635; border: 1px solid rgba(163,230,53,0.15);">
-                            </div>
-                        </div>
+
                     </div>
                     </div>
                 </div>
@@ -1673,7 +1599,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.2.81" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.2.82" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -3241,9 +3167,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.2.81"></script>
-    <script type="module" src="src/core/app.js?v=4.2.81"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.2.81"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.2.82"></script>
+    <script type="module" src="src/core/app.js?v=4.2.82"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.2.82"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
