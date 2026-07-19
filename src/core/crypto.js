@@ -105,14 +105,17 @@ export async function decrypt(cipherText, password) {
 }
 
 // Generate Asymmetric RSA-OAEP Keypair
+// CVE-4 Fix (v4.2.86): Nâng key size từ 2048 lên 4096-bit để đảm bảo bảo mật dài hạn.
+// Lưu ý: keypair cũ (2048-bit) vẫn hoạt động bình thường do hash: "SHA-256" giữ nguyên.
+// Keypair mới chỉ được tạo khi người dùng thiết lập lần đầu hoặc reset thiết bị.
 export async function generateAsymmetricKeypair() {
     try {
         const keyPair = await window.crypto.subtle.generateKey(
             {
                 name: "RSA-OAEP",
-                modulusLength: 2048,
+                modulusLength: 4096,          // Nâng từ 2048 → 4096-bit (NIST approved, secure 2030+)
                 publicExponent: new Uint8Array([1, 0, 1]),
-                hash: "SHA-256"
+                hash: "SHA-256"               // Giữ SHA-256 để tương thích với keypair cũ
             },
             true, // extractable
             ["encrypt", "decrypt"]
