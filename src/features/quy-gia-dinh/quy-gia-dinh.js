@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.60';
-import { decrypt } from '../../core/crypto.js?v=4.2.60';
-import * as sync from '../../core/sync.js?v=4.2.60';
+} from '../../core/app.js?v=4.2.61';
+import { decrypt } from '../../core/crypto.js?v=4.2.61';
+import * as sync from '../../core/sync.js?v=4.2.61';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -389,12 +389,28 @@ export async function checkForSharedFamilyFund() {
                                     state.familyFundsUpdated = fundData.familyFundsUpdated || '';
                                 }
 
-                                // Gộp fundTransactions
-                                const localTransTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
-                                const remoteTransTime = fundData.fundTransactionsUpdated ? new Date(fundData.fundTransactionsUpdated).getTime() : 0;
-                                if (remoteTransTime > localTransTime) {
-                                    state.fundTransactions = fundData.fundTransactions || [];
-                                    state.fundTransactionsUpdated = fundData.fundTransactionsUpdated || '';
+                                // Union Merge fundTransactions (chống mất dữ liệu của cả 2 phía)
+                                const remoteTxs = fundData.fundTransactions || [];
+                                const localTxs = state.fundTransactions || [];
+                                const txMap = new Map();
+                                // Nhâp local trước
+                                localTxs.forEach(t => txMap.set(t.id, t));
+                                // Override bằng remote nếu remote mới hơn (field-level LWW)
+                                remoteTxs.forEach(t => {
+                                    const existing = txMap.get(t.id);
+                                    if (!existing) {
+                                        txMap.set(t.id, t);
+                                    } else {
+                                        const localTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
+                                        const remoteTime = t.updated_at ? new Date(t.updated_at).getTime() : 0;
+                                        if (remoteTime >= localTime) txMap.set(t.id, t);
+                                    }
+                                });
+                                const mergedTxs = Array.from(txMap.values());
+                                state.fundTransactions = mergedTxs;
+                                const newTxTimestamp = remoteTxs.length > 0 ? (fundData.fundTransactionsUpdated || new Date().toISOString()) : (state.fundTransactionsUpdated || '');
+                                if (!state.fundTransactionsUpdated || new Date(newTxTimestamp).getTime() > new Date(state.fundTransactionsUpdated).getTime()) {
+                                    state.fundTransactionsUpdated = newTxTimestamp;
                                 }
 
                                 // Gộp WeLove Start Date
@@ -567,8 +583,27 @@ export async function checkForSharedFamilyFund() {
                                 const decryptedFund = await decrypt(parsed.encrypted_fund, fundKey);
                                 const fundData = JSON.parse(decryptedFund);
                                 state.familyFunds = fundData.familyFunds || [];
-                                state.fundTransactions = fundData.fundTransactions || [];
-                                state.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
+                                // Union Merge fundTransactions cho CASE A (Spouse)
+                                const remoteTxsA = fundData.fundTransactions || [];
+                                const localTxsA = state.fundTransactions || [];
+                                const txMapA = new Map();
+                                localTxsA.forEach(t => txMapA.set(t.id, t));
+                                remoteTxsA.forEach(t => {
+                                    const existing = txMapA.get(t.id);
+                                    if (!existing) {
+                                        txMapA.set(t.id, t);
+                                    } else {
+                                        const localTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
+                                        const remoteTime = t.updated_at ? new Date(t.updated_at).getTime() : 0;
+                                        if (remoteTime >= localTime) txMapA.set(t.id, t);
+                                    }
+                                });
+                                state.fundTransactions = Array.from(txMapA.values());
+                                if (fundData.fundTransactionsUpdated) {
+                                    const remoteT = new Date(fundData.fundTransactionsUpdated).getTime();
+                                    const localT = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
+                                    if (remoteT > localT) state.fundTransactionsUpdated = fundData.fundTransactionsUpdated;
+                                }
 
                                 // Gộp dữ liệu Góc tình yêu (WeLove) từ Quỹ chung bằng Last Write Wins (LWW)
                                 if (fundData.weLoveStartDateUpdated) {
