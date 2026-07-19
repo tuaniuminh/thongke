@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.56';
-import { decrypt } from '../../core/crypto.js?v=4.2.56';
-import * as sync from '../../core/sync.js?v=4.2.56';
+} from '../../core/app.js?v=4.2.57';
+import { decrypt } from '../../core/crypto.js?v=4.2.57';
+import * as sync from '../../core/sync.js?v=4.2.57';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -441,7 +441,10 @@ export async function checkForSharedFamilyFund() {
                 const parsed = JSON.parse(row.encrypted_data);
                 
                 if (parsed && parsed.is_hybrid) {
-                    if (parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail) {
+                    const isSharedOwner = state.sharedFundSourceRow && row.user_id === state.sharedFundSourceRow.user_id;
+                    const isSpouseEmailMatched = parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail;
+                    
+                    if (isSpouseEmailMatched || isSharedOwner) {
                         const inviteTime = state.familyFundInviteStatusUpdated ? new Date(state.familyFundInviteStatusUpdated).getTime() : 0;
                         const rowTime = row.updated_at ? new Date(row.updated_at).getTime() : 0;
                         
