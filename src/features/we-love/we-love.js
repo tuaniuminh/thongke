@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.73';
-import * as sync from '../../core/sync.js?v=4.2.73';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.73';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.73';
+} from '../../core/app.js?v=4.2.74';
+import * as sync from '../../core/sync.js?v=4.2.74';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.74';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.74';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.73');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.74');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.73';
+        const logoPath = './logo_pwa_small.png?v=4.2.74';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.73';
+    const logoPath = './logo_pwa_small.png?v=4.2.74';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1643,12 +1643,14 @@ export function renderFamilyPairingSettings() {
                 state.pairingCodeExpired = new Date(Date.now() + 10 * 60 * 1000).toISOString();
                 state.pairingFundKeyEncrypted = encryptedKey;
                 await saveLocalState();
+                console.log("[Generate Debug] Before sync: pairingCode =", state.pairingCode);
                 showToast("Đang tải mã lên máy chủ...", "info");
                 await performSync(true);
+                console.log("[Generate Debug] After sync: pairingCode =", state.pairingCode);
                 showToast("Đã tạo mã ghép đôi! Gửi cho vợ nhé. ❤️");
                 renderFamilyPairingSettings();
             } catch (err) {
-                console.error("Failed to generate pairing code:", err);
+                console.error("Failed to generate pairing code:", err.message, err.stack);
                 showToast("Không thể tạo mã: " + err.message, "error");
             }
         });

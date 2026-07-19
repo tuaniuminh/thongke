@@ -12,7 +12,7 @@ import * as sync from './sync.js?v=4.2.61';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.61';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.61';
 
-const APP_VERSION = '4.2.73';
+const APP_VERSION = '4.2.74';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1339,6 +1339,7 @@ async function performSync(silent = false) {
         }
 
         // 5e. Construct and upload hybrid payload
+        console.log("[Sync Debug] Preparing hybridPayload. pairing_code:", state.pairingCode, "pairingCodeExpired:", state.pairingCodeExpired);
         const hybridPayload = JSON.stringify({
             is_hybrid: true,
             encrypted_personal: encryptedPersonal,
