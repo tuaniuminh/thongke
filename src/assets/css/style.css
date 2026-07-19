@@ -4312,3 +4312,29 @@ body.ios-device .home-widgets-container {
         top: calc(12px + env(safe-area-inset-top, 44px)) !important;
     }
 }
+
+/* Explicit literal backgrounds on html element for active states (fixes iOS native wrapper / WKWebView bounce black bars) */
+html.active-tab-home,
+html.active-tab-dashboard,
+html.active-tab-received,
+html.active-tab-sent,
+html.active-tab-settings,
+html.active-tab-health,
+html.active-tab-fund,
+html.active-tab-fund-history,
+html.active-tab-fund-management,
+html.active-tab-tc-management {
+    background: #090d16 !important; /* Fallback / Dark mode background */
+}
+html.light-mode.active-tab-home,
+html.light-mode.active-tab-dashboard,
+html.light-mode.active-tab-received,
+html.light-mode.active-tab-sent,
+html.light-mode.active-tab-settings,
+html.light-mode.active-tab-health,
+html.light-mode.active-tab-fund,
+html.light-mode.active-tab-fund-history,
+html.light-mode.active-tab-fund-management,
+html.light-mode.active-tab-tc-management {
+    background: #f3f4f6 !important; /* Light mode background */
+}
