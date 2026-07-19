@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.84';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.84';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.84';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.84';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.85';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.85';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.85';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.85';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.84';
-import * as sync from './sync.js?v=4.2.84';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.84';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.84';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.85';
+import * as sync from './sync.js?v=4.2.85';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.85';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.85';
 
-const APP_VERSION = '4.2.84';
+const APP_VERSION = '4.2.85';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -162,6 +162,132 @@ let customEventsEditMode = false;
 
 
 // --- Helper Functions ---
+
+// ============================================================
+// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.2.85)
+// Thay thế plain-text PIN trong localStorage bằng cơ chế 2 lớp:
+//   - localStorage: chỉ lưu encrypted PIN (ciphertext vô dụng nếu không có wrap key)
+//   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
+// ============================================================
+const _WRAP_DB_NAME    = 'familife_secure';
+const _WRAP_STORE_NAME = 'keys';
+const _WRAP_KEY_ID     = 'unlock_wrap_key';
+const _ENC_PIN_LS_KEY  = 'gift_ledger_pin_v2';   // localStorage key cho encrypted PIN
+const _LEGACY_PIN_KEY  = 'gift_ledger_remembered_pin'; // key cũ (plain text) cần migrate
+
+function _openWrapKeyDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(_WRAP_DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+            e.target.result.createObjectStore(_WRAP_STORE_NAME, { keyPath: 'id' });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror  = () => reject(req.error);
+    });
+}
+
+async function _saveWrapKey(cryptoKey) {
+    const db = await _openWrapKeyDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(_WRAP_STORE_NAME, 'readwrite');
+        tx.objectStore(_WRAP_STORE_NAME).put({ id: _WRAP_KEY_ID, key: cryptoKey });
+        tx.oncomplete = () => resolve();
+        tx.onerror    = () => reject(tx.error);
+    });
+}
+
+async function _loadWrapKey() {
+    const db = await _openWrapKeyDB();
+    return new Promise((resolve) => {
+        const tx  = db.transaction(_WRAP_STORE_NAME, 'readonly');
+        const req = tx.objectStore(_WRAP_STORE_NAME).get(_WRAP_KEY_ID);
+        req.onsuccess = () => resolve(req.result ? req.result.key : null);
+        req.onerror   = () => resolve(null);
+    });
+}
+
+async function _deleteWrapKey() {
+    try {
+        const db = await _openWrapKeyDB();
+        await new Promise((resolve) => {
+            const tx = db.transaction(_WRAP_STORE_NAME, 'readwrite');
+            tx.objectStore(_WRAP_STORE_NAME).delete(_WRAP_KEY_ID);
+            tx.oncomplete = resolve;
+            tx.onerror    = resolve;
+        });
+    } catch (_) { /* ignore */ }
+}
+
+/** Lưu PIN an toàn: tạo wrap key → mã hóa PIN → lưu 2 nơi */
+async function storeRememberedPin(pin) {
+    try {
+        // Tạo wrap key ngẫu nhiên — non-extractable (JS không thể đọc giá trị thực)
+        const wrapKey = await window.crypto.subtle.generateKey(
+            { name: 'AES-GCM', length: 256 },
+            false, // extractable = false → không thể export ra string
+            ['encrypt', 'decrypt']
+        );
+        // Mã hóa PIN bằng wrap key
+        const iv         = window.crypto.getRandomValues(new Uint8Array(12));
+        const pinBytes   = new TextEncoder().encode(pin);
+        const encBuf     = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, pinBytes);
+        const ivHex      = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
+        const encHex     = Array.from(new Uint8Array(encBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        // Lưu encrypted PIN vào localStorage (vô dụng nếu không có wrap key)
+        localStorage.setItem(_ENC_PIN_LS_KEY, `${ivHex}:${encHex}`);
+        // Lưu wrap key vào IndexedDB (non-extractable)
+        await _saveWrapKey(wrapKey);
+        return true;
+    } catch (e) {
+        console.warn('[SecurePin] storeRememberedPin failed:', e);
+        return false;
+    }
+}
+
+/** Lấy PIN an toàn: lấy wrap key từ IndexedDB → giải mã encrypted PIN */
+async function retrieveRememberedPin() {
+    try {
+        // Kiểm tra migration: nếu có key cũ (plain text) → migrate sang format mới
+        const legacyPin = localStorage.getItem(_LEGACY_PIN_KEY);
+        if (legacyPin) {
+            const migrated = await storeRememberedPin(legacyPin);
+            if (migrated) {
+                localStorage.removeItem(_LEGACY_PIN_KEY); // Xóa key cũ ngay lập tức
+            }
+            return legacyPin; // Dùng PIN cũ cho lần này, lần sau dùng format mới
+        }
+        // Format mới: lấy wrap key từ IndexedDB
+        const stored = localStorage.getItem(_ENC_PIN_LS_KEY);
+        if (!stored) return null;
+        const parts = stored.split(':');
+        if (parts.length !== 2) { clearRememberedPin(); return null; }
+        const wrapKey = await _loadWrapKey();
+        if (!wrapKey) { localStorage.removeItem(_ENC_PIN_LS_KEY); return null; }
+        const iv      = new Uint8Array(parts[0].match(/.{2}/g).map(b => parseInt(b, 16)));
+        const encData = new Uint8Array(parts[1].match(/.{2}/g).map(b => parseInt(b, 16)));
+        const decBuf  = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, wrapKey, encData);
+        return new TextDecoder().decode(decBuf);
+    } catch (e) {
+        console.warn('[SecurePin] retrieveRememberedPin failed — clearing stored PIN:', e);
+        await clearRememberedPin();
+        return null;
+    }
+}
+
+/** Xóa PIN đã lưu: xóa cả encrypted PIN (localStorage) và wrap key (IndexedDB) */
+async function clearRememberedPin() {
+    localStorage.removeItem(_ENC_PIN_LS_KEY);
+    localStorage.removeItem(_LEGACY_PIN_KEY); // Xóa key cũ nếu còn tồn tại
+    await _deleteWrapKey();
+}
+
+/** Kiểm tra xem PIN có đang được ghi nhớ không */
+function isRememberedPinStored() {
+    return localStorage.getItem(_ENC_PIN_LS_KEY) !== null ||
+           localStorage.getItem(_LEGACY_PIN_KEY) !== null;
+}
+// ============================================================
+
 
 // Generate UUID for records
 function generateId() {
@@ -1344,7 +1470,7 @@ async function performSync(silent = false) {
         }
 
         // 5e. Construct and upload hybrid payload
-        console.log("[Sync Debug] Preparing hybridPayload. pairing_code:", state.pairingCode, "pairingCodeExpired:", state.pairingCodeExpired);
+        if (DEBUG_E2EE) console.log("[Sync Debug] Preparing hybridPayload. pairing_code:", state.pairingCode, "pairingCodeExpired:", state.pairingCodeExpired);
         const hybridPayload = JSON.stringify({
             is_hybrid: true,
             encrypted_personal: encryptedPersonal,
@@ -2117,9 +2243,9 @@ async function handleWizardSubmit(e) {
     // Ghi nhớ mở khóa
     const rememberCheckbox = document.getElementById('rememberWizardCheckbox');
     if (rememberCheckbox && rememberCheckbox.checked) {
-        localStorage.setItem('gift_ledger_remembered_pin', password);
+        await storeRememberedPin(password);
     } else {
-        localStorage.removeItem('gift_ledger_remembered_pin');
+        await clearRememberedPin();
     }
     
     // Hide overlay
@@ -2161,9 +2287,9 @@ async function handleUnlockSubmit(e) {
             // Ghi nhớ mở khóa
             const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
             if (rememberCheckbox && rememberCheckbox.checked) {
-                localStorage.setItem('gift_ledger_remembered_pin', password);
+                await storeRememberedPin(password);
             } else {
-                localStorage.removeItem('gift_ledger_remembered_pin');
+                await clearRememberedPin();
             }
             
             if (document.activeElement) document.activeElement.blur();
@@ -2230,8 +2356,8 @@ window.handleChangePassword = async function() {
     await saveLocalState();
     
     // Cập nhật mã PIN đã ghi nhớ nếu tính năng này đang hoạt động
-    if (localStorage.getItem('gift_ledger_remembered_pin') !== null) {
-        localStorage.setItem('gift_ledger_remembered_pin', newPassword);
+    if (isRememberedPinStored()) {
+        await storeRememberedPin(newPassword);
     }
     
     // Đồng bộ toàn bộ dữ liệu lên Supabase với mật khẩu mới (thay vì chỉ 2 trường)
@@ -2349,9 +2475,9 @@ async function handleWizardKeypadPress(val) {
                 // Ghi nhớ mở khóa
                 const rememberCheckbox = document.getElementById('rememberWizardCheckbox');
                 if (rememberCheckbox && rememberCheckbox.checked) {
-                    localStorage.setItem('gift_ledger_remembered_pin', wizardPinBuffer);
+                    await storeRememberedPin(wizardPinBuffer);
                 } else {
-                    localStorage.removeItem('gift_ledger_remembered_pin');
+                    await clearRememberedPin();
                 }
                 
                 if (document.activeElement) document.activeElement.blur();
@@ -2409,9 +2535,9 @@ async function handleUnlockKeypadPress(val) {
                 // Ghi nhớ mở khóa
                 const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
                 if (rememberCheckbox && rememberCheckbox.checked) {
-                    localStorage.setItem('gift_ledger_remembered_pin', pin);
+                    await storeRememberedPin(pin);
                 } else {
-                    localStorage.removeItem('gift_ledger_remembered_pin');
+                    await clearRememberedPin();
                 }
                 
                 if (document.activeElement) document.activeElement.blur();
@@ -2566,8 +2692,8 @@ async function initializeApp() {
     const hasDb = localStorage.getItem('gift_ledger_db') !== null;
     
     if (hasDb) {
-        // Check if auto-unlock pin exists
-        const rememberedPin = localStorage.getItem('gift_ledger_remembered_pin');
+        // Check if auto-unlock pin exists (secure wrap key format, with legacy migration)
+        const rememberedPin = await retrieveRememberedPin();
         let autoUnlocked = false;
         
         if (rememberedPin) {
@@ -2585,7 +2711,7 @@ async function initializeApp() {
                     checkLoginStatus();
                 }
             } else {
-                localStorage.removeItem('gift_ledger_remembered_pin');
+                await clearRememberedPin();
             }
         }
         
@@ -2757,9 +2883,9 @@ async function initializeApp() {
                     // Ghi nhớ mở khóa
                     const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
                     if (rememberCheckbox && rememberCheckbox.checked) {
-                        localStorage.setItem('gift_ledger_remembered_pin', val);
+                        await storeRememberedPin(val);
                     } else {
-                        localStorage.removeItem('gift_ledger_remembered_pin');
+                        await clearRememberedPin();
                     }
                     
                     if (document.activeElement) document.activeElement.blur();
