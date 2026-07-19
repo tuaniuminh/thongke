@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.41';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.41';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.41';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.41';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.42';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.42';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.42';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.42';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.41';
-import * as sync from './sync.js?v=4.2.41';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.41';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.41';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.42';
+import * as sync from './sync.js?v=4.2.42';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.42';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.42';
 
-const APP_VERSION = '4.2.41';
+const APP_VERSION = '4.2.42';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -103,6 +103,7 @@ let state = {
     familyFundsUpdated: '',
     spouseEmail: '',
     ownerEmail: '',
+    ownerEmailUpdated: '',
     googleSheetsWebhook: '',
     activeChartFundIds: ['fund-main'],
     viewingSharedFund: false,
@@ -962,6 +963,8 @@ async function performSync(silent = false) {
                     state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
                     state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
                     state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
+                    state.ownerEmail = remoteData.ownerEmail || '';
+                    state.ownerEmailUpdated = remoteData.ownerEmailUpdated || '';
                     state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
                     state.asymmetricPublicKey = remoteData.asymmetricPublicKey || '';
                     state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted || '';
@@ -1083,6 +1086,14 @@ async function performSync(silent = false) {
                     if (remoteVisitsTime > localVisitsTime) {
                         state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
                         state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
+                    }
+
+                    // Merge ownerEmail using LWW
+                    const localOwnerEmailTime = state.ownerEmailUpdated ? new Date(state.ownerEmailUpdated).getTime() : 0;
+                    const remoteOwnerEmailTime = remoteData.ownerEmailUpdated ? new Date(remoteData.ownerEmailUpdated).getTime() : 0;
+                    if (remoteOwnerEmailTime > localOwnerEmailTime) {
+                        state.ownerEmail = remoteData.ownerEmail || '';
+                        state.ownerEmailUpdated = remoteData.ownerEmailUpdated || '';
                     }
 
                     // Recover key fields from remote if they are missing locally but exist remotely
@@ -1301,6 +1312,8 @@ async function performSync(silent = false) {
             asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted || '',
             fundSymmetricKey: state.fundSymmetricKey || '',
             spouseEmail: state.spouseEmail || '',
+            ownerEmail: state.ownerEmail || '',
+            ownerEmailUpdated: state.ownerEmailUpdated || '',
             googleSheetsWebhook: state.googleSheetsWebhook || '',
             familyFundInviteStatus: state.familyFundInviteStatus || '',
             familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
@@ -1814,7 +1827,11 @@ const tabHashMapping = {
     'quan-ly-thu-chi': 'tc-management',
     'tc-management': 'tc-management',
     'gockyniem': 'welove',
-    'welove': 'welove'
+    'welove': 'welove',
+    'welove-admin': 'welove-admin',
+    'gockyniem-admin': 'welove-admin',
+    'welove-settings': 'welove-settings',
+    'gockyniem-settings': 'welove-settings'
 };
 
 const tabIdToHash = {
@@ -1828,7 +1845,9 @@ const tabIdToHash = {
     'fund-history': 'nhat-ky-quy',
     'fund-management': 'quan-ly-quy',
     'tc-management': 'quan-ly-thu-chi',
-    'welove': 'gockyniem'
+    'welove': 'gockyniem',
+    'welove-admin': 'gockyniem-admin',
+    'welove-settings': 'gockyniem-settings'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -1985,17 +2004,9 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = 'Hồ sơ y tế';
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
         renderHealthDashboard();
-    } else if (tabId === 'welove') {
-        title.innerText = 'Kỷ Niệm Tình Yêu';
-        subtitle.innerText = 'Nơi đếm ngày bên nhau và lưu giữ khoảnh khắc yêu thương';
-        renderWeLoveDashboard();
-    } else if (tabId === 'welove-admin') {
-        title.innerText = 'Kỷ Niệm Tình Yêu';
-        subtitle.innerText = 'Nơi đếm ngày bên nhau và lưu giữ khoảnh khắc yêu thương';
-        renderWeLoveDashboard();
-    } else if (tabId === 'welove-settings') {
-        title.innerText = 'Kỷ Niệm Tình Yêu';
-        subtitle.innerText = 'Cấu hình biệt danh, ngày kỷ niệm và bạn tình';
+    } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+        title.innerText = '';
+        subtitle.innerText = '';
         renderWeLoveDashboard();
     } else if (tabId === 'fund') {
         title.innerText = 'Tổng quan Quỹ';

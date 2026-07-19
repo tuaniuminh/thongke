@@ -1245,3 +1245,27 @@ body.dark-mode .home-love-left-widget {
     box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15);
     border-color: rgba(244, 63, 94, 0.3);
 }
+
+/* Pulsing Red Heart Animation for Couple Names Header */
+@keyframes heartBeatRed {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+.pulsing-heart-red {
+  animation: heartBeatRed 1.2s infinite;
+  display: inline-block;
+}
