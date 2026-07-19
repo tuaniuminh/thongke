@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.82';
-import * as sync from '../../core/sync.js?v=4.2.82';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.82';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.82';
+} from '../../core/app.js?v=4.2.83';
+import * as sync from '../../core/sync.js?v=4.2.83';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.83';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.83';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.82');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.83');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.82';
+        const logoPath = './logo_pwa_small.png?v=4.2.83';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.82';
+    const logoPath = './logo_pwa_small.png?v=4.2.83';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1010,20 +1010,7 @@ export async function renderWeLoveDashboard() {
                                 </label>
                             </div>
 
-                            <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
-                                <label class="welove-form-label" style="font-weight: 700;">💞 Kết nối với nửa kia:</label>
-                                ${state.spouseEmail ? `
-                                    <div style="background: var(--bg-secondary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
-                                        <p style="font-size: 0.8rem; color: var(--text-primary); margin: 0 0 8px 0; font-weight: 600;">💞 Đang kết nối với:</p>
-                                        <p style="font-size: 0.85rem; font-weight: 700; color: var(--accent-rose); word-break: break-all; margin: 0 0 4px 0;">${state.spouseEmail}</p>
-                                        <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0;">Để thay đổi hoặc hủy kết nối, hãy vào <strong>⚙️ Cài Đặt → Kết nối Gia đình</strong>.</p>
-                                    </div>
-                                ` : `
-                                    <div style="background: rgba(225, 29, 72, 0.04); padding: 12px; border-radius: 12px; border: 1px dashed var(--accent-rose);">
-                                        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">Chưa kết nối với nửa kia. Hãy vào <strong>⚙️ Cài Đặt → Kết nối Gia đình</strong> để tạo hoặc nhập mã ghép đôi.</p>
-                                    </div>
-                                `}
-                            </div>
+
 
                             <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%;">
                                 Lưu Cấu Hình 💾
@@ -1508,6 +1495,10 @@ function bindSettingsEvents() {
 
 // Global hook for mobile/desktop subview switching mapped to routing tabs
 window.switchWeLoveSubView = function(subView) {
+    if (state.viewingSharedFund && (subView === 'admin' || subView === 'settings')) {
+        showToast("Bạn không có quyền truy cập vào mục này. 🔐", "warning");
+        return;
+    }
     if (!state.weLoveStartDate && subView !== 'settings') {
         showToast("Vui lòng cấu hình ngày bắt đầu yêu trước nhé! ❤️", "warning");
         return;
@@ -1556,6 +1547,14 @@ export function renderFamilyPairingSettings() {
         document.getElementById('btnFamilyPairingUnlink')?.addEventListener('click', async () => {
             const confirmed = await window.showConfirm("Bạn có chắc chắn muốn hủy liên kết với bạn tình hiện tại không? 🥺");
             if (!confirmed) return;
+
+            const confirmPassword = await window.showPrompt("Để hủy kết nối vợ chồng, vui lòng xác nhận mật khẩu Master (hoặc mã PIN):");
+            if (confirmPassword === null) return;
+            
+            if (confirmPassword !== state.masterPassword) {
+                showToast("Mật khẩu Master không chính xác. Hủy bỏ hủy kết nối!", "error");
+                return;
+            }
 
             // Bước 1: Báo hiệu đối phương bằng cách đẩy trạng thái 'left' lên Supabase trước
             state.spouseStatus = 'left';

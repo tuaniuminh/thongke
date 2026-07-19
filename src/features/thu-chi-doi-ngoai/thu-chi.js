@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.2.82';
-import * as sync from '../../core/sync.js?v=4.2.82';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.82';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.82';
+} from '../../core/app.js?v=4.2.83';
+import * as sync from '../../core/sync.js?v=4.2.83';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.83';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.83';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1367,12 +1367,14 @@ function updateMobileNavbar(tabId) {
                 <button class="nav-icon-btn text-only ${curSubView === 'memory' ? 'active' : ''}" onclick="window.switchWeLoveSubView('memory')" title="Kỷ niệm" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
                     Kỷ niệm
                 </button>
+                ${!state.viewingSharedFund ? `
                 <button class="nav-icon-btn text-only ${curSubView === 'admin' ? 'active' : ''}" onclick="window.switchWeLoveSubView('admin')" title="Lịch nhắc" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
                     Lịch nhắc
                 </button>
                 <button class="nav-icon-btn text-only ${curSubView === 'settings' ? 'active' : ''}" onclick="window.switchWeLoveSubView('settings')" title="Quản lý">
                     Quản lý
                 </button>
+                ` : ''}
             </div>
         `;
     } else {
