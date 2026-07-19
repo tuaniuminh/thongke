@@ -4313,7 +4313,7 @@ body.ios-device .home-widgets-container {
     }
 }
 
-/* Explicit literal backgrounds on html element for active states (fixes iOS native wrapper / WKWebView bounce black bars) */
+/* Explicit literal backgrounds on html and body elements for active states (fixes iOS native wrapper / WKWebView bounce black bars) */
 html.active-tab-home,
 html.active-tab-dashboard,
 html.active-tab-received,
@@ -4323,8 +4323,19 @@ html.active-tab-health,
 html.active-tab-fund,
 html.active-tab-fund-history,
 html.active-tab-fund-management,
-html.active-tab-tc-management {
-    background: #090d16 !important; /* Fallback / Dark mode background */
+html.active-tab-tc-management,
+body.active-tab-home,
+body.active-tab-dashboard,
+body.active-tab-received,
+body.active-tab-sent,
+body.active-tab-settings,
+body.active-tab-health,
+body.active-tab-fund,
+body.active-tab-fund-history,
+body.active-tab-fund-management,
+body.active-tab-tc-management {
+    background-color: #090d16 !important; /* Fallback / Dark mode background */
+    background-image: none !important;
 }
 html.light-mode.active-tab-home,
 html.light-mode.active-tab-dashboard,
@@ -4335,6 +4346,17 @@ html.light-mode.active-tab-health,
 html.light-mode.active-tab-fund,
 html.light-mode.active-tab-fund-history,
 html.light-mode.active-tab-fund-management,
-html.light-mode.active-tab-tc-management {
-    background: #f3f4f6 !important; /* Light mode background */
+html.light-mode.active-tab-tc-management,
+body.light-mode.active-tab-home,
+body.light-mode.active-tab-dashboard,
+body.light-mode.active-tab-received,
+body.light-mode.active-tab-sent,
+body.light-mode.active-tab-settings,
+body.light-mode.active-tab-health,
+body.light-mode.active-tab-fund,
+body.light-mode.active-tab-fund-history,
+body.light-mode.active-tab-fund-management,
+body.light-mode.active-tab-tc-management {
+    background-color: #f3f4f6 !important; /* Light mode background */
+    background-image: none !important;
 }
