@@ -12,7 +12,7 @@ import * as sync from './sync.js?v=4.2.61';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.61';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.61';
 
-const APP_VERSION = '4.2.71';
+const APP_VERSION = '4.2.72';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -522,7 +522,10 @@ async function saveLocalState() {
         sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
         lastFullBackupDate: state.lastFullBackupDate || '',
         activeChartFundIds: state.activeChartFundIds || ['fund-main'],
-        reportAiInsights: state.reportAiInsights || {}
+        reportAiInsights: state.reportAiInsights || {},
+        pairingCode: state.pairingCode || '',
+        pairingCodeExpired: state.pairingCodeExpired || '',
+        pairingFundKeyEncrypted: state.pairingFundKeyEncrypted || ''
     });
     
     try {
@@ -601,6 +604,9 @@ export async function loadLocalState(password) {
         state.lastFullBackupDate = '';
         state.activeChartFundIds = ['fund-main'];
         state.reportAiInsights = {};
+        state.pairingCode = '';
+        state.pairingCodeExpired = '';
+        state.pairingFundKeyEncrypted = '';
         return true;
     }
     
@@ -670,6 +676,9 @@ export async function loadLocalState(password) {
         state.lastFullBackupDate = data.lastFullBackupDate || '';
         state.activeChartFundIds = data.activeChartFundIds || ['fund-main'];
         state.reportAiInsights = data.reportAiInsights || {};
+        state.pairingCode = data.pairingCode || '';
+        state.pairingCodeExpired = data.pairingCodeExpired || '';
+        state.pairingFundKeyEncrypted = data.pairingFundKeyEncrypted || '';
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
