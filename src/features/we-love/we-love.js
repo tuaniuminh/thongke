@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.66';
-import * as sync from '../../core/sync.js?v=4.2.66';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.66';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.66';
+} from '../../core/app.js?v=4.2.67';
+import * as sync from '../../core/sync.js?v=4.2.67';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.67';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.67';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.66');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.67');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.66';
+        const logoPath = './logo_pwa_small.png?v=4.2.67';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.66';
+    const logoPath = './logo_pwa_small.png?v=4.2.67';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1681,7 +1681,7 @@ export function renderFamilyPairingSettings() {
             try {
                 // Thử cả 2 pattern: có space (JSONB cast) và không space (TEXT thuần)
                 let data = null, error = null;
-                ({ data, error } = await supabaseClient
+                ({ data, error } = await _sbClient
                     .from('gift_sync')
                     .select('user_id, encrypted_data, user_email, public_key')
                     .ilike('encrypted_data', `%"pairing_code":"${code}"%`)
@@ -1689,7 +1689,7 @@ export function renderFamilyPairingSettings() {
 
                 if (!error && !data) {
                     // Thử lại với space sau colon (Supabase JSONB cast to text format)
-                    ({ data, error } = await supabaseClient
+                    ({ data, error } = await _sbClient
                         .from('gift_sync')
                         .select('user_id, encrypted_data, user_email, public_key')
                         .ilike('encrypted_data', `%"pairing_code": "${code}"%`)

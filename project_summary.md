@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.2.66** |
+| **Phiên bản hiện tại** | **v4.2.67** |
+| **v4.2.67** | ✅ **Sửa lỗi `supabaseClient is not defined` khi vợ nhập mã ghép đôi**: Khi refactor query sang dual-pattern ilike ở v4.2.66, biến `supabaseClient` bị xóa nhưng vẫn được tham chiếu. Thay bằng `_sbClient` đã khai báo đúng ngay đầu handler. Bơm cache-busting `v4.2.67`. |
 | **v4.2.66** | ✅ **Sửa lỗi "Không tìm thấy mã" khi vợ nhập mã ghép đôi (Fixed pairing code search query)**: (1) Thay `.like()` bằng `.ilike()` để tránh case-sensitivity. (2) Thử 2 pattern lần lượt: `"pairing_code":"CODE"` (TEXT column) và `"pairing_code": "CODE"` (JSONB-to-text có space sau colon) để xử lý cả 2 loại cột Supabase. (3) Cải thiện thông báo lỗi rõ hơn khi không tìm thấy. (4) Bơm cache-busting `v4.2.66` cho toàn bộ files kể cả `sw.js`. |
 | **v4.2.65** | ✅ **Sửa triệt để lỗi "cần cấu hình Supabase" khi tạo/nhập mã ghép đôi (Fixed Supabase module isolation bug)**: (1) Nguyên nhân gốc: `we-love.js` import `sync.js` theo đường dẫn khác nên nhận một instance module riêng biệt, không chia sẻ Supabase client đã được khởi tạo từ `app.js`. (2) Giải pháp: expose `window._getSupabaseClient = () => sync.getSupabase()` từ `app.js` — nơi sync đã khởi tạo đúng. (3) `we-love.js` dùng `window._getSupabaseClient?.()` thay vì `sync.getSupabase()` trực tiếp. (4) Cập nhật `sw.js` cùng phiên bản. Bơm cache-busting `v4.2.65`. |
 | **v4.2.64** | ✅ **Sửa lỗi toast "cần đăng nhập" khi vợ nhập mã ghép đôi (Fixed Supabase auth check in pairing submit handler)**: (1) Thay `sync.isConfigured() \|\| !state.user` bằng kiểm tra `sync.getSupabase()` trực tiếp ở cả 2 nút Tạo mã và Nhập mã — `getSupabase()` trả về client thực tế (null nếu chưa init). (2) Dùng optional chaining `state.user?.email` để tránh crash khi `state.user` chưa load. (3) Bơm cache-busting `v4.2.64`. |
