@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.63';
-import * as sync from '../../core/sync.js?v=4.2.63';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.63';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.63';
+} from '../../core/app.js?v=4.2.64';
+import * as sync from '../../core/sync.js?v=4.2.64';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.64';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.64';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.63');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.64');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.63';
+        const logoPath = './logo_pwa_small.png?v=4.2.64';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.63';
+    const logoPath = './logo_pwa_small.png?v=4.2.64';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1625,6 +1625,11 @@ export function renderFamilyPairingSettings() {
 
         // Handler: Tạo mã
         document.getElementById('btnFPGenerateCode')?.addEventListener('click', async () => {
+            const _sb = sync.getSupabase();
+            if (!_sb) {
+                showToast("Bạn cần cấu hình và kết nối Supabase trước!", "warning");
+                return;
+            }
             const codeNum = Math.floor(100000 + Math.random() * 900000);
             const pairingCode = `LOVE-${codeNum}`;
             try {
@@ -1660,8 +1665,9 @@ export function renderFamilyPairingSettings() {
         const btnSubmit = document.getElementById('btnFPSubmitCode');
         const inputCode = document.getElementById('fpPairingCodeInput');
         btnSubmit?.addEventListener('click', async () => {
-            if (!sync.isConfigured() || !state.user) {
-                showToast("Bạn cần cấu hình Supabase và đăng nhập trước!", "warning");
+            const _sbClient = sync.getSupabase();
+            if (!_sbClient) {
+                showToast("Bạn cần cấu hình và kết nối Supabase trước!", "warning");
                 return;
             }
             const code = (inputCode?.value || '').trim().toUpperCase();
@@ -1674,7 +1680,7 @@ export function renderFamilyPairingSettings() {
             btnSubmit.innerText = "Đang kết nối...";
             try {
                 showToast("Đang tìm kiếm mã trên máy chủ...", "info");
-                const supabaseClient = sync.getSupabase();
+                const supabaseClient = _sbClient;
                 const { data, error } = await supabaseClient
                     .from('gift_sync')
                     .select('user_id, encrypted_data, user_email, public_key')
@@ -1685,7 +1691,8 @@ export function renderFamilyPairingSettings() {
                 if (!data) throw new Error("Không tìm thấy mã hoặc mã đã bị hủy!");
 
                 const husbandEmail = (data.user_email || '').toLowerCase().trim();
-                if (husbandEmail === state.user.email.toLowerCase().trim()) throw new Error("Bạn không thể tự ghép đôi với chính mình!");
+                const myEmail = (state.user?.email || state.userEmail || '').toLowerCase().trim();
+                if (myEmail && husbandEmail === myEmail) throw new Error("Bạn không thể tự ghép đôi với chính mình!");
 
                 const parsed = JSON.parse(data.encrypted_data);
                 if (!parsed?.pairing_code_expired || !parsed?.pairing_fund_key_encrypted) throw new Error("Mã ghép đôi không hợp lệ!");
