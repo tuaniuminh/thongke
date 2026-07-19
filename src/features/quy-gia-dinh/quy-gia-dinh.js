@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.53';
-import { decrypt } from '../../core/crypto.js?v=4.2.53';
-import * as sync from '../../core/sync.js?v=4.2.53';
+} from '../../core/app.js?v=4.2.54';
+import { decrypt } from '../../core/crypto.js?v=4.2.54';
+import * as sync from '../../core/sync.js?v=4.2.54';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -339,6 +339,8 @@ export async function checkForSharedFamilyFund() {
                 continue; // Skip own data
             }
 
+            let rowProcessed = false;
+
             // CASE C: Kiểm tra xem đây có phải là dòng của spouse (người được mình mời kết nối) để tự động chia sẻ khóa đối xứng
             const rowEmail = (row.user_email || '').toLowerCase().trim();
             if (state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim()) {
@@ -380,6 +382,7 @@ export async function checkForSharedFamilyFund() {
                                 }
                             }, 500);
                         }
+                        rowProcessed = true;
                     }
                 } catch (e) {
                     console.error("[E2EE Debug] Error checking spouse row:", e);
@@ -387,7 +390,7 @@ export async function checkForSharedFamilyFund() {
             }
 
             // CASE D: Đối với người tạo mã ghép đôi (Admin), tự động nhận diện khi đối tác đã nhập mã và chấp nhận kết nối
-            if (!state.spouseEmail) {
+            if (!state.spouseEmail && !rowProcessed) {
                 try {
                     const parsed = JSON.parse(row.encrypted_data);
                     if (parsed && parsed.is_hybrid && parsed.spouse_email) {
@@ -419,6 +422,7 @@ export async function checkForSharedFamilyFund() {
                             if (typeof window.renderWeLoveDashboard === 'function') {
                                 window.renderWeLoveDashboard();
                             }
+                            rowProcessed = true;
                         }
                     }
                 } catch (e) {
@@ -426,6 +430,10 @@ export async function checkForSharedFamilyFund() {
                         console.error("[E2EE Debug] Error in CASE D pairing detection:", e);
                     }
                 }
+            }
+
+            if (rowProcessed) {
+                continue;
             }
 
             try {
