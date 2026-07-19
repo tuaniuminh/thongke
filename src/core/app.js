@@ -12,7 +12,7 @@ import * as sync from './sync.js?v=4.2.61';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.61';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.61';
 
-const APP_VERSION = '4.2.64';
+const APP_VERSION = '4.2.65';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3188,6 +3188,10 @@ function formatDate(dateStr) {
 
 // Expose switchTab globally so dynamically generated onclick handlers can use it
 window.switchTab = switchTab;
+
+// Expose Supabase client globally so we-love.js and other modules can use
+// the SAME initialized Supabase instance (fixes module isolation issue)
+window._getSupabaseClient = () => sync.getSupabase();
 
 function renderDashboardSyncBanner() {
     const banner = document.getElementById('dashboardSyncBanner');
