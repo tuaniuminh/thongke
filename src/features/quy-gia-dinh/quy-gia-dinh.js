@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.51';
-import { decrypt } from '../../core/crypto.js?v=4.2.51';
-import * as sync from '../../core/sync.js?v=4.2.51';
+} from '../../core/app.js?v=4.2.52';
+import { decrypt } from '../../core/crypto.js?v=4.2.52';
+import * as sync from '../../core/sync.js?v=4.2.52';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -348,7 +348,7 @@ export async function checkForSharedFamilyFund() {
                         let spousePubKey = parsed.asymmetricPublicKey || '';
                         
                         // Nếu vợ đã cập nhật trạng thái chấp nhận kết nối
-                        const remoteSpouseStatus = parsed.familyFundInviteStatus || parsed.spouseStatus || '';
+                        const remoteSpouseStatus = parsed.spouse_status || '';
                         if (remoteSpouseStatus === 'accepted' && state.spouseStatus !== 'accepted') {
                             state.spouseStatus = 'accepted';
                             state.spouseStatusUpdated = new Date().toISOString();
@@ -392,7 +392,7 @@ export async function checkForSharedFamilyFund() {
                     const parsed = JSON.parse(row.encrypted_data);
                     if (parsed && parsed.is_hybrid && parsed.spouse_email) {
                         const remoteSpouseEmail = parsed.spouse_email.toLowerCase().trim();
-                        const remoteSpouseStatus = parsed.familyFundInviteStatus || parsed.spouseStatus || '';
+                        const remoteSpouseStatus = parsed.spouse_status || '';
                         
                         if (remoteSpouseEmail === myEmail && remoteSpouseStatus === 'accepted') {
                             const spouseEmailVal = (row.user_email || '').toLowerCase().trim();
@@ -422,7 +422,9 @@ export async function checkForSharedFamilyFund() {
                         }
                     }
                 } catch (e) {
-                    console.error("[E2EE Debug] Error in CASE D pairing detection:", e);
+                    if (!(e instanceof SyntaxError)) {
+                        console.error("[E2EE Debug] Error in CASE D pairing detection:", e);
+                    }
                 }
             }
 
