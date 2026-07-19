@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.79';
-import { decrypt } from '../../core/crypto.js?v=4.2.79';
-import * as sync from '../../core/sync.js?v=4.2.79';
+} from '../../core/app.js?v=4.2.80';
+import { decrypt } from '../../core/crypto.js?v=4.2.80';
+import * as sync from '../../core/sync.js?v=4.2.80';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -375,10 +375,10 @@ export async function checkForSharedFamilyFund() {
                 await saveLocalState();
             }
         } else if (determinedAsOwner) {
-            if (state.viewingSharedFund || state.spouseRole !== 'wife' || state.sharedFundSourceRow !== null) {
+            if (state.viewingSharedFund || state.spouseRole !== 'husband' || state.sharedFundSourceRow !== null) {
                 console.log("[E2EE Healing] Automatically healed device as OWNER (Husband).");
                 state.viewingSharedFund = false;
-                state.spouseRole = 'wife';
+                state.spouseRole = 'husband';
                 state.sharedFundOwnerEmail = '';
                 state.sharedFundSourceRow = null;
                 await saveLocalState();
@@ -419,9 +419,12 @@ export async function checkForSharedFamilyFund() {
                                 const spouseEmailKey = state.spouseEmail.toLowerCase().trim();
                                 if (myParsed && myParsed.fund_shared_keys) {
                                     const hasKeyForSpouse = !!myParsed.fund_shared_keys[spouseEmailKey];
-                                    if (!hasKeyForSpouse && spousePubKey) {
+                                    const spousePubKeyChanged = spousePubKey && spousePubKey !== state.spousePublicKey;
+                                    if ((!hasKeyForSpouse || spousePubKeyChanged) && spousePubKey) {
                                         needsSyncForSpouse = true;
-                                        console.log("[E2EE Debug] Spouse has public key but we haven't encrypted fund key for them yet. Triggering performSync.");
+                                        state.spousePublicKey = spousePubKey;
+                                        await saveLocalState();
+                                        console.log("[E2EE Debug] Spouse public key changed or key missing. Triggering performSync.");
                                     }
                                 }
                             } catch (e) {}
@@ -556,7 +559,7 @@ export async function checkForSharedFamilyFund() {
                             
                             state.spouseEmail = spouseEmailVal;
                             state.spouseStatus = 'accepted';
-                            state.spouseRole = 'wife'; // Đối tác kết nối là Vợ (Spouse)
+                            state.spouseRole = 'husband'; // Current user is Husband (Admin)
                             state.familyFundInviteStatus = 'accepted';
                             state.spouseStatusUpdated = new Date().toISOString();
                             
@@ -1039,9 +1042,9 @@ function populateMemberSelects() {
 
     let currentUserRole = 'husband';
     if (state.viewingSharedFund) {
-        currentUserRole = state.spouseRole || 'wife';
+        currentUserRole = 'wife';
     } else if (state.spouseEmail) {
-        currentUserRole = state.spouseRole === 'husband' ? 'wife' : 'husband';
+        currentUserRole = 'husband';
     }
 
     if (currentUserRole === 'wife') {
@@ -1578,9 +1581,9 @@ async function handleTransferSubmit(e) {
 
     let memberId = 'p-husband';
     if (state.viewingSharedFund) {
-        memberId = state.spouseRole === 'husband' ? 'p-husband' : 'p-wife';
+        memberId = 'p-wife';
     } else if (state.spouseEmail) {
-        memberId = state.spouseRole === 'husband' ? 'p-wife' : 'p-husband';
+        memberId = 'p-husband';
     }
 
     const tx = {
@@ -1636,9 +1639,9 @@ async function handleSpendingSubmit(e) {
 
     let memberId = 'p-husband';
     if (state.viewingSharedFund) {
-        memberId = state.spouseRole === 'husband' ? 'p-husband' : 'p-wife';
+        memberId = 'p-wife';
     } else if (state.spouseEmail) {
-        memberId = state.spouseRole === 'husband' ? 'p-wife' : 'p-husband';
+        memberId = 'p-husband';
     }
 
     const tx = {

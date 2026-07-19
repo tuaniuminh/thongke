@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.79';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.79';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.79';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.79';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.80';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.80';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.80';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.80';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.79';
-import * as sync from './sync.js?v=4.2.79';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.79';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.79';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.80';
+import * as sync from './sync.js?v=4.2.80';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.80';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.80';
 
-const APP_VERSION = '4.2.79';
+const APP_VERSION = '4.2.80';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -56,6 +56,7 @@ let state = {
     masterPassword: '',
     asymmetricPublicKey: '',
     asymmetricPrivateKeyEncrypted: '',
+    spousePublicKey: '',
     fundSymmetricKey: '',
     receivedGifts: [],
     sentGifts: [],
@@ -510,6 +511,7 @@ async function saveLocalState() {
         fundTransactionsUpdated: state.fundTransactionsUpdated || '',
         asymmetricPublicKey: state.asymmetricPublicKey || '',
         asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted || '',
+        spousePublicKey: state.spousePublicKey || '',
         fundSymmetricKey: state.fundSymmetricKey || '',
         spouseEmail: state.spouseEmail || '',
         googleSheetsWebhook: state.googleSheetsWebhook || '',
@@ -591,6 +593,7 @@ export async function loadLocalState(password) {
         state.fundTransactionsUpdated = '';
         state.asymmetricPublicKey = '';
         state.asymmetricPrivateKeyEncrypted = '';
+        state.spousePublicKey = '';
         state.fundSymmetricKey = '';
         state.spouseEmail = '';
         state.googleSheetsWebhook = '';
@@ -663,6 +666,7 @@ export async function loadLocalState(password) {
         state.fundTransactionsUpdated = data.fundTransactionsUpdated || '';
         state.asymmetricPublicKey = data.asymmetricPublicKey || '';
         state.asymmetricPrivateKeyEncrypted = data.asymmetricPrivateKeyEncrypted || '';
+        state.spousePublicKey = data.spousePublicKey || '';
         state.fundSymmetricKey = data.fundSymmetricKey || '';
         state.spouseEmail = data.spouseEmail || '';
         state.googleSheetsWebhook = data.googleSheetsWebhook || '';
@@ -1332,6 +1336,7 @@ async function performSync(silent = false) {
                 try {
                     const encryptedSpouseKey = await encryptWithPublicKey(spousePubKey, state.fundSymmetricKey);
                     fundSharedKeys[state.spouseEmail.toLowerCase().trim()] = encryptedSpouseKey;
+                    state.spousePublicKey = spousePubKey;
                 } catch (spouseKeyErr) {
                     console.error("Failed to encrypt fund key for spouse:", spouseKeyErr);
                 }
