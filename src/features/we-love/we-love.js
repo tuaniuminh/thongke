@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.52';
-import * as sync from '../../core/sync.js?v=4.2.52';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.52';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.52';
+} from '../../core/app.js?v=4.2.53';
+import * as sync from '../../core/sync.js?v=4.2.53';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.53';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.53';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.52');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.53');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.52';
+        const logoPath = './logo_pwa_small.png?v=4.2.53';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.52';
+    const logoPath = './logo_pwa_small.png?v=4.2.53';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1707,6 +1707,15 @@ function bindSettingsEvents() {
                 state.familyFundInviteStatus = 'accepted';
                 state.viewingSharedFund = true;
                 state.sharedFundOwnerEmail = husbandEmail;
+                state.sharedFundSourceRow = {
+                    user_id: data.user_id,
+                    encrypted_data: data.encrypted_data,
+                    encrypted_personal: parsed.encrypted_personal || '',
+                    fund_shared_keys: parsed.fund_shared_keys || {},
+                    owner_email: parsed.owner_email || husbandEmail,
+                    spouse_email: parsed.spouse_email || '',
+                    google_sheets_webhook: parsed.google_sheets_webhook || ''
+                };
                 
                 await saveLocalState();
 
