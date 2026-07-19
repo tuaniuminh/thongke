@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.55';
-import { decrypt } from '../../core/crypto.js?v=4.2.55';
-import * as sync from '../../core/sync.js?v=4.2.55';
+} from '../../core/app.js?v=4.2.56';
+import { decrypt } from '../../core/crypto.js?v=4.2.56';
+import * as sync from '../../core/sync.js?v=4.2.56';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -390,7 +390,8 @@ export async function checkForSharedFamilyFund() {
             }
 
             // CASE D: Đối với người tạo mã ghép đôi (Admin), tự động nhận diện khi đối tác đã nhập mã và chấp nhận kết nối
-            if (!state.spouseEmail && !rowProcessed) {
+            const isPairingActive = state.pairingCode && state.pairingCodeExpired && (new Date(state.pairingCodeExpired).getTime() > Date.now());
+            if (!state.spouseEmail && !rowProcessed && isPairingActive) {
                 try {
                     const parsed = JSON.parse(row.encrypted_data);
                     if (parsed && parsed.is_hybrid && parsed.spouse_email) {

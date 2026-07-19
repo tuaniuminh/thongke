@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.55';
-import * as sync from '../../core/sync.js?v=4.2.55';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.55';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.55';
+} from '../../core/app.js?v=4.2.56';
+import * as sync from '../../core/sync.js?v=4.2.56';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.56';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.56';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.55');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.56');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.55';
+        const logoPath = './logo_pwa_small.png?v=4.2.56';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.55';
+    const logoPath = './logo_pwa_small.png?v=4.2.56';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1737,6 +1737,19 @@ function bindSettingsEvents() {
         btnUnlink.addEventListener('click', async () => {
             const confirmUnlink = await window.showConfirm("Bạn có chắc chắn muốn hủy liên kết với bạn tình hiện tại không? 🥺");
             if (confirmUnlink) {
+                // Bước 1: Đổi trạng thái thành 'left' và đồng bộ lên Supabase để báo cho đối phương
+                state.spouseStatus = 'left';
+                await saveLocalState();
+                
+                if (sync.isConfigured() && state.user) {
+                    try {
+                        await performSync(true);
+                    } catch (e) {
+                        console.error("[Unlink] Failed to notify remote:", e);
+                    }
+                }
+
+                // Bước 2: Dọn dẹp sạch sẽ local
                 state.spouseEmail = '';
                 state.spouseStatus = '';
                 state.spouseRole = 'wife';
@@ -1746,13 +1759,10 @@ function bindSettingsEvents() {
                 state.familyFundInviteStatus = '';
                 state.viewingSharedFund = false;
                 state.sharedFundOwnerEmail = '';
+                state.sharedFundSourceRow = null;
                 
                 await saveLocalState();
                 
-                if (sync.isConfigured() && state.user) {
-                    performSync(true);
-                }
-
                 showToast("Đã hủy kết nối.");
                 renderWeLoveDashboard();
             }
