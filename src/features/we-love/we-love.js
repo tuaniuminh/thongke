@@ -1504,7 +1504,7 @@ function bindSettingsEvents() {
             }
         });
     }
-
+}
 
 // Global hook for mobile/desktop subview switching mapped to routing tabs
 window.switchWeLoveSubView = function(subView) {
