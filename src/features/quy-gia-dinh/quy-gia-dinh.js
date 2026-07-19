@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.75';
-import { decrypt } from '../../core/crypto.js?v=4.2.75';
-import * as sync from '../../core/sync.js?v=4.2.75';
+} from '../../core/app.js?v=4.2.76';
+import { decrypt } from '../../core/crypto.js?v=4.2.76';
+import * as sync from '../../core/sync.js?v=4.2.76';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -343,7 +343,7 @@ export async function checkForSharedFamilyFund() {
 
             // CASE C: Kiểm tra xem đây có phải là dòng của spouse (người được mình mời kết nối) để tự động chia sẻ khóa đối xứng
             const rowEmail = (row.user_email || '').toLowerCase().trim();
-            if (state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim()) {
+            if (!state.viewingSharedFund && state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim()) {
                 try {
                     const parsed = JSON.parse(row.encrypted_data);
                     if (parsed) {
@@ -543,8 +543,9 @@ export async function checkForSharedFamilyFund() {
                 if (parsed && parsed.is_hybrid) {
                     const isSharedOwner = state.sharedFundSourceRow && row.user_id === state.sharedFundSourceRow.user_id;
                     const isSpouseEmailMatched = parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail;
+                    const isCurrentSpouse = state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim();
                     
-                    if (isSpouseEmailMatched || isSharedOwner) {
+                    if (state.viewingSharedFund && isCurrentSpouse && (isSpouseEmailMatched || isSharedOwner)) {
                         const inviteTime = state.familyFundInviteStatusUpdated ? new Date(state.familyFundInviteStatusUpdated).getTime() : 0;
                         const rowTime = row.updated_at ? new Date(row.updated_at).getTime() : 0;
                         
