@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.80';
-import { decrypt } from '../../core/crypto.js?v=4.2.80';
-import * as sync from '../../core/sync.js?v=4.2.80';
+} from '../../core/app.js?v=4.2.81';
+import { decrypt } from '../../core/crypto.js?v=4.2.81';
+import * as sync from '../../core/sync.js?v=4.2.81';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -351,13 +351,20 @@ export async function checkForSharedFamilyFund() {
                     }
 
                     if (parsed && parsed.is_hybrid) {
-                        const hasKeys = parsed.fund_shared_keys && Object.keys(parsed.fund_shared_keys).length > 0;
-                        if (hasKeys && parsed.fund_shared_keys[myEmail]) {
-                            // Đối phương có chia sẻ khóa cho mình -> Mình là Guest (Vợ)
+                        if (parsed.spouse_role === 'husband') {
+                            // Đối phương tự nhận là Chồng (Admin) -> Mình là Guest (Vợ)
                             determinedAsGuest = true;
-                        } else {
-                            // Đối phương không chia sẻ khóa cho mình -> Mình là Owner (Chồng)
+                        } else if (parsed.spouse_role === 'wife') {
+                            // Đối phương tự nhận là Vợ (Spouse) -> Mình là Owner (Chồng)
                             determinedAsOwner = true;
+                        } else {
+                            // Fallback phòng hờ bản cũ chưa đồng bộ trường spouse_role
+                            const hasKeys = parsed.fund_shared_keys && Object.keys(parsed.fund_shared_keys).length > 0;
+                            if (hasKeys && parsed.fund_shared_keys[myEmail]) {
+                                determinedAsGuest = true;
+                            } else {
+                                determinedAsOwner = true;
+                            }
                         }
                     }
                 } catch (e) {
