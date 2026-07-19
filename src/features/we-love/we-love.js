@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.68';
-import * as sync from '../../core/sync.js?v=4.2.68';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.68';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.68';
+} from '../../core/app.js?v=4.2.69';
+import * as sync from '../../core/sync.js?v=4.2.69';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.69';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.69';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.68');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.69');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.68';
+        const logoPath = './logo_pwa_small.png?v=4.2.69';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.68';
+    const logoPath = './logo_pwa_small.png?v=4.2.69';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1679,41 +1679,45 @@ export function renderFamilyPairingSettings() {
             btnSubmit.disabled = true;
             btnSubmit.innerText = "Đang kết nối...";
             try {
-                // Thử cả 2 pattern: có space (JSONB cast) và không space (TEXT thuần)
-                let data = null, error = null;
-                ({ data, error } = await _sbClient
+                // Giải pháp tối ưu: Tải toàn bộ dòng của gift_sync và lọc khớp mã E2EE trong JS (không phụ thuộc vào format JSON của DB)
+                const { data: allRows, error } = await _sbClient
                     .from('gift_sync')
-                    .select('user_id, encrypted_data, user_email, public_key')
-                    .ilike('encrypted_data', `%"pairing_code":"${code}"%`)
-                    .maybeSingle());
+                    .select('user_id, encrypted_data, user_email, public_key');
 
-                console.log('[Pairing Debug] Query1 result:', { data: data ? 'FOUND' : 'null', error: error ? error.message : 'none' });
-
-                if (!error && !data) {
-                    // Thử lại với space sau colon (Supabase JSONB cast to text format)
-                    ({ data, error } = await _sbClient
-                        .from('gift_sync')
-                        .select('user_id, encrypted_data, user_email, public_key')
-                        .ilike('encrypted_data', `%"pairing_code": "${code}"%`)
-                        .maybeSingle());
-                    console.log('[Pairing Debug] Query2 result:', { data: data ? 'FOUND' : 'null', error: error ? error.message : 'none' });
+                if (error) throw new Error("Lỗi kết nối máy chủ: " + error.message);
+                
+                let matchingRow = null;
+                let parsed = null;
+                
+                if (allRows) {
+                    console.log(`[Pairing Debug] Scanned ${allRows.length} rows to find code: ${code}`);
+                    for (const row of allRows) {
+                        try {
+                            const p = JSON.parse(row.encrypted_data);
+                            const rowCode = (p?.pairing_code || '').trim().toUpperCase();
+                            console.log(`[Pairing Debug] Row email: ${row.user_email} | Code: ${rowCode}`);
+                            if (p && rowCode === code) {
+                                matchingRow = row;
+                                parsed = p;
+                                break;
+                            }
+                        } catch (e) {
+                            console.warn("[Pairing Debug] Failed to parse row for E2EE:", e);
+                        }
+                    }
                 }
 
-                if (!error && !data) {
-                    // Diagnostic: kiểm tra RLS bằng cách đếm tổng số rows có thể đọc được
-                    const { count, error: countErr } = await _sbClient
-                        .from('gift_sync').select('*', { count: 'exact', head: true });
-                    console.log('[Pairing Debug] Total accessible rows:', count, '| countErr:', countErr?.message);
+                if (!matchingRow || !parsed) {
+                    throw new Error("Không tìm thấy mã! Hãy kiểm tra lại mã hoặc nhờ chồng tạo mã mới (mã chỉ có hiệu lực trong 10 phút).");
                 }
 
-                if (error) throw new Error("Lỗi kết nối máy chủ: " + (error.message || JSON.stringify(error)));
-                if (!data) throw new Error("Không tìm thấy mã! Hãy kiểm tra mã hoặc nhờ chồng tạo mã mới (mã có hiệu lực 10 phút).");
+                const data = matchingRow;
 
                 const husbandEmail = (data.user_email || '').toLowerCase().trim();
                 const myEmail = (state.user?.email || state.userEmail || '').toLowerCase().trim();
                 if (myEmail && husbandEmail === myEmail) throw new Error("Bạn không thể tự ghép đôi với chính mình!");
 
-                const parsed = JSON.parse(data.encrypted_data);
+                // parsed đã được gán và kiểm tra ở trên rồi
                 if (!parsed?.pairing_code_expired || !parsed?.pairing_fund_key_encrypted) throw new Error("Mã ghép đôi không hợp lệ!");
                 if (new Date(parsed.pairing_code_expired).getTime() < Date.now()) throw new Error("Mã đã hết hạn! Nhờ chồng tạo mã mới nhé.");
 

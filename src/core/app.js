@@ -12,7 +12,7 @@ import * as sync from './sync.js?v=4.2.61';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.61';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.61';
 
-const APP_VERSION = '4.2.68';
+const APP_VERSION = '4.2.69';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
