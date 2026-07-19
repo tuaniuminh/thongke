@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.76';
-import { decrypt } from '../../core/crypto.js?v=4.2.76';
-import * as sync from '../../core/sync.js?v=4.2.76';
+} from '../../core/app.js?v=4.2.77';
+import { decrypt } from '../../core/crypto.js?v=4.2.77';
+import * as sync from '../../core/sync.js?v=4.2.77';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -315,6 +315,12 @@ export async function checkForSharedFamilyFund() {
         return;
     }
 
+    if (state.spouseEmail && state.spouseRole === 'husband') {
+        console.log("[E2EE Healing] Detected incorrect spouseRole 'husband'. Healing to 'wife'.");
+        state.spouseRole = 'wife';
+        saveLocalState();
+    }
+
     try {
         console.log("[E2EE Debug] Starting checkForSharedFamilyFund for user:", state.user.email);
         const { data, error } = await supabaseClient
@@ -504,7 +510,7 @@ export async function checkForSharedFamilyFund() {
                             
                             state.spouseEmail = spouseEmailVal;
                             state.spouseStatus = 'accepted';
-                            state.spouseRole = 'husband'; // Mình là admin khởi tạo mã
+                            state.spouseRole = 'wife'; // Đối tác kết nối là Vợ (Spouse)
                             state.familyFundInviteStatus = 'accepted';
                             state.spouseStatusUpdated = new Date().toISOString();
                             

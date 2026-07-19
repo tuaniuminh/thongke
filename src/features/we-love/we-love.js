@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.76';
-import * as sync from '../../core/sync.js?v=4.2.76';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.76';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.76';
+} from '../../core/app.js?v=4.2.77';
+import * as sync from '../../core/sync.js?v=4.2.77';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.77';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.77';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.76');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.77');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.76';
+        const logoPath = './logo_pwa_small.png?v=4.2.77';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.76';
+    const logoPath = './logo_pwa_small.png?v=4.2.77';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -860,8 +860,8 @@ export async function renderWeLoveDashboard() {
     }
     window.weLoveCurrentSubView = weLoveCurrentSubView;
 
-    // Force settings subview if start date is not configured yet (first time)
-    if (!state.weLoveStartDate && state.activeTab !== 'welove-settings') {
+    // Force settings subview if start date is not configured yet (first time) - Chỉ dành cho Chủ quỹ (Chồng/Admin)
+    if (!state.weLoveStartDate && state.activeTab !== 'welove-settings' && !state.viewingSharedFund) {
         setTimeout(() => {
             if (typeof window.switchTab === 'function') {
                 window.switchTab('welove-settings');
@@ -1539,7 +1539,7 @@ export function renderFamilyPairingSettings() {
 
     if (state.spouseEmail) {
         // ---- ĐÃ KẾT NỐI ----
-        const roleLabel = state.spouseRole === 'husband' ? '👑 Chồng (Admin)' : '💕 Vợ (Spouse)';
+        const roleLabel = state.viewingSharedFund ? '💕 Vợ (Spouse)' : '👑 Chồng (Admin)';
         const statusLabel = state.spouseStatus === 'accepted' ? '✅ Đã liên kết' : '⏳ Đang chờ đối phương';
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 10px;">

@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.2.76';
-import * as sync from '../../core/sync.js?v=4.2.76';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.76';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.76';
+} from '../../core/app.js?v=4.2.77';
+import * as sync from '../../core/sync.js?v=4.2.77';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.77';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.77';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1227,8 +1227,16 @@ function updateSidebarNavVisibility(tabId) {
     } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.welove) navItems.welove.style.display = 'block';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'block';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'block';
+        
+        // Ẩn tab Lịch nhắc (welove-admin) và Quản lý (welove-settings) cho tài khoản Vợ (Spouse)
+        if (state.viewingSharedFund) {
+            if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+            if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+        } else {
+            if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'block';
+            if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'block';
+        }
+        
         if (navItems.settings) navItems.settings.style.display = 'block';
         
         if (navItems.dashboard) navItems.dashboard.style.display = 'none';
