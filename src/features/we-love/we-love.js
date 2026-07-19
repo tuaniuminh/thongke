@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.61';
-import * as sync from '../../core/sync.js?v=4.2.61';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.61';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.61';
+} from '../../core/app.js?v=4.2.62';
+import * as sync from '../../core/sync.js?v=4.2.62';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.62';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.62';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.61');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.62');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.61';
+        const logoPath = './logo_pwa_small.png?v=4.2.62';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.61';
+    const logoPath = './logo_pwa_small.png?v=4.2.62';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1537,11 +1537,18 @@ export function renderFamilyPairingSettings() {
     const container = document.getElementById('familyPairingConfigView');
     if (!container) return;
 
-    if (!sync.isConfigured() || !state.user) {
+    if (!sync.isConfigured()) {
         container.innerHTML = `
             <p style="font-size: 0.85rem; color: var(--text-secondary); padding: 8px 0;">
-                Bạn cần <strong>cấu hình Supabase và đăng nhập</strong> trước khi có thể ghép đôi.
+                Bạn cần <strong>cấu hình URL & Key Supabase</strong> trong mục "Đồng bộ đám mây" trước khi có thể ghép đôi.
             </p>`;
+        return;
+    }
+
+    // Nếu state.user chưa sẵn sàng, thử lại sau 300ms
+    if (!state.user) {
+        container.innerHTML = `<p style="font-size: 0.82rem; color: var(--text-secondary); padding: 8px 0;">⏳ Đang tải thông tin đăng nhập...</p>`;
+        setTimeout(() => renderFamilyPairingSettings(), 300);
         return;
     }
 
