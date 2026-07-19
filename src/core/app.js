@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.58';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.58';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.58';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.58';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.59';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.59';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.59';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.59';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.58';
-import * as sync from './sync.js?v=4.2.58';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.58';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.58';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.59';
+import * as sync from './sync.js?v=4.2.59';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.59';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.59';
 
-const APP_VERSION = '4.2.58';
+const APP_VERSION = '4.2.59';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -830,6 +830,10 @@ async function performSync(silent = false) {
                         remoteData.googleSheetsWebhook = parsedObj.google_sheets_webhook || '';
                         remoteData.spouseRole = parsedObj.spouse_role || 'wife';
                         remoteData.ownerNickname = parsedObj.owner_nickname || '';
+                        
+                        state.pairingCode = parsedObj.pairing_code || '';
+                        state.pairingCodeExpired = parsedObj.pairing_code_expired || '';
+                        state.pairingFundKeyEncrypted = parsedObj.pairing_fund_key_encrypted || '';
                     }
                 } catch (jsonErr) {
                     // Fallback below

@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.2.58';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.58';
+} from '../../core/app.js?v=4.2.59';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.59';
 
 let healthTrendChartInstance = null;
 
