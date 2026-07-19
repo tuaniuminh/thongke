@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.2.47';
-import * as sync from '../../core/sync.js?v=4.2.47';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.47';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.47';
+} from '../../core/app.js?v=4.2.48';
+import * as sync from '../../core/sync.js?v=4.2.48';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.48';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.2.48';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1178,7 +1178,7 @@ function updateSidebarNavVisibility(tabId) {
     if (sidebarLogoText) {
         if (tabId === 'health') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
-        } else if (tabId === 'welove') {
+        } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
             sidebarLogoText.innerText = 'Kỷ Niệm Tình Yêu';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'settings' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
@@ -1439,7 +1439,7 @@ function updateMobileNavbar(tabId) {
                 </button>
             </div>
         `;
-    } else if (tabId === 'welove') {
+    } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
         mobileNavbar.classList.add('two-line');
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');
