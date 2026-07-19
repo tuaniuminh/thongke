@@ -1,9 +1,9 @@
-// sw.js — FamiLife Service Worker v4.2.72
+// sw.js — FamiLife Service Worker v4.2.73
 // Chiến lược: Network-first cho JS/CSS/HTML nội bộ (luôn nhận code mới)
 //             Cache-first cho ảnh và CDN static libraries (Supabase, Chart.js, Lucide...) để tải cực nhanh & offline
 //             Bỏ qua hoàn toàn các API calls động bên ngoài (Supabase API, Gemini API, Weather API)
 
-const CACHE_NAME = 'familife-cache-v4.2.72';
+const CACHE_NAME = 'familife-cache-v4.2.73';
 
 // App shell — danh sách tài nguyên cần cache ngay khi install
 const SHELL_ASSETS = [
@@ -93,8 +93,16 @@ self.addEventListener('fetch', (event) => {
         );
     } else {
         // ── Network-first cho JS/CSS/HTML nội bộ (luôn lấy bản mới nhất) ──
+        let fetchPromise;
+        try {
+            // Thử bỏ qua browser HTTP/disk cache để lấy code thực tế mới nhất từ server
+            fetchPromise = fetch(event.request, { cache: 'no-cache' });
+        } catch (e) {
+            fetchPromise = fetch(event.request);
+        }
+
         event.respondWith(
-            fetch(event.request)
+            fetchPromise
                 .then((response) => {
                     // Cache lại nếu response hợp lệ
                     if (response && response.status === 200) {
