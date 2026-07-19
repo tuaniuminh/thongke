@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.57';
-import { decrypt } from '../../core/crypto.js?v=4.2.57';
-import * as sync from '../../core/sync.js?v=4.2.57';
+} from '../../core/app.js?v=4.2.58';
+import { decrypt } from '../../core/crypto.js?v=4.2.58';
+import * as sync from '../../core/sync.js?v=4.2.58';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -375,6 +375,90 @@ export async function checkForSharedFamilyFund() {
                             } catch (e) {}
                         }
                         
+                        // Giải mã Quỹ chung từ dòng của Spouse và gộp LWW vào cục bộ
+                        if (state.fundSymmetricKey && parsed.encrypted_fund) {
+                            try {
+                                const decryptedFund = await decrypt(parsed.encrypted_fund, state.fundSymmetricKey);
+                                const fundData = JSON.parse(decryptedFund);
+                                
+                                // Gộp familyFunds
+                                const localFundTime = state.familyFundsUpdated ? new Date(state.familyFundsUpdated).getTime() : 0;
+                                const remoteFundTime = fundData.familyFundsUpdated ? new Date(fundData.familyFundsUpdated).getTime() : 0;
+                                if (remoteFundTime > localFundTime) {
+                                    state.familyFunds = fundData.familyFunds || [];
+                                    state.familyFundsUpdated = fundData.familyFundsUpdated || '';
+                                }
+
+                                // Gộp fundTransactions
+                                const localTransTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
+                                const remoteTransTime = fundData.fundTransactionsUpdated ? new Date(fundData.fundTransactionsUpdated).getTime() : 0;
+                                if (remoteTransTime > localTransTime) {
+                                    state.fundTransactions = fundData.fundTransactions || [];
+                                    state.fundTransactionsUpdated = fundData.fundTransactionsUpdated || '';
+                                }
+
+                                // Gộp WeLove Start Date
+                                const localStartDateTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
+                                const remoteStartDateTime = fundData.weLoveStartDateUpdated ? new Date(fundData.weLoveStartDateUpdated).getTime() : 0;
+                                if (remoteStartDateTime > localStartDateTime) {
+                                    state.weLoveStartDate = fundData.weLoveStartDate || '';
+                                    state.weLoveStartDateUpdated = fundData.weLoveStartDateUpdated || '';
+                                }
+
+                                // Gộp WeLove Name1
+                                const localName1Time = state.weLoveName1Updated ? new Date(state.weLoveName1Updated).getTime() : 0;
+                                const remoteName1Time = fundData.weLoveName1Updated ? new Date(fundData.weLoveName1Updated).getTime() : 0;
+                                if (remoteName1Time > localName1Time) {
+                                    state.weLoveName1 = fundData.weLoveName1 || '';
+                                    state.weLoveName1Updated = fundData.weLoveName1Updated || '';
+                                }
+
+                                // Gộp WeLove Name2
+                                const localName2Time = state.weLoveName2Updated ? new Date(state.weLoveName2Updated).getTime() : 0;
+                                const remoteName2Time = fundData.weLoveName2Updated ? new Date(fundData.weLoveName2Updated).getTime() : 0;
+                                if (remoteName2Time > localName2Time) {
+                                    state.weLoveName2 = fundData.weLoveName2 || '';
+                                    state.weLoveName2Updated = fundData.weLoveName2Updated || '';
+                                }
+
+                                // Gộp WeLove Show Sickness
+                                const localShowSick = state.weLoveShowSicknessUpdated ? new Date(state.weLoveShowSicknessUpdated).getTime() : 0;
+                                const remoteShowSick = fundData.weLoveShowSicknessUpdated ? new Date(fundData.weLoveShowSicknessUpdated).getTime() : 0;
+                                if (remoteShowSick > localShowSick) {
+                                    state.weLoveShowSickness = fundData.weLoveShowSickness !== false;
+                                    state.weLoveShowSicknessUpdated = fundData.weLoveShowSicknessUpdated || '';
+                                }
+
+                                // Gộp WeLove Sickness Logs
+                                const localSickLogs = state.weLoveSicknessLogsUpdated ? new Date(state.weLoveSicknessLogsUpdated).getTime() : 0;
+                                const remoteSickLogs = fundData.weLoveSicknessLogsUpdated ? new Date(fundData.weLoveSicknessLogsUpdated).getTime() : 0;
+                                if (remoteSickLogs > localSickLogs) {
+                                    state.weLoveSicknessLogs = fundData.weLoveSicknessLogs || [];
+                                    state.weLoveSicknessLogsUpdated = fundData.weLoveSicknessLogsUpdated || '';
+                                }
+
+                                // Gộp WeLove Reminders
+                                const localRem = state.weLoveRemindersUpdated ? new Date(state.weLoveRemindersUpdated).getTime() : 0;
+                                const remoteRem = fundData.weLoveRemindersUpdated ? new Date(fundData.weLoveRemindersUpdated).getTime() : 0;
+                                if (remoteRem > localRem) {
+                                    state.weLoveReminders = fundData.weLoveReminders || [];
+                                    state.weLoveRemindersUpdated = fundData.weLoveRemindersUpdated || '';
+                                }
+
+                                // Gộp WeLove Autoplay
+                                const localAuto = state.weLoveAutoplayUpdated ? new Date(state.weLoveAutoplayUpdated).getTime() : 0;
+                                const remoteAuto = fundData.weLoveAutoplayUpdated ? new Date(fundData.weLoveAutoplayUpdated).getTime() : 0;
+                                if (remoteAuto > localAuto) {
+                                    state.weLoveAutoplay = fundData.weLoveAutoplay === true;
+                                    state.weLoveAutoplayUpdated = fundData.weLoveAutoplayUpdated || '';
+                                }
+
+                                await saveLocalState();
+                            } catch (decFundErr) {
+                                console.error("[E2EE Debug] Admin failed to decrypt Spouse's fund:", decFundErr);
+                            }
+                        }
+
                         if (needsSyncForSpouse) {
                             setTimeout(() => {
                                 if (typeof performSync === 'function') {

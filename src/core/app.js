@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.57';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.57';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.57';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.57';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.58';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.58';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.58';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.58';
 // app.js - Main Application Logic & UI Control
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.57';
-import * as sync from './sync.js?v=4.2.57';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.57';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.57';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.58';
+import * as sync from './sync.js?v=4.2.58';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.58';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.58';
 
-const APP_VERSION = '4.2.57';
+const APP_VERSION = '4.2.58';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -712,202 +712,6 @@ async function performSync(silent = false) {
     if (!state.masterPassword) {
         console.warn("[Sync] Chặn đồng bộ do Master Password chưa được thiết lập.");
         return;
-    }
-
-    if (state.viewingSharedFund) {
-        if (!state.sharedFundSourceRow || !state.sharedFundSourceRow.user_id) {
-            console.error("No shared fund source metadata found.");
-            return;
-        }
-        
-        const supabaseClient = sync.getSupabase();
-        if (!supabaseClient) {
-            console.error("Supabase client is not initialized.");
-            return;
-        }
-        
-        try {
-            if (!silent) showToast("Đang đồng bộ lên quỹ chung...", "warning");
-            
-            const { data: remoteRecord, error: fetchErr } = await supabaseClient
-                .from('gift_sync')
-                .select('encrypted_data')
-                .eq('user_id', state.sharedFundSourceRow.user_id)
-                .maybeSingle();
-                
-            if (fetchErr) throw fetchErr;
-            
-            let latestFamilyFunds = state.familyFunds;
-            let latestFundTransactions = state.fundTransactions;
-            
-            // WeLove variables (LWW)
-            let latestWeLoveStartDate = state.weLoveStartDate || '';
-            let latestWeLoveStartDateUpdated = state.weLoveStartDateUpdated || '';
-            let latestWeLoveName1 = state.weLoveName1 || '';
-            let latestWeLoveName1Updated = state.weLoveName1Updated || '';
-            let latestWeLoveName2 = state.weLoveName2 || '';
-            let latestWeLoveName2Updated = state.weLoveName2Updated || '';
-            let latestWeLoveShowSickness = state.weLoveShowSickness !== false;
-            let latestWeLoveShowSicknessUpdated = state.weLoveShowSicknessUpdated || '';
-            let latestWeLoveSicknessLogs = state.weLoveSicknessLogs || [];
-            let latestWeLoveSicknessLogsUpdated = state.weLoveSicknessLogsUpdated || '';
-            let latestWeLoveReminders = state.weLoveReminders || [];
-            let latestWeLoveRemindersUpdated = state.weLoveRemindersUpdated || '';
-            let latestWeLoveAutoplay = state.weLoveAutoplay === true;
-            let latestWeLoveAutoplayUpdated = state.weLoveAutoplayUpdated || '';
-            let latestOwnerEmail = state.ownerEmail || '';
-            let latestOwnerEmailUpdated = state.ownerEmailUpdated || '';
-
-            let fundKey = state.fundSymmetricKey;
-            let originalParsed = {};
-            
-            if (remoteRecord && remoteRecord.encrypted_data) {
-                originalParsed = JSON.parse(remoteRecord.encrypted_data);
-                if (originalParsed.is_hybrid && originalParsed.encrypted_fund) {
-                    const decryptedFund = await decrypt(originalParsed.encrypted_fund, fundKey);
-                    const fundData = JSON.parse(decryptedFund);
-                    
-                    latestFundTransactions = mergeLists(state.fundTransactions, fundData.fundTransactions || []);
-                    latestFamilyFunds = fundData.familyFunds || state.familyFunds;
-
-                    // Gộp WeLove (LWW)
-                    const remoteSTime = fundData.weLoveStartDateUpdated ? new Date(fundData.weLoveStartDateUpdated).getTime() : 0;
-                    const localSTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
-                    if (remoteSTime > localSTime) {
-                        latestWeLoveStartDate = fundData.weLoveStartDate || '';
-                        latestWeLoveStartDateUpdated = fundData.weLoveStartDateUpdated || '';
-                    }
-                    
-                    const remoteN1Time = fundData.weLoveName1Updated ? new Date(fundData.weLoveName1Updated).getTime() : 0;
-                    const localN1Time = state.weLoveName1Updated ? new Date(state.weLoveName1Updated).getTime() : 0;
-                    if (remoteN1Time > localN1Time) {
-                        latestWeLoveName1 = fundData.weLoveName1 || '';
-                        latestWeLoveName1Updated = fundData.weLoveName1Updated || '';
-                    }
-
-                    const remoteN2Time = fundData.weLoveName2Updated ? new Date(fundData.weLoveName2Updated).getTime() : 0;
-                    const localN2Time = state.weLoveName2Updated ? new Date(state.weLoveName2Updated).getTime() : 0;
-                    if (remoteN2Time > localN2Time) {
-                        latestWeLoveName2 = fundData.weLoveName2 || '';
-                        latestWeLoveName2Updated = fundData.weLoveName2Updated || '';
-                    }
-
-                    const remoteSickTime = fundData.weLoveShowSicknessUpdated ? new Date(fundData.weLoveShowSicknessUpdated).getTime() : 0;
-                    const localSickTime = state.weLoveShowSicknessUpdated ? new Date(state.weLoveShowSicknessUpdated).getTime() : 0;
-                    if (remoteSickTime > localSickTime) {
-                        latestWeLoveShowSickness = fundData.weLoveShowSickness !== false;
-                        latestWeLoveShowSicknessUpdated = fundData.weLoveShowSicknessUpdated || '';
-                    }
-
-                    const remoteSickLogsTime = fundData.weLoveSicknessLogsUpdated ? new Date(fundData.weLoveSicknessLogsUpdated).getTime() : 0;
-                    const localSickLogsTime = state.weLoveSicknessLogsUpdated ? new Date(state.weLoveSicknessLogsUpdated).getTime() : 0;
-                    if (remoteSickLogsTime > localSickLogsTime) {
-                        latestWeLoveSicknessLogs = fundData.weLoveSicknessLogs || [];
-                        latestWeLoveSicknessLogsUpdated = fundData.weLoveSicknessLogsUpdated || '';
-                    }
-
-                    const remoteRemTime = fundData.weLoveRemindersUpdated ? new Date(fundData.weLoveRemindersUpdated).getTime() : 0;
-                    const localRemTime = state.weLoveRemindersUpdated ? new Date(state.weLoveRemindersUpdated).getTime() : 0;
-                    if (remoteRemTime > localRemTime) {
-                        latestWeLoveReminders = fundData.weLoveReminders || [];
-                        latestWeLoveRemindersUpdated = fundData.weLoveRemindersUpdated || '';
-                    }
-
-                    const remoteAutoTime = fundData.weLoveAutoplayUpdated ? new Date(fundData.weLoveAutoplayUpdated).getTime() : 0;
-                    const localAutoTime = state.weLoveAutoplayUpdated ? new Date(state.weLoveAutoplayUpdated).getTime() : 0;
-                    if (remoteAutoTime > localAutoTime) {
-                        latestWeLoveAutoplay = fundData.weLoveAutoplay === true;
-                        latestWeLoveAutoplayUpdated = fundData.weLoveAutoplayUpdated || '';
-                    }
-
-                    const remoteOwnerTime = fundData.ownerEmailUpdated ? new Date(fundData.ownerEmailUpdated).getTime() : 0;
-                    const localOwnerTime = state.ownerEmailUpdated ? new Date(state.ownerEmailUpdated).getTime() : 0;
-                    if (remoteOwnerTime > localOwnerTime) {
-                        latestOwnerEmail = fundData.ownerEmail || '';
-                        latestOwnerEmailUpdated = fundData.ownerEmailUpdated || '';
-                    }
-                }
-            }
-            
-            const fundPayload = JSON.stringify({
-                familyFunds: latestFamilyFunds,
-                familyFundsUpdated: new Date().toISOString(),
-                fundTransactions: latestFundTransactions,
-                fundTransactionsUpdated: new Date().toISOString(),
-                activeChartFundIds: state.activeChartFundIds || ['fund-main'],
-                weLoveStartDate: latestWeLoveStartDate,
-                weLoveStartDateUpdated: latestWeLoveStartDateUpdated,
-                weLoveName1: latestWeLoveName1,
-                weLoveName1Updated: latestWeLoveName1Updated,
-                weLoveName2: latestWeLoveName2,
-                weLoveName2Updated: latestWeLoveName2Updated,
-                weLoveShowSickness: latestWeLoveShowSickness,
-                weLoveShowSicknessUpdated: latestWeLoveShowSicknessUpdated,
-                weLoveSicknessLogs: latestWeLoveSicknessLogs,
-                weLoveSicknessLogsUpdated: latestWeLoveSicknessLogsUpdated,
-                weLoveReminders: latestWeLoveReminders,
-                weLoveRemindersUpdated: latestWeLoveRemindersUpdated,
-                weLoveAutoplay: latestWeLoveAutoplay,
-                weLoveAutoplayUpdated: latestWeLoveAutoplayUpdated,
-                ownerEmail: latestOwnerEmail,
-                ownerEmailUpdated: latestOwnerEmailUpdated
-            });
-            const encryptedFund = await encrypt(fundPayload, fundKey);
-            
-            const hybridPayload = JSON.stringify({
-                is_hybrid: true,
-                encrypted_personal: originalParsed.encrypted_personal,
-                encrypted_fund: encryptedFund,
-                fund_shared_keys: originalParsed.fund_shared_keys,
-                owner_email: originalParsed.owner_email,
-                spouse_email: originalParsed.spouse_email,
-                spouse_role: originalParsed.spouse_role || 'wife',
-                owner_nickname: originalParsed.owner_nickname || '',
-                spouse_status: originalParsed.spouse_status || 'accepted',
-                google_sheets_webhook: originalParsed.google_sheets_webhook || '',
-                family_funds_updated: new Date().toISOString(),
-                fund_transactions_updated: new Date().toISOString()
-            });
-            
-            const { error: uploadErr } = await supabaseClient
-                .from('gift_sync')
-                .upsert({
-                    user_id: state.sharedFundSourceRow.user_id,
-                    encrypted_data: hybridPayload,
-                    updated_at: new Date().toISOString(),
-                    user_email: originalParsed.owner_email,
-                    public_key: originalParsed.public_key || null
-                });
-                
-            if (uploadErr) throw uploadErr;
-            
-            state.familyFunds = latestFamilyFunds;
-            state.fundTransactions = latestFundTransactions;
-            state.weLoveStartDate = latestWeLoveStartDate;
-            state.weLoveStartDateUpdated = latestWeLoveStartDateUpdated;
-            state.weLoveName1 = latestWeLoveName1;
-            state.weLoveName1Updated = latestWeLoveName1Updated;
-            state.weLoveName2 = latestWeLoveName2;
-            state.weLoveName2Updated = latestWeLoveName2Updated;
-            state.weLoveShowSickness = latestWeLoveShowSickness;
-            state.weLoveShowSicknessUpdated = latestWeLoveShowSicknessUpdated;
-            state.weLoveSicknessLogs = latestWeLoveSicknessLogs;
-            state.weLoveSicknessLogsUpdated = latestWeLoveSicknessLogsUpdated;
-            state.weLoveReminders = latestWeLoveReminders;
-            state.weLoveRemindersUpdated = latestWeLoveRemindersUpdated;
-            state.weLoveAutoplay = latestWeLoveAutoplay;
-            state.weLoveAutoplayUpdated = latestWeLoveAutoplayUpdated;
-            state.ownerEmail = latestOwnerEmail;
-            state.ownerEmailUpdated = latestOwnerEmailUpdated;
-            await saveLocalState();
-            
-            if (!silent) showToast("Đồng bộ quỹ chung thành công!");
-            renderAll();
-        } catch (e) {
-            console.error("Shared fund sync error:", e);
-            if (!silent) showToast("Lỗi đồng bộ lên quỹ chung: " + e.message, "danger");
-            return;
-        }
     }
 
     if (!sync.isConfigured()) {
