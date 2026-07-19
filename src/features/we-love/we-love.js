@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.70';
-import * as sync from '../../core/sync.js?v=4.2.70';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.70';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.70';
+} from '../../core/app.js?v=4.2.71';
+import * as sync from '../../core/sync.js?v=4.2.71';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.71';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.71';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.70');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.71');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.70';
+        const logoPath = './logo_pwa_small.png?v=4.2.71';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.70';
+    const logoPath = './logo_pwa_small.png?v=4.2.71';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1692,17 +1692,24 @@ export function renderFamilyPairingSettings() {
                 if (allRows) {
                     console.log(`[Pairing Debug] Scanned ${allRows.length} rows to find code: ${code}`);
                     for (const row of allRows) {
+                        console.log(`[Pairing Debug] Inspecting Row email: ${row.user_email}`);
                         try {
-                            const p = JSON.parse(row.encrypted_data);
+                            let p = null;
+                            if (typeof row.encrypted_data === 'object' && row.encrypted_data !== null) {
+                                p = row.encrypted_data;
+                            } else {
+                                p = JSON.parse(row.encrypted_data);
+                            }
+                            
                             const rowCode = (p?.pairing_code || '').trim().toUpperCase();
-                            console.log(`[Pairing Debug] Row email: ${row.user_email} | Code: ${rowCode}`);
+                            console.log(`[Pairing Debug] -> Parse Success. Code: ${rowCode}`);
                             if (p && rowCode === code) {
                                 matchingRow = row;
                                 parsed = p;
                                 break;
                             }
                         } catch (e) {
-                            console.warn("[Pairing Debug] Failed to parse row for E2EE:", e);
+                            console.warn(`[Pairing Debug] -> Failed to parse row data for ${row.user_email}:`, e.message);
                         }
                     }
                 }
@@ -1754,7 +1761,8 @@ export function renderFamilyPairingSettings() {
                 if (typeof window.renderWeLoveDashboard === 'function') window.renderWeLoveDashboard();
                 if (typeof window.updateHomeLayoutUI === 'function') window.updateHomeLayoutUI();
             } catch (err) {
-                console.error("Pairing failed:", err);
+                console.error("Pairing failed error message:", err.message);
+                console.error("Pairing failed stack trace:", err.stack);
                 showToast(err.message || "Kết nối thất bại!", "error");
             } finally {
                 btnSubmit.disabled = false;
