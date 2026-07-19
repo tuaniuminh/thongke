@@ -12,7 +12,7 @@ import * as sync from './sync.js?v=4.2.61';
 import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.61';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.61';
 
-const APP_VERSION = '4.2.69';
+const APP_VERSION = '4.2.70';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -366,6 +366,28 @@ window.showPrompt = function(message, defaultValue = "", title = "Nhập thông 
     });
 };
 
+// Force reload app by clearing service worker & cache to bust PWA caching
+async function forceReloadApp() {
+    showToast("Đang xóa bộ nhớ đệm & tải lại...", "info");
+    try {
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            for (const key of keys) {
+                await caches.delete(key);
+            }
+        }
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const r of registrations) {
+                await r.unregister();
+            }
+        }
+    } catch (err) {
+        console.error("Cache clear failed:", err);
+    }
+    window.location.reload(true);
+}
+
 // Show Update Notification (Persistent Toast with Action)
 function showUpdateNotification(newVersion) {
     const container = document.getElementById('toastContainer');
@@ -392,8 +414,8 @@ function showUpdateNotification(newVersion) {
     `;
     
     // Add click handler to reload
-    toast.addEventListener('click', () => {
-        window.location.reload(true);
+    toast.addEventListener('click', async () => {
+        await forceReloadApp();
     });
     
     container.appendChild(toast);
@@ -413,7 +435,9 @@ async function checkAppVersion(isManual = false) {
             if (data.version !== APP_VERSION) {
                 if (isManual) {
                     showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
-                    setTimeout(() => window.location.reload(true), 1000);
+                    setTimeout(async () => {
+                        await forceReloadApp();
+                    }, 1000);
                 } else {
                     showUpdateNotification(data.version);
                 }
