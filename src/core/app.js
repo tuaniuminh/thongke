@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.10';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.10';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.10';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.10';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.11';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.11';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.11';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.11';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.10';
-import * as sync from './sync.js?v=4.3.10';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.10';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.10';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.11';
+import * as sync from './sync.js?v=4.3.11';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.11';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.11';
 
-const APP_VERSION = '4.3.10';
+const APP_VERSION = '4.3.11';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1296,15 +1296,17 @@ async function performSync(silent = false) {
                         state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     }
                     
-                    // Luôn đồng bộ thông tin liên kết gia đình và ghép đôi E2EE từ remote profile
-                    if (remoteData.spouseEmail !== undefined) state.spouseEmail = remoteData.spouseEmail || '';
-                    if (remoteData.googleSheetsWebhook !== undefined) state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
-                    if (remoteData.spouseRole !== undefined) state.spouseRole = remoteData.spouseRole || 'wife';
-                    if (remoteData.ownerNickname !== undefined) state.ownerNickname = remoteData.ownerNickname || '';
-                    if (remoteData.spouseStatus !== undefined) state.spouseStatus = remoteData.spouseStatus || '';
-                    if (remoteData.viewingSharedFund !== undefined) state.viewingSharedFund = !!remoteData.viewingSharedFund;
-                    if (remoteData.sharedFundOwnerEmail !== undefined) state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
-                    if (remoteData.spousePublicKey !== undefined) state.spousePublicKey = remoteData.spousePublicKey || '';
+                    // Đồng bộ thông tin liên kết gia đình E2EE (chỉ ghi đè nếu remote có giá trị hoặc local rỗng)
+                    if (remoteData.spouseEmail) state.spouseEmail = remoteData.spouseEmail;
+                    if (remoteData.googleSheetsWebhook) state.googleSheetsWebhook = remoteData.googleSheetsWebhook;
+                    if (remoteData.spouseRole) state.spouseRole = remoteData.spouseRole;
+                    if (remoteData.ownerNickname) state.ownerNickname = remoteData.ownerNickname;
+                    if (remoteData.spouseStatus) state.spouseStatus = remoteData.spouseStatus;
+                    if (remoteData.viewingSharedFund !== undefined && (remoteData.viewingSharedFund || !state.spouseEmail)) {
+                        state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                    }
+                    if (remoteData.sharedFundOwnerEmail) state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail;
+                    if (remoteData.spousePublicKey) state.spousePublicKey = remoteData.spousePublicKey;
                     // Merge reportAiInsights — local thắng theo từng key (tháng), remote bổ sung các key còn thiếu
                     if (remoteData.reportAiInsights && typeof remoteData.reportAiInsights === 'object') {
                         state.reportAiInsights = Object.assign({}, remoteData.reportAiInsights, state.reportAiInsights || {});
