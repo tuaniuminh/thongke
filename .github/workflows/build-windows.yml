@@ -30,6 +30,10 @@ jobs:
         run: |
           npm install
 
+      - name: Prepare Web Assets
+        run: |
+          npm run prepare-dist
+
       - name: Build Tauri App
         run: |
           npx @tauri-apps/cli@1 build
