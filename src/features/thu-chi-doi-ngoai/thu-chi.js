@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.3.01';
-import * as sync from '../../core/sync.js?v=4.3.01';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.01';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.01';
+} from '../../core/app.js?v=4.3.04';
+import * as sync from '../../core/sync.js?v=4.3.04';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.04';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.04';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1572,8 +1572,7 @@ async function handleExportEncrypted(type = 'all') {
             try {
                 await navigator.share({
                     files: [file],
-                    title: 'Xuất file dữ liệu FamiLife',
-                    text: 'File sao lưu dữ liệu hiếu hỷ đã mã hóa'
+                    title: 'Xuất file dữ liệu FamiLife'
                 });
                 shared = true;
             } catch (err) {

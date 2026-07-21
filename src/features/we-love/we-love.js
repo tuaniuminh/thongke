@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.3.01';
-import * as sync from '../../core/sync.js?v=4.3.01';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.01';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.01';
+} from '../../core/app.js?v=4.3.04';
+import * as sync from '../../core/sync.js?v=4.3.04';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.04';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.04';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.01');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.04');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.01';
+        const logoPath = './logo_pwa_small.png?v=4.3.04';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -376,7 +376,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.01';
+    const logoPath = './logo_pwa_small.png?v=4.3.04';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1628,9 +1628,9 @@ export function renderFamilyPairingSettings() {
         // ---- CHƯA KẾT NỐI ----
         const isPairingActive = state.pairingCode && state.pairingCodeExpired && (new Date(state.pairingCodeExpired).getTime() > Date.now());
         const codeDisplay = isPairingActive ? `
-            <div id="fpPairingCodeDisplayContainer" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-                <span id="fpPairingCodeVal" style="font-size: 1.15rem; font-weight: 800; letter-spacing: 1.5px; color: var(--accent-rose); background: var(--bg-secondary); padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border-color);">${escapeHTML(state.pairingCode)}</span>
-                <button class="btn" id="btnFPCopyCode" style="font-size: 0.75rem; padding: 6px 10px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color);" title="Sao chép mã">📋 Copy</button>
+            <div id="fpPairingCodeDisplayContainer" class="pairing-code-row" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                <span id="fpPairingCodeVal" style="font-size: 1.15rem; font-weight: 800; letter-spacing: 1.5px; color: var(--accent-rose); background: var(--bg-secondary); padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">${escapeHTML(state.pairingCode)}</span>
+                <button class="btn" id="btnFPCopyCode" style="font-size: 0.75rem; padding: 8px 14px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" title="Sao chép mã">📋 Copy</button>
             </div>
             <div id="fpPairingCodeTimer" style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 5px; text-align: right;"></div>
         ` : '';
@@ -1652,9 +1652,9 @@ export function renderFamilyPairingSettings() {
                 <div style="background: var(--bg-secondary); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color);">
                     <p style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">2. Nhập mã ghép đôi (Dành cho Vợ):</p>
                     <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 10px 0;">Nhập mã chồng đã gửi để hoàn thành kết nối 2 chiều và mở khóa Quỹ chung & Góc tình yêu.</p>
-                    <div style="display: flex; gap: 8px;">
+                    <div class="pairing-input-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <input type="text" id="fpPairingCodeInput" placeholder="Ví dụ: LOVE-123456" style="flex-grow: 1; min-width: 0; padding: 8px 12px; font-size: 0.88rem; text-transform: uppercase; font-weight: 700; text-align: center; letter-spacing: 1px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
-                        <button class="btn btn-primary" id="btnFPSubmitCode" style="font-size: 0.82rem; padding: 0 16px; background: #059669; border: none; border-radius: 10px; font-weight: 700; color: white; white-space: nowrap;">
+                        <button class="btn btn-primary" id="btnFPSubmitCode" style="font-size: 0.82rem; padding: 10px 16px; background: #059669; border: none; border-radius: 10px; font-weight: 700; color: white; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                             Kết nối
                         </button>
                     </div>
