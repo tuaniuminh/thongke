@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.95';
-import * as sync from '../../core/sync.js?v=4.2.95';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.95';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.95';
+} from '../../core/app.js?v=4.2.96';
+import * as sync from '../../core/sync.js?v=4.2.96';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.96';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.96';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.95');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.96');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.95';
+        const logoPath = './logo_pwa_small.png?v=4.2.96';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.95';
+    const logoPath = './logo_pwa_small.png?v=4.2.96';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -936,9 +936,14 @@ export async function renderWeLoveDashboard() {
                     <!-- Nhật ký truy cập của em yêu -->
                     ${isAdmin ? `
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
-                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                            <span style="font-size: 1.8rem;">📊</span>
-                            <h3 class="welove-title">Nhật Ký Truy Cập Của Nửa Kia</h3>
+                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.8rem;">📊</span>
+                                <h3 class="welove-title" style="margin: 0;">Nhật Ký Truy Cập Của Nửa Kia</h3>
+                            </div>
+                            <button id="btnWeLoveClearVisitLogs" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); color: #ef4444; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Xóa toàn bộ lịch sử truy cập">
+                                🗑️ Xóa lịch sử
+                            </button>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; font-weight: 600;">
                             Đang theo dõi email: <span style="color: var(--accent-rose);">${state.spouseEmail || 'chưa liên kết'}</span>
@@ -1432,6 +1437,26 @@ function bindAdminEvents() {
             remMessageInput.value = '';
             
             showToast("Lên lịch nhắc nhở thành công ⏰");
+        });
+    }
+
+    const btnClearLogs = document.getElementById('btnWeLoveClearVisitLogs');
+    if (btnClearLogs) {
+        btnClearLogs.addEventListener('click', async () => {
+            const ok = confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử truy cập của nửa kia? 🗑️");
+            if (!ok) return;
+
+            state.weLoveVisitLogs = [];
+            state.weLoveVisitLogsUpdated = new Date().toISOString();
+            await saveLocalState();
+
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+
+            visitLogs = [];
+            renderVisitLogs();
+            showToast("Đã xóa toàn bộ lịch sử truy cập 🧹");
         });
     }
 }
