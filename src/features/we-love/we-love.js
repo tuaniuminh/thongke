@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.93';
-import * as sync from '../../core/sync.js?v=4.2.93';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.93';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.93';
+} from '../../core/app.js?v=4.2.94';
+import * as sync from '../../core/sync.js?v=4.2.94';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.94';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.94';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.93');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.94');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.93';
+        const logoPath = './logo_pwa_small.png?v=4.2.94';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.93';
+    const logoPath = './logo_pwa_small.png?v=4.2.94';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -850,6 +850,8 @@ export async function renderWeLoveDashboard() {
     const tabContainer = document.getElementById('tab-welove');
     if (!tabContainer) return;
 
+    const renderingTab = state.activeTab;
+
     // Map activeTab route directly to sub-view state
     if (state.activeTab === 'welove-admin') {
         weLoveCurrentSubView = 'admin';
@@ -1149,6 +1151,13 @@ export async function renderWeLoveDashboard() {
 
     // Load data and bind events
     await fetchWeLoveData();
+    
+    // Ngăn chặn race condition nếu người dùng chuyển tab nhanh trước khi API trả về xong
+    if (state.activeTab !== renderingTab) {
+        console.warn(`[WeLove] Render race condition aborted: ${renderingTab} -> ${state.activeTab}`);
+        return;
+    }
+
     updateAudioPlaybackState();
 
     if (weLoveCurrentSubView === 'memory') {

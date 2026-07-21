@@ -1344,3 +1344,13 @@ body.active-tab-welove-admin .sidebar .nav-link:hover i,
 body.active-tab-welove-settings .sidebar .nav-link:hover i {
     color: #e11d48 !important;
 }
+
+/* Unlock/unfreeze the horizontal header (sidebar) on Desktop for WeLove pages to allow it to scroll out of view */
+@media (min-width: 769px) {
+  body.active-tab-welove .sidebar,
+  body.active-tab-welove-admin .sidebar,
+  body.active-tab-welove-settings .sidebar {
+    position: relative !important;
+  }
+}
+
