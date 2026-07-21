@@ -30,8 +30,8 @@ async function deriveKey(password, salt) {
         {
             name: 'PBKDF2',
             salt: salt,
-            iterations: 100000,
-            hash: 'SHA-256'
+            iterations: 600000,
+            hash: 'SHA-512'
         },
         baseKey,
         { name: 'AES-GCM', length: 256 },
