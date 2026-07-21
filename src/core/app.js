@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.08';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.08';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.08';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.08';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.09';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.09';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.09';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.09';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.08';
-import * as sync from './sync.js?v=4.3.08';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.08';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.08';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.09';
+import * as sync from './sync.js?v=4.3.09';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.09';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.09';
 
-const APP_VERSION = '4.3.08';
+const APP_VERSION = '4.3.09';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1084,6 +1084,15 @@ async function performSync(silent = false) {
                     state.spouseStatus = remoteData.spouseStatus || '';
                     state.lastFullBackupDate = remoteData.lastFullBackupDate || '';
                     state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
+                    
+                    // Khôi phục trạng thái ghép đôi và liên kết E2EE
+                    state.spouseEmail = remoteData.spouseEmail || '';
+                    state.spouseRole = remoteData.spouseRole || 'wife';
+                    state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                    state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
+                    state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
+                    state.ownerNickname = remoteData.ownerNickname || '';
+                    state.spousePublicKey = remoteData.spousePublicKey || '';
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
@@ -1275,11 +1284,6 @@ async function performSync(silent = false) {
                     if (remoteFundsTime > localFundsTime) {
                         state.familyFunds = remoteData.familyFunds || [];
                         state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
-                        state.spouseEmail = remoteData.spouseEmail || '';
-                        state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
-                        state.spouseRole = remoteData.spouseRole || 'wife';
-                        state.ownerNickname = remoteData.ownerNickname || '';
-                        state.spouseStatus = remoteData.spouseStatus || '';
                         state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
                     }
                     // Merge fundTransactions using LWW
@@ -1289,16 +1293,16 @@ async function performSync(silent = false) {
                         state.fundTransactions = remoteData.fundTransactions || [];
                         state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     }
-                    // Merge viewingSharedFund and sharedFundOwnerEmail using LWW (Last Write Wins)
-                    // These are ONLY stored in encrypted_personal, so must be merged from remoteData
-                    if (remoteData.viewingSharedFund !== undefined) {
-                        // If remote says true, always trust it (wife device can restore this flag)
-                        if (remoteData.viewingSharedFund) {
-                            state.viewingSharedFund = true;
-                            state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || state.sharedFundOwnerEmail || '';
-                        }
-                        // If local is already true, keep it (never downgrade from remote false during sync)
-                    }
+                    
+                    // Luôn đồng bộ thông tin liên kết gia đình và ghép đôi E2EE từ remote profile
+                    if (remoteData.spouseEmail !== undefined) state.spouseEmail = remoteData.spouseEmail || '';
+                    if (remoteData.googleSheetsWebhook !== undefined) state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
+                    if (remoteData.spouseRole !== undefined) state.spouseRole = remoteData.spouseRole || 'wife';
+                    if (remoteData.ownerNickname !== undefined) state.ownerNickname = remoteData.ownerNickname || '';
+                    if (remoteData.spouseStatus !== undefined) state.spouseStatus = remoteData.spouseStatus || '';
+                    if (remoteData.viewingSharedFund !== undefined) state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                    if (remoteData.sharedFundOwnerEmail !== undefined) state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
+                    if (remoteData.spousePublicKey !== undefined) state.spousePublicKey = remoteData.spousePublicKey || '';
                     // Merge reportAiInsights — local thắng theo từng key (tháng), remote bổ sung các key còn thiếu
                     if (remoteData.reportAiInsights && typeof remoteData.reportAiInsights === 'object') {
                         state.reportAiInsights = Object.assign({}, remoteData.reportAiInsights, state.reportAiInsights || {});
@@ -1534,6 +1538,16 @@ async function performSync(silent = false) {
         renderAll();
         updateSyncIndicator('synced');
         if (!silent) showToast("Đồng bộ dữ liệu thành công!");
+        
+        // Tự động kéo dữ liệu gia đình/WeLove của đối tác về sau khi đồng bộ xong
+        if (typeof window.checkForSharedFamilyFund === 'function') {
+            try {
+                await window.checkForSharedFamilyFund();
+            } catch (checkErr) {
+                console.error("[Sync] Error running checkForSharedFamilyFund:", checkErr);
+            }
+        }
+
         // Cập nhật lại giao diện kết nối gia đình nếu đang ở tab cài đặt
         if (typeof window.renderFamilyPairingSettings === 'function') {
             setTimeout(() => window.renderFamilyPairingSettings(), 100);
@@ -4092,6 +4106,80 @@ document.addEventListener('click', (e) => {
         triggerHapticFeedback('light');
     }
 });
+
+// Xóa sạch toàn bộ dữ liệu trạng thái (trừ Master Password để giữ trạng thái đã unlock)
+export async function clearAllStateData() {
+    state.receivedGifts = [];
+    state.sentGifts = [];
+    state.medicalRecords = [];
+    state.medicalRecordsUpdated = '';
+    state.geminiApiKey = '';
+    state.geminiApiKeyUpdated = '';
+    state.lastAiAnalysis = '';
+    state.lastAiAnalysisDate = '';
+    state.lastAiAnalysisUpdated = '';
+    state.lastBpAnalysis = '';
+    state.lastBpAnalysisDate = '';
+    state.lastBpAnalysisUpdated = '';
+    state.selectedSpeechVoiceName = '';
+    state.selectedSpeechRate = 1.0;
+    state.familyProfiles = [{ id: 'p-self', name: 'Bản thân' }];
+    state.familyProfilesUpdated = '';
+    state.selectedHealthProfileId = 'p-self';
+    state.lastResetTime = '';
+    state.showImportNotesOption = false;
+    state.showImportNotesOptionUpdated = '';
+    state.showFamilyFundCard = false;
+    state.showFamilyFundCardUpdated = '';
+    state.showLoveWidget = true;
+    state.showLoveWidgetUpdated = '';
+    state.weLoveStartDate = '';
+    state.weLoveStartDateUpdated = '';
+    state.weLoveName1 = '';
+    state.weLoveName1Updated = '';
+    state.weLoveName2 = '';
+    state.weLoveName2Updated = '';
+    state.weLoveShowSickness = true;
+    state.weLoveShowSicknessUpdated = '';
+    state.weLoveSicknessLogs = [];
+    state.weLoveSicknessLogsUpdated = '';
+    state.weLoveReminders = [];
+    state.weLoveRemindersUpdated = '';
+    state.weLoveVisitLogs = [];
+    state.weLoveVisitLogsUpdated = '';
+    state.customEventTypes = [];
+    state.customEventTypesUpdated = '';
+    state.bloodPressureRecords = [];
+    state.bloodPressureRecordsUpdated = '';
+    state.bodyCompositionRecords = [];
+    state.bodyCompositionRecordsUpdated = '';
+    state.familyFunds = [];
+    state.familyFundsUpdated = '';
+    state.fundTransactions = [];
+    state.fundTransactionsUpdated = '';
+    state.asymmetricPublicKey = '';
+    state.asymmetricPrivateKeyEncrypted = '';
+    state.spousePublicKey = '';
+    state.fundSymmetricKey = '';
+    state.spouseEmail = '';
+    state.googleSheetsWebhook = '';
+    state.familyFundInviteStatus = '';
+    state.familyFundInviteStatusUpdated = '';
+    state.spouseRole = 'wife';
+    state.ownerNickname = '';
+    state.spouseStatus = '';
+    state.viewingSharedFund = false;
+    state.sharedFundOwnerEmail = '';
+    state.sharedFundSourceRow = null;
+    state.lastFullBackupDate = '';
+    state.activeChartFundIds = ['fund-main'];
+    state.reportAiInsights = {};
+    state.pairingCode = '';
+    state.pairingCodeExpired = '';
+    state.pairingFundKeyEncrypted = '';
+    
+    await saveLocalState();
+}
 
 export { logScrollDiagnostics, triggerHapticFeedback };
 

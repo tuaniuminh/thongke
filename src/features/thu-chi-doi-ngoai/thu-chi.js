@@ -3,11 +3,11 @@ import {
     APP_VERSION, formatDate, escapeHTML, formatVND, generateId,
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
-    compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.3.08';
-import * as sync from '../../core/sync.js?v=4.3.08';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.08';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.08';
+    compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData
+} from '../../core/app.js?v=4.3.09';
+import * as sync from '../../core/sync.js?v=4.3.09';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.09';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.09';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1520,25 +1520,15 @@ async function handleSyncSignOut() {
     try {
         await sync.signOut();
         state.user = null;
-        // Xóa sạch toàn bộ trạng thái kết nối gia đình
-        state.spouseEmail = '';
-        state.spouseRole = 'wife';
-        state.spouseStatus = '';
-        state.spousePublicKey = '';
-        state.ownerNickname = '';
-        state.viewingSharedFund = false;
-        state.sharedFundOwnerEmail = '';
-        state.sharedFundSourceRow = null;
-        state.spouseFundInvitePending = false;
-        state.spouseFundInviteOwnerEmail = '';
-        state.familyFundInviteStatus = '';
-        state.familyFundInviteStatusUpdated = '';
-        state.pairingCode = '';
-        state.pairingCodeExpired = '';
-        state.pairingFundKeyEncrypted = '';
-        await saveLocalState();
+        
+        // Xóa sạch toàn bộ dữ liệu cục bộ đã đồng bộ (trừ mã PIN/Master Password)
+        await clearAllStateData();
+        
+        // Cập nhật lại toàn bộ UI về trạng thái trống
+        renderAll();
+        
         updateUserBadge();
-        showToast("Đã đăng xuất tài khoản đồng bộ. Kết nối gia đình đã được xóa.");
+        showToast("Đã đăng xuất tài khoản đồng bộ. Dữ liệu trên thiết bị đã được dọn sạch.");
         renderSettings();
         // Cập nhật lại giao diện kết nối gia đình ngay lập tức
         if (typeof window.renderFamilyPairingSettings === 'function') {
