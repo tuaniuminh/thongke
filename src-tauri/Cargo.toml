@@ -1,0 +1,25 @@
+[package]
+name = "familife"
+version = "4.3.12"
+description = "FamiLife - Thu Chi & Sức Khỏe Gia Đình"
+authors = ["Antigravity"]
+license = "MIT"
+repository = ""
+default-run = "familife"
+edition = "2021"
+rust-version = "1.57"
+
+[build-dependencies]
+tauri-build = { version = "1.5" }
+
+[dependencies]
+tauri = { version = "1.6", features = [ "shell-open" ] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[features]
+# by default Tauri runs in production mode
+# when building a dev version it will run in "dev-code"
+default = [ "custom-protocol" ]
+# this feature is used for production builds where assets are embedded in the binary
+custom-protocol = [ "tauri/custom-protocol" ]
