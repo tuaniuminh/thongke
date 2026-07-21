@@ -30,6 +30,13 @@ jobs:
           sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" src/core/app.js
           sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" src/core/app.js
 
+      - name: Get Version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('version.json'))['version'])")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -58,5 +65,5 @@ jobs:
       - name: Upload Windows Installer (.msi)
         uses: actions/upload-artifact@v4
         with:
-          name: FamiLife-Windows-Installer
+          name: FamiLife_windows_v${{ steps.get_version.outputs.VERSION }}
           path: src-tauri/target/release/bundle/msi/*.msi

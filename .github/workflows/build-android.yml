@@ -68,14 +68,16 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Package and Rename APK
+        id: get_version
         run: |
           VERSION=$(python3 -c "import json; print(json.load(open('version.json'))['version'])")
           cp android/app/build/outputs/apk/debug/app-debug.apk "FamiLife_v${VERSION}.apk"
           echo "APK_NAME=FamiLife_v${VERSION}.apk" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FamiLife-Android-Debug
+          name: FamiLife_android_v${{ steps.get_version.outputs.VERSION }}
           path: ${{ env.APK_NAME }}
           if-no-files-found: error
