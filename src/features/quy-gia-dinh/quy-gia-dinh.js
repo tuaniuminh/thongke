@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.90';
-import { decrypt } from '../../core/crypto.js?v=4.2.90';
-import * as sync from '../../core/sync.js?v=4.2.90';
+} from '../../core/app.js?v=4.2.91';
+import { decrypt } from '../../core/crypto.js?v=4.2.91';
+import * as sync from '../../core/sync.js?v=4.2.91';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -536,7 +536,7 @@ export async function checkForSharedFamilyFund() {
                             }
                         }
                         console.log("[E2EE Debug] Match found for spouse_email!");
-                        state.spouseRole = (parsed.spouse_role === 'husband') ? 'wife' : 'husband';
+                        state.spouseRole = 'wife'; // Guest's role is always 'wife' (Partner is Husband/Admin)
                         state.ownerNickname = parsed.owner_nickname || '';
                         let fundKey = '';
                         if (state.asymmetricPrivateKeyEncrypted) {
@@ -744,44 +744,8 @@ export async function checkForSharedFamilyFund() {
             }
         }
         
-        if (state.viewingSharedFund || state.sharedFundOwnerEmail) {
-            if (state.masterPassword) {
-                await loadLocalState(state.masterPassword);
-            }
-            state.viewingSharedFund = false;
-            state.sharedFundOwnerEmail = '';
-            state.familyFunds = state.familyFunds || [];
-            state.fundTransactions = state.fundTransactions || [];
-            state.fundSymmetricKey = '';
-            state.familyFundInviteStatus = '';
-            state.sharedFundSourceRow = null;
-            await saveLocalState();
-            showToast("Liên kết Quỹ gia đình đã bị hủy bởi đối tác. Quay về quỹ cá nhân.");
-        }
-        
-        state.viewingSharedFund = false;
-        if (typeof window.updateHomeLayoutUI === 'function') {
-            window.updateHomeLayoutUI();
-        }
     } catch (e) {
         console.error("Error checking shared family fund:", e);
-        if (state.viewingSharedFund || state.sharedFundOwnerEmail) {
-            if (state.masterPassword) {
-                await loadLocalState(state.masterPassword);
-            }
-            state.viewingSharedFund = false;
-            state.sharedFundOwnerEmail = '';
-            state.familyFunds = state.familyFunds || [];
-            state.fundTransactions = state.fundTransactions || [];
-            state.fundSymmetricKey = '';
-            state.familyFundInviteStatus = '';
-            state.sharedFundSourceRow = null;
-            await saveLocalState();
-        }
-        state.viewingSharedFund = false;
-        if (typeof window.updateHomeLayoutUI === 'function') {
-            window.updateHomeLayoutUI();
-        }
     }
 }
 
