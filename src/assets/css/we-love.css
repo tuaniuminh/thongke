@@ -147,7 +147,7 @@ body:not(.light-mode) .memory-page {
   --border-focus: #818cf8;
 
   min-height: 100vh;
-  background: var(--bg-gradient);
+  background: transparent;
 }
 
 /* Floating background hearts */
@@ -1208,6 +1208,7 @@ body.light-mode.active-tab-welove-settings .main-content {
 }
 
 /* Custom pink active states for navbar/header buttons inside Kỷ Niệm Tình Yêu context */
+/* Light Mode (default fallback) */
 body.active-tab-welove .mobile-navbar-right .nav-icon-btn:hover,
 body.active-tab-welove-admin .mobile-navbar-right .nav-icon-btn:hover,
 body.active-tab-welove-settings .mobile-navbar-right .nav-icon-btn:hover {
@@ -1221,6 +1222,23 @@ body.active-tab-welove-settings .mobile-navbar-right .nav-icon-btn.active {
     color: var(--accent-rose) !important;
     background: rgba(244, 63, 94, 0.12) !important;
     border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+
+/* Dark Mode Overrides for WeLove Navbar Buttons (Premium & Soft) */
+body:not(.light-mode).active-tab-welove .mobile-navbar-right .nav-icon-btn:hover,
+body:not(.light-mode).active-tab-welove-admin .mobile-navbar-right .nav-icon-btn:hover,
+body:not(.light-mode).active-tab-welove-settings .mobile-navbar-right .nav-icon-btn:hover {
+    color: #fecdd3 !important; /* Soft pink rose-100 */
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+body:not(.light-mode).active-tab-welove .mobile-navbar-right .nav-icon-btn.active,
+body:not(.light-mode).active-tab-welove-admin .mobile-navbar-right .nav-icon-btn.active,
+body:not(.light-mode).active-tab-welove-settings .mobile-navbar-right .nav-icon-btn.active {
+    color: #fda4af !important; /* Soft rose-200 */
+    background: rgba(244, 63, 94, 0.15) !important;
+    border: 1px solid rgba(244, 63, 94, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.1) !important;
 }
 
 
