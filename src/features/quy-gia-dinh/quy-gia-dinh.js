@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.94';
-import { decrypt } from '../../core/crypto.js?v=4.2.94';
-import * as sync from '../../core/sync.js?v=4.2.94';
+} from '../../core/app.js?v=4.2.95';
+import { decrypt } from '../../core/crypto.js?v=4.2.95';
+import * as sync from '../../core/sync.js?v=4.2.95';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -444,6 +444,14 @@ export async function checkForSharedFamilyFund() {
                                     state.weLoveAutoplayUpdated = fundData.weLoveAutoplayUpdated || '';
                                 }
 
+                                // Gộp WeLove Visit Logs
+                                const localVisits = state.weLoveVisitLogsUpdated ? new Date(state.weLoveVisitLogsUpdated).getTime() : 0;
+                                const remoteVisits = fundData.weLoveVisitLogsUpdated ? new Date(fundData.weLoveVisitLogsUpdated).getTime() : 0;
+                                if (remoteVisits > localVisits) {
+                                    state.weLoveVisitLogs = fundData.weLoveVisitLogs || [];
+                                    state.weLoveVisitLogsUpdated = fundData.weLoveVisitLogsUpdated || '';
+                                }
+
                                 await saveLocalState();
                             } catch (decFundErr) {
                                 console.error("[E2EE Debug] Admin failed to decrypt Spouse's fund:", decFundErr);
@@ -639,6 +647,14 @@ export async function checkForSharedFamilyFund() {
                                         state.weLoveAutoplayUpdated = fundData.weLoveAutoplayUpdated;
                                     }
                                 }
+                                 if (fundData.weLoveVisitLogsUpdated) {
+                                     const localTime = state.weLoveVisitLogsUpdated ? new Date(state.weLoveVisitLogsUpdated).getTime() : 0;
+                                     const remoteTime = new Date(fundData.weLoveVisitLogsUpdated).getTime();
+                                     if (remoteTime > localTime) {
+                                         state.weLoveVisitLogs = fundData.weLoveVisitLogs || [];
+                                         state.weLoveVisitLogsUpdated = fundData.weLoveVisitLogsUpdated;
+                                     }
+                                 }
                                 if (fundData.ownerEmailUpdated) {
                                     const localTime = state.ownerEmailUpdated ? new Date(state.ownerEmailUpdated).getTime() : 0;
                                     const remoteTime = new Date(fundData.ownerEmailUpdated).getTime();

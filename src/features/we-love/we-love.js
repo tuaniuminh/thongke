@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.94';
-import * as sync from '../../core/sync.js?v=4.2.94';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.94';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.94';
+} from '../../core/app.js?v=4.2.95';
+import * as sync from '../../core/sync.js?v=4.2.95';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.95';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.95';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.94');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.95');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.94';
+        const logoPath = './logo_pwa_small.png?v=4.2.95';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.94';
+    const logoPath = './logo_pwa_small.png?v=4.2.95';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -470,7 +470,9 @@ export async function logSpouseVisit() {
     const user = await sync.getCurrentUser();
     if (!user) return;
     
-    const isAdmin = state.ownerEmail && user.email.toLowerCase().trim() === state.ownerEmail.toLowerCase().trim();
+    // Vợ (người nhập mã) có vai trò 'wife'. Chồng hoặc tài khoản độc lập có vai trò 'husband' hoặc trống.
+    const isSpouse = state.viewingSharedFund && state.spouseRole === 'wife';
+    const isAdmin = !isSpouse;
     if (!isAdmin) {
         const visitLogged = sessionStorage.getItem('we_love_visit_logged');
         if (!visitLogged) {
@@ -876,10 +878,10 @@ export async function renderWeLoveDashboard() {
 
     const isLocal = !sync.isConfigured() || !state.user;
     // isSpouseRole: Vợ (người nhập mã) chỉ được xem WeLove, không chỉnh sửa cấu hình
-    const isSpouseRole = !!state.spouseEmail && state.viewingSharedFund;
+    const isSpouseRole = state.viewingSharedFund && state.spouseRole === 'wife';
     const canEdit = !isSpouseRole && (isLocal || state.user !== null);
     const showSickness = state.weLoveShowSickness !== false;
-    const isAdmin = state.user && state.ownerEmail && state.user.email.toLowerCase().trim() === state.ownerEmail.toLowerCase().trim();
+    const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
 
     tabContainer.innerHTML = `
         <div class="memory-page" id="weLovePage">
