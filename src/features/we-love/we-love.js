@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.97';
-import * as sync from '../../core/sync.js?v=4.2.97';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.97';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.97';
+} from '../../core/app.js?v=4.2.98';
+import * as sync from '../../core/sync.js?v=4.2.98';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.98';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.98';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.97');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.98');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.97';
+        const logoPath = './logo_pwa_small.png?v=4.2.98';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -197,13 +197,17 @@ export function calculateLoveDays() {
     const month = parseInt(parts[1]) - 1;
     const day = parseInt(parts[2]);
     
-    const startDateLocal = new Date(year, month, day, 0, 0, 0);
-    const startDayEpoch = Math.floor(startDateLocal.getTime() / (1000 * 60 * 60 * 24));
+    // Khởi tạo ngày bắt đầu ở múi giờ địa phương (00:00:00)
+    const startDateLocal = new Date(year, month, day, 0, 0, 0, 0);
     
+    // Khởi tạo ngày hiện tại ở múi giờ địa phương và đưa về nửa đêm (00:00:00)
     const today = new Date();
-    const currentDayEpoch = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+    const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
     
-    loveDaysCount = currentDayEpoch - startDayEpoch + 1;
+    // Tính khoảng cách ngày chính xác dựa trên mili-giây múi giờ Việt Nam
+    const diffMs = todayLocal.getTime() - startDateLocal.getTime();
+    loveDaysCount = Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1;
+    
     if (loveDaysCount < 0) loveDaysCount = 0;
     
     return loveDaysCount;
@@ -372,7 +376,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.97';
+    const logoPath = './logo_pwa_small.png?v=4.2.98';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
