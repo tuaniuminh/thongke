@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.09';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.09';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.09';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.09';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.10';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.10';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.10';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.10';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.09';
-import * as sync from './sync.js?v=4.3.09';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.09';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.09';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.10';
+import * as sync from './sync.js?v=4.3.10';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.10';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.10';
 
-const APP_VERSION = '4.3.09';
+const APP_VERSION = '4.3.10';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -916,8 +916,10 @@ async function performSync(silent = false) {
                         isHybrid = true;
                         
                         // Decrypt personal data
+                        console.log("[Sync Debug] Hybrid data found. Decrypting personal data envelope...");
                         const decryptedPersonal = await decrypt(parsedObj.encrypted_personal, state.masterPassword);
                         remoteData = JSON.parse(decryptedPersonal);
+                        console.log("[Sync Debug] Personal data decrypted successfully. spouseEmail =", remoteData.spouseEmail, "spouseStatus =", remoteData.spouseStatus, "viewingSharedFund =", remoteData.viewingSharedFund);
                         
                         // Check if spouse has left
                         if (parsedObj.spouse_status === 'left') {
@@ -1021,7 +1023,7 @@ async function performSync(silent = false) {
                 const localResetTime = localReset ? new Date(localReset).getTime() : 0;
                 const remoteResetTime = remoteReset ? new Date(remoteReset).getTime() : 0;
                 
-                if (remoteResetTime > localResetTime) {
+                if (remoteResetTime > localResetTime || !localReset) {
                     // Remote has a newer reset/overwrite. Discard local data.
                     state.receivedGifts = [];
                     state.sentGifts = [];
@@ -1353,6 +1355,7 @@ async function performSync(silent = false) {
         // sharedFundSourceRow is not persisted in saveLocalState, so on a fresh device
         // (incognito / new install) we need to re-build it from husband's Supabase row.
         // Condition: has spouseEmail + is in "wife" mode (viewingSharedFund=true) + no existing row
+        console.log("[Sync Debug] Rebuild check - spouseEmail =", state.spouseEmail, "viewingSharedFund =", state.viewingSharedFund, "hasSourceRow =", !!state.sharedFundSourceRow);
         if (state.spouseEmail && state.viewingSharedFund && !state.sharedFundSourceRow) {
             try {
                 const husbandRow = await sync.getSyncDataByEmail(state.spouseEmail);

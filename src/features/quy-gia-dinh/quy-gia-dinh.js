@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.09';
-import { decrypt } from '../../core/crypto.js?v=4.3.09';
-import * as sync from '../../core/sync.js?v=4.3.09';
+} from '../../core/app.js?v=4.3.10';
+import { decrypt } from '../../core/crypto.js?v=4.3.10';
+import * as sync from '../../core/sync.js?v=4.3.10';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -528,6 +528,7 @@ export async function checkForSharedFamilyFund() {
                     const isSpouseEmailMatched = parsed.spouse_email && parsed.spouse_email.toLowerCase().trim() === myEmail;
                     const isCurrentSpouse = state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim();
                     
+                    console.log("[E2EE Debug] Case E Check - rowEmail =", rowEmail, "spouseEmail =", state.spouseEmail, "viewingSharedFund =", state.viewingSharedFund, "isCurrentSpouse =", isCurrentSpouse, "isSpouseEmailMatched =", isSpouseEmailMatched, "isSharedOwner =", isSharedOwner);
                     if (state.viewingSharedFund && isCurrentSpouse && (isSpouseEmailMatched || isSharedOwner)) {
                         const inviteTime = state.familyFundInviteStatusUpdated ? new Date(state.familyFundInviteStatusUpdated).getTime() : 0;
                         const rowTime = row.updated_at ? new Date(row.updated_at).getTime() : 0;
@@ -560,6 +561,11 @@ export async function checkForSharedFamilyFund() {
                                 }
                             }
                             decryptedPrivKey = null; // CVE-6: xóa khỏi memory ngay sau dùng
+                        }
+                        
+                        if (!fundKey && state.fundSymmetricKey) {
+                            fundKey = state.fundSymmetricKey;
+                            console.log("[E2EE Debug] Fallback: Using local fundSymmetricKey to decrypt spouse's fund.");
                         }
                         
                         if (fundKey && parsed.encrypted_fund) {
