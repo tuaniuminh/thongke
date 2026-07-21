@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.87';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.87';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.87';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.87';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.2.89';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.2.89';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.2.89';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.2.89';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.87';
-import * as sync from './sync.js?v=4.2.87';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.87';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.87';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.2.89';
+import * as sync from './sync.js?v=4.2.89';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.2.89';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.2.89';
 
-const APP_VERSION = '4.2.87';
+const APP_VERSION = '4.2.89';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -23,28 +23,29 @@ const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
 
 // Helper to check and retrieve Supabase connection credentials
+// v4.2.88: Xóa localStorage fallback (supabase_url/supabase_key).
+// Chỉ dùng build-time injection. Dọn sạch key cũ nếu còn tồn tại.
 function getSupabaseConfig() {
     if (localStorage.getItem('supabase_disabled') === 'true') {
         return { url: null, key: null, source: 'none' };
     }
-    
-    const localUrl = localStorage.getItem('supabase_url');
-    const localKey = localStorage.getItem('supabase_key');
-    
-    // If user manually configured settings locally, prioritize them
-    if (localUrl && localKey) {
-        return { url: localUrl, key: localKey, source: 'local' };
+
+    // Migration cleanup: xóa key cũ từ phiên bản trước nếu còn tồn tại
+    // (UI nhập thủ công đã bị xóa — key này không bao giờ được ghi nữa)
+    if (localStorage.getItem('supabase_url') || localStorage.getItem('supabase_key')) {
+        localStorage.removeItem('supabase_url');
+        localStorage.removeItem('supabase_key');
     }
-    
-    // Otherwise, check if build placeholders were replaced during deployment
+
+    // Dùng build-time injection (GitHub Actions Secrets thay placeholder lúc deploy)
     const buildUrlVal = BUILD_SUPABASE_URL;
     const buildKeyVal = BUILD_SUPABASE_ANON_KEY;
-    
-    if (buildUrlVal && !buildUrlVal.includes('PLACEHOLDER') && 
+
+    if (buildUrlVal && !buildUrlVal.includes('PLACEHOLDER') &&
         buildKeyVal && !buildKeyVal.includes('PLACEHOLDER')) {
         return { url: buildUrlVal, key: buildKeyVal, source: 'build' };
     }
-    
+
     return { url: null, key: null, source: 'none' };
 }
 
@@ -953,7 +954,7 @@ async function performSync(silent = false) {
                         let fundKey = remoteData.fundSymmetricKey || state.fundSymmetricKey;
                         
                         if (!fundKey && state.asymmetricPrivateKeyEncrypted) {
-                            const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
+                            let decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
                             const myEmail = user.email.toLowerCase().trim();
                             const myEncryptedFundKey = parsedObj.fund_shared_keys ? parsedObj.fund_shared_keys[myEmail] : null;
                             if (myEncryptedFundKey) {
@@ -963,6 +964,7 @@ async function performSync(silent = false) {
                                     console.error("Failed to decrypt Fund Key using Private Key:", decKeyErr);
                                 }
                             }
+                            decryptedPrivKey = null; // CVE-6: xóa khỏi memory ngay sau dùng
                         }
                         
                         // Decrypt family fund data

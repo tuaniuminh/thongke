@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.87';
-import { decrypt } from '../../core/crypto.js?v=4.2.87';
-import * as sync from '../../core/sync.js?v=4.2.87';
+} from '../../core/app.js?v=4.2.89';
+import { decrypt } from '../../core/crypto.js?v=4.2.89';
+import * as sync from '../../core/sync.js?v=4.2.89';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -98,33 +98,6 @@ export function initFundBindings() {
         chartSelectYear.addEventListener('change', () => {
             renderMonthlyFundChart();
         });
-    }
-
-    // Link spouse email form
-    const spouseEmailForm = document.getElementById('fundSpouseEmailForm');
-    if (spouseEmailForm) {
-        spouseEmailForm.addEventListener('submit', handleSpouseEmailSubmit);
-    }
-
-    const unlinkSpouseBtn = document.getElementById('btnUnlinkSpouse');
-    if (unlinkSpouseBtn) {
-        unlinkSpouseBtn.addEventListener('click', handleUnlinkSpouse);
-    }
-
-    const reinviteSpouseBtn = document.getElementById('btnReinviteSpouse');
-    if (reinviteSpouseBtn) {
-        reinviteSpouseBtn.addEventListener('click', handleReinviteSpouse);
-    }
-
-    const leaveSpouseBtn = document.getElementById('btnLeaveSpouseFund');
-    if (leaveSpouseBtn) {
-        leaveSpouseBtn.addEventListener('click', handleLeaveSpouseFund);
-    }
-
-    const emailInput = document.getElementById('spouseEmailInput');
-    if (emailInput) {
-        emailInput.removeEventListener('click', handleEmailInputClick);
-        emailInput.addEventListener('click', handleEmailInputClick);
     }
 
     // Add custom fund form
@@ -567,7 +540,7 @@ export async function checkForSharedFamilyFund() {
                         state.ownerNickname = parsed.owner_nickname || '';
                         let fundKey = '';
                         if (state.asymmetricPrivateKeyEncrypted) {
-                            const decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
+                            let decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
                             const myEncryptedFundKey = parsed.fund_shared_keys ? parsed.fund_shared_keys[myEmail] : null;
                             console.log("[E2EE Debug] myEncryptedFundKey exists:", !!myEncryptedFundKey);
                             if (myEncryptedFundKey) {
@@ -578,6 +551,7 @@ export async function checkForSharedFamilyFund() {
                                     console.error("[E2EE Debug] Spouse failed to decrypt Fund Key:", decKeyErr);
                                 }
                             }
+                            decryptedPrivKey = null; // CVE-6: xóa khỏi memory ngay sau dùng
                         }
                         
                         if (fundKey && parsed.encrypted_fund) {
@@ -1811,14 +1785,6 @@ window.openFundActionModal = function(action, targetFundId = '') {
     }
 };
 
-function handleEmailInputClick() {
-    if (state.spouseEmail && state.spouseStatus === 'accepted') {
-        const unlinkBtn = document.getElementById('btnUnlinkSpouse');
-        if (unlinkBtn) {
-            unlinkBtn.style.display = unlinkBtn.style.display === 'none' ? 'inline-block' : 'none';
-        }
-    }
-}
 
 // Render management tab elements (Linked to tab-fund-management view)
 export function renderManagementTab() {
@@ -2065,65 +2031,6 @@ async function handleFundEditSubmit(e) {
     closeModal('fundEditModal');
     renderManagementTab();
     showToast("Đã lưu thay đổi quỹ thành công!");
-    performSync(true);
-}
-
-// Spouse Email Save handler
-async function handleSpouseEmailSubmit(e) {
-    e.preventDefault();
-    if (state.viewingSharedFund) {
-        showToast("Đang ở chế độ xem tài khoản liên kết, không thể sửa cài đặt này!", "warning");
-        return;
-    }
-    if (!state.user) {
-        showToast("Vui lòng đăng nhập tài khoản trước", "warning");
-        return;
-    }
-
-    const email = document.getElementById('spouseEmailInput').value.trim();
-    const role = document.getElementById('spouseRoleInput')?.value || 'wife';
-    const nickname = document.getElementById('ownerNicknameInput')?.value.trim() || '';
-
-    state.spouseEmail = email;
-    state.spouseRole = role;
-    state.ownerNickname = nickname;
-    state.familyFundsUpdated = new Date().toISOString();
-
-    await saveLocalState();
-    showToast("Đã lưu email liên kết thành công!");
-    renderManagementTab();
-    performSync(true);
-}
-
-// Unlink Spouse (Owner's action)
-async function handleUnlinkSpouse() {
-    if (state.viewingSharedFund) return;
-    if (!await window.showConfirm("Bạn có chắc chắn muốn xóa liên kết tài khoản Vợ/Chồng này? Dữ liệu Quỹ gia đình sẽ không còn được chia sẻ với họ.")) {
-        return;
-    }
-
-    state.spouseEmail = '';
-    state.spouseRole = 'wife';
-    state.ownerNickname = '';
-    state.spouseStatus = '';
-    state.familyFundsUpdated = new Date().toISOString();
-
-    await saveLocalState();
-    showToast("Đã xóa liên kết tài khoản Vợ/Chồng!");
-    renderManagementTab();
-    performSync(true);
-}
-
-// Reinvite Spouse
-async function handleReinviteSpouse() {
-    if (!state.spouseEmail) return;
-    
-    state.spouseStatus = '';
-    state.familyFundsUpdated = new Date().toISOString();
-    
-    await saveLocalState();
-    showToast("Đã gửi lại lời mời mới!");
-    renderManagementTab();
     performSync(true);
 }
 
