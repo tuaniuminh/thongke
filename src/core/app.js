@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.00';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.00';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.00';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.00';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.01';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.01';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.01';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.01';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.00';
-import * as sync from './sync.js?v=4.3.00';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.00';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.00';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.01';
+import * as sync from './sync.js?v=4.3.01';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.01';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.01';
 
-const APP_VERSION = '4.3.00';
+const APP_VERSION = '4.3.01';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3730,7 +3730,39 @@ async function handleFullBackup() {
             lastAiAnalysis: state.lastAiAnalysis,
             lastAiAnalysisDate: state.lastAiAnalysisDate,
             lastBpAnalysis: state.lastBpAnalysis,
-            lastBpAnalysisDate: state.lastBpAnalysisDate
+            lastBpAnalysisDate: state.lastBpAnalysisDate,
+            weLoveStartDate: state.weLoveStartDate,
+            weLoveName1: state.weLoveName1,
+            weLoveName2: state.weLoveName2,
+            weLoveShowSickness: state.weLoveShowSickness,
+            weLoveSicknessLogs: state.weLoveSicknessLogs,
+            weLoveReminders: state.weLoveReminders,
+            weLoveVisitLogs: state.weLoveVisitLogs,
+            
+            // Cryptographic keys
+            asymmetricPublicKey: state.asymmetricPublicKey,
+            asymmetricPrivateKeyEncrypted: state.asymmetricPrivateKeyEncrypted,
+            spousePublicKey: state.spousePublicKey,
+            fundSymmetricKey: state.fundSymmetricKey,
+            
+            // Connection and pairing metadata
+            viewingSharedFund: state.viewingSharedFund,
+            sharedFundOwnerEmail: state.sharedFundOwnerEmail,
+            sharedFundSourceRow: state.sharedFundSourceRow,
+            pairingCode: state.pairingCode,
+            pairingCodeExpired: state.pairingCodeExpired,
+            pairingFundKeyEncrypted: state.pairingFundKeyEncrypted,
+            familyFundInviteStatus: state.familyFundInviteStatus,
+            familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated,
+            
+            // Body composition records
+            bodyCompositionRecords: state.bodyCompositionRecords || [],
+            
+            // Other settings
+            reportAiInsights: state.reportAiInsights,
+            selectedSpeechVoiceName: state.selectedSpeechVoiceName,
+            selectedSpeechRate: state.selectedSpeechRate,
+            showLoveWidget: state.showLoveWidget
         };
         const jsonStr = JSON.stringify(backupData);
         const encrypted = await encrypt(jsonStr, state.masterPassword);
@@ -3825,6 +3857,38 @@ async function handleFullRestore(file) {
         if (data.lastBpAnalysis !== undefined) state.lastBpAnalysis = data.lastBpAnalysis;
         if (data.lastBpAnalysisDate !== undefined) state.lastBpAnalysisDate = data.lastBpAnalysisDate;
         
+        // Restore WeLove
+        if (data.weLoveStartDate !== undefined) state.weLoveStartDate = data.weLoveStartDate;
+        if (data.weLoveName1 !== undefined) state.weLoveName1 = data.weLoveName1;
+        if (data.weLoveName2 !== undefined) state.weLoveName2 = data.weLoveName2;
+        if (data.weLoveShowSickness !== undefined) state.weLoveShowSickness = data.weLoveShowSickness;
+        if (data.weLoveSicknessLogs !== undefined) state.weLoveSicknessLogs = data.weLoveSicknessLogs;
+        if (data.weLoveReminders !== undefined) state.weLoveReminders = data.weLoveReminders;
+        if (data.weLoveVisitLogs !== undefined) state.weLoveVisitLogs = data.weLoveVisitLogs;
+        
+        // Restore Cryptographic Keys & Pairing Settings
+        if (data.asymmetricPublicKey !== undefined) state.asymmetricPublicKey = data.asymmetricPublicKey;
+        if (data.asymmetricPrivateKeyEncrypted !== undefined) state.asymmetricPrivateKeyEncrypted = data.asymmetricPrivateKeyEncrypted;
+        if (data.spousePublicKey !== undefined) state.spousePublicKey = data.spousePublicKey;
+        if (data.fundSymmetricKey !== undefined) state.fundSymmetricKey = data.fundSymmetricKey;
+        if (data.viewingSharedFund !== undefined) state.viewingSharedFund = data.viewingSharedFund;
+        if (data.sharedFundOwnerEmail !== undefined) state.sharedFundOwnerEmail = data.sharedFundOwnerEmail;
+        if (data.sharedFundSourceRow !== undefined) state.sharedFundSourceRow = data.sharedFundSourceRow;
+        if (data.pairingCode !== undefined) state.pairingCode = data.pairingCode;
+        if (data.pairingCodeExpired !== undefined) state.pairingCodeExpired = data.pairingCodeExpired;
+        if (data.pairingFundKeyEncrypted !== undefined) state.pairingFundKeyEncrypted = data.pairingFundKeyEncrypted;
+        if (data.familyFundInviteStatus !== undefined) state.familyFundInviteStatus = data.familyFundInviteStatus;
+        if (data.familyFundInviteStatusUpdated !== undefined) state.familyFundInviteStatusUpdated = data.familyFundInviteStatusUpdated;
+        
+        // Restore body composition records
+        if (data.bodyCompositionRecords) state.bodyCompositionRecords = data.bodyCompositionRecords;
+        
+        // Restore other settings
+        if (data.reportAiInsights !== undefined) state.reportAiInsights = data.reportAiInsights;
+        if (data.selectedSpeechVoiceName !== undefined) state.selectedSpeechVoiceName = data.selectedSpeechVoiceName;
+        if (data.selectedSpeechRate !== undefined) state.selectedSpeechRate = data.selectedSpeechRate;
+        if (data.showLoveWidget !== undefined) state.showLoveWidget = data.showLoveWidget;
+        
         // Update timestamps
         const now = new Date().toISOString();
         state.medicalRecordsUpdated = now;
@@ -3833,6 +3897,14 @@ async function handleFullRestore(file) {
         state.familyFundsUpdated = now;
         state.fundTransactionsUpdated = now;
         state.customEventTypesUpdated = now;
+        state.weLoveStartDateUpdated = now;
+        state.weLoveName1Updated = now;
+        state.weLoveName2Updated = now;
+        state.weLoveShowSicknessUpdated = now;
+        state.weLoveSicknessLogsUpdated = now;
+        state.weLoveRemindersUpdated = now;
+        state.weLoveVisitLogsUpdated = now;
+        state.bodyCompositionRecordsUpdated = now;
         
         await saveLocalState();
         performSync(true);
