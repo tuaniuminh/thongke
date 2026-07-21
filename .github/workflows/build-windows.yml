@@ -13,6 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Inject Supabase Secrets
+        shell: bash
+        run: |
+          URL_VAL="${{ secrets.VITE_SUPABASE_URL }}"
+          if [ -z "$URL_VAL" ]; then
+            URL_VAL="${{ vars.VITE_SUPABASE_URL }}"
+          fi
+
+          KEY_VAL="${{ secrets.VITE_SUPABASE_ANON_KEY }}"
+          if [ -z "$KEY_VAL" ]; then
+            KEY_VAL="${{ vars.VITE_SUPABASE_ANON_KEY }}"
+          fi
+
+          # Thay thế placeholders trong src/core/app.js
+          sed -i "s|VITE_SUPABASE_URL_PLACEHOLDER|$URL_VAL|g" src/core/app.js
+          sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" src/core/app.js
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
