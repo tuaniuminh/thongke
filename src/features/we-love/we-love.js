@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.3.07';
-import * as sync from '../../core/sync.js?v=4.3.07';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.07';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.07';
+} from '../../core/app.js?v=4.3.08';
+import * as sync from '../../core/sync.js?v=4.3.08';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.08';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.08';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.07');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.08');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.07';
+        const logoPath = './logo_pwa_small.png?v=4.3.08';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -376,7 +376,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.07';
+    const logoPath = './logo_pwa_small.png?v=4.3.08';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,

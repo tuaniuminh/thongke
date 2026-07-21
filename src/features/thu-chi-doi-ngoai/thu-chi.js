@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.3.07';
-import * as sync from '../../core/sync.js?v=4.3.07';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.07';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.07';
+} from '../../core/app.js?v=4.3.08';
+import * as sync from '../../core/sync.js?v=4.3.08';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.08';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.08';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1540,6 +1540,10 @@ async function handleSyncSignOut() {
         updateUserBadge();
         showToast("Đã đăng xuất tài khoản đồng bộ. Kết nối gia đình đã được xóa.");
         renderSettings();
+        // Cập nhật lại giao diện kết nối gia đình ngay lập tức
+        if (typeof window.renderFamilyPairingSettings === 'function') {
+            setTimeout(() => window.renderFamilyPairingSettings(), 50);
+        }
     } catch (err) {
         console.error("Signout failed:", err);
         showToast("Lỗi khi đăng xuất!", "error");

@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.07';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.07';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.07';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.07';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.08';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.08';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.08';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.08';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.07';
-import * as sync from './sync.js?v=4.3.07';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.07';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.07';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.08';
+import * as sync from './sync.js?v=4.3.08';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.08';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.08';
 
-const APP_VERSION = '4.3.07';
+const APP_VERSION = '4.3.08';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1289,6 +1289,16 @@ async function performSync(silent = false) {
                         state.fundTransactions = remoteData.fundTransactions || [];
                         state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     }
+                    // Merge viewingSharedFund and sharedFundOwnerEmail using LWW (Last Write Wins)
+                    // These are ONLY stored in encrypted_personal, so must be merged from remoteData
+                    if (remoteData.viewingSharedFund !== undefined) {
+                        // If remote says true, always trust it (wife device can restore this flag)
+                        if (remoteData.viewingSharedFund) {
+                            state.viewingSharedFund = true;
+                            state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || state.sharedFundOwnerEmail || '';
+                        }
+                        // If local is already true, keep it (never downgrade from remote false during sync)
+                    }
                     // Merge reportAiInsights — local thắng theo từng key (tháng), remote bổ sung các key còn thiếu
                     if (remoteData.reportAiInsights && typeof remoteData.reportAiInsights === 'object') {
                         state.reportAiInsights = Object.assign({}, remoteData.reportAiInsights, state.reportAiInsights || {});
@@ -1338,7 +1348,8 @@ async function performSync(silent = false) {
         // 4b. Re-fetch sharedFundSourceRow for "wife" device after sync
         // sharedFundSourceRow is not persisted in saveLocalState, so on a fresh device
         // (incognito / new install) we need to re-build it from husband's Supabase row.
-        if (state.viewingSharedFund && state.spouseEmail && !state.sharedFundSourceRow) {
+        // Condition: has spouseEmail + is in "wife" mode (viewingSharedFund=true) + no existing row
+        if (state.spouseEmail && state.viewingSharedFund && !state.sharedFundSourceRow) {
             try {
                 const husbandRow = await sync.getSyncDataByEmail(state.spouseEmail);
                 if (husbandRow) {
@@ -1349,7 +1360,9 @@ async function performSync(silent = false) {
                         spouse_email: user.email || '',
                         google_sheets_webhook: state.googleSheetsWebhook || ''
                     };
-                    if (DEBUG_E2EE) console.log('[Sync] Re-built sharedFundSourceRow for wife from husband Supabase row.');
+                    console.log('[Sync] Re-built sharedFundSourceRow for wife from husband Supabase row:', state.spouseEmail);
+                } else {
+                    console.warn('[Sync] Husband row not found in Supabase for email:', state.spouseEmail);
                 }
             } catch (refetchErr) {
                 console.warn('[Sync] Could not re-fetch sharedFundSourceRow for wife:', refetchErr);
@@ -1521,6 +1534,10 @@ async function performSync(silent = false) {
         renderAll();
         updateSyncIndicator('synced');
         if (!silent) showToast("Đồng bộ dữ liệu thành công!");
+        // Cập nhật lại giao diện kết nối gia đình nếu đang ở tab cài đặt
+        if (typeof window.renderFamilyPairingSettings === 'function') {
+            setTimeout(() => window.renderFamilyPairingSettings(), 100);
+        }
 
     } catch (e) {
         console.error("Sync error:", e);
