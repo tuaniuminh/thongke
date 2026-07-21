@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.06';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.06';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.06';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.06';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.07';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.07';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.07';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.07';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.06';
-import * as sync from './sync.js?v=4.3.06';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.06';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.06';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.07';
+import * as sync from './sync.js?v=4.3.07';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.07';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.07';
 
-const APP_VERSION = '4.3.06';
+const APP_VERSION = '4.3.07';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1334,6 +1334,28 @@ async function performSync(silent = false) {
         state.familyFunds = mergedFamilyFunds;
         state.fundTransactions = mergedFundTransactions;
         state.lastResetTime = localReset;
+
+        // 4b. Re-fetch sharedFundSourceRow for "wife" device after sync
+        // sharedFundSourceRow is not persisted in saveLocalState, so on a fresh device
+        // (incognito / new install) we need to re-build it from husband's Supabase row.
+        if (state.viewingSharedFund && state.spouseEmail && !state.sharedFundSourceRow) {
+            try {
+                const husbandRow = await sync.getSyncDataByEmail(state.spouseEmail);
+                if (husbandRow) {
+                    state.sharedFundSourceRow = {
+                        user_id: husbandRow.user_id,
+                        encrypted_data: husbandRow.encrypted_data,
+                        owner_email: state.spouseEmail,
+                        spouse_email: user.email || '',
+                        google_sheets_webhook: state.googleSheetsWebhook || ''
+                    };
+                    if (DEBUG_E2EE) console.log('[Sync] Re-built sharedFundSourceRow for wife from husband Supabase row.');
+                }
+            } catch (refetchErr) {
+                console.warn('[Sync] Could not re-fetch sharedFundSourceRow for wife:', refetchErr);
+            }
+        }
+
         await saveLocalState();
         
         // 5. Encrypt and upload merged state to server (Hybrid E2EE payload)

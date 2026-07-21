@@ -122,6 +122,21 @@ export async function getSyncData() {
 }
 
 
+// Fetch sync data row by another user's email (for wife to re-fetch husband's row after sync)
+export async function getSyncDataByEmail(email) {
+    if (!supabase) throw new Error("Chưa cấu hình kết nối Supabase");
+    const { data, error } = await supabase
+        .from('gift_sync')
+        .select('user_id, encrypted_data, public_key, user_email')
+        .eq('user_email', email.toLowerCase().trim())
+        .maybeSingle();
+    if (error) {
+        console.error("Error fetching sync data by email:", error);
+        throw new Error("Lỗi khi tải dữ liệu đối tác: " + error.message);
+    }
+    return data;
+}
+
 // Save encrypted data to gift_sync table (insert or update)
 // publicKey: optional RSA public key string to publish (prevents circular import of state)
 export async function saveSyncData(encryptedData, publicKey = null) {

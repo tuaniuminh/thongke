@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.3.06';
-import * as sync from '../../core/sync.js?v=4.3.06';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.06';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.06';
+} from '../../core/app.js?v=4.3.07';
+import * as sync from '../../core/sync.js?v=4.3.07';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.07';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.07';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1520,8 +1520,25 @@ async function handleSyncSignOut() {
     try {
         await sync.signOut();
         state.user = null;
+        // Xóa sạch toàn bộ trạng thái kết nối gia đình
+        state.spouseEmail = '';
+        state.spouseRole = 'wife';
+        state.spouseStatus = '';
+        state.spousePublicKey = '';
+        state.ownerNickname = '';
+        state.viewingSharedFund = false;
+        state.sharedFundOwnerEmail = '';
+        state.sharedFundSourceRow = null;
+        state.spouseFundInvitePending = false;
+        state.spouseFundInviteOwnerEmail = '';
+        state.familyFundInviteStatus = '';
+        state.familyFundInviteStatusUpdated = '';
+        state.pairingCode = '';
+        state.pairingCodeExpired = '';
+        state.pairingFundKeyEncrypted = '';
+        await saveLocalState();
         updateUserBadge();
-        showToast("Đã đăng xuất tài khoản đồng bộ.");
+        showToast("Đã đăng xuất tài khoản đồng bộ. Kết nối gia đình đã được xóa.");
         renderSettings();
     } catch (err) {
         console.error("Signout failed:", err);
