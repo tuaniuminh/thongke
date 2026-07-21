@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.2.89';
-import { decrypt } from '../../core/crypto.js?v=4.2.89';
-import * as sync from '../../core/sync.js?v=4.2.89';
+} from '../../core/app.js?v=4.2.90';
+import { decrypt } from '../../core/crypto.js?v=4.2.90';
+import * as sync from '../../core/sync.js?v=4.2.90';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -536,7 +536,7 @@ export async function checkForSharedFamilyFund() {
                             }
                         }
                         console.log("[E2EE Debug] Match found for spouse_email!");
-                        state.spouseRole = parsed.spouse_role || 'wife';
+                        state.spouseRole = (parsed.spouse_role === 'husband') ? 'wife' : 'husband';
                         state.ownerNickname = parsed.owner_nickname || '';
                         let fundKey = '';
                         if (state.asymmetricPrivateKeyEncrypted) {
