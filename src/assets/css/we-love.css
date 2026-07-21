@@ -1299,3 +1299,30 @@ body.dark-mode .partner-name {
   transform: translateY(-2px) scale(1.08);
   filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.4));
 }
+
+/* Custom active states for sidebar nav-links inside WeLove context on Desktop (overriding default green) */
+body.active-tab-welove .sidebar .nav-link.active,
+body.active-tab-welove-admin .sidebar .nav-link.active,
+body.active-tab-welove-settings .sidebar .nav-link.active {
+    color: #e11d48 !important;
+    background: rgba(225, 29, 72, 0.06) !important;
+}
+
+body.active-tab-welove .sidebar .nav-link.active i,
+body.active-tab-welove-admin .sidebar .nav-link.active i,
+body.active-tab-welove-settings .sidebar .nav-link.active i {
+    color: #e11d48 !important;
+}
+
+body.active-tab-welove .sidebar .nav-link:hover,
+body.active-tab-welove-admin .sidebar .nav-link:hover,
+body.active-tab-welove-settings .sidebar .nav-link:hover {
+    color: #e11d48 !important;
+    background: rgba(225, 29, 72, 0.03) !important;
+}
+
+body.active-tab-welove .sidebar .nav-link:hover i,
+body.active-tab-welove-admin .sidebar .nav-link:hover i,
+body.active-tab-welove-settings .sidebar .nav-link:hover i {
+    color: #e11d48 !important;
+}

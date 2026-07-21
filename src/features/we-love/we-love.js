@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.2.91';
-import * as sync from '../../core/sync.js?v=4.2.91';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.91';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.91';
+} from '../../core/app.js?v=4.2.92';
+import * as sync from '../../core/sync.js?v=4.2.92';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.2.92';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.2.92';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.91');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.2.92');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.2.91';
+        const logoPath = './logo_pwa_small.png?v=4.2.92';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -372,7 +372,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.2.91';
+    const logoPath = './logo_pwa_small.png?v=4.2.92';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1610,7 +1610,7 @@ export function renderFamilyPairingSettings() {
                     <p style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">2. Nhập mã ghép đôi (Dành cho Vợ):</p>
                     <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 10px 0;">Nhập mã chồng đã gửi để hoàn thành kết nối 2 chiều và mở khóa Quỹ chung & Góc tình yêu.</p>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="fpPairingCodeInput" placeholder="Ví dụ: LOVE-123456" style="flex-grow: 1; padding: 8px 12px; font-size: 0.88rem; text-transform: uppercase; font-weight: 700; text-align: center; letter-spacing: 1px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <input type="text" id="fpPairingCodeInput" placeholder="Ví dụ: LOVE-123456" style="flex-grow: 1; min-width: 0; padding: 8px 12px; font-size: 0.88rem; text-transform: uppercase; font-weight: 700; text-align: center; letter-spacing: 1px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                         <button class="btn btn-primary" id="btnFPSubmitCode" style="font-size: 0.82rem; padding: 0 16px; background: #059669; border: none; border-radius: 10px; font-weight: 700; color: white; white-space: nowrap;">
                             Kết nối
                         </button>
