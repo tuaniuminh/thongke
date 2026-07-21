@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString
-} from '../../core/app.js?v=4.3.04';
-import * as sync from '../../core/sync.js?v=4.3.04';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.04';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.04';
+} from '../../core/app.js?v=4.3.05';
+import * as sync from '../../core/sync.js?v=4.3.05';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.05';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.05';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1758,8 +1758,7 @@ async function handleExportExcel(type = 'all') {
             try {
                 await navigator.share({
                     files: [file],
-                    title: 'Xuất file Excel FamiLife',
-                    text: 'Danh sách thu chi đối ngoại'
+                    title: 'Xuất file Excel FamiLife'
                 });
                 shared = true;
             } catch (err) {
