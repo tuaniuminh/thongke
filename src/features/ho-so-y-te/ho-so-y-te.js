@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.3.15';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.15';
+} from '../../core/app.js?v=4.3.16';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.16';
 
 let healthTrendChartInstance = null;
 
@@ -936,13 +936,6 @@ function closeHealthIntro() {
 window.closeHealthIntro = closeHealthIntro;
 
 function renderHealthDashboard() {
-    // Show/Hide Intro Banner based on localStorage
-    const isIntroClosed = localStorage.getItem('familife_health_intro_closed');
-    const introBanner = document.getElementById('healthIntroBanner');
-    if (introBanner) {
-        introBanner.style.display = (isIntroClosed === 'true') ? 'none' : 'block';
-    }
-
     // Update API Key Card Collapsed state
     updateApiConfigCardState();
 

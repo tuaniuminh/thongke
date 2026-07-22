@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.15';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.15';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.15';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.15';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.16';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.16';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.16';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.16';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.15';
-import * as sync from './sync.js?v=4.3.15';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.15';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.15';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.16';
+import * as sync from './sync.js?v=4.3.16';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.16';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.16';
 
-const APP_VERSION = '4.3.15';
+const APP_VERSION = '4.3.16';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -170,11 +170,48 @@ let customEventsEditMode = false;
 //   - localStorage: chỉ lưu encrypted PIN (ciphertext vô dụng nếu không có wrap key)
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
+// ============================================================
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.16)
+//   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
+//   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
+// ============================================================
 const _WRAP_DB_NAME    = 'familife_secure';
 const _WRAP_STORE_NAME = 'keys';
 const _WRAP_KEY_ID     = 'unlock_wrap_key';
-const _ENC_PIN_LS_KEY  = 'gift_ledger_pin_v2';   // localStorage key cho encrypted PIN
+const _ENC_PIN_LS_KEY  = 'gift_ledger_pin_v2';   // localStorage key cho encrypted PIN (IndexedDB format)
+const _SALT_PIN_LS_KEY = 'gift_ledger_pin_v3';   // localStorage key cho encrypted PIN (Device-Salt format)
 const _LEGACY_PIN_KEY  = 'gift_ledger_remembered_pin'; // key cũ (plain text) cần migrate
+
+function _getOrCreateDeviceSalt() {
+    let salt = localStorage.getItem('_familife_device_salt');
+    if (!salt) {
+        const arr = new Uint8Array(16);
+        window.crypto.getRandomValues(arr);
+        salt = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+        localStorage.setItem('_familife_device_salt', salt);
+    }
+    return salt;
+}
+
+async function _getDeviceSaltKey() {
+    const saltHex = _getOrCreateDeviceSalt();
+    const enc = new TextEncoder();
+    const keyMaterial = await window.crypto.subtle.importKey(
+        "raw", enc.encode(saltHex), { name: "PBKDF2" }, false, ["deriveKey"]
+    );
+    return window.crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: enc.encode("familife_pin_salt_v3"),
+            iterations: 10000,
+            hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+    );
+}
 
 function _openWrapKeyDB() {
     return new Promise((resolve, reject) => {
@@ -219,74 +256,115 @@ async function _deleteWrapKey() {
     } catch (_) { /* ignore */ }
 }
 
-/** Lưu PIN an toàn: tạo wrap key → mã hóa PIN → lưu 2 nơi */
+/** Lưu PIN an toàn: lưu IndexedDB (wrap key) + device-salt AES fallback trong localStorage */
 async function storeRememberedPin(pin) {
+    if (!pin) return false;
+    let storedAny = false;
+
+    // 1. IndexedDB + WrapKey primary
     try {
-        // Tạo wrap key ngẫu nhiên — non-extractable (JS không thể đọc giá trị thực)
         const wrapKey = await window.crypto.subtle.generateKey(
             { name: 'AES-GCM', length: 256 },
-            false, // extractable = false → không thể export ra string
+            false,
             ['encrypt', 'decrypt']
         );
-        // Mã hóa PIN bằng wrap key
-        const iv         = window.crypto.getRandomValues(new Uint8Array(12));
-        const pinBytes   = new TextEncoder().encode(pin);
-        const encBuf     = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, pinBytes);
-        const ivHex      = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
-        const encHex     = Array.from(new Uint8Array(encBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        // Lưu encrypted PIN vào localStorage (vô dụng nếu không có wrap key)
-        localStorage.setItem(_ENC_PIN_LS_KEY, `${ivHex}:${encHex}`);
-        // Lưu wrap key vào IndexedDB (non-extractable)
+        const iv       = window.crypto.getRandomValues(new Uint8Array(12));
+        const pinBytes = new TextEncoder().encode(pin);
+        const encBuf   = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapKey, pinBytes);
+        const ivHex    = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
+        const encHex   = Array.from(new Uint8Array(encBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
         await _saveWrapKey(wrapKey);
-        return true;
+        localStorage.setItem(_ENC_PIN_LS_KEY, `${ivHex}:${encHex}`);
+        storedAny = true;
     } catch (e) {
-        console.warn('[SecurePin] storeRememberedPin failed:', e);
-        return false;
+        console.warn('[SecurePin] IndexedDB wrapKey store failed:', e);
     }
+
+    // 2. Device-salted AES-GCM fallback (luôn lưu để đảm bảo 100% hoạt động trên iOS/Capacitor)
+    try {
+        const key      = await _getDeviceSaltKey();
+        const iv       = window.crypto.getRandomValues(new Uint8Array(12));
+        const pinBytes = new TextEncoder().encode(pin);
+        const encBuf   = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, pinBytes);
+        const ivHex    = Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join('');
+        const encHex   = Array.from(new Uint8Array(encBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        localStorage.setItem(_SALT_PIN_LS_KEY, `${ivHex}:${encHex}`);
+        storedAny = true;
+    } catch (e) {
+        console.warn('[SecurePin] Device-salt store failed:', e);
+    }
+
+    return storedAny;
 }
 
-/** Lấy PIN an toàn: lấy wrap key từ IndexedDB → giải mã encrypted PIN */
+/** Lấy PIN an toàn: thử Legacy → IndexedDB WrapKey → Device-Salt Fallback */
 async function retrieveRememberedPin() {
+    // 1. Check legacy plain text
     try {
-        // Kiểm tra migration: nếu có key cũ (plain text) → migrate sang format mới
         const legacyPin = localStorage.getItem(_LEGACY_PIN_KEY);
         if (legacyPin) {
-            const migrated = await storeRememberedPin(legacyPin);
-            if (migrated) {
-                localStorage.removeItem(_LEGACY_PIN_KEY); // Xóa key cũ ngay lập tức
-            }
-            return legacyPin; // Dùng PIN cũ cho lần này, lần sau dùng format mới
+            await storeRememberedPin(legacyPin);
+            localStorage.removeItem(_LEGACY_PIN_KEY);
+            return legacyPin;
         }
-        // Format mới: lấy wrap key từ IndexedDB
+    } catch (_) {}
+
+    // 2. Try IndexedDB WrapKey format
+    try {
         const stored = localStorage.getItem(_ENC_PIN_LS_KEY);
-        if (!stored) return null;
-        const parts = stored.split(':');
-        if (parts.length !== 2) { clearRememberedPin(); return null; }
-        const wrapKey = await _loadWrapKey();
-        if (!wrapKey) { localStorage.removeItem(_ENC_PIN_LS_KEY); return null; }
-        const iv      = new Uint8Array(parts[0].match(/.{2}/g).map(b => parseInt(b, 16)));
-        const encData = new Uint8Array(parts[1].match(/.{2}/g).map(b => parseInt(b, 16)));
-        const decBuf  = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, wrapKey, encData);
-        return new TextDecoder().decode(decBuf);
+        if (stored) {
+            const parts = stored.split(':');
+            if (parts.length === 2) {
+                const wrapKey = await _loadWrapKey();
+                if (wrapKey) {
+                    const iv      = new Uint8Array(parts[0].match(/.{2}/g).map(b => parseInt(b, 16)));
+                    const encData = new Uint8Array(parts[1].match(/.{2}/g).map(b => parseInt(b, 16)));
+                    const decBuf  = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, wrapKey, encData);
+                    const pinDec  = new TextDecoder().decode(decBuf);
+                    if (pinDec) return pinDec;
+                }
+            }
+        }
     } catch (e) {
-        console.warn('[SecurePin] retrieveRememberedPin failed — clearing stored PIN:', e);
-        await clearRememberedPin();
-        return null;
+        console.warn('[SecurePin] WrapKey retrieval failed, trying fallback:', e);
     }
+
+    // 3. Try Device-Salt Fallback format
+    try {
+        const storedSalt = localStorage.getItem(_SALT_PIN_LS_KEY);
+        if (storedSalt) {
+            const parts = storedSalt.split(':');
+            if (parts.length === 2) {
+                const key     = await _getDeviceSaltKey();
+                const iv      = new Uint8Array(parts[0].match(/.{2}/g).map(b => parseInt(b, 16)));
+                const encData = new Uint8Array(parts[1].match(/.{2}/g).map(b => parseInt(b, 16)));
+                const decBuf  = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encData);
+                const pinDec  = new TextDecoder().decode(decBuf);
+                if (pinDec) return pinDec;
+            }
+        }
+    } catch (e) {
+        console.warn('[SecurePin] Device-salt retrieval failed:', e);
+    }
+
+    return null;
 }
 
-/** Xóa PIN đã lưu: xóa cả encrypted PIN (localStorage) và wrap key (IndexedDB) */
+/** Xóa PIN đã lưu ở tất cả các định dạng */
 async function clearRememberedPin() {
     localStorage.removeItem(_ENC_PIN_LS_KEY);
-    localStorage.removeItem(_LEGACY_PIN_KEY); // Xóa key cũ nếu còn tồn tại
+    localStorage.removeItem(_SALT_PIN_LS_KEY);
+    localStorage.removeItem(_LEGACY_PIN_KEY);
     await _deleteWrapKey();
 }
 
 /** Kiểm tra xem PIN có đang được ghi nhớ không */
 function isRememberedPinStored() {
     return localStorage.getItem(_ENC_PIN_LS_KEY) !== null ||
+           localStorage.getItem(_SALT_PIN_LS_KEY) !== null ||
            localStorage.getItem(_LEGACY_PIN_KEY) !== null;
 }
+// ============================================================
 // ============================================================
 
 
@@ -2799,7 +2877,7 @@ async function initializeApp() {
             document.getElementById('unlockOverlay').style.display = 'flex';
             
             const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
-            if (rememberCheckbox) rememberCheckbox.checked = false;
+            if (rememberCheckbox) rememberCheckbox.checked = true;
             
             // Auto select mode based on device type (desktop vs mobile)
             const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
