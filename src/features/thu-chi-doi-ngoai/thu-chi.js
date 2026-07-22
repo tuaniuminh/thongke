@@ -4,10 +4,10 @@ import {
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData
-} from '../../core/app.js?v=4.3.16';
-import * as sync from '../../core/sync.js?v=4.3.16';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.16';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.16';
+} from '../../core/app.js?v=4.3.17';
+import * as sync from '../../core/sync.js?v=4.3.17';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.17';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.17';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -966,6 +966,11 @@ function renderSettings() {
     const toggleMobileTable = document.getElementById('toggleMobileTableView');
     if (toggleMobileTable) {
         toggleMobileTable.checked = state.mobileViewMode === 'table';
+    }
+
+    const geminiInput = document.getElementById('geminiApiKeyInput');
+    if (geminiInput) {
+        geminiInput.value = state.geminiApiKey || '';
     }
 
     if (typeof lucide !== 'undefined' && lucide.createIcons) {

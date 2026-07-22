@@ -3,8 +3,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.3.16';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.3.16';
+} from '../../core/app.js?v=4.3.17';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.3.17';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -230,7 +230,7 @@ function renderReportHtml() {
     if (!state.geminiApiKey) {
         aiHtml = `
             <div style="font-size:0.78rem; color:var(--text-muted); text-align:center;">
-                ⚠️ Vui lòng cấu hình Gemini API Key tại mục <strong>Hồ sơ y tế / AI Scanner</strong> để mở khóa tính năng AI nhận xét tài chính gia đình.
+                ⚠️ Vui lòng cấu hình Gemini API Key tại mục <strong style="color:var(--primary-color); cursor:pointer; text-decoration:underline;" onclick="if(typeof switchTab==='function') switchTab('settings')">Cài Đặt</strong> để mở khóa tính năng AI nhận xét tài chính gia đình.
             </div>
         `;
     } else if (aiInsightText) {
@@ -321,7 +321,8 @@ function renderReportHtml() {
 // Request AI insight analysis from Gemini API
 window.requestAiReportInsight = async function(btn) {
     if (!state.geminiApiKey) {
-        showToast("Vui lòng cấu hình Gemini API Key để sử dụng tính năng này!", "warning");
+        showToast("Vui lòng cấu hình Gemini API Key tại phần Cài đặt!", "warning");
+        if (typeof window.switchTab === 'function') window.switchTab('settings');
         return;
     }
 

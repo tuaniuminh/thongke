@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.3.16';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.16';
+} from '../../core/app.js?v=4.3.17';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.17';
 
 let healthTrendChartInstance = null;
 
@@ -1499,11 +1499,8 @@ async function handleHealthFiles(files) {
         return;
     }
     if (!state.geminiApiKey) {
-        showToast("Vui lòng cấu hình Gemini API Key trước khi quét!", "warning");
-        const popoverMenu = document.getElementById('geminiPopoverMenu');
-        if (popoverMenu) {
-            popoverMenu.style.display = 'block';
-        }
+        showToast("Vui lòng nhập Gemini API Key trong phần Cài đặt trước khi quét!", "warning");
+        if (typeof window.switchTab === 'function') window.switchTab('settings');
         return;
     }
     
@@ -2776,11 +2773,8 @@ function renderHealthAiReport() {
 
 async function generateHealthAiAnalysis(forceFresh = false) {
     if (!state.geminiApiKey) {
-        showToast("Vui lòng cấu hình Gemini API Key trước!", "warning");
-        const popoverMenu = document.getElementById('geminiPopoverMenu');
-        if (popoverMenu) {
-            popoverMenu.style.display = 'block';
-        }
+        showToast("Vui lòng cài đặt Gemini API Key trong mục Cài đặt!", "warning");
+        if (typeof window.switchTab === 'function') window.switchTab('settings');
         return;
     }
     
@@ -3611,7 +3605,8 @@ async function handleNativeCameraCapture(file) {
     if (!file) return;
 
     if (!state.geminiApiKey) {
-        showToast('Vui lòng cấu hình Gemini API Key trước khi phân tích ảnh!', 'warning');
+        showToast('Vui lòng cài đặt Gemini API Key trong mục Cài đặt trước khi phân tích!', 'warning');
+        if (typeof window.switchTab === 'function') window.switchTab('settings');
         return;
     }
 
@@ -4344,9 +4339,8 @@ window.switchBodyCompTab = switchBodyCompTab;
 
 async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full') {
     if (!state.geminiApiKey) {
-        showToast('Vui lòng cấu hình Gemini API Key trước!', 'warning');
-        const popoverMenu = document.getElementById('geminiPopoverMenu');
-        if (popoverMenu) popoverMenu.style.display = 'block';
+        showToast('Vui lòng cài đặt Gemini API Key trong mục Cài đặt!', 'warning');
+        if (typeof window.switchTab === 'function') window.switchTab('settings');
         return;
     }
 

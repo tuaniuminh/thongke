@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.16';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.16';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.16';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.16';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.17';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.17';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.17';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.17';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.16';
-import * as sync from './sync.js?v=4.3.16';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.16';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.16';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.17';
+import * as sync from './sync.js?v=4.3.17';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.17';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.17';
 
-const APP_VERSION = '4.3.16';
+const APP_VERSION = '4.3.17';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -171,7 +171,7 @@ let customEventsEditMode = false;
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.16)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.17)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -3074,6 +3074,32 @@ async function initializeApp() {
     // Bind change password button
     document.getElementById('changePasswordBtn').addEventListener('click', handleChangePassword);
     
+    // Gemini AI Settings listeners
+    const saveGeminiBtn = document.getElementById('saveGeminiKeyBtn');
+    if (saveGeminiBtn) {
+        saveGeminiBtn.addEventListener('click', async () => {
+            const apiKey = document.getElementById('geminiApiKeyInput')?.value.trim() || '';
+            state.geminiApiKey = apiKey;
+            state.geminiApiKeyUpdated = new Date().toISOString();
+            await saveLocalState();
+            showToast("Đã lưu cấu hình Google Gemini API Key thành công!", "success");
+            if (typeof performSync === 'function') performSync(true);
+        });
+    }
+
+    const toggleGeminiVisBtn = document.getElementById('toggleGeminiKeyVisibility');
+    if (toggleGeminiVisBtn) {
+        toggleGeminiVisBtn.addEventListener('click', () => {
+            const input = document.getElementById('geminiApiKeyInput');
+            if (input) {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                toggleGeminiVisBtn.innerHTML = `<i data-lucide="${isPassword ? 'eye-off' : 'eye'}" style="width: 16px; height: 16px;"></i>`;
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            }
+        });
+    }
+
     // Full Backup listeners
     const fullBackupBtn = document.getElementById('fullBackupBtn');
     if (fullBackupBtn) fullBackupBtn.addEventListener('click', handleFullBackup);
