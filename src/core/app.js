@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.20';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.20';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.20';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.20';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.21';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.21';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.21';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.21';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.20';
-import * as sync from './sync.js?v=4.3.20';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.20';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.20';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.21';
+import * as sync from './sync.js?v=4.3.21';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.21';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.21';
 
-const APP_VERSION = '4.3.20';
+const APP_VERSION = '4.3.21';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -171,7 +171,7 @@ let customEventsEditMode = false;
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.20)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.21)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -4208,13 +4208,14 @@ async function triggerHapticFeedback(type = 'light') {
 }
 
 // Lắng nghe click toàn cục để rung phản hồi xúc giác cho mọi nút bấm (Haptic Feedback)
+// Sử dụng Capturing Phase (true) để đảm bảo rung hoạt động ngay cả khi sự kiện click bị e.stopPropagation() chặn nổi bọt.
 document.addEventListener('click', (e) => {
-    const btn = e.target.closest('button, a, .btn, .health-btn, .keypad-btn, .nav-icon-btn, .nav-link, .action-btn, [role="button"]');
+    const btn = e.target.closest('button, a, .btn, .health-btn, .keypad-btn, .nav-icon-btn, .nav-link, .action-btn, [role="button"], input[type="submit"], input[type="button"], .welove-btn, .quote-nav-btn, .music-toggle-btn, .notification-test-btn, .tx-action-delete');
     if (btn) {
         if (btn.disabled || btn.classList.contains('disabled')) return;
         triggerHapticFeedback('light');
     }
-});
+}, true);
 
 // Xóa sạch toàn bộ dữ liệu trạng thái (trừ Master Password để giữ trạng thái đã unlock)
 export async function clearAllStateData() {
