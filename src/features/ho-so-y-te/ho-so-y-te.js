@@ -943,9 +943,13 @@ window.handleRemoveIndicatorRow = handleRemoveIndicatorRow;
 
 
 function renderHealthDashboard() {
+    const selectorCard = document.getElementById('healthProfileSelectorCard');
     if (state.activeTab === 'health-reminders') {
+        if (selectorCard) selectorCard.style.display = 'none';
         renderHealthReminders();
         return;
+    } else {
+        if (selectorCard) selectorCard.style.display = 'flex';
     }
 
     // Update API Key Card Collapsed state
@@ -4965,23 +4969,6 @@ function renderHealthReminders() {
     
     remindersListContainer.innerHTML = '';
     
-    // 0. Điền danh sách thành viên vào bộ chọn trong form đặt lịch nhắc
-    const remProfileSelect = document.getElementById('healthRemProfileSelect');
-    if (remProfileSelect && !remProfileSelect.dataset.populated) {
-        const currentSel = state.selectedHealthProfileId || 'all';
-        const activeProfileId = currentSel !== 'all' ? currentSel : 'p-self';
-        
-        remProfileSelect.innerHTML = `
-            <option value="p-self">Bản thân</option>
-            ${(state.familyProfiles || []).map(p => `
-                <option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>
-            `).join('')}
-        `;
-        remProfileSelect.value = activeProfileId;
-        remProfileSelect.dataset.populated = 'true';
-    }
-    
-    const selectedProfileId = state.selectedHealthProfileId || 'all';
     const now = new Date();
     
     // Helper to append a deworming card
@@ -5005,17 +4992,15 @@ function renderHealthReminders() {
         dewormingCard.className = 'health-card';
         dewormingCard.style.cssText = 'border-left: 4px solid var(--health-primary); padding: 14px; background: var(--bg-secondary); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; box-sizing: border-box;';
         
-        const memberSuffix = selectedProfileId === 'all' ? ` (${escapeHTML(getProfileName(rem.profileId))})` : '';
-        
         dewormingCard.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <strong style="color: var(--text-primary); font-size: 0.95rem;">💊 Uống thuốc tẩy giun định kỳ${memberSuffix}</strong>
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">💊 Uống thuốc tẩy giun định kỳ</strong>
                     ${statusBadge}
                 </div>
                 <span style="font-size: 0.8rem; color: var(--text-muted);">Lần cuối: ${formatDate(rem.lastDate)} | Dự kiến tiếp theo: <strong style="color: var(--health-primary);">${formatDate(rem.nextDate)}</strong></span>
             </div>
-            <button type="button" class="health-btn health-btn-primary" onclick="window.confirmHealthAutoReminder('deworming', '${rem.nextDate}', '${rem.profileId}')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
+            <button type="button" class="health-btn health-btn-primary" onclick="window.confirmHealthAutoReminder('deworming', '${rem.nextDate}', 'p-self')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
                 Đã uống
             </button>
         `;
@@ -5043,46 +5028,28 @@ function renderHealthReminders() {
         dentalCard.className = 'health-card';
         dentalCard.style.cssText = 'border-left: 4px solid var(--accent-blue); padding: 14px; background: var(--bg-secondary); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; box-sizing: border-box;';
         
-        const memberSuffix = selectedProfileId === 'all' ? ` (${escapeHTML(getProfileName(rem.profileId))})` : '';
-        
         dentalCard.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <strong style="color: var(--text-primary); font-size: 0.95rem;">🦷 Lấy cao răng định kỳ${memberSuffix}</strong>
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">🦷 Lấy cao răng định kỳ</strong>
                     ${statusBadge}
                 </div>
                 <span style="font-size: 0.8rem; color: var(--text-muted);">Lần cuối: ${formatDate(rem.lastDate)} | Dự kiến tiếp theo: <strong style="color: var(--accent-blue);">${formatDate(rem.nextDate)}</strong></span>
             </div>
-            <button type="button" class="health-btn health-btn-primary" onclick="window.confirmHealthAutoReminder('dental_scaling', '${rem.nextDate}', '${rem.profileId}')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
+            <button type="button" class="health-btn health-btn-primary" onclick="window.confirmHealthAutoReminder('dental_scaling', '${rem.nextDate}', 'p-self')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
                 Đã lấy
             </button>
         `;
         remindersListContainer.appendChild(dentalCard);
     }
     
-    // 1. Lấy thông báo định kỳ tự động theo bộ lọc
-    if (selectedProfileId === 'all') {
-        // Render của Bản thân
-        appendDewormingCard(getNextDewormingReminder('p-self'));
-        appendDentalCard(getNextDentalScalingReminder('p-self'));
-        
-        // Render các thành viên khác
-        (state.familyProfiles || []).forEach(p => {
-            appendDewormingCard(getNextDewormingReminder(p.id));
-            appendDentalCard(getNextDentalScalingReminder(p.id));
-        });
-    } else {
-        appendDewormingCard(getNextDewormingReminder(selectedProfileId));
-        appendDentalCard(getNextDentalScalingReminder(selectedProfileId));
-    }
+    // 1. Chỉ lấy thông báo định kỳ tự động của Bản thân (p-self)
+    appendDewormingCard(getNextDewormingReminder('p-self'));
+    appendDentalCard(getNextDentalScalingReminder('p-self'));
     
-    // 2. Render lời nhắc tùy chỉnh theo bộ lọc
+    // 2. Render lời nhắc tùy chỉnh của Bản thân (p-self)
     const customReminders = state.healthReminders || [];
-    let activeCustomReminders = customReminders.filter(r => !r.isSent);
-    
-    if (selectedProfileId !== 'all') {
-        activeCustomReminders = activeCustomReminders.filter(r => (r.profileId || 'p-self') === selectedProfileId);
-    }
+    let activeCustomReminders = customReminders.filter(r => !r.isSent && (r.profileId || 'p-self') === 'p-self');
     
     activeCustomReminders.forEach((r) => {
         const schedTime = new Date(r.scheduledTime);
@@ -5093,12 +5060,10 @@ function renderHealthReminders() {
         card.className = 'health-card';
         card.style.cssText = 'border-left: 4px solid var(--accent-orange); padding: 14px; background: var(--bg-secondary); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; box-sizing: border-box;';
         
-        const memberSuffix = selectedProfileId === 'all' ? ` (${escapeHTML(getProfileName(r.profileId))})` : '';
-        
         card.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <strong style="color: var(--text-primary); font-size: 0.95rem;">🔔 ${escapeHTML(r.title)}${memberSuffix}</strong>
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">🔔 ${escapeHTML(r.title)}</strong>
                     ${isOverdue ? '<span style="background: rgba(239,68,68,0.15); color: #ef4444; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700;">Đến hạn!</span>' : ''}
                 </div>
                 <span style="font-size: 0.82rem; color: var(--text-secondary);">${escapeHTML(r.message)}</span>
@@ -5116,7 +5081,7 @@ function renderHealthReminders() {
             <div class="health-empty-state" style="padding: 24px;">
                 <i data-lucide="bell-off"></i>
                 <h5 style="margin-top: 8px; font-weight: 600; font-size: 0.9rem;">Không có lịch nhắc nhở nào</h5>
-                <p style="margin-top: 4px; font-size: 0.8rem;">Không có lịch nhắc nhở sức khỏe định kỳ hoặc tùy chỉnh nào sắp tới cho thành viên được chọn.</p>
+                <p style="margin-top: 4px; font-size: 0.8rem;">Không có lịch nhắc nhở sức khỏe định kỳ hoặc tùy chỉnh nào sắp tới cho Bản thân.</p>
             </div>
         `;
     }
@@ -5145,10 +5110,10 @@ function renderHealthReminders() {
 
 // Xử lý hoàn thành nhắc nhở tự động định kỳ
 window.confirmHealthAutoReminder = async function(type, nextDateStr, profileId) {
-    const finalProfileId = profileId || state.selectedHealthProfileId || 'p-self';
+    const finalProfileId = profileId || 'p-self';
     const newRecord = {
         id: 'mr-' + Math.random().toString(36).substring(2, 10),
-        profileId: finalProfileId === 'all' ? 'p-self' : finalProfileId,
+        profileId: finalProfileId,
         type: type,
         title: type === 'deworming' ? 'Uống thuốc tẩy giun' : 'Lấy cao răng',
         date: new Date().toISOString().split('T')[0],
@@ -5177,10 +5142,10 @@ window.completeHealthCustomReminder = async function(id) {
         rem.isSent = true;
         state.healthRemindersUpdated = new Date().toISOString();
         
-        const finalProfileId = rem.profileId || state.selectedHealthProfileId || 'p-self';
+        const finalProfileId = rem.profileId || 'p-self';
         const newRecord = {
             id: 'mr-' + Math.random().toString(36).substring(2, 10),
-            profileId: finalProfileId === 'all' ? 'p-self' : finalProfileId,
+            profileId: finalProfileId,
             type: 'other',
             title: rem.title,
             date: new Date().toISOString().split('T')[0],
@@ -5205,7 +5170,6 @@ window.completeHealthCustomReminder = async function(id) {
 // Submit form thêm nhắc nhở sức khỏe
 async function handleAddHealthReminderSubmit(e) {
     e.preventDefault();
-    const profileSelect = document.getElementById('healthRemProfileSelect');
     const typeSelect = document.getElementById('healthRemTypeSelect');
     const timeInput = document.getElementById('healthRemTimeInput');
     const titleInput = document.getElementById('healthRemTitleInput');
@@ -5214,8 +5178,6 @@ async function handleAddHealthReminderSubmit(e) {
     
     if (!timeInput.value || !titleInput.value || !messageInput.value) return;
     
-    const profileId = profileSelect ? profileSelect.value : 'p-self';
-    
     const newReminder = {
         id: 'hr-' + Math.random().toString(36).substring(2, 10),
         type: typeSelect.value,
@@ -5223,7 +5185,7 @@ async function handleAddHealthReminderSubmit(e) {
         message: messageInput.value.trim(),
         scheduledTime: new Date(timeInput.value).toISOString(),
         repeatMonths: parseInt(repeatSelect.value) || 0,
-        profileId: profileId,
+        profileId: 'p-self',
         isSent: false,
         createdAt: new Date().toISOString()
     };

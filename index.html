@@ -989,7 +989,7 @@
             <section class="tab-panel" id="tab-health" style="display: none;">
                 <div class="health-theme-container">
                     <!-- Member Profile Selector Bar -->
-                    <div class="health-card profile-selector-card" style="overflow: visible; z-index: 50; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                    <div class="health-card profile-selector-card" id="healthProfileSelectorCard" style="overflow: visible; z-index: 50; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <i data-lucide="users" style="color: var(--health-accent); width: 20px; height: 20px;"></i>
                             <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Hồ sơ của:</span>
@@ -1210,13 +1210,7 @@
                                 </div>
                             </div>
                             <form id="healthAddReminderForm" style="display: none; text-align: left; flex-direction: column; gap: 14px; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
-                                <div class="health-form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
-                                    <div class="form-group">
-                                        <label class="form-label" style="font-weight: 600;">Dành cho thành viên</label>
-                                        <select id="healthRemProfileSelect" class="form-control health-input" style="width: 100%;">
-                                            <!-- Sẽ được điền động bằng JS -->
-                                        </select>
-                                    </div>
+                                <div class="health-form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                     <div class="form-group">
                                         <label class="form-label" style="font-weight: 600;">Loại nhắc nhở</label>
                                         <select id="healthRemTypeSelect" class="form-control health-input" style="width: 100%;">
