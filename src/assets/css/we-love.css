@@ -281,6 +281,19 @@ body:not(.light-mode) .memory-page {
   text-transform: uppercase;
 }
 
+.detailed-duration {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e11d48;
+  margin-top: 0.8rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+body:not(.light-mode) .detailed-duration {
+  color: #fda4af;
+}
+
 .milestone-date {
   display: inline-block;
   background: rgba(244, 63, 94, 0.08);

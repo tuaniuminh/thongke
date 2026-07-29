@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.3.18';
-import * as sync from '../../core/sync.js?v=4.3.18';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.18';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.18';
+} from '../../core/app.js?v=4.3.19';
+import * as sync from '../../core/sync.js?v=4.3.19';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.19';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.19';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.18');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.19');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.18';
+        const logoPath = './logo_pwa_small.png?v=4.3.19';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -211,6 +211,61 @@ export function calculateLoveDays() {
     if (loveDaysCount < 0) loveDaysCount = 0;
     
     return loveDaysCount;
+}
+
+// Calculate detailed duration in years, months, and days
+export function getDetailedLoveDuration() {
+    const startDateStr = state.weLoveStartDate;
+    if (!startDateStr) return null;
+    
+    const parts = startDateStr.split('-');
+    if (parts.length !== 3) return null;
+    
+    const sYear = parseInt(parts[0]);
+    const sMonth = parseInt(parts[1]) - 1;
+    const sDay = parseInt(parts[2]);
+    
+    const start = new Date(sYear, sMonth, sDay);
+    const today = new Date();
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    if (end < start) return null;
+    
+    let years = end.getFullYear() - start.getFullYear();
+    let months = end.getMonth() - start.getMonth();
+    let days = end.getDate() - start.getDate();
+    
+    if (days < 0) {
+        // Lấy ngày cuối của tháng trước
+        const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+        days += prevMonth.getDate();
+        months--;
+    }
+    
+    if (months < 0) {
+        months += 12;
+        years--;
+    }
+    
+    return { years, months, days };
+}
+
+export function formatDetailedLoveDuration() {
+    const duration = getDetailedLoveDuration();
+    if (!duration) return '';
+    
+    const { years, months, days } = duration;
+    
+    if (years === 0 && months === 0) {
+        return ''; // Dưới 1 tháng thì không hiện chi tiết (chỉ cần số ngày là đủ)
+    }
+    
+    const parts = [];
+    if (years > 0) parts.push(`${years} năm`);
+    if (months > 0) parts.push(`${months} tháng`);
+    if (days > 0) parts.push(`${days} ngày`);
+    
+    return `💕 Đã bên nhau: ${parts.join(', ')}`;
 }
 
 // Update the double hearts widget on home page
@@ -376,7 +431,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.18';
+    const logoPath = './logo_pwa_small.png?v=4.3.19';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1049,6 +1104,7 @@ export async function renderWeLoveDashboard() {
                     <div class="days-counter-box">
                         <div class="days-number" id="weLoveDaysCountVal">${state.weLoveStartDate ? loveDaysCount : '?'}</div>
                         <div class="days-label">Ngày bên nhau</div>
+                        ${state.weLoveStartDate ? `<div class="detailed-duration">${formatDetailedLoveDuration()}</div>` : ''}
                     </div>
 
                     <div class="milestone-date" style="${!state.weLoveStartDate ? 'color: var(--accent-rose); font-weight: 700;' : ''}">
@@ -1478,24 +1534,7 @@ function bindSettingsEvents() {
     const autoplayInput = document.getElementById('weLoveAutoplayInput');
     const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
 
-    if (startDateInput) {
-        // Date placeholder trick: toggle input type dynamically
-        const updateDateType = () => {
-            if (!startDateInput.value) {
-                startDateInput.type = 'text';
-                startDateInput.placeholder = 'Ngày/tháng/năm';
-            } else {
-                startDateInput.type = 'date';
-            }
-        };
-        updateDateType();
-        startDateInput.addEventListener('focus', () => {
-            startDateInput.type = 'date';
-        });
-        startDateInput.addEventListener('blur', () => {
-            updateDateType();
-        });
-    }
+
 
     if (formConfig) {
         formConfig.addEventListener('submit', async (e) => {
