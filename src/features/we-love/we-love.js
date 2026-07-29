@@ -1,10 +1,10 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.3.21';
-import * as sync from '../../core/sync.js?v=4.3.21';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.21';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.21';
+} from '../../core/app.js?v=4.3.22';
+import * as sync from '../../core/sync.js?v=4.3.22';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.22';
+import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.22';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +68,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.21');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.22');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +110,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.21';
+        const logoPath = './logo_pwa_small.png?v=4.3.22';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -431,7 +431,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.21';
+    const logoPath = './logo_pwa_small.png?v=4.3.22';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -516,47 +516,14 @@ export async function fetchWeLoveData() {
     reminders = state.weLoveReminders || [];
     reminders.sort((a, b) => new Date(b.scheduledTime) - new Date(a.scheduledTime));
 
-    // 3. Process Visit Logs
-    if (!state.weLoveVisitLogs) state.weLoveVisitLogs = [];
-    visitLogs = state.weLoveVisitLogs || [];
-    visitLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
 
     updateSyncStatusBadge();
 }
 
 // Log a visit by the current logged in user (if they are the guest/spouse)
 export async function logSpouseVisit() {
-    const user = await sync.getCurrentUser();
-    if (!user) return;
-    
-    // Kiểm tra chính xác vai trò dựa trên việc liên kết quỹ chung và dòng dữ liệu nguồn
-    // Nếu viewingSharedFund = true và sharedFundSourceRow !== null thì đây là tài khoản Vợ (Guest)
-    const isSpouse = state.viewingSharedFund && state.sharedFundSourceRow !== null;
-    const isAdmin = !isSpouse;
-    if (!isAdmin) {
-        const visitLogged = sessionStorage.getItem('we_love_visit_logged');
-        const hasNoLogs = !state.weLoveVisitLogs || state.weLoveVisitLogs.length === 0;
-        
-        if (!visitLogged || hasNoLogs) {
-            sessionStorage.setItem('we_love_visit_logged', 'true');
-            
-            const newVisit = {
-                id: Math.random().toString(36).substring(2, 10),
-                email: user.email,
-                timestamp: new Date().toISOString(),
-                deviceInfo: parseDeviceFromUA(navigator.userAgent || 'Web Browser')
-            };
-            
-            if (!state.weLoveVisitLogs) state.weLoveVisitLogs = [];
-            state.weLoveVisitLogs.unshift(newVisit);
-            state.weLoveVisitLogsUpdated = new Date().toISOString();
-            await saveLocalState();
-            
-            if (sync.isConfigured() && state.user) {
-                performSync(true);
-            }
-        }
-    }
+    // Đã xóa theo yêu cầu người dùng
 }
 
 // Sync check reminders and UI updates
@@ -774,125 +741,7 @@ function renderRemindersList() {
 
 // Render visits in admin view
 function renderVisitLogs() {
-    const statsContainer = document.getElementById('weLoveVisitStats');
-    const logsContainer = document.getElementById('weLoveVisitLogsTimeline');
-    if (!logsContainer) return;
-
-    const stats = {};
-    visitLogs.forEach(log => {
-        const dateObj = new Date(log.timestamp);
-        const ictMs = dateObj.getTime() + (7 * 60 * 60 * 1000);
-        const ictDate = new Date(ictMs);
-        
-        const year = ictDate.getUTCFullYear();
-        const month = String(ictDate.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(ictDate.getUTCDate()).padStart(2, '0');
-        
-        const monthKey = `${month}/${year}`;
-        const dayKey = `${day}/${month}/${year}`;
-        
-        if (!stats[monthKey]) {
-            stats[monthKey] = { total: 0, days: {} };
-        }
-        stats[monthKey].total += 1;
-        stats[monthKey].days[dayKey] = (stats[monthKey].days[dayKey] || 0) + 1;
-    });
-
-    if (statsContainer) {
-        const totalVisits = visitLogs.length;
-        
-        const now = new Date();
-        const curMonthKey = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
-        const curDayKey = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
-        
-        const monthVisits = stats[curMonthKey]?.total || 0;
-        const todayVisits = stats[curMonthKey]?.days[curDayKey] || 0;
-
-        statsContainer.innerHTML = `
-            <div class="stats-item" style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <span style="font-size: 1.8rem; margin-bottom: 4px;">📈</span>
-                <span class="stats-val" style="font-size: 1.5rem; font-weight: 800; color: var(--accent-rose);">${totalVisits}</span>
-                <span class="stats-label" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Tổng số lần truy cập</span>
-            </div>
-            <div class="stats-item" style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <span style="font-size: 1.8rem; margin-bottom: 4px;">🗓️</span>
-                <span class="stats-val" style="font-size: 1.5rem; font-weight: 800; color: var(--accent-rose);">${monthVisits}</span>
-                <span class="stats-label" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Lần trong tháng</span>
-            </div>
-            <div class="stats-item" style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <span style="font-size: 1.8rem; margin-bottom: 4px;">☀️</span>
-                <span class="stats-val" style="font-size: 1.5rem; font-weight: 800; color: var(--accent-rose);">${todayVisits}</span>
-                <span class="stats-label" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Lần hôm nay</span>
-            </div>
-        `;
-    }
-
-    let detailsHtml = '';
-    if (visitLogs.length === 0) {
-        detailsHtml = `<p style="color: var(--text-muted); font-size: 0.9rem; font-style: italic; text-align: center; padding: 1rem 0;">Chưa có dữ liệu truy cập 📭</p>`;
-    } else {
-        detailsHtml = Object.entries(stats).map(([month, mData]) => `
-            <div style="padding: 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 18px; margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px;">
-                    <span>📅 Tháng ${month}</span>
-                    <span style="background: var(--accent-rose); color: white; padding: 2px 10px; border-radius: 50px; font-size: 0.8rem;">${mData.total} lần</span>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    ${Object.entries(mData.days)
-                        .sort((a,b) => {
-                            const parseDate = (s) => {
-                                const [d,m,y] = s.split('/').map(Number);
-                                return new Date(y, m-1, d);
-                            };
-                            return parseDate(b[0]) - parseDate(a[0]);
-                        })
-                        .map(([day, cnt]) => `
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 0.85rem;">
-                                <span style="color: var(--text-secondary);">🗓️ Ngày ${day}</span>
-                                <span style="font-weight: 700; color: var(--text-primary);">${cnt} lần</span>
-                            </div>
-                        `).join('')}
-                </div>
-            </div>
-        `).join('');
-    }
-    const calendarSection = document.getElementById('weLoveVisitCalendarDetails');
-    if (calendarSection) calendarSection.innerHTML = detailsHtml;
-
-    if (visitLogs.length === 0) {
-        logsContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-style: italic; padding: 2rem 0;">Chưa có lịch sử truy cập</p>`;
-        return;
-    }
-
-    logsContainer.innerHTML = visitLogs.slice(0, 10).map((log, index) => {
-        const dObj = new Date(log.timestamp);
-        const ictMs = dObj.getTime() + (7 * 60 * 60 * 1000);
-        const ictDate = new Date(ictMs);
-        
-        const timeStr = String(ictDate.getUTCHours()).padStart(2, '0') + ':' + 
-                        String(ictDate.getUTCMinutes()).padStart(2, '0') + ':' + 
-                        String(ictDate.getUTCSeconds()).padStart(2, '0');
-        
-        const dateStr = String(ictDate.getUTCDate()).padStart(2, '0') + '/' + 
-                        String(ictDate.getUTCMonth() + 1).padStart(2, '0') + '/' + 
-                        ictDate.getUTCFullYear();
-
-        const isMobile = log.deviceInfo.includes('Điện thoại');
-        return `
-            <div class="welove-log-item" style="padding: 0.8rem 1rem; margin-bottom: 0.5rem; min-height: auto; gap: 0.75rem;">
-                <div class="welove-log-icon" style="width: 38px; height: 38px; font-size: 1.2rem; padding: 0; display: flex; align-items: center; justify-content: center;">
-                    ${isMobile ? '📱' : '💻'}
-                </div>
-                <div class="welove-log-content" style="display: flex; flex-direction: column; gap: 2px; width: 100%;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span style="font-size: 0.85rem; font-weight: 700;">${dateStr} - ${timeStr}</span>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(log.email)}</span>
-                    </div>
-                    <span style="font-size: 0.75rem; color: var(--text-secondary);">${escapeHTML(log.deviceInfo)}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
+    // Đã xóa theo yêu cầu người dùng
 }
 
 // HTML escape helper
@@ -995,41 +844,7 @@ export async function renderWeLoveDashboard() {
                         </div>
                     </div>
 
-                    <!-- Nhật ký truy cập của em yêu -->
-                    ${isAdmin ? `
-                    <div class="welove-card" style="margin-top: 0; width: 100%;">
-                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 1.8rem;">📊</span>
-                                <h3 class="welove-title" style="margin: 0;">Nhật Ký Truy Cập Của Nửa Kia</h3>
-                            </div>
-                            <button id="btnWeLoveClearVisitLogs" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); color: #ef4444; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Xóa toàn bộ lịch sử truy cập">
-                                🗑️ Xóa lịch sử
-                            </button>
-                        </div>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; font-weight: 600;">
-                            Đang theo dõi email: <span style="color: var(--accent-rose);">${state.spouseEmail || 'chưa liên kết'}</span>
-                        </p>
 
-                        <div class="stats-grid" id="weLoveVisitStats" style="margin-bottom: 2rem;">
-                            <!-- populated by JS -->
-                        </div>
-
-                        <h4 style="font-size: 1rem; font-weight: 700; border-left: 4px solid var(--accent-rose); padding-left: 0.5rem; text-align: left; margin-bottom: 1rem;">
-                            Chi tiết lượt truy cập qua các ngày
-                        </h4>
-                        <div id="weLoveVisitCalendarDetails" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; text-align: left;">
-                            <!-- populated by JS -->
-                        </div>
-
-                        <h4 style="font-size: 1rem; font-weight: 700; border-left: 4px solid var(--accent-rose); padding-left: 0.5rem; text-align: left; margin-bottom: 1rem;">
-                            Lịch sử 10 lần truy cập gần nhất
-                        </h4>
-                        <div class="welove-timeline" id="weLoveVisitLogsTimeline" style="max-height: 280px;">
-                            <!-- populated by JS -->
-                        </div>
-                    </div>
-                    ` : ''}
 
                 </div>
             ` : weLoveCurrentSubView === 'settings' && canEdit ? `
@@ -1503,25 +1318,7 @@ function bindAdminEvents() {
         });
     }
 
-    const btnClearLogs = document.getElementById('btnWeLoveClearVisitLogs');
-    if (btnClearLogs) {
-        btnClearLogs.addEventListener('click', async () => {
-            const ok = confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử truy cập của nửa kia? 🗑️");
-            if (!ok) return;
 
-            state.weLoveVisitLogs = [];
-            state.weLoveVisitLogsUpdated = new Date().toISOString();
-            await saveLocalState();
-
-            if (sync.isConfigured() && state.user) {
-                performSync(true);
-            }
-
-            visitLogs = [];
-            renderVisitLogs();
-            showToast("Đã xóa toàn bộ lịch sử truy cập 🧹");
-        });
-    }
 }
 
 // Bind events for settings view
