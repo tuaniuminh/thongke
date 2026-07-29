@@ -90,6 +90,68 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        #appSplashOverlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            background: #090d16;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        #appSplashOverlay h2 {
+            font-family: var(--font-heading);
+            color: #ffffff;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        #appSplashOverlay p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+        #appSplashOverlay img {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+        }
+        #appSplashOverlay .splash-spinner {
+            margin: 0 auto;
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255, 255, 255, 0.08);
+            border-top-color: var(--accent-rose, #ff4d7e);
+            border-radius: 50%;
+            animation: app-splash-spin 1s linear infinite;
+        }
+        
+        /* Light Theme Styles */
+        html[data-theme="light"] #appSplashOverlay {
+            background: #f8fafc;
+        }
+        html[data-theme="light"] #appSplashOverlay h2 {
+            color: #0f172a;
+        }
+        html[data-theme="light"] #appSplashOverlay p {
+            color: #64748b;
+        }
+        html[data-theme="light"] #appSplashOverlay img {
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            border: 2px solid rgba(15, 23, 42, 0.05);
+        }
+        html[data-theme="light"] #appSplashOverlay .splash-spinner {
+            border: 3px solid rgba(15, 23, 42, 0.06);
+        }
     </style>
 </head>
 <body>
@@ -1796,15 +1858,31 @@
         </div>
     </div>
 
+    <!-- Script nhận diện và đồng bộ giao diện cho Splash Screen -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gift_ledger_theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                window.addEventListener('DOMContentLoaded', () => {
+                    const img = document.getElementById('splashLogoImg');
+                    if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.29';
+                });
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     <!-- App Splash Welcome Screen Overlay -->
-    <div class="setup-overlay" id="appSplashOverlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; background: #090d16; transition: opacity 0.4s ease, visibility 0.4s ease; position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+    <div class="setup-overlay" id="appSplashOverlay">
         <div style="text-align: center;">
             <div class="splash-logo" style="margin-bottom: 24px; position: relative;">
-                <img src="src/assets/images/icon.png?v=4.3.29" alt="FamiLife" style="width: 88px; height: 88px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 2px solid rgba(255, 255, 255, 0.05);">
+                <img src="src/assets/images/icon.png?v=4.3.29" alt="FamiLife" id="splashLogoImg">
             </div>
-            <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.7rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px;">FamiLife</h2>
-            <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.85rem; margin-bottom: 28px; font-weight: 500;">Quản lý tài chính & Sức khỏe gia đình</p>
-            <div class="splash-spinner" style="margin: 0 auto; width: 28px; height: 28px; border: 3px solid rgba(255, 255, 255, 0.08); border-top-color: var(--accent-rose, #ff4d7e); border-radius: 50%; animation: app-splash-spin 1s linear infinite;"></div>
+            <h2>FamiLife</h2>
+            <p>Quản lý tài chính & Sức khỏe gia đình</p>
+            <div class="splash-spinner"></div>
         </div>
     </div>
 
