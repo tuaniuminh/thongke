@@ -767,6 +767,9 @@ export async function renderWeLoveDashboard() {
     const tabContainer = document.getElementById('tab-welove');
     if (!tabContainer) return;
 
+    // Tự động kiểm tra kỉ niệm và gửi Telegram (nếu đủ điều kiện)
+    checkAndSendWeLoveAnniversaryTelegram();
+
     const renderingTab = state.activeTab;
 
     // Map activeTab route directly to sub-view state
@@ -1371,6 +1374,10 @@ function bindSettingsEvents() {
 
             await saveLocalState();
             
+            // Đồng bộ Local Notifications kỷ niệm và gửi telegram (nếu đến hạn)
+            syncWeLoveAnniversaryNotifications();
+            checkAndSendWeLoveAnniversaryTelegram();
+            
             if (sync.isConfigured() && state.user) {
                 performSync(true);
             }
@@ -1793,6 +1800,118 @@ export async function syncLocalNotifications() {
         }
     } catch (err) {
         console.error("[WeLove] syncLocalNotifications error:", err);
+    }
+}
+
+export async function syncWeLoveAnniversaryNotifications() {
+    if (!state.weLoveStartDate) return;
+    if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications)) {
+        return;
+    }
+    
+    try {
+        const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+        const perm = await LocalNotifications.checkPermissions();
+        if (perm.display !== 'granted') {
+            const req = await LocalNotifications.requestPermissions();
+            if (req.display !== 'granted') return;
+        }
+        
+        await LocalNotifications.cancel({ notifications: [{ id: 30000000 }, { id: 30000001 }] });
+        
+        const dateParts = state.weLoveStartDate.split('-');
+        if (dateParts.length !== 3) return;
+        const m = parseInt(dateParts[1], 10);
+        const d = parseInt(dateParts[2], 10);
+        
+        const tempDate = new Date(2026, m - 1, d);
+        tempDate.setDate(tempDate.getDate() - 3);
+        const mMinus3 = tempDate.getMonth() + 1;
+        const dMinus3 = tempDate.getDate();
+        
+        const listToSchedule = [
+            {
+                id: 30000000,
+                title: `❤️ FamiLife: Kỷ niệm ngày yêu nhau!`,
+                body: `Hôm nay là ngày kỷ niệm tình yêu của hai bạn! Chúc hai bạn luôn hạnh phúc và ấm áp bên nhau nhé! 🥰`,
+                schedule: {
+                    on: { month: m, day: d, hour: 9, minute: 0 },
+                    repeats: true
+                },
+                smallIcon: 'res://drawable/push_icon',
+                sound: 'res://raw/beep.wav'
+            },
+            {
+                id: 30000001,
+                title: `🔔 FamiLife: Sắp đến ngày kỷ niệm yêu nhau!`,
+                body: `Chỉ còn 3 ngày nữa là đến ngày kỷ niệm yêu nhau rồi đó! Hãy chuẩn bị quà và lên kế hoạch hẹn hò thôi nào! 🎁🌹`,
+                schedule: {
+                    on: { month: mMinus3, day: dMinus3, hour: 9, minute: 0 },
+                    repeats: true
+                },
+                smallIcon: 'res://drawable/push_icon',
+                sound: 'res://raw/beep.wav'
+            }
+        ];
+        
+        await LocalNotifications.schedule({ notifications: listToSchedule });
+        console.log("[WeLove] Scheduled anniversary local notifications successfully.");
+    } catch (err) {
+        console.error("[WeLove] syncWeLoveAnniversaryNotifications error:", err);
+    }
+}
+
+export async function checkAndSendWeLoveAnniversaryTelegram() {
+    if (state.notifyWeLove === false) return;
+    if (!state.googleSheetsWebhook || !state.weLoveStartDate) return;
+    
+    try {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        
+        if (state.weLoveLastAnniversaryNotifiedYear === currentYear) return;
+        
+        const dateParts = state.weLoveStartDate.split('-');
+        if (dateParts.length !== 3) return;
+        const m = parseInt(dateParts[1], 10);
+        const d = parseInt(dateParts[2], 10);
+        
+        const annivDate = new Date(currentYear, m - 1, d);
+        const diffTime = annivDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        let textMsg = '';
+        if (diffDays === 0) {
+            const years = currentYear - parseInt(dateParts[0], 10);
+            textMsg = `❤️ *CHÚC MỪNG NGÀY KỶ NIỆM YÊU NHAU!* 🎉\n\n` +
+                      `⏰ Hôm nay chính là kỷ niệm tròn *${years} năm* ngày bắt đầu tình yêu của hai bạn! 🥰\n` +
+                      `💕 Chúc hai bạn luôn ngập tràn niềm vui, hạnh phúc và gắn bó bền chặt hơn mỗi ngày. 🌹\n` +
+                      `_Gửi tự động từ góc kỷ niệm FamiLife_`;
+        } else if (diffDays > 0 && diffDays <= 3) {
+            textMsg = `🔔 *NHẮC NHỞ KỶ NIỆM YÊU NHAU* 🔔\n\n` +
+                      `⏰ Chỉ còn *${diffDays} ngày* nữa là đến ngày kỷ niệm yêu nhau của hai bạn rồi đó!\n` +
+                      `🎁 Đừng quên chuẩn bị những món quà bất ngờ hoặc lên kế hoạch cho một buổi hẹn hò thật lãng mạn nhé! 😉\n` +
+                      `_Gửi tự động từ góc kỷ niệm FamiLife_`;
+        }
+        
+        if (textMsg) {
+            await fetch(state.googleSheetsWebhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: textMsg, content: textMsg }),
+                mode: 'no-cors'
+            });
+            
+            state.weLoveLastAnniversaryNotifiedYear = currentYear;
+            await saveLocalState();
+            
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+            console.log("[WeLove] Sent anniversary Telegram notification successfully.");
+        }
+    } catch (err) {
+        console.error("[WeLove] checkAndSendWeLoveAnniversaryTelegram error:", err);
     }
 }
 
