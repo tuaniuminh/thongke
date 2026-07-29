@@ -1,6 +1,6 @@
 [package]
 name = "familife"
-version = "4.3.19"
+version = "4.3.20"
 description = "FamiLife - Thu Chi & Sức Khỏe Gia Đình"
 authors = ["Antigravity"]
 license = "MIT"
