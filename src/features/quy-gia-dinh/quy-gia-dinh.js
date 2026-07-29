@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.23';
-import { decrypt } from '../../core/crypto.js?v=4.3.23';
-import * as sync from '../../core/sync.js?v=4.3.23';
+} from '../../core/app.js?v=4.3.24';
+import { decrypt } from '../../core/crypto.js?v=4.3.24';
+import * as sync from '../../core/sync.js?v=4.3.24';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -161,6 +161,7 @@ function parseMoneyInput(str) {
 
 // Trigger Google Sheets Webhook Sync
 async function triggerGoogleSheetsSync(tx, isDeletion = false) {
+    if (state.notifyFund === false) return; // Bỏ qua nếu tắt thông báo Quỹ
     if (!state.googleSheetsWebhook || state.viewingSharedFund) return;
 
     const fund = state.familyFunds.find(f => f.id === tx.fundId || f.id === tx.fromFundId);

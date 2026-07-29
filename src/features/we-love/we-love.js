@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.23';
-import * as sync from '../../core/sync.js?v=4.3.23';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.23';
+} from '../../core/app.js?v=4.3.24';
+import * as sync from '../../core/sync.js?v=4.3.24';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.24';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.23');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.24');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.23';
+        const logoPath = './logo_pwa_small.png?v=4.3.24';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -430,7 +430,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.23';
+    const logoPath = './logo_pwa_small.png?v=4.3.24';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1698,6 +1698,7 @@ window.renderFamilyPairingSettings = renderFamilyPairingSettings;
 
 // Gửi tin nhắn tức thời qua Webhook Telegram khi tạo lời nhắc mới
 async function sendWeLoveReminderTelegram(reminder) {
+    if (state.notifyWeLove === false) return; // Bỏ qua nếu tắt thông báo WeLove
     if (!state.googleSheetsWebhook) {
         console.warn("[WeLove] Webhook URL not configured. Skip sending Telegram notification.");
         return;

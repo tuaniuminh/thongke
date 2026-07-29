@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.3.23';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.23';
+} from '../../core/app.js?v=4.3.24';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.24';
 
 let healthTrendChartInstance = null;
 
@@ -929,6 +929,11 @@ window.handleRemoveIndicatorRow = handleRemoveIndicatorRow;
 
 
 function renderHealthDashboard() {
+    if (window.healthCurrentSubView === 'reminders') {
+        renderHealthReminders();
+        return;
+    }
+
     // Update API Key Card Collapsed state
     updateApiConfigCardState();
 
@@ -4862,7 +4867,433 @@ function updateIndicatorProgress() {
 })();
 
 
-export { initHealthBindings, renderHealthDashboard, updateProfileDropdowns, callGeminiTextAPI };
+// ============================================================
+// HEALTH REMINDERS MODULE (v4.3.24)
+// ============================================================
+window.healthCurrentSubView = 'records';
+
+window.switchHealthSubView = function(subView) {
+    window.healthCurrentSubView = subView;
+    
+    const recordsBtn = document.getElementById('healthSubViewRecordsBtn');
+    const remindersBtn = document.getElementById('healthSubViewRemindersBtn');
+    const recordsView = document.getElementById('healthRecordsView');
+    const remindersView = document.getElementById('healthRemindersView');
+    
+    if (subView === 'records') {
+        if (recordsBtn) {
+            recordsBtn.classList.add('active');
+            recordsBtn.style.color = 'var(--health-primary)';
+            recordsBtn.style.borderBottom = '2px solid var(--health-primary)';
+            recordsBtn.style.fontWeight = '700';
+        }
+        if (remindersBtn) {
+            remindersBtn.classList.remove('active');
+            remindersBtn.style.color = 'var(--text-secondary)';
+            remindersBtn.style.borderBottom = '2px solid transparent';
+            remindersBtn.style.fontWeight = '500';
+        }
+        if (recordsView) recordsView.style.display = 'block';
+        if (remindersView) remindersView.style.display = 'none';
+        renderHealthDashboard();
+    } else {
+        if (recordsBtn) {
+            recordsBtn.classList.remove('active');
+            recordsBtn.style.color = 'var(--text-secondary)';
+            recordsBtn.style.borderBottom = '2px solid transparent';
+            recordsBtn.style.fontWeight = '500';
+        }
+        if (remindersBtn) {
+            remindersBtn.classList.add('active');
+            remindersBtn.style.color = 'var(--health-primary)';
+            remindersBtn.style.borderBottom = '2px solid var(--health-primary)';
+            remindersBtn.style.fontWeight = '700';
+        }
+        if (recordsView) recordsView.style.display = 'none';
+        if (remindersView) remindersView.style.display = 'block';
+        renderHealthReminders();
+    }
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+};
+
+// Lọc lịch sử lấy ra nhắc nhở Tẩy giun tiếp theo
+function getNextDewormingReminder() {
+    const records = state.medicalRecords || [];
+    const dewormingRecords = records.filter(r => r.type === 'deworming' && !r.deleted_at);
+    if (dewormingRecords.length === 0) return null;
+    
+    dewormingRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const lastRecord = dewormingRecords[0];
+    
+    let nextDateStr = lastRecord.nextDoseDate;
+    if (!nextDateStr) {
+        const lastDate = new Date(lastRecord.date);
+        lastDate.setMonth(lastDate.getMonth() + 6);
+        const yyyy = lastDate.getFullYear();
+        const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(lastDate.getDate()).padStart(2, '0');
+        nextDateStr = `${yyyy}-${mm}-${dd}`;
+    }
+    return {
+        lastDate: lastRecord.date,
+        nextDate: nextDateStr,
+        recordId: lastRecord.id
+    };
+}
+
+// Lọc lịch sử lấy ra nhắc nhở Lấy cao răng tiếp theo
+function getNextDentalScalingReminder() {
+    const records = state.medicalRecords || [];
+    const dentalRecords = records.filter(r => r.type === 'dental_scaling' && !r.deleted_at);
+    if (dentalRecords.length === 0) return null;
+    
+    dentalRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const lastRecord = dentalRecords[0];
+    
+    // Mặc định lấy cao răng là 6 tháng hoặc 1 năm. Ta tính 6 tháng từ ngày làm gần nhất.
+    const lastDate = new Date(lastRecord.date);
+    lastDate.setMonth(lastDate.getMonth() + 6);
+    const yyyy = lastDate.getFullYear();
+    const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(lastDate.getDate()).padStart(2, '0');
+    const nextDateStr = `${yyyy}-${mm}-${dd}`;
+    
+    return {
+        lastDate: lastRecord.date,
+        nextDate: nextDateStr,
+        recordId: lastRecord.id
+    };
+}
+
+// Render nhắc nhở y tế
+function renderHealthReminders() {
+    const remindersListContainer = document.getElementById('healthRemindersList');
+    if (!remindersListContainer) return;
+    
+    remindersListContainer.innerHTML = '';
+    
+    // 1. Lấy thông báo định kỳ tự động
+    const dewormingRem = getNextDewormingReminder();
+    const dentalRem = getNextDentalScalingReminder();
+    const now = new Date();
+    
+    if (dewormingRem) {
+        const nextDate = new Date(dewormingRem.nextDate);
+        const isOverdue = nextDate < now;
+        const diffDays = Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24));
+        const isNear = diffDays <= 15;
+        
+        let statusBadge = '';
+        if (isOverdue) {
+            statusBadge = `<span style="background: rgba(239,68,68,0.15); color: #ef4444; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">Đã quá hạn!</span>`;
+        } else if (isNear) {
+            statusBadge = `<span style="background: rgba(245,158,11,0.15); color: #f59e0b; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">Sắp đến hạn (${diffDays} ngày nữa)</span>`;
+        } else {
+            statusBadge = `<span style="background: rgba(16,185,129,0.15); color: #10b981; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">Bình thường</span>`;
+        }
+        
+        const dewormingCard = document.createElement('div');
+        dewormingCard.className = 'health-card';
+        dewormingCard.style.cssText = 'border-left: 4px solid var(--health-primary); padding: 14px; background: var(--bg-secondary); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; box-sizing: border-box;';
+        dewormingCard.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">💊 Uống thuốc tẩy giun định kỳ</strong>
+                    ${statusBadge}
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Lần cuối: ${formatDate(dewormingRem.lastDate)} | Dự kiến tiếp theo: <strong style="color: var(--health-primary);">${formatDate(dewormingRem.nextDate)}</strong></span>
+            </div>
+            <button type="button" class="health-btn health-btn-primary" onclick="window.confirmHealthAutoReminder('deworming', '${dewormingRem.nextDate}')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
+                Đã uống
+            </button>
+        `;
+        remindersListContainer.appendChild(dewormingCard);
+    }
+    
+    if (dentalRem) {
+        const nextDate = new Date(dentalRem.nextDate);
+        const isOverdue = nextDate < now;
+        const diffDays = Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24));
+        const isNear = diffDays <= 15;
+        
+        let statusBadge = '';
+        if (isOverdue) {
+            statusBadge = `<span style="background: rgba(239,68,68,0.15); color: #ef4444; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">Đã quá hạn!</span>`;
+        } else if (isNear) {
+            statusBadge = `<span style="background: rgba(245,158,11,0.15); color: #f59e0b; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">Sắp đến hạn (${diffDays} ngày nữa)</span>`;
+        } else {
+            statusBadge = `<span style="background: rgba(16,185,129,0.15); color: #10b981; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">Bình thường</span>`;
+        }
+        
+        const dentalCard = document.createElement('div');
+        dentalCard.className = 'health-card';
+        dentalCard.style.cssText = 'border-left: 4px solid var(--accent-blue); padding: 14px; background: var(--bg-secondary); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; box-sizing: border-box;';
+        dentalCard.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">🦷 Lấy cao răng định kỳ</strong>
+                    ${statusBadge}
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Lần cuối: ${formatDate(dentalRem.lastDate)} | Dự kiến tiếp theo: <strong style="color: var(--accent-blue);">${formatDate(dentalRem.nextDate)}</strong></span>
+            </div>
+            <button type="button" class="health-btn health-btn-primary" onclick="window.confirmHealthAutoReminder('dental_scaling', '${dentalRem.nextDate}')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
+                Đã lấy
+            </button>
+        `;
+        remindersListContainer.appendChild(dentalCard);
+    }
+    
+    // 2. Render lời nhắc tùy chỉnh
+    const customReminders = state.healthReminders || [];
+    const activeCustomReminders = customReminders.filter(r => !r.isSent);
+    
+    activeCustomReminders.forEach((r, idx) => {
+        const schedTime = new Date(r.scheduledTime);
+        const isOverdue = schedTime < now;
+        const formattedTime = schedTime.toLocaleString('vi-VN');
+        
+        const card = document.createElement('div');
+        card.className = 'health-card';
+        card.style.cssText = 'border-left: 4px solid var(--accent-orange); padding: 14px; background: var(--bg-secondary); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; box-sizing: border-box;';
+        card.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">🔔 ${escapeHTML(r.title)}</strong>
+                    ${isOverdue ? '<span style="background: rgba(239,68,68,0.15); color: #ef4444; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700;">Đến hạn!</span>' : ''}
+                </div>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">${escapeHTML(r.message)}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Thời gian thông báo: <strong style="color: var(--accent-orange);">${formattedTime}</strong></span>
+            </div>
+            <button type="button" class="health-btn health-btn-primary" onclick="window.completeHealthCustomReminder('${r.id}')" style="padding: 6px 12px; font-size: 0.8rem; white-space: nowrap;">
+                Hoàn thành
+            </button>
+        `;
+        remindersListContainer.appendChild(card);
+    });
+    
+    if (remindersListContainer.children.length === 0) {
+        remindersListContainer.innerHTML = `
+            <div class="health-empty-state" style="padding: 24px;">
+                <i data-lucide="bell-off"></i>
+                <h5 style="margin-top: 8px; font-weight: 600; font-size: 0.9rem;">Không có lịch nhắc nhở nào</h5>
+                <p style="margin-top: 4px; font-size: 0.8rem;">Bạn chưa có lịch nhắc nhở sức khỏe định kỳ hoặc tùy chỉnh nào sắp tới.</p>
+            </div>
+        `;
+    }
+    
+    // Gắn sự kiện cho Form (nếu chưa gắn)
+    const form = document.getElementById('healthAddReminderForm');
+    if (form && !form.dataset.listenerAttached) {
+        form.addEventListener('submit', handleAddHealthReminderSubmit);
+        form.dataset.listenerAttached = 'true';
+        
+        // Tự động điền ngày giờ hiện tại cho tiện
+        const timeInput = document.getElementById('healthRemTimeInput');
+        if (timeInput) {
+            const date = new Date();
+            date.setMinutes(date.getMinutes() + 30); // mặc định 30 phút sau
+            const tzoffset = date.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(date - tzoffset)).toISOString().slice(0, 16);
+            timeInput.value = localISOTime;
+        }
+    }
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Xử lý hoàn thành nhắc nhở tự động định kỳ
+window.confirmHealthAutoReminder = async function(type, nextDateStr) {
+    const profileId = state.selectedHealthProfileId || 'p-self';
+    const newRecord = {
+        id: 'mr-' + Math.random().toString(36).substring(2, 10),
+        profileId: profileId,
+        type: type,
+        title: type === 'deworming' ? 'Uống thuốc tẩy giun' : 'Lấy cao răng',
+        date: new Date().toISOString().split('T')[0],
+        nextDoseDate: nextDateStr,
+        created_at: new Date().toISOString()
+    };
+    
+    if (!state.medicalRecords) state.medicalRecords = [];
+    state.medicalRecords.unshift(newRecord);
+    state.medicalRecordsUpdated = new Date().toISOString();
+    await saveLocalState();
+    
+    if (sync.isConfigured() && state.user) {
+        performSync(true);
+    }
+    
+    showToast(`Đã ghi nhận ${type === 'deworming' ? 'uống thuốc tẩy giun' : 'lấy cao răng'} thành công! ❤️`);
+    renderHealthReminders();
+};
+
+// Xử lý hoàn thành nhắc nhở tùy chỉnh
+window.completeHealthCustomReminder = async function(id) {
+    const list = state.healthReminders || [];
+    const rem = list.find(r => r.id === id);
+    if (rem) {
+        rem.isSent = true;
+        state.healthRemindersUpdated = new Date().toISOString();
+        
+        const profileId = state.selectedHealthProfileId || 'p-self';
+        const newRecord = {
+            id: 'mr-' + Math.random().toString(36).substring(2, 10),
+            profileId: profileId,
+            type: 'other',
+            title: rem.title,
+            date: new Date().toISOString().split('T')[0],
+            notes: rem.message,
+            created_at: new Date().toISOString()
+        };
+        
+        if (!state.medicalRecords) state.medicalRecords = [];
+        state.medicalRecords.unshift(newRecord);
+        state.medicalRecordsUpdated = new Date().toISOString();
+        
+        await saveLocalState();
+        if (sync.isConfigured() && state.user) {
+            performSync(true);
+        }
+        
+        showToast("Đã hoàn thành lời nhắc nhở sức khỏe! 🩺");
+        renderHealthReminders();
+    }
+};
+
+// Submit form thêm nhắc nhở sức khỏe
+async function handleAddHealthReminderSubmit(e) {
+    e.preventDefault();
+    const typeSelect = document.getElementById('healthRemTypeSelect');
+    const timeInput = document.getElementById('healthRemTimeInput');
+    const titleInput = document.getElementById('healthRemTitleInput');
+    const messageInput = document.getElementById('healthRemMessageInput');
+    const repeatSelect = document.getElementById('healthRemRepeatSelect');
+    
+    if (!timeInput.value || !titleInput.value || !messageInput.value) return;
+    
+    const newReminder = {
+        id: 'hr-' + Math.random().toString(36).substring(2, 10),
+        type: typeSelect.value,
+        title: titleInput.value.trim(),
+        message: messageInput.value.trim(),
+        scheduledTime: new Date(timeInput.value).toISOString(),
+        repeatMonths: parseInt(repeatSelect.value) || 0,
+        isSent: false,
+        createdAt: new Date().toISOString()
+    };
+    
+    if (!state.healthReminders) state.healthReminders = [];
+    state.healthReminders.unshift(newReminder);
+    state.healthRemindersUpdated = new Date().toISOString();
+    await saveLocalState();
+    
+    if (state.notifyHealth !== false) {
+        sendHealthReminderTelegram(newReminder);
+    }
+    
+    if (typeof syncHealthLocalNotifications === 'function') {
+        syncHealthLocalNotifications();
+    }
+    
+    if (sync.isConfigured() && state.user) {
+        performSync(true);
+    }
+    
+    timeInput.value = '';
+    titleInput.value = '';
+    messageInput.value = '';
+    
+    showToast("Lên lịch nhắc nhở sức khỏe thành công! ⏰");
+    renderHealthReminders();
+}
+
+async function sendHealthReminderTelegram(reminder) {
+    if (!state.googleSheetsWebhook) return;
+    
+    const formattedTime = new Date(reminder.scheduledTime).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+    const textMsg = `🩺 *LỊCH NHẮC SỨC KHỎE MỚI* từ FamiLife\n\n` +
+                 `⏰ *Thời gian:* ${formattedTime}\n` +
+                 `📝 *Tiêu đề:* ${reminder.title}\n` +
+                 `✉️ *Nội dung:* ${reminder.message}\n` +
+                 `_Hãy quan tâm sức khỏe mỗi ngày nhé!_`;
+    try {
+        await fetch(state.googleSheetsWebhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textMsg, content: textMsg }),
+            mode: 'no-cors'
+        });
+    } catch (err) {
+        console.error("Failed to send health webhook:", err);
+    }
+}
+
+export async function syncHealthLocalNotifications() {
+    if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications)) {
+        return;
+    }
+    
+    try {
+        const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+        const perm = await LocalNotifications.checkPermissions();
+        if (perm.display !== 'granted') {
+            const req = await LocalNotifications.requestPermissions();
+            if (req.display !== 'granted') return;
+        }
+        
+        const pending = await LocalNotifications.getPending();
+        if (pending.notifications && pending.notifications.length > 0) {
+            const healthIds = pending.notifications.filter(n => n.id >= 20000000 && n.id < 30000000);
+            if (healthIds.length > 0) {
+                await LocalNotifications.cancel({ notifications: healthIds });
+            }
+        }
+        
+        const now = new Date();
+        const listToSchedule = [];
+        
+        const customReminders = state.healthReminders || [];
+        customReminders.forEach((r, idx) => {
+            if (r.isSent) return;
+            const schedTime = new Date(r.scheduledTime);
+            if (schedTime > now) {
+                const id = 20000000 + (Math.abs(hashCode(r.id || idx.toString())) % 9999999);
+                listToSchedule.push({
+                    title: `🩺 FamiLife: ${r.title}`,
+                    body: r.message,
+                    id: id,
+                    schedule: { at: schedTime },
+                    smallIcon: 'res://drawable/push_icon',
+                    sound: 'res://raw/beep.wav'
+                });
+            }
+        });
+        
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash = hash & hash;
+            }
+            return hash;
+        }
+        
+        if (listToSchedule.length > 0) {
+            await LocalNotifications.schedule({ notifications: listToSchedule });
+            console.log(`[Health] Scheduled ${listToSchedule.length} local notifications successfully.`);
+        }
+    } catch (err) {
+        console.error("syncHealthLocalNotifications error:", err);
+    }
+}
+
+export { initHealthBindings, renderHealthDashboard, updateProfileDropdowns, callGeminiTextAPI, syncHealthLocalNotifications };
 
 
 

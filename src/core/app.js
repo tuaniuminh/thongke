@@ -107,6 +107,11 @@ let state = {
     ownerEmail: '',
     ownerEmailUpdated: '',
     googleSheetsWebhook: '',
+    notifyWeLove: true,
+    notifyFund: true,
+    notifyHealth: true,
+    healthReminders: [],
+    healthRemindersUpdated: '',
     activeChartFundIds: ['fund-main'],
     viewingSharedFund: false,
     sharedFundOwnerEmail: '',
@@ -802,6 +807,11 @@ export async function loadLocalState(password) {
         state.fundSymmetricKey = '';
         state.spouseEmail = '';
         state.googleSheetsWebhook = '';
+        state.notifyWeLove = true;
+        state.notifyFund = true;
+        state.notifyHealth = true;
+        state.healthReminders = [];
+        state.healthRemindersUpdated = '';
         state.familyFundInviteStatus = '';
         state.familyFundInviteStatusUpdated = '';
         state.spouseRole = 'wife';
@@ -875,6 +885,11 @@ export async function loadLocalState(password) {
         state.fundSymmetricKey = data.fundSymmetricKey || '';
         state.spouseEmail = data.spouseEmail || '';
         state.googleSheetsWebhook = data.googleSheetsWebhook || '';
+        state.notifyWeLove = data.notifyWeLove !== false;
+        state.notifyFund = data.notifyFund !== false;
+        state.notifyHealth = data.notifyHealth !== false;
+        state.healthReminders = data.healthReminders || [];
+        state.healthRemindersUpdated = data.healthRemindersUpdated || '';
         state.familyFundInviteStatus = data.familyFundInviteStatus || '';
         state.familyFundInviteStatusUpdated = data.familyFundInviteStatusUpdated || '';
         state.spouseRole = data.spouseRole || 'wife';
@@ -2256,10 +2271,17 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (typeof window.renderFamilyPairingSettings === 'function') {
             setTimeout(() => window.renderFamilyPairingSettings(), 50);
         }
+        if (typeof initNotificationSettingsUI === 'function') {
+            initNotificationSettingsUI();
+        }
     } else if (tabId === 'health') {
         title.innerText = 'Hồ sơ y tế';
         subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
-        renderHealthDashboard();
+        if (typeof window.switchHealthSubView === 'function') {
+            window.switchHealthSubView(window.healthCurrentSubView || 'records');
+        } else {
+            renderHealthDashboard();
+        }
     } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
         title.innerText = '';
         subtitle.innerText = '';
@@ -3085,6 +3107,16 @@ async function initializeApp() {
             showToast("Đã lưu cấu hình Google Gemini API Key thành công!", "success");
             if (typeof performSync === 'function') performSync(true);
         });
+    }
+
+    // Notification Settings listeners
+    const testNotificationBtn = document.getElementById('testNotificationBtn');
+    if (testNotificationBtn) {
+        testNotificationBtn.addEventListener('click', testNotificationWebhook);
+    }
+    const saveNotificationBtn = document.getElementById('saveNotificationBtn');
+    if (saveNotificationBtn) {
+        saveNotificationBtn.addEventListener('click', saveNotificationSettings);
     }
 
     const toggleGeminiVisBtn = document.getElementById('toggleGeminiKeyVisibility');
@@ -4479,6 +4511,82 @@ function updateMobileNavbar(tabId) {
     }
 }
 
+// ============================================================
+// NOTIFICATION SETTINGS CONTROLLER (v4.3.24)
+// ============================================================
+function initNotificationSettingsUI() {
+    const webhookInput = document.getElementById('notificationWebhookInput');
+    const notifyFundInput = document.getElementById('notifyFundCheckbox');
+    const notifyWeLoveInput = document.getElementById('notifyWeLoveCheckbox');
+    const notifyHealthInput = document.getElementById('notifyHealthCheckbox');
+    
+    if (webhookInput) {
+        webhookInput.value = state.googleSheetsWebhook || '';
+    }
+    if (notifyFundInput) {
+        notifyFundInput.checked = state.notifyFund !== false;
+    }
+    if (notifyWeLoveInput) {
+        notifyWeLoveInput.checked = state.notifyWeLove !== false;
+    }
+    if (notifyHealthInput) {
+        notifyHealthInput.checked = state.notifyHealth !== false;
+    }
+}
+
+async function saveNotificationSettings() {
+    const webhookInput = document.getElementById('notificationWebhookInput');
+    const notifyFundInput = document.getElementById('notifyFundCheckbox');
+    const notifyWeLoveInput = document.getElementById('notifyWeLoveCheckbox');
+    const notifyHealthInput = document.getElementById('notifyHealthCheckbox');
+    
+    if (webhookInput) {
+        state.googleSheetsWebhook = webhookInput.value.trim();
+    }
+    if (notifyFundInput) {
+        state.notifyFund = notifyFundInput.checked;
+    }
+    if (notifyWeLoveInput) {
+        state.notifyWeLove = notifyWeLoveInput.checked;
+    }
+    if (notifyHealthInput) {
+        state.notifyHealth = notifyHealthInput.checked;
+    }
+    
+    await saveLocalState();
+    if (sync.isConfigured() && state.user) {
+        performSync(true);
+    }
+    showToast("Lưu thiết lập thông báo thành công!");
+}
+
+async function testNotificationWebhook() {
+    const webhookInput = document.getElementById('notificationWebhookInput');
+    const webhookUrl = webhookInput ? webhookInput.value.trim() : '';
+    if (!webhookUrl) {
+        showToast("Vui lòng nhập Webhook URL trước khi test!", "error");
+        return;
+    }
+    
+    showToast("Đang gửi thử nghiệm thông báo...");
+    const textMsg = `🔔 *Thông báo thử nghiệm FamiLife* \n\n` +
+                 `Chúc mừng! Kết nối Webhook của bạn đã hoạt động chính xác. 🎉\n` +
+                 `⏰ Thời gian: ${new Date().toLocaleString('vi-VN')}\n` +
+                 `_Gửi tự động từ ứng dụng FamiLife_`;
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textMsg, content: textMsg }),
+            mode: 'no-cors'
+        });
+        showToast("Đã gửi thử nghiệm thành công! Hãy kiểm tra Telegram/Discord.");
+    } catch (err) {
+        console.error("Test Webhook failed:", err);
+        showToast("Gửi thử nghiệm thất bại: " + err.message, "error");
+    }
+}
+
 function logScrollDiagnostics() {
     console.log("[ScrollDiag] --- STARTUP DIAGNOSTICS ---");
     console.log(`[ScrollDiag] window.innerHeight: ${window.innerHeight}px`);
@@ -4668,7 +4776,7 @@ export async function clearAllStateData() {
     await saveLocalState();
 }
 
-export { logScrollDiagnostics, triggerHapticFeedback };
+export { logScrollDiagnostics, triggerHapticFeedback, initNotificationSettingsUI, saveNotificationSettings, testNotificationWebhook };
 
 
 
