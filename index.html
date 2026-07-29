@@ -65,13 +65,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.32">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.33">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.32">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.32">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.32">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.32">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.33">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.33">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.33">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.33">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -291,7 +291,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.32" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.33" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -407,7 +407,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.32" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.33" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1198,12 +1198,25 @@
                     <!-- Div bao bọc reminders view -->
                     <div id="healthRemindersView" style="display: none;">
                         <div class="health-card" style="margin-bottom: 20px;">
-                            <h4 class="health-card-title">
-                                <i data-lucide="bell" style="color: var(--health-primary);"></i>
-                                <span>Đặt lịch nhắc sức khỏe</span>
-                            </h4>
-                            <form id="healthAddReminderForm" style="text-align: left; display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
-                                <div class="health-form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                            <!-- Header gập gọn đặt lịch nhắc -->
+                            <div class="health-card-header" id="toggleReminderFormHeader" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+                                <h4 class="health-card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="bell" style="color: var(--health-primary); width: 20px; height: 20px;"></i>
+                                    <span>Đặt lịch nhắc sức khỏe</span>
+                                </h4>
+                                <div style="display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.82rem;">
+                                    <span id="toggleReminderFormText">Mở rộng</span>
+                                    <i data-lucide="chevron-down" id="toggleReminderFormIcon" style="width: 16px; height: 16px; transition: transform 0.2s;"></i>
+                                </div>
+                            </div>
+                            <form id="healthAddReminderForm" style="display: none; text-align: left; flex-direction: column; gap: 14px; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                                <div class="health-form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Dành cho thành viên</label>
+                                        <select id="healthRemProfileSelect" class="form-control health-input" style="width: 100%;">
+                                            <!-- Sẽ được điền động bằng JS -->
+                                        </select>
+                                    </div>
                                     <div class="form-group">
                                         <label class="form-label" style="font-weight: 600;">Loại nhắc nhở</label>
                                         <select id="healthRemTypeSelect" class="form-control health-input" style="width: 100%;">
@@ -1786,7 +1799,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.32" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.33" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1875,11 +1888,11 @@
                         if (savedTheme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.32';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.33';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.32';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.33';
                         }
                     })();
                 </script>
@@ -3384,9 +3397,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.32"></script>
-    <script type="module" src="src/core/app.js?v=4.3.32"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.32"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.33"></script>
+    <script type="module" src="src/core/app.js?v=4.3.33"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.33"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
