@@ -1,10 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
-    state, saveLocalState, showToast, performSync
-} from '../../core/app.js?v=4.3.22';
-import * as sync from '../../core/sync.js?v=4.3.22';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.22';
-import { updateSidebarNavVisibility } from '../thu-chi-doi-ngoai/thu-chi.js?v=4.3.22';
+    state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
+} from '../../core/app.js?v=4.3.23';
+import * as sync from '../../core/sync.js?v=4.3.23';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.23';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -68,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.22');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.23');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -110,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.22';
+        const logoPath = './logo_pwa_small.png?v=4.3.23';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -431,7 +430,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.22';
+    const logoPath = './logo_pwa_small.png?v=4.3.23';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -519,6 +518,11 @@ export async function fetchWeLoveData() {
 
 
     updateSyncStatusBadge();
+    
+    // Tự động lên lịch thông báo native Local Notifications
+    if (typeof syncLocalNotifications === 'function') {
+        syncLocalNotifications();
+    }
 }
 
 // Log a visit by the current logged in user (if they are the guest/spouse)
@@ -1303,6 +1307,14 @@ function bindAdminEvents() {
             state.weLoveRemindersUpdated = new Date().toISOString();
             await saveLocalState();
 
+            // Gửi tin nhắn tức thời qua Telegram Webhook (Giai đoạn 1)
+            sendWeLoveReminderTelegram(newReminder);
+
+            // Đồng bộ cục bộ Capacitor Local Notifications (Giai đoạn 1)
+            if (typeof syncLocalNotifications === 'function') {
+                syncLocalNotifications();
+            }
+
             if (sync.isConfigured() && state.user) {
                 performSync(true);
             }
@@ -1679,5 +1691,108 @@ function _startFPTimer() {
 
 // Expose globally for app.js switchTab to call
 window.renderFamilyPairingSettings = renderFamilyPairingSettings;
+
+// ============================================================
+// WE-LOVE NOTIFICATIONS INTEGRATION (Giai đoạn 1)
+// ============================================================
+
+// Gửi tin nhắn tức thời qua Webhook Telegram khi tạo lời nhắc mới
+async function sendWeLoveReminderTelegram(reminder) {
+    if (!state.googleSheetsWebhook) {
+        console.warn("[WeLove] Webhook URL not configured. Skip sending Telegram notification.");
+        return;
+    }
+    
+    // Tên người gửi: Chồng (Admin) hoặc Vợ (Spouse) tùy theo state
+    const senderName = state.weLoveName1 || 'Nửa kia';
+    const formattedTime = new Date(reminder.scheduledTime).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+    
+    const textMsg = `🔔 *LỜI NHẮC YÊU THƯƠNG MỚI* từ *${senderName}* ❤️\n\n` +
+                 `⏰ *Thời gian:* ${formattedTime}\n` +
+                 `📝 *Tiêu đề:* ${reminder.title}\n` +
+                 `✉️ *Nội dung:* ${reminder.message}\n\n` +
+                 `_Gửi tự động từ góc kỷ niệm FamiLife_`;
+
+    try {
+        await fetch(state.googleSheetsWebhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: textMsg, // Telegram
+                content: textMsg // Discord
+            }),
+            mode: 'no-cors'
+        });
+        console.log("[WeLove] Sent Telegram/Discord Webhook successfully");
+    } catch (err) {
+        console.error("[WeLove] Failed to send Webhook:", err);
+    }
+}
+
+// Hash helper to generate 32-bit integer IDs
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash;
+    }
+    return hash;
+}
+
+// Lên lịch Capacitor Local Notifications cho tất cả lời nhắc chưa gửi
+export async function syncLocalNotifications() {
+    if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications)) {
+        return; // Không chạy trong môi trường Capacitor hoặc thiếu plugin
+    }
+    
+    try {
+        const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+        
+        // 1. Kiểm tra và xin quyền thông báo
+        const perm = await LocalNotifications.checkPermissions();
+        if (perm.display !== 'granted') {
+            const req = await LocalNotifications.requestPermissions();
+            if (req.display !== 'granted') {
+                console.warn("[WeLove] Notification permission denied");
+                return;
+            }
+        }
+        
+        // 2. Hủy các lịch nhắc cũ của app WeLove để tránh trùng lặp
+        const pending = await LocalNotifications.getPending();
+        if (pending.notifications && pending.notifications.length > 0) {
+            await LocalNotifications.cancel({ notifications: pending.notifications });
+        }
+        
+        // 3. Lên lịch cho các lời nhắc chưa gửi ở tương lai
+        const now = new Date();
+        const listToSchedule = [];
+        const remindersList = state.weLoveReminders || [];
+        
+        remindersList.forEach((r, idx) => {
+            if (r.isSent) return;
+            const schedTime = new Date(r.scheduledTime);
+            if (schedTime > now) {
+                const id = Math.abs(hashCode(r.scheduledTime || r.id || idx.toString())) % 2147483647;
+                listToSchedule.push({
+                    title: r.title,
+                    body: r.message,
+                    id: id,
+                    schedule: { at: schedTime },
+                    smallIcon: 'res://drawable/push_icon',
+                    sound: 'res://raw/beep.wav'
+                });
+            }
+        });
+        
+        if (listToSchedule.length > 0) {
+            await LocalNotifications.schedule({ notifications: listToSchedule });
+            console.log(`[WeLove] Scheduled ${listToSchedule.length} local notifications successfully.`);
+        }
+    } catch (err) {
+        console.error("[WeLove] syncLocalNotifications error:", err);
+    }
+}
 
 

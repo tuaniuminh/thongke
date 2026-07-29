@@ -1,18 +1,18 @@
 import { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
-    updateUserBadge, updateSidebarNavVisibility, updateHomeLayoutUI,
+    updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.22';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.22';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.22';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.22';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.23';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.23';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.23';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.23';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.22';
-import * as sync from './sync.js?v=4.3.22';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.22';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.22';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.23';
+import * as sync from './sync.js?v=4.3.23';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.23';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.23';
 
-const APP_VERSION = '4.3.22';
+const APP_VERSION = '4.3.23';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4092,7 +4092,7 @@ function updateLastBackupDisplay() {
 
 window.renderTcManagement = renderTcManagement;
 
-export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString };
+export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 
@@ -4101,6 +4101,383 @@ export {
     generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey,
     handleFullBackup, handleFullRestore, updateLastBackupDisplay
 };
+
+// ============================================================
+// UI NAVIGATION / LAYOUT CONTROLLER (Moved from thu-chi.js)
+// ============================================================
+function updateSidebarNavVisibility(tabId) {
+    const sidebarLogoText = document.getElementById('sidebarLogoText');
+    const sidebarLogoImg = document.getElementById('sidebarLogoImg');
+    
+    if (sidebarLogoImg) {
+        const currentLogoSrc = state.theme === 'light' 
+            ? `src/assets/images/icon-light.png?v=${APP_VERSION}` 
+            : `src/assets/images/icon.png?v=${APP_VERSION}`;
+        sidebarLogoImg.src = currentLogoSrc;
+    }
+    
+    if (sidebarLogoText) {
+        if (tabId === 'health') {
+            sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
+        } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+            sidebarLogoText.innerText = 'Kỷ Niệm Tình Yêu';
+        } else if (tabId === 'settings') {
+            sidebarLogoText.innerText = 'Cài đặt';
+        } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'tc-management') {
+            sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
+        } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
+            sidebarLogoText.innerText = 'Quỹ Gia Đình';
+        } else {
+            sidebarLogoText.innerText = 'FamiLife';
+        }
+    }
+
+    const navItems = {
+        home: document.querySelector('[data-nav="home"]'),
+        welove: document.querySelector('[data-nav="welove"]'),
+        weloveAdmin: document.querySelector('[data-nav="welove-admin"]'),
+        weloveSettings: document.querySelector('[data-nav="welove-settings"]'),
+        dashboard: document.querySelector('[data-nav="dashboard"]'),
+        received: document.querySelector('[data-nav="received"]'),
+        sent: document.querySelector('[data-nav="sent"]'),
+        settings: document.querySelector('[data-nav="settings"]'),
+        financePortal: document.querySelector('[data-nav="finance-portal"]'),
+        health: document.querySelector('[data-nav="health"]'),
+        fund: document.querySelector('[data-nav="fund"]'),
+        fundHistory: document.querySelector('[data-nav="fund-history"]'),
+        fundManagement: document.querySelector('[data-nav="fund-management"]'),
+        tcManagement: document.querySelector('[data-nav="tc-management"]')
+    };
+
+    if (!navItems.health) return;
+
+    if (tabId === 'health') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
+    } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'block';
+        
+        // Ẩn tab Lịch nhắc (welove-admin) và Quản lý (welove-settings) cho tài khoản Vợ (Spouse)
+        if (state.viewingSharedFund) {
+            if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+            if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+        } else {
+            if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'block';
+            if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'block';
+        }
+        
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
+    } else if (tabId === 'settings') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+        
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
+    } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
+        if (navItems.received) navItems.received.style.display = 'block';
+        if (navItems.sent) navItems.sent.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+        
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+    } else if (tabId === 'fund' || tabId === 'fund-management' || tabId === 'fund-history') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+
+        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
+        if (navItems.received) navItems.received.style.display = 'none';
+        if (navItems.sent) navItems.sent.style.display = 'none';
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
+    } else if (tabId === 'tc-management') {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
+        if (navItems.received) navItems.received.style.display = 'block';
+        if (navItems.sent) navItems.sent.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+
+        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.fund) navItems.fund.style.display = 'none';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
+    } else {
+        if (navItems.home) navItems.home.style.display = 'block';
+        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
+        if (navItems.received) navItems.received.style.display = 'block';
+        if (navItems.sent) navItems.sent.style.display = 'block';
+        if (navItems.settings) navItems.settings.style.display = 'block';
+        if (navItems.health) navItems.health.style.display = 'block';
+        if (navItems.fund) navItems.fund.style.display = 'block';
+        if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
+        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
+        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
+        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
+        if (navItems.welove) navItems.welove.style.display = 'none';
+        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
+        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+    }
+    
+    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundHistory', 'fundManagement', 'tcManagement'];
+    lockableNavKeys.forEach(key => {
+        const item = navItems[key];
+        if (item) {
+            item.classList.remove('nav-locked');
+        }
+    });
+    
+    updateMobileNavbar(tabId);
+}
+
+function updateMobileNavbar(tabId) {
+    const mobileNavbar = document.getElementById('mobileNavbar');
+    if (!mobileNavbar) return;
+
+    const pageTitleBlock = document.querySelector('.top-header .page-title');
+    const mobileHomeBtn = document.getElementById('mobileHomeBtn');
+
+    mobileNavbar.classList.remove('two-line');
+    if (pageTitleBlock) {
+        pageTitleBlock.classList.remove('mobile-hide-title');
+    }
+    if (mobileHomeBtn) {
+        mobileHomeBtn.style.setProperty('display', 'none', 'important');
+    }
+    mobileNavbar.style.removeProperty('display');
+
+    if (tabId === 'settings') {
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+            
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
+                <div class="mobile-navbar-logo">
+                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                </div>
+                <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài đặt</span>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+        `;
+    } else if (tabId === 'health') {
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
+                <div class="mobile-navbar-logo">
+                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                </div>
+                <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+        `;
+    } else if (tabId === 'fund' || tabId === 'fund-management' || tabId === 'fund-history') {
+        mobileNavbar.classList.add('two-line');
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div onclick="switchTab('fund')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Quỹ Gia Đình</span>
+                </div>
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only ${tabId === 'fund' ? 'active' : ''}" onclick="switchTab('fund')" title="Tổng quan">
+                    Tổng quan
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'fund-history' ? 'active' : ''}" onclick="switchTab('fund-history')" title="Nhật ký">
+                    Nhật ký
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'fund-management' ? 'active' : ''}" onclick="switchTab('fund-management')" title="Quản lý">
+                    Quản lý
+                </button>
+            </div>
+        `;
+    } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+        const isSpouse = !!state.viewingSharedFund;
+        if (!isSpouse) {
+            mobileNavbar.classList.add('two-line');
+        }
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+            
+        const curSubView = window.weLoveCurrentSubView || 'settings';
+
+        if (isSpouse) {
+            mobileNavbar.innerHTML = `
+                <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
+                </div>
+                <div class="mobile-navbar-right" id="mobileNavbarNav">
+                    <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                        <i data-lucide="home"></i>
+                        <span class="btn-label">Trang chủ</span>
+                    </button>
+                </div>
+            `;
+        } else {
+            mobileNavbar.innerHTML = `
+                <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                    <div onclick="switchTab('welove')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <div class="mobile-navbar-logo">
+                            <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                        </div>
+                        <span class="mobile-navbar-title" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
+                    </div>
+                    <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                        <i data-lucide="home"></i>
+                        <span class="btn-label">Trang chủ</span>
+                    </button>
+                </div>
+                <div class="mobile-navbar-right" id="mobileNavbarNav">
+                    <button class="nav-icon-btn text-only ${curSubView === 'memory' ? 'active' : ''}" onclick="window.switchWeLoveSubView('memory')" title="Kỷ niệm" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
+                        Kỷ niệm
+                    </button>
+                    <button class="nav-icon-btn text-only ${curSubView === 'admin' ? 'active' : ''}" onclick="window.switchWeLoveSubView('admin')" title="Lịch nhắc" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
+                        Lịch nhắc
+                    </button>
+                    <button class="nav-icon-btn text-only ${curSubView === 'settings' ? 'active' : ''}" onclick="window.switchWeLoveSubView('settings')" title="Quản lý">
+                        Quản lý
+                    </button>
+                </div>
+            `;
+        }
+    } else {
+        mobileNavbar.classList.add('two-line');
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div onclick="switchTab('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
+                </div>
+                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only ${tabId === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')" title="Tổng quan">
+                    Tổng quan
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'received' ? 'active' : ''}" onclick="switchTab('received')" title="Tiền tôi Nhận">
+                    Tiền tôi Nhận
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'sent' ? 'active' : ''}" onclick="switchTab('sent')" title="Tiền tôi Mừng">
+                    Tiền tôi Mừng
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'tc-management' ? 'active' : ''}" onclick="switchTab('tc-management')" title="Quản lý" style="display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px;">
+                    <i data-lucide="sliders" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
 
 function logScrollDiagnostics() {
     console.log("[ScrollDiag] --- STARTUP DIAGNOSTICS ---");
