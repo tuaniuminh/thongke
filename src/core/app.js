@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.28';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.28';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.28';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.28';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.29';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.29';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.29';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.29';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.28';
-import * as sync from './sync.js?v=4.3.28';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.28';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.28';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.29';
+import * as sync from './sync.js?v=4.3.29';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.29';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.29';
 
-const APP_VERSION = '4.3.28';
+const APP_VERSION = '4.3.29';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2875,6 +2875,18 @@ async function initializeApp() {
     }
     updateMobileViewUI();
 
+    // Helper to hide splash screen with transition
+    function hideSplashScreen() {
+        const splash = document.getElementById('appSplashOverlay');
+        if (splash) {
+            splash.style.opacity = '0';
+            splash.style.visibility = 'hidden';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 400);
+        }
+    }
+
     // Check if database already exists in LocalStorage
     const hasDb = localStorage.getItem('gift_ledger_db') !== null;
     
@@ -2890,6 +2902,7 @@ async function initializeApp() {
                 autoUnlocked = true;
                 
                 enterApp();
+                hideSplashScreen();
                 
                 const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
                 if (rememberCheckbox) rememberCheckbox.checked = true;
@@ -2905,6 +2918,7 @@ async function initializeApp() {
         if (!autoUnlocked) {
             document.getElementById('setupWizardOverlay').style.display = 'none';
             document.getElementById('unlockOverlay').style.display = 'flex';
+            hideSplashScreen();
             
             const rememberCheckbox = document.getElementById('rememberUnlockCheckbox');
             if (rememberCheckbox) rememberCheckbox.checked = true;
@@ -2932,6 +2946,7 @@ async function initializeApp() {
     } else {
         document.getElementById('setupWizardOverlay').style.display = 'flex';
         document.getElementById('unlockOverlay').style.display = 'none';
+        hideSplashScreen();
         
         // Auto select mode for setup wizard based on device type (desktop vs mobile)
         const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
