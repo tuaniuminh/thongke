@@ -2172,6 +2172,54 @@ function enterApp() {
     renderAll();
 }
 
+window.navigateToTab = function(tabId) {
+    if (state.viewingSharedFund && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
+        tabId = 'welove';
+    }
+
+    const currentTab = state.activeTab || 'home';
+    if (currentTab === tabId) return;
+
+    const hash = tabIdToHash[tabId] || tabId;
+    const finalHash = hash.startsWith('#') ? hash : '#' + hash;
+
+    function getTabGroup(tId) {
+        if (['dashboard', 'received', 'sent', 'tc-management'].includes(tId)) {
+            return 'thu-chi';
+        }
+        if (['fund', 'fund-history', 'fund-management'].includes(tId)) {
+            return 'quy-gia-dinh';
+        }
+        if (['health', 'health-reminders'].includes(tId)) {
+            return 'ho-so-y-te';
+        }
+        if (['welove', 'welove-admin', 'welove-settings'].includes(tId)) {
+            return 'we-love';
+        }
+        return 'other';
+    }
+
+    const currentGroup = getTabGroup(currentTab);
+    const targetGroup = getTabGroup(tabId);
+
+    const isSameGroup = (currentGroup === targetGroup && currentGroup !== 'other');
+    const isGoingHome = (tabId === 'home' || tabId === 'trangchu');
+
+    if (window.history && window.history.pushState) {
+        try {
+            if (isSameGroup || isGoingHome) {
+                window.history.replaceState({ tabId: tabId }, '', finalHash);
+            } else {
+                window.history.pushState({ tabId: tabId }, '', finalHash);
+            }
+        } catch (err) {
+            console.warn("[Router] Navigation state update failed:", err);
+        }
+    }
+
+    switchTab(tabId, false);
+};
+
 function handleHashRoute() {
     const appLayout = document.getElementById('appLayout');
     const homeLayout = document.getElementById('homeLayout');
@@ -3194,8 +3242,7 @@ async function initializeApp() {
                 return;
             }
             const tabId = link.getAttribute('data-tab');
-            const hash = tabIdToHash[tabId] || tabId;
-            window.location.hash = hash;
+            window.navigateToTab(tabId);
         });
     });
     
@@ -3349,7 +3396,7 @@ async function initializeApp() {
                 }
                 
                 // Redirect to dashboard
-                window.location.hash = "#tongquan";
+                window.navigateToTab('dashboard');
             } else {
                 showToast("Mã PIN xác nhận không đúng. Đã hủy bỏ xóa dữ liệu!", "error");
             }
@@ -4394,7 +4441,7 @@ function updateMobileNavbar(tabId) {
                 <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài đặt</span>
             </div>
             <div class="mobile-navbar-right" id="mobileNavbarNav">
-                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
                 </button>
@@ -4418,7 +4465,7 @@ function updateMobileNavbar(tabId) {
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
                 </div>
-                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
                 </button>
@@ -4450,7 +4497,7 @@ function updateMobileNavbar(tabId) {
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Quỹ Gia Đình</span>
                 </div>
-                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
                 </button>
@@ -4491,7 +4538,7 @@ function updateMobileNavbar(tabId) {
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
                 </div>
                 <div class="mobile-navbar-right" id="mobileNavbarNav">
-                    <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                         <i data-lucide="home"></i>
                         <span class="btn-label">Trang chủ</span>
                     </button>
@@ -4506,7 +4553,7 @@ function updateMobileNavbar(tabId) {
                         </div>
                         <span class="mobile-navbar-title" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
                     </div>
-                    <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                    <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                         <i data-lucide="home"></i>
                         <span class="btn-label">Trang chủ</span>
                     </button>
@@ -4539,7 +4586,7 @@ function updateMobileNavbar(tabId) {
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
-                <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
                 </button>

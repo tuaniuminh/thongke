@@ -4893,14 +4893,17 @@ window.healthCurrentSubView = 'records';
 window.switchHealthSubView = function(subView) {
     const recordsView = document.getElementById('healthRecordsView');
     const remindersView = document.getElementById('healthRemindersView');
+    const selectorCard = document.getElementById('healthProfileSelectorCard');
     
     if (subView === 'records') {
         if (recordsView) recordsView.style.display = 'block';
         if (remindersView) remindersView.style.display = 'none';
+        if (selectorCard) selectorCard.style.display = 'flex';
         renderHealthDashboard();
     } else {
         if (recordsView) recordsView.style.display = 'none';
         if (remindersView) remindersView.style.display = 'block';
+        if (selectorCard) selectorCard.style.display = 'none';
         renderHealthReminders();
     }
     
