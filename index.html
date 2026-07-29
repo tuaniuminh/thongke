@@ -65,13 +65,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.29">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.31">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.29">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.29">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.29">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.29">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.31">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.31">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.31">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.31">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -136,20 +136,20 @@
         }
         
         /* Light Theme Styles */
-        html[data-theme="light"] #appSplashOverlay {
+        html.light-mode #appSplashOverlay {
             background: #f8fafc;
         }
-        html[data-theme="light"] #appSplashOverlay h2 {
+        html.light-mode #appSplashOverlay h2 {
             color: #0f172a;
         }
-        html[data-theme="light"] #appSplashOverlay p {
+        html.light-mode #appSplashOverlay p {
             color: #64748b;
         }
-        html[data-theme="light"] #appSplashOverlay img {
+        html.light-mode #appSplashOverlay img {
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
             border: 2px solid rgba(15, 23, 42, 0.05);
         }
-        html[data-theme="light"] #appSplashOverlay .splash-spinner {
+        html.light-mode #appSplashOverlay .splash-spinner {
             border: 3px solid rgba(15, 23, 42, 0.06);
         }
     </style>
@@ -291,7 +291,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.29" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.31" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -407,7 +407,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.29" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.31" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1786,7 +1786,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.29" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.31" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1861,15 +1861,22 @@
     <!-- Script nhận diện và đồng bộ giao diện cho Splash Screen -->
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('gift_ledger_theme') || 'dark';
+            let savedTheme = 'dark';
+            try {
+                savedTheme = localStorage.getItem('gift_ledger_theme') || 'dark';
+            } catch (e) {
+                console.warn("localStorage access error:", e);
+            }
             if (savedTheme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.classList.add('light-mode');
+                document.documentElement.style.colorScheme = 'light';
                 window.addEventListener('DOMContentLoaded', () => {
                     const img = document.getElementById('splashLogoImg');
-                    if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.29';
+                    if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.31';
                 });
             } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
+                document.documentElement.classList.remove('light-mode');
+                document.documentElement.style.colorScheme = 'dark';
             }
         })();
     </script>
@@ -1878,7 +1885,7 @@
     <div class="setup-overlay" id="appSplashOverlay">
         <div style="text-align: center;">
             <div class="splash-logo" style="margin-bottom: 24px; position: relative;">
-                <img src="src/assets/images/icon.png?v=4.3.29" alt="FamiLife" id="splashLogoImg">
+                <img src="src/assets/images/icon.png?v=4.3.31" alt="FamiLife" id="splashLogoImg">
             </div>
             <h2>FamiLife</h2>
             <p>Quản lý tài chính & Sức khỏe gia đình</p>
@@ -3380,9 +3387,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.29"></script>
-    <script type="module" src="src/core/app.js?v=4.3.29"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.29"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.31"></script>
+    <script type="module" src="src/core/app.js?v=4.3.31"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.31"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
