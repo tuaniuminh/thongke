@@ -65,13 +65,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.25">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.26">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.25">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.25">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.25">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.25">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.26">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.26">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.26">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.26">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -223,7 +223,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.25" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.26" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -292,6 +292,12 @@
                         <span>Hồ sơ y tế</span>
                     </a>
                 </li>
+                <li class="nav-item" data-nav="health-reminders" style="display: none;">
+                    <a class="nav-link" data-tab="health-reminders">
+                        <i data-lucide="bell"></i>
+                        <span>Lịch nhắc y tế</span>
+                    </a>
+                </li>
                 <li class="nav-item" data-nav="fund" style="display: none;">
                     <a class="nav-link" data-tab="fund">
                         <i data-lucide="layout-dashboard"></i>
@@ -333,7 +339,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.25" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.26" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -934,16 +940,6 @@
                                 <i data-lucide="file-down" style="width: 14px; height: 14px;"></i> Xuất PDF
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Health Sub-views Selector -->
-                    <div class="health-subview-nav" style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; overflow-x: auto; white-space: nowrap;">
-                        <button type="button" class="health-nav-btn active" id="healthSubViewRecordsBtn" onclick="window.switchHealthSubView('records')" style="background: transparent; border: none; color: var(--health-primary); font-weight: 700; padding: 8px 16px; cursor: pointer; border-bottom: 2px solid var(--health-primary); font-size: 0.9rem; transition: all 0.2s;">
-                            🩺 Chỉ số & Hồ sơ y tế
-                        </button>
-                        <button type="button" class="health-nav-btn" id="healthSubViewRemindersBtn" onclick="window.switchHealthSubView('reminders')" style="background: transparent; border: none; color: var(--text-secondary); font-weight: 500; padding: 8px 16px; cursor: pointer; font-size: 0.9rem; border-bottom: 2px solid transparent; transition: all 0.2s;">
-                            ⏰ Lịch nhắc sức khỏe
-                        </button>
                     </div>
 
                     <!-- Div bao bọc records view -->
@@ -1722,7 +1718,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.25" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.26" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -3288,9 +3284,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.25"></script>
-    <script type="module" src="src/core/app.js?v=4.3.25"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.25"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.26"></script>
+    <script type="module" src="src/core/app.js?v=4.3.26"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.26"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>

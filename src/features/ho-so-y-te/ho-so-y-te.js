@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.3.25';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.25';
+} from '../../core/app.js?v=4.3.26';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.26';
 
 let healthTrendChartInstance = null;
 
@@ -929,7 +929,7 @@ window.handleRemoveIndicatorRow = handleRemoveIndicatorRow;
 
 
 function renderHealthDashboard() {
-    if (window.healthCurrentSubView === 'reminders') {
+    if (state.activeTab === 'health-reminders') {
         renderHealthReminders();
         return;
     }
@@ -4873,42 +4873,14 @@ function updateIndicatorProgress() {
 window.healthCurrentSubView = 'records';
 
 window.switchHealthSubView = function(subView) {
-    window.healthCurrentSubView = subView;
-    
-    const recordsBtn = document.getElementById('healthSubViewRecordsBtn');
-    const remindersBtn = document.getElementById('healthSubViewRemindersBtn');
     const recordsView = document.getElementById('healthRecordsView');
     const remindersView = document.getElementById('healthRemindersView');
     
     if (subView === 'records') {
-        if (recordsBtn) {
-            recordsBtn.classList.add('active');
-            recordsBtn.style.color = 'var(--health-primary)';
-            recordsBtn.style.borderBottom = '2px solid var(--health-primary)';
-            recordsBtn.style.fontWeight = '700';
-        }
-        if (remindersBtn) {
-            remindersBtn.classList.remove('active');
-            remindersBtn.style.color = 'var(--text-secondary)';
-            remindersBtn.style.borderBottom = '2px solid transparent';
-            remindersBtn.style.fontWeight = '500';
-        }
         if (recordsView) recordsView.style.display = 'block';
         if (remindersView) remindersView.style.display = 'none';
         renderHealthDashboard();
     } else {
-        if (recordsBtn) {
-            recordsBtn.classList.remove('active');
-            recordsBtn.style.color = 'var(--text-secondary)';
-            recordsBtn.style.borderBottom = '2px solid transparent';
-            recordsBtn.style.fontWeight = '500';
-        }
-        if (remindersBtn) {
-            remindersBtn.classList.add('active');
-            remindersBtn.style.color = 'var(--health-primary)';
-            remindersBtn.style.borderBottom = '2px solid var(--health-primary)';
-            remindersBtn.style.fontWeight = '700';
-        }
         if (recordsView) recordsView.style.display = 'none';
         if (remindersView) remindersView.style.display = 'block';
         renderHealthReminders();

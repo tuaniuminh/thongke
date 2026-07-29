@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.25';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.25';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.25';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.25';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.26';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.26';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.26';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.26';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.25';
-import * as sync from './sync.js?v=4.3.25';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.25';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.25';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.26';
+import * as sync from './sync.js?v=4.3.26';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.26';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.26';
 
-const APP_VERSION = '4.3.25';
+const APP_VERSION = '4.3.26';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2076,6 +2076,8 @@ const tabHashMapping = {
     'settings': 'settings',
     'hosoyte': 'health',
     'health': 'health',
+    'lichnhacyte': 'health-reminders',
+    'health-reminders': 'health-reminders',
     'quy-gia-dinh': 'fund',
     'fund': 'fund',
     'nhat-ky-quy': 'fund-history',
@@ -2099,6 +2101,7 @@ const tabIdToHash = {
     'sent': 'tientoimung',
     'settings': 'caidat',
     'health': 'hosoyte',
+    'health-reminders': 'lichnhacyte',
     'fund': 'quy-gia-dinh',
     'fund-history': 'nhat-ky-quy',
     'fund-management': 'quan-ly-quy',
@@ -2218,7 +2221,10 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     
     // Show/Hide Panels
     document.querySelectorAll('.tab-panel').forEach(panel => {
-        if (panel.id === `tab-${tabId}` || (panel.id === 'tab-welove' && (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings'))) {
+        if (panel.id === `tab-${tabId}` 
+            || (panel.id === 'tab-welove' && (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings'))
+            || (panel.id === 'tab-health' && (tabId === 'health' || tabId === 'health-reminders'))
+        ) {
             panel.style.display = 'block';
         } else {
             panel.style.display = 'none';
@@ -2239,7 +2245,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     // Toggle sticky class on sidebar for desktop when in health tab
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) {
-        if (tabId === 'health') {
+        if (tabId === 'health' || tabId === 'health-reminders') {
             sidebar.classList.add('non-sticky-on-desktop');
         } else {
             sidebar.classList.remove('non-sticky-on-desktop');
@@ -2274,11 +2280,13 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (typeof initNotificationSettingsUI === 'function') {
             initNotificationSettingsUI();
         }
-    } else if (tabId === 'health') {
-        title.innerText = 'Hồ sơ y tế';
-        subtitle.innerText = 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner';
+    } else if (tabId === 'health' || tabId === 'health-reminders') {
+        title.innerText = tabId === 'health' ? 'Hồ sơ y tế' : 'Lịch nhắc y tế';
+        subtitle.innerText = tabId === 'health' 
+            ? 'Theo dõi chỉ số sức khỏe, kết quả xét nghiệm qua AI Scanner' 
+            : 'Quản lý và đặt lịch nhắc nhở y tế định kỳ/tùy chỉnh';
         if (typeof window.switchHealthSubView === 'function') {
-            window.switchHealthSubView(window.healthCurrentSubView || 'records');
+            window.switchHealthSubView(tabId === 'health' ? 'records' : 'reminders');
         } else {
             renderHealthDashboard();
         }
@@ -4149,7 +4157,7 @@ function updateSidebarNavVisibility(tabId) {
     }
     
     if (sidebarLogoText) {
-        if (tabId === 'health') {
+        if (tabId === 'health' || tabId === 'health-reminders') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
         } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
             sidebarLogoText.innerText = 'Kỷ Niệm Tình Yêu';
@@ -4175,6 +4183,7 @@ function updateSidebarNavVisibility(tabId) {
         settings: document.querySelector('[data-nav="settings"]'),
         financePortal: document.querySelector('[data-nav="finance-portal"]'),
         health: document.querySelector('[data-nav="health"]'),
+        healthReminders: document.querySelector('[data-nav="health-reminders"]'),
         fund: document.querySelector('[data-nav="fund"]'),
         fundHistory: document.querySelector('[data-nav="fund-history"]'),
         fundManagement: document.querySelector('[data-nav="fund-management"]'),
@@ -4183,7 +4192,7 @@ function updateSidebarNavVisibility(tabId) {
 
     if (!navItems.health) return;
 
-    if (tabId === 'health') {
+    if (tabId === 'health' || tabId === 'health-reminders') {
         if (navItems.home) navItems.home.style.display = 'block';
         if (navItems.welove) navItems.welove.style.display = 'none';
         if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
@@ -4194,7 +4203,8 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.received) navItems.received.style.display = 'none';
         if (navItems.sent) navItems.sent.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.health) navItems.health.style.display = 'block';
+        if (navItems.healthReminders) navItems.healthReminders.style.display = 'block';
         if (navItems.fund) navItems.fund.style.display = 'none';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
@@ -4219,6 +4229,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.sent) navItems.sent.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
@@ -4231,6 +4242,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
         
         if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
         if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
@@ -4251,6 +4263,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
         
         if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
@@ -4269,6 +4282,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.received) navItems.received.style.display = 'none';
         if (navItems.sent) navItems.sent.style.display = 'none';
         if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
     } else if (tabId === 'tc-management') {
@@ -4283,6 +4297,7 @@ function updateSidebarNavVisibility(tabId) {
         if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
 
         if (navItems.health) navItems.health.style.display = 'none';
+        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
         if (navItems.financePortal) navItems.financePortal.style.display = 'none';
         if (navItems.fund) navItems.fund.style.display = 'none';
         if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
@@ -4354,7 +4369,8 @@ function updateMobileNavbar(tabId) {
                 </button>
             </div>
         `;
-    } else if (tabId === 'health') {
+    } else if (tabId === 'health' || tabId === 'health-reminders') {
+        mobileNavbar.classList.add('two-line');
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');
         }
@@ -4364,16 +4380,24 @@ function updateMobileNavbar(tabId) {
             : 'src/assets/images/icon.png';
 
         mobileNavbar.innerHTML = `
-            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
-                <div class="mobile-navbar-logo">
-                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div onclick="switchTab('health')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
                 </div>
-                <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
-            </div>
-            <div class="mobile-navbar-right" id="mobileNavbarNav">
                 <button class="nav-icon-btn text-below" onclick="window.location.hash = 'trangchu'" title="Trang chủ">
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only ${tabId === 'health' ? 'active' : ''}" onclick="switchTab('health')" title="Hồ sơ & Chỉ số">
+                    Hồ sơ & Chỉ số
+                </button>
+                <button class="nav-icon-btn text-only ${tabId === 'health-reminders' ? 'active' : ''}" onclick="switchTab('health-reminders')" title="Lịch nhắc">
+                    Lịch nhắc
                 </button>
             </div>
         `;
