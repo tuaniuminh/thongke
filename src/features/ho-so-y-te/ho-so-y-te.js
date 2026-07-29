@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.3.24';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.24';
+} from '../../core/app.js?v=4.3.25';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.25';
 
 let healthTrendChartInstance = null;
 
@@ -5233,7 +5233,7 @@ async function sendHealthReminderTelegram(reminder) {
     }
 }
 
-export async function syncHealthLocalNotifications() {
+async function syncHealthLocalNotifications() {
     if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications)) {
         return;
     }
