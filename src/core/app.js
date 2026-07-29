@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.33';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.33';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.33';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.33';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.35';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.35';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.35';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.35';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.33';
-import * as sync from './sync.js?v=4.3.33';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.33';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.33';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.35';
+import * as sync from './sync.js?v=4.3.35';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.35';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.35';
 
-const APP_VERSION = '4.3.33';
+const APP_VERSION = '4.3.35';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -578,8 +578,21 @@ window.showPrompt = function(message, defaultValue = "", title = "Nhập thông 
 };
 
 // Force reload app by clearing service worker & cache to bust PWA caching
-async function forceReloadApp() {
+async function forceReloadApp(newVersion) {
     showToast("Đang xóa bộ nhớ đệm & tải lại...", "info");
+    let targetVersion = newVersion;
+    try {
+        if (!targetVersion) {
+            const response = await fetch(`version.json?t=${Date.now()}`);
+            if (response.ok) {
+                const data = await response.json();
+                targetVersion = data.version;
+            }
+        }
+    } catch (e) {
+        console.warn("Could not fetch target version:", e);
+    }
+    
     try {
         if ('caches' in window) {
             const keys = await caches.keys();
@@ -596,7 +609,10 @@ async function forceReloadApp() {
     } catch (err) {
         console.error("Cache clear failed:", err);
     }
-    window.location.reload(true);
+    
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', targetVersion || APP_VERSION || Date.now());
+    window.location.href = url.toString();
 }
 
 // Show Update Notification (Persistent Toast with Action)
@@ -626,7 +642,7 @@ function showUpdateNotification(newVersion) {
     
     // Add click handler to reload
     toast.addEventListener('click', async () => {
-        await forceReloadApp();
+        await forceReloadApp(newVersion);
     });
     
     container.appendChild(toast);
@@ -647,7 +663,7 @@ async function checkAppVersion(isManual = false) {
                 if (isManual) {
                     showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
                     setTimeout(async () => {
-                        await forceReloadApp();
+                        await forceReloadApp(data.version);
                     }, 1000);
                 } else {
                     showUpdateNotification(data.version);
