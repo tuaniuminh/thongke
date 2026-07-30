@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.47';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.47';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.47';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.47';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.49';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.49';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.49';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.49';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.47';
-import * as sync from './sync.js?v=4.3.47';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.47';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.47';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.49';
+import * as sync from './sync.js?v=4.3.49';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.49';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.49';
 
-const APP_VERSION = '4.3.47';
+const APP_VERSION = '4.3.49';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -698,14 +698,25 @@ async function checkAppVersion(isManual = false) {
     // Tải thông tin phiên bản mới nhất từ version.json online trên GitHub
     let latestVersion = null;
     try {
-        // Luôn fetch online để Desktop PWA và Desktop App đồng bộ lấy được version.json mới nhất
-        const response = await fetch(`https://raw.githubusercontent.com/tuaniuminh/thongke/main/version.json?t=${Date.now()}`);
-        if (response.ok) {
-            const data = await response.json();
-            latestVersion = data.version;
+        if (isTauri && window.__TAURI__ && window.__TAURI__.http) {
+            // Dùng Tauri HTTP Client để bypass CORS của WebView
+            const { getClient } = window.__TAURI__.http;
+            const client = await getClient();
+            const response = await client.get(`https://raw.githubusercontent.com/tuaniuminh/thongke/main/version.json?t=${Date.now()}`);
+            if (response.status === 200) {
+                const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+                latestVersion = data.version;
+            }
+        } else {
+            // Dùng window.fetch thông thường cho PWA Web
+            const response = await fetch(`https://raw.githubusercontent.com/tuaniuminh/thongke/main/version.json?t=${Date.now()}`);
+            if (response.ok) {
+                const data = await response.json();
+                latestVersion = data.version;
+            }
         }
     } catch (err) {
-        console.warn("Could not fetch online version.json:", err);
+        console.warn("Could not fetch online version.json via primary method:", err);
         // Fallback local fetch nếu offline hoặc lỗi mạng
         try {
             const response = await fetch(`version.json?t=${Date.now()}`);
@@ -2923,6 +2934,20 @@ async function initializeApp() {
     // Detect iOS/Capacitor native environment vs. web PWA
     const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
                         window.location.protocol === 'capacitor:';
+
+    // Detect Android native environment via Capacitor
+    const isAndroidNative = window.Capacitor && window.Capacitor.getPlatform() === 'android';
+    if (isAndroidNative) {
+        document.body.classList.add('android-device');
+        if (window.Capacitor.Plugins && window.Capacitor.Plugins.TextZoom) {
+            try {
+                await window.Capacitor.Plugins.TextZoom.set({ value: 1.0 });
+                console.log('Successfully set Android WebView text zoom to 1.0');
+            } catch (e) {
+                console.error('Failed to set text zoom via Capacitor:', e);
+            }
+        }
+    }
 
     if (isIOSNative) {
         document.body.classList.add('ios-device');

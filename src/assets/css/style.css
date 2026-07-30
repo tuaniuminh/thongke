@@ -4388,3 +4388,10 @@ body.light-mode.active-tab-tc-management {
         padding: 10px 14px !important;
     }
 }
+
+/* Android APK Specific Font-Scaling Resets */
+body.android-device, body.android-device * {
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+}
+
