@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.50';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.50';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.50';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.50';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.52';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.52';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.52';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.52';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.50';
-import * as sync from './sync.js?v=4.3.50';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.50';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.50';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.52';
+import * as sync from './sync.js?v=4.3.52';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.52';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.52';
 
-const APP_VERSION = '4.3.50';
+const APP_VERSION = '4.3.52';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2982,6 +2982,42 @@ async function initializeApp() {
             } catch (e) {
                 console.error('Failed to set text zoom via Capacitor:', e);
             }
+        }
+        
+        // Setup Android hardware back button handler
+        if (window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.addListener('backButton', () => {
+                // 1. Check if there are active modals
+                const activeModal = document.querySelector('.modal-overlay.active, .modal.active');
+                if (activeModal) {
+                    if (window.closeModal) {
+                        window.closeModal(activeModal.id);
+                    } else {
+                        activeModal.classList.remove('active');
+                    }
+                    console.log('[Back Button] Closed active modal:', activeModal.id);
+                    return;
+                }
+                
+                // 2. Check if we have tab navigation history
+                if (state.tabHistory && state.tabHistory.length > 0) {
+                    const prevTab = state.tabHistory.pop();
+                    console.log('[Back Button] Navigating to previous tab:', prevTab);
+                    switchTab(prevTab, true, false); // pushHistory = false to avoid push loop
+                    return;
+                }
+                
+                // 3. Check if we are not on home tab (fallback)
+                if (state.activeTab && state.activeTab !== 'home') {
+                    console.log('[Back Button] Navigating to home');
+                    switchTab('home');
+                    return;
+                }
+                
+                // 4. Otherwise, exit the app
+                console.log('[Back Button] Exiting app');
+                window.Capacitor.Plugins.App.exitApp();
+            });
         }
     }
 
