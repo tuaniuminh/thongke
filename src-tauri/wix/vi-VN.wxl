@@ -11,13 +11,13 @@
   <String Id="WixUINo">Không</String>
 
   <!-- Welcome Dialog -->
-  <String Id="WelcomeDlgTitle">{\WixUI_Font_Bigger}Chào mừng đến với trình cài đặt [ProductName]</String>
-  <String Id="WelcomeDlgDescription">Trình cài đặt sẽ cài đặt [ProductName] trên máy tính của bạn. Bấm Tiếp theo để tiếp tục hoặc Hủy bỏ để thoát.</String>
+  <String Id="WelcomeDlgTitle">{\WixUI_Font_Bigger}Chào mừng đến với trình cài đặt FamiLife</String>
+  <String Id="WelcomeDlgDescription">Trình cài đặt sẽ cài đặt FamiLife trên máy tính của bạn. Bấm Tiếp theo để tiếp tục hoặc Hủy bỏ để thoát.</String>
 
   <!-- Destination Folder Dialog -->
   <String Id="InstallDirDlgTitle">{\WixUI_Font_Title}Chọn thư mục cài đặt</String>
   <String Id="InstallDirDlgDescription">Chọn thư mục để cài đặt ứng dụng.</String>
-  <String Id="InstallDirDlgFolderLabel">Cài đặt [ProductName] vào thư mục:</String>
+  <String Id="InstallDirDlgFolderLabel">Cài đặt FamiLife vào thư mục:</String>
   <String Id="InstallDirDlgChange">Thay đổi...</String>
 
   <!-- Disk Cost Dialog -->
@@ -26,20 +26,20 @@
 
   <!-- Verify Ready Dialog -->
   <String Id="VerifyReadyDlgInstallTitle">{\WixUI_Font_Title}Sẵn sàng cài đặt</String>
-  <String Id="VerifyReadyDlgInstallText">Nhấn Cài đặt để bắt đầu cài đặt [ProductName] trên máy tính của bạn. Nếu bạn muốn kiểm tra hoặc thay đổi bất kỳ thiết lập nào, hãy nhấn Quay lại.</String>
+  <String Id="VerifyReadyDlgInstallText">Nhấn Cài đặt để bắt đầu cài đặt FamiLife trên máy tính của bạn. Nếu bạn muốn kiểm tra hoặc thay đổi bất kỳ thiết lập nào, hãy nhấn Quay lại.</String>
 
   <!-- Progress Dialog -->
-  <String Id="ProgressDlgTitle">{\WixUI_Font_Title}Đang cài đặt [ProductName]</String>
-  <String Id="ProgressDlgDescription">Vui lòng chờ trong khi trình cài đặt hoàn tất cài đặt [ProductName].</String>
+  <String Id="ProgressDlgTitle">{\WixUI_Font_Title}Đang cài đặt FamiLife</String>
+  <String Id="ProgressDlgDescription">Vui lòng chờ trong khi trình cài đặt hoàn tất cài đặt FamiLife.</String>
   <String Id="ProgressDlgStatusLabel">Trạng thái:</String>
 
   <!-- Exit Dialog -->
-  <String Id="ExitDialogTitle">{\WixUI_Font_Bigger}Hoàn tất cài đặt [ProductName]</String>
-  <String Id="ExitDialogDescription">Ứng dụng [ProductName] đã được cài đặt thành công trên máy tính của bạn. Nhấn Hoàn tất để đóng trình cài đặt.</String>
+  <String Id="ExitDialogTitle">{\WixUI_Font_Bigger}Hoàn tất cài đặt FamiLife</String>
+  <String Id="ExitDialogDescription">Ứng dụng FamiLife đã được cài đặt thành công trên máy tính của bạn. Nhấn Hoàn tất để đóng trình cài đặt.</String>
 
   <!-- Maintenance Welcome Dialog -->
-  <String Id="MaintenanceWelcomeDlgTitle">{\WixUI_Font_Bigger}Sửa chữa hoặc gỡ bỏ [ProductName]</String>
-  <String Id="MaintenanceWelcomeDlgDescription">Trình cài đặt sẽ cho phép bạn sửa lỗi hoặc gỡ bỏ [ProductName] khỏi máy tính của bạn. Nhấn Tiếp theo để tiếp tục.</String>
+  <String Id="MaintenanceWelcomeDlgTitle">{\WixUI_Font_Bigger}Sửa chữa hoặc gỡ bỏ FamiLife</String>
+  <String Id="MaintenanceWelcomeDlgDescription">Trình cài đặt sẽ cho phép bạn sửa lỗi hoặc gỡ bỏ FamiLife khỏi máy tính của bạn. Nhấn Tiếp theo để tiếp tục.</String>
 
   <!-- Maintenance Type Dialog -->
   <String Id="MaintenanceTypeDlgTitle">{\WixUI_Font_Title}Chọn thao tác</String>
@@ -47,11 +47,11 @@
   <String Id="MaintenanceTypeDlgRepairButton">Sửa chữa</String>
   <String Id="MaintenanceTypeDlgRepairText">Sửa các lỗi cài đặt ứng dụng bằng cách cài lại các file bị thiếu hoặc bị lỗi.</String>
   <String Id="MaintenanceTypeDlgRemoveButton">Gỡ bỏ</String>
-  <String Id="MaintenanceTypeDlgRemoveText">Gỡ bỏ ứng dụng [ProductName] khỏi máy tính.</String>
+  <String Id="MaintenanceTypeDlgRemoveText">Gỡ bỏ ứng dụng FamiLife khỏi máy tính.</String>
 
   <!-- Tauri Specific Strings -->
-  <String Id="LaunchApp">Khởi chạy [ProductName]</String>
-  <String Id="DowngradeErrorMessage">Một phiên bản mới hơn của [ProductName] đã được cài đặt trên máy tính của bạn.</String>
+  <String Id="LaunchApp">Khởi chạy FamiLife</String>
+  <String Id="DowngradeErrorMessage">Một phiên bản mới hơn của FamiLife đã được cài đặt trên máy tính của bạn.</String>
   <String Id="PathEnvVarFeature">Thêm đường dẫn cài đặt vào biến môi trường PATH.</String>
-  <String Id="InstallAppFeature">Cài đặt ứng dụng [ProductName].</String>
+  <String Id="InstallAppFeature">Cài đặt ứng dụng FamiLife.</String>
 </WixLocalization>
