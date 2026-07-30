@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.22"
+    "version": "4.3.39"
   },
   "tauri": {
     "allowlist": {
@@ -15,7 +15,21 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "updater": {
+        "all": true
+      },
+      "process": {
+        "relaunch": true
       }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://raw.githubusercontent.com/tuaniuminh/thongke/main/updater.json"
+      ],
+      "dialog": false,
+      "pubkey": ""
     },
     "bundle": {
       "active": true,

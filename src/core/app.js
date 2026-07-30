@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.38';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.38';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.38';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.38';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.39';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.39';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.39';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.39';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.38';
-import * as sync from './sync.js?v=4.3.38';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.38';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.38';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.39';
+import * as sync from './sync.js?v=4.3.39';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.39';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.39';
 
-const APP_VERSION = '4.3.38';
+const APP_VERSION = '4.3.39';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -645,8 +645,42 @@ function showUpdateNotification(newVersion) {
     if (window.lucide) window.lucide.createIcons();
 }
 
-// Check for App Version Updates from version.json
+// Check for App Version Updates from version.json / Tauri Auto-Updater
 async function checkAppVersion(isManual = false) {
+    const isTauri = !!(window && window.__TAURI__);
+    
+    if (isTauri) {
+        try {
+            const { checkUpdate, installUpdate } = window.__TAURI__.updater;
+            const { relaunch } = window.__TAURI__.process;
+            
+            showToast("Đang kiểm tra cập nhật ứng dụng Desktop...", "info");
+            const updateResult = await checkUpdate();
+            
+            if (updateResult.shouldUpdate) {
+                showToast(`Phát hiện bản cập nhật mới v${updateResult.manifest.version}. Đang tải và cài đặt tự động...`, "success");
+                
+                // Bắt đầu cài đặt bản cập nhật
+                await installUpdate();
+                
+                showToast("Cài đặt thành công! Ứng dụng sẽ tự động khởi động lại sau 2 giây...", "success");
+                setTimeout(async () => {
+                    await relaunch();
+                }, 2000);
+                return true;
+            } else {
+                if (isManual) {
+                    showToast(`Ứng dụng Desktop đang ở phiên bản mới nhất (v${APP_VERSION}).`);
+                }
+                return false;
+            }
+        } catch (err) {
+            console.error("Tauri updater error:", err);
+            if (isManual) showToast("Không thể kiểm tra cập nhật ứng dụng Desktop.", "error");
+            return false;
+        }
+    }
+    
     try {
         const response = await fetch(`version.json?t=${Date.now()}`);
         if (!response.ok) {
