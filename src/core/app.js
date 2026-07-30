@@ -645,72 +645,111 @@ function showUpdateNotification(newVersion) {
     if (window.lucide) window.lucide.createIcons();
 }
 
-// Check for App Version Updates from version.json / Tauri Auto-Updater
+// Download and execute Tauri desktop MSI installer
+async function downloadAndInstallUpdateTauri(newVersion) {
+    showToast("Đang tải bản cập nhật mới ngầm...", "info");
+    
+    try {
+        const { writeBinaryFile } = window.__TAURI__.fs;
+        const { tempDir } = window.__TAURI__.path;
+        const { open } = window.__TAURI__.shell;
+        
+        // 1. Lấy thư mục tạm của hệ thống
+        const tempPath = await tempDir();
+        const filename = `FamiLife_${newVersion}_x64_en-US.msi`;
+        const savePath = `${tempPath}${filename}`;
+        
+        // 2. Fetch tệp .msi nhị phân từ GitHub Releases
+        const downloadUrl = `https://github.com/tuaniuminh/thongke/releases/download/v${newVersion}/${filename}`;
+        
+        const response = await fetch(downloadUrl);
+        if (!response.ok) {
+            throw new Error(`Không thể tải tệp cập nhật: Status ${response.status}`);
+        }
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        
+        // 3. Ghi file xuống ổ đĩa cục bộ Temp
+        await writeBinaryFile(savePath, uint8Array);
+        
+        showToast("Tải về hoàn tất! Đang khởi chạy trình cài đặt tiếng Việt...", "success");
+        
+        // 4. Kích hoạt mở file MSI (Windows Installer sẽ tự động hiện lên)
+        await open(savePath);
+        
+        // 5. Tự động thoát ứng dụng sau 3 giây để tránh lỗi file đang bận khi cài đè
+        setTimeout(() => {
+            if (window.__TAURI__.process && window.__TAURI__.process.exit) {
+                window.__TAURI__.process.exit(0);
+            }
+        }, 3000);
+        
+    } catch (err) {
+        console.error("Tauri custom update error:", err);
+        showToast("Lỗi tải hoặc khởi chạy file cài đặt cập nhật.", "error");
+    }
+}
+
+// Check for App Version Updates from version.json
 async function checkAppVersion(isManual = false) {
     const isTauri = !!(window && window.__TAURI__);
     
-    if (isTauri) {
+    // Tải thông tin phiên bản mới nhất từ version.json online trên GitHub
+    let latestVersion = null;
+    try {
+        // Luôn fetch online để Desktop PWA và Desktop App đồng bộ lấy được version.json mới nhất
+        const response = await fetch(`https://raw.githubusercontent.com/tuaniuminh/thongke/main/version.json?t=${Date.now()}`);
+        if (response.ok) {
+            const data = await response.json();
+            latestVersion = data.version;
+        }
+    } catch (err) {
+        console.warn("Could not fetch online version.json:", err);
+        // Fallback local fetch nếu offline hoặc lỗi mạng
         try {
-            const { checkUpdate, installUpdate } = window.__TAURI__.updater;
-            const { relaunch } = window.__TAURI__.process;
-            
-            showToast("Đang kiểm tra cập nhật ứng dụng Desktop...", "info");
-            const updateResult = await checkUpdate();
-            
-            if (updateResult.shouldUpdate) {
-                showToast(`Phát hiện bản cập nhật mới v${updateResult.manifest.version}. Đang tải và cài đặt tự động...`, "success");
-                
-                // Bắt đầu cài đặt bản cập nhật
-                await installUpdate();
-                
-                showToast("Cài đặt thành công! Ứng dụng sẽ tự động khởi động lại sau 2 giây...", "success");
-                setTimeout(async () => {
-                    await relaunch();
-                }, 2000);
-                return true;
-            } else {
-                if (isManual) {
-                    showToast(`Ứng dụng Desktop đang ở phiên bản mới nhất (v${APP_VERSION}).`);
-                }
-                return false;
+            const response = await fetch(`version.json?t=${Date.now()}`);
+            if (response.ok) {
+                const data = await response.json();
+                latestVersion = data.version;
             }
-        } catch (err) {
-            console.error("Tauri updater error:", err);
-            if (isManual) showToast("Không thể kiểm tra cập nhật ứng dụng Desktop.", "error");
-            return false;
+        } catch (e) {
+            console.error("Fallback version fetch failed:", e);
         }
     }
     
-    try {
-        const response = await fetch(`version.json?t=${Date.now()}`);
-        if (!response.ok) {
-            if (isManual) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật.", "error");
-            return false;
-        }
-        const data = await response.json();
-        if (data && data.version) {
-            if (data.version !== APP_VERSION) {
-                if (isManual) {
-                    showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
-                    setTimeout(async () => {
-                        await forceReloadApp(data.version);
-                    }, 1000);
-                } else {
-                    showUpdateNotification(data.version);
-                }
-                return true;
+    if (!latestVersion) {
+        if (isManual) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật.", "error");
+        return false;
+    }
+    
+    const hasUpdate = latestVersion !== APP_VERSION;
+    
+    if (hasUpdate) {
+        if (isTauri) {
+            // Chạy tiến trình tải và kích hoạt installer tự động cho Desktop
+            await downloadAndInstallUpdateTauri(latestVersion);
+        } else {
+            // Chạy tiến trình reload có param cho PWA Web
+            if (isManual) {
+                showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
+                setTimeout(async () => {
+                    await forceReloadApp(latestVersion);
+                }, 1000);
             } else {
-                if (isManual) {
-                    showToast(`Ứng dụng đang ở phiên bản mới nhất (v${APP_VERSION}).`);
-                }
-                return false;
+                showUpdateNotification(latestVersion);
             }
         }
-    } catch (e) {
-        console.error("Error checking app version:", e);
-        if (isManual) showToast("Lỗi kiểm tra phiên bản cập nhật.", "error");
+        return true;
+    } else {
+        if (isManual) {
+            showToast(isTauri 
+                ? `Ứng dụng Desktop đang ở phiên bản mới nhất (v${APP_VERSION}).`
+                : `Ứng dụng đang ở phiên bản mới nhất (v${APP_VERSION}).`
+            );
+        }
+        return false;
     }
-    return false;
 }
 
 // Save database state locally (encrypted)

@@ -16,20 +16,18 @@
         "all": false,
         "open": true
       },
-      "updater": {
+      "fs": {
+        "all": false,
+        "writeFile": true,
+        "writeBinaryFile": true,
+        "scope": ["$TEMP/*"]
+      },
+      "path": {
         "all": true
       },
       "process": {
-        "relaunch": true
+        "exit": true
       }
-    },
-    "updater": {
-      "active": true,
-      "endpoints": [
-        "https://raw.githubusercontent.com/tuaniuminh/thongke/main/updater.json"
-      ],
-      "dialog": false,
-      "pubkey": ""
     },
     "bundle": {
       "active": true,
@@ -44,7 +42,10 @@
         "icons/icon.png"
       ],
       "resources": [],
-      "publisher": "FamiLife Team"
+      "publisher": "FamiLife Team",
+      "wix": {
+        "language": ["vi-VN"]
+      }
     },
     "security": {
       "csp": null
