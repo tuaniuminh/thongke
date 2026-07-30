@@ -16,7 +16,9 @@
     "@capacitor/ios": "^6.1.2",
     "@capacitor/android": "^6.1.2",
     "@capacitor/local-notifications": "^6.1.2",
-    "@capacitor/text-zoom": "^6.0.0"
+    "@capacitor/text-zoom": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0",
+    "@capawesome/capacitor-navigation-bar": "^6.0.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5"

@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.49';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.49';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.49';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.49';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.50';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.50';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.50';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.50';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.49';
-import * as sync from './sync.js?v=4.3.49';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.49';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.49';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.50';
+import * as sync from './sync.js?v=4.3.50';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.50';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.50';
 
-const APP_VERSION = '4.3.49';
+const APP_VERSION = '4.3.50';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2045,6 +2045,38 @@ function updateFamilyFundCardUI() {
     }
 }
 
+// Helper to dynamically update native system bars (StatusBar and NavigationBar)
+async function updateNativeSystemBars(color, isLight) {
+    if (window.Capacitor && window.Capacitor.Plugins) {
+        // 1. Update Status Bar
+        if (window.Capacitor.Plugins.StatusBar) {
+            try {
+                const style = isLight ? 'LIGHT' : 'DARK';
+                await window.Capacitor.Plugins.StatusBar.setStyle({ style: style });
+                if (window.Capacitor.getPlatform() === 'android') {
+                    await window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: color });
+                }
+                console.log(`[System Bars] StatusBar style set to ${style}, color to ${color}`);
+            } catch (e) {
+                console.warn('[System Bars] Failed to update StatusBar:', e);
+            }
+        }
+        // 2. Update Navigation Bar
+        if (window.Capacitor.Plugins.NavigationBar) {
+            try {
+                const darkButtons = isLight;
+                await window.Capacitor.Plugins.NavigationBar.setNavigationBarColor({
+                    color: color,
+                    darkButtons: darkButtons
+                });
+                console.log(`[System Bars] NavigationBar color set to ${color}, darkButtons to ${darkButtons}`);
+            } catch (e) {
+                console.warn('[System Bars] Failed to update NavigationBar:', e);
+            }
+        }
+    }
+}
+
 // Dynamic theme-color meta manager to support iOS black-translucent status bar removal
 function updateThemeColorMeta(color) {
     let themeMeta = document.getElementById('themeColorMeta');
@@ -2060,6 +2092,10 @@ function updateThemeColorMeta(color) {
             document.head.appendChild(themeMeta);
         }
         themeMeta.setAttribute('content', color);
+        
+        // Sync with Native System Bars
+        const isLight = color.toLowerCase() === '#fff1f2' || color.toLowerCase() === '#f3f4f6';
+        updateNativeSystemBars(color, isLight);
     }
 }
 
