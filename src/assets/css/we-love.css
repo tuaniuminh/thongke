@@ -1443,12 +1443,16 @@ body:not(.light-mode) .memory-page.layout-modern .welove-card {
   background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
   filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.35)) !important;
   letter-spacing: -0.04em !important;
   margin-bottom: 0.5rem !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .days-number {
   background: linear-gradient(135deg, #f43f5e 0%, #f472b6 50%, #d946ef 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
   filter: drop-shadow(0 4px 20px rgba(244, 63, 94, 0.65)) !important;
 }
 
