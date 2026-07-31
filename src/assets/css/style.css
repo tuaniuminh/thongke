@@ -4417,12 +4417,14 @@ body.low-perf-mode .home-widget-box,
 body.low-perf-mode .home-card,
 body.low-perf-mode .settings-card,
 body.low-perf-mode .health-record-card,
-body.low-perf-mode .fund-stat-card,
-body.low-perf-mode .btn,
-body.low-perf-mode .form-input {
+body.low-perf-mode .fund-stat-card {
     background: var(--bg-secondary) !important;
     box-shadow: none !important;
     border-color: var(--border-color) !important;
+}
+
+body.low-perf-mode .btn {
+    box-shadow: none !important;
 }
 
 body.low-perf-mode {
