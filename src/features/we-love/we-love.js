@@ -891,6 +891,15 @@ export async function renderWeLoveDashboard() {
                                 <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || ''}" required>
                             </div>
 
+                            <!-- 2.4. Giao diện hiển thị máy tính -->
+                            <div class="welove-form-group">
+                                <label class="welove-form-label">🖥️ Giao diện trên Máy tính (Desktop):</label>
+                                <select class="welove-input" id="weLoveDesktopLayoutInput" style="width: 100%;">
+                                    <option value="traditional" ${state.weLoveDesktopLayout === 'traditional' ? 'selected' : ''}>Giao diện 1 cột truyền thống</option>
+                                    <option value="modern" ${state.weLoveDesktopLayout === 'modern' ? 'selected' : ''}>Giao diện 2 cột hiện đại</option>
+                                </select>
+                            </div>
+
                             <!-- 2.5. Tự động phát nhạc nền -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
                                 <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
