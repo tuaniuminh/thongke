@@ -27,6 +27,7 @@
   <!-- Verify Ready Dialog -->
   <String Id="VerifyReadyDlgInstallTitle">{\WixUI_Font_Title}Sẵn sàng cài đặt</String>
   <String Id="VerifyReadyDlgInstallText">Nhấn Cài đặt để bắt đầu cài đặt FamiLife trên máy tính của bạn. Nếu bạn muốn kiểm tra hoặc thay đổi bất kỳ thiết lập nào, hãy nhấn Quay lại.</String>
+  <String Id="VerifyReadyDlgInstall">Cài đặt</String>
 
   <!-- Progress Dialog -->
   <String Id="ProgressDlgTitle">{\WixUI_Font_Title}Đang cài đặt FamiLife</String>
