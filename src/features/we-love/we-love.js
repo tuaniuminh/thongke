@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.57';
-import * as sync from '../../core/sync.js?v=4.3.57';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.57';
+} from '../../core/app.js?v=4.3.58';
+import * as sync from '../../core/sync.js?v=4.3.58';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.58';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.57');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.58');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -97,10 +97,21 @@ function updateAudioPlaybackState() {
     if (btn) {
         if (isAudioPlaying) {
             btn.classList.add('playing');
-            btn.innerHTML = '🎵';
+            if (btn.classList.contains('modern-round-btn')) {
+                btn.innerHTML = `<i data-lucide="music" style="width: 16px; height: 16px; color: var(--accent-rose);"></i>`;
+            } else {
+                btn.innerHTML = '🎵';
+            }
         } else {
             btn.classList.remove('playing');
-            btn.innerHTML = '🔇';
+            if (btn.classList.contains('modern-round-btn')) {
+                btn.innerHTML = `<i data-lucide="music-2" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>`;
+            } else {
+                btn.innerHTML = '🔇';
+            }
+        }
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
         }
     }
 }
@@ -109,7 +120,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.57';
+        const logoPath = './logo_pwa_small.png?v=4.3.58';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -430,7 +441,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.57';
+    const logoPath = './logo_pwa_small.png?v=4.3.58';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -801,8 +812,9 @@ export async function renderWeLoveDashboard() {
     const showSickness = state.weLoveShowSickness !== false;
     const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
 
+    const isModern = state.weLoveDesktopLayout === "modern";
     tabContainer.innerHTML = `
-        <div class="memory-page" id="weLovePage">
+        <div class="memory-page ${isModern ? 'layout-modern' : ''}" id="weLovePage">
 
             <!-- Couple Names Header under Navbar -->
             <div class="couple-names-header" style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 1.5rem; margin-top: 0.5rem; width: 100%; z-index: 5;">
@@ -918,10 +930,22 @@ export async function renderWeLoveDashboard() {
             ` : `
                 <!-- STANDARD KỶ NIỆM SUBVIEW -->
                 <div class="memory-card">
-                    <!-- Music player disk button -->
-                    <button class="music-toggle-btn" id="weLoveMusicToggle" title="Phát nhạc nền lãng mạn">🔇</button>
-                    <!-- Test notifications bell -->
-                    <button class="notification-test-btn" id="weLoveNotificationTest" title="Thử nghiệm thông báo yêu thương">🔔</button>
+                    ${isModern ? `
+                         <!-- Modern Action Buttons -->
+                         <div class="modern-action-buttons" style="position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; z-index: 10;">
+                             <button id="weLoveMusicToggle" class="modern-round-btn music-toggle-btn" style="width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast);" title="Phát nhạc nền lãng mạn">
+                                 <i data-lucide="${isAudioPlaying ? 'music' : 'music-2'}" style="width: 16px; height: 16px; color: ${isAudioPlaying ? 'var(--accent-rose)' : 'var(--text-secondary)'}"></i>
+                             </button>
+                             <button id="weLoveNotificationTest" class="modern-round-btn notification-test-btn" style="width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast);" title="Thử nghiệm thông báo yêu thương">
+                                 <i data-lucide="bell" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+                             </button>
+                         </div>
+                    ` : `
+                         <!-- Music player disk button -->
+                         <button class="music-toggle-btn" id="weLoveMusicToggle" title="Phát nhạc nền lãng mạn">🔇</button>
+                         <!-- Test notifications bell -->
+                         <button class="notification-test-btn" id="weLoveNotificationTest" title="Thử nghiệm thông báo yêu thương">🔔</button>
+                    `}
 
                     <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
                     <h2 class="memory-title">Kỷ Niệm Tình Yêu</h2>
@@ -932,6 +956,27 @@ export async function renderWeLoveDashboard() {
                         <div class="days-label">Ngày bên nhau</div>
                         ${state.weLoveStartDate ? `<div class="detailed-duration">${formatDetailedLoveDuration()}</div>` : ''}
                     </div>
+
+                    ${(function() {
+                        if (!state.weLoveStartDate || state.weLoveDesktopLayout !== 'modern') return '';
+                        const milestones = [100, 200, 365, 500, 730, 1000, 1500, 2000, 2500, 3000, 3650, 4000, 5000];
+                        const nextMilestone = milestones.find(m => m > loveDaysCount) || (Math.ceil(loveDaysCount / 1000) * 1000);
+                        const prevMilestone = [...milestones].reverse().find(m => m < loveDaysCount) || 0;
+                        const progressPercent = Math.min(100, Math.max(0, ((loveDaysCount - prevMilestone) / (nextMilestone - prevMilestone)) * 100));
+                        const daysRemaining = nextMilestone - loveDaysCount;
+                        
+                        return `
+                            <div class="milestone-progress-container" style="margin-top: 1.75rem; text-align: left; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600;">
+                                    <span>🎯 Cột mốc tiếp theo: ${nextMilestone} ngày</span>
+                                    <span style="color: var(--accent-rose);">Còn ${daysRemaining} ngày</span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; overflow: hidden; position: relative;">
+                                    <div style="width: ${progressPercent}%; height: 100%; background: linear-gradient(90deg, #f43f5e, #ec4899); border-radius: 4px; transition: width 1s ease-out;"></div>
+                                </div>
+                            </div>
+                        `;
+                    })()}
 
                     <div class="milestone-date" style="${!state.weLoveStartDate ? 'color: var(--accent-rose); font-weight: 700;' : ''}">
                         ${state.weLoveStartDate ? `📅 Cột mốc khởi đầu: ${formatDateDisplay(state.weLoveStartDate)}` : '⚠️ Chưa thiết lập ngày bắt đầu yêu. Vui lòng chọn trong phần Thiết lập!'}
@@ -1346,6 +1391,7 @@ function bindSettingsEvents() {
     const name1Input = document.getElementById('weLoveName1Input');
     const name2Input = document.getElementById('weLoveName2Input');
     const startDateInput = document.getElementById('weLoveStartDateInput');
+    const desktopLayoutInput = document.getElementById('weLoveDesktopLayoutInput');
     const showSicknessInput = document.getElementById('weLoveShowSicknessInput');
     const autoplayInput = document.getElementById('weLoveAutoplayInput');
     const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
@@ -1375,6 +1421,9 @@ function bindSettingsEvents() {
 
             state.weLoveAutoplay = weLoveAutoplay;
             state.weLoveAutoplayUpdated = new Date().toISOString();
+
+            state.weLoveDesktopLayout = desktopLayoutInput ? desktopLayoutInput.value : 'traditional';
+            state.weLoveDesktopLayoutUpdated = new Date().toISOString();
 
             await saveLocalState();
             

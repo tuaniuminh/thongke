@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.57';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.57';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.57';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.57';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.58';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.58';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.58';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.58';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.57';
-import * as sync from './sync.js?v=4.3.57';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.57';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.57';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.58';
+import * as sync from './sync.js?v=4.3.58';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.58';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.58';
 
-const APP_VERSION = '4.3.57';
+const APP_VERSION = '4.3.58';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -93,6 +93,8 @@ let state = {
     weLoveName2Updated: '',
     weLoveShowSickness: true,
     weLoveShowSicknessUpdated: '',
+    weLoveDesktopLayout: 'traditional',
+    weLoveDesktopLayoutUpdated: '',
     weLoveSicknessLogs: [],
     weLoveSicknessLogsUpdated: '',
     weLoveReminders: [],
@@ -800,6 +802,8 @@ async function saveLocalState() {
         weLoveName2Updated: state.weLoveName2Updated || '',
         weLoveShowSickness: state.weLoveShowSickness !== false,
         weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
+        weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
+        weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
         weLoveSicknessLogs: state.weLoveSicknessLogs || [],
         weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
         weLoveReminders: state.weLoveReminders || [],
@@ -882,6 +886,8 @@ export async function loadLocalState(password) {
         state.weLoveName2Updated = '';
         state.weLoveShowSickness = true;
         state.weLoveShowSicknessUpdated = '';
+        state.weLoveDesktopLayout = 'traditional';
+        state.weLoveDesktopLayoutUpdated = '';
         state.weLoveSicknessLogs = [];
         state.weLoveSicknessLogsUpdated = '';
         state.weLoveReminders = [];
@@ -960,6 +966,8 @@ export async function loadLocalState(password) {
         state.weLoveName2Updated = data.weLoveName2Updated || '';
         state.weLoveShowSickness = data.weLoveShowSickness !== false;
         state.weLoveShowSicknessUpdated = data.weLoveShowSicknessUpdated || '';
+        state.weLoveDesktopLayout = data.weLoveDesktopLayout || 'traditional';
+        state.weLoveDesktopLayoutUpdated = data.weLoveDesktopLayoutUpdated || '';
         state.weLoveSicknessLogs = data.weLoveSicknessLogs || [];
         state.weLoveSicknessLogsUpdated = data.weLoveSicknessLogsUpdated || '';
         state.weLoveReminders = data.weLoveReminders || [];
@@ -1234,6 +1242,8 @@ async function performSync(silent = false) {
                     state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
                     state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
                     state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
+                    state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
+                    state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
                     state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
                     state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
                     state.weLoveReminders = remoteData.weLoveReminders || [];
@@ -1348,6 +1358,14 @@ async function performSync(silent = false) {
                     if (remoteShowSicknessTime > localShowSicknessTime) {
                         state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
                         state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
+                    }
+                    
+                    // Merge WeLove Desktop Layout
+                    const localDesktopLayoutTime = state.weLoveDesktopLayoutUpdated ? new Date(state.weLoveDesktopLayoutUpdated).getTime() : 0;
+                    const remoteDesktopLayoutTime = remoteData.weLoveDesktopLayoutUpdated ? new Date(remoteData.weLoveDesktopLayoutUpdated).getTime() : 0;
+                    if (remoteDesktopLayoutTime > localDesktopLayoutTime) {
+                        state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
+                        state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
                     }
 
                     // Merge WeLove Sickness Logs
@@ -1613,6 +1631,8 @@ async function performSync(silent = false) {
             weLoveName2Updated: state.weLoveName2Updated || '',
             weLoveShowSickness: state.weLoveShowSickness !== false,
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
+            weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
+            weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
             weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
             weLoveReminders: state.weLoveReminders || [],
@@ -1669,6 +1689,8 @@ async function performSync(silent = false) {
             weLoveName2Updated: state.weLoveName2Updated || '',
             weLoveShowSickness: state.weLoveShowSickness !== false,
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
+            weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
+            weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
             weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
             weLoveReminders: state.weLoveReminders || [],
@@ -4218,6 +4240,7 @@ async function handleFullBackup() {
             weLoveName1: state.weLoveName1,
             weLoveName2: state.weLoveName2,
             weLoveShowSickness: state.weLoveShowSickness,
+            weLoveDesktopLayout: state.weLoveDesktopLayout,
             weLoveSicknessLogs: state.weLoveSicknessLogs,
             weLoveReminders: state.weLoveReminders,
             weLoveVisitLogs: state.weLoveVisitLogs,
@@ -4343,6 +4366,7 @@ async function handleFullRestore(file) {
         if (data.weLoveName1 !== undefined) state.weLoveName1 = data.weLoveName1;
         if (data.weLoveName2 !== undefined) state.weLoveName2 = data.weLoveName2;
         if (data.weLoveShowSickness !== undefined) state.weLoveShowSickness = data.weLoveShowSickness;
+        if (data.weLoveDesktopLayout !== undefined) state.weLoveDesktopLayout = data.weLoveDesktopLayout;
         if (data.weLoveSicknessLogs !== undefined) state.weLoveSicknessLogs = data.weLoveSicknessLogs;
         if (data.weLoveReminders !== undefined) state.weLoveReminders = data.weLoveReminders;
         if (data.weLoveVisitLogs !== undefined) state.weLoveVisitLogs = data.weLoveVisitLogs;
@@ -4382,6 +4406,7 @@ async function handleFullRestore(file) {
         state.weLoveName1Updated = now;
         state.weLoveName2Updated = now;
         state.weLoveShowSicknessUpdated = now;
+        state.weLoveDesktopLayoutUpdated = now;
         state.weLoveSicknessLogsUpdated = now;
         state.weLoveRemindersUpdated = now;
         state.weLoveVisitLogsUpdated = now;
@@ -5041,6 +5066,8 @@ export async function clearAllStateData() {
     state.weLoveName2Updated = '';
     state.weLoveShowSickness = true;
     state.weLoveShowSicknessUpdated = '';
+    state.weLoveDesktopLayout = 'traditional';
+    state.weLoveDesktopLayoutUpdated = '';
     state.weLoveSicknessLogs = [];
     state.weLoveSicknessLogsUpdated = '';
     state.weLoveReminders = [];
