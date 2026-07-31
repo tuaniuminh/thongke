@@ -34,26 +34,34 @@ $bannerBmp.Save($bannerSavePath, [System.Drawing.Imaging.ImageFormat]::Bmp)
 $bannerBmp.Dispose()
 Write-Host "Saved banner.bmp to $bannerSavePath"
 
-# 2. Create dialog.bmp (164x312)
-$dialogWidth = 164
+# 2. Create dialog.bmp (493x312)
+$dialogWidth = 493
 $dialogHeight = 312
 $dialogBmp = New-Object System.Drawing.Bitmap($dialogWidth, $dialogHeight)
 $dialogGraphics = [System.Drawing.Graphics]::FromImage($dialogBmp)
 
-# Fill background with Linear Gradient from top-left (#0284c7) to bottom-right (#1d4ed8)
+# Define left sidebar region (Width = 164, Height = 312)
+$leftWidth = 164
+$rectLeft = New-Object System.Drawing.Rectangle(0, 0, $leftWidth, $dialogHeight)
+
+# Fill left sidebar with Linear Gradient from top (#0284c7) to bottom (#1d4ed8)
 $colorStart = [System.Drawing.Color]::FromArgb(255, 2, 132, 199)
 $colorEnd = [System.Drawing.Color]::FromArgb(255, 29, 78, 216)
-$rect = New-Object System.Drawing.Rectangle(0, 0, $dialogWidth, $dialogHeight)
-$gradientBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush($rect, $colorStart, $colorEnd, 90.0) # 90 degrees = vertical gradient
+$gradientBrush = New-Object System.Drawing.Drawing2D.LinearGradientBrush($rectLeft, $colorStart, $colorEnd, 90.0) # 90 degrees = vertical gradient
+$dialogGraphics.FillRectangle($gradientBrush, $rectLeft)
 
-$dialogGraphics.FillRectangle($gradientBrush, $rect)
+# Fill right area with Solid White (Width = 493 - 164 = 329, Height = 312)
+$rectRight = New-Object System.Drawing.Rectangle($leftWidth, 0, ($dialogWidth - $leftWidth), $dialogHeight)
+$whiteBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 255, 255, 255))
+$dialogGraphics.FillRectangle($whiteBrush, $rectRight)
 
-# Draw icon resized at center (X = 42, Y = 100, Size = 80x80)
+# Draw icon resized at center of left sidebar (X = (164 - 64)/2 = 50, Y = 100, Size = 64x64)
 $dialogGraphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-$dialogGraphics.DrawImage($icon, 42, 100, 80, 80)
+$dialogGraphics.DrawImage($icon, 50, 100, 64, 64)
 
 # Clean up dialog drawing resources
 $gradientBrush.Dispose()
+$whiteBrush.Dispose()
 $dialogGraphics.Dispose()
 
 # Save dialog.bmp
