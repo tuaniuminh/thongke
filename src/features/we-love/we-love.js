@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.56';
-import * as sync from '../../core/sync.js?v=4.3.56';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.56';
+} from '../../core/app.js?v=4.3.57';
+import * as sync from '../../core/sync.js?v=4.3.57';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.57';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.56');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.57');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -109,7 +109,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.56';
+        const logoPath = './logo_pwa_small.png?v=4.3.57';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -430,7 +430,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.56';
+    const logoPath = './logo_pwa_small.png?v=4.3.57';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -832,7 +832,7 @@ export async function renderWeLoveDashboard() {
                             </div>
                             <div class="welove-form-group">
                                 <label class="welove-form-label">✍️ Tiêu đề thông báo:</label>
-                                <input type="text" class="welove-input" id="remTitleInput" placeholder="Ví dụ: Lời nhắc từ anh Tuấn ❤️, Chú ý em iu ơi! 🥤" required>
+                                <input type="text" class="welove-input" id="remTitleInput" placeholder="Ví dụ: Chú ý em iu ơi! 🥤" required>
                             </div>
                             <div class="welove-form-group">
                                 <label class="welove-form-label">✍️ Nội dung lời nhắc:</label>
@@ -880,26 +880,30 @@ export async function renderWeLoveDashboard() {
                             </div>
 
                             <!-- 2.5. Tự động phát nhạc nền -->
-                            <div class="welove-form-group" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
-                                <div>
-                                    <label class="welove-form-label" style="font-weight: 700; margin-bottom: 2px; display: block;">🎵 Tự động phát nhạc nền</label>
-                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Tự động phát nhạc nền khi click/chạm vào màn hình</span>
-                                </div>
-                                <label class="switch-toggle" style="margin-left: 10px;">
-                                    <input type="checkbox" id="weLoveAutoplayInput" ${state.weLoveAutoplay === true ? 'checked' : ''}>
-                                    <span class="slider-round"></span>
+                            <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                                <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
+                                    <div>
+                                        <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🎵 Tự động phát nhạc nền</span>
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; display: block;">Tự động phát nhạc nền khi click/chạm vào màn hình</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <input type="checkbox" id="weLoveAutoplayInput" class="status-checkbox" ${state.weLoveAutoplay === true ? 'checked' : ''}>
+                                        <span class="status-slider"></span>
+                                    </div>
                                 </label>
                             </div>
 
                             <!-- 3. Bật tắt theo dõi lượt ốm -->
-                            <div class="welove-form-group" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
-                                <div>
-                                    <label class="welove-form-label" style="font-weight: 700; margin-bottom: 2px; display: block;">🩺 Theo dõi Sổ tay sức khỏe em yêu</label>
-                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Ẩn hoặc hiện biểu đồ, lịch sử đợt ốm trong tab Kỷ niệm</span>
-                                </div>
-                                <label class="switch-toggle" style="margin-left: 10px;">
-                                    <input type="checkbox" id="weLoveShowSicknessInput" ${state.weLoveShowSickness !== false ? 'checked' : ''}>
-                                    <span class="slider-round"></span>
+                            <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                                <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
+                                    <div>
+                                        <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🩺 Theo dõi Sổ tay sức khỏe em yêu</span>
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; display: block;">Ẩn hoặc hiện biểu đồ, lịch sử đợt ốm trong tab Kỷ niệm</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <input type="checkbox" id="weLoveShowSicknessInput" class="status-checkbox" ${state.weLoveShowSickness !== false ? 'checked' : ''}>
+                                        <span class="status-slider"></span>
+                                    </div>
                                 </label>
                             </div>
 
