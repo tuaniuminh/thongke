@@ -1371,17 +1371,17 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
 @media (min-width: 1024px) {
   .memory-page.layout-modern {
     display: grid !important;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 2rem;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2.5rem;
     align-items: start;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 3rem 2rem;
   }
   
   .memory-page.layout-modern .couple-names-header {
     grid-column: span 2;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 1rem !important;
   }
   
   .memory-page.layout-modern .memory-card,
@@ -1389,20 +1389,137 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
     margin: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
+    border-radius: 32px !important;
+    padding: 3.5rem 2.5rem !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
+}
+
+/* Page Background Enhancement for Modern Layout */
+body.light-mode .memory-page.layout-modern {
+  background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
+}
+body:not(.light-mode) .memory-page.layout-modern {
+  background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
+}
+
+/* Glassmorphic Frosted Card Styling */
+.memory-page.layout-modern .memory-card,
+.memory-page.layout-modern .welove-card {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 20px 50px rgba(244, 63, 94, 0.08) !important;
+}
+body:not(.light-mode) .memory-page.layout-modern .memory-card,
+body:not(.light-mode) .memory-page.layout-modern .welove-card {
+  background: rgba(17, 24, 39, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* Romantic Neon Rose Glow Hover Effects */
 .memory-page.layout-modern .memory-card:hover,
 .memory-page.layout-modern .welove-card:hover {
-  border-color: rgba(244, 63, 94, 0.4) !important;
-  box-shadow: 0 10px 40px -10px rgba(244, 63, 94, 0.2), 
-              0 0 25px 0 rgba(244, 63, 94, 0.08) !important;
-  transform: translateY(-2px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-color: rgba(244, 63, 94, 0.45) !important;
+  box-shadow: 0 20px 55px -10px rgba(244, 63, 94, 0.22), 
+              0 0 25px 0 rgba(244, 63, 94, 0.1) !important;
+  transform: translateY(-4px);
 }
 
-/* Modern Round Buttons style modifications */
+/* Glow Heart Pulsing */
+.memory-page.layout-modern .heart-pulsing {
+  font-size: 5.5rem !important;
+  filter: drop-shadow(0 0 20px rgba(244, 63, 94, 0.75)) !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Premium Days Counter Text with glowing pink/rose gradient */
+.memory-page.layout-modern .days-number {
+  font-size: 7rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.35)) !important;
+  letter-spacing: -0.04em !important;
+  margin-bottom: 0.5rem !important;
+}
+body:not(.light-mode) .memory-page.layout-modern .days-number {
+  background: linear-gradient(135deg, #f43f5e 0%, #f472b6 50%, #d946ef 100%) !important;
+  filter: drop-shadow(0 4px 20px rgba(244, 63, 94, 0.65)) !important;
+}
+
+.memory-page.layout-modern .days-label {
+  font-size: 1rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary) !important;
+}
+
+.memory-page.layout-modern .detailed-duration {
+  font-size: 0.9rem !important;
+  color: #e11d48 !important;
+  font-weight: 700 !important;
+  background: rgba(244, 63, 94, 0.06) !important;
+  padding: 6px 16px !important;
+  border-radius: 20px !important;
+  display: inline-block !important;
+  margin-top: 0.5rem !important;
+  border: 1px solid rgba(244, 63, 94, 0.15) !important;
+}
+body:not(.light-mode) .memory-page.layout-modern .detailed-duration {
+  background: rgba(244, 63, 94, 0.18) !important;
+  color: #fda4af !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+
+/* Premium styled quote box */
+.memory-page.layout-modern .quote-container {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 24px !important;
+  padding: 1.5rem 2.5rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.02) !important;
+  margin-top: 1.75rem !important;
+}
+body:not(.light-mode) .memory-page.layout-modern .quote-container {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Premium Sickness stats circle */
+.memory-page.layout-modern .welove-heart-circle {
+  width: 120px !important;
+  height: 120px !important;
+  background: linear-gradient(135deg, #ff0844 0%, #ff8a9a 100%) !important;
+  border: 4px solid #fff !important;
+  box-shadow: 0 12px 35px rgba(244, 63, 94, 0.28) !important;
+}
+body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle {
+  background: linear-gradient(135deg, #4c0519 0%, #be123c 100%) !important;
+  border: 4px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 35px rgba(225, 29, 72, 0.45) !important;
+}
+
+.memory-page.layout-modern .welove-heart-circle .welove-count-num {
+  color: #fff !important;
+  font-size: 3.2rem !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+.memory-page.layout-modern .welove-heart-circle .welove-count-lbl {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 700 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+/* Modern Round Buttons styles */
 .modern-round-btn:hover {
   background: rgba(244, 63, 94, 0.12) !important;
   border-color: rgba(244, 63, 94, 0.3) !important;
