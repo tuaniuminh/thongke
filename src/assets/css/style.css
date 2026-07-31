@@ -3385,6 +3385,10 @@ select.health-select-sm {
     .home-card-content h3 {
         font-size: 1.05rem;
     }
+    
+    .home-card-content p {
+        display: none !important;
+    }
 }
 
 /* User Badge Interactivity */
@@ -4393,5 +4397,35 @@ body.light-mode.active-tab-tc-management {
 body.android-device, body.android-device * {
     -webkit-text-size-adjust: 100% !important;
     text-size-adjust: 100% !important;
+}
+
+/* ==========================================
+   LOW PERFORMANCE MODE (CHẾ ĐỘ MÁY YẾU)
+   ========================================== */
+body.low-perf-mode * {
+    transition: none !important;
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.low-perf-mode .glass-panel,
+body.low-perf-mode .modal-card,
+body.low-perf-mode .sidebar,
+body.low-perf-mode .home-settings-btn,
+body.low-perf-mode .home-widget-box,
+body.low-perf-mode .home-card,
+body.low-perf-mode .settings-card,
+body.low-perf-mode .health-record-card,
+body.low-perf-mode .fund-stat-card,
+body.low-perf-mode .btn,
+body.low-perf-mode .form-input {
+    background: var(--bg-secondary) !important;
+    box-shadow: none !important;
+    border-color: var(--border-color) !important;
+}
+
+body.low-perf-mode {
+    background-color: var(--bg-primary) !important;
 }
 

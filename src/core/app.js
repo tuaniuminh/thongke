@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.53';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.53';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.53';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.53';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.54';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.54';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.54';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.54';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.53';
-import * as sync from './sync.js?v=4.3.53';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.53';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.53';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.54';
+import * as sync from './sync.js?v=4.3.54';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.54';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.54';
 
-const APP_VERSION = '4.3.53';
+const APP_VERSION = '4.3.54';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -154,7 +154,8 @@ let state = {
 
     // Body Composition tracking (Accuniq/InBody)
     bodyCompositionRecords: [],
-    bodyCompositionRecordsUpdated: ''
+    bodyCompositionRecordsUpdated: '',
+    lowPerfMode: false
 };
 
 // Chart.js instances
@@ -2967,6 +2968,16 @@ async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
 
+    // Load lowPerfMode state and disable animations if active
+    state.lowPerfMode = localStorage.getItem('fami_low_perf_mode') === 'true';
+    if (state.lowPerfMode) {
+        document.documentElement.classList.add('low-perf-mode');
+        document.body.classList.add('low-perf-mode');
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.animation = false;
+        }
+    }
+
     // Detect iOS/Capacitor native environment vs. web PWA
     const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
                         window.location.protocol === 'capacitor:';
@@ -3348,6 +3359,32 @@ async function initializeApp() {
     
     // Bind change password button
     document.getElementById('changePasswordBtn').addEventListener('click', handleChangePassword);
+
+    // Bind Low Performance Mode checkbox
+    const lowPerfCheckbox = document.getElementById('lowPerfModeCheckbox');
+    if (lowPerfCheckbox) {
+        lowPerfCheckbox.checked = !!state.lowPerfMode;
+        lowPerfCheckbox.addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            state.lowPerfMode = enabled;
+            localStorage.setItem('fami_low_perf_mode', enabled);
+            if (enabled) {
+                document.documentElement.classList.add('low-perf-mode');
+                document.body.classList.add('low-perf-mode');
+                if (typeof Chart !== 'undefined') {
+                    Chart.defaults.animation = false;
+                }
+                showToast("Đã bật chế độ tối giản. Biểu đồ và hiệu ứng chuyển động đã được tắt.", "success");
+            } else {
+                document.documentElement.classList.remove('low-perf-mode');
+                document.body.classList.remove('low-perf-mode');
+                if (typeof Chart !== 'undefined') {
+                    Chart.defaults.animation = true;
+                }
+                showToast("Đã tắt chế độ tối giản. Hãy tải lại trang để tải lại đầy đủ hiệu ứng.", "info");
+            }
+        });
+    }
     
     // Gemini AI Settings listeners
     const saveGeminiBtn = document.getElementById('saveGeminiKeyBtn');

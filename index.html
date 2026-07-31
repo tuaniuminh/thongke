@@ -65,13 +65,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.53">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.54">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.53">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.53">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.53">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.53">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.54">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.54">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.54">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.54">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -305,7 +305,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.53" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.54" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -421,7 +421,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.53" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.54" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -825,6 +825,38 @@
                         </div>
                     </div>
 
+                    <!-- Theme Settings Card (Mobile only) -->
+                    <div class="settings-card mobile-only-settings-card">
+                        <h2>
+                            <i data-lucide="palette"></i>
+                            <span>Giao diện ứng dụng</span>
+                        </h2>
+                        <p class="settings-info">
+                            Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
+                        </p>
+                        <button class="btn btn-outline w-full theme-toggle-btn-trigger" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
+                            <i data-lucide="sun" class="theme-icon"></i>
+                            <span class="theme-text">Giao diện sáng</span>
+                        </button>
+                    </div>
+
+                    <!-- Low Performance Mode Card -->
+                    <div class="settings-card" id="lowPerfSettingsCard">
+                        <h2>
+                            <i data-lucide="cpu" style="color: var(--accent-blue);"></i>
+                            <span>Chế độ máy yếu (Hiệu năng)</span>
+                        </h2>
+                        <p class="settings-info">
+                            Tối ưu hóa giao diện bằng cách tắt hiệu ứng kính mờ (blur), các chuyển động và hoạt họa biểu đồ giúp ứng dụng mượt mà trên máy tính cũ hoặc cấu hình yếu.
+                        </p>
+                        <div style="margin-top: 14px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 600;">
+                                <input type="checkbox" id="lowPerfModeCheckbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                                <span>Kích hoạt Chế độ tối giản (Tăng hiệu năng)</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Family Pairing Card -->
                     <div class="settings-card" id="familyPairingCard">
                         <h2>
@@ -873,21 +905,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Theme Settings Card (Mobile only) -->
-                    <div class="settings-card mobile-only-settings-card">
-                        <h2>
-                            <i data-lucide="palette"></i>
-                            <span>Giao diện ứng dụng</span>
-                        </h2>
-                        <p class="settings-info">
-                            Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
-                        </p>
-                        <button class="btn btn-outline w-full theme-toggle-btn-trigger" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
-                            <i data-lucide="sun" class="theme-icon"></i>
-                            <span class="theme-text">Giao diện sáng</span>
-                        </button>
                     </div>
 
                     <!-- Security / Master Password Card -->
@@ -1807,7 +1824,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.53" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.54" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1887,20 +1904,25 @@
                 <script>
                     (function() {
                         let savedTheme = 'dark';
+                        let lowPerfMode = false;
                         try {
                             savedTheme = localStorage.getItem('gift_ledger_theme') || 'dark';
+                            lowPerfMode = localStorage.getItem('fami_low_perf_mode') === 'true';
                         } catch (e) {
                             console.warn("localStorage access error:", e);
+                        }
+                        if (lowPerfMode) {
+                            document.documentElement.classList.add('low-perf-mode');
                         }
                         const img = document.getElementById('splashLogoImg');
                         if (savedTheme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.53';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.54';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.53';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.54';
                         }
                     })();
                 </script>
@@ -3405,9 +3427,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.53"></script>
-    <script type="module" src="src/core/app.js?v=4.3.53"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.53"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.54"></script>
+    <script type="module" src="src/core/app.js?v=4.3.54"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.54"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
