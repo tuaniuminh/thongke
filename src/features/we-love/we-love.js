@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.77';
-import * as sync from '../../core/sync.js?v=4.3.77';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.77';
+} from '../../core/app.js?v=4.3.78';
+import * as sync from '../../core/sync.js?v=4.3.78';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.78';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2497,6 +2497,7 @@ export function closeWeLoveLightbox() {
 
 export function initWeLoveLightboxZoomAndDrag() {
     const lightboxImg = document.getElementById('weLoveLightboxImg');
+    const lightboxImgWrapper = document.getElementById('weLoveLightboxImgWrapper');
     const btnZoomIn = document.getElementById('btnWeLoveZoomIn');
     const btnZoomOut = document.getElementById('btnWeLoveZoomOut');
     const btnZoomReset = document.getElementById('btnWeLoveZoomReset');
@@ -2508,6 +2509,14 @@ export function initWeLoveLightboxZoomAndDrag() {
     let isDragging = false;
     let startX = 0, startY = 0;
     let currentX = 0, currentY = 0;
+
+    // Pinch-to-zoom variables
+    let initialPinchDistance = 0;
+    let startScale = 1;
+    let startTranslateX = 0;
+    let startTranslateY = 0;
+    let pinchCenterX = 0;
+    let pinchCenterY = 0;
 
     function updateTransform(smooth = true) {
         lightboxImg.style.transition = smooth ? 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none';
@@ -2538,10 +2547,42 @@ export function initWeLoveLightboxZoomAndDrag() {
         }
     }
 
+    // Zoom bằng chuột cuộn (bi lăn) tại vị trí con trỏ chuột
+    if (lightboxImgWrapper) {
+        lightboxImgWrapper.addEventListener('wheel', (e) => {
+            e.preventDefault(); // Ngăn cuộn trang web nền
+            
+            const rect = lightboxImg.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const oldScale = scale;
+            const zoomStep = 0.15;
+            
+            if (e.deltaY < 0) {
+                scale = Math.min(4, scale + zoomStep);
+            } else {
+                scale = Math.max(1, scale - zoomStep);
+            }
+
+            if (scale > 1) {
+                const factor = (scale / oldScale) - 1;
+                // Điều chỉnh x dịch chuyển để giữ nguyên tiêu điểm dưới chuột
+                currentX -= (mouseX - rect.width / 2) * factor / scale;
+                currentY -= (mouseY - rect.height / 2) * factor / scale;
+            } else {
+                currentX = 0;
+                currentY = 0;
+            }
+
+            updateTransform(false); // zoom chuột mượt mà phản hồi tức thì
+        }, { passive: false });
+    }
+
     if (btnZoomIn) {
         btnZoomIn.addEventListener('click', (e) => {
             e.stopPropagation();
-            scale = Math.min(3, scale + 0.25);
+            scale = Math.min(4, scale + 0.25);
             updateTransform(true);
         });
     }
@@ -2564,7 +2605,7 @@ export function initWeLoveLightboxZoomAndDrag() {
         });
     }
 
-    // Chạm/Click đúp zoom 2x
+    // Chạm/Click đúp zoom nhanh 2x
     lightboxImg.addEventListener('dblclick', (e) => {
         e.stopPropagation();
         if (scale > 1) {
@@ -2582,6 +2623,7 @@ export function initWeLoveLightboxZoomAndDrag() {
         updateTransform(true);
     });
 
+    // Touch double tap cho thiết bị di động
     let lastTap = 0;
     lightboxImg.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
@@ -2607,6 +2649,7 @@ export function initWeLoveLightboxZoomAndDrag() {
         }
     }, { passive: false });
 
+    // Drag / Pan logic
     function dragStart(clientX, clientY) {
         if (scale <= 1) return;
         isDragging = true;
@@ -2643,21 +2686,68 @@ export function initWeLoveLightboxZoomAndDrag() {
         dragEnd();
     });
 
+    // Pinch-to-zoom (2 ngón tay) và Drag (1 ngón tay) cho Mobile
     lightboxImg.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1 && scale > 1) {
+        if (e.touches.length === 2) {
+            // Chuẩn bị Pinch-to-zoom
+            isDragging = false;
+            initialPinchDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            startScale = scale;
+            startTranslateX = currentX;
+            startTranslateY = currentY;
+
+            // Tính toán tâm nhúm của hai ngón tay để zoom tương ứng
+            const rect = lightboxImg.getBoundingClientRect();
+            const touch0X = e.touches[0].clientX - rect.left;
+            const touch0Y = e.touches[0].clientY - rect.top;
+            const touch1X = e.touches[1].clientX - rect.left;
+            const touch1Y = e.touches[1].clientY - rect.top;
+            pinchCenterX = (touch0X + touch1X) / 2;
+            pinchCenterY = (touch0Y + touch1Y) / 2;
+        } else if (e.touches.length === 1 && scale > 1) {
+            // Drag 1 ngón tay bình thường
             const touch = e.touches[0];
             dragStart(touch.clientX, touch.clientY);
         }
     }, { passive: true });
 
     lightboxImg.addEventListener('touchmove', (e) => {
-        if (isDragging && e.touches.length === 1) {
+        if (e.touches.length === 2 && initialPinchDistance > 0) {
+            e.preventDefault(); // chặn zoom mặc định của trình duyệt
+            
+            const currentDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const ratio = currentDistance / initialPinchDistance;
+            const oldScale = scale;
+            
+            scale = Math.min(4, Math.max(1, startScale * ratio));
+
+            if (scale > 1) {
+                const factor = (scale / oldScale) - 1;
+                const rect = lightboxImg.getBoundingClientRect();
+                currentX -= (pinchCenterX - rect.width / 2) * factor / scale;
+                currentY -= (pinchCenterY - rect.height / 2) * factor / scale;
+            } else {
+                currentX = 0;
+                currentY = 0;
+            }
+
+            updateTransform(false); // Phóng to tức thời phản hồi 1:1
+        } else if (isDragging && e.touches.length === 1) {
             const touch = e.touches[0];
             dragMove(touch.clientX, touch.clientY);
         }
-    }, { passive: true });
+    }, { passive: false }); // Cần passive: false để preventDefault hoạt động khi nhúm zoom
 
-    lightboxImg.addEventListener('touchend', () => {
+    lightboxImg.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+            initialPinchDistance = 0;
+        }
         dragEnd();
     });
 
