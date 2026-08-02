@@ -2182,7 +2182,7 @@ export function getGoogleDriveDirectLink(url) {
     }
 
     if (fileId) {
-        const directLink = `https://lh3.googleusercontent.com/d/${fileId}`;
+        const directLink = `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
         console.log(`[WeLove Album] Parsed Google Drive Link: ${url} -> Direct URL: ${directLink}`);
         return directLink;
     }
