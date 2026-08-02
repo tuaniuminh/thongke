@@ -1398,11 +1398,14 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
 }
 
 /* Page Background Enhancement for Modern Layout */
-body.light-mode .memory-page.layout-modern {
+body.light-mode #tab-welove {
   background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
 }
-body:not(.light-mode) .memory-page.layout-modern {
+body:not(.light-mode) #tab-welove {
   background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
+}
+.memory-page.layout-modern {
+  background: transparent !important;
 }
 
 /* Glassmorphic Frosted Card Styling */
