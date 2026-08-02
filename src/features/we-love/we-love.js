@@ -1177,10 +1177,21 @@ export async function renderWeLoveDashboard() {
         </div>
 
         <!-- LIGHTBOX PREVIEW MODAL -->
-        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center;">
-            <div style="position: relative; max-width: 90%; max-height: 85%; display: flex; flex-direction: column; align-items: center;">
-                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: -45px; right: 0; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5);" title="Đóng">✕</button>
-                <img id="weLoveLightboxImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center;">
+            <div style="position: relative; max-width: 90%; max-height: 85%; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: -45px; right: 0; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 2010;" title="Đóng">✕</button>
+                
+                <!-- Zoom Toolbar -->
+                <div class="welove-lightbox-tools" style="display: flex; gap: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.06); padding: 4px 14px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); z-index: 2005;">
+                    <button type="button" id="btnWeLoveZoomOut" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; opacity: 0.9; user-select: none;" title="Thu nhỏ">➖</button>
+                    <span id="weLoveZoomPercent" style="color: #fff; font-size: 0.8rem; font-weight: 600; min-width: 40px; text-align: center; display: flex; align-items: center; justify-content: center; user-select: none;">100%</span>
+                    <button type="button" id="btnWeLoveZoomIn" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; opacity: 0.9; user-select: none;" title="Phóng to">➕</button>
+                    <button type="button" id="btnWeLoveZoomReset" style="background: rgba(255,255,255,0.12); border: none; color: #fff; cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; user-select: none;" title="Đặt lại">1:1</button>
+                </div>
+
+                <div id="weLoveLightboxImgWrapper" style="overflow: hidden; max-width: 100%; max-height: 70vh; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; width: auto; height: auto;">
+                    <img id="weLoveLightboxImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100%; max-height: 70vh; object-fit: contain; transform-origin: center; will-change: transform; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); user-select: none; -webkit-user-drag: none;">
+                </div>
                 <p id="weLoveLightboxCaption" style="color: #fff; margin-top: 15px; font-size: 1rem; font-weight: 600; font-style: italic; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.5);"></p>
             </div>
         </div>
@@ -1505,6 +1516,10 @@ function bindMemoryEvents() {
             }
         });
     }
+
+    // Khởi tạo tính năng Zoom và Rê ảnh (Drag) cho Lightbox
+    initWeLoveLightboxZoomAndDrag();
+}
 }
 
 // Bind events for admin view
@@ -2444,6 +2459,13 @@ export function updateWeLoveAlbumManagerList() {
     });
 }
 
+const preventDefaultTouchMove = (e) => {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (lightboxModal && lightboxModal.style.display !== 'none') {
+        e.preventDefault();
+    }
+};
+
 export function openWeLoveLightbox(url, caption) {
     const lightboxModal = document.getElementById('weLoveLightboxModal');
     const lightboxImg = document.getElementById('weLoveLightboxImg');
@@ -2456,6 +2478,9 @@ export function openWeLoveLightbox(url, caption) {
     lightboxModal.style.display = 'flex';
     document.body.classList.add('lightbox-open');
     document.documentElement.classList.add('lightbox-open');
+
+    // Khóa cuộn triệt để cho Safari iOS 16 trở xuống
+    document.addEventListener('touchmove', preventDefaultTouchMove, { passive: false });
 }
 
 export function closeWeLoveLightbox() {
@@ -2464,5 +2489,193 @@ export function closeWeLoveLightbox() {
         lightboxModal.style.display = 'none';
         document.body.classList.remove('lightbox-open');
         document.documentElement.classList.remove('lightbox-open');
+
+        // Hủy khóa cuộn
+        document.removeEventListener('touchmove', preventDefaultTouchMove, { passive: false });
     }
+}
+
+export function initWeLoveLightboxZoomAndDrag() {
+    const lightboxImg = document.getElementById('weLoveLightboxImg');
+    const btnZoomIn = document.getElementById('btnWeLoveZoomIn');
+    const btnZoomOut = document.getElementById('btnWeLoveZoomOut');
+    const btnZoomReset = document.getElementById('btnWeLoveZoomReset');
+    const zoomPercent = document.getElementById('weLoveZoomPercent');
+
+    if (!lightboxImg) return;
+
+    let scale = 1;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let currentX = 0, currentY = 0;
+
+    function updateTransform(smooth = true) {
+        lightboxImg.style.transition = smooth ? 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none';
+        
+        if (scale > 1) {
+            const rect = lightboxImg.getBoundingClientRect();
+            const parentRect = lightboxImg.parentElement.getBoundingClientRect();
+            
+            const maxDragX = Math.max(0, (rect.width - parentRect.width) / 2) / scale;
+            const maxDragY = Math.max(0, (rect.height - parentRect.height) / 2) / scale;
+            
+            currentX = Math.max(-maxDragX, Math.min(maxDragX, currentX));
+            currentY = Math.max(-maxDragY, Math.min(maxDragY, currentY));
+        } else {
+            currentX = 0;
+            currentY = 0;
+        }
+
+        lightboxImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+        if (zoomPercent) {
+            zoomPercent.textContent = `${Math.round(scale * 100)}%`;
+        }
+        
+        if (scale > 1) {
+            lightboxImg.style.cursor = 'grab';
+        } else {
+            lightboxImg.style.cursor = 'zoom-in';
+        }
+    }
+
+    if (btnZoomIn) {
+        btnZoomIn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            scale = Math.min(3, scale + 0.25);
+            updateTransform(true);
+        });
+    }
+
+    if (btnZoomOut) {
+        btnZoomOut.addEventListener('click', (e) => {
+            e.stopPropagation();
+            scale = Math.max(1, scale - 0.25);
+            updateTransform(true);
+        });
+    }
+
+    if (btnZoomReset) {
+        btnZoomReset.addEventListener('click', (e) => {
+            e.stopPropagation();
+            scale = 1;
+            currentX = 0;
+            currentY = 0;
+            updateTransform(true);
+        });
+    }
+
+    // Chạm/Click đúp zoom 2x
+    lightboxImg.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        if (scale > 1) {
+            scale = 1;
+            currentX = 0;
+            currentY = 0;
+        } else {
+            scale = 2;
+            const rect = lightboxImg.getBoundingClientRect();
+            const clickX = e.clientX - rect.left - rect.width / 2;
+            const clickY = e.clientY - rect.top - rect.height / 2;
+            currentX = -clickX / scale;
+            currentY = -clickY / scale;
+        }
+        updateTransform(true);
+    });
+
+    let lastTap = 0;
+    lightboxImg.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                e.preventDefault();
+                if (scale > 1) {
+                    scale = 1;
+                    currentX = 0;
+                    currentY = 0;
+                } else {
+                    scale = 2;
+                    const touch = e.touches[0];
+                    const rect = lightboxImg.getBoundingClientRect();
+                    const clickX = touch.clientX - rect.left - rect.width / 2;
+                    const clickY = touch.clientY - rect.top - rect.height / 2;
+                    currentX = -clickX / scale;
+                    currentY = -clickY / scale;
+                }
+                updateTransform(true);
+            }
+            lastTap = now;
+        }
+    }, { passive: false });
+
+    function dragStart(clientX, clientY) {
+        if (scale <= 1) return;
+        isDragging = true;
+        startX = clientX - currentX * scale;
+        startY = clientY - currentY * scale;
+        lightboxImg.style.cursor = 'grabbing';
+    }
+
+    function dragMove(clientX, clientY) {
+        if (!isDragging) return;
+        currentX = (clientX - startX) / scale;
+        currentY = (clientY - startY) / scale;
+        updateTransform(false);
+    }
+
+    function dragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        lightboxImg.style.cursor = 'grab';
+        updateTransform(true);
+    }
+
+    lightboxImg.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        dragStart(e.clientX, e.clientY);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        dragMove(e.clientX, e.clientY);
+    });
+
+    window.addEventListener('mouseup', () => {
+        dragEnd();
+    });
+
+    lightboxImg.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1 && scale > 1) {
+            const touch = e.touches[0];
+            dragStart(touch.clientX, touch.clientY);
+        }
+    }, { passive: true });
+
+    lightboxImg.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length === 1) {
+            const touch = e.touches[0];
+            dragMove(touch.clientX, touch.clientY);
+        }
+    }, { passive: true });
+
+    lightboxImg.addEventListener('touchend', () => {
+        dragEnd();
+    });
+
+    const originalClose = window.closeWeLoveLightbox;
+    window.closeWeLoveLightbox = function() {
+        scale = 1;
+        currentX = 0;
+        currentY = 0;
+        updateTransform(false);
+        if (originalClose) originalClose.apply(this, arguments);
+    };
+    
+    const originalOpen = window.openWeLoveLightbox;
+    window.openWeLoveLightbox = function(url, caption) {
+        scale = 1;
+        currentX = 0;
+        currentY = 0;
+        updateTransform(false);
+        if (originalOpen) originalOpen.apply(this, arguments);
+    };
 }
