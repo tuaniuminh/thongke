@@ -1722,3 +1722,142 @@ body:not(.light-mode) .memory-page.layout-modern .milestone-date {
   transition: all 0.25s ease;
 }
 
+/* --- Custom Album Slider with Swipe/Scroll --- */
+.welove-slider-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.welove-slides-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  gap: 15px;
+  padding: 5px 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.welove-slides-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.welove-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.welove-slide-img-wrapper {
+  width: 100%;
+  height: 280px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #080c14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 40px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+  position: relative;
+}
+
+.welove-slide-img-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(244, 63, 94, 0.15), inset 0 0 40px rgba(0,0,0,0.6);
+  border-color: rgba(244, 63, 94, 0.2);
+}
+
+.welove-slide-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welove-slide-img-wrapper:hover .welove-slide-img {
+  transform: scale(1.04);
+}
+
+/* Glassmorphism Caption */
+.welove-slide-caption-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%);
+  padding: 40px 20px 20px 20px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.welove-slide-caption {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  margin: 0;
+  letter-spacing: 0.02em;
+  opacity: 0.95;
+}
+
+/* Custom Navigation Buttons */
+.welove-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.welove-nav-btn:hover {
+  background: var(--accent-rose, #e11d48);
+  border-color: var(--accent-rose, #e11d48);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 20px rgba(225, 29, 72, 0.5);
+}
+
+.welove-nav-btn.prev {
+  left: 15px;
+}
+
+.welove-nav-btn.next {
+  right: 15px;
+}
+
+/* Hide navigation buttons on mobile, make images slightly taller */
+@media (max-width: 768px) {
+  .welove-nav-btn {
+    display: none;
+  }
+  .welove-slide-img-wrapper {
+    height: 320px;
+  }
+}
+

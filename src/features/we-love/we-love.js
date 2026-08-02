@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.74';
-import * as sync from '../../core/sync.js?v=4.3.74';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.74';
+} from '../../core/app.js?v=4.3.75';
+import * as sync from '../../core/sync.js?v=4.3.75';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.75';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2229,29 +2229,29 @@ export function updateWeLoveAlbum() {
     album.forEach((photo, idx) => {
         const directUrl = getGoogleDriveDirectLink(photo.url);
         slidesHtml += `
-            <div class="welove-slide ${idx === state.activePhotoIndex ? 'active' : ''}" style="display: ${idx === state.activePhotoIndex ? 'block' : 'none'}; width: 100%; position: relative;">
-                <div class="welove-slide-img-wrapper" style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);">
-                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease;" class="welove-slide-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center;">
+            <div class="welove-slide" data-idx="${idx}">
+                <div class="welove-slide-img-wrapper">
+                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-slide-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center; border-radius: 24px;">
                         <span style="font-size: 2.2rem; margin-bottom: 8px;">⚠️</span>
                         <p style="font-size: 0.82rem; margin: 0 0 4px 0; font-weight: 700;">Ảnh chưa bật công khai</p>
                         <p style="font-size: 0.72rem; margin: 0; color: var(--text-secondary); line-height: 1.3;">Hãy chuyển file Google Drive sang chế độ<br><b>"Bất kỳ ai có liên kết đều có thể xem"</b></p>
                     </div>
+                    ${photo.caption ? `
+                        <div class="welove-slide-caption-wrapper">
+                            <p class="welove-slide-caption">${escapeHTML(photo.caption)}</p>
+                        </div>
+                    ` : ''}
                 </div>
-                ${photo.caption ? `
-                    <div class="welove-slide-caption" style="text-align: center; margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-style: italic;">
-                        "${photo.caption}"
-                    </div>
-                ` : ''}
             </div>
         `;
     });
 
     const controlsHtml = album.length > 1 ? `
-        <button class="quote-nav-btn prev" id="btnWeLovePrevPhoto" style="position: absolute; top: 110px; left: 10px; z-index: 5;">‹</button>
-        <button class="quote-nav-btn next" id="btnWeLoveNextPhoto" style="position: absolute; top: 110px; right: 10px; z-index: 5;">›</button>
+        <button class="welove-nav-btn prev" id="btnWeLovePrevPhoto">‹</button>
+        <button class="welove-nav-btn next" id="btnWeLoveNextPhoto">›</button>
         
-        <div class="welove-slider-dots" style="display: flex; justify-content: center; gap: 6px; margin-top: 12px;">
+        <div class="welove-slider-dots" style="display: flex; justify-content: center; gap: 6px; margin-top: 16px;">
             ${album.map((_, idx) => `
                 <span class="welove-slider-dot ${idx === state.activePhotoIndex ? 'active' : ''}" data-idx="${idx}" style="width: 8px; height: 8px; border-radius: 50%; background: ${idx === state.activePhotoIndex ? 'var(--accent-rose)' : 'rgba(255,255,255,0.2)'}; cursor: pointer; transition: all 0.3s ease;"></span>
             `).join('')}
@@ -2259,23 +2259,87 @@ export function updateWeLoveAlbum() {
     ` : '';
 
     container.innerHTML = `
-        <div class="welove-slider-wrapper" style="width: 100%; position: relative;">
-            ${slidesHtml}
+        <div class="welove-slider-wrapper">
+            <div class="welove-slides-container" id="weLoveSlidesContainer">
+                ${slidesHtml}
+            </div>
             ${controlsHtml}
         </div>
     `;
 
+    const slidesContainer = document.getElementById('weLoveSlidesContainer');
+    
+    // Initial scroll offset placement
+    if (slidesContainer && state.activePhotoIndex > 0) {
+        setTimeout(() => {
+            const activeSlide = slidesContainer.querySelector(`.welove-slide[data-idx="${state.activePhotoIndex}"]`);
+            if (activeSlide) {
+                slidesContainer.scrollLeft = activeSlide.offsetLeft;
+            }
+        }, 50);
+    }
+
     // Bind slider actions
-    if (album.length > 1) {
+    if (album.length > 1 && slidesContainer) {
+        let isScrollingByClick = false;
+
+        // Auto update active dot index on manual swipe/scroll (optimized avoiding full re-render)
+        slidesContainer.addEventListener('scroll', () => {
+            if (isScrollingByClick) return;
+            const containerWidth = slidesContainer.clientWidth;
+            if (containerWidth <= 0) return;
+            
+            const scrollLeft = slidesContainer.scrollLeft;
+            const newIndex = Math.round(scrollLeft / containerWidth);
+            
+            if (newIndex >= 0 && newIndex < album.length && newIndex !== state.activePhotoIndex) {
+                state.activePhotoIndex = newIndex;
+                const dots = container.querySelectorAll('.welove-slider-dot');
+                dots.forEach((dot, idx) => {
+                    if (idx === newIndex) {
+                        dot.classList.add('active');
+                        dot.style.background = 'var(--accent-rose)';
+                    } else {
+                        dot.classList.remove('active');
+                        dot.style.background = 'rgba(255,255,255,0.2)';
+                    }
+                });
+            }
+        });
+
+        const scrollToSlide = (idx) => {
+            isScrollingByClick = true;
+            const activeSlide = slidesContainer.querySelector(`.welove-slide[data-idx="${idx}"]`);
+            if (activeSlide) {
+                slidesContainer.scrollTo({
+                    left: activeSlide.offsetLeft,
+                    behavior: 'smooth'
+                });
+            }
+            const dots = container.querySelectorAll('.welove-slider-dot');
+            dots.forEach((dot, dIdx) => {
+                if (dIdx === idx) {
+                    dot.classList.add('active');
+                    dot.style.background = 'var(--accent-rose)';
+                } else {
+                    dot.classList.remove('active');
+                    dot.style.background = 'rgba(255,255,255,0.2)';
+                }
+            });
+            setTimeout(() => {
+                isScrollingByClick = false;
+            }, 400);
+        };
+
         document.getElementById('btnWeLovePrevPhoto').addEventListener('click', (e) => {
             e.stopPropagation();
             state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
-            updateWeLoveAlbum();
+            scrollToSlide(state.activePhotoIndex);
         });
         document.getElementById('btnWeLoveNextPhoto').addEventListener('click', (e) => {
             e.stopPropagation();
             state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
-            updateWeLoveAlbum();
+            scrollToSlide(state.activePhotoIndex);
         });
         
         // Dots clicks
@@ -2285,19 +2349,23 @@ export function updateWeLoveAlbum() {
                 e.stopPropagation();
                 const idx = parseInt(e.target.getAttribute('data-idx'));
                 state.activePhotoIndex = idx;
-                updateWeLoveAlbum();
+                scrollToSlide(idx);
             });
         });
     }
 
-    // Lightbox click preview
-    const imgs = container.querySelectorAll('.welove-slide-img-wrapper');
-    imgs.forEach(wrapper => {
-        wrapper.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const activePhoto = album[state.activePhotoIndex];
-            openWeLoveLightbox(getGoogleDriveDirectLink(activePhoto.url), activePhoto.caption);
-        });
+    // Lightbox click preview for each individual image wrapper
+    const slides = container.querySelectorAll('.welove-slide');
+    slides.forEach(slide => {
+        const imgWrapper = slide.querySelector('.welove-slide-img-wrapper');
+        const idx = parseInt(slide.getAttribute('data-idx'));
+        if (imgWrapper) {
+            imgWrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const photo = album[idx];
+                openWeLoveLightbox(getGoogleDriveDirectLink(photo.url), photo.caption);
+            });
+        }
     });
 }
 
