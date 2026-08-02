@@ -2182,8 +2182,8 @@ export function getGoogleDriveDirectLink(url) {
     }
 
     if (fileId) {
-        // Use thumbnail endpoint - most reliable, works for public files, no CORS issues
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
+        // Use direct Google User Content link - bypasses drive.google.com auth issues for public files
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
     }
     
     // Not a Google Drive link — return as-is (supports direct image URLs too)
