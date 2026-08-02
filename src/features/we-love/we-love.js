@@ -2231,7 +2231,12 @@ export function updateWeLoveAlbum() {
         slidesHtml += `
             <div class="welove-slide ${idx === state.activePhotoIndex ? 'active' : ''}" style="display: ${idx === state.activePhotoIndex ? 'block' : 'none'}; width: 100%; position: relative;">
                 <div class="welove-slide-img-wrapper" style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);">
-                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease;" class="welove-slide-img">
+                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease;" class="welove-slide-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center;">
+                        <span style="font-size: 2.2rem; margin-bottom: 8px;">⚠️</span>
+                        <p style="font-size: 0.82rem; margin: 0 0 4px 0; font-weight: 700;">Ảnh chưa bật công khai</p>
+                        <p style="font-size: 0.72rem; margin: 0; color: var(--text-secondary); line-height: 1.3;">Hãy chuyển file Google Drive sang chế độ<br><b>"Bất kỳ ai có liên kết đều có thể xem"</b></p>
+                    </div>
                 </div>
                 ${photo.caption ? `
                     <div class="welove-slide-caption" style="text-align: center; margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-style: italic;">
@@ -2321,7 +2326,10 @@ export function updateWeLoveAlbumManagerList() {
         const directUrl = getGoogleDriveDirectLink(photo.url);
         return `
             <div class="welove-log-card welove-photo-manager-item" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-color);">
-                <img src="${directUrl}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; background: #000; border: 1px solid var(--border-color);">
+                <div style="position: relative; width: 50px; height: 50px; flex-shrink: 0;">
+                    <img src="${directUrl}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; background: #000; border: 1px solid var(--border-color);" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display: none; width: 50px; height: 50px; border-radius: 8px; background: rgba(244,63,94,0.1); border: 1px dashed var(--accent-rose); align-items: center; justify-content: center; color: var(--accent-rose); font-size: 0.9rem;" title="Ảnh chưa bật công khai hoặc bị chặn quyền truy cập">⚠️</div>
+                </div>
                 <div style="flex: 1; min-width: 0;">
                     <p style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
                         ${photo.caption || 'Kỷ niệm không có tên'}
