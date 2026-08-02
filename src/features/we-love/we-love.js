@@ -1180,7 +1180,7 @@ export async function renderWeLoveDashboard() {
         <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center;">
             <div style="position: relative; max-width: 90%; max-height: 85%; display: flex; flex-direction: column; align-items: center;">
                 <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: -45px; right: 0; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5);" title="Đóng">✕</button>
-                <img id="weLoveLightboxImg" src="" alt="Xem ảnh" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+                <img id="weLoveLightboxImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
                 <p id="weLoveLightboxCaption" style="color: #fff; margin-top: 15px; font-size: 1rem; font-weight: 600; font-style: italic; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.5);"></p>
             </div>
         </div>
