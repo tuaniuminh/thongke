@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.76';
-import * as sync from '../../core/sync.js?v=4.3.76';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.76';
+} from '../../core/app.js?v=4.3.77';
+import * as sync from '../../core/sync.js?v=4.3.77';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.77';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2454,11 +2454,15 @@ export function openWeLoveLightbox(url, caption) {
     lightboxImg.src = url;
     lightboxCaption.textContent = caption ? `"${caption}"` : '';
     lightboxModal.style.display = 'flex';
+    document.body.classList.add('lightbox-open');
+    document.documentElement.classList.add('lightbox-open');
 }
 
 export function closeWeLoveLightbox() {
     const lightboxModal = document.getElementById('weLoveLightboxModal');
     if (lightboxModal) {
         lightboxModal.style.display = 'none';
+        document.body.classList.remove('lightbox-open');
+        document.documentElement.classList.remove('lightbox-open');
     }
 }

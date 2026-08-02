@@ -1861,3 +1861,9 @@ body:not(.light-mode) .memory-page.layout-modern .milestone-date {
   }
 }
 
+/* Chặn cuộn nền khi xem ảnh lớn Lightbox */
+body.lightbox-open, html.lightbox-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+

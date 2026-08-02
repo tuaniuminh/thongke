@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.76';
-import { decrypt } from '../../core/crypto.js?v=4.3.76';
-import * as sync from '../../core/sync.js?v=4.3.76';
+} from '../../core/app.js?v=4.3.77';
+import { decrypt } from '../../core/crypto.js?v=4.3.77';
+import * as sync from '../../core/sync.js?v=4.3.77';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -453,6 +453,14 @@ export async function checkForSharedFamilyFund() {
                                     state.weLoveVisitLogsUpdated = fundData.weLoveVisitLogsUpdated || '';
                                 }
 
+                                // Gộp WeLove Photo Album
+                                const localPhotoAlbum = state.weLovePhotoAlbumUpdated ? new Date(state.weLovePhotoAlbumUpdated).getTime() : 0;
+                                const remotePhotoAlbum = fundData.weLovePhotoAlbumUpdated ? new Date(fundData.weLovePhotoAlbumUpdated).getTime() : 0;
+                                if (remotePhotoAlbum > localPhotoAlbum) {
+                                    state.weLovePhotoAlbum = fundData.weLovePhotoAlbum || [];
+                                    state.weLovePhotoAlbumUpdated = fundData.weLovePhotoAlbumUpdated || '';
+                                }
+
                                 await saveLocalState();
                             } catch (decFundErr) {
                                 console.error("[E2EE Debug] Admin failed to decrypt Spouse's fund:", decFundErr);
@@ -660,6 +668,14 @@ export async function checkForSharedFamilyFund() {
                                      if (remoteTime > localTime) {
                                          state.weLoveVisitLogs = fundData.weLoveVisitLogs || [];
                                          state.weLoveVisitLogsUpdated = fundData.weLoveVisitLogsUpdated;
+                                     }
+                                 }
+                                 if (fundData.weLovePhotoAlbumUpdated) {
+                                     const localTime = state.weLovePhotoAlbumUpdated ? new Date(state.weLovePhotoAlbumUpdated).getTime() : 0;
+                                     const remoteTime = new Date(fundData.weLovePhotoAlbumUpdated).getTime();
+                                     if (remoteTime > localTime) {
+                                         state.weLovePhotoAlbum = fundData.weLovePhotoAlbum || [];
+                                         state.weLovePhotoAlbumUpdated = fundData.weLovePhotoAlbumUpdated;
                                      }
                                  }
                                 if (fundData.ownerEmailUpdated) {
