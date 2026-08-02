@@ -1397,25 +1397,32 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
   }
 }
 
-/* Page Background Enhancement for Modern Layout */
-body.light-mode #tab-welove {
+/* Page Background Enhancement: Apply to the WHOLE PAGE when WeLove tab is active */
+/* switchTab() already adds class active-tab-welove to both <html> and <body> */
+html.active-tab-welove.light-mode,
+html.active-tab-welove body.light-mode {
   background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
 }
-body:not(.light-mode) #tab-welove {
+html.active-tab-welove:not(.light-mode),
+html.active-tab-welove body:not(.light-mode) {
   background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
+}
+/* Also apply to body so it actually renders */
+body.active-tab-welove.light-mode {
+  background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
+}
+body.active-tab-welove:not(.light-mode) {
+  background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
+}
+/* Tab panel and memory-page are transparent so body gradient shows through */
+#tab-welove {
+  background: transparent !important;
 }
 .memory-page.layout-modern {
   background: transparent !important;
 }
-
-/* Make tab-welove full-bleed on Desktop by offsetting main-content padding and header margin */
-@media (min-width: 1024px) {
-  #tab-welove {
-    margin: -2.5rem -3rem -2rem -3rem !important;
-    padding: 3rem !important;
-    min-height: calc(100vh - 80px) !important;
-    box-sizing: border-box !important;
-  }
+.memory-page {
+  background: transparent !important;
 }
 
 /* Glassmorphic Frosted Card Styling */
