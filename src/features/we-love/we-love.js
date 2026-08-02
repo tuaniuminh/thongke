@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.65';
-import * as sync from '../../core/sync.js?v=4.3.65';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.65';
+} from '../../core/app.js?v=4.3.66';
+import * as sync from '../../core/sync.js?v=4.3.66';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.66';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.65');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.66');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -120,7 +120,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.65';
+        const logoPath = './logo_pwa_small.png?v=4.3.66';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -441,7 +441,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.65';
+    const logoPath = './logo_pwa_small.png?v=4.3.66';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -2156,20 +2156,40 @@ export function getGoogleDriveDirectLink(url) {
     if (!url) return '';
     url = url.trim();
     
+    // Extract Google Drive FILE_ID from various share link formats
+    let fileId = null;
+
     // Pattern 1: drive.google.com/file/d/[ID]/view
     const fileDMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (fileDMatch && fileDMatch[1]) {
-        return `https://lh3.googleusercontent.com/d/${fileDMatch[1]}`;
+        fileId = fileDMatch[1];
     }
     
-    // Pattern 2: drive.google.com/open?id=[ID]
-    const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (openIdMatch && openIdMatch[1]) {
-        return `https://lh3.googleusercontent.com/d/${openIdMatch[1]}`;
+    // Pattern 2: drive.google.com/open?id=[ID] or id=[ID] query param
+    if (!fileId) {
+        const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (openIdMatch && openIdMatch[1]) {
+            fileId = openIdMatch[1];
+        }
+    }
+
+    // Pattern 3: drive.google.com/drive/folders or uc?id=
+    if (!fileId) {
+        const ucIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+        if (ucIdMatch && ucIdMatch[1]) {
+            fileId = ucIdMatch[1];
+        }
+    }
+
+    if (fileId) {
+        // Use thumbnail endpoint - most reliable, works for public files, no CORS issues
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
     }
     
+    // Not a Google Drive link — return as-is (supports direct image URLs too)
     return url;
 }
+
 
 export function updateWeLoveAlbum() {
     const container = document.getElementById('weLoveAlbumContainer');
