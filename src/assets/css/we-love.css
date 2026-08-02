@@ -1408,6 +1408,16 @@ body:not(.light-mode) #tab-welove {
   background: transparent !important;
 }
 
+/* Make tab-welove full-bleed on Desktop by offsetting main-content padding and header margin */
+@media (min-width: 1024px) {
+  #tab-welove {
+    margin: -2.5rem -3rem -2rem -3rem !important;
+    padding: 3rem !important;
+    min-height: calc(100vh - 80px) !important;
+    box-sizing: border-box !important;
+  }
+}
+
 /* Glassmorphic Frosted Card Styling */
 .memory-page.layout-modern .memory-card,
 .memory-page.layout-modern .welove-card {
