@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.66';
-import * as sync from '../../core/sync.js?v=4.3.66';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.66';
+} from '../../core/app.js?v=4.3.67';
+import * as sync from '../../core/sync.js?v=4.3.67';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.67';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.66');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.67');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -120,7 +120,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.66';
+        const logoPath = './logo_pwa_small.png?v=4.3.67';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -441,7 +441,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.66';
+    const logoPath = './logo_pwa_small.png?v=4.3.67';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -2156,38 +2156,42 @@ export function getGoogleDriveDirectLink(url) {
     if (!url) return '';
     url = url.trim();
     
-    // Extract Google Drive FILE_ID from various share link formats
-    let fileId = null;
-
-    // Pattern 1: drive.google.com/file/d/[ID]/view
-    const fileDMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (fileDMatch && fileDMatch[1]) {
-        fileId = fileDMatch[1];
-    }
-    
-    // Pattern 2: drive.google.com/open?id=[ID] or id=[ID] query param
-    if (!fileId) {
-        const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (openIdMatch && openIdMatch[1]) {
-            fileId = openIdMatch[1];
-        }
-    }
-
-    // Pattern 3: drive.google.com/drive/folders or uc?id=
-    if (!fileId) {
-        const ucIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
-        if (ucIdMatch && ucIdMatch[1]) {
-            fileId = ucIdMatch[1];
-        }
-    }
-
+    const fileId = extractGoogleDriveFileId(url);
     if (fileId) {
-        // Use thumbnail endpoint - most reliable, works for public files, no CORS issues
+        // Primary: thumbnail endpoint (works for public Drive files, no CORS)
         return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
     }
-    
-    // Not a Google Drive link — return as-is (supports direct image URLs too)
     return url;
+}
+
+export function extractGoogleDriveFileId(url) {
+    if (!url) return null;
+    url = url.trim();
+
+    // Pattern 1: /file/d/[ID]/
+    let m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m && m[1]) return m[1];
+
+    // Pattern 2: ?id=[ID] or &id=[ID]
+    m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m && m[1]) return m[1];
+
+    // Pattern 3: generic /d/[ID]
+    m = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+    if (m && m[1]) return m[1];
+
+    return null;
+}
+
+// Build chain of fallback URLs for a Google Drive file
+export function getGdriveUrlChain(rawUrl) {
+    const fileId = extractGoogleDriveFileId(rawUrl);
+    if (!fileId) return [rawUrl]; // not a Drive link, use as-is
+    return [
+        `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`,
+        `https://lh3.googleusercontent.com/d/${fileId}`,
+        `https://drive.google.com/uc?export=view&id=${fileId}`,
+    ];
 }
 
 
@@ -2226,15 +2230,23 @@ export function updateWeLoveAlbum() {
     // Render slider html
     let slidesHtml = '';
     album.forEach((photo, idx) => {
-        const directUrl = getGoogleDriveDirectLink(photo.url);
+        const urlChain = getGdriveUrlChain(photo.url);
+        const primaryUrl = urlChain[0];
+        const fallbackUrls = JSON.stringify(urlChain.slice(1));
         slidesHtml += `
             <div class="welove-slide ${idx === state.activePhotoIndex ? 'active' : ''}" style="display: ${idx === state.activePhotoIndex ? 'block' : 'none'}; width: 100%; position: relative;">
-                <div class="welove-slide-img-wrapper" style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);">
-                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease;" class="welove-slide-img">
+                <div class="welove-slide-img-wrapper" style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 30px rgba(0,0,0,0.3);">
+                    <img src="${primaryUrl}"
+                        alt="${photo.caption || 'Kỷ niệm'}"
+                        data-fallbacks='${fallbackUrls}'
+                        data-fallback-idx="0"
+                        style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease;"
+                        class="welove-slide-img"
+                        onerror="window._weloveImgFallback(this)">
                 </div>
                 ${photo.caption ? `
                     <div class="welove-slide-caption" style="text-align: center; margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-style: italic;">
-                        "${photo.caption}"
+                        \"${photo.caption}\"
                     </div>
                 ` : ''}
             </div>
@@ -2385,3 +2397,49 @@ export function closeWeLoveLightbox() {
         lightboxModal.style.display = 'none';
     }
 }
+
+// Global fallback handler for Google Drive images
+// Automatically tries next URL in chain when image fails to load
+window._weloveImgFallback = function(img) {
+    const fallbacksAttr = img.getAttribute('data-fallbacks');
+    const fallbackIdxAttr = img.getAttribute('data-fallback-idx');
+    
+    if (!fallbacksAttr) {
+        _weloveShowImgPlaceholder(img);
+        return;
+    }
+
+    let fallbacks;
+    try { fallbacks = JSON.parse(fallbacksAttr); } catch(e) { fallbacks = []; }
+    
+    const currentIdx = parseInt(fallbackIdxAttr || '0');
+    
+    if (currentIdx < fallbacks.length) {
+        // Try next fallback URL
+        img.setAttribute('data-fallback-idx', String(currentIdx + 1));
+        img.onerror = () => window._weloveImgFallback(img);
+        img.src = fallbacks[currentIdx];
+    } else {
+        // All fallbacks exhausted — show friendly placeholder
+        _weloveShowImgPlaceholder(img);
+    }
+};
+
+function _weloveShowImgPlaceholder(img) {
+    img.onerror = null;
+    img.style.display = 'none';
+    const wrapper = img.closest('.welove-slide-img-wrapper') || img.parentElement;
+    if (wrapper && !wrapper.querySelector('.welove-img-error')) {
+        wrapper.insertAdjacentHTML('beforeend', `
+            <div class="welove-img-error" style="text-align:center; padding: 1rem; color: var(--text-secondary);">
+                <div style="font-size: 2rem; margin-bottom: 8px;">🚫</div>
+                <p style="font-size: 0.8rem; margin: 0; line-height: 1.4;">
+                    Không tải được ảnh.<br>
+                    Hãy đảm bảo Google Drive đã đặt chia sẻ<br>
+                    <b>"Bất kỳ ai có liên kết"</b>.
+                </p>
+            </div>
+        `);
+    }
+}
+
