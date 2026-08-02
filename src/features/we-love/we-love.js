@@ -2182,8 +2182,9 @@ export function getGoogleDriveDirectLink(url) {
     }
 
     if (fileId) {
-        // Use direct Google User Content link - bypasses drive.google.com auth issues for public files
-        return `https://lh3.googleusercontent.com/d/${fileId}`;
+        const directLink = `https://lh3.googleusercontent.com/d/${fileId}`;
+        console.log(`[WeLove Album] Parsed Google Drive Link: ${url} -> Direct URL: ${directLink}`);
+        return directLink;
     }
     
     // Not a Google Drive link — return as-is (supports direct image URLs too)
