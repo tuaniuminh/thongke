@@ -1530,6 +1530,14 @@ body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle {
   transform: scale(1.08);
 }
 
+/* Vô hiệu hóa position absolute của nút nhạc/chuông trong modern actions để tránh bị lệch */
+.memory-page.layout-modern .modern-action-buttons .music-toggle-btn,
+.memory-page.layout-modern .modern-action-buttons .notification-test-btn {
+  position: static !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Glassmorphic Couple Names Header Container */
 .memory-page.layout-modern .couple-names-header {
   background: rgba(255, 255, 255, 0.6) !important;
@@ -1619,5 +1627,78 @@ body:not(.light-mode) .memory-page.layout-modern .welove-log-card:hover {
 body:not(.light-mode) .memory-page.layout-modern .milestone-date {
   background: rgba(244, 63, 94, 0.15) !important;
   border-color: rgba(244, 63, 94, 0.22) !important;
+}
+
+/* ============================================================
+   HỖ TRỢ ALBUM ẢNH KỶ NIỆM (LOVE PHOTO ALBUM)
+   ============================================================ */
+
+.welove-album-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Slide image container styling */
+.welove-slide-img-wrapper {
+  position: relative;
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.welove-slide-img-wrapper:hover {
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+.welove-slide-img-wrapper:hover img {
+  transform: scale(1.02);
+}
+
+/* Dots navigation indicator slider dots */
+.welove-slider-dot {
+  opacity: 0.7;
+}
+
+.welove-slider-dot.active {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.welove-slider-dot:hover {
+  opacity: 1;
+  background: var(--accent-rose) !important;
+}
+
+/* Lightbox Modal Style */
+#weLoveLightboxModal {
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+/* Manager List scrollbar styling */
+#weLoveAlbumManagerList::-webkit-scrollbar {
+  width: 6px;
+}
+
+#weLoveAlbumManagerList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#weLoveAlbumManagerList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+[data-theme='dark'] #weLoveAlbumManagerList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#weLoveAlbumManagerList::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.3);
+}
+
+/* Thumbnail item styles in manager list */
+.welove-photo-manager-item {
+  transition: all 0.25s ease;
 }
 

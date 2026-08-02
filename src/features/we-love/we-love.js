@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.61';
-import * as sync from '../../core/sync.js?v=4.3.61';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.61';
+} from '../../core/app.js?v=4.3.62';
+import * as sync from '../../core/sync.js?v=4.3.62';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.62';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -67,7 +67,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.61');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.62');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -120,7 +120,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.61';
+        const logoPath = './logo_pwa_small.png?v=4.3.62';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -441,7 +441,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.61';
+    const logoPath = './logo_pwa_small.png?v=4.3.62';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -812,6 +812,50 @@ export async function renderWeLoveDashboard() {
     const showSickness = state.weLoveShowSickness !== false;
     const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
 
+    const sicknessCardHtml = showSickness ? `
+                    <div class="welove-card">
+                        <div class="welove-title-box">
+                            <span style="font-size: 1.8rem;">🩺</span>
+                            <h3 class="welove-title">Sổ Tay Sức Khỏe Của Em Iu</h3>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                            Thống kê đợt ốm qua các năm của em iu và lời dặn dỗ yêu thương từ anh đẹp trai
+                        </p>
+
+                        <!-- Years selector filter pills -->
+                        <div class="welove-years-container" id="weLoveYearsFilter" style="margin-top: 1.5rem;">
+                            <!-- populated by JS -->
+                        </div>
+
+                        <!-- Sickness circle stats & alert -->
+                        <div class="welove-summary-box">
+                            <div class="welove-heart-circle">
+                                <span class="welove-count-lbl">Tổng</span>
+                                <span class="welove-count-num" id="weLoveSicknessCount">0</span>
+                                <span class="welove-count-lbl">Lần Ốm</span>
+                            </div>
+                            <div class="welove-warning-msg" id="weLoveHealthWarning">
+                                Đang tải...
+                            </div>
+                        </div>
+
+                        <!-- Timeline Title & Add Btn -->
+                        <div class="welove-timeline-title">
+                            <span id="weLoveHistoryTitle">📅 Lịch Sử Các Đợt Ốm</span>
+                            ${canEdit ? `
+                                <button class="btn btn-primary" id="btnWeLoveAddSickness" style="margin-left: auto; font-size: 0.85rem; padding: 4px 12px; border-radius: 10px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.15);">
+                                    <span>Ghi nhận mới 📝</span>
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <!-- Timeline list -->
+                        <div class="welove-timeline" id="weLoveSicknessTimeline">
+                            <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
+                        </div>
+                    </div>
+    ` : '';
+
     const isModern = state.weLoveDesktopLayout === "modern";
     tabContainer.innerHTML = `
         <div class="memory-page ${isModern ? 'layout-modern' : ''}" id="weLovePage">
@@ -1002,50 +1046,50 @@ export async function renderWeLoveDashboard() {
                     </div>
                 </div>
 
-                <!-- Sổ tay sức khỏe em iu (Conditional show/hide) -->
-                ${showSickness ? `
-                    <div class="welove-card">
-                        <div class="welove-title-box">
-                            <span style="font-size: 1.8rem;">🩺</span>
-                            <h3 class="welove-title">Sổ Tay Sức Khỏe Của Em Iu</h3>
-                        </div>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
-                            Thống kê đợt ốm qua các năm của em iu và lời dặn dỗ yêu thương từ anh đẹp trai
-                        </p>
-
-                        <!-- Years selector filter pills -->
-                        <div class="welove-years-container" id="weLoveYearsFilter" style="margin-top: 1.5rem;">
-                            <!-- populated by JS -->
-                        </div>
-
-                        <!-- Sickness circle stats & alert -->
-                        <div class="welove-summary-box">
-                            <div class="welove-heart-circle">
-                                <span class="welove-count-lbl">Tổng</span>
-                                <span class="welove-count-num" id="weLoveSicknessCount">0</span>
-                                <span class="welove-count-lbl">Lần Ốm</span>
+                <!-- Right Column wrapper (if modern) or direct cards -->
+                ${state.weLoveDesktopLayout === 'modern' ? `
+                    <div class="welove-right-column" style="display: flex; flex-direction: column; gap: 2.5rem; width: 100%;">
+                        ${sicknessCardHtml}
+                        
+                        <!-- Love Photo Album Card -->
+                        <div class="welove-card welove-album-card" style="margin-top: 0;">
+                            <div class="welove-title-box" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; width: 100%;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 1.8rem;">📸</span>
+                                    <h3 class="welove-title">Album Ảnh Tình Yêu</h3>
+                                </div>
+                                ${canEdit ? `
+                                    <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quản lý Album ảnh">
+                                        <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                ` : ''}
                             </div>
-                            <div class="welove-warning-msg" id="weLoveHealthWarning">
-                                Đang tải...
+                            <div id="weLoveAlbumContainer" style="width: 100%; position: relative;">
+                                <!-- populated by JS -->
                             </div>
                         </div>
-
-                        <!-- Timeline Title & Add Btn -->
-                        <div class="welove-timeline-title">
-                            <span id="weLoveHistoryTitle">📅 Lịch Sử Các Đợt Ốm</span>
+                    </div>
+                ` : `
+                    ${sicknessCardHtml}
+                    
+                    <!-- Love Photo Album Card -->
+                    <div class="welove-card welove-album-card" style="margin-top: 2rem;">
+                        <div class="welove-title-box" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.8rem;">📸</span>
+                                <h3 class="welove-title">Album Ảnh Tình Yêu</h3>
+                            </div>
                             ${canEdit ? `
-                                <button class="btn btn-primary" id="btnWeLoveAddSickness" style="margin-left: auto; font-size: 0.85rem; padding: 4px 12px; border-radius: 10px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.15);">
-                                    <span>Ghi nhận mới 📝</span>
+                                <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quản lý Album ảnh">
+                                    <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
                                 </button>
                             ` : ''}
                         </div>
-
-                        <!-- Timeline list -->
-                        <div class="welove-timeline" id="weLoveSicknessTimeline">
-                            <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
+                        <div id="weLoveAlbumContainer" style="width: 100%; position: relative;">
+                            <!-- populated by JS -->
                         </div>
                     </div>
-                ` : ''}
+                `}
             `}
         </div>
 
@@ -1090,6 +1134,54 @@ export async function renderWeLoveDashboard() {
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- ALBUM MANAGER MODAL -->
+        <div class="welove-modal-overlay" id="weLoveAlbumManagerModal" style="display: none; z-index: 1000;">
+            <div class="welove-modal-content" style="max-width: 500px; width: 90%;">
+                <h4 class="welove-modal-title">
+                    <span>📸 Quản Lý Album Ảnh Kỷ Niệm</span>
+                </h4>
+                
+                <form id="weLoveAddPhotoForm" style="margin-bottom: 20px; text-align: left;">
+                    <div class="welove-form-group">
+                        <label class="welove-form-label">🔗 Link ảnh / Google Drive link:</label>
+                        <input type="url" class="welove-input" id="weLovePhotoUrlInput" placeholder="https://drive.google.com/file/d/.../view" required style="width: 100%;">
+                        <span style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px; display: block;">
+                            Hỗ trợ link chia sẻ từ Google Drive (để chế độ công khai ai cũng xem được).
+                        </span>
+                    </div>
+                    <div class="welove-form-group">
+                        <label class="welove-form-label">✍️ Lời dặn / Chú thích ảnh:</label>
+                        <input type="text" class="welove-input" id="weLovePhotoCaptionInput" placeholder="Ví dụ: Đi chơi Đà Lạt 🌸" style="width: 100%;">
+                    </div>
+                    <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%; font-weight: 700;">
+                        Thêm vào Album ➕
+                    </button>
+                </form>
+
+                <div style="border-top: 1px solid var(--border-color); padding-top: 15px; text-align: left;">
+                    <h5 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--text-primary); font-weight: 700;">Danh sách hình ảnh</h5>
+                    <div id="weLoveAlbumManagerList" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+                        <!-- Populate dynamically -->
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                    <button type="button" class="welove-btn" id="btnWeLoveCloseAlbumManager" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 20px; border-radius: 12px; font-weight: 600; cursor: pointer;">
+                        Đóng cửa sổ ❌
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIGHTBOX PREVIEW MODAL -->
+        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center;">
+            <div style="position: relative; max-width: 90%; max-height: 85%; display: flex; flex-direction: column; align-items: center;">
+                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: -45px; right: 0; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5);" title="Đóng">✕</button>
+                <img id="weLoveLightboxImg" src="" alt="Xem ảnh" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+                <p id="weLoveLightboxCaption" style="color: #fff; margin-top: 15px; font-size: 1rem; font-weight: 600; font-style: italic; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.5);"></p>
             </div>
         </div>
     `;
@@ -1332,6 +1424,85 @@ function bindMemoryEvents() {
             renderSicknessHistory();
             modalOverlay.style.display = 'none';
             showToast("Đã ghi nhận đợt ốm thành công ❤️");
+        });
+    }
+
+    // Initialize album index
+    if (state.weLovePhotoAlbum && state.weLovePhotoAlbum.length > 0) {
+        state.activePhotoIndex = state.activePhotoIndex || 0;
+        if (state.activePhotoIndex >= state.weLovePhotoAlbum.length) {
+            state.activePhotoIndex = 0;
+        }
+    } else {
+        state.activePhotoIndex = 0;
+    }
+    
+    // Render photo album slider content
+    updateWeLoveAlbum();
+
+    // Bind Manage Album settings button click
+    const btnManageAlbum = document.getElementById('btnWeLoveManageAlbum');
+    if (btnManageAlbum) {
+        btnManageAlbum.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openWeLoveAlbumManager();
+        });
+    }
+
+    // Modal close and submission listeners for photo manager
+    const modalAlbum = document.getElementById('weLoveAlbumManagerModal');
+    const btnCloseAlbum = document.getElementById('btnWeLoveCloseAlbumManager');
+    const formAddPhoto = document.getElementById('weLoveAddPhotoForm');
+    
+    if (btnCloseAlbum && modalAlbum) {
+        btnCloseAlbum.addEventListener('click', () => {
+            modalAlbum.style.display = 'none';
+        });
+    }
+
+    if (formAddPhoto) {
+        formAddPhoto.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlInput = document.getElementById('weLovePhotoUrlInput');
+            const captionInput = document.getElementById('weLovePhotoCaptionInput');
+            const rawUrl = urlInput.value.trim();
+            const caption = captionInput.value.trim();
+
+            if (!rawUrl) return;
+
+            if (!state.weLovePhotoAlbum) state.weLovePhotoAlbum = [];
+            state.weLovePhotoAlbum.push({
+                id: 'photo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                url: rawUrl,
+                caption: caption
+            });
+            state.weLovePhotoAlbumUpdated = new Date().toISOString();
+            await saveLocalState();
+
+            urlInput.value = '';
+            captionInput.value = '';
+            
+            updateWeLoveAlbumManagerList();
+            updateWeLoveAlbum();
+
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+            showToast("Đã thêm ảnh vào album thành công 📸");
+        });
+    }
+
+    // Lightbox Modal Close
+    const btnCloseLightbox = document.getElementById('btnWeLoveCloseLightbox');
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (btnCloseLightbox && lightboxModal) {
+        btnCloseLightbox.addEventListener('click', () => {
+            closeWeLoveLightbox();
+        });
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal) {
+                closeWeLoveLightbox();
+            }
         });
     }
 }
@@ -1977,4 +2148,220 @@ export async function checkAndSendWeLoveAnniversaryTelegram() {
     }
 }
 
+// ============================================================
+// HỖ TRỢ ALBUM ẢNH KỶ NIỆM (TƯƠNG THÍCH GOOGLE DRIVE)
+// ============================================================
 
+export function getGoogleDriveDirectLink(url) {
+    if (!url) return '';
+    url = url.trim();
+    
+    // Pattern 1: drive.google.com/file/d/[ID]/view
+    const fileDMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileDMatch && fileDMatch[1]) {
+        return `https://lh3.googleusercontent.com/d/${fileDMatch[1]}`;
+    }
+    
+    // Pattern 2: drive.google.com/open?id=[ID]
+    const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (openIdMatch && openIdMatch[1]) {
+        return `https://lh3.googleusercontent.com/d/${openIdMatch[1]}`;
+    }
+    
+    return url;
+}
+
+export function updateWeLoveAlbum() {
+    const container = document.getElementById('weLoveAlbumContainer');
+    if (!container) return;
+
+    const album = state.weLovePhotoAlbum || [];
+    if (album.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 2.5rem 1.5rem; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed var(--border-color);">
+                <span style="font-size: 2.5rem; display: block; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(244,63,94,0.3));">📸</span>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 1.25rem 0;">Chưa có ảnh nào trong album. Hãy thêm những khoảnh khắc đẹp của hai bạn!</p>
+                ${(!state.viewingSharedFund || state.sharedFundSourceRow === null) ? `
+                    <button class="btn btn-primary" id="btnWeLoveAddPhotoPlaceholder" style="font-size: 0.85rem; padding: 6px 16px; border-radius: 12px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);">
+                        Thêm ảnh đầu tiên ➕
+                    </button>
+                ` : '<p style="font-size: 0.8rem; color: var(--accent-rose); margin:0;">Chỉ tài khoản chính mới có quyền quản lý ảnh</p>'}
+            </div>
+        `;
+        
+        const btnAddPlaceholder = document.getElementById('btnWeLoveAddPhotoPlaceholder');
+        if (btnAddPlaceholder) {
+            btnAddPlaceholder.addEventListener('click', () => {
+                openWeLoveAlbumManager();
+            });
+        }
+        return;
+    }
+
+    // Ensure active index is within bounds
+    if (typeof state.activePhotoIndex !== 'number' || state.activePhotoIndex >= album.length || state.activePhotoIndex < 0) {
+        state.activePhotoIndex = 0;
+    }
+
+    // Render slider html
+    let slidesHtml = '';
+    album.forEach((photo, idx) => {
+        const directUrl = getGoogleDriveDirectLink(photo.url);
+        slidesHtml += `
+            <div class="welove-slide ${idx === state.activePhotoIndex ? 'active' : ''}" style="display: ${idx === state.activePhotoIndex ? 'block' : 'none'}; width: 100%; position: relative;">
+                <div class="welove-slide-img-wrapper" style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);">
+                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.5s ease;" class="welove-slide-img">
+                </div>
+                ${photo.caption ? `
+                    <div class="welove-slide-caption" style="text-align: center; margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-style: italic;">
+                        "${photo.caption}"
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+
+    const controlsHtml = album.length > 1 ? `
+        <button class="quote-nav-btn prev" id="btnWeLovePrevPhoto" style="position: absolute; top: 110px; left: 10px; z-index: 5;">‹</button>
+        <button class="quote-nav-btn next" id="btnWeLoveNextPhoto" style="position: absolute; top: 110px; right: 10px; z-index: 5;">›</button>
+        
+        <div class="welove-slider-dots" style="display: flex; justify-content: center; gap: 6px; margin-top: 12px;">
+            ${album.map((_, idx) => `
+                <span class="welove-slider-dot ${idx === state.activePhotoIndex ? 'active' : ''}" data-idx="${idx}" style="width: 8px; height: 8px; border-radius: 50%; background: ${idx === state.activePhotoIndex ? 'var(--accent-rose)' : 'rgba(255,255,255,0.2)'}; cursor: pointer; transition: all 0.3s ease;"></span>
+            `).join('')}
+        </div>
+    ` : '';
+
+    container.innerHTML = `
+        <div class="welove-slider-wrapper" style="width: 100%; position: relative;">
+            ${slidesHtml}
+            ${controlsHtml}
+        </div>
+    `;
+
+    // Bind slider actions
+    if (album.length > 1) {
+        document.getElementById('btnWeLovePrevPhoto').addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
+            updateWeLoveAlbum();
+        });
+        document.getElementById('btnWeLoveNextPhoto').addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
+            updateWeLoveAlbum();
+        });
+        
+        // Dots clicks
+        const dots = container.querySelectorAll('.welove-slider-dot');
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(e.target.getAttribute('data-idx'));
+                state.activePhotoIndex = idx;
+                updateWeLoveAlbum();
+            });
+        });
+    }
+
+    // Lightbox click preview
+    const imgs = container.querySelectorAll('.welove-slide-img-wrapper');
+    imgs.forEach(wrapper => {
+        wrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const activePhoto = album[state.activePhotoIndex];
+            openWeLoveLightbox(getGoogleDriveDirectLink(activePhoto.url), activePhoto.caption);
+        });
+    });
+}
+
+export function openWeLoveAlbumManager() {
+    const modalAlbum = document.getElementById('weLoveAlbumManagerModal');
+    if (!modalAlbum) return;
+    
+    modalAlbum.style.display = 'flex';
+    updateWeLoveAlbumManagerList();
+}
+
+export function updateWeLoveAlbumManagerList() {
+    const listContainer = document.getElementById('weLoveAlbumManagerList');
+    if (!listContainer) return;
+
+    const album = state.weLovePhotoAlbum || [];
+    if (album.length === 0) {
+        listContainer.innerHTML = `<p style="text-align: center; color: var(--text-secondary); font-style: italic; font-size: 0.85rem; margin: 15px 0;">Không có hình ảnh nào trong danh sách.</p>`;
+        return;
+    }
+
+    const isSpouseRole = state.viewingSharedFund && state.sharedFundSourceRow !== null;
+    const canDelete = !isSpouseRole;
+
+    listContainer.innerHTML = album.map((photo) => {
+        const directUrl = getGoogleDriveDirectLink(photo.url);
+        return `
+            <div class="welove-log-card welove-photo-manager-item" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-color);">
+                <img src="${directUrl}" alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; background: #000; border: 1px solid var(--border-color);">
+                <div style="flex: 1; min-width: 0;">
+                    <p style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        ${photo.caption || 'Kỷ niệm không có tên'}
+                    </p>
+                    <p style="margin: 2px 0 0 0; font-size: 0.7rem; color: var(--text-secondary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        ${photo.url}
+                    </p>
+                </div>
+                ${canDelete ? `
+                    <button type="button" class="btn-delete-photo" data-id="${photo.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;" title="Xóa hình ảnh này">
+                        🗑️
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+
+    // Bind delete events
+    const deleteBtns = listContainer.querySelectorAll('.btn-delete-photo');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const id = e.target.getAttribute('data-id');
+            const confirmed = await window.showConfirm("Bạn có chắc chắn muốn xóa hình ảnh này khỏi album không? 🥺");
+            if (!confirmed) return;
+
+            state.weLovePhotoAlbum = state.weLovePhotoAlbum.filter(p => p.id !== id);
+            state.weLovePhotoAlbumUpdated = new Date().toISOString();
+            
+            // Adjust active index if it falls out of bounds
+            if (state.activePhotoIndex >= state.weLovePhotoAlbum.length) {
+                state.activePhotoIndex = Math.max(0, state.weLovePhotoAlbum.length - 1);
+            }
+
+            await saveLocalState();
+            updateWeLoveAlbumManagerList();
+            updateWeLoveAlbum();
+
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+            showToast("Đã xóa ảnh khỏi album 🗑️");
+        });
+    });
+}
+
+export function openWeLoveLightbox(url, caption) {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    const lightboxImg = document.getElementById('weLoveLightboxImg');
+    const lightboxCaption = document.getElementById('weLoveLightboxCaption');
+
+    if (!lightboxModal || !lightboxImg || !lightboxCaption) return;
+
+    lightboxImg.src = url;
+    lightboxCaption.textContent = caption ? `"${caption}"` : '';
+    lightboxModal.style.display = 'flex';
+}
+
+export function closeWeLoveLightbox() {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (lightboxModal) {
+        lightboxModal.style.display = 'none';
+    }
+}
