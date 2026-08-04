@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.103';
-import * as sync from '../../core/sync.js?v=4.3.103';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.103';
+} from '../../core/app.js?v=4.3.104';
+import * as sync from '../../core/sync.js?v=4.3.104';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.104';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -2528,14 +2528,11 @@ export function updateSliderPhotos() {
                 if (img.src !== targetSrc && img.getAttribute('src') !== targetSrc) {
                     img.src = targetSrc;
                 }
-            } else {
-                if (img.getAttribute('src') !== 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') {
-                    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                }
             }
+            // Không gỡ src của ảnh ở xa ra để tránh việc phải tải lại ảnh khi vuốt ngược lại
         }
 
-        // Đồng bộ trạng thái active của thumbnail kiểu Telegram
+        // Đồng bộ trạng thái active của thumbnail kiểu Telegram tức thời
         const thumb = document.getElementById(`weLoveThumb_${idx}`);
         if (thumb) {
             if (idx === activeIdx) {
@@ -2550,16 +2547,21 @@ export function updateSliderPhotos() {
         }
     });
 
-    // Tự động cuộn thumbnail active vào chính giữa dải
-    const activeThumb = document.getElementById(`weLoveThumb_${activeIdx}`);
-    if (activeThumb) {
-        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    // Trì hoãn nhẹ việc cuộn dải thumbnail và đồng bộ album chính để tránh xung đột cử chỉ vuốt nhanh
+    if (window.weLoveLightboxScrollTimeout) {
+        clearTimeout(window.weLoveLightboxScrollTimeout);
     }
-
-    // Đồng bộ thanh trượt trang chính
-    if (typeof window.updateWeLoveAlbum === 'function') {
-        window.updateWeLoveAlbum();
-    }
+    window.weLoveLightboxScrollTimeout = setTimeout(() => {
+        const activeThumb = document.getElementById(`weLoveThumb_${activeIdx}`);
+        if (activeThumb) {
+            activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+        
+        // Đồng bộ thanh trượt trang chính
+        if (typeof window.updateWeLoveAlbum === 'function') {
+            window.updateWeLoveAlbum();
+        }
+    }, 120);
 }
 
 export function updateLightboxUiVisibility(visible) {
@@ -3206,23 +3208,19 @@ export function initWeLoveLightboxZoomAndDrag() {
     // Bấm nút Prev/Next trên Lightbox (chỉ hiện trên màn hình có chuột/desktop)
 
     // Tự động cập nhật active index và dải thumbnail khi cuộn ngang slider (vuốt ngang bằng tay hoặc click)
-    let scrollTimeout = null;
     slider.addEventListener('scroll', () => {
         if (scale > 1) return; // Không xử lý khi đang zoom ảnh
         
-        if (scrollTimeout) clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            const scrollLeft = slider.scrollLeft;
-            const width = window.innerWidth;
-            if (width <= 0) return;
-            const newIndex = Math.round(scrollLeft / width);
-            
-            const album = state.weLovePhotoAlbum || [];
-            if (newIndex >= 0 && newIndex < album.length && newIndex !== state.activePhotoIndex) {
-                state.activePhotoIndex = newIndex;
-                updateSliderPhotos();
-            }
-        }, 50);
+        const scrollLeft = slider.scrollLeft;
+        const width = window.innerWidth;
+        if (width <= 0) return;
+        const newIndex = Math.round(scrollLeft / width);
+        
+        const album = state.weLovePhotoAlbum || [];
+        if (newIndex >= 0 && newIndex < album.length && newIndex !== state.activePhotoIndex) {
+            state.activePhotoIndex = newIndex;
+            updateSliderPhotos();
+        }
     });
 
     // Bấm nút Prev/Next trên Lightbox (chỉ hiện trên màn hình có chuột/desktop)
