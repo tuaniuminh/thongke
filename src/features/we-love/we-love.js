@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.84';
-import * as sync from '../../core/sync.js?v=4.3.84';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.84';
+} from '../../core/app.js?v=4.3.85';
+import * as sync from '../../core/sync.js?v=4.3.85';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.85';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2472,7 +2472,32 @@ export function updateWeLoveAlbumManagerList() {
     const deleteBtns = listContainer.querySelectorAll('.btn-delete-photo');
     deleteBtns.forEach(btn => {
         btn.addEventListener('click', async (e) => {
-            e.stopPropagationexport function initWeLoveLightboxZoomAndDrag() {
+            e.stopPropagation();
+            const id = e.target.getAttribute('data-id');
+            const confirmed = await window.showConfirm("Bạn có chắc chắn muốn xóa hình ảnh này khỏi album không? 🥺");
+            if (!confirmed) return;
+
+            state.weLovePhotoAlbum = state.weLovePhotoAlbum.filter(p => p.id !== id);
+            state.weLovePhotoAlbumUpdated = new Date().toISOString();
+            
+            // Adjust active index if it falls out of bounds
+            if (state.activePhotoIndex >= state.weLovePhotoAlbum.length) {
+                state.activePhotoIndex = Math.max(0, state.weLovePhotoAlbum.length - 1);
+            }
+
+            await saveLocalState();
+            updateWeLoveAlbumManagerList();
+            updateWeLoveAlbum();
+
+            if (sync.isConfigured() && state.user) {
+                performSync(true);
+            }
+            showToast("Đã xóa ảnh khỏi album 🗑️");
+        });
+    });
+}
+
+export function initWeLoveLightboxZoomAndDrag() {
     const lightboxImg = document.getElementById('weLoveLightboxImgActive');
     const slider = document.getElementById('weLoveLightboxSlider');
     const btnZoomIn = document.getElementById('btnWeLoveZoomIn');
