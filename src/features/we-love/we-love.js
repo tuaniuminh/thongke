@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.80';
-import * as sync from '../../core/sync.js?v=4.3.80';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.80';
+} from '../../core/app.js?v=4.3.81';
+import * as sync from '../../core/sync.js?v=4.3.81';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.81';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -1177,22 +1177,26 @@ export async function renderWeLoveDashboard() {
         </div>
 
         <!-- LIGHTBOX PREVIEW MODAL -->
-        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center;">
-            <div style="position: relative; max-width: 90%; max-height: 85%; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: -45px; right: 0; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 2010;" title="Đóng">✕</button>
+        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: #000; z-index: 2000; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; overflow: hidden;">
+            <div style="position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
+                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: max(20px, env(safe-area-inset-top, 20px)); right: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2010; backdrop-filter: blur(8px); transition: background 0.2s;" title="Đóng">✕</button>
                 
                 <!-- Zoom Toolbar -->
-                <div class="welove-lightbox-tools" style="display: flex; gap: 12px; margin-bottom: 15px; background: rgba(255,255,255,0.06); padding: 4px 14px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); z-index: 2005;">
+                <div class="welove-lightbox-tools" style="position: absolute; top: max(20px, env(safe-area-inset-top, 20px)); left: 50%; transform: translateX(-50%); display: flex; gap: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); padding: 4px 14px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 2005; height: 38px; align-items: center;">
                     <button type="button" id="btnWeLoveZoomOut" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; opacity: 0.9; user-select: none;" title="Thu nhỏ">➖</button>
                     <span id="weLoveZoomPercent" style="color: #fff; font-size: 0.8rem; font-weight: 600; min-width: 40px; text-align: center; display: flex; align-items: center; justify-content: center; user-select: none;">100%</span>
                     <button type="button" id="btnWeLoveZoomIn" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; opacity: 0.9; user-select: none;" title="Phóng to">➕</button>
-                    <button type="button" id="btnWeLoveZoomReset" style="background: rgba(255,255,255,0.12); border: none; color: #fff; cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; user-select: none;" title="Đặt lại">1:1</button>
+                    <button type="button" id="btnWeLoveZoomReset" style="background: rgba(255,255,255,0.15); border: none; color: #fff; cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; user-select: none;" title="Đặt lại">1:1</button>
                 </div>
 
-                <div id="weLoveLightboxImgWrapper" style="overflow: hidden; max-width: 100%; max-height: 70vh; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; width: auto; height: auto;">
-                    <img id="weLoveLightboxImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100%; max-height: 70vh; object-fit: contain; transform-origin: center; will-change: transform; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); user-select: none; -webkit-user-drag: none;">
+                <!-- Navigation buttons (hidden on mobile but visible on desktop via CSS hover) -->
+                <button type="button" id="btnWeLoveLightboxPrev" class="welove-lightbox-nav prev" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 2010; backdrop-filter: blur(8px); transition: all 0.2s;" title="Ảnh trước">‹</button>
+                <button type="button" id="btnWeLoveLightboxNext" class="welove-lightbox-nav next" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 2010; backdrop-filter: blur(8px); transition: all 0.2s;" title="Ảnh sau">›</button>
+
+                <div id="weLoveLightboxImgWrapper" style="width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; position: relative; overflow: hidden;">
+                    <img id="weLoveLightboxImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); user-select: none; -webkit-user-drag: none;">
                 </div>
-                <p id="weLoveLightboxCaption" style="color: #fff; margin-top: 15px; font-size: 1rem; font-weight: 600; font-style: italic; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.5);"></p>
+                <p id="weLoveLightboxCaption" style="position: absolute; bottom: max(30px, env(safe-area-inset-bottom, 30px)); left: 50%; transform: translateX(-50%); color: #fff; font-size: 0.95rem; font-weight: 600; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); width: auto; max-width: 80%; pointer-events: none; z-index: 2005; margin: 0;"></p>
             </div>
         </div>
     `;
@@ -1202,14 +1206,11 @@ export async function renderWeLoveDashboard() {
 
 
 
-    // Load data and bind events
-    await fetchWeLoveData();
-    
-    // Ngăn chặn race condition nếu người dùng chuyển tab nhanh trước khi API trả về xong
-    if (state.activeTab !== renderingTab) {
-        console.warn(`[WeLove] Render race condition aborted: ${renderingTab} -> ${state.activeTab}`);
-        return;
-    }
+    // UX Optimization: Gán dữ liệu local có sẵn để render nhanh lập tức (dưới 50ms) tránh màn hình trống
+    sicknessLogs = state.weLoveSicknessLogs || [];
+    sicknessLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    reminders = state.weLoveReminders || [];
+    reminders.sort((a, b) => new Date(b.scheduledTime) - new Date(a.scheduledTime));
 
     updateAudioPlaybackState();
 
@@ -1223,6 +1224,25 @@ export async function renderWeLoveDashboard() {
     } else if (weLoveCurrentSubView === 'settings') {
         bindSettingsEvents();
     }
+
+    // Tải dữ liệu đám mây và cập nhật UI bất đồng bộ ở background
+    (async () => {
+        try {
+            await fetchWeLoveData();
+            // Vẽ lại dữ liệu mới từ đám mây (nếu người dùng vẫn đang ở tab WeLove)
+            if (state.activeTab === renderingTab) {
+                if (weLoveCurrentSubView === 'memory') {
+                    renderSicknessHistory();
+                    updateWeLoveAlbum();
+                } else if (weLoveCurrentSubView === 'admin') {
+                    renderRemindersList();
+                    renderVisitLogs();
+                }
+            }
+        } catch (fetchErr) {
+            console.error("[WeLove] Background fetch error:", fetchErr);
+        }
+    })();
 
     // Sync sidebar & mobile navbar display
     updateSidebarNavVisibility('welove');
@@ -1510,8 +1530,9 @@ function bindMemoryEvents() {
         btnCloseLightbox.addEventListener('click', () => {
             closeWeLoveLightbox();
         });
-        lightboxModal.addEventListener('click', (e) => {
-            if (e.target === lightboxModal) {
+        const imgWrapper = document.getElementById('weLoveLightboxImgWrapper');
+        imgWrapper?.addEventListener('click', (e) => {
+            if (e.target === imgWrapper) {
                 closeWeLoveLightbox();
             }
         });
@@ -1731,7 +1752,7 @@ export function renderFamilyPairingSettings() {
         const isPairingActive = state.pairingCode && state.pairingCodeExpired && (new Date(state.pairingCodeExpired).getTime() > Date.now());
         const codeDisplay = isPairingActive ? `
             <div id="fpPairingCodeDisplayContainer" class="pairing-code-row" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
-                <span id="fpPairingCodeVal" style="font-size: 1.15rem; font-weight: 800; letter-spacing: 1.5px; color: var(--accent-rose); background: var(--bg-secondary); padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">${escapeHTML(state.pairingCode)}</span>
+                <span id="fpPairingCodeVal" style="font-size: 1.15rem; font-weight: 800; letter-spacing: 1.5px; color: var(--accent-rose); background: var(--bg-secondary); padding: 5px 14px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">${escapeHTML(state.pairingCode.replace('LOVE-', ''))}</span>
                 <button class="btn" id="btnFPCopyCode" style="font-size: 0.75rem; padding: 8px 14px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" title="Sao chép mã">📋 Copy</button>
             </div>
             <div id="fpPairingCodeTimer" style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 5px; text-align: right;"></div>
@@ -1802,7 +1823,8 @@ export function renderFamilyPairingSettings() {
         // Handler: Copy mã
         document.getElementById('btnFPCopyCode')?.addEventListener('click', () => {
             if (!state.pairingCode) return;
-            navigator.clipboard.writeText(state.pairingCode)
+            const rawCode = state.pairingCode.replace('LOVE-', '');
+            navigator.clipboard.writeText(rawCode)
                 .then(() => showToast("Đã sao chép mã!"))
                 .catch(() => showToast("Không thể sao chép, copy thủ công nhé."));
         });
@@ -1941,7 +1963,7 @@ function _startFPTimer() {
         const m = Math.floor(diff / 60000);
         const s = Math.floor((diff % 60000) / 1000);
         if (timerEl) timerEl.innerText = `Mã hết hạn sau: ${m}:${s.toString().padStart(2, '0')}`;
-        if (valEl) valEl.innerText = state.pairingCode;
+        if (valEl) valEl.innerText = state.pairingCode.replace('LOVE-', '');
     };
     update();
     _pairingInterval = setInterval(update, 1000);
@@ -2200,7 +2222,7 @@ export function getGoogleDriveDirectLink(url) {
     }
 
     if (fileId) {
-        const directLink = `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
+        const directLink = `https://lh3.googleusercontent.com/d/${fileId}=s0`;
         console.log(`[WeLove Album] Parsed Google Drive Link: ${url} -> Direct URL: ${directLink}`);
         return directLink;
     }
@@ -2689,11 +2711,16 @@ export function initWeLoveLightboxZoomAndDrag() {
         dragEnd();
     });
 
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+
     // Pinch-to-zoom (2 ngón tay) và Drag (1 ngón tay) cho Mobile
     lightboxImg.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) {
             // Chuẩn bị Pinch-to-zoom
             isDragging = false;
+            isSwiping = false;
             initialPinchDistance = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
                 e.touches[0].clientY - e.touches[1].clientY
@@ -2710,10 +2737,19 @@ export function initWeLoveLightboxZoomAndDrag() {
             const touch1Y = e.touches[1].clientY - rect.top;
             pinchCenterX = (touch0X + touch1X) / 2;
             pinchCenterY = (touch0Y + touch1Y) / 2;
-        } else if (e.touches.length === 1 && scale > 1) {
-            // Drag 1 ngón tay bình thường
-            const touch = e.touches[0];
-            dragStart(touch.clientX, touch.clientY);
+        } else if (e.touches.length === 1) {
+            if (scale > 1) {
+                // Drag 1 ngón tay bình thường
+                const touch = e.touches[0];
+                dragStart(touch.clientX, touch.clientY);
+            } else {
+                // Chuẩn bị vuốt (swipe) chuyển ảnh khi scale = 1
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                isSwiping = true;
+                lightboxImg.style.transition = 'none'; // Tắt transition để di chuyển ảnh theo ngón tay
+            }
         }
     }, { passive: true });
 
@@ -2744,6 +2780,16 @@ export function initWeLoveLightboxZoomAndDrag() {
         } else if (isDragging && e.touches.length === 1) {
             const touch = e.touches[0];
             dragMove(touch.clientX, touch.clientY);
+        } else if (isSwiping && e.touches.length === 1) {
+            const touch = e.touches[0];
+            const diffX = touch.clientX - touchStartX;
+            const diffY = touch.clientY - touchStartY;
+            
+            // Nếu vuốt ngang nhiều hơn vuốt dọc
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                e.preventDefault();
+                lightboxImg.style.transform = `translateX(${diffX}px) scale(1)`;
+            }
         }
     }, { passive: false }); // Cần passive: false để preventDefault hoạt động khi nhúm zoom
 
@@ -2751,8 +2797,145 @@ export function initWeLoveLightboxZoomAndDrag() {
         if (e.touches.length < 2) {
             initialPinchDistance = 0;
         }
+        
+        if (isSwiping) {
+            isSwiping = false;
+            lightboxImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const diffX = touchEndX - touchStartX;
+            const album = state.weLovePhotoAlbum || [];
+            
+            if (Math.abs(diffX) > 80 && album.length > 1) {
+                // Swipe horizontal đủ 80px -> chuyển ảnh
+                let nextIdx = state.activePhotoIndex;
+                if (diffX > 0) {
+                    // Vuốt sang phải -> ảnh trước đó
+                    nextIdx = (state.activePhotoIndex - 1 + album.length) % album.length;
+                    lightboxImg.style.transform = 'translateX(100vw) scale(1)'; // cho ảnh bay qua phải
+                } else {
+                    // Vuốt sang trái -> ảnh tiếp theo
+                    nextIdx = (state.activePhotoIndex + 1) % album.length;
+                    lightboxImg.style.transform = 'translateX(-100vw) scale(1)'; // cho ảnh bay qua trái
+                }
+                
+                state.activePhotoIndex = nextIdx;
+                
+                setTimeout(() => {
+                    const nextPhoto = album[nextIdx];
+                    lightboxImg.src = getGoogleDriveDirectLink(nextPhoto.url);
+                    const lightboxCaption = document.getElementById('weLoveLightboxCaption');
+                    if (lightboxCaption) {
+                        lightboxCaption.textContent = nextPhoto.caption ? `"${nextPhoto.caption}"` : '';
+                    }
+                    
+                    // Cho ảnh mới bay vào từ hướng ngược lại
+                    lightboxImg.style.transition = 'none';
+                    lightboxImg.style.transform = diffX > 0 ? 'translateX(-100vw) scale(1)' : 'translateX(100vw) scale(1)';
+                    
+                    // Buộc trình duyệt reflow
+                    lightboxImg.offsetHeight;
+                    
+                    // Bay về trung tâm
+                    lightboxImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    lightboxImg.style.transform = 'translateX(0px) scale(1)';
+                    
+                    // Đồng bộ thanh trượt trang chính
+                    if (typeof window.updateWeLoveAlbum === 'function') {
+                        window.updateWeLoveAlbum();
+                    }
+                }, 200);
+            } else {
+                // Không vuốt đủ -> Trượt ảnh về vị trí cũ
+                lightboxImg.style.transform = 'translate(0px, 0px) scale(1)';
+            }
+        }
+        
         dragEnd();
     });
+
+    // Bấm nút Prev/Next trên Lightbox (chỉ hiện trên màn hình có chuột/desktop)
+    const btnLightboxPrev = document.getElementById('btnWeLoveLightboxPrev');
+    const btnLightboxNext = document.getElementById('btnWeLoveLightboxNext');
+    const lightboxCaption = document.getElementById('weLoveLightboxCaption');
+
+    if (btnLightboxPrev) {
+        btnLightboxPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const album = state.weLovePhotoAlbum || [];
+            if (album.length <= 1) return;
+            scale = 1;
+            currentX = 0;
+            currentY = 0;
+            state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
+            const prevPhoto = album[state.activePhotoIndex];
+            
+            // Hiệu ứng bay ảnh qua phải
+            lightboxImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            lightboxImg.style.transform = 'translateX(100vw) scale(1)';
+            
+            setTimeout(() => {
+                lightboxImg.src = getGoogleDriveDirectLink(prevPhoto.url);
+                if (lightboxCaption) lightboxCaption.textContent = prevPhoto.caption ? `"${prevPhoto.caption}"` : '';
+                
+                lightboxImg.style.transition = 'none';
+                lightboxImg.style.transform = 'translateX(-100vw) scale(1)';
+                lightboxImg.offsetHeight; // reflow
+                
+                lightboxImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                lightboxImg.style.transform = 'translateX(0px) scale(1)';
+                
+                if (typeof window.updateWeLoveAlbum === 'function') window.updateWeLoveAlbum();
+            }, 200);
+        });
+    }
+
+    if (btnLightboxNext) {
+        btnLightboxNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const album = state.weLovePhotoAlbum || [];
+            if (album.length <= 1) return;
+            scale = 1;
+            currentX = 0;
+            currentY = 0;
+            state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
+            const nextPhoto = album[state.activePhotoIndex];
+            
+            // Hiệu ứng bay ảnh qua trái
+            lightboxImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            lightboxImg.style.transform = 'translateX(-100vw) scale(1)';
+            
+            setTimeout(() => {
+                lightboxImg.src = getGoogleDriveDirectLink(nextPhoto.url);
+                if (lightboxCaption) lightboxCaption.textContent = nextPhoto.caption ? `"${nextPhoto.caption}"` : '';
+                
+                lightboxImg.style.transition = 'none';
+                lightboxImg.style.transform = 'translateX(100vw) scale(1)';
+                lightboxImg.offsetHeight; // reflow
+                
+                lightboxImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                lightboxImg.style.transform = 'translateX(0px) scale(1)';
+                
+                if (typeof window.updateWeLoveAlbum === 'function') window.updateWeLoveAlbum();
+            }, 200);
+        });
+    }
+
+    // Phím tắt bàn phím máy tính
+    const handleKeyDown = (e) => {
+        const lightboxModal = document.getElementById('weLoveLightboxModal');
+        if (lightboxModal && lightboxModal.style.display !== 'none') {
+            if (e.key === 'ArrowLeft') {
+                btnLightboxPrev?.click();
+            } else if (e.key === 'ArrowRight') {
+                btnLightboxNext?.click();
+            } else if (e.key === 'Escape') {
+                closeWeLoveLightbox();
+            }
+        }
+    };
+    window.removeEventListener('keydown', handleKeyDown); // Tránh leak event listeners trùng lặp
+    window.addEventListener('keydown', handleKeyDown);
 
     const originalClose = window.closeWeLoveLightbox;
     window.closeWeLoveLightbox = function() {
