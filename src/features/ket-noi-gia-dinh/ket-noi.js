@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.111';
-import { decrypt } from '../../core/crypto.js?v=4.3.111';
-import * as sync from '../../core/sync.js?v=4.3.111';
+} from '../../core/app.js?v=4.3.112';
+import { decrypt } from '../../core/crypto.js?v=4.3.112';
+import * as sync from '../../core/sync.js?v=4.3.112';
 
 let _pairingInterval = null;
 
@@ -637,31 +637,42 @@ export function renderFamilyPairingSettings() {
                 return;
             }
 
-            // Bước 1: Báo hiệu đối phương bằng cách đẩy trạng thái 'left' lên Supabase trước
-            state.spouseStatus = 'left';
-            await saveLocalState();
-            if (sync.isConfigured() && state.user) {
-                try { await performSync(true); } catch (e) { console.error("[Unlink] notify remote failed:", e); }
+            // Hiện màn hình chờ tải
+            showLoadingOverlay("Đang xử lý hủy kết nối gia đình...");
+
+            try {
+                // Bước 1: Báo hiệu đối phương bằng cách đẩy trạng thái 'left' lên Supabase trước
+                state.spouseStatus = 'left';
+                await saveLocalState();
+                if (sync.isConfigured() && state.user) {
+                    try { await performSync(true); } catch (e) { console.error("[Unlink] notify remote failed:", e); }
+                }
+
+                // Bước 2: Dọn sạch local
+                state.spouseEmail = '';
+                state.spouseStatus = '';
+                state.spouseRole = 'wife';
+                state.pairingCode = '';
+                state.pairingCodeExpired = '';
+                state.pairingFundKeyEncrypted = '';
+                state.pairingCodeAccepted = '';
+                state.familyFundInviteStatus = '';
+                state.viewingSharedFund = false;
+                state.sharedFundOwnerEmail = '';
+                state.sharedFundSourceRow = null;
+                await saveLocalState();
+                if (sync.isConfigured() && state.user) {
+                    try { await performSync(true); } catch (e) { console.error("[Unlink] clear remote failed:", e); }
+                }
+
+                showToast("Đã hủy kết nối gia đình.");
+            } catch (err) {
+                console.error("Hủy kết nối gia đình thất bại:", err);
+                showToast("Không thể hủy kết nối: " + err.message, "error");
+            } finally {
+                hideLoadingOverlay();
             }
 
-            // Bước 2: Dọn sạch local
-            state.spouseEmail = '';
-            state.spouseStatus = '';
-            state.spouseRole = 'wife';
-            state.pairingCode = '';
-            state.pairingCodeExpired = '';
-            state.pairingFundKeyEncrypted = '';
-            state.pairingCodeAccepted = '';
-            state.familyFundInviteStatus = '';
-            state.viewingSharedFund = false;
-            state.sharedFundOwnerEmail = '';
-            state.sharedFundSourceRow = null;
-            await saveLocalState();
-            if (sync.isConfigured() && state.user) {
-                try { await performSync(true); } catch (e) { console.error("[Unlink] clear remote failed:", e); }
-            }
-
-            showToast("Đã hủy kết nối gia đình.");
             renderFamilyPairingSettings();
             if (typeof window.renderWeLoveDashboard === 'function') window.renderWeLoveDashboard();
         });
@@ -884,3 +895,86 @@ function _startFPTimer() {
 // Expose globally for app.js and other files to call
 window.checkForSharedFamilyFund = checkForSharedFamilyFund;
 window.renderFamilyPairingSettings = renderFamilyPairingSettings;
+
+// --- HELPERS: LOADING OVERLAY ---
+function showLoadingOverlay(message = "Đang xử lý...") {
+    let overlay = document.getElementById('familyConnectionLoadingOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'familyConnectionLoadingOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 11000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: inherit;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        `;
+        
+        // Spinner
+        const spinner = document.createElement('div');
+        spinner.style.cssText = `
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(225, 29, 72, 0.15);
+            border-top: 4px solid #e11d48;
+            border-radius: 50%;
+            animation: family-spin 1s linear infinite;
+            margin-bottom: 20px;
+        `;
+        
+        // Add animation keyframes to head if not present
+        if (!document.getElementById('family-spin-keyframes')) {
+            const style = document.createElement('style');
+            style.id = 'family-spin-keyframes';
+            style.innerHTML = `
+                @keyframes family-spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        const text = document.createElement('p');
+        text.id = 'familyConnectionLoadingText';
+        text.style.cssText = `
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        `;
+        
+        overlay.appendChild(spinner);
+        overlay.appendChild(text);
+        document.body.appendChild(overlay);
+    }
+    
+    const textEl = document.getElementById('familyConnectionLoadingText');
+    if (textEl) textEl.innerText = message;
+    overlay.style.display = 'flex';
+    // Trigger reflow
+    overlay.offsetHeight;
+    overlay.style.opacity = '1';
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('familyConnectionLoadingOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
+    }
+}
