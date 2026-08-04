@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.95';
-import * as sync from '../../core/sync.js?v=4.3.95';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.95';
+} from '../../core/app.js?v=4.3.93';
+import * as sync from '../../core/sync.js?v=4.3.93';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.93';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
