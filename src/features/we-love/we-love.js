@@ -1,9 +1,12 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.101';
-import * as sync from '../../core/sync.js?v=4.3.101';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.101';
+} from '../../core/app.js?v=4.3.102';
+import * as sync from '../../core/sync.js?v=4.3.102';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.102';
+
+// Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
+let currentLightboxScale = 1;
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -1177,12 +1180,12 @@ export async function renderWeLoveDashboard() {
         </div>
 
         <!-- LIGHTBOX PREVIEW MODAL -->
-        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: #000; z-index: 2000; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; overflow: hidden;">
+        <div class="welove-modal-overlay" id="weLoveLightboxModal" style="display: none; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; overflow: hidden; transition: background 0.2s;">
             <div style="position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
-                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: max(20px, env(safe-area-inset-top, 20px)); right: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2010; backdrop-filter: blur(8px); transition: background 0.2s;" title="Đóng">✕</button>
+                <button type="button" id="btnWeLoveCloseLightbox" style="position: absolute; top: max(20px, env(safe-area-inset-top, 20px)); right: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2010; backdrop-filter: blur(8px); transition: background 0.2s, opacity 0.25s, transform 0.25s;" title="Đóng">✕</button>
                 
                 <!-- Zoom Toolbar -->
-                <div class="welove-lightbox-tools" style="position: absolute; top: max(20px, env(safe-area-inset-top, 20px)); left: 50%; transform: translateX(-50%); display: flex; gap: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); padding: 4px 14px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 2005; height: 38px; align-items: center;">
+                <div class="welove-lightbox-tools" style="position: absolute; top: max(20px, env(safe-area-inset-top, 20px)); left: 50%; transform: translateX(-50%); display: flex; gap: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); padding: 4px 14px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 2005; height: 38px; align-items: center; transition: opacity 0.25s, transform 0.25s;">
                     <button type="button" id="btnWeLoveZoomOut" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; opacity: 0.9; user-select: none;" title="Thu nhỏ">➖</button>
                     <span id="weLoveZoomPercent" style="color: #fff; font-size: 0.8rem; font-weight: 600; min-width: 40px; text-align: center; display: flex; align-items: center; justify-content: center; user-select: none;">100%</span>
                     <button type="button" id="btnWeLoveZoomIn" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; opacity: 0.9; user-select: none;" title="Phóng to">➕</button>
@@ -1190,10 +1193,10 @@ export async function renderWeLoveDashboard() {
                 </div>
 
                 <!-- Navigation buttons (hidden on mobile but visible on desktop via CSS hover) -->
-                <button type="button" id="btnWeLoveLightboxPrev" class="welove-lightbox-nav prev" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 2010; backdrop-filter: blur(8px); transition: all 0.2s;" title="Ảnh trước">‹</button>
-                <button type="button" id="btnWeLoveLightboxNext" class="welove-lightbox-nav next" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 2010; backdrop-filter: blur(8px); transition: all 0.2s;" title="Ảnh sau">›</button>
+                <button type="button" id="btnWeLoveLightboxPrev" class="welove-lightbox-nav prev" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 2010; backdrop-filter: blur(8px); transition: all 0.2s, opacity 0.25s, transform 0.25s;" title="Ảnh trước">‹</button>
+                <button type="button" id="btnWeLoveLightboxNext" class="welove-lightbox-nav next" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 2010; backdrop-filter: blur(8px); transition: all 0.2s, opacity 0.25s, transform 0.25s;" title="Ảnh sau">›</button>
 
-                <div id="weLoveLightboxSliderContainer" style="width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; position: relative; overflow: hidden;">
+                <div id="weLoveLightboxSliderContainer" style="width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; display: flex; align-items: center; justify-content: center; background: transparent; position: relative; overflow: hidden;">
                     <style>
                         #weLoveLightboxSlider::-webkit-scrollbar { display: none; }
                     </style>
@@ -1201,7 +1204,13 @@ export async function renderWeLoveDashboard() {
                         <!-- Các slide con sẽ được render động bằng Javascript -->
                     </div>
                 </div>
-                <p id="weLoveLightboxCaption" style="position: absolute; bottom: max(30px, env(safe-area-inset-bottom, 30px)); left: 50%; transform: translateX(-50%); color: #fff; font-size: 0.95rem; font-weight: 600; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); width: auto; max-width: 80%; pointer-events: none; z-index: 2005; margin: 0;"></p>
+
+                <!-- Dải ảnh thu nhỏ (Thumbnail Strip) kiểu Telegram -->
+                <div id="weLoveLightboxThumbnails" style="position: absolute; bottom: max(95px, env(safe-area-inset-bottom, 95px)); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; max-width: 90%; overflow-x: auto; padding: 6px 12px; z-index: 2005; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; border-radius: 14px; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 0.25s, transform 0.25s; border: 1px solid rgba(255,255,255,0.08);">
+                    <!-- Sẽ được render động -->
+                </div>
+
+                <p id="weLoveLightboxCaption" style="position: absolute; bottom: max(35px, env(safe-area-inset-bottom, 35px)); left: 50%; transform: translateX(-50%); color: #fff; font-size: 0.95rem; font-weight: 600; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); width: auto; max-width: 80%; pointer-events: none; z-index: 2005; margin: 0; transition: opacity 0.25s, transform 0.25s;"></p>
             </div>
         </div>
     `;
@@ -2525,11 +2534,72 @@ export function updateSliderPhotos() {
                 }
             }
         }
+
+        // Đồng bộ trạng thái active của thumbnail kiểu Telegram
+        const thumb = document.getElementById(`weLoveThumb_${idx}`);
+        if (thumb) {
+            if (idx === activeIdx) {
+                thumb.style.borderColor = '#fff';
+                thumb.style.opacity = '1';
+                thumb.style.transform = 'scale(1.1)';
+            } else {
+                thumb.style.borderColor = 'transparent';
+                thumb.style.opacity = '0.45';
+                thumb.style.transform = 'scale(1)';
+            }
+        }
     });
+
+    // Tự động cuộn thumbnail active vào chính giữa dải
+    const activeThumb = document.getElementById(`weLoveThumb_${activeIdx}`);
+    if (activeThumb) {
+        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
 
     // Đồng bộ thanh trượt trang chính
     if (typeof window.updateWeLoveAlbum === 'function') {
         window.updateWeLoveAlbum();
+    }
+}
+
+export function updateLightboxUiVisibility(visible) {
+    window.isWeLoveLightboxUiVisible = visible;
+    const btnClose = document.getElementById('btnWeLoveCloseLightbox');
+    const tools = document.querySelector('.welove-lightbox-tools');
+    const btnPrev = document.getElementById('btnWeLoveLightboxPrev');
+    const btnNext = document.getElementById('btnWeLoveLightboxNext');
+    const caption = document.getElementById('weLoveLightboxCaption');
+    const thumbs = document.getElementById('weLoveLightboxThumbnails');
+
+    if (btnClose) {
+        btnClose.style.opacity = visible ? '1' : '0';
+        btnClose.style.pointerEvents = visible ? 'auto' : 'none';
+        btnClose.style.transform = visible ? 'translateY(0)' : 'translateY(-20px)';
+    }
+    if (tools) {
+        tools.style.opacity = visible ? '1' : '0';
+        tools.style.pointerEvents = visible ? 'auto' : 'none';
+        tools.style.transform = visible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-20px)';
+    }
+    if (btnPrev) {
+        btnPrev.style.opacity = visible ? '1' : '0';
+        btnPrev.style.pointerEvents = visible ? 'auto' : 'none';
+        btnPrev.style.transform = visible ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-20px)';
+    }
+    if (btnNext) {
+        btnNext.style.opacity = visible ? '1' : '0';
+        btnNext.style.pointerEvents = visible ? 'auto' : 'none';
+        btnNext.style.transform = visible ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(20px)';
+    }
+    if (caption) {
+        caption.style.opacity = visible ? '1' : '0';
+        caption.style.pointerEvents = visible ? 'auto' : 'none';
+        caption.style.transform = visible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(20px)';
+    }
+    if (thumbs) {
+        thumbs.style.opacity = visible ? '1' : '0';
+        thumbs.style.pointerEvents = visible ? 'auto' : 'none';
+        thumbs.style.transform = visible ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(20px)';
     }
 }
 
@@ -2552,13 +2622,63 @@ export function openWeLoveLightbox(url, caption) {
         `).join('');
     }
 
+    // Render dải Thumbnail kiểu Telegram
+    const thumbsContainer = document.getElementById('weLoveLightboxThumbnails');
+    if (thumbsContainer) {
+        thumbsContainer.innerHTML = album.map((photo, index) => `
+            <img class="welove-lightbox-thumb" id="weLoveThumb_${index}" src="${getGoogleDriveDirectLink(photo.url)}" style="width: 42px; height: 42px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; opacity: 0.45;" title="${escapeHTML(photo.caption || '')}">
+        `).join('');
+
+        // Thêm click event cho các thumbnail
+        album.forEach((photo, index) => {
+            const thumb = document.getElementById(`weLoveThumb_${index}`);
+            if (thumb) {
+                thumb.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const slider = document.getElementById('weLoveLightboxSlider');
+                    if (slider) {
+                        slider.style.scrollBehavior = 'smooth';
+                        slider.scrollLeft = index * window.innerWidth;
+                        setTimeout(() => {
+                            const sliderAgain = document.getElementById('weLoveLightboxSlider');
+                            if (sliderAgain) sliderAgain.style.scrollBehavior = 'auto';
+                        }, 300);
+                    }
+                });
+            }
+        });
+    }
+
+    // Reset trạng thái UI hiển thị
+    window.isWeLoveLightboxUiVisible = true;
+    updateLightboxUiVisibility(true);
+
     lightboxModal.style.display = 'flex';
+    // Đảm bảo background đục ban đầu
+    lightboxModal.style.background = 'rgba(0, 0, 0, 0.85)';
     document.body.classList.add('lightbox-open');
     document.documentElement.classList.add('lightbox-open');
 
     // Khóa cuộn nền triệt để
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+
+    // Sự kiện tap nhẹ (single-tap) để ẩn/hiện UI
+    const sliderContainer = document.getElementById('weLoveLightboxSliderContainer');
+    if (sliderContainer) {
+        const handleContainerClick = (e) => {
+            if (currentLightboxScale && currentLightboxScale > 1) return;
+            if (window.isWeLoveLightboxSwipingDown) return;
+            
+            const visible = !window.isWeLoveLightboxUiVisible;
+            updateLightboxUiVisibility(visible);
+        };
+        // Sử dụng một cờ để tránh gán trùng
+        if (!sliderContainer.dataset.hasClickEvent) {
+            sliderContainer.addEventListener('click', handleContainerClick);
+            sliderContainer.dataset.hasClickEvent = 'true';
+        }
+    }
 
     if (slider) {
         slider.style.scrollBehavior = 'auto';
@@ -2616,6 +2736,11 @@ export function initWeLoveLightboxZoomAndDrag() {
     let velocityY = 0;
     let inertiaFrameId = null;
 
+    // Các biến phụ trách kéo vuốt dọc đóng Lightbox
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let touchDeltaY = 0;
+
     function getActiveImg() {
         return document.getElementById(`weLoveLightboxImg_${state.activePhotoIndex}`);
     }
@@ -2641,10 +2766,14 @@ export function initWeLoveLightboxZoomAndDrag() {
         
         activeImg.style.transition = smooth ? 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none';
         
+        // Cập nhật scale module level
+        currentLightboxScale = scale;
+
+        // Nếu scale lớn hơn 1, giới hạn biên kéo rê. Nếu co giãn đàn hồi (elastic) nhỏ hơn 1 hoặc lớn hơn 4, ta giữ nguyên transform kéo tạm thời
         if (scale > 1) {
             currentX = Math.max(-maxDragX, Math.min(maxDragX, currentX));
             currentY = Math.max(-maxDragY, Math.min(maxDragY, currentY));
-        } else {
+        } else if (scale === 1) {
             currentX = 0;
             currentY = 0;
         }
@@ -2744,13 +2873,14 @@ export function initWeLoveLightboxZoomAndDrag() {
             currentX = 0;
             currentY = 0;
         } else {
-            scale = 2;
+            scale = 2.5;
             const rect = activeImg.getBoundingClientRect();
             const clickX = e.clientX - rect.left - rect.width / 2;
             const clickY = e.clientY - rect.top - rect.height / 2;
             calculateDragBounds();
-            currentX = -clickX / scale;
-            currentY = -clickY / scale;
+            const factor = (scale - 1) / scale;
+            currentX = -clickX * factor;
+            currentY = -clickY * factor;
         }
         updateTransform(true);
     });
@@ -2771,14 +2901,15 @@ export function initWeLoveLightboxZoomAndDrag() {
                     currentX = 0;
                     currentY = 0;
                 } else {
-                    scale = 2;
+                    scale = 2.5;
                     const touch = e.touches[0];
                     const rect = activeImg.getBoundingClientRect();
                     const clickX = touch.clientX - rect.left - rect.width / 2;
                     const clickY = touch.clientY - rect.top - rect.height / 2;
                     calculateDragBounds();
-                    currentX = -clickX / scale;
-                    currentY = -clickY / scale;
+                    const factor = (scale - 1) / scale;
+                    currentX = -clickX * factor;
+                    currentY = -clickY * factor;
                 }
                 updateTransform(true);
             }
@@ -2904,6 +3035,7 @@ export function initWeLoveLightboxZoomAndDrag() {
         
         if (e.touches.length === 2) {
             isDragging = false;
+            window.isWeLoveLightboxSwipingDown = false;
             initialPinchDistance = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
                 e.touches[0].clientY - e.touches[1].clientY
@@ -2911,7 +3043,6 @@ export function initWeLoveLightboxZoomAndDrag() {
             startScale = scale;
 
             const rect = e.target.getBoundingClientRect();
-            // Tính toán vị trí tâm chạm so với tâm ảnh lúc bắt đầu touch
             const touch0X = e.touches[0].clientX;
             const touch0Y = e.touches[0].clientY;
             const touch1X = e.touches[1].clientX;
@@ -2922,12 +3053,18 @@ export function initWeLoveLightboxZoomAndDrag() {
             const imgCenterX = rect.left + rect.width / 2;
             const imgCenterY = rect.top + rect.height / 2;
             
-            // Khoảng cách từ tâm ảnh đến tâm nhúm ngón tay (quy đổi về tọa độ gốc trước scale)
             pinchCenterX = (clientCenterX - imgCenterX) / scale;
             pinchCenterY = (clientCenterY - imgCenterY) / scale;
-        } else if (e.touches.length === 1 && scale > 1) {
+        } else if (e.touches.length === 1) {
             const touch = e.touches[0];
-            dragStart(touch.clientX, touch.clientY);
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchDeltaY = 0;
+            window.isWeLoveLightboxSwipingDown = false;
+            
+            if (scale > 1) {
+                dragStart(touch.clientX, touch.clientY);
+            }
         }
     }, { passive: true });
 
@@ -2944,7 +3081,16 @@ export function initWeLoveLightboxZoomAndDrag() {
             const ratio = currentDistance / initialPinchDistance;
             const oldScale = scale;
             
-            scale = Math.min(4, Math.max(1, startScale * ratio));
+            // Lực cản đàn hồi (Elastic Zoom)
+            const rawScale = startScale * ratio;
+            if (rawScale < 1) {
+                scale = 1 - (1 - rawScale) * 0.45;
+            } else if (rawScale > 4) {
+                scale = 4 + (rawScale - 4) * 0.45;
+            } else {
+                scale = rawScale;
+            }
+
             calculateDragBounds();
 
             if (scale > 1) {
@@ -2957,10 +3103,43 @@ export function initWeLoveLightboxZoomAndDrag() {
             }
 
             updateTransform(false);
-        } else if (isDragging && e.touches.length === 1 && scale > 1) {
-            e.preventDefault();
+        } else if (e.touches.length === 1) {
             const touch = e.touches[0];
-            dragMove(touch.clientX, touch.clientY);
+            
+            if (scale > 1) {
+                if (isDragging) {
+                    e.preventDefault();
+                    dragMove(touch.clientX, touch.clientY);
+                }
+            } else if (scale === 1) {
+                const deltaX = touch.clientX - touchStartX;
+                const deltaY = touch.clientY - touchStartY;
+                
+                if (window.isWeLoveLightboxSwipingDown) {
+                    e.preventDefault();
+                    touchDeltaY = deltaY;
+                    
+                    const activeImg = getActiveImg();
+                    if (activeImg) {
+                        activeImg.style.transition = 'none';
+                        activeImg.style.transform = `translate3d(0px, ${deltaY}px, 0px) scale(1)`;
+                    }
+                    
+                    const lightboxModal = document.getElementById('weLoveLightboxModal');
+                    if (lightboxModal) {
+                        const opacity = Math.max(0.1, 0.85 - Math.abs(deltaY) / 600);
+                        lightboxModal.style.background = `rgba(0, 0, 0, ${opacity})`;
+                        const blurPx = Math.max(0, 15 - Math.abs(deltaY) / 20);
+                        lightboxModal.style.backdropFilter = `blur(${blurPx}px)`;
+                        lightboxModal.style.webkitBackdropFilter = `blur(${blurPx}px)`;
+                    }
+                } else {
+                    if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 8) {
+                        window.isWeLoveLightboxSwipingDown = true;
+                        slider.style.overflowX = 'hidden';
+                    }
+                }
+            }
         }
     }, { passive: false });
 
@@ -2968,7 +3147,58 @@ export function initWeLoveLightboxZoomAndDrag() {
         if (e.touches.length < 2) {
             initialPinchDistance = 0;
         }
-        if (scale > 1) {
+
+        // Hồi vị đàn hồi (Bounce zoom)
+        if (scale < 1) {
+            scale = 1;
+            currentX = 0;
+            currentY = 0;
+            updateTransform(true);
+        } else if (scale > 4) {
+            scale = 4;
+            calculateDragBounds();
+            updateTransform(true);
+        }
+
+        // Đàn hồi / Đóng khi vuốt dọc
+        if (window.isWeLoveLightboxSwipingDown) {
+            window.isWeLoveLightboxSwipingDown = false;
+            slider.style.overflowX = 'auto';
+            
+            const activeImg = getActiveImg();
+            const lightboxModal = document.getElementById('weLoveLightboxModal');
+            
+            if (Math.abs(touchDeltaY) > 100) {
+                // Trượt bay đi và đóng
+                if (activeImg) {
+                    activeImg.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    activeImg.style.transform = `translate3d(0px, ${touchDeltaY > 0 ? 1000 : -1000}px, 0px) scale(0.65)`;
+                }
+                if (lightboxModal) {
+                    lightboxModal.style.transition = 'background 0.25s, opacity 0.25s';
+                    lightboxModal.style.background = 'rgba(0, 0, 0, 0)';
+                    lightboxModal.style.backdropFilter = 'blur(0px)';
+                    lightboxModal.style.webkitBackdropFilter = 'blur(0px)';
+                }
+                setTimeout(() => {
+                    closeWeLoveLightbox();
+                }, 220);
+            } else {
+                // Hồi vị đàn hồi về giữa
+                if (activeImg) {
+                    activeImg.style.transition = 'transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    activeImg.style.transform = 'translate3d(0px, 0px, 0px) scale(1)';
+                }
+                if (lightboxModal) {
+                    lightboxModal.style.transition = 'background 0.22s';
+                    lightboxModal.style.background = 'rgba(0, 0, 0, 0.85)';
+                    lightboxModal.style.backdropFilter = 'blur(15px)';
+                    lightboxModal.style.webkitBackdropFilter = 'blur(15px)';
+                }
+            }
+        }
+
+        if (scale > 1 && !window.isWeLoveLightboxSwipingDown) {
             dragEnd();
         }
     }, { passive: true });
