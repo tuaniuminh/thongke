@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.98';
-import * as sync from '../../core/sync.js?v=4.3.98';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.98';
+} from '../../core/app.js?v=4.3.99';
+import * as sync from '../../core/sync.js?v=4.3.99';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.99';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2492,7 +2492,10 @@ export function updateWeLoveAlbumManagerList() {
 const preventDefaultTouchMove = (e) => {
     const lightboxModal = document.getElementById('weLoveLightboxModal');
     if (lightboxModal && lightboxModal.style.display !== 'none') {
-        e.preventDefault();
+        // Chỉ chặn cuộn nếu không phải touch trên slider
+        if (!e.target.closest('#weLoveLightboxSlider')) {
+            e.preventDefault();
+        }
     }
 };
 
@@ -2900,12 +2903,20 @@ export function initWeLoveLightboxZoomAndDrag() {
             startScale = scale;
 
             const rect = e.target.getBoundingClientRect();
-            const touch0X = e.touches[0].clientX - rect.left;
-            const touch0Y = e.touches[0].clientY - rect.top;
-            const touch1X = e.touches[1].clientX - rect.left;
-            const touch1Y = e.touches[1].clientY - rect.top;
-            pinchCenterX = (touch0X + touch1X) / 2;
-            pinchCenterY = (touch0Y + touch1Y) / 2;
+            // Tính toán vị trí tâm chạm so với tâm ảnh lúc bắt đầu touch
+            const touch0X = e.touches[0].clientX;
+            const touch0Y = e.touches[0].clientY;
+            const touch1X = e.touches[1].clientX;
+            const touch1Y = e.touches[1].clientY;
+            const clientCenterX = (touch0X + touch1X) / 2;
+            const clientCenterY = (touch0Y + touch1Y) / 2;
+            
+            const imgCenterX = rect.left + rect.width / 2;
+            const imgCenterY = rect.top + rect.height / 2;
+            
+            // Khoảng cách từ tâm ảnh đến tâm nhúm ngón tay (quy đổi về tọa độ gốc trước scale)
+            pinchCenterX = (clientCenterX - imgCenterX) / scale;
+            pinchCenterY = (clientCenterY - imgCenterY) / scale;
         } else if (e.touches.length === 1 && scale > 1) {
             const touch = e.touches[0];
             dragStart(touch.clientX, touch.clientY);
@@ -2929,10 +2940,9 @@ export function initWeLoveLightboxZoomAndDrag() {
             calculateDragBounds();
 
             if (scale > 1) {
-                const factor = (scale / oldScale) - 1;
-                const rect = e.target.getBoundingClientRect();
-                currentX -= (pinchCenterX - rect.width / 2) * factor / scale;
-                currentY -= (pinchCenterY - rect.height / 2) * factor / scale;
+                const deltaScale = scale - oldScale;
+                currentX -= pinchCenterX * deltaScale;
+                currentY -= pinchCenterY * deltaScale;
             } else {
                 currentX = 0;
                 currentY = 0;
