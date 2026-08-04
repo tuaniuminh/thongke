@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.82';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.82';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.82';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.82';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.83';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.83';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.83';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.83';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.82';
-import * as sync from './sync.js?v=4.3.82';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.82';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.82';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.83';
+import * as sync from './sync.js?v=4.3.83';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.83';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.83';
 
-const APP_VERSION = '4.3.82';
+const APP_VERSION = '4.3.83';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -721,14 +721,14 @@ async function checkAppVersion(isManual = false) {
             // Dùng Tauri HTTP Client để bypass CORS của WebView
             const { getClient } = window.__TAURI__.http;
             const client = await getClient();
-            const response = await client.get(`https://raw.githubusercontent.com/tuaniuminh/thongke/main/version.json?t=${Date.now()}`);
+            const response = await client.get(`https://tuaniuminh.github.io/thongke/version.json?t=${Date.now()}`);
             if (response.status === 200) {
                 const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
                 latestVersion = data.version;
             }
         } else {
-            // Dùng window.fetch thông thường cho PWA Web
-            const response = await fetch(`https://raw.githubusercontent.com/tuaniuminh/thongke/main/version.json?t=${Date.now()}`);
+            // Dùng window.fetch thông thường cho PWA Web / Mobile APK
+            const response = await fetch(`https://tuaniuminh.github.io/thongke/version.json?t=${Date.now()}`);
             if (response.ok) {
                 const data = await response.json();
                 latestVersion = data.version;
