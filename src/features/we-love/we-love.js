@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.106';
-import * as sync from '../../core/sync.js?v=4.3.106';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.106';
+} from '../../core/app.js?v=4.3.107';
+import * as sync from '../../core/sync.js?v=4.3.107';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.107';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -1006,8 +1006,12 @@ export async function renderWeLoveDashboard() {
                         ${state.weLoveStartDate ? `<div class="detailed-duration">${formatDetailedLoveDuration()}</div>` : ''}
                     </div>
 
+                    <div class="milestone-date" style="${!state.weLoveStartDate ? 'color: var(--accent-rose); font-weight: 700;' : ''}">
+                        ${state.weLoveStartDate ? `📅 Cột mốc khởi đầu: ${formatDateDisplay(state.weLoveStartDate)}` : '⚠️ Chưa thiết lập ngày bắt đầu yêu. Vui lòng chọn trong phần Thiết lập!'}
+                    </div>
+
                     ${(function() {
-                        if (!state.weLoveStartDate || window.innerWidth <= 768) return '';
+                        if (!state.weLoveStartDate) return '';
                         const milestones = [100, 200, 365, 500, 730, 1000, 1500, 2000, 2500, 3000, 3650, 4000, 5000];
                         const nextMilestone = milestones.find(m => m > loveDaysCount) || (Math.ceil(loveDaysCount / 1000) * 1000);
                         const prevMilestone = [...milestones].reverse().find(m => m < loveDaysCount) || 0;
@@ -1015,9 +1019,9 @@ export async function renderWeLoveDashboard() {
                         const daysRemaining = nextMilestone - loveDaysCount;
                         
                         return `
-                            <div class="milestone-progress-container" style="margin-top: 1.75rem; text-align: left; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
+                            <div class="milestone-progress-container" style="margin-top: 1.25rem; margin-bottom: 0.5rem; text-align: left; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600;">
-                                    <span>🎯 Cột mốc tiếp theo: ${nextMilestone} ngày</span>
+                                    <span>🎯 Dấu mốc tiếp theo: ${nextMilestone} ngày</span>
                                     <span style="color: var(--accent-rose);">Còn ${daysRemaining} ngày</span>
                                 </div>
                                 <div style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; overflow: hidden; position: relative;">
@@ -1026,10 +1030,6 @@ export async function renderWeLoveDashboard() {
                             </div>
                         `;
                     })()}
-
-                    <div class="milestone-date" style="${!state.weLoveStartDate ? 'color: var(--accent-rose); font-weight: 700;' : ''}">
-                        ${state.weLoveStartDate ? `📅 Cột mốc khởi đầu: ${formatDateDisplay(state.weLoveStartDate)}` : '⚠️ Chưa thiết lập ngày bắt đầu yêu. Vui lòng chọn trong phần Thiết lập!'}
-                    </div>
 
                     <!-- Quotes board -->
                     <div class="quote-container" id="weLoveQuoteContainer" style="cursor: grab;" title="Nhập nút hoặc vuốt câu nói để chuyển câu">
