@@ -2,17 +2,17 @@
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.91';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.91';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.91';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.91';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.92';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.92';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.92';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.92';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.91';
-import * as sync from './sync.js?v=4.3.91';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.91';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.91';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.92';
+import * as sync from './sync.js?v=4.3.92';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.92';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.92';
 
-const APP_VERSION = '4.3.91';
+const APP_VERSION = '4.3.92';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1327,6 +1327,8 @@ async function performSync(silent = false) {
                 const localResetTime = localReset ? new Date(localReset).getTime() : 0;
                 const remoteResetTime = remoteReset ? new Date(remoteReset).getTime() : 0;
                 
+                const isWifeViewingShared = !!(state.viewingSharedFund && state.spouseRole === 'wife');
+                
                 if (remoteResetTime > localResetTime || !localReset) {
                     // Remote has a newer reset/overwrite. Discard local data.
                     state.receivedGifts = [];
@@ -1337,7 +1339,6 @@ async function performSync(silent = false) {
                     state.showImportNotesOption = !!remoteData.showImportNotesOption;
                     state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
                     
-                    const isWifeViewingShared = state.viewingSharedFund && state.spouseRole === 'wife';
                     if (!isWifeViewingShared) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
@@ -5315,6 +5316,7 @@ export async function clearAllStateData() {
 }
 
 export { logScrollDiagnostics, triggerHapticFeedback, initNotificationSettingsUI, saveNotificationSettings, testNotificationWebhook };
+
 
 
 

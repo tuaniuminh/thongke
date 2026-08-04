@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.3.91** |
+| **Phiên bản hiện tại** | **v4.3.92** |
+| **v4.3.92** | ✅ **Sửa lỗi ReferenceError trong performSync (v4.3.92)**: (1) Khai báo biến `isWifeViewingShared` ra ngoài phạm vi block `if` tại [app.js](file:///c:/Users/PC%20VIP/Documents/Thong-ke/src/core/app.js) để tránh lỗi ReferenceError khi chạy vào nhánh logic khác. (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.92`. |
 | **v4.3.91** | ✅ **Khắc phục lỗi cú pháp biên dịch đầu file JS (v4.3.91)**: (1) Sửa lỗi cắt mất 1 ký tự ở đầu 10 tệp JS do lệnh so sánh BOM không chính xác ở Powershell phiên bản trước. Khôi phục hoàn chỉnh các từ khóa `import`, `//` và `/**` ở dòng 1. (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.91`. |
 | **v4.3.90** | ✅ **Tăng cường chẩn đoán lỗi giải mã đám mây (v4.3.90)**: (1) Sửa log trong catch block của `performSync` trong [app.js](file:///c:/Users/PC%20VIP/Documents/Thong-ke/src/core/app.js) để in ra chi tiết message và stack trace thay vì in ra Object rỗng `{}` khi giải mã lỗi. (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.90`. |
 | **v4.3.89** | ✅ **Hoàn nguyên thuật toán mã hóa về SHA-512/600k đúng chuẩn (v4.3.89)**: (1) Khôi phục hàm `deriveKey()` trong [crypto.js](file:///c:/Users/PC%20VIP/Documents/Thong-ke/src/core/crypto.js) về **SHA-512, 600.000 vòng** — đúng như người dùng đã nâng cấp từ trước. (2) Cập nhật thứ tự `candidates` trong `decrypt()`: ưu tiên SHA-512/600k trước, sau đó fallback SHA-256/100k để giải mã dữ liệu lỡ được mã hóa bằng v4.3.87. (3) Nâng cấp cache-busting toàn hệ thống lên `v4.3.89`. |

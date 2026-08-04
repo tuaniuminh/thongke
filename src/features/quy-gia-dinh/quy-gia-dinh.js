@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.91';
-import { decrypt } from '../../core/crypto.js?v=4.3.91';
-import * as sync from '../../core/sync.js?v=4.3.91';
+} from '../../core/app.js?v=4.3.92';
+import { decrypt } from '../../core/crypto.js?v=4.3.92';
+import * as sync from '../../core/sync.js?v=4.3.92';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -2661,6 +2661,7 @@ async function runFundDiagnostics() {
         log(`Quá trình chẩn đoán gặp lỗi ngoại lệ: ${gErr.message}`, "error");
     }
 }
+
 
 
 
