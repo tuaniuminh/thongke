@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.102';
-import * as sync from '../../core/sync.js?v=4.3.102';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.102';
+} from '../../core/app.js?v=4.3.103';
+import * as sync from '../../core/sync.js?v=4.3.103';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.103';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -3205,6 +3205,27 @@ export function initWeLoveLightboxZoomAndDrag() {
 
     // Bấm nút Prev/Next trên Lightbox (chỉ hiện trên màn hình có chuột/desktop)
 
+    // Tự động cập nhật active index và dải thumbnail khi cuộn ngang slider (vuốt ngang bằng tay hoặc click)
+    let scrollTimeout = null;
+    slider.addEventListener('scroll', () => {
+        if (scale > 1) return; // Không xử lý khi đang zoom ảnh
+        
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            const scrollLeft = slider.scrollLeft;
+            const width = window.innerWidth;
+            if (width <= 0) return;
+            const newIndex = Math.round(scrollLeft / width);
+            
+            const album = state.weLovePhotoAlbum || [];
+            if (newIndex >= 0 && newIndex < album.length && newIndex !== state.activePhotoIndex) {
+                state.activePhotoIndex = newIndex;
+                updateSliderPhotos();
+            }
+        }, 50);
+    });
+
+    // Bấm nút Prev/Next trên Lightbox (chỉ hiện trên màn hình có chuột/desktop)
     if (btnLightboxPrev) {
         btnLightboxPrev.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -3216,15 +3237,14 @@ export function initWeLoveLightboxZoomAndDrag() {
             scale = 1;
             currentX = 0;
             currentY = 0;
-            updateTransform(false);
+            updateTransform(true); // Trở về zoom 1x mượt mà trước khi chuyển
             
-            // Trượt sang phải
-            slider.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            slider.style.transform = 'translate3d(0px, 0px, 0px)';
+            const prevIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
+            slider.scrollTo({ left: prevIndex * window.innerWidth, behavior: 'smooth' });
             
             setTimeout(() => {
-                transitionSlide('weLoveLightboxImgPrev', (state.activePhotoIndex - 1 + album.length) % album.length);
-            }, 250);
+                isTransitioning = false;
+            }, 300);
         });
     }
 
@@ -3239,15 +3259,14 @@ export function initWeLoveLightboxZoomAndDrag() {
             scale = 1;
             currentX = 0;
             currentY = 0;
-            updateTransform(false);
+            updateTransform(true);
             
-            // Trượt sang trái
-            slider.style.transition = 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            slider.style.transform = 'translate3d(-200vw, 0px, 0px)';
+            const nextIndex = (state.activePhotoIndex + 1) % album.length;
+            slider.scrollTo({ left: nextIndex * window.innerWidth, behavior: 'smooth' });
             
             setTimeout(() => {
-                transitionSlide('weLoveLightboxImgNext', (state.activePhotoIndex + 1) % album.length);
-            }, 250);
+                isTransitioning = false;
+            }, 300);
         });
     }
 
