@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.104';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.104';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.104';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.104';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.105';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.105';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.105';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.105';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.104';
-import * as sync from './sync.js?v=4.3.104';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.104';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.104';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.105';
+import * as sync from './sync.js?v=4.3.105';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.105';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.105';
 
-const APP_VERSION = '4.3.104';
+const APP_VERSION = '4.3.105';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2591,6 +2591,20 @@ function handleHashRoute() {
 
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
+    // Tự động đóng Lightbox nếu đang mở và mở khóa cuộn nền khi chuyển tab
+    if (typeof window.closeWeLoveLightbox === 'function') {
+        window.closeWeLoveLightbox();
+    } else {
+        const lightboxModal = document.getElementById('weLoveLightboxModal');
+        if (lightboxModal) {
+            lightboxModal.style.display = 'none';
+        }
+        document.body.classList.remove('lightbox-open');
+        document.documentElement.classList.remove('lightbox-open');
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    }
+
     // Ngăn chặn thành viên (Vợ/Spouse) truy cập các tab cấu hình và lịch nhắc của WeLove
     if (state.viewingSharedFund && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
         tabId = 'welove';
