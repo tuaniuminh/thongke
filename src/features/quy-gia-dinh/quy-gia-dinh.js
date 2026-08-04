@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.81';
-import { decrypt } from '../../core/crypto.js?v=4.3.81';
-import * as sync from '../../core/sync.js?v=4.3.81';
+} from '../../core/app.js?v=4.3.82';
+import { decrypt } from '../../core/crypto.js?v=4.3.82';
+import * as sync from '../../core/sync.js?v=4.3.82';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -698,6 +698,12 @@ export async function checkForSharedFamilyFund() {
                                     spouse_email: parsed.spouse_email,
                                     google_sheets_webhook: parsed.google_sheets_webhook
                                 };
+                                if (typeof window.updateHomeLoveWidget === 'function') {
+                                    window.updateHomeLoveWidget();
+                                }
+                                if (typeof window.renderWeLoveDashboard === 'function') {
+                                    window.renderWeLoveDashboard();
+                                }
                                 if (typeof window.updateHomeLayoutUI === 'function') {
                                     window.updateHomeLayoutUI();
                                 }
@@ -715,6 +721,12 @@ export async function checkForSharedFamilyFund() {
                                     spouse_email: parsed.spouse_email,
                                     google_sheets_webhook: parsed.google_sheets_webhook
                                 };
+                                if (typeof window.updateHomeLoveWidget === 'function') {
+                                    window.updateHomeLoveWidget();
+                                }
+                                if (typeof window.renderWeLoveDashboard === 'function') {
+                                    window.renderWeLoveDashboard();
+                                }
                                 if (typeof window.updateHomeLayoutUI === 'function') {
                                     window.updateHomeLayoutUI();
                                 }
@@ -764,6 +776,12 @@ export async function checkForSharedFamilyFund() {
                             state.fundTransactions = legacyParsed.fundTransactions || [];
                             state.viewingSharedFund = true;
                             state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                            if (typeof window.updateHomeLoveWidget === 'function') {
+                                window.updateHomeLoveWidget();
+                            }
+                            if (typeof window.renderWeLoveDashboard === 'function') {
+                                window.renderWeLoveDashboard();
+                            }
                             if (typeof window.updateHomeLayoutUI === 'function') {
                                 window.updateHomeLayoutUI();
                             }
@@ -771,6 +789,12 @@ export async function checkForSharedFamilyFund() {
                         } else {
                             state.viewingSharedFund = false;
                             state.sharedFundOwnerEmail = legacyParsed.ownerEmail || 'Chồng/Vợ';
+                            if (typeof window.updateHomeLoveWidget === 'function') {
+                                window.updateHomeLoveWidget();
+                            }
+                            if (typeof window.renderWeLoveDashboard === 'function') {
+                                window.renderWeLoveDashboard();
+                            }
                             if (typeof window.updateHomeLayoutUI === 'function') {
                                 window.updateHomeLayoutUI();
                             }

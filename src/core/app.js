@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.81';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.81';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.81';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.81';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.82';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.82';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.82';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.82';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.81';
-import * as sync from './sync.js?v=4.3.81';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.81';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.81';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.82';
+import * as sync from './sync.js?v=4.3.82';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.82';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.82';
 
-const APP_VERSION = '4.3.81';
+const APP_VERSION = '4.3.82';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1197,18 +1197,90 @@ async function performSync(silent = false) {
                                 remoteData.fundTransactions = fundData.fundTransactions || [];
                                 remoteData.fundTransactionsUpdated = fundData.fundTransactionsUpdated || '';
                                 remoteData.activeChartFundIds = fundData.activeChartFundIds || ['fund-main'];
+                                
+                                // Gộp các trường WeLove từ fundData
+                                remoteData.weLoveStartDate = fundData.weLoveStartDate || '';
+                                remoteData.weLoveStartDateUpdated = fundData.weLoveStartDateUpdated || '';
+                                remoteData.weLoveName1 = fundData.weLoveName1 || '';
+                                remoteData.weLoveName1Updated = fundData.weLoveName1Updated || '';
+                                remoteData.weLoveName2 = fundData.weLoveName2 || '';
+                                remoteData.weLoveName2Updated = fundData.weLoveName2Updated || '';
+                                remoteData.weLoveShowSickness = fundData.weLoveShowSickness !== false;
+                                remoteData.weLoveShowSicknessUpdated = fundData.weLoveShowSicknessUpdated || '';
+                                remoteData.weLoveDesktopLayout = fundData.weLoveDesktopLayout || 'traditional';
+                                remoteData.weLoveDesktopLayoutUpdated = fundData.weLoveDesktopLayoutUpdated || '';
+                                remoteData.weLovePhotoAlbum = fundData.weLovePhotoAlbum || [];
+                                remoteData.weLovePhotoAlbumUpdated = fundData.weLovePhotoAlbumUpdated || '';
+                                remoteData.weLoveSicknessLogs = fundData.weLoveSicknessLogs || [];
+                                remoteData.weLoveSicknessLogsUpdated = fundData.weLoveSicknessLogsUpdated || '';
+                                remoteData.weLoveReminders = fundData.weLoveReminders || [];
+                                remoteData.weLoveRemindersUpdated = fundData.weLoveRemindersUpdated || '';
+                                remoteData.weLoveVisitLogs = fundData.weLoveVisitLogs || [];
+                                remoteData.weLoveVisitLogsUpdated = fundData.weLoveVisitLogsUpdated || '';
+                                remoteData.weLoveAutoplay = fundData.weLoveAutoplay === true;
+                                remoteData.weLoveAutoplayUpdated = fundData.weLoveAutoplayUpdated || '';
+                                remoteData.ownerEmail = fundData.ownerEmail || '';
+                                remoteData.ownerEmailUpdated = fundData.ownerEmailUpdated || '';
                             } catch (decFundErr) {
                                 console.error("Failed to decrypt Fund Data using Fund Key:", decFundErr);
                                 remoteData.familyFunds = state.familyFunds;
                                 remoteData.familyFundsUpdated = state.familyFundsUpdated;
                                 remoteData.fundTransactions = state.fundTransactions;
                                 remoteData.fundTransactionsUpdated = state.fundTransactionsUpdated;
+                                
+                                // Khôi phục các trường WeLove từ local state để bảo vệ khi giải mã lỗi
+                                remoteData.weLoveStartDate = state.weLoveStartDate;
+                                remoteData.weLoveStartDateUpdated = state.weLoveStartDateUpdated;
+                                remoteData.weLoveName1 = state.weLoveName1;
+                                remoteData.weLoveName1Updated = state.weLoveName1Updated;
+                                remoteData.weLoveName2 = state.weLoveName2;
+                                remoteData.weLoveName2Updated = state.weLoveName2Updated;
+                                remoteData.weLoveShowSickness = state.weLoveShowSickness;
+                                remoteData.weLoveShowSicknessUpdated = state.weLoveShowSicknessUpdated;
+                                remoteData.weLoveDesktopLayout = state.weLoveDesktopLayout;
+                                remoteData.weLoveDesktopLayoutUpdated = state.weLoveDesktopLayoutUpdated;
+                                remoteData.weLovePhotoAlbum = state.weLovePhotoAlbum;
+                                remoteData.weLovePhotoAlbumUpdated = state.weLovePhotoAlbumUpdated;
+                                remoteData.weLoveSicknessLogs = state.weLoveSicknessLogs;
+                                remoteData.weLoveSicknessLogsUpdated = state.weLoveSicknessLogsUpdated;
+                                remoteData.weLoveReminders = state.weLoveReminders;
+                                remoteData.weLoveRemindersUpdated = state.weLoveRemindersUpdated;
+                                remoteData.weLoveVisitLogs = state.weLoveVisitLogs;
+                                remoteData.weLoveVisitLogsUpdated = state.weLoveVisitLogsUpdated;
+                                remoteData.weLoveAutoplay = state.weLoveAutoplay;
+                                remoteData.weLoveAutoplayUpdated = state.weLoveAutoplayUpdated;
+                                remoteData.ownerEmail = state.ownerEmail;
+                                remoteData.ownerEmailUpdated = state.ownerEmailUpdated;
                             }
                         } else {
                             remoteData.familyFunds = state.familyFunds;
                             remoteData.familyFundsUpdated = state.familyFundsUpdated;
                             remoteData.fundTransactions = state.fundTransactions;
                             remoteData.fundTransactionsUpdated = state.fundTransactionsUpdated;
+                            
+                            // Khôi phục các trường WeLove từ local state
+                            remoteData.weLoveStartDate = state.weLoveStartDate;
+                            remoteData.weLoveStartDateUpdated = state.weLoveStartDateUpdated;
+                            remoteData.weLoveName1 = state.weLoveName1;
+                            remoteData.weLoveName1Updated = state.weLoveName1Updated;
+                            remoteData.weLoveName2 = state.weLoveName2;
+                            remoteData.weLoveName2Updated = state.weLoveName2Updated;
+                            remoteData.weLoveShowSickness = state.weLoveShowSickness;
+                            remoteData.weLoveShowSicknessUpdated = state.weLoveShowSicknessUpdated;
+                            remoteData.weLoveDesktopLayout = state.weLoveDesktopLayout;
+                            remoteData.weLoveDesktopLayoutUpdated = state.weLoveDesktopLayoutUpdated;
+                            remoteData.weLovePhotoAlbum = state.weLovePhotoAlbum;
+                            remoteData.weLovePhotoAlbumUpdated = state.weLovePhotoAlbumUpdated;
+                            remoteData.weLoveSicknessLogs = state.weLoveSicknessLogs;
+                            remoteData.weLoveSicknessLogsUpdated = state.weLoveSicknessLogsUpdated;
+                            remoteData.weLoveReminders = state.weLoveReminders;
+                            remoteData.weLoveRemindersUpdated = state.weLoveRemindersUpdated;
+                            remoteData.weLoveVisitLogs = state.weLoveVisitLogs;
+                            remoteData.weLoveVisitLogsUpdated = state.weLoveVisitLogsUpdated;
+                            remoteData.weLoveAutoplay = state.weLoveAutoplay;
+                            remoteData.weLoveAutoplayUpdated = state.weLoveAutoplayUpdated;
+                            remoteData.ownerEmail = state.ownerEmail;
+                            remoteData.ownerEmailUpdated = state.ownerEmailUpdated;
                         }
                         
                         remoteData.spouseEmail = parsedObj.spouse_email || '';
@@ -1250,30 +1322,72 @@ async function performSync(silent = false) {
                     localReset = remoteReset;
                     state.showImportNotesOption = !!remoteData.showImportNotesOption;
                     state.showImportNotesOptionUpdated = remoteData.showImportNotesOptionUpdated || '';
-                    state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
-                    state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
-                    state.showLoveWidget = remoteData.showLoveWidget !== false;
-                    state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
-                    state.weLoveStartDate = remoteData.weLoveStartDate || '';
-                    state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
-                    state.weLoveName1 = remoteData.weLoveName1 || '';
-                    state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
-                    state.weLoveName2 = remoteData.weLoveName2 || '';
-                    state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
-                    state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
-                    state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
-                    state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
-                    state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
-                    state.weLovePhotoAlbum = remoteData.weLovePhotoAlbum || [];
-                    state.weLovePhotoAlbumUpdated = remoteData.weLovePhotoAlbumUpdated || '';
-                    state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
-                    state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
-                    state.weLoveReminders = remoteData.weLoveReminders || [];
-                    state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
-                    state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
-                    state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
-                    state.ownerEmail = remoteData.ownerEmail || '';
-                    state.ownerEmailUpdated = remoteData.ownerEmailUpdated || '';
+                    
+                    const isWifeViewingShared = state.viewingSharedFund && state.spouseRole === 'wife';
+                    if (!isWifeViewingShared) {
+                        state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
+                        state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                        state.showLoveWidget = remoteData.showLoveWidget !== false;
+                        state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
+                        state.weLoveStartDate = remoteData.weLoveStartDate || '';
+                        state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                        state.weLoveName1 = remoteData.weLoveName1 || '';
+                        state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
+                        state.weLoveName2 = remoteData.weLoveName2 || '';
+                        state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
+                        state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
+                        state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
+                        state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
+                        state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
+                        state.weLovePhotoAlbum = remoteData.weLovePhotoAlbum || [];
+                        state.weLovePhotoAlbumUpdated = remoteData.weLovePhotoAlbumUpdated || '';
+                        state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
+                        state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
+                        state.weLoveReminders = remoteData.weLoveReminders || [];
+                        state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
+                        state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
+                        state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
+                        state.ownerEmail = remoteData.ownerEmail || '';
+                        state.ownerEmailUpdated = remoteData.ownerEmailUpdated || '';
+                        state.familyFunds = remoteData.familyFunds || [];
+                        state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
+                        state.fundTransactions = remoteData.fundTransactions || [];
+                        state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                    } else {
+                        // Nếu là vợ đang xem quỹ chung, giữ nguyên local và chỉ gộp nếu local trống
+                        if (!state.weLoveStartDate && remoteData.weLoveStartDate) {
+                            state.weLoveStartDate = remoteData.weLoveStartDate;
+                            state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                        }
+                        if (!state.weLoveName1 && remoteData.weLoveName1) {
+                            state.weLoveName1 = remoteData.weLoveName1;
+                            state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
+                        }
+                        if (!state.weLoveName2 && remoteData.weLoveName2) {
+                            state.weLoveName2 = remoteData.weLoveName2;
+                            state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
+                        }
+                        if (state.weLovePhotoAlbum.length === 0 && remoteData.weLovePhotoAlbum && remoteData.weLovePhotoAlbum.length > 0) {
+                            state.weLovePhotoAlbum = remoteData.weLovePhotoAlbum;
+                            state.weLovePhotoAlbumUpdated = remoteData.weLovePhotoAlbumUpdated || '';
+                        }
+                        if (state.weLoveSicknessLogs.length === 0 && remoteData.weLoveSicknessLogs && remoteData.weLoveSicknessLogs.length > 0) {
+                            state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs;
+                            state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
+                        }
+                        if (state.weLoveReminders.length === 0 && remoteData.weLoveReminders && remoteData.weLoveReminders.length > 0) {
+                            state.weLoveReminders = remoteData.weLoveReminders;
+                            state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
+                        }
+                        if (state.familyFunds.length === 0 && remoteData.familyFunds && remoteData.familyFunds.length > 0) {
+                            state.familyFunds = remoteData.familyFunds;
+                            state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
+                        }
+                        if (state.fundTransactions.length === 0 && remoteData.fundTransactions && remoteData.fundTransactions.length > 0) {
+                            state.fundTransactions = remoteData.fundTransactions;
+                            state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                        }
+                    }
                     // Khôi phục trạng thái ghép đôi và liên kết E2EE (chỉ ghi đè nếu remote có giá trị hoặc local trống để tránh mất liên kết vừa tạo)
                     if (remoteData.fundSymmetricKey || !state.fundSymmetricKey) {
                         state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
@@ -1370,76 +1484,79 @@ async function performSync(silent = false) {
                         state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
                     }
 
-                    // Merge WeLove Start Date
-                    const localStartDateTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
-                    const remoteStartDateTime = remoteData.weLoveStartDateUpdated ? new Date(remoteData.weLoveStartDateUpdated).getTime() : 0;
-                    if (remoteStartDateTime > localStartDateTime) {
-                        state.weLoveStartDate = remoteData.weLoveStartDate || '';
-                        state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
-                    }
+                    // Merge WeLove fields only if not wife viewing shared (wife merges via checkForSharedFamilyFund)
+                    if (!isWifeViewingShared) {
+                        // Merge WeLove Start Date
+                        const localStartDateTime = state.weLoveStartDateUpdated ? new Date(state.weLoveStartDateUpdated).getTime() : 0;
+                        const remoteStartDateTime = remoteData.weLoveStartDateUpdated ? new Date(remoteData.weLoveStartDateUpdated).getTime() : 0;
+                        if (remoteStartDateTime > localStartDateTime) {
+                            state.weLoveStartDate = remoteData.weLoveStartDate || '';
+                            state.weLoveStartDateUpdated = remoteData.weLoveStartDateUpdated || '';
+                        }
 
-                    // Merge WeLove Name1
-                    const localName1Time = state.weLoveName1Updated ? new Date(state.weLoveName1Updated).getTime() : 0;
-                    const remoteName1Time = remoteData.weLoveName1Updated ? new Date(remoteData.weLoveName1Updated).getTime() : 0;
-                    if (remoteName1Time > localName1Time) {
-                        state.weLoveName1 = remoteData.weLoveName1 || '';
-                        state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
-                    }
+                        // Merge WeLove Name1
+                        const localName1Time = state.weLoveName1Updated ? new Date(state.weLoveName1Updated).getTime() : 0;
+                        const remoteName1Time = remoteData.weLoveName1Updated ? new Date(remoteData.weLoveName1Updated).getTime() : 0;
+                        if (remoteName1Time > localName1Time) {
+                            state.weLoveName1 = remoteData.weLoveName1 || '';
+                            state.weLoveName1Updated = remoteData.weLoveName1Updated || '';
+                        }
 
-                    // Merge WeLove Name2
-                    const localName2Time = state.weLoveName2Updated ? new Date(state.weLoveName2Updated).getTime() : 0;
-                    const remoteName2Time = remoteData.weLoveName2Updated ? new Date(remoteData.weLoveName2Updated).getTime() : 0;
-                    if (remoteName2Time > localName2Time) {
-                        state.weLoveName2 = remoteData.weLoveName2 || '';
-                        state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
-                    }
+                        // Merge WeLove Name2
+                        const localName2Time = state.weLoveName2Updated ? new Date(state.weLoveName2Updated).getTime() : 0;
+                        const remoteName2Time = remoteData.weLoveName2Updated ? new Date(remoteData.weLoveName2Updated).getTime() : 0;
+                        if (remoteName2Time > localName2Time) {
+                            state.weLoveName2 = remoteData.weLoveName2 || '';
+                            state.weLoveName2Updated = remoteData.weLoveName2Updated || '';
+                        }
 
-                    // Merge WeLove Show Sickness
-                    const localShowSicknessTime = state.weLoveShowSicknessUpdated ? new Date(state.weLoveShowSicknessUpdated).getTime() : 0;
-                    const remoteShowSicknessTime = remoteData.weLoveShowSicknessUpdated ? new Date(remoteData.weLoveShowSicknessUpdated).getTime() : 0;
-                    if (remoteShowSicknessTime > localShowSicknessTime) {
-                        state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
-                        state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
-                    }
-                    
-                    // Merge WeLove Desktop Layout
-                    const localDesktopLayoutTime = state.weLoveDesktopLayoutUpdated ? new Date(state.weLoveDesktopLayoutUpdated).getTime() : 0;
-                    const remoteDesktopLayoutTime = remoteData.weLoveDesktopLayoutUpdated ? new Date(remoteData.weLoveDesktopLayoutUpdated).getTime() : 0;
-                    if (remoteDesktopLayoutTime > localDesktopLayoutTime) {
-                        state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
-                        state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
-                    }
-                    
-                    // Merge WeLove Photo Album
-                    const localPhotoAlbumTime = state.weLovePhotoAlbumUpdated ? new Date(state.weLovePhotoAlbumUpdated).getTime() : 0;
-                    const remotePhotoAlbumTime = remoteData.weLovePhotoAlbumUpdated ? new Date(remoteData.weLovePhotoAlbumUpdated).getTime() : 0;
-                    if (remotePhotoAlbumTime > localPhotoAlbumTime) {
-                        state.weLovePhotoAlbum = remoteData.weLovePhotoAlbum || [];
-                        state.weLovePhotoAlbumUpdated = remoteData.weLovePhotoAlbumUpdated || '';
-                    }
+                        // Merge WeLove Show Sickness
+                        const localShowSicknessTime = state.weLoveShowSicknessUpdated ? new Date(state.weLoveShowSicknessUpdated).getTime() : 0;
+                        const remoteShowSicknessTime = remoteData.weLoveShowSicknessUpdated ? new Date(remoteData.weLoveShowSicknessUpdated).getTime() : 0;
+                        if (remoteShowSicknessTime > localShowSicknessTime) {
+                            state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
+                            state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
+                        }
+                        
+                        // Merge WeLove Desktop Layout
+                        const localDesktopLayoutTime = state.weLoveDesktopLayoutUpdated ? new Date(state.weLoveDesktopLayoutUpdated).getTime() : 0;
+                        const remoteDesktopLayoutTime = remoteData.weLoveDesktopLayoutUpdated ? new Date(remoteData.weLoveDesktopLayoutUpdated).getTime() : 0;
+                        if (remoteDesktopLayoutTime > localDesktopLayoutTime) {
+                            state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
+                            state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
+                        }
+                        
+                        // Merge WeLove Photo Album
+                        const localPhotoAlbumTime = state.weLovePhotoAlbumUpdated ? new Date(state.weLovePhotoAlbumUpdated).getTime() : 0;
+                        const remotePhotoAlbumTime = remoteData.weLovePhotoAlbumUpdated ? new Date(remoteData.weLovePhotoAlbumUpdated).getTime() : 0;
+                        if (remotePhotoAlbumTime > localPhotoAlbumTime) {
+                            state.weLovePhotoAlbum = remoteData.weLovePhotoAlbum || [];
+                            state.weLovePhotoAlbumUpdated = remoteData.weLovePhotoAlbumUpdated || '';
+                        }
 
-                    // Merge WeLove Sickness Logs
-                    const localSicknessTime = state.weLoveSicknessLogsUpdated ? new Date(state.weLoveSicknessLogsUpdated).getTime() : 0;
-                    const remoteSicknessTime = remoteData.weLoveSicknessLogsUpdated ? new Date(remoteData.weLoveSicknessLogsUpdated).getTime() : 0;
-                    if (remoteSicknessTime > localSicknessTime) {
-                        state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
-                        state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
-                    }
+                        // Merge WeLove Sickness Logs
+                        const localSicknessTime = state.weLoveSicknessLogsUpdated ? new Date(state.weLoveSicknessLogsUpdated).getTime() : 0;
+                        const remoteSicknessTime = remoteData.weLoveSicknessLogsUpdated ? new Date(remoteData.weLoveSicknessLogsUpdated).getTime() : 0;
+                        if (remoteSicknessTime > localSicknessTime) {
+                            state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
+                            state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
+                        }
 
-                    // Merge WeLove Reminders
-                    const localRemindersTime = state.weLoveRemindersUpdated ? new Date(state.weLoveRemindersUpdated).getTime() : 0;
-                    const remoteRemindersTime = remoteData.weLoveRemindersUpdated ? new Date(remoteData.weLoveRemindersUpdated).getTime() : 0;
-                    if (remoteRemindersTime > localRemindersTime) {
-                        state.weLoveReminders = remoteData.weLoveReminders || [];
-                        state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
-                    }
+                        // Merge WeLove Reminders
+                        const localRemindersTime = state.weLoveRemindersUpdated ? new Date(state.weLoveRemindersUpdated).getTime() : 0;
+                        const remoteRemindersTime = remoteData.weLoveRemindersUpdated ? new Date(remoteData.weLoveRemindersUpdated).getTime() : 0;
+                        if (remoteRemindersTime > localRemindersTime) {
+                            state.weLoveReminders = remoteData.weLoveReminders || [];
+                            state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
+                        }
 
-                    // Merge WeLove Visit Logs
-                    const localVisitsTime = state.weLoveVisitLogsUpdated ? new Date(state.weLoveVisitLogsUpdated).getTime() : 0;
-                    const remoteVisitsTime = remoteData.weLoveVisitLogsUpdated ? new Date(remoteData.weLoveVisitLogsUpdated).getTime() : 0;
-                    if (remoteVisitsTime > localVisitsTime) {
-                        state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
-                        state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
+                        // Merge WeLove Visit Logs
+                        const localVisitsTime = state.weLoveVisitLogsUpdated ? new Date(state.weLoveVisitLogsUpdated).getTime() : 0;
+                        const remoteVisitsTime = remoteData.weLoveVisitLogsUpdated ? new Date(remoteData.weLoveVisitLogsUpdated).getTime() : 0;
+                        if (remoteVisitsTime > localVisitsTime) {
+                            state.weLoveVisitLogs = remoteData.weLoveVisitLogs || [];
+                            state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
+                        }
                     }
 
                     // Merge ownerEmail using LWW
@@ -1538,20 +1655,23 @@ async function performSync(silent = false) {
                         state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
                         state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
                     }
-                    // Merge familyFunds using LWW
-                    const localFundsTime = state.familyFundsUpdated ? new Date(state.familyFundsUpdated).getTime() : 0;
-                    const remoteFundsTime = remoteData.familyFundsUpdated ? new Date(remoteData.familyFundsUpdated).getTime() : 0;
-                    if (remoteFundsTime > localFundsTime) {
-                        state.familyFunds = remoteData.familyFunds || [];
-                        state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
-                        state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
-                    }
-                    // Merge fundTransactions using LWW
-                    const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
-                    const remoteTxTime = remoteData.fundTransactionsUpdated ? new Date(remoteData.fundTransactionsUpdated).getTime() : 0;
-                    if (remoteTxTime > localTxTime) {
-                        state.fundTransactions = remoteData.fundTransactions || [];
-                        state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                    // Merge familyFunds & transactions only if not wife viewing shared
+                    if (!isWifeViewingShared) {
+                        // Merge familyFunds using LWW
+                        const localFundsTime = state.familyFundsUpdated ? new Date(state.familyFundsUpdated).getTime() : 0;
+                        const remoteFundsTime = remoteData.familyFundsUpdated ? new Date(remoteData.familyFundsUpdated).getTime() : 0;
+                        if (remoteFundsTime > localFundsTime) {
+                            state.familyFunds = remoteData.familyFunds || [];
+                            state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
+                            state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
+                        }
+                        // Merge fundTransactions using LWW
+                        const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
+                        const remoteTxTime = remoteData.fundTransactionsUpdated ? new Date(remoteData.fundTransactionsUpdated).getTime() : 0;
+                        if (remoteTxTime > localTxTime) {
+                            state.fundTransactions = remoteData.fundTransactions || [];
+                            state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                        }
                     }
                     
                     // Đồng bộ thông tin liên kết gia đình E2EE (chỉ ghi đè nếu remote có giá trị hoặc local rỗng)
