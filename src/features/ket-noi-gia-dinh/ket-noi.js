@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.112';
-import { decrypt } from '../../core/crypto.js?v=4.3.112';
-import * as sync from '../../core/sync.js?v=4.3.112';
+} from '../../core/app.js?v=4.3.113';
+import { decrypt } from '../../core/crypto.js?v=4.3.113';
+import * as sync from '../../core/sync.js?v=4.3.113';
 
 let _pairingInterval = null;
 
@@ -637,18 +637,29 @@ export function renderFamilyPairingSettings() {
                 return;
             }
 
+            // [BUG DETECTOR] Bật cờ hủy liên kết để chặn ghi đè từ performSync
+            window._isUnlinking = true;
+            console.log(`[BUG DETECTOR] Starting unlink action. Set window._isUnlinking = true.`);
+
             // Hiện màn hình chờ tải
             showLoadingOverlay("Đang xử lý hủy kết nối gia đình...");
 
             try {
                 // Bước 1: Báo hiệu đối phương bằng cách đẩy trạng thái 'left' lên Supabase trước
+                console.log(`[BUG DETECTOR] Unlink Step 1: Setting spouseStatus = 'left' and performing sync.`);
                 state.spouseStatus = 'left';
                 await saveLocalState();
                 if (sync.isConfigured() && state.user) {
-                    try { await performSync(true); } catch (e) { console.error("[Unlink] notify remote failed:", e); }
+                    try { 
+                        await performSync(true); 
+                        console.log(`[BUG DETECTOR] Unlink Step 1 Sync complete. Current state.spouseStatus = ${state.spouseStatus}`);
+                    } catch (e) { 
+                        console.error("[Unlink notify remote failed]", e); 
+                    }
                 }
 
                 // Bước 2: Dọn sạch local
+                console.log(`[BUG DETECTOR] Unlink Step 2: Clearing all local spouse state variables.`);
                 state.spouseEmail = '';
                 state.spouseStatus = '';
                 state.spouseRole = 'wife';
@@ -662,14 +673,22 @@ export function renderFamilyPairingSettings() {
                 state.sharedFundSourceRow = null;
                 await saveLocalState();
                 if (sync.isConfigured() && state.user) {
-                    try { await performSync(true); } catch (e) { console.error("[Unlink] clear remote failed:", e); }
+                    try { 
+                        await performSync(true); 
+                        console.log(`[BUG DETECTOR] Unlink Step 2 Sync complete. Current state.spouseEmail = ${state.spouseEmail}`);
+                    } catch (e) { 
+                        console.error("[Unlink clear remote failed]", e); 
+                    }
                 }
 
                 showToast("Đã hủy kết nối gia đình.");
             } catch (err) {
-                console.error("Hủy kết nối gia đình thất bại:", err);
+                console.error("[BUG DETECTOR] Unlink failed error details:", err);
                 showToast("Không thể hủy kết nối: " + err.message, "error");
             } finally {
+                // [BUG DETECTOR] Tắt cờ hủy liên kết
+                window._isUnlinking = false;
+                console.log(`[BUG DETECTOR] Unlink action completed. Set window._isUnlinking = false.`);
                 hideLoadingOverlay();
             }
 

@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.112';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.112';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.112';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.112';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.113';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.113';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.113';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.113';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.112';
-import * as sync from './sync.js?v=4.3.112';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.112';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.112';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.113';
+import * as sync from './sync.js?v=4.3.113';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.113';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.113';
 
-const APP_VERSION = '4.3.112';
+const APP_VERSION = '4.3.113';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1144,8 +1144,9 @@ async function performSync(silent = false) {
                         console.log("[Sync Debug] Personal data decrypted successfully. spouseEmail =", remoteData.spouseEmail, "spouseStatus =", remoteData.spouseStatus, "viewingSharedFund =", remoteData.viewingSharedFund);
                         
                         // Check if spouse has left
+                        console.log(`[BUG DETECTOR] spouse_status check: remoteStatus=${parsedObj.spouse_status}, isUnlinking=${window._isUnlinking}`);
                         if (parsedObj.spouse_status === 'left') {
-                            if (DEBUG_E2EE) console.log("[E2EE Debug] Spouse has left the fund. Performing auto-unlink.");
+                            if (DEBUG_E2EE || true) console.log("[BUG DETECTOR] Spouse has left the fund. Performing auto-unlink.");
                             parsedObj.spouse_email = '';
                             parsedObj.spouse_role = 'wife';
                             parsedObj.owner_nickname = '';
@@ -1439,39 +1440,42 @@ async function performSync(silent = false) {
                     state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                     state.fundTransactions = remoteData.fundTransactions || [];
                     state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
-                    if (remoteData.familyFundInviteStatus || !state.familyFundInviteStatus) {
-                        state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
-                        state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
-                    }
-                    if (remoteData.spouseStatus || !state.spouseStatus) {
-                        state.spouseStatus = remoteData.spouseStatus || '';
-                    }
-                    state.lastFullBackupDate = remoteData.lastFullBackupDate || '';
-                    state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
-                    
-                    if (remoteData.spouseEmail || !state.spouseEmail) {
-                        state.spouseEmail = remoteData.spouseEmail || '';
-                    }
-                    if (remoteData.spouseRole || !state.spouseRole) {
-                        state.spouseRole = remoteData.spouseRole || 'wife';
-                    }
-                    if (remoteData.viewingSharedFund !== undefined && (remoteData.viewingSharedFund || !state.spouseEmail)) {
-                        state.viewingSharedFund = !!remoteData.viewingSharedFund;
-                    }
-                    if (remoteData.sharedFundOwnerEmail || !state.sharedFundOwnerEmail) {
-                        state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
-                    }
-                    if (remoteData.googleSheetsWebhook || !state.googleSheetsWebhook) {
-                        state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
-                    }
-                    if (remoteData.ownerNickname || !state.ownerNickname) {
-                        state.ownerNickname = remoteData.ownerNickname || '';
-                    }
-                    if (remoteData.spousePublicKey || !state.spousePublicKey) {
-                        state.spousePublicKey = remoteData.spousePublicKey || '';
-                    }
-                    if (remoteData.pairingCodeAccepted || !state.pairingCodeAccepted) {
-                        state.pairingCodeAccepted = remoteData.pairingCodeAccepted || '';
+                    // [BUG DETECTOR] Bỏ qua ghi đè thông tin spouse từ máy chủ nếu đang trong quá trình hủy liên kết
+                    if (window._isUnlinking) {
+                        console.log(`[BUG DETECTOR] Skip merging spouse fields from remote record. spouseEmail=${state.spouseEmail}, spouseStatus=${state.spouseStatus}, spouseRole=${state.spouseRole}`);
+                    } else {
+                        console.log(`[BUG DETECTOR] Merging spouse fields from remote. Remote email: ${remoteData.spouseEmail || 'none'}, Remote status: ${remoteData.spouseStatus || 'none'}`);
+                        if (remoteData.familyFundInviteStatus || !state.familyFundInviteStatus) {
+                            state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
+                            state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
+                        }
+                        if (remoteData.spouseStatus || !state.spouseStatus) {
+                            state.spouseStatus = remoteData.spouseStatus || '';
+                        }
+                        if (remoteData.spouseEmail || !state.spouseEmail) {
+                            state.spouseEmail = remoteData.spouseEmail || '';
+                        }
+                        if (remoteData.spouseRole || !state.spouseRole) {
+                            state.spouseRole = remoteData.spouseRole || 'wife';
+                        }
+                        if (remoteData.viewingSharedFund !== undefined && (remoteData.viewingSharedFund || !state.spouseEmail)) {
+                            state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                        }
+                        if (remoteData.sharedFundOwnerEmail || !state.sharedFundOwnerEmail) {
+                            state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
+                        }
+                        if (remoteData.googleSheetsWebhook || !state.googleSheetsWebhook) {
+                            state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
+                        }
+                        if (remoteData.ownerNickname || !state.ownerNickname) {
+                            state.ownerNickname = remoteData.ownerNickname || '';
+                        }
+                        if (remoteData.spousePublicKey || !state.spousePublicKey) {
+                            state.spousePublicKey = remoteData.spousePublicKey || '';
+                        }
+                        if (remoteData.pairingCodeAccepted || !state.pairingCodeAccepted) {
+                            state.pairingCodeAccepted = remoteData.pairingCodeAccepted || '';
+                        }
                     }
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
@@ -1696,18 +1700,23 @@ async function performSync(silent = false) {
                         }
                     }
                     
-                    // Đồng bộ thông tin liên kết gia đình E2EE (chỉ ghi đè nếu remote có giá trị hoặc local rỗng)
-                    if (remoteData.spouseEmail) state.spouseEmail = remoteData.spouseEmail;
-                    if (remoteData.googleSheetsWebhook) state.googleSheetsWebhook = remoteData.googleSheetsWebhook;
-                    if (remoteData.spouseRole) state.spouseRole = remoteData.spouseRole;
-                    if (remoteData.ownerNickname) state.ownerNickname = remoteData.ownerNickname;
-                    if (remoteData.spouseStatus) state.spouseStatus = remoteData.spouseStatus;
-                    if (remoteData.viewingSharedFund !== undefined && (remoteData.viewingSharedFund || !state.spouseEmail)) {
-                        state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                    // [BUG DETECTOR] Bỏ qua ghi đè thông tin spouse từ máy chủ nếu đang trong quá trình hủy liên kết
+                    if (window._isUnlinking) {
+                        console.log(`[BUG DETECTOR] Skip merging spouse fields from remote record in local merge. spouseEmail=${state.spouseEmail}, spouseStatus=${state.spouseStatus}`);
+                    } else {
+                        console.log(`[BUG DETECTOR] Merging spouse fields in local merge block. Remote email: ${remoteData.spouseEmail || 'none'}`);
+                        if (remoteData.spouseEmail) state.spouseEmail = remoteData.spouseEmail;
+                        if (remoteData.googleSheetsWebhook) state.googleSheetsWebhook = remoteData.googleSheetsWebhook;
+                        if (remoteData.spouseRole) state.spouseRole = remoteData.spouseRole;
+                        if (remoteData.ownerNickname) state.ownerNickname = remoteData.ownerNickname;
+                        if (remoteData.spouseStatus) state.spouseStatus = remoteData.spouseStatus;
+                        if (remoteData.viewingSharedFund !== undefined && (remoteData.viewingSharedFund || !state.spouseEmail)) {
+                            state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                        }
+                        if (remoteData.sharedFundOwnerEmail) state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail;
+                        if (remoteData.spousePublicKey) state.spousePublicKey = remoteData.spousePublicKey;
+                        if (remoteData.pairingCodeAccepted) state.pairingCodeAccepted = remoteData.pairingCodeAccepted;
                     }
-                    if (remoteData.sharedFundOwnerEmail) state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail;
-                    if (remoteData.spousePublicKey) state.spousePublicKey = remoteData.spousePublicKey;
-                    if (remoteData.pairingCodeAccepted) state.pairingCodeAccepted = remoteData.pairingCodeAccepted;
                     // Merge reportAiInsights — local thắng theo từng key (tháng), remote bổ sung các key còn thiếu
                     if (remoteData.reportAiInsights && typeof remoteData.reportAiInsights === 'object') {
                         state.reportAiInsights = Object.assign({}, remoteData.reportAiInsights, state.reportAiInsights || {});
