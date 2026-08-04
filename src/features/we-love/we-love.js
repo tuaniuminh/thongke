@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.109';
-import * as sync from '../../core/sync.js?v=4.3.109';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.109';
+} from '../../core/app.js?v=4.3.110';
+import * as sync from '../../core/sync.js?v=4.3.110';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.110';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -1741,6 +1741,7 @@ export function renderFamilyPairingSettings() {
             state.pairingCode = '';
             state.pairingCodeExpired = '';
             state.pairingFundKeyEncrypted = '';
+            state.pairingCodeAccepted = '';
             state.familyFundInviteStatus = '';
             state.viewingSharedFund = false;
             state.sharedFundOwnerEmail = '';
@@ -1925,6 +1926,7 @@ export function renderFamilyPairingSettings() {
                 state.familyFundInviteStatus = 'accepted';
                 state.viewingSharedFund = true;
                 state.sharedFundOwnerEmail = husbandEmail;
+                state.pairingCodeAccepted = code;
                 state.sharedFundSourceRow = {
                     user_id: data.user_id,
                     encrypted_data: data.encrypted_data,

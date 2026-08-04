@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.109';
-import { decrypt } from '../../core/crypto.js?v=4.3.109';
-import * as sync from '../../core/sync.js?v=4.3.109';
+} from '../../core/app.js?v=4.3.110';
+import { decrypt } from '../../core/crypto.js?v=4.3.110';
+import * as sync from '../../core/sync.js?v=4.3.110';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -491,11 +491,21 @@ export async function checkForSharedFamilyFund() {
                         const remoteSpouseStatus = parsed.spouse_status || '';
                         
                         if (remoteSpouseEmail === myEmail && remoteSpouseStatus === 'accepted') {
-                            // Chỉ chấp nhận kết nối nếu dòng dữ liệu của đối tác được cập nhật sau khi mã ghép đôi được tạo
-                            // (Mã ghép đôi có hiệu lực 10 phút, nên thời điểm tạo là pairingCodeExpired - 10 phút)
-                            const pairingCodeGeneratedAt = new Date(state.pairingCodeExpired).getTime() - 10 * 60 * 1000;
-                            const rowUpdatedAt = new Date(row.updated_at).getTime();
-                            if (rowUpdatedAt >= pairingCodeGeneratedAt) {
+                            // Kiểm tra mã ghép đôi đối tác đã nhập để tránh nhận nhầm các kết nối cũ (như của vợ cũ)
+                            const partnerCodeAccepted = (parsed.pairing_code_accepted || '').trim().toUpperCase();
+                            const myActiveCode = (state.pairingCode || '').trim().toUpperCase();
+                            
+                            let isMatch = false;
+                            if (partnerCodeAccepted && myActiveCode) {
+                                isMatch = (partnerCodeAccepted === myActiveCode);
+                            } else {
+                                // Fallback: Nếu đối phương dùng app phiên bản cũ chưa gửi kèm mã, dùng mốc thời gian để lọc
+                                const pairingCodeGeneratedAt = new Date(state.pairingCodeExpired).getTime() - 10 * 60 * 1000;
+                                const rowUpdatedAt = new Date(row.updated_at).getTime();
+                                isMatch = (rowUpdatedAt >= pairingCodeGeneratedAt);
+                            }
+                            
+                            if (isMatch) {
                                 const spouseEmailVal = (row.user_email || '').toLowerCase().trim();
                                 console.log("[E2EE Debug] Detected partner accepted pairing. Connecting to:", spouseEmailVal);
                                 
@@ -522,7 +532,7 @@ export async function checkForSharedFamilyFund() {
                                 }
                                 rowProcessed = true;
                             } else {
-                                console.log("[E2EE Debug] Skipping old pairing row (updated before code generation):", row.user_email);
+                                console.log("[E2EE Debug] Skipping old/unmatched pairing row for:", row.user_email);
                             }
                         }
                     }

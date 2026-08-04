@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.109';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.109';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.109';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.109';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.110';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.110';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.110';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.110';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.109';
-import * as sync from './sync.js?v=4.3.109';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.109';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.109';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.110';
+import * as sync from './sync.js?v=4.3.110';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.110';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.110';
 
-const APP_VERSION = '4.3.109';
+const APP_VERSION = '4.3.110';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -108,6 +108,7 @@ let state = {
     familyFunds: [],
     familyFundsUpdated: '',
     spouseEmail: '',
+    pairingCodeAccepted: '',
     ownerEmail: '',
     ownerEmailUpdated: '',
     googleSheetsWebhook: '',
@@ -856,7 +857,8 @@ async function saveLocalState() {
         reportAiInsights: state.reportAiInsights || {},
         pairingCode: state.pairingCode || '',
         pairingCodeExpired: state.pairingCodeExpired || '',
-        pairingFundKeyEncrypted: state.pairingFundKeyEncrypted || ''
+        pairingFundKeyEncrypted: state.pairingFundKeyEncrypted || '',
+        pairingCodeAccepted: state.pairingCodeAccepted || ''
     });
     
     try {
@@ -1293,12 +1295,14 @@ async function performSync(silent = false) {
                         remoteData.googleSheetsWebhook = parsedObj.google_sheets_webhook || '';
                         remoteData.spouseRole = parsedObj.spouse_role || 'wife';
                         remoteData.ownerNickname = parsedObj.owner_nickname || '';
+                        remoteData.pairingCodeAccepted = parsedObj.pairing_code_accepted || '';
                         
                         const isLocalPairingActive = state.pairingCode && state.pairingCodeExpired && (new Date(state.pairingCodeExpired).getTime() > Date.now());
                         if (!isLocalPairingActive) {
                             state.pairingCode = parsedObj.pairing_code || '';
                             state.pairingCodeExpired = parsedObj.pairing_code_expired || '';
                             state.pairingFundKeyEncrypted = parsedObj.pairing_fund_key_encrypted || '';
+                            state.pairingCodeAccepted = parsedObj.pairing_code_accepted || '';
                         }
                     }
                 } catch (jsonErr) {
@@ -1465,6 +1469,9 @@ async function performSync(silent = false) {
                     }
                     if (remoteData.spousePublicKey || !state.spousePublicKey) {
                         state.spousePublicKey = remoteData.spousePublicKey || '';
+                    }
+                    if (remoteData.pairingCodeAccepted || !state.pairingCodeAccepted) {
+                        state.pairingCodeAccepted = remoteData.pairingCodeAccepted || '';
                     }
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
@@ -1700,6 +1707,7 @@ async function performSync(silent = false) {
                     }
                     if (remoteData.sharedFundOwnerEmail) state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail;
                     if (remoteData.spousePublicKey) state.spousePublicKey = remoteData.spousePublicKey;
+                    if (remoteData.pairingCodeAccepted) state.pairingCodeAccepted = remoteData.pairingCodeAccepted;
                     // Merge reportAiInsights — local thắng theo từng key (tháng), remote bổ sung các key còn thiếu
                     if (remoteData.reportAiInsights && typeof remoteData.reportAiInsights === 'object') {
                         state.reportAiInsights = Object.assign({}, remoteData.reportAiInsights, state.reportAiInsights || {});
@@ -1860,7 +1868,8 @@ async function performSync(silent = false) {
             sharedFundOwnerEmail: state.sharedFundOwnerEmail || '',
             lastFullBackupDate: state.lastFullBackupDate || '',
             activeChartFundIds: state.activeChartFundIds || ['fund-main'],
-            reportAiInsights: state.reportAiInsights || {}
+            reportAiInsights: state.reportAiInsights || {},
+            pairingCodeAccepted: state.pairingCodeAccepted || ''
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 
@@ -1944,6 +1953,7 @@ async function performSync(silent = false) {
             pairing_code: state.pairingCode || '',
             pairing_code_expired: state.pairingCodeExpired || '',
             pairing_fund_key_encrypted: state.pairingFundKeyEncrypted || '',
+            pairing_code_accepted: state.pairingCodeAccepted || '',
             asymmetricPublicKey: state.asymmetricPublicKey || ''
         });
 
