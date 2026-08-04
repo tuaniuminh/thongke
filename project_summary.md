@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.3.93** |
+| **Phiên bản hiện tại** | **v4.3.94** |
+| **v4.3.94** | ✅ **Tối ưu hóa chất lượng hiển thị ảnh trong Lightbox (v4.3.94)**: (1) Bổ sung thuộc tính CSS `image-rendering: -webkit-optimize-contrast` và `image-rendering: crisp-edges` vào các thẻ ảnh xem toàn màn hình để ép trình duyệt trên điện thoại (đặc biệt là iOS Safari) sử dụng thuật toán render sắc nét, chống mờ nhòe khi co phóng. (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.94`. |
 | **v4.3.93** | ✅ **Khắc phục lỗi chớp ảnh cũ khi xem ảnh toàn màn hình (v4.3.93)**: (1) Tích hợp phương thức Web API `img.decode()` để chờ ảnh được tải và giải mã xong trước khi dịch chuyển slider về vị trí trung tâm. (2) Tối ưu hóa hàm `updateSliderPhotos` chỉ gán `src` mới khi có sự thay đổi thực sự, triệt tiêu hoàn toàn hiện tượng hiển thị ảnh cũ và chớp tắt khi vuốt hoặc nhấn chuyển ảnh. (3) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.93`. |
 | **v4.3.92** | ✅ **Sửa lỗi ReferenceError trong performSync (v4.3.92)**: (1) Khai báo biến `isWifeViewingShared` ra ngoài phạm vi block `if` tại [app.js](file:///c:/Users/PC%20VIP/Documents/Thong-ke/src/core/app.js) để tránh lỗi ReferenceError khi chạy vào nhánh logic khác. (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.92`. |
 | **v4.3.91** | ✅ **Khắc phục lỗi cú pháp biên dịch đầu file JS (v4.3.91)**: (1) Sửa lỗi cắt mất 1 ký tự ở đầu 10 tệp JS do lệnh so sánh BOM không chính xác ở Powershell phiên bản trước. Khôi phục hoàn chỉnh các từ khóa `import`, `//` và `/**` ở dòng 1. (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.91`. |
