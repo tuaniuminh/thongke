@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.79';
-import * as sync from '../../core/sync.js?v=4.3.79';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.79';
+} from '../../core/app.js?v=4.3.80';
+import * as sync from '../../core/sync.js?v=4.3.80';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.80';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -1755,7 +1755,7 @@ export function renderFamilyPairingSettings() {
                     <p style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">2. Nhập mã ghép đôi (Dành cho Vợ):</p>
                     <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0 0 10px 0;">Nhập mã chồng đã gửi để hoàn thành kết nối 2 chiều và mở khóa Quỹ chung & Góc tình yêu.</p>
                     <div class="pairing-input-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <input type="text" id="fpPairingCodeInput" placeholder="Ví dụ: LOVE-123456" style="flex-grow: 1; min-width: 0; padding: 8px 12px; font-size: 0.88rem; text-transform: uppercase; font-weight: 700; text-align: center; letter-spacing: 1px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <input type="text" id="fpPairingCodeInput" placeholder="Nhập 6 chữ số (Ví dụ: 123456)" style="flex-grow: 1; min-width: 0; padding: 8px 12px; font-size: 0.88rem; text-transform: uppercase; font-weight: 700; text-align: center; letter-spacing: 1px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
                         <button class="btn btn-primary" id="btnFPSubmitCode" style="font-size: 0.82rem; padding: 10px 16px; background: #059669; border: none; border-radius: 10px; font-weight: 700; color: white; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                             Kết nối
                         </button>
@@ -1816,9 +1816,13 @@ export function renderFamilyPairingSettings() {
                 showToast("Bạn cần cấu hình và kết nối Supabase trước!", "warning");
                 return;
             }
-            const code = (inputCode?.value || '').trim().toUpperCase();
+            let code = (inputCode?.value || '').trim().toUpperCase();
+            // Nếu người dùng nhập 6 chữ số, tự động chuyển đổi thành tiền tố LOVE-
+            if (/^\d{6}$/.test(code)) {
+                code = `LOVE-${code}`;
+            }
             if (!code.startsWith('LOVE-') || code.length < 10) {
-                showToast("Mã không đúng định dạng! (Ví dụ: LOVE-123456)", "warning");
+                showToast("Mã không đúng định dạng! (Ví dụ: 123456 hoặc LOVE-123456)", "warning");
                 return;
             }
 

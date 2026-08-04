@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.79';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.79';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.79';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.79';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.80';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.80';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.80';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.80';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.79';
-import * as sync from './sync.js?v=4.3.79';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.79';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.79';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.80';
+import * as sync from './sync.js?v=4.3.80';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.80';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.80';
 
-const APP_VERSION = '4.3.79';
+const APP_VERSION = '4.3.80';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1274,7 +1274,10 @@ async function performSync(silent = false) {
                     state.weLoveVisitLogsUpdated = remoteData.weLoveVisitLogsUpdated || '';
                     state.ownerEmail = remoteData.ownerEmail || '';
                     state.ownerEmailUpdated = remoteData.ownerEmailUpdated || '';
-                    state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
+                    // Khôi phục trạng thái ghép đôi và liên kết E2EE (chỉ ghi đè nếu remote có giá trị hoặc local trống để tránh mất liên kết vừa tạo)
+                    if (remoteData.fundSymmetricKey || !state.fundSymmetricKey) {
+                        state.fundSymmetricKey = remoteData.fundSymmetricKey || '';
+                    }
                     state.asymmetricPublicKey = remoteData.asymmetricPublicKey || '';
                     state.asymmetricPrivateKeyEncrypted = remoteData.asymmetricPrivateKeyEncrypted || '';
                     state.customEventTypes = remoteData.customEventTypes || [];
@@ -1303,20 +1306,37 @@ async function performSync(silent = false) {
                     state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                     state.fundTransactions = remoteData.fundTransactions || [];
                     state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
-                    state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
-                    state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
-                    state.spouseStatus = remoteData.spouseStatus || '';
+                    if (remoteData.familyFundInviteStatus || !state.familyFundInviteStatus) {
+                        state.familyFundInviteStatus = remoteData.familyFundInviteStatus || '';
+                        state.familyFundInviteStatusUpdated = remoteData.familyFundInviteStatusUpdated || '';
+                    }
+                    if (remoteData.spouseStatus || !state.spouseStatus) {
+                        state.spouseStatus = remoteData.spouseStatus || '';
+                    }
                     state.lastFullBackupDate = remoteData.lastFullBackupDate || '';
                     state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
                     
-                    // Khôi phục trạng thái ghép đôi và liên kết E2EE
-                    state.spouseEmail = remoteData.spouseEmail || '';
-                    state.spouseRole = remoteData.spouseRole || 'wife';
-                    state.viewingSharedFund = !!remoteData.viewingSharedFund;
-                    state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
-                    state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
-                    state.ownerNickname = remoteData.ownerNickname || '';
-                    state.spousePublicKey = remoteData.spousePublicKey || '';
+                    if (remoteData.spouseEmail || !state.spouseEmail) {
+                        state.spouseEmail = remoteData.spouseEmail || '';
+                    }
+                    if (remoteData.spouseRole || !state.spouseRole) {
+                        state.spouseRole = remoteData.spouseRole || 'wife';
+                    }
+                    if (remoteData.viewingSharedFund !== undefined && (remoteData.viewingSharedFund || !state.spouseEmail)) {
+                        state.viewingSharedFund = !!remoteData.viewingSharedFund;
+                    }
+                    if (remoteData.sharedFundOwnerEmail || !state.sharedFundOwnerEmail) {
+                        state.sharedFundOwnerEmail = remoteData.sharedFundOwnerEmail || '';
+                    }
+                    if (remoteData.googleSheetsWebhook || !state.googleSheetsWebhook) {
+                        state.googleSheetsWebhook = remoteData.googleSheetsWebhook || '';
+                    }
+                    if (remoteData.ownerNickname || !state.ownerNickname) {
+                        state.ownerNickname = remoteData.ownerNickname || '';
+                    }
+                    if (remoteData.spousePublicKey || !state.spousePublicKey) {
+                        state.spousePublicKey = remoteData.spousePublicKey || '';
+                    }
                 } else if (localResetTime > remoteResetTime) {
                     // Local has a newer reset/overwrite. Discard remote data.
                     remoteReceived = [];
