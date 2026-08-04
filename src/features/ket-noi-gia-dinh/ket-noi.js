@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.113';
-import { decrypt } from '../../core/crypto.js?v=4.3.113';
-import * as sync from '../../core/sync.js?v=4.3.113';
+} from '../../core/app.js?v=4.3.114';
+import { decrypt } from '../../core/crypto.js?v=4.3.114';
+import * as sync from '../../core/sync.js?v=4.3.114';
 
 let _pairingInterval = null;
 
@@ -12,6 +12,13 @@ let _pairingInterval = null;
 export async function checkForSharedFamilyFund() {
     const supabaseClient = sync.getSupabase();
     if (!state.user || !supabaseClient) {
+        return;
+    }
+
+    // [BUG DETECTOR FIX] Nếu đang trong quá trình hủy liên kết, bỏ qua hoàn toàn
+    // để tránh interval này ghi đè lại spouseStatus = 'accepted' song song
+    if (window._isUnlinking) {
+        console.log('[BUG DETECTOR] checkForSharedFamilyFund: Skipping due to active unlink process.');
         return;
     }
 
