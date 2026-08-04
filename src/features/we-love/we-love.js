@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.108';
-import * as sync from '../../core/sync.js?v=4.3.108';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.108';
+} from '../../core/app.js?v=4.3.109';
+import * as sync from '../../core/sync.js?v=4.3.109';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.109';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -1746,6 +1746,9 @@ export function renderFamilyPairingSettings() {
             state.sharedFundOwnerEmail = '';
             state.sharedFundSourceRow = null;
             await saveLocalState();
+            if (sync.isConfigured() && state.user) {
+                try { await performSync(true); } catch (e) { console.error("[Unlink] clear remote failed:", e); }
+            }
 
             showToast("Đã hủy kết nối gia đình.");
             renderFamilyPairingSettings();

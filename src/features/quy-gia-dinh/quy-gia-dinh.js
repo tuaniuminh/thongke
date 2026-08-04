@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.108';
-import { decrypt } from '../../core/crypto.js?v=4.3.108';
-import * as sync from '../../core/sync.js?v=4.3.108';
+} from '../../core/app.js?v=4.3.109';
+import { decrypt } from '../../core/crypto.js?v=4.3.109';
+import * as sync from '../../core/sync.js?v=4.3.109';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -491,31 +491,39 @@ export async function checkForSharedFamilyFund() {
                         const remoteSpouseStatus = parsed.spouse_status || '';
                         
                         if (remoteSpouseEmail === myEmail && remoteSpouseStatus === 'accepted') {
-                            const spouseEmailVal = (row.user_email || '').toLowerCase().trim();
-                            console.log("[E2EE Debug] Detected partner accepted pairing. Connecting to:", spouseEmailVal);
-                            
-                            state.spouseEmail = spouseEmailVal;
-                            state.spouseStatus = 'accepted';
-                            state.spouseRole = 'husband'; // Current user is Husband (Admin)
-                            state.familyFundInviteStatus = 'accepted';
-                            state.spouseStatusUpdated = new Date().toISOString();
-                            
-                            await saveLocalState();
-                            
-                            // Thực hiện đồng bộ ngầm để chia sẻ khóa đối xứng và dữ liệu WeLove chung
-                            setTimeout(() => {
-                                if (typeof performSync === 'function') {
-                                    performSync(true);
+                            // Chỉ chấp nhận kết nối nếu dòng dữ liệu của đối tác được cập nhật sau khi mã ghép đôi được tạo
+                            // (Mã ghép đôi có hiệu lực 10 phút, nên thời điểm tạo là pairingCodeExpired - 10 phút)
+                            const pairingCodeGeneratedAt = new Date(state.pairingCodeExpired).getTime() - 10 * 60 * 1000;
+                            const rowUpdatedAt = new Date(row.updated_at).getTime();
+                            if (rowUpdatedAt >= pairingCodeGeneratedAt) {
+                                const spouseEmailVal = (row.user_email || '').toLowerCase().trim();
+                                console.log("[E2EE Debug] Detected partner accepted pairing. Connecting to:", spouseEmailVal);
+                                
+                                state.spouseEmail = spouseEmailVal;
+                                state.spouseStatus = 'accepted';
+                                state.spouseRole = 'husband'; // Current user is Husband (Admin)
+                                state.familyFundInviteStatus = 'accepted';
+                                state.spouseStatusUpdated = new Date().toISOString();
+                                
+                                await saveLocalState();
+                                
+                                // Thực hiện đồng bộ ngầm để chia sẻ khóa đối xứng và dữ liệu WeLove chung
+                                setTimeout(() => {
+                                    if (typeof performSync === 'function') {
+                                        performSync(true);
+                                    }
+                                }, 500);
+                                
+                                if (typeof window.updateHomeLayoutUI === 'function') {
+                                    window.updateHomeLayoutUI();
                                 }
-                            }, 500);
-                            
-                            if (typeof window.updateHomeLayoutUI === 'function') {
-                                window.updateHomeLayoutUI();
+                                if (typeof window.renderWeLoveDashboard === 'function') {
+                                    window.renderWeLoveDashboard();
+                                }
+                                rowProcessed = true;
+                            } else {
+                                console.log("[E2EE Debug] Skipping old pairing row (updated before code generation):", row.user_email);
                             }
-                            if (typeof window.renderWeLoveDashboard === 'function') {
-                                window.renderWeLoveDashboard();
-                            }
-                            rowProcessed = true;
                         }
                     }
                 } catch (e) {
