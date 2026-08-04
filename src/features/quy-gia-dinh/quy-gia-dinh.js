@@ -1,12 +1,12 @@
-﻿// src/features/quy-gia-dinh/quy-gia-dinh.js - Family Fund Management Logic
+// src/features/quy-gia-dinh/quy-gia-dinh.js - Family Fund Management Logic
 
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.92';
-import { decrypt } from '../../core/crypto.js?v=4.3.92';
-import * as sync from '../../core/sync.js?v=4.3.92';
+} from '../../core/app.js?v=4.3.93';
+import { decrypt } from '../../core/crypto.js?v=4.3.93';
+import * as sync from '../../core/sync.js?v=4.3.93';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};

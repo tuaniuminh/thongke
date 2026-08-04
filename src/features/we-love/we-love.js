@@ -1,9 +1,9 @@
-﻿// src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
+// src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.92';
-import * as sync from '../../core/sync.js?v=4.3.92';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.92';
+} from '../../core/app.js?v=4.3.93';
+import * as sync from '../../core/sync.js?v=4.3.93';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.93';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2517,9 +2517,30 @@ export function updateSliderPhotos() {
     const imgNext = document.getElementById('weLoveLightboxImgNext');
     const lightboxCaption = document.getElementById('weLoveLightboxCaption');
     
-    if (imgActive) imgActive.src = getGoogleDriveDirectLink(activePhoto.url);
-    if (imgPrev) imgPrev.src = album.length > 1 ? getGoogleDriveDirectLink(album[prevIdx].url) : '';
-    if (imgNext) imgNext.src = album.length > 1 ? getGoogleDriveDirectLink(album[nextIdx].url) : '';
+    const activeSrc = getGoogleDriveDirectLink(activePhoto.url);
+    const prevSrc = album.length > 1 ? getGoogleDriveDirectLink(album[prevIdx].url) : '';
+    const nextSrc = album.length > 1 ? getGoogleDriveDirectLink(album[nextIdx].url) : '';
+    
+    if (imgActive) {
+        const currentSrc = imgActive.src;
+        if (currentSrc !== activeSrc && imgActive.getAttribute('src') !== activeSrc) {
+            imgActive.src = activeSrc;
+        }
+    }
+    
+    if (imgPrev) {
+        const currentSrc = imgPrev.src;
+        if (currentSrc !== prevSrc && imgPrev.getAttribute('src') !== prevSrc) {
+            imgPrev.src = prevSrc;
+        }
+    }
+    
+    if (imgNext) {
+        const currentSrc = imgNext.src;
+        if (currentSrc !== nextSrc && imgNext.getAttribute('src') !== nextSrc) {
+            imgNext.src = nextSrc;
+        }
+    }
     
     if (lightboxCaption) {
         lightboxCaption.textContent = activePhoto.caption ? `"${activePhoto.caption}"` : '';
@@ -2591,6 +2612,33 @@ export function initWeLoveLightboxZoomAndDrag() {
 
     // Transition state
     let isTransitioning = false;
+
+    // Helper to transition slide smoothly using image decode
+    function transitionSlide(targetImgId, targetIndex) {
+        const imgActive = document.getElementById('weLoveLightboxImgActive');
+        const imgTarget = document.getElementById(targetImgId);
+        
+        const proceed = () => {
+            if (slider) {
+                slider.style.transition = 'none';
+                slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
+            }
+            state.activePhotoIndex = targetIndex;
+            updateSliderPhotos();
+            isTransitioning = false;
+        };
+
+        if (imgActive && imgTarget && imgTarget.src) {
+            imgActive.src = imgTarget.src;
+            if (typeof imgActive.decode === 'function') {
+                imgActive.decode().then(proceed).catch(proceed);
+            } else {
+                proceed();
+            }
+        } else {
+            proceed();
+        }
+    }
 
     // Inertia variables
     let lastTouchTime = 0;
@@ -2968,31 +3016,13 @@ export function initWeLoveLightboxZoomAndDrag() {
                     // Vuốt sang phải -> ảnh trước đó
                     slider.style.transform = 'translate3d(0px, 0px, 0px)';
                     setTimeout(() => {
-                        const imgActive = document.getElementById('weLoveLightboxImgActive');
-                        const imgPrev = document.getElementById('weLoveLightboxImgPrev');
-                        if (imgActive && imgPrev && imgPrev.src) {
-                            imgActive.src = imgPrev.src;
-                        }
-                        slider.style.transition = 'none';
-                        slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
-                        state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
-                        updateSliderPhotos();
-                        isTransitioning = false;
+                        transitionSlide('weLoveLightboxImgPrev', (state.activePhotoIndex - 1 + album.length) % album.length);
                     }, 250);
                 } else {
                     // Vuốt sang trái -> ảnh tiếp theo
                     slider.style.transform = 'translate3d(-200vw, 0px, 0px)';
                     setTimeout(() => {
-                        const imgActive = document.getElementById('weLoveLightboxImgActive');
-                        const imgNext = document.getElementById('weLoveLightboxImgNext');
-                        if (imgActive && imgNext && imgNext.src) {
-                            imgActive.src = imgNext.src;
-                        }
-                        slider.style.transition = 'none';
-                        slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
-                        state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
-                        updateSliderPhotos();
-                        isTransitioning = false;
+                        transitionSlide('weLoveLightboxImgNext', (state.activePhotoIndex + 1) % album.length);
                     }, 250);
                 }
             } else {
@@ -3027,16 +3057,7 @@ export function initWeLoveLightboxZoomAndDrag() {
             slider.style.transform = 'translate3d(0px, 0px, 0px)';
             
             setTimeout(() => {
-                const imgActive = document.getElementById('weLoveLightboxImgActive');
-                const imgPrev = document.getElementById('weLoveLightboxImgPrev');
-                if (imgActive && imgPrev && imgPrev.src) {
-                    imgActive.src = imgPrev.src;
-                }
-                slider.style.transition = 'none';
-                slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
-                state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
-                updateSliderPhotos();
-                isTransitioning = false;
+                transitionSlide('weLoveLightboxImgPrev', (state.activePhotoIndex - 1 + album.length) % album.length);
             }, 250);
         });
     }
@@ -3059,16 +3080,7 @@ export function initWeLoveLightboxZoomAndDrag() {
             slider.style.transform = 'translate3d(-200vw, 0px, 0px)';
             
             setTimeout(() => {
-                const imgActive = document.getElementById('weLoveLightboxImgActive');
-                const imgNext = document.getElementById('weLoveLightboxImgNext');
-                if (imgActive && imgNext && imgNext.src) {
-                    imgActive.src = imgNext.src;
-                }
-                slider.style.transition = 'none';
-                slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
-                state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
-                updateSliderPhotos();
-                isTransitioning = false;
+                transitionSlide('weLoveLightboxImgNext', (state.activePhotoIndex + 1) % album.length);
             }, 250);
         });
     }

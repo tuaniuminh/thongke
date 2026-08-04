@@ -1,14 +1,14 @@
-﻿import { 
+import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, formatVND, generateId,
     parseAmountInput, switchTab, getSupabaseConfig, checkLoginStatus,
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.92';
-import * as sync from '../../core/sync.js?v=4.3.92';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.92';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.92';
+} from '../../core/app.js?v=4.3.93';
+import * as sync from '../../core/sync.js?v=4.3.93';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.93';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.93';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
