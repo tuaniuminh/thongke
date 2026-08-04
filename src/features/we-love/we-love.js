@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.94';
-import * as sync from '../../core/sync.js?v=4.3.94';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.94';
+} from '../../core/app.js?v=4.3.95';
+import * as sync from '../../core/sync.js?v=4.3.95';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.95';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -1197,15 +1197,15 @@ export async function renderWeLoveDashboard() {
                     <div id="weLoveLightboxSlider" style="display: flex; width: 300vw; height: 100vh; transform: translate3d(-100vw, 0px, 0px); will-change: transform; user-select: none; -webkit-user-drag: none; position: absolute; left: 0; top: 0;">
                         <!-- Slide trước đó (Prev) -->
                         <div class="we-love-lightbox-slide" style="width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
-                            <img id="weLoveLightboxImgPrev" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
+                            <img id="weLoveLightboxImgPrev" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none;">
                         </div>
                         <!-- Slide hiện tại (Active) -->
                         <div class="we-love-lightbox-slide" style="width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
-                            <img id="weLoveLightboxImgActive" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: zoom-in; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
+                            <img id="weLoveLightboxImgActive" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: zoom-in;">
                         </div>
                         <!-- Slide tiếp theo (Next) -->
                         <div class="we-love-lightbox-slide" style="width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative;">
-                            <img id="weLoveLightboxImgNext" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
+                            <img id="weLoveLightboxImgNext" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none;">
                         </div>
                     </div>
                 </div>
