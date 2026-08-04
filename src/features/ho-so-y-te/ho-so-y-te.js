@@ -1,8 +1,8 @@
-﻿mport { 
+﻿import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.3.90';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.90';
+} from '../../core/app.js?v=4.3.91';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.91';
 
 let healthTrendChartInstance = null;
 
@@ -5311,6 +5311,7 @@ async function syncHealthLocalNotifications() {
 }
 
 export { initHealthBindings, renderHealthDashboard, updateProfileDropdowns, callGeminiTextAPI, syncHealthLocalNotifications };
+
 
 
 

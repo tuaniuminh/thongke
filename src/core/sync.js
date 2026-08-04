@@ -1,4 +1,4 @@
-/ sync.js - Supabase integration for synchronization
+// sync.js - Supabase integration for synchronization
 
 let supabase = null;
 let currentUrl = null;

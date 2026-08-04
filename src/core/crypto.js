@@ -1,4 +1,4 @@
-/ crypto.js - Client-side AES-GCM-256 encryption helper
+// crypto.js - Client-side AES-GCM-256 encryption helper
 
 // Helper to convert ArrayBuffer to Hex string
 function bufToHex(buffer) {
