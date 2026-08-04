@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.107';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.107';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.107';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.107';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.108';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.108';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.108';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.108';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.107';
-import * as sync from './sync.js?v=4.3.107';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.107';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.107';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.108';
+import * as sync from './sync.js?v=4.3.108';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.108';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.108';
 
-const APP_VERSION = '4.3.107';
+const APP_VERSION = '4.3.108';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2688,7 +2688,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         subtitle.innerText = 'Quản lý danh sách tiền đi mừng hiếu hỷ, thăm ốm... của tôi';
         renderSentTable();
     } else if (tabId === 'settings') {
-        title.innerText = 'Cài đặt';
+        title.innerText = 'Cài Đặt';
         subtitle.innerText = 'Cấu hình bảo mật, đồng bộ dữ liệu và sao lưu';
         renderSettings();
         updateLastBackupDisplay();
@@ -4687,7 +4687,7 @@ function updateSidebarNavVisibility(tabId) {
         } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
             sidebarLogoText.innerText = 'Kỷ Niệm Tình Yêu';
         } else if (tabId === 'settings') {
-            sidebarLogoText.innerText = 'Cài đặt';
+            sidebarLogoText.innerText = 'Cài Đặt';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
         } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
@@ -4885,7 +4885,7 @@ function updateMobileNavbar(tabId) {
                 <div class="mobile-navbar-logo">
                     <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                 </div>
-                <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài đặt</span>
+                <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài Đặt</span>
             </div>
             <div class="mobile-navbar-right" id="mobileNavbarNav">
                 <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">

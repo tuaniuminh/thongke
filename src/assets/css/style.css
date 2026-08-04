@@ -4431,3 +4431,56 @@ body.low-perf-mode {
     background-color: var(--bg-primary) !important;
 }
 
+/* Phủ màu viền và màu chữ tiêu đề các card trên điện thoại giống máy tính */
+@media (max-width: 768px) {
+    .home-card.card-finance {
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08) !important;
+    }
+    .home-card.card-finance h3 {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        display: inline-block;
+    }
+    
+    .home-card.card-health {
+        border-color: rgba(13, 148, 136, 0.35) !important;
+        box-shadow: 0 4px 15px rgba(13, 148, 136, 0.08) !important;
+    }
+    .home-card.card-health h3 {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        display: inline-block;
+    }
+    
+    .home-card.card-fund {
+        border-color: rgba(2, 132, 199, 0.35) !important;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08) !important;
+    }
+    .home-card.card-fund h3 {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        display: inline-block;
+    }
+    
+    /* Giao diện sáng điều chỉnh độ tương phản tốt hơn */
+    body.light-mode .home-card.card-finance h3 {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+    body.light-mode .home-card.card-health h3 {
+        background: linear-gradient(135deg, #0d9488 0%, #115e59 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+    body.light-mode .home-card.card-fund h3 {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+}
+
