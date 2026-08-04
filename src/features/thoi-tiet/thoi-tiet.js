@@ -1,4 +1,4 @@
-// Fetch thời tiết Hà Nội từ Open-Meteo và hiển thị (luôn cập nhật mới mỗi lần mở app/vào trang chủ)
+/ Fetch thời tiết Hà Nội từ Open-Meteo và hiển thị (luôn cập nhật mới mỗi lần mở app/vào trang chủ)
 export async function updateHomeWeather() {
     try {
         const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=21.0285&longitude=105.8542&current=temperature_2m,weather_code');

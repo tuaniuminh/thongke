@@ -1,12 +1,12 @@
-﻿// src/features/quy-gia-dinh/quy-gia-dinh.js - Family Fund Management Logic
+﻿/ src/features/quy-gia-dinh/quy-gia-dinh.js - Family Fund Management Logic
 
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.89';
-import { decrypt } from '../../core/crypto.js?v=4.3.89';
-import * as sync from '../../core/sync.js?v=4.3.89';
+} from '../../core/app.js?v=4.3.90';
+import { decrypt } from '../../core/crypto.js?v=4.3.90';
+import * as sync from '../../core/sync.js?v=4.3.90';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -2661,6 +2661,7 @@ async function runFundDiagnostics() {
         log(`Quá trình chẩn đoán gặp lỗi ngoại lệ: ${gErr.message}`, "error");
     }
 }
+
 
 
 

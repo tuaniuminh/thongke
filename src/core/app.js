@@ -1,18 +1,18 @@
-﻿import { 
+﻿mport { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.89';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.89';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.89';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.89';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.90';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.90';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.90';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.90';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.89';
-import * as sync from './sync.js?v=4.3.89';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.89';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.89';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.90';
+import * as sync from './sync.js?v=4.3.90';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.90';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.90';
 
-const APP_VERSION = '4.3.89';
+const APP_VERSION = '4.3.90';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1714,7 +1714,7 @@ async function performSync(silent = false) {
                 mergedFamilyFunds = state.familyFunds; // Already merged via LWW above
                 mergedFundTransactions = state.fundTransactions; // Already merged via LWW above
             } catch (decErr) {
-                console.error("Remote decryption failed:", decErr);
+                console.error("Remote decryption failed:", decErr, "\nMessage:", decErr ? decErr.message : "No message", "\nStack:", decErr ? decErr.stack : "No stack");
                 const forceOverwrite = await window.showConfirm(
                     "Không thể giải mã dữ liệu trên máy chủ (có thể do lỗi phiên bản cũ làm lệch mã hóa hoặc mật khẩu khác biệt).\n\n" +
                     "Bạn có muốn GHI ĐÈ dữ liệu từ thiết bị này lên máy chủ để khôi phục trạng thái đồng bộ không?\n" +
@@ -5315,6 +5315,7 @@ export async function clearAllStateData() {
 }
 
 export { logScrollDiagnostics, triggerHapticFeedback, initNotificationSettingsUI, saveNotificationSettings, testNotificationWebhook };
+
 
 
 
