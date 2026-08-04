@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.85';
-import * as sync from '../../core/sync.js?v=4.3.85';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.85';
+} from '../../core/app.js?v=4.3.86';
+import * as sync from '../../core/sync.js?v=4.3.86';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.86';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2497,6 +2497,73 @@ export function updateWeLoveAlbumManagerList() {
     });
 }
 
+const preventDefaultTouchMove = (e) => {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (lightboxModal && lightboxModal.style.display !== 'none') {
+        e.preventDefault();
+    }
+};
+
+export function updateSliderPhotos() {
+    const album = state.weLovePhotoAlbum || [];
+    if (album.length === 0) return;
+    
+    const activePhoto = album[state.activePhotoIndex];
+    const prevIdx = (state.activePhotoIndex - 1 + album.length) % album.length;
+    const nextIdx = (state.activePhotoIndex + 1) % album.length;
+    
+    const imgActive = document.getElementById('weLoveLightboxImgActive');
+    const imgPrev = document.getElementById('weLoveLightboxImgPrev');
+    const imgNext = document.getElementById('weLoveLightboxImgNext');
+    const lightboxCaption = document.getElementById('weLoveLightboxCaption');
+    
+    if (imgActive) imgActive.src = getGoogleDriveDirectLink(activePhoto.url);
+    if (imgPrev) imgPrev.src = album.length > 1 ? getGoogleDriveDirectLink(album[prevIdx].url) : '';
+    if (imgNext) imgNext.src = album.length > 1 ? getGoogleDriveDirectLink(album[nextIdx].url) : '';
+    
+    if (lightboxCaption) {
+        lightboxCaption.textContent = activePhoto.caption ? `"${activePhoto.caption}"` : '';
+    }
+    
+    // Đồng bộ thanh trượt trang chính
+    if (typeof window.updateWeLoveAlbum === 'function') {
+        window.updateWeLoveAlbum();
+    }
+}
+
+export function openWeLoveLightbox(url, caption) {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (!lightboxModal) return;
+
+    // Reset slider transform về vị trí trung tâm (-100vw)
+    const slider = document.getElementById('weLoveLightboxSlider');
+    if (slider) {
+        slider.style.transition = 'none';
+        slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
+    }
+
+    updateSliderPhotos();
+
+    lightboxModal.style.display = 'flex';
+    document.body.classList.add('lightbox-open');
+    document.documentElement.classList.add('lightbox-open');
+
+    // Khóa cuộn triệt để cho Safari iOS 16 trở xuống
+    document.addEventListener('touchmove', preventDefaultTouchMove, { passive: false });
+}
+
+export function closeWeLoveLightbox() {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (lightboxModal) {
+        lightboxModal.style.display = 'none';
+        document.body.classList.remove('lightbox-open');
+        document.documentElement.classList.remove('lightbox-open');
+
+        // Hủy khóa cuộn
+        document.removeEventListener('touchmove', preventDefaultTouchMove, { passive: false });
+    }
+}
+
 export function initWeLoveLightboxZoomAndDrag() {
     const lightboxImg = document.getElementById('weLoveLightboxImgActive');
     const slider = document.getElementById('weLoveLightboxSlider');
@@ -2921,21 +2988,19 @@ export function initWeLoveLightboxZoomAndDrag() {
     window.removeEventListener('keydown', handleKeyDown); // Tránh leak event listeners trùng lặp
     window.addEventListener('keydown', handleKeyDown);
 
-    const originalClose = window.closeWeLoveLightbox;
     window.closeWeLoveLightbox = function() {
         scale = 1;
         currentX = 0;
         currentY = 0;
         updateTransform(false);
-        if (originalClose) originalClose.apply(this, arguments);
+        closeWeLoveLightbox();
     };
     
-    const originalOpen = window.openWeLoveLightbox;
     window.openWeLoveLightbox = function(url, caption) {
         scale = 1;
         currentX = 0;
         currentY = 0;
         updateTransform(false);
-        if (originalOpen) originalOpen.apply(this, arguments);
+        openWeLoveLightbox(url, caption);
     };
 }

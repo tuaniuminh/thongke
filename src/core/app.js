@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.85';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.85';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.85';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.85';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.86';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.86';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.86';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.86';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.85';
-import * as sync from './sync.js?v=4.3.85';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.85';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.85';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.86';
+import * as sync from './sync.js?v=4.3.86';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.86';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.86';
 
-const APP_VERSION = '4.3.85';
+const APP_VERSION = '4.3.86';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1174,17 +1174,21 @@ async function performSync(silent = false) {
                         let fundKey = remoteData.fundSymmetricKey || state.fundSymmetricKey;
                         
                         if (!fundKey && state.asymmetricPrivateKeyEncrypted) {
-                            let decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
-                            const myEmail = user.email.toLowerCase().trim();
-                            const myEncryptedFundKey = parsedObj.fund_shared_keys ? parsedObj.fund_shared_keys[myEmail] : null;
-                            if (myEncryptedFundKey) {
-                                try {
-                                    fundKey = await decryptWithPrivateKey(decryptedPrivKey, myEncryptedFundKey);
-                                } catch (decKeyErr) {
-                                    console.error("Failed to decrypt Fund Key using Private Key:", decKeyErr);
+                            try {
+                                let decryptedPrivKey = await decrypt(state.asymmetricPrivateKeyEncrypted, state.masterPassword);
+                                const myEmail = user.email.toLowerCase().trim();
+                                const myEncryptedFundKey = parsedObj.fund_shared_keys ? parsedObj.fund_shared_keys[myEmail] : null;
+                                if (myEncryptedFundKey) {
+                                    try {
+                                        fundKey = await decryptWithPrivateKey(decryptedPrivKey, myEncryptedFundKey);
+                                    } catch (decKeyErr) {
+                                        console.error("Failed to decrypt Fund Key using Private Key:", decKeyErr);
+                                    }
                                 }
+                                decryptedPrivKey = null; // CVE-6: xóa khỏi memory ngay sau dùng
+                            } catch (decPrivKeyErr) {
+                                console.warn("Failed to decrypt asymmetric private key, will regenerate keys during overwrite/sync:", decPrivKeyErr);
                             }
-                            decryptedPrivKey = null; // CVE-6: xóa khỏi memory ngay sau dùng
                         }
                         
                         // Decrypt family fund data
@@ -1708,6 +1712,10 @@ async function performSync(silent = false) {
                     "- Chọn 'Hủy': Dừng đồng bộ để bạn tự sao lưu hoặc kiểm tra lại."
                 );
                 if (forceOverwrite) {
+                    // Reset asymmetric keys to force regeneration with current Master Password
+                    state.asymmetricPublicKey = '';
+                    state.asymmetricPrivateKeyEncrypted = '';
+                    
                     mergedReceived = [...state.receivedGifts];
                     mergedSent = [...state.sentGifts];
                     mergedMedical = [...(state.medicalRecords || [])];
