@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.105';
-import * as sync from '../../core/sync.js?v=4.3.105';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.105';
+} from '../../core/app.js?v=4.3.106';
+import * as sync from '../../core/sync.js?v=4.3.106';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.106';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -859,7 +859,7 @@ export async function renderWeLoveDashboard() {
                     </div>
     ` : '';
 
-    const isModern = state.weLoveDesktopLayout === "modern";
+    const isModern = window.innerWidth > 768;
     tabContainer.innerHTML = `
         <div class="memory-page ${isModern ? 'layout-modern' : ''}" id="weLovePage">
 
@@ -938,14 +938,7 @@ export async function renderWeLoveDashboard() {
                                 <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || ''}" required>
                             </div>
 
-                            <!-- 2.4. Giao diện hiển thị máy tính -->
-                            <div class="welove-form-group">
-                                <label class="welove-form-label">🖥️ Giao diện trên Máy tính (Desktop):</label>
-                                <select class="welove-input" id="weLoveDesktopLayoutInput" style="width: 100%;">
-                                    <option value="traditional" ${state.weLoveDesktopLayout === 'traditional' ? 'selected' : ''}>Giao diện 1 cột truyền thống</option>
-                                    <option value="modern" ${state.weLoveDesktopLayout === 'modern' ? 'selected' : ''}>Giao diện 2 cột hiện đại</option>
-                                </select>
-                            </div>
+
 
                             <!-- 2.5. Tự động phát nhạc nền -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
@@ -1014,7 +1007,7 @@ export async function renderWeLoveDashboard() {
                     </div>
 
                     ${(function() {
-                        if (!state.weLoveStartDate || state.weLoveDesktopLayout !== 'modern') return '';
+                        if (!state.weLoveStartDate || window.innerWidth <= 768) return '';
                         const milestones = [100, 200, 365, 500, 730, 1000, 1500, 2000, 2500, 3000, 3650, 4000, 5000];
                         const nextMilestone = milestones.find(m => m > loveDaysCount) || (Math.ceil(loveDaysCount / 1000) * 1000);
                         const prevMilestone = [...milestones].reverse().find(m => m < loveDaysCount) || 0;
@@ -1050,7 +1043,7 @@ export async function renderWeLoveDashboard() {
                 </div>
 
                 <!-- Right Column wrapper (if modern) or direct cards -->
-                ${state.weLoveDesktopLayout === 'modern' ? `
+                ${window.innerWidth > 768 ? `
                     <div class="welove-right-column" style="display: flex; flex-direction: column; gap: 2.5rem; width: 100%;">
                         ${sicknessCardHtml}
                         
@@ -1620,7 +1613,6 @@ function bindSettingsEvents() {
     const name1Input = document.getElementById('weLoveName1Input');
     const name2Input = document.getElementById('weLoveName2Input');
     const startDateInput = document.getElementById('weLoveStartDateInput');
-    const desktopLayoutInput = document.getElementById('weLoveDesktopLayoutInput');
     const showSicknessInput = document.getElementById('weLoveShowSicknessInput');
     const autoplayInput = document.getElementById('weLoveAutoplayInput');
     const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
@@ -1651,8 +1643,7 @@ function bindSettingsEvents() {
             state.weLoveAutoplay = weLoveAutoplay;
             state.weLoveAutoplayUpdated = new Date().toISOString();
 
-            state.weLoveDesktopLayout = desktopLayoutInput ? desktopLayoutInput.value : 'traditional';
-            state.weLoveDesktopLayoutUpdated = new Date().toISOString();
+
 
             await saveLocalState();
             
