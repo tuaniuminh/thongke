@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.115';
-import * as sync from '../../core/sync.js?v=4.3.115';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.115';
+} from '../../core/app.js?v=4.3.116';
+import * as sync from '../../core/sync.js?v=4.3.116';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.116';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;

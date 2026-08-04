@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.115';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.115';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.115';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.115';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.116';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.116';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.116';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.116';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.115';
-import * as sync from './sync.js?v=4.3.115';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.115';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.115';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.116';
+import * as sync from './sync.js?v=4.3.116';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.116';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.116';
 
-const APP_VERSION = '4.3.115';
+const APP_VERSION = '4.3.116';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1299,11 +1299,16 @@ async function performSync(silent = false) {
                         remoteData.pairingCodeAccepted = parsedObj.pairing_code_accepted || '';
                         
                         const isLocalPairingActive = state.pairingCode && state.pairingCodeExpired && (new Date(state.pairingCodeExpired).getTime() > Date.now());
-                        if (!isLocalPairingActive) {
+                        // [BUG DETECTOR FIX] Không phục hồi pairingCode từ Supabase khi đang hủy liên kết
+                        // vì nó sẽ khiến checkForSharedFamilyFund Case D tự ghép đôi lại sau khi hủy
+                        if (!isLocalPairingActive && !window._isUnlinking) {
+                            console.log(`[BUG DETECTOR] Restoring pairing code from remote. pairingCode=${parsedObj.pairing_code || 'none'}`);
                             state.pairingCode = parsedObj.pairing_code || '';
                             state.pairingCodeExpired = parsedObj.pairing_code_expired || '';
                             state.pairingFundKeyEncrypted = parsedObj.pairing_fund_key_encrypted || '';
                             state.pairingCodeAccepted = parsedObj.pairing_code_accepted || '';
+                        } else if (window._isUnlinking) {
+                            console.log(`[BUG DETECTOR] Skip restoring pairing code from remote during unlink. Keeping local: pairingCode=${state.pairingCode || 'none'}`);
                         }
                     }
                 } catch (jsonErr) {
