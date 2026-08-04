@@ -1,9 +1,9 @@
-// src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
+﻿// src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.87';
-import * as sync from '../../core/sync.js?v=4.3.87';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.87';
+} from '../../core/app.js?v=4.3.89';
+import * as sync from '../../core/sync.js?v=4.3.89';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.89';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -3105,3 +3105,5 @@ export function initWeLoveLightboxZoomAndDrag() {
         openWeLoveLightbox(url, caption);
     };
 }
+
+

@@ -1,18 +1,18 @@
-import { 
+﻿import { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.87';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.87';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.87';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.87';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.89';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.89';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.89';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.89';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.87';
-import * as sync from './sync.js?v=4.3.87';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.87';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.87';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.89';
+import * as sync from './sync.js?v=4.3.89';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.89';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.89';
 
-const APP_VERSION = '4.3.87';
+const APP_VERSION = '4.3.89';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1302,7 +1302,11 @@ async function performSync(silent = false) {
                         }
                     }
                 } catch (jsonErr) {
-                    // Fallback below
+                    // Lỗi phân tích JSON hoặc giải mã inner — ghi log để dễ debug
+                    console.error("[Sync Debug] Inner hybrid decrypt/parse error:", jsonErr);
+                    // Fallback: thử giải mã theo format cũ (non-hybrid)
+                    isHybrid = false;
+                    remoteData = null;
                 }
                 
                 if (!isHybrid) {
@@ -1722,6 +1726,9 @@ async function performSync(silent = false) {
                     state.asymmetricPublicKey = '';
                     state.asymmetricPrivateKeyEncrypted = '';
                     
+                    // Đặt lastResetTime mới để đảm bảo local data luôn thắng remote trong lần sync tiếp
+                    state.lastResetTime = new Date().toISOString();
+                    
                     mergedReceived = [...state.receivedGifts];
                     mergedSent = [...state.sentGifts];
                     mergedMedical = [...(state.medicalRecords || [])];
@@ -1729,6 +1736,9 @@ async function performSync(silent = false) {
                     mergedBodyComp = [...(state.bodyCompositionRecords || [])];
                     mergedFamilyFunds = [...(state.familyFunds || [])];
                     mergedFundTransactions = [...(state.fundTransactions || [])];
+                    
+                    // Lưu ngay state để đảm bảo lastResetTime mới được ghi vào LocalStorage
+                    await saveLocalState();
                 } else {
                     throw new Error("Không thể giải mã dữ liệu trên máy chủ. Có thể do Master Password trên máy chủ khác biệt?");
                 }
@@ -5305,6 +5315,7 @@ export async function clearAllStateData() {
 }
 
 export { logScrollDiagnostics, triggerHapticFeedback, initNotificationSettingsUI, saveNotificationSettings, testNotificationWebhook };
+
 
 
 

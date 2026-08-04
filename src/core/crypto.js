@@ -42,8 +42,9 @@ async function deriveKeyWithParams(password, salt, hash = 'SHA-512', iterations 
 }
 
 // Derive a CryptoKey from password and salt using PBKDF2
+// Thuật toán mặc định: SHA-512, 600.000 vòng (chuẩn bảo mật cao nhất của ứng dụng)
 async function deriveKey(password, salt) {
-    return deriveKeyWithParams(password, salt, 'SHA-256', 100000);
+    return deriveKeyWithParams(password, salt, 'SHA-512', 600000);
 }
 
 // Encrypt plain text using a master password
@@ -81,55 +82,44 @@ export async function encrypt(plainText, password) {
 
 // Decrypt cipher text using a master password
 export async function decrypt(cipherText, password) {
-    try {
-        const parts = cipherText.split(':');
-        if (parts.length !== 3) {
-            throw new Error("Định dạng dữ liệu mã hóa không hợp lệ");
-        }
-        
-        const salt = new Uint8Array(hexToBuf(parts[0]));
-        const iv = new Uint8Array(hexToBuf(parts[1]));
-        const encryptedData = hexToBuf(parts[2]);
-        
-        // 1. Thử giải mã bằng thuật toán mặc định (SHA-256, 100.000 vòng)
+    const parts = cipherText.split(':');
+    if (parts.length !== 3) {
+        throw new Error("Định dạng dữ liệu mã hóa không hợp lệ");
+    }
+    
+    const salt = new Uint8Array(hexToBuf(parts[0]));
+    const iv = new Uint8Array(hexToBuf(parts[1]));
+    const encryptedData = hexToBuf(parts[2]);
+    
+    // Thử lần lượt 4 kết hợp thuật toán, ưu tiên SHA-512/600k (mặc định hiện tại) trước
+    const candidates = [
+        { hash: 'SHA-512', iterations: 600000 },  // Mặc định hiện tại (tử v4.2.x+)
+        { hash: 'SHA-256', iterations: 100000 },  // Lừa lõi: dữ liệu lỡ mã hóa bằng v4.3.87
+        { hash: 'SHA-256', iterations: 600000 },  // Phòng ngừa kết hợp hiếm gặp
+        { hash: 'SHA-512', iterations: 100000 },  // Phòng ngừa kết hợp hiếm gặp
+    ];
+    
+    let lastError = null;
+    for (const cfg of candidates) {
         try {
-            const key = await deriveKey(password, salt);
+            const key = await deriveKeyWithParams(password, salt, cfg.hash, cfg.iterations);
             const decryptedBuf = await window.crypto.subtle.decrypt(
-                {
-                    name: 'AES-GCM',
-                    iv: iv
-                },
+                { name: 'AES-GCM', iv: iv },
                 key,
                 encryptedData
             );
             const decoder = new TextDecoder();
             return decoder.decode(decryptedBuf);
-        } catch (e256) {
-            console.warn("Giải mã bằng SHA-256 thất bại, thử tự động giải mã bằng SHA-512...", e256);
-            
-            // 2. Thử giải mã bằng thuật toán SHA-512 (600.000 vòng) để tương thích ngược dữ liệu lỡ mã hóa
-            try {
-                const legacyKey512 = await deriveKeyWithParams(password, salt, 'SHA-512', 600000);
-                const decryptedBuf = await window.crypto.subtle.decrypt(
-                    {
-                        name: 'AES-GCM',
-                        iv: iv
-                    },
-                    legacyKey512,
-                    encryptedData
-                );
-                const decoder = new TextDecoder();
-                return decoder.decode(decryptedBuf);
-            } catch (e512) {
-                console.error("Giải mã bằng SHA-512 cũng thất bại, từ chối giải mã:", e512);
-                throw e512;
-            }
+        } catch (err) {
+            lastError = err;
         }
-    } catch (e) {
-        console.error("Decryption failed:", e);
-        throw new Error("Sai mật khẩu giải mã hoặc dữ liệu bị lỗi");
     }
+    
+    // Tất cả 4 kết hợp đều thất bại → password sai hoặc data bị hỏng
+    console.error("Decryption failed with all algorithm candidates:", lastError);
+    throw new Error("Sai mật khẩu giải mã hoặc dữ liệu bị lỗi");
 }
+
 
 // Generate Asymmetric RSA-OAEP Keypair
 // v4.2.87: Nâng lên 4096-bit + SHA-512 cho keypair mới.
@@ -226,4 +216,5 @@ export async function decryptWithPrivateKey(privKeyJwkStr, cipherTextHex) {
         throw new Error("Giải mã bằng khóa bí mật thất bại");
     }
 }
+
 
