@@ -5,7 +5,8 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.3.97** |
+| **Phiên bản hiện tại** | **v4.3.98** |
+| **v4.3.98** | ✅ **Khắc phục lỗi khai báo lại (Redeclaration) biến nút bấm Lightbox (v4.3.98)**: (1) Sửa lỗi SyntaxError do khai báo lại biến `btnLightboxPrev` và `btnLightboxNext` tại dòng 2959 trong `we-love.js` bằng cách loại bỏ các dòng khai báo thừa (do các biến này đã được khai báo ở đầu scope hàm `initWeLoveLightboxZoomAndDrag`). (2) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.98`. |
 | **v4.3.97** | ✅ **Sửa lỗi SyntaxError Lightbox, mặc định theme sáng màn hình loading, và thêm hệ thống chẩn đoán mã lỗi bằng số (v4.3.97)**: (1) Sửa lỗi SyntaxError do thừa dấu ngoặc nhọn trong sự kiện `touchend` của `we-love.js`. (2) Sửa màn hình loading của ứng dụng thành mặc định theme sáng (thêm class `light-mode` trực tiếp vào thẻ `html` tĩnh và sửa logic kiểm tra theme ở splash image script để tránh fallback nhầm sang dark khi theme chưa được lưu). (3) Thiết lập hệ thống chẩn đoán mã lỗi toàn cục tự động phân loại lỗi thành mã số (`ERR-101` cho cú pháp, `ERR-102` cho tham chiếu, `ERR-103` cho TypeError, `ERR-201` cho lỗi mạng, `ERR-202` cho lỗi giải mã E2EE...) hiển thị trực tiếp trên banner đỏ cứu hộ để người dùng dễ đọc mã báo lỗi. (4) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.97`. |
 | **v4.3.96** | ✅ **Nâng cấp Lightbox xem ảnh sang cơ chế CSS Scroll Snap (v4.3.96)**: (1) Thay đổi cấu trúc slider sang cuộn ngang native của trình duyệt bằng CSS Scroll Snap, mang lại độ mượt vuốt trượt 100% bằng phần cứng. (2) Triển khai cơ chế Lazy-load hai chiều thông minh: chỉ tải `src` ảnh hiện tại và 2 ảnh lân cận, tự động giải phóng bộ nhớ cho các ảnh ở xa. (3) Tích hợp Zoom-lock: Tự động khóa cuộn slider khi đang zoom ảnh để người dùng kéo rê thoải mái không bị nhảy slide. (4) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.96`. |
 | **v4.3.93** | ✅ **Khắc phục lỗi chớp ảnh cũ khi xem ảnh toàn màn hình (v4.3.93)**: (1) Tích hợp phương thức Web API `img.decode()` để chờ ảnh được tải và giải mã xong trước khi dịch chuyển slider về vị trí trung tâm. (2) Tối ưu hóa hàm `updateSliderPhotos` chỉ gán `src` mới khi có sự thay đổi thực sự, triệt tiêu hoàn toàn hiện tượng hiển thị ảnh cũ và chớp tắt khi vuốt hoặc nhấn chuyển ảnh. (3) Thực hiện quy trình nâng cấp cache-busting toàn hệ thống lên `v4.3.93`. |
@@ -433,6 +434,20 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 | v4.1.77 | ✅ Ép cấu hình cuộn native Swift lên Debug Console qua evaluateJavaScript và override thêm capacitorDidLoad. |
 | v4.1.76 | ✅ Bổ sung nút Xuất log và tích hợp Web Share API cho phép chia sẻ/gửi file log .txt nhanh chóng trên cả mobile. |
 | v4.1.75 | ✅ Tích hợp module chẩn đoán lỗi cuộn thời gian thực (logScrollDiagnostics) in ra con bọ debug khi khởi chạy và khi chạm. |
+
+## 🛠 Hệ Thống Chẩn Đoán Mã Lỗi Toàn Cục (Error Codes)
+
+Ứng dụng tích hợp hệ thống chẩn đoán lỗi toàn cục tại [index.html](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html), tự động bắt lỗi và ánh xạ sang các mã số chẩn đoán hiển thị trực quan trên Banner màu đỏ để người dùng dễ dàng báo cáo:
+
+| Mã số lỗi | Phân nhóm lỗi | Định nghĩa & Nguyên nhân phổ biến |
+|---|---|---|
+| **`ERR-101`** | **Lỗi cú pháp (SyntaxError)** | Thiếu dấu đóng mở ngoặc, dấu phẩy, lỗi cú pháp biên dịch JavaScript |
+| **`ERR-102`** | **Lỗi tham chiếu (ReferenceError)** | Gọi một biến hoặc một hàm chưa được định nghĩa |
+| **`ERR-103`** | **Lỗi kiểu dữ liệu (TypeError)** | Gọi hàm không tồn tại, truy cập thuộc tính trên đối tượng `null` hoặc `undefined` |
+| **`ERR-201`** | **Lỗi mạng / API** | Không thể kết nối tới máy chủ, lỗi gọi API Supabase, lỗi Fetch |
+| **`ERR-202`** | **Lỗi giải mã E2EE** | Nhập sai Master PIN, khóa bất đối xứng không hợp lệ, dữ liệu đồng bộ bị hỏng |
+| **`ERR-301`** | **Lỗi PWA / Service Worker** | Lỗi trong quá trình cập nhật Service Worker, nạp cache offline |
+| **`ERR-999`** | **Lỗi không xác định** | Các lỗi runtime hoặc Promise Rejection khác chưa được phân loại |
 
 ---
 

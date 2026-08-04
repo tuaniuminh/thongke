@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.97';
-import * as sync from '../../core/sync.js?v=4.3.97';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.97';
+} from '../../core/app.js?v=4.3.98';
+import * as sync from '../../core/sync.js?v=4.3.98';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.98';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2956,8 +2956,6 @@ export function initWeLoveLightboxZoomAndDrag() {
     }, { passive: true });
 
     // Bấm nút Prev/Next trên Lightbox (chỉ hiện trên màn hình có chuột/desktop)
-    const btnLightboxPrev = document.getElementById('btnWeLoveLightboxPrev');
-    const btnLightboxNext = document.getElementById('btnWeLoveLightboxNext');
 
     if (btnLightboxPrev) {
         btnLightboxPrev.addEventListener('click', (e) => {
