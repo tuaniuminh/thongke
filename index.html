@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="light-mode">
 <head>
     <meta charset="UTF-8">
     <!-- Content Security Policy (CVE-8 Fix v4.2.88) -->
@@ -67,13 +67,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.96">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.97">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.96">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.96">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.96">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.96">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.97">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.97">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.97">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.97">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -267,21 +267,44 @@
             originalError.apply(console, arguments);
         };
         
+        // Hàm phân loại lỗi để trả về Error Code bằng số
+        function getErrorCode(message) {
+            const msg = (message || '').toLowerCase();
+            if (msg.includes('syntaxerror') || msg.includes('unexpected token') || msg.includes('missing )')) {
+                return 'ERR-101'; // Lỗi cú pháp
+            }
+            if (msg.includes('referenceerror') || msg.includes('is not defined')) {
+                return 'ERR-102'; // Lỗi tham chiếu
+            }
+            if (msg.includes('typeerror') || msg.includes('cannot read property') || msg.includes('is not a function')) {
+                return 'ERR-103'; // Lỗi kiểu dữ liệu
+            }
+            if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch') || msg.includes('supabase')) {
+                return 'ERR-201'; // Lỗi kết nối mạng / Supabase
+            }
+            if (msg.includes('decrypt') || msg.includes('decryption') || msg.includes('master pin') || msg.includes('pbkdf2')) {
+                return 'ERR-202'; // Lỗi giải mã dữ liệu E2EE
+            }
+            if (msg.includes('service worker') || msg.includes('sw.js') || msg.includes('controllerchange')) {
+                return 'ERR-301'; // Lỗi Service Worker / PWA
+            }
+            return 'ERR-999'; // Lỗi hệ thống không xác định
+        }
+
         // Bẫy lỗi toàn cục để hiện lỗi lên badge giải cứu và debug console
         window.addEventListener('error', function(e) {
-            // Hiển thị lên cứu hộ banner
             const rescueBadge = document.getElementById('js-global-error-badge');
             const rescueText = document.getElementById('js-global-error-text');
+            const errCode = getErrorCode(e.message);
             if (rescueBadge && rescueText) {
                 rescueBadge.style.display = 'block';
                 rescueBadge.style.backgroundColor = '#ef4444';
-                rescueText.innerHTML = '<b>Lỗi hoạt động:</b> ' + e.message + ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')';
+                rescueText.innerHTML = '<b>Lỗi hoạt động [' + errCode + ']:</b> ' + e.message + ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')';
             }
             
-            // Hiển thị lên Debug console
             const errMsg = e.filename 
-                ? `${e.message} tại ${e.filename.split('/').pop()}:${e.lineno}`
-                : e.message;
+                ? `[${errCode}] ${e.message} tại ${e.filename.split('/').pop()}:${e.lineno}`
+                : `[${errCode}] ${e.message}`;
             appendToScreenConsole('error', [errMsg]);
         });
 
@@ -296,7 +319,8 @@
         }, true); // true = capturing phase
         
         window.addEventListener('unhandledrejection', function(e) {
-            const errMsg = `Unhandled Promise Rejection: ${e.reason}`;
+            const errCode = getErrorCode(String(e.reason));
+            const errMsg = `[${errCode}] Unhandled Promise Rejection: ${e.reason}`;
             appendToScreenConsole('error', [errMsg]);
         });
         
@@ -305,8 +329,13 @@
             const savedTheme = localStorage.getItem('gift_ledger_theme');
             const theme = savedTheme || 'light';
             if (theme === 'light') {
+                document.documentElement.classList.add('light-mode');
                 document.body.classList.add('light-mode');
                 document.documentElement.style.colorScheme = 'light';
+            } else {
+                document.documentElement.classList.remove('light-mode');
+                document.body.classList.remove('light-mode');
+                document.documentElement.style.colorScheme = 'dark';
             }
         })();
     </script>
@@ -317,7 +346,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.96" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.97" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -433,7 +462,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.96" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.97" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1848,7 +1877,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.96" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.97" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -1939,14 +1968,15 @@
                             document.documentElement.classList.add('low-perf-mode');
                         }
                         const img = document.getElementById('splashLogoImg');
-                        if (savedTheme === 'light') {
+                        const theme = savedTheme || 'light';
+                        if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.96';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.97';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.96';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.97';
                         }
                     })();
                 </script>
@@ -3451,9 +3481,9 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.96"></script>
-    <script type="module" src="src/core/app.js?v=4.3.96"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.96"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.97"></script>
+    <script type="module" src="src/core/app.js?v=4.3.97"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.97"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
