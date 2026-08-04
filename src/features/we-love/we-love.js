@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.99';
-import * as sync from '../../core/sync.js?v=4.3.99';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.99';
+} from '../../core/app.js?v=4.3.101';
+import * as sync from '../../core/sync.js?v=4.3.101';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.101';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2534,72 +2534,57 @@ export function updateSliderPhotos() {
 }
 
 export function openWeLoveLightbox(url, caption) {
+    const lightboxModal = document.getElementById('weLoveLightboxModal');
+    if (!lightboxModal) return;
+
     const album = state.weLovePhotoAlbum || [];
-    if (album.length === 0) return;
-    
     let selectIndex = album.findIndex(photo => getGoogleDriveDirectLink(photo.url) === url || photo.url === url);
     if (selectIndex === -1) selectIndex = 0;
     
-    const dataSource = album.map((photo) => {
-        const directUrl = getGoogleDriveDirectLink(photo.url);
-        return {
-            src: directUrl,
-            w: 0,
-            h: 0,
-            alt: photo.caption || 'Kỷ niệm tình yêu'
-        };
-    });
+    state.activePhotoIndex = selectIndex;
 
-    const pswp = new PhotoSwipe({
-        dataSource: dataSource,
-        index: selectIndex,
-        bgOpacity: 0.96,
-        closeOnVerticalDrag: true,
-        arrowKeys: true,
-        errorMsg: 'Không thể tải ảnh. Hãy kiểm tra cài đặt chia sẻ của Google Drive.'
-    });
+    const slider = document.getElementById('weLoveLightboxSlider');
+    if (slider) {
+        slider.innerHTML = album.map((photo, index) => `
+            <div class="we-love-lightbox-slide" style="width: 100vw; height: 100vh; flex-shrink: 0; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                <img class="we-love-lightbox-img" id="weLoveLightboxImg_${index}" data-index="${index}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Xem ảnh" style="max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; transform-origin: center; will-change: transform; user-select: none; -webkit-user-drag: none; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); cursor: zoom-in;">
+            </div>
+        `).join('');
+    }
 
-    pswp.on('gettingData', (e) => {
-        const { data } = e;
-        if (data.w === 0 || data.h === 0) {
-            const img = new Image();
-            img.src = data.src;
-            img.onload = () => {
-                data.w = img.naturalWidth;
-                data.h = img.naturalHeight;
-                pswp.refreshSlideContent(e.index);
-            };
-            img.onerror = () => {
-                data.w = 1200;
-                data.h = 1200;
-                pswp.refreshSlideContent(e.index);
-            };
-        }
-    });
+    lightboxModal.style.display = 'flex';
+    document.body.classList.add('lightbox-open');
+    document.documentElement.classList.add('lightbox-open');
 
-    pswp.on('change', () => {
-        state.activePhotoIndex = pswp.currIndex;
-        if (typeof window.updateWeLoveAlbum === 'function') {
-            window.updateWeLoveAlbum();
-        }
-    });
+    // Khóa cuộn nền triệt để
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
-    pswp.init();
+    if (slider) {
+        slider.style.scrollBehavior = 'auto';
+        slider.scrollLeft = selectIndex * window.innerWidth;
+    }
+
+    updateSliderPhotos();
+
+    document.addEventListener('touchmove', preventDefaultTouchMove, { passive: false });
 }
 
 export function closeWeLoveLightbox() {
-    return; // PhotoSwipe tự quản lý đóng mở
     const lightboxModal = document.getElementById('weLoveLightboxModal');
     if (lightboxModal) {
         lightboxModal.style.display = 'none';
         document.body.classList.remove('lightbox-open');
         document.documentElement.classList.remove('lightbox-open');
 
+        // Mở khóa cuộn nền
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+
         document.removeEventListener('touchmove', preventDefaultTouchMove, { passive: false });
     }
 }
 export function initWeLoveLightboxZoomAndDrag() {
-    return; // PhotoSwipe tự quản lý thu phóng và vuốt trượt
     const slider = document.getElementById('weLoveLightboxSlider');
     const btnZoomIn = document.getElementById('btnWeLoveZoomIn');
     const btnZoomOut = document.getElementById('btnWeLoveZoomOut');
@@ -3052,11 +3037,22 @@ export function initWeLoveLightboxZoomAndDrag() {
     window.removeEventListener('keydown', handleKeyDown); // Tránh leak event listeners trùng lặp
     window.addEventListener('keydown', handleKeyDown);
 
+    window.closeWeLoveLightbox = function() {
+        scale = 1;
+        currentX = 0;
+        currentY = 0;
+        updateTransform(false);
+        closeWeLoveLightbox();
+    };
+    
+    window.openWeLoveLightbox = function(url, caption) {
+        scale = 1;
+        currentX = 0;
+        currentY = 0;
+        updateTransform(false);
+        openWeLoveLightbox(url, caption);
+    };
 }
-
-window.closeWeLoveLightbox = () => {};
-window.openWeLoveLightbox = openWeLoveLightbox;
-window.initWeLoveLightboxZoomAndDrag = () => {};
 
 
 
