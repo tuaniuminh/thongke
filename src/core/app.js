@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.86';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.86';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.86';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.86';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.87';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.87';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.87';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.87';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.86';
-import * as sync from './sync.js?v=4.3.86';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.86';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.86';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.87';
+import * as sync from './sync.js?v=4.3.87';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.87';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.87';
 
-const APP_VERSION = '4.3.86';
+const APP_VERSION = '4.3.87';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -820,6 +820,8 @@ async function saveLocalState() {
         weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
         weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
         weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
+        weLovePhotoAlbum: state.weLovePhotoAlbum || [],
+        weLovePhotoAlbumUpdated: state.weLovePhotoAlbumUpdated || '',
         weLoveSicknessLogs: state.weLoveSicknessLogs || [],
         weLoveSicknessLogsUpdated: state.weLoveSicknessLogsUpdated || '',
         weLoveReminders: state.weLoveReminders || [],
@@ -1306,6 +1308,10 @@ async function performSync(silent = false) {
                 if (!isHybrid) {
                     const remoteDecrypted = await decrypt(remoteRecord.encrypted_data, state.masterPassword);
                     remoteData = JSON.parse(remoteDecrypted);
+                }
+                
+                if (!remoteData) {
+                    throw new Error("Không thể giải mã hoặc phân tích dữ liệu trên máy chủ.");
                 }
                 
                 const remoteReset = remoteData.lastResetTime || '';

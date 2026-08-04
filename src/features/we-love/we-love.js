@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.86';
-import * as sync from '../../core/sync.js?v=4.3.86';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.86';
+} from '../../core/app.js?v=4.3.87';
+import * as sync from '../../core/sync.js?v=4.3.87';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.87';
 
 // Selected romantic quotes (bilingual: Chinese - Vietnamese)
 const LOVE_QUOTES = [
@@ -2592,6 +2592,14 @@ export function initWeLoveLightboxZoomAndDrag() {
     // Transition state
     let isTransitioning = false;
 
+    // Inertia variables
+    let lastTouchTime = 0;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let velocityX = 0;
+    let velocityY = 0;
+    let inertiaFrameId = null;
+
     function calculateDragBounds() {
         if (scale <= 1) {
             maxDragX = 0;
@@ -2744,25 +2752,98 @@ export function initWeLoveLightboxZoomAndDrag() {
     // Drag / Pan logic
     function dragStart(clientX, clientY) {
         if (scale <= 1 || isTransitioning) return;
+        
+        if (inertiaFrameId) {
+            cancelAnimationFrame(inertiaFrameId);
+            inertiaFrameId = null;
+        }
+        
         isDragging = true;
         calculateDragBounds();
         startX = clientX - currentX * scale;
         startY = clientY - currentY * scale;
+        
+        lastTouchTime = Date.now();
+        lastTouchX = clientX;
+        lastTouchY = clientY;
+        velocityX = 0;
+        velocityY = 0;
+        
         lightboxImg.style.cursor = 'grabbing';
     }
 
     function dragMove(clientX, clientY) {
         if (!isDragging) return;
+        
+        const now = Date.now();
+        const dt = now - lastTouchTime;
+        if (dt > 0) {
+            velocityX = ((clientX - lastTouchX) / scale) / dt;
+            velocityY = ((clientY - lastTouchY) / scale) / dt;
+        }
+        lastTouchTime = now;
+        lastTouchX = clientX;
+        lastTouchY = clientY;
+        
         currentX = (clientX - startX) / scale;
         currentY = (clientY - startY) / scale;
         updateTransform(false);
+    }
+
+    function runInertia() {
+        if (inertiaFrameId) cancelAnimationFrame(inertiaFrameId);
+        
+        const friction = 0.94; // hệ số ma sát nhẹ cho độ đà bay bổng giống native app
+        let lastFrameTime = Date.now();
+        
+        function tick() {
+            if (isDragging) return;
+            const now = Date.now();
+            let dt = now - lastFrameTime;
+            if (dt > 100) dt = 16;
+            lastFrameTime = now;
+            
+            currentX += velocityX * dt;
+            currentY += velocityY * dt;
+            
+            velocityX *= friction;
+            velocityY *= friction;
+            
+            calculateDragBounds();
+            
+            if (currentX < -maxDragX || currentX > maxDragX) {
+                velocityX = 0;
+                currentX = Math.max(-maxDragX, Math.min(maxDragX, currentX));
+            }
+            if (currentY < -maxDragY || currentY > maxDragY) {
+                velocityY = 0;
+                currentY = Math.max(-maxDragY, Math.min(maxDragY, currentY));
+            }
+            
+            updateTransform(false);
+            
+            const speed = Math.hypot(velocityX, velocityY);
+            if (speed > 0.005 && !isDragging) {
+                inertiaFrameId = requestAnimationFrame(tick);
+            } else {
+                updateTransform(true);
+            }
+        }
+        
+        inertiaFrameId = requestAnimationFrame(tick);
     }
 
     function dragEnd() {
         if (!isDragging) return;
         isDragging = false;
         lightboxImg.style.cursor = 'grab';
-        updateTransform(true);
+        
+        const speed = Math.hypot(velocityX, velocityY);
+        if (speed > 0.03) {
+            runInertia();
+        } else {
+            updateTransform(true);
+        }
     }
 
     lightboxImg.addEventListener('mousedown', (e) => {
@@ -2887,20 +2968,30 @@ export function initWeLoveLightboxZoomAndDrag() {
                     // Vuốt sang phải -> ảnh trước đó
                     slider.style.transform = 'translate3d(0px, 0px, 0px)';
                     setTimeout(() => {
-                        state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
-                        updateSliderPhotos();
+                        const imgActive = document.getElementById('weLoveLightboxImgActive');
+                        const imgPrev = document.getElementById('weLoveLightboxImgPrev');
+                        if (imgActive && imgPrev && imgPrev.src) {
+                            imgActive.src = imgPrev.src;
+                        }
                         slider.style.transition = 'none';
                         slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
+                        state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
+                        updateSliderPhotos();
                         isTransitioning = false;
                     }, 250);
                 } else {
                     // Vuốt sang trái -> ảnh tiếp theo
                     slider.style.transform = 'translate3d(-200vw, 0px, 0px)';
                     setTimeout(() => {
-                        state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
-                        updateSliderPhotos();
+                        const imgActive = document.getElementById('weLoveLightboxImgActive');
+                        const imgNext = document.getElementById('weLoveLightboxImgNext');
+                        if (imgActive && imgNext && imgNext.src) {
+                            imgActive.src = imgNext.src;
+                        }
                         slider.style.transition = 'none';
                         slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
+                        state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
+                        updateSliderPhotos();
                         isTransitioning = false;
                     }, 250);
                 }
@@ -2936,10 +3027,15 @@ export function initWeLoveLightboxZoomAndDrag() {
             slider.style.transform = 'translate3d(0px, 0px, 0px)';
             
             setTimeout(() => {
-                state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
-                updateSliderPhotos();
+                const imgActive = document.getElementById('weLoveLightboxImgActive');
+                const imgPrev = document.getElementById('weLoveLightboxImgPrev');
+                if (imgActive && imgPrev && imgPrev.src) {
+                    imgActive.src = imgPrev.src;
+                }
                 slider.style.transition = 'none';
                 slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
+                state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
+                updateSliderPhotos();
                 isTransitioning = false;
             }, 250);
         });
@@ -2963,10 +3059,15 @@ export function initWeLoveLightboxZoomAndDrag() {
             slider.style.transform = 'translate3d(-200vw, 0px, 0px)';
             
             setTimeout(() => {
-                state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
-                updateSliderPhotos();
+                const imgActive = document.getElementById('weLoveLightboxImgActive');
+                const imgNext = document.getElementById('weLoveLightboxImgNext');
+                if (imgActive && imgNext && imgNext.src) {
+                    imgActive.src = imgNext.src;
+                }
                 slider.style.transition = 'none';
                 slider.style.transform = 'translate3d(-100vw, 0px, 0px)';
+                state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
+                updateSliderPhotos();
                 isTransitioning = false;
             }, 250);
         });

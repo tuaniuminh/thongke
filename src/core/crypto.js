@@ -43,7 +43,7 @@ async function deriveKeyWithParams(password, salt, hash = 'SHA-512', iterations 
 
 // Derive a CryptoKey from password and salt using PBKDF2
 async function deriveKey(password, salt) {
-    return deriveKeyWithParams(password, salt, 'SHA-512', 600000);
+    return deriveKeyWithParams(password, salt, 'SHA-256', 100000);
 }
 
 // Encrypt plain text using a master password
@@ -91,7 +91,7 @@ export async function decrypt(cipherText, password) {
         const iv = new Uint8Array(hexToBuf(parts[1]));
         const encryptedData = hexToBuf(parts[2]);
         
-        // 1. Thử giải mã bằng thuật toán mới (SHA-512, 600.000 vòng)
+        // 1. Thử giải mã bằng thuật toán mặc định (SHA-256, 100.000 vòng)
         try {
             const key = await deriveKey(password, salt);
             const decryptedBuf = await window.crypto.subtle.decrypt(
@@ -104,21 +104,26 @@ export async function decrypt(cipherText, password) {
             );
             const decoder = new TextDecoder();
             return decoder.decode(decryptedBuf);
-        } catch (e512) {
-            console.warn("Giải mã bằng SHA-512 thất bại, tự động chuyển sang chế độ tương thích ngược SHA-256...", e512);
+        } catch (e256) {
+            console.warn("Giải mã bằng SHA-256 thất bại, thử tự động giải mã bằng SHA-512...", e256);
             
-            // 2. Thử giải mã bằng thuật toán cũ (SHA-256, 100.000 vòng)
-            const legacyKey = await deriveKeyWithParams(password, salt, 'SHA-256', 100000);
-            const decryptedBuf = await window.crypto.subtle.decrypt(
-                {
-                    name: 'AES-GCM',
-                    iv: iv
-                },
-                legacyKey,
-                encryptedData
-            );
-            const decoder = new TextDecoder();
-            return decoder.decode(decryptedBuf);
+            // 2. Thử giải mã bằng thuật toán SHA-512 (600.000 vòng) để tương thích ngược dữ liệu lỡ mã hóa
+            try {
+                const legacyKey512 = await deriveKeyWithParams(password, salt, 'SHA-512', 600000);
+                const decryptedBuf = await window.crypto.subtle.decrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv
+                    },
+                    legacyKey512,
+                    encryptedData
+                );
+                const decoder = new TextDecoder();
+                return decoder.decode(decryptedBuf);
+            } catch (e512) {
+                console.error("Giải mã bằng SHA-512 cũng thất bại, từ chối giải mã:", e512);
+                throw e512;
+            }
         }
     } catch (e) {
         console.error("Decryption failed:", e);
