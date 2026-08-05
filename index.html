@@ -67,13 +67,13 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.116">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.117">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.116">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.116">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.116">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.116">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.117">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.117">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.117">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.117">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -346,7 +346,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.116" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.117" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -462,7 +462,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.116" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.117" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1568,43 +1568,42 @@
             <div class="modal-overlay health-theme-overlay" id="fundTransferModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
-                        <h3 class="health-modal-title">
+                        <h3 class="modal-title">
                             <i data-lucide="arrow-left-right" style="color: var(--accent-blue);"></i>
                             <span>Trích chuyển tiền giữa các quỹ</span>
                         </h3>
                         <button type="button" class="close-btn" onclick="closeModal('fundTransferModal')">&times;</button>
                     </div>
                     <form id="fundTransferForm">
-                        <div class="health-modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
-                            <div class="health-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+                            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="transferFromFund">Từ quỹ (Nguồn)</label>
-                                    <select id="transferFromFund" class="form-control health-input" required></select>
+                                    <label class="form-label" for="transferFromFund">Từ quỹ (Nguồn)</label>
+                                    <select id="transferFromFund" class="form-control" required></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="transferToFund">Đến quỹ (Đích)</label>
-                                    <select id="transferToFund" class="form-control health-input" required></select>
+                                    <label class="form-label" for="transferToFund">Đến quỹ (Đích)</label>
+                                    <select id="transferToFund" class="form-control" required></select>
                                 </div>
                             </div>
-                            <div class="health-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="transferAmount">Số tiền chuyển (đ)</label>
-                                    <input type="text" id="transferAmount" class="form-control health-input" placeholder="Ví dụ: 500 (500k)" required>
-                                    <span style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; display: block;">* 500 = 500.000đ, 2000 = 2.000.000đ</span>
+                                    <label class="form-label" for="transferAmount">Số tiền chuyển (đ)</label>
+                                    <input type="text" id="transferAmount" class="form-control" placeholder="Ví dụ: 500 (500k)" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="transferDate">Ngày chuyển</label>
-                                    <input type="date" id="transferDate" class="form-control health-input" required>
+                                    <label class="form-label" for="transferDate">Ngày chuyển</label>
+                                    <input type="date" id="transferDate" class="form-control" required>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label health-form-label" for="transferNotes">Ghi chú / Lý do chuyển</label>
-                                <input type="text" id="transferNotes" class="form-control health-input" placeholder="Ví dụ: Trích quỹ chi tiêu sinh hoạt" required>
+                                <label class="form-label" for="transferNotes">Ghi chú / Lý do chuyển</label>
+                                <input type="text" id="transferNotes" class="form-control" placeholder="Ví dụ: Trích quỹ chi tiêu sinh hoạt" required>
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: rgba(0,0,0,0.15);">
-                            <button type="button" class="health-btn health-btn-outline" onclick="closeModal('fundTransferModal')">Hủy</button>
-                            <button type="submit" class="health-btn health-btn-primary" style="background-color: var(--accent-blue); border-color: var(--accent-blue);">Xác nhận chuyển</button>
+                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                            <button type="button" class="btn btn-outline" onclick="closeModal('fundTransferModal')">Hủy</button>
+                            <button type="submit" class="btn btn-primary" style="background-color: var(--accent-blue);">Xác nhận chuyển</button>
                         </div>
                     </form>
                 </div>
@@ -1614,36 +1613,35 @@
             <div class="modal-overlay health-theme-overlay" id="fundSpendingModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
-                        <h3 class="health-modal-title">
+                        <h3 class="modal-title">
                             <i data-lucide="arrow-up-right" style="color: var(--accent-rose);"></i>
                             <span>Ghi nhận chi tiêu từ quỹ</span>
                         </h3>
                         <button type="button" class="close-btn" onclick="closeModal('fundSpendingModal')">&times;</button>
                     </div>
                     <form id="fundSpendingForm">
-                        <div class="health-modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
-                            <div class="health-form-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
+                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+                            <div class="form-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="spendingFundSelect">Chi từ quỹ</label>
-                                    <select id="spendingFundSelect" class="form-control health-input" required></select>
+                                    <label class="form-label" for="spendingFundSelect">Chi từ quỹ</label>
+                                    <select id="spendingFundSelect" class="form-control" required></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="spendingDate">Ngày chi</label>
-                                    <input type="date" id="spendingDate" class="form-control health-input" required>
+                                    <label class="form-label" for="spendingDate">Ngày chi</label>
+                                    <input type="date" id="spendingDate" class="form-control" required>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label health-form-label" for="spendingAmount">Số tiền chi tiêu (đ)</label>
-                                <input type="text" id="spendingAmount" class="form-control health-input" placeholder="Ví dụ: 500 (500k)" required>
-                                <span style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; display: block;">* 500 = 500.000đ, 2000 = 2.000.000đ</span>
+                                <label class="form-label" for="spendingAmount">Số tiền chi tiêu (đ)</label>
+                                <input type="text" id="spendingAmount" class="form-control" placeholder="Ví dụ: 500 (500k)" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label health-form-label" for="spendingNotes">Lý do chi tiêu</label>
-                                <input type="text" id="spendingNotes" class="form-control health-input" placeholder="Ví dụ: Mua thực phẩm hàng ngày" required>
+                                <label class="form-label" for="spendingNotes">Lý do chi tiêu</label>
+                                <input type="text" id="spendingNotes" class="form-control" placeholder="Ví dụ: Mua thực phẩm hàng ngày" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label health-form-label" for="spendingEventType">Loại sự kiện</label>
-                                <select id="spendingEventType" class="form-control health-input">
+                                <label class="form-label" for="spendingEventType">Loại sự kiện</label>
+                                <select id="spendingEventType" class="form-control">
                                     <option value="none" selected>Không có sự kiện</option>
                                     <option value="Đám cưới">Đám cưới</option>
                                     <option value="Đám hiếu">Đám hiếu</option>
@@ -1655,16 +1653,16 @@
                             </div>
                             <div class="form-group" id="spendingSyncExternalGroup" style="display: none; align-items: center; gap: 8px;">
                                 <input type="checkbox" id="spendingSyncExternal" style="width: 18px; height: 18px; accent-color: var(--accent-emerald);">
-                                <label for="spendingSyncExternal" class="form-label health-form-label" style="margin: 0; cursor: pointer; user-select: none;">Đồng bộ vào Thu chi đối ngoại (Tiền tôi mừng)</label>
+                                <label for="spendingSyncExternal" class="form-label" style="margin: 0; cursor: pointer; user-select: none;">Đồng bộ vào Thu chi đối ngoại (Tiền tôi mừng)</label>
                             </div>
                             <div id="spendingExternalDetails" style="display: none; flex-direction: column; gap: 12px; border-left: 2px solid var(--accent-emerald); padding-left: 12px; margin-top: 4px;">
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="spendingExternalName">Họ và Tên người nhận</label>
-                                    <input type="text" id="spendingExternalName" class="form-control health-input" placeholder="Ví dụ: Nguyễn Văn A">
+                                    <label class="form-label" for="spendingExternalName">Họ và Tên người nhận</label>
+                                    <input type="text" id="spendingExternalName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="spendingExternalRelationship">Mối quan hệ</label>
-                                    <select id="spendingExternalRelationship" class="form-control health-input">
+                                    <label class="form-label" for="spendingExternalRelationship">Mối quan hệ</label>
+                                    <select id="spendingExternalRelationship" class="form-control">
                                         <option value="Họ hàng">Họ hàng</option>
                                         <option value="Bạn học">Bạn học</option>
                                         <option value="Đồng nghiệp">Đồng nghiệp</option>
@@ -1675,14 +1673,14 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="spendingExternalAddress">Địa chỉ / Nơi diễn ra sự kiện</label>
-                                    <input type="text" id="spendingExternalAddress" class="form-control health-input" placeholder="Ví dụ: Nhà hàng tiệc cưới...">
+                                    <label class="form-label" for="spendingExternalAddress">Địa chỉ / Nơi diễn ra sự kiện</label>
+                                    <input type="text" id="spendingExternalAddress" class="form-control" placeholder="Ví dụ: Nhà hàng tiệc cưới...">
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: rgba(0,0,0,0.15);">
-                            <button type="button" class="health-btn health-btn-outline" onclick="closeModal('fundSpendingModal')">Hủy</button>
-                            <button type="submit" class="health-btn health-btn-danger" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border-color: #dc2626;">Xác nhận chi</button>
+                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                            <button type="button" class="btn btn-outline" onclick="closeModal('fundSpendingModal')">Hủy</button>
+                            <button type="submit" class="btn btn-danger" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">Xác nhận chi</button>
                         </div>
                     </form>
                 </div>
@@ -1692,17 +1690,17 @@
             <div class="modal-overlay health-theme-overlay" id="fundMonthlyReportModal">
                 <div class="modal-container health-modal-container" style="width: 650px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
-                        <h3 class="health-modal-title">
+                        <h3 class="modal-title">
                             <i data-lucide="file-bar-chart-2" style="color: var(--accent-blue);"></i>
                             <span>Báo cáo tài chính tháng</span>
                         </h3>
                         <button type="button" class="close-btn" onclick="closeModal('fundMonthlyReportModal')">&times;</button>
                     </div>
-                    <div class="health-modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+                    <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
                         <!-- Select Month and Year -->
                         <div style="display: flex; gap: 12px; align-items: center; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; flex-wrap: wrap;">
                             <span style="font-weight: 500; font-size: 0.9rem;">Tháng báo cáo:</span>
-                            <select id="reportSelectMonth" onchange="generateMonthlyReport()" class="form-control health-input" style="max-width: 110px; font-size: 0.85rem; padding: 6px 12px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); border-radius: 6px;">
+                            <select id="reportSelectMonth" onchange="generateMonthlyReport()" class="form-control" style="max-width: 110px; font-size: 0.85rem; padding: 6px 12px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); border-radius: 6px;">
                                 <option value="1">Tháng 1</option>
                                 <option value="2">Tháng 2</option>
                                 <option value="3">Tháng 3</option>
@@ -1716,7 +1714,7 @@
                                 <option value="11">Tháng 11</option>
                                 <option value="12">Tháng 12</option>
                             </select>
-                            <select id="reportSelectYear" onchange="generateMonthlyReport()" class="form-control health-input" style="max-width: 100px; font-size: 0.85rem; padding: 6px 12px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); border-radius: 6px;">
+                            <select id="reportSelectYear" onchange="generateMonthlyReport()" class="form-control" style="max-width: 100px; font-size: 0.85rem; padding: 6px 12px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); border-radius: 6px;">
                                 <!-- Dynamically populated -->
                             </select>
 
@@ -1745,46 +1743,45 @@
             <div class="modal-overlay health-theme-overlay" id="fundInvestModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
-                        <h3 class="health-modal-title">
+                        <h3 class="modal-title">
                             <i data-lucide="trending-up" style="color: #f59e0b;"></i>
                             <span>Chốt giá trị đầu tư Lãi/Lỗ</span>
                         </h3>
                         <button type="button" class="close-btn" onclick="closeModal('fundInvestModal')">&times;</button>
                     </div>
                     <form id="fundInvestForm">
-                        <div class="health-modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
-                            <div class="health-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+                            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="investFundSelect">Quỹ đầu tư</label>
-                                    <select id="investFundSelect" class="form-control health-input" required></select>
+                                    <label class="form-label" for="investFundSelect">Quỹ đầu tư</label>
+                                    <select id="investFundSelect" class="form-control" required></select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="investTypeSelect">Loại biến động</label>
-                                    <select id="investTypeSelect" class="form-control health-input" required>
+                                    <label class="form-label" for="investTypeSelect">Loại biến động</label>
+                                    <select id="investTypeSelect" class="form-control" required>
                                         <option value="profit">Lãi đầu tư (+)</option>
                                         <option value="loss">Lỗ đầu tư (-)</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="health-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="investAmount">Số tiền chênh lệch (đ)</label>
-                                    <input type="text" id="investAmount" class="form-control health-input" placeholder="Ví dụ: 500 (500k)" required>
-                                    <span style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; display: block;">* 500 = 500.000đ, 2000 = 2.000.000đ</span>
+                                    <label class="form-label" for="investAmount">Số tiền chênh lệch (đ)</label>
+                                    <input type="text" id="investAmount" class="form-control" placeholder="Ví dụ: 500 (500k)" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label health-form-label" for="investDate">Ngày chốt</label>
-                                    <input type="date" id="investDate" class="form-control health-input" required>
+                                    <label class="form-label" for="investDate">Ngày chốt</label>
+                                    <input type="date" id="investDate" class="form-control" required>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label health-form-label" for="investNotes">Ghi chú (Tên dự án, cổ phiếu, v.v.)</label>
-                                <input type="text" id="investNotes" class="form-control health-input" placeholder="Ví dụ: Chốt lãi cổ phiếu FPT" required>
+                                <label class="form-label" for="investNotes">Ghi chú (Tên dự án, cổ phiếu, v.v.)</label>
+                                <input type="text" id="investNotes" class="form-control" placeholder="Ví dụ: Chốt lãi cổ phiếu FPT" required>
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: rgba(0,0,0,0.15);">
-                            <button type="button" class="health-btn health-btn-outline" onclick="closeModal('fundInvestModal')">Hủy</button>
-                            <button type="submit" class="health-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-color: #d97706; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: var(--btn-radius); cursor: pointer;">Xác nhận chốt</button>
+                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                            <button type="button" class="btn btn-outline" onclick="closeModal('fundInvestModal')">Hủy</button>
+                            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none;">Xác nhận chốt</button>
                         </div>
                     </form>
                 </div>
@@ -1794,23 +1791,23 @@
             <div class="modal-overlay health-theme-overlay" id="fundEditModal">
                 <div class="modal-container health-modal-container" style="width: 420px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
-                        <h3 class="health-modal-title">
+                        <h3 class="modal-title">
                             <i data-lucide="edit-3" style="color: var(--accent-blue);"></i>
                             <span>Chỉnh sửa Quỹ</span>
                         </h3>
                         <button type="button" class="close-btn" onclick="closeModal('fundEditModal')">&times;</button>
                     </div>
                     <form id="fundEditForm">
-                        <div class="health-modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 16px;">
                             <input type="hidden" id="editFundId">
                             
                             <div class="form-group">
-                                <label class="form-label health-form-label" for="editFundName">Tên quỹ</label>
-                                <input type="text" id="editFundName" class="form-control health-input" required>
+                                <label class="form-label" for="editFundName">Tên quỹ</label>
+                                <input type="text" id="editFundName" class="form-control" required>
                             </div>
                             
                             <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                <label class="form-label health-form-label" for="editFundShowChart" style="margin: 0; cursor: pointer;">Hiển thị biểu đồ dòng tiền</label>
+                                <label class="form-label" for="editFundShowChart" style="margin: 0; cursor: pointer;">Hiển thị biểu đồ dòng tiền</label>
                                 <label class="switch-control" style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer;">
                                     <input type="checkbox" id="editFundShowChart" style="opacity: 0; width: 0; height: 0;">
                                     <span class="slider-round" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 24px;"></span>
@@ -1818,7 +1815,7 @@
                             </div>
                             
                             <div class="form-group" id="editFundHasContributionContainer" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                <label class="form-label health-form-label" for="editFundHasContribution" style="margin: 0; cursor: pointer;">Cho phép đóng góp từ tiền riêng</label>
+                                <label class="form-label" for="editFundHasContribution" style="margin: 0; cursor: pointer;">Cho phép đóng góp từ tiền riêng</label>
                                 <label class="switch-control" style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer;">
                                     <input type="checkbox" id="editFundHasContribution" style="opacity: 0; width: 0; height: 0;">
                                     <span class="slider-round" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 24px;"></span>
@@ -1826,14 +1823,14 @@
                             </div>
                             
                             <div id="editFundDeleteContainer" style="display: none; border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 8px;">
-                                <button type="button" id="btnDeleteFundFromEdit" class="health-btn health-btn-danger" style="width: 100%; gap: 6px;">
+                                <button type="button" id="btnDeleteFundFromEdit" class="btn btn-danger" style="width: 100%; gap: 6px;">
                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Xóa quỹ này
                                 </button>
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: rgba(0,0,0,0.15);">
-                            <button type="button" class="health-btn health-btn-outline" onclick="closeModal('fundEditModal')">Hủy</button>
-                            <button type="submit" class="health-btn health-btn-primary" style="background-color: var(--accent-blue); border-color: var(--accent-blue); padding: 8px 16px;">Lưu thay đổi</button>
+                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
+                            <button type="button" class="btn btn-outline" onclick="closeModal('fundEditModal')">Hủy</button>
+                            <button type="submit" class="btn btn-primary" style="background-color: var(--accent-blue);">Lưu thay đổi</button>
                         </div>
                     </form>
                 </div>
@@ -1877,7 +1874,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.116" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.117" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -3481,10 +3478,10 @@
     </div>
 
     <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.116"></script>
-    <script type="module" src="src/core/app.js?v=4.3.116"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.116"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.116"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.117"></script>
+    <script type="module" src="src/core/app.js?v=4.3.117"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.117"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.117"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>

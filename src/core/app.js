@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.116';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.116';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.116';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.116';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.117';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.117';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.117';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.117';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.116';
-import * as sync from './sync.js?v=4.3.116';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.116';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.116';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.117';
+import * as sync from './sync.js?v=4.3.117';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.117';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.117';
 
-const APP_VERSION = '4.3.116';
+const APP_VERSION = '4.3.117';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1144,7 +1144,8 @@ async function performSync(silent = false) {
                         console.log("[Sync Debug] Personal data decrypted successfully. spouseEmail =", remoteData.spouseEmail, "spouseStatus =", remoteData.spouseStatus, "viewingSharedFund =", remoteData.viewingSharedFund);
                         
                         // Check if spouse has left
-                        console.log(`[BUG DETECTOR] spouse_status check: remoteStatus=${parsedObj.spouse_status}, isUnlinking=${window._isUnlinking}`);
+                        const isUnlinkingActive = window._isUnlinking || localStorage.getItem('fami_is_unlinking') === 'true';
+                        console.log(`[BUG DETECTOR] spouse_status check: remoteStatus=${parsedObj.spouse_status}, isUnlinking=${isUnlinkingActive}`);
                         if (parsedObj.spouse_status === 'left') {
                             if (DEBUG_E2EE || true) console.log("[BUG DETECTOR] Spouse has left the fund. Performing auto-unlink.");
                             parsedObj.spouse_email = '';
@@ -1299,15 +1300,16 @@ async function performSync(silent = false) {
                         remoteData.pairingCodeAccepted = parsedObj.pairing_code_accepted || '';
                         
                         const isLocalPairingActive = state.pairingCode && state.pairingCodeExpired && (new Date(state.pairingCodeExpired).getTime() > Date.now());
+                        const isUnlinkingActive = window._isUnlinking || localStorage.getItem('fami_is_unlinking') === 'true';
                         // [BUG DETECTOR FIX] Không phục hồi pairingCode từ Supabase khi đang hủy liên kết
                         // vì nó sẽ khiến checkForSharedFamilyFund Case D tự ghép đôi lại sau khi hủy
-                        if (!isLocalPairingActive && !window._isUnlinking) {
+                        if (!isLocalPairingActive && !isUnlinkingActive) {
                             console.log(`[BUG DETECTOR] Restoring pairing code from remote. pairingCode=${parsedObj.pairing_code || 'none'}`);
                             state.pairingCode = parsedObj.pairing_code || '';
                             state.pairingCodeExpired = parsedObj.pairing_code_expired || '';
                             state.pairingFundKeyEncrypted = parsedObj.pairing_fund_key_encrypted || '';
                             state.pairingCodeAccepted = parsedObj.pairing_code_accepted || '';
-                        } else if (window._isUnlinking) {
+                        } else if (isUnlinkingActive) {
                             console.log(`[BUG DETECTOR] Skip restoring pairing code from remote during unlink. Keeping local: pairingCode=${state.pairingCode || 'none'}`);
                         }
                     }
@@ -1446,7 +1448,8 @@ async function performSync(silent = false) {
                     state.fundTransactions = remoteData.fundTransactions || [];
                     state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     // [BUG DETECTOR] Bỏ qua ghi đè thông tin spouse từ máy chủ nếu đang trong quá trình hủy liên kết
-                    if (window._isUnlinking) {
+                    const isUnlinkingActive1 = window._isUnlinking || localStorage.getItem('fami_is_unlinking') === 'true';
+                    if (isUnlinkingActive1) {
                         console.log(`[BUG DETECTOR] Skip merging spouse fields from remote record. spouseEmail=${state.spouseEmail}, spouseStatus=${state.spouseStatus}, spouseRole=${state.spouseRole}`);
                     } else {
                         console.log(`[BUG DETECTOR] Merging spouse fields from remote. Remote email: ${remoteData.spouseEmail || 'none'}, Remote status: ${remoteData.spouseStatus || 'none'}`);
@@ -1706,7 +1709,8 @@ async function performSync(silent = false) {
                     }
                     
                     // [BUG DETECTOR] Bỏ qua ghi đè thông tin spouse từ máy chủ nếu đang trong quá trình hủy liên kết
-                    if (window._isUnlinking) {
+                    const isUnlinkingActive2 = window._isUnlinking || localStorage.getItem('fami_is_unlinking') === 'true';
+                    if (isUnlinkingActive2) {
                         console.log(`[BUG DETECTOR] Skip merging spouse fields from remote record in local merge. spouseEmail=${state.spouseEmail}, spouseStatus=${state.spouseStatus}`);
                     } else {
                         console.log(`[BUG DETECTOR] Merging spouse fields in local merge block. Remote email: ${remoteData.spouseEmail || 'none'}`);

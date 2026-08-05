@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.116';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.116';
-import * as sync from '../../core/sync.js?v=4.3.116';
+} from '../../core/app.js?v=4.3.117';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.117';
+import * as sync from '../../core/sync.js?v=4.3.117';
 
 let _pairingInterval = null;
 
@@ -17,7 +17,7 @@ export async function checkForSharedFamilyFund() {
 
     // [BUG DETECTOR FIX] Nếu đang trong quá trình hủy liên kết, bỏ qua hoàn toàn
     // để tránh interval này ghi đè lại spouseStatus = 'accepted' song song
-    if (window._isUnlinking) {
+    if (window._isUnlinking || localStorage.getItem('fami_is_unlinking') === 'true') {
         console.log('[BUG DETECTOR] checkForSharedFamilyFund: Skipping due to active unlink process.');
         return;
     }
@@ -148,7 +148,7 @@ export async function checkForSharedFamilyFund() {
                                     state.familyFundsUpdated = fundData.familyFundsUpdated || '';
                                 }
 
-                                // Union Merge fundTransactions (chống mất dữ liệu của cả 2 phía)
+                                // Union Merge fundTransactions (chống mất dữ liệu của cả 2 phía & hỗ trợ soft-delete)
                                 const remoteTxs = fundData.fundTransactions || [];
                                 const localTxs = state.fundTransactions || [];
                                 const txMap = new Map();
@@ -158,9 +158,15 @@ export async function checkForSharedFamilyFund() {
                                     if (!existing) {
                                         txMap.set(t.id, t);
                                     } else {
-                                        const localTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
-                                        const remoteTime = t.updated_at ? new Date(t.updated_at).getTime() : 0;
-                                        if (remoteTime >= localTime) txMap.set(t.id, t);
+                                        const localDelTime = existing.deleted_at ? new Date(existing.deleted_at).getTime() : 0;
+                                        const remoteDelTime = t.deleted_at ? new Date(t.deleted_at).getTime() : 0;
+                                        if (localDelTime > 0 || remoteDelTime > 0) {
+                                            if (remoteDelTime >= localDelTime) txMap.set(t.id, t);
+                                        } else {
+                                            const localTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
+                                            const remoteTime = t.updated_at ? new Date(t.updated_at).getTime() : 0;
+                                            if (remoteTime >= localTime) txMap.set(t.id, t);
+                                        }
                                     }
                                 });
                                 const mergedTxs = Array.from(txMap.values());
@@ -296,6 +302,12 @@ export async function checkForSharedFamilyFund() {
                                 state.familyFundInviteStatus = 'accepted';
                                 state.spouseStatusUpdated = new Date().toISOString();
                                 
+                                // [BẢO MẬT v4.3.117] Ngay khi ghép đôi thành công, dọn sạch mã ghép đôi 6 số
+                                // để triệt tiêu thời gian tồn tại của mã trên đám mây Supabase (chống brute-force)
+                                state.pairingCode = '';
+                                state.pairingCodeExpired = '';
+                                state.pairingFundKeyEncrypted = '';
+                                
                                 await saveLocalState();
                                 
                                 // Thực hiện đồng bộ ngầm để chia sẻ khóa đối xứng và dữ liệu WeLove chung
@@ -382,7 +394,7 @@ export async function checkForSharedFamilyFund() {
                                 const decryptedFund = await decrypt(parsed.encrypted_fund, fundKey);
                                 const fundData = JSON.parse(decryptedFund);
                                 state.familyFunds = fundData.familyFunds || [];
-                                // Union Merge fundTransactions cho CASE A (Spouse)
+                                // Union Merge fundTransactions cho CASE A (Spouse, hỗ trợ soft-delete)
                                 const remoteTxsA = fundData.fundTransactions || [];
                                 const localTxsA = state.fundTransactions || [];
                                 const txMapA = new Map();
@@ -392,9 +404,15 @@ export async function checkForSharedFamilyFund() {
                                     if (!existing) {
                                         txMapA.set(t.id, t);
                                     } else {
-                                        const localTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
-                                        const remoteTime = t.updated_at ? new Date(t.updated_at).getTime() : 0;
-                                        if (remoteTime >= localTime) txMapA.set(t.id, t);
+                                        const localDelTime = existing.deleted_at ? new Date(existing.deleted_at).getTime() : 0;
+                                        const remoteDelTime = t.deleted_at ? new Date(t.deleted_at).getTime() : 0;
+                                        if (localDelTime > 0 || remoteDelTime > 0) {
+                                            if (remoteDelTime >= localDelTime) txMapA.set(t.id, t);
+                                        } else {
+                                            const localTime = existing.updated_at ? new Date(existing.updated_at).getTime() : 0;
+                                            const remoteTime = t.updated_at ? new Date(t.updated_at).getTime() : 0;
+                                            if (remoteTime >= localTime) txMapA.set(t.id, t);
+                                        }
                                     }
                                 });
                                 state.fundTransactions = Array.from(txMapA.values());
@@ -644,9 +662,10 @@ export function renderFamilyPairingSettings() {
                 return;
             }
 
-            // [BUG DETECTOR] Bật cờ hủy liên kết để chặn ghi đè từ performSync
+            // [BUG DETECTOR] Bật cờ hủy liên kết (cả RAM và localStorage để chống sập trình duyệt)
             window._isUnlinking = true;
-            console.log(`[BUG DETECTOR] Starting unlink action. Set window._isUnlinking = true.`);
+            localStorage.setItem('fami_is_unlinking', 'true');
+            console.log(`[BUG DETECTOR] Starting unlink action. Set window._isUnlinking = true and saved fami_is_unlinking in localStorage.`);
 
             // Hiện màn hình chờ tải
             showLoadingOverlay("Đang xử lý hủy kết nối gia đình...");
@@ -695,7 +714,8 @@ export function renderFamilyPairingSettings() {
             } finally {
                 // [BUG DETECTOR] Tắt cờ hủy liên kết
                 window._isUnlinking = false;
-                console.log(`[BUG DETECTOR] Unlink action completed. Set window._isUnlinking = false.`);
+                localStorage.removeItem('fami_is_unlinking');
+                console.log(`[BUG DETECTOR] Unlink action completed. Cleared fami_is_unlinking flag.`);
                 hideLoadingOverlay();
             }
 
