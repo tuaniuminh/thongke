@@ -69,18 +69,37 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.125">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.126">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.125">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.125">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.125">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.125">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.126">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.126">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.126">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.126">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Central Version & Module Import Maps (Single Source of Truth v4.3.126) -->
+    <script>window.APP_VERSION = '4.3.126';</script>
+    <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.wasm.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "core/app": "./src/core/app.js?v=4.3.126",
+        "core/crypto": "./src/core/crypto.js?v=4.3.126",
+        "core/sync": "./src/core/sync.js?v=4.3.126",
+        "features/thu-chi": "./src/features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.126",
+        "features/ho-so-y-te": "./src/features/ho-so-y-te/ho-so-y-te.js?v=4.3.126",
+        "features/quy-gia-dinh": "./src/features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.126",
+        "features/bao-cao-thang": "./src/features/quy-gia-dinh/bao-cao-thang.js?v=4.3.126",
+        "features/thoi-tiet": "./src/features/thoi-tiet/thoi-tiet.js?v=4.3.126",
+        "features/we-love": "./src/features/we-love/we-love.js?v=4.3.126",
+        "features/ket-noi": "./src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.126"
+      }
+    }
+    </script>
     <!-- SheetJS with styling support -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <!-- Lucide Icons -->
@@ -349,7 +368,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.125" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.126" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -465,7 +484,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.125" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.126" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1877,7 +1896,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.125" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.126" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -3480,17 +3499,17 @@
         </div>
     </div>
 
-    <!-- JS Application Logic -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.125"></script>
-    <script type="module" src="src/core/app.js?v=4.3.125"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.125"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.125"></script>
+    <!-- JS Application Logic (Using ES Module Imports mapped via importmap) -->
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.126"></script>
+    <script type="module" src="core/app"></script>
+    <script type="module" src="features/ket-noi"></script>
+    <script type="module" src="features/we-love"></script>
 
-    <!-- Service Worker Registration (PWA Offline Support) -->
+    <!-- Service Worker Registration (PWA Offline Support with Dynamic Version Cache) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(window.APP_VERSION || '4.3.126'))
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

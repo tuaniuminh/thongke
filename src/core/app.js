@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.125';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.125';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.125';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.125';
+} from 'features/thu-chi';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from 'features/ho-so-y-te';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from 'features/quy-gia-dinh';
+import { checkNewMonthNotification } from 'features/bao-cao-thang';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.125';
-import * as sync from './sync.js?v=4.3.125';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.125';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.125';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from 'core/crypto';
+import * as sync from 'core/sync';
+import { updateHomeWeather } from 'features/thoi-tiet';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from 'features/we-love';
 
-const APP_VERSION = '4.3.125';
+const APP_VERSION = window.APP_VERSION || '4.3.126';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)

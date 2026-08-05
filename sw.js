@@ -1,9 +1,10 @@
-// sw.js — FamiLife Service Worker v4.3.125
+// sw.js — FamiLife Service Worker (Tự động hóa quản lý Cache theo URL Version)
 // Chiến lược: Network-first cho JS/CSS/HTML nội bộ (luôn nhận code mới)
 //             Cache-first cho ảnh và CDN static libraries (Supabase, Chart.js, Lucide...) để tải cực nhanh & offline
 //             Bỏ qua hoàn toàn các API calls động bên ngoài (Supabase API, Gemini API, Weather API)
 
-const CACHE_NAME = 'familife-cache-v4.3.125';
+const SW_VERSION = new URL(location).searchParams.get('v') || 'v4.3.126';
+const CACHE_NAME = 'familife-cache-' + (SW_VERSION.startsWith('v') ? SW_VERSION : 'v' + SW_VERSION);
 
 // App shell — danh sách tài nguyên cần cache ngay khi install
 const SHELL_ASSETS = [
