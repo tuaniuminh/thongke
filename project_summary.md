@@ -1,20 +1,235 @@
-﻿# 📋 Tóm Tắt Dự Án FamiLife – Tài liệu chuyển giao cho cuộc trò chuyện mới
+# 📋 Tóm Tắt Dự Án FamiLife – Tài liệu chuyển giao cho cuộc trò chuyện mới
 
----
+> [!IMPORTANT]
+
+> **QUY TẮC PHÁT HIỆN LỖI (BUG DETECTOR RULE)**: Đối với các lỗi đã sửa/fix từ 2 lần trở lên mà vẫn không fix thành công, bắt buộc phải nâng cấp hệ thống debug log / in ra vết chi tiết (tiền tố `[BUG DETECTOR]`) tại các điểm nghi ngờ để tìm ra chính xác lỗi nằm ở đâu trước khi thực hiện chỉnh sửa tiếp theo.
 
 ## 🗂 Thông tin dự án
 
 | Mục | Chi tiết |
+
 |-----|----------|
+
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
+
 | **Phiên bản hiện tại** | **v4.3.125** |
-| **v4.3.125** | ✅ **Sửa Triệt Để Lỗi 3-4 Toast "Đối tác đã hủy" Xuất Hiện Khi Chồng Kết Nối Thành Công (v4.3.125)**: Nguyên nhân từ log F12: Khi vợ vừa nhập mã, máy chồng nhận tín hiệu WebSocket và chạy checkForSharedFamilyFund. Ban đầu state.spouseEmail của chồng rỗng, khi chạy hết các dòng thì trong Case D máy chồng tự động gán state.spouseEmail = wifeEmail. Khi hàm chạy xong, điều kiện if (state.spouseEmail && !husbandRowFound) kiểm tra husbandRowFound (vốn bằng alse do ban đầu spouseEmail rỗng), dẫn đến việc máy chồng vừa kết nối xong thì lập tức tự kích hoạt auto-unlink và bắn toast! Fix: (1) Đặt husbandRowFound = true ngay khi Case D nhận diện đối tác ghép đôi thành công. (2) Thắt chặt điều kiện auto-unlink chỉ kiểm tra khi state.spouseStatus === 'accepted' và !state.pairingCode. Triệt tiêu hoàn toàn lỗi toast lặp. Nâng phiên bản toàn hệ thống sang ?v=4.3.125. |
-| **v4.3.124** | ✅ **Sửa Lỗi CSP WebSocket & Thêm Auto-Unlink Khi Dòng Của Chồng Bị Xóa/Không Tìm Thấy (v4.3.124)**: Qua log F12 phát hiện 2 vấn đề: (1) Trình duyệt chặn kết nối WebSocket do CSP trong index.html thiếu wss://*.supabase.co wss:. Fix: Bổ sung wss://*.supabase.co wss: vào connect-src CSP. (2) Khi chồng hủy liên kết và xóa/dọn sạch dòng của chồng trên Supabase, hàm quét trên máy vợ checkForSharedFamilyFund đọc được 1 dòng (chỉ có dòng của vợ), dẫn đến việc vòng lặp or (const row of data) không khớp được email chồng và không bao giờ kích hoạt auto-unlink. Fix: Thêm cờ husbandRowFound. Sau khi quét xong toàn bộ danh sách, nếu máy vợ đang lưu spouseEmail nhưng husbandRowFound === false, máy vợ sẽ tự động thực hiện auto-unlink ngay lập tức và đưa giao diện về trạng thái Chưa kết nối! Nâng phiên bản toàn hệ thống sang ?v=4.3.124. |
-| **v4.3.123** | ✅ **Nâng Cấp Hệ Thống Kết Nối Gia Đình Sang Supabase Realtime WebSockets (v4.3.123)**: Tích hợp công nghệ truyền tin thời gian thực **Supabase Realtime Broadcast Channels** (amilife_pairing_room). (1) Khi vợ nhập mã ghép đôi 6 số, ứng dụng phát ngay sự kiện PAIR_ACCEPTED qua WebSocket, màn hình máy chồng tức thì chuyển sang "Đã kết nối thành công" (độ trễ 0.1s). (2) Khi một bên hủy liên kết, sự kiện PAIR_UNLINKED được phát đi tức thì giúp thiết bị còn lại tự xóa kết nối ngay lập tức mà không bao giờ bị trễ hay lặp toast. (3) Hoàn toàn không cần cấu hình SQL backend, hoạt động tức thì trên ứng dụng. Nâng phiên bản toàn hệ thống sang ?v=4.3.123. |
-| **v4.3.122** | ✅ **Sửa Lỗi Đếm Lần Ốm & Sổ Tay Sức Khỏe Gia Đình (v4.3.122)**: Sửa lỗi tính toán tổng số đợt ốm trong Sổ tay sức khỏe, đảm bảo hiển thị đúng số lần và lịch sử ốm của các thành viên. Nâng phiên bản toàn hệ thống sang ?v=4.3.122. |
-| **v4.3.121** | ✅ **Tối Ưu Hóa Giao Diện & Tải Ảnh Album Tình Yêu (v4.3.121)**: Tối ưu hóa tải ảnh Google Drive trong album kỷ niệm, hỗ trợ xem ảnh sắc nét và thao tác Lightbox mượt mà. Nâng phiên bản toàn hệ thống sang ?v=4.3.121. |
-| **Thư mục dự án** | C:\Users\PC VIP\Documents\Thong-ke |
-| **GitHub Repository** | https://github.com/tuaniuminh/thongke.git (nhánh main) |
-| **Ngôn ngữ & Kiến trúc** | HTML5 + Vanilla JS (ES6 Modules) + CSS3 (Zero framework, Zero build tool heavy dependency) |
+| **v4.3.125** | ✅ **Sửa Triệt Để Lỗi 3-4 Toast "Đối tác đã hủy" Xuất Hiện Khi Chồng Kết Nối Thành Công (v4.3.125)**: Nguyên nhân từ log F12: Khi vợ vừa nhập mã, máy chồng nhận tín hiệu WebSocket và chạy `checkForSharedFamilyFund`. Ban đầu `state.spouseEmail` của chồng rỗng, khi chạy hết các dòng thì trong Case D máy chồng tự động gán `state.spouseEmail = wifeEmail`. Khi hàm chạy xong, điều kiện `if (state.spouseEmail && !husbandRowFound)` kiểm tra `husbandRowFound` (vốn bằng `false` do ban đầu `spouseEmail` rỗng), dẫn đến việc máy chồng vừa kết nối xong thì lập tức tự kích hoạt auto-unlink và bắn toast! Fix: (1) Đặt `husbandRowFound = true` ngay khi Case D nhận diện đối tác ghép đôi thành công. (2) Thắt chặt điều kiện auto-unlink chỉ kiểm tra khi `state.spouseStatus === 'accepted'` và `!state.pairingCode`. Triệt tiêu hoàn toàn lỗi toast lặp. Nâng phiên bản toàn hệ thống sang `?v=4.3.125`. |
+| **v4.3.124** | ✅ **Sửa Lỗi CSP WebSocket & Thêm Auto-Unlink Khi Dòng Của Chồng Bị Xóa/Không Tìm Thấy (v4.3.124)**: Qua log F12 phát hiện 2 vấn đề: (1) Trình duyệt chặn kết nối WebSocket do CSP trong `index.html` thiếu `wss://*.supabase.co wss:`. Fix: Bổ sung `wss://*.supabase.co wss:` vào `connect-src` CSP. (2) Khi chồng hủy liên kết và xóa/dọn sạch dòng của chồng trên Supabase, hàm quét trên máy vợ `checkForSharedFamilyFund` đọc được 1 dòng (chỉ có dòng của vợ), dẫn đến việc vòng lặp `for (const row of data)` không khớp được email chồng và không bao giờ kích hoạt auto-unlink. Fix: Thêm cờ `husbandRowFound`. Sau khi quét xong toàn bộ danh sách, nếu máy vợ đang lưu `spouseEmail` nhưng `husbandRowFound === false`, máy vợ sẽ tự động thực hiện auto-unlink ngay lập tức và đưa giao diện về trạng thái Chưa kết nối! Nâng phiên bản toàn hệ thống sang `?v=4.3.124`. |
+| **v4.3.123** | ✅ **Nâng Cấp Hệ Thống Kết Nối Gia Đình Sang Supabase Realtime WebSockets (v4.3.123)**: Tích hợp công nghệ truyền tin thời gian thực **Supabase Realtime Broadcast Channels** (`familife_pairing_room`). (1) Khi vợ nhập mã ghép đôi 6 số, ứng dụng phát ngay sự kiện `PAIR_ACCEPTED` qua WebSocket, màn hình máy chồng tức thì chuyển sang "Đã kết nối thành công" (độ trễ 0.1s). (2) Khi một bên hủy liên kết, sự kiện `PAIR_UNLINKED` được phát đi tức thì giúp thiết bị còn lại tự xóa kết nối ngay lập tức mà không bao giờ bị trễ hay lặp toast. (3) Hoàn toàn không cần cấu hình SQL backend, hoạt động tức thì trên ứng dụng. Nâng phiên bản toàn hệ thống sang `?v=4.3.123`. |
+| **v4.3.122** | ✅ **Sửa Lỗi Đếm Lần Ốm & Sổ Tay Sức Khỏe Gia Đình (v4.3.122)**: Sửa lỗi tính toán tổng số đợt ốm trong Sổ tay sức khỏe, đảm bảo hiển thị đúng số lần và lịch sử ốm của các thành viên. Nâng phiên bản toàn hệ thống sang `?v=4.3.122`. |
+| **v4.3.121** | ✅ **Tối Ưu Hóa Giao Diện & Tải Ảnh Album Tình Yêu (v4.3.121)**: Tối ưu hóa tải ảnh Google Drive trong album kỷ niệm, hỗ trợ xem ảnh sắc nét và thao tác Lightbox mượt mà. Nâng phiên bản toàn hệ thống sang `?v=4.3.121`. |
+| **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
+
+| **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
+
+| **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
 
 ---
+
+---
+
+## 🏗 Kiến trúc & Tệp quan trọng (Đã bóc tách module)
+
+Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sang kiến trúc module ES6 gọn nhẹ hơn:
+
+| Tệp / Thư mục | Mô tả |
+
+|-----|-------|
+
+| `index.html` | Toàn bộ cấu trúc HTML chính của ứng dụng |
+
+| `404.html` | Xử lý routing ảo cho SPA trên GitHub Pages |
+
+| `src/core/app.js` | Logic cốt lõi: Router, State, Auth, thiết lập UI chung (~2000 dòng) |
+
+| `src/core/crypto.js` | Mã hóa AES-256 bằng PBKDF2 + Web Crypto API |
+
+| `src/core/sync.js` | Đồng bộ với Supabase (realtime, auth) |
+
+| `src/features/thu-chi-doi-ngoai/thu-chi.js` | Module quản lý Thu/Chi, Biểu đồ dòng tiền, Export/Import Excel |
+
+| `src/features/ho-so-y-te/ho-so-y-te.js` | Module quản lý Y tế, Bệnh án, Quét ảnh AI, Giọng đọc, Xuất PDF |
+
+| `src/features/thoi-tiet/thoi-tiet.js` | Tính năng Dự báo Thời tiết (Open-Meteo API) |
+
+| `src/features/am-lich/lunar_vietnam.js` | Thư viện lịch âm Việt Nam (thuật toán Hồ Ngọc Đức, GMT+7) |
+
+| `src/assets/` | Chứa CSS (`style.css`) và Hình ảnh (`icon.png`, logo...) |
+
+| `version.json` | Kiểm tra cập nhật tự động |
+
+---
+
+## ✨ Tính năng chính của ứng dụng
+
+### 1. Bảo mật
+
+- **Mã hóa toàn bộ dữ liệu** bằng AES-256 (PBKDF2) trước khi lưu vào `localStorage`
+
+- **Master Password**: Khóa mã hóa do người dùng đặt khi lần đầu truy cập
+
+- **Hai chế độ đặt mật khẩu**: PIN 6 số (bàn phím T9) hoặc Mật khẩu chữ
+
+- **Ghi nhớ đăng nhập**: Checkbox "Ghi nhớ mở khóa trên thiết bị này" lưu mật khẩu vào `localStorage` dưới key `gift_ledger_remembered_pin`
+
+- **Tự động chọn chế độ**: Desktop → Keyboard Mode; Mobile → PIN Mode
+
+### 2. Thu Chi Đối Ngoại
+
+- Ghi nhận tiền **nhận** và **gửi đi** (đám cưới, thôi nôi, v.v.)
+
+- Lọc theo sự kiện, tìm kiếm người, thống kê tổng hợp với thuật toán tính điểm ưu tiên họ tên khớp trước địa chỉ
+
+- Biểu đồ Chart.js
+
+### 3. Hồ Sơ Sức Khỏe
+
+- Lưu chỉ số xét nghiệm (máu, sinh hóa, ...)
+
+- Theo dõi lịch sử huyết áp (Tâm thu, tâm trương, nhịp tim, buổi đo sáng/tối)
+
+- **Từ điển chỉ số y tế** (~150+ chỉ số): tên viết tắt, đơn vị, ngưỡng bình thường, chú giải
+
+- Lời giới thiệu khi vào trang "Hồ sơ sức khỏe"
+
+- **Tải ảnh / Chụp ảnh trực tiếp từ camera**: Quét nhanh các chỉ số xét nghiệm hoặc kết quả đo huyết áp tự động
+
+### 4. Tích hợp AI (Gemini) nâng quan tâm
+
+- **Nhận diện ảnh đa năng**: Tự động nhận diện nếu ảnh là máy đo huyết áp (Omron HEM-7361T) hoặc kết quả xét nghiệm y tế
+
+- **Thuật toán thông minh cho máy Omron**: Chỉ trích xuất cột kết quả đo mới nhất ở bên **PHẢI** (bỏ qua cột kết quả cũ bên trái)
+
+- **Cơ chế Thử lại Tự động (Fallback models)**: Khi gặp lỗi quá tải/đáp ứng cao (`gemini-3.5-flash`), hệ thống tự động đổi sang `gemini-2.5-flash` rồi `gemini-1.5-flash` để đảm bảo quét thành công
+
+- **Báo cáo phân tích tổng hợp (Blood Test + BP)**: Kết hợp các xét nghiệm máu và lịch sử đo huyết áp để phân tích tim mạch, đường huyết, mỡ máu tổng quan
+
+- **Tùy chọn Phân tích linh hoạt**: Sau khi quét huyết áp, hiển thị modal cho phép lựa chọn:
+
+- **Phương án 1**: Chỉ phân tích chỉ số Huyết áp (Hôm nay & Lịch sử)
+
+- **Phương án 2**: Phân tích Huyết áp kết hợp toàn bộ dữ liệu sức khỏe (Xét nghiệm máu, nước tiểu...)
+
+- **Giọng đọc AI (Text-to-Speech) cải tiến**: Tự động phát hiện và lựa chọn giọng đọc tự nhiên (Natural/Google/Microsoft), tinh chỉnh tốc độ đọc xuống `0.9` để giảm tối đa tính máy móc, tự động ngắt tiếng khi tắt modal.
+
+### 5. Xuất báo cáo PDF
+
+- Xuất dữ liệu y tế và lịch sử huyết áp ra file PDF chuyên nghiệp
+
+- **Sửa lỗi Font tiếng Việt**: Nhúng font Roboto (Regular & Bold) tự động từ CDN cdnjs hỗ trợ diacritics tiếng Việt trọn vẹn
+
+- Việt hóa toàn bộ văn bản trong file PDF xuất ra
+
+### 6. Trang chủ & Đồng bộ
+
+- Widget **Thời tiết Hà Nội** (Open-Meteo API, mô tả tiếng Việt) và **Lịch âm Việt Nam** (GMT+7)
+
+- Cập nhật sáng/tối đồng bộ
+
+- **Đồng bộ Supabase**: Dữ liệu mã hóa của cả Thu Chi và Huyết áp được đồng bộ tự động theo thời gian thực (nhất quán LWW)
+
+---
+
+## 🔑 Lưu ý kỹ thuật quan trọng
+
+> [!CAUTION]
+
+> **KHÔNG tự động tải lên GitHub.** Sau khi hoàn thành tính năng hoặc sửa lỗi, agent **chỉ được phép** `git add` + `git commit` (nếu người dùng yêu cầu rõ ràng). Việc `git push` lên GitHub **do người dùng tự thực hiện** trên cuộc trò chuyện riêng. Không được tự ý push code.
+
+> [!IMPORTANT]
+
+> **Nâng cấp phiên bản (Version Bump):** Ở MỖI LẦN chỉnh sửa mã nguồn (dù là nhỏ nhất), agent **bắt buộc** phải nâng cấp số phiên bản (ví dụ từ `v4.0.18` lên `v4.0.23`) đồng loạt trong 3 file: `version.json`, `src/core/app.js` (biến `APP_VERSION`), và `index.html` (các tham số `?v=...` ở CSS/JS/Images). Việc này là cực kỳ quan trọng để đảm bảo trình duyệt tự động xóa bộ đệm (cache) và nạp code mới nhất.
+
+> [!IMPORTANT]
+
+> **Cập nhật Lịch sử Phiên bản:** Cùng với việc nâng cấp version, bạn bắt buộc phải thêm dòng tóm tắt thông tin các thay đổi của phiên bản mới vào bảng "Lịch sử phiên bản gần đây" trong chính file `project_summary.md` này.
+
+> [!IMPORTANT]
+
+> **Tính Độc Lập Giữa Các Module:** Mọi chỉnh sửa trong tính năng **Thu chi đối ngoại** tuyệt đối không được ảnh hưởng đến dữ liệu hoặc hoạt động của **Hồ sơ sức khỏe** và ngược lại. Hai phân hệ này phải hoàn toàn độc lập với nhau.
+
+> [!IMPORTANT]
+
+> **Đóng gói & Đặt tên file IPA (iOS):** Khi ứng dụng được đóng gói tự động trên GitHub Actions (file `build-ios.yml`), file `.ipa` đầu ra bắt buộc phải được tự động đổi tên theo định dạng `FamiLife_v[Phiên_bản].ipa` (ví dụ: `FamiLife_v4.1.41.ipa`) dựa trên thuộc tính `version` trong `package.json`.
+
+---
+
+## 🛠 Hệ Thống Chẩn Đoán Mã Lỗi Toàn Cục (Error Codes)
+
+Ứng dụng tích hợp hệ thống chẩn đoán lỗi toàn cục tại [index.html](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html), tự động bắt lỗi và ánh xạ sang các mã số chẩn đoán hiển thị trực quan trên Banner màu đỏ để người dùng dễ dàng báo cáo:
+
+| Mã số lỗi | Phân nhóm lỗi | Định nghĩa & Nguyên nhân phổ biến |
+
+|---|---|---|
+
+| **`ERR-101`** | **Lỗi cú pháp (SyntaxError)** | Thiếu dấu đóng mở ngoặc, dấu phẩy, lỗi cú pháp biên dịch JavaScript |
+
+| **`ERR-102`** | **Lỗi tham chiếu (ReferenceError)** | Gọi một biến hoặc một hàm chưa được định nghĩa |
+
+| **`ERR-103`** | **Lỗi kiểu dữ liệu (TypeError)** | Gọi hàm không tồn tại, truy cập thuộc tính trên đối tượng `null` hoặc `undefined` |
+
+| **`ERR-201`** | **Lỗi mạng / API** | Không thể kết nối tới máy chủ, lỗi gọi API Supabase, lỗi Fetch |
+
+| **`ERR-202`** | **Lỗi giải mã E2EE** | Nhập sai Master PIN, khóa bất đối xứng không hợp lệ, dữ liệu đồng bộ bị hỏng |
+
+| **`ERR-301`** | **Lỗi PWA / Service Worker** | Lỗi trong quá trình cập nhật Service Worker, nạp cache offline |
+
+| **`ERR-999`** | **Lỗi không xác định** | Các lỗi runtime hoặc Promise Rejection khác chưa được phân loại |
+
+---
+
+## 🛢 Cấu trúc Cơ sở dữ liệu & Chính sách RLS (Supabase)
+
+Bảng `gift_sync` trên Supabase được cấu hình Row Level Security (RLS) để cho phép trao đổi khóa bất đối xứng và đồng bộ Quỹ gia đình E2EE giữa 2 vợ chồng:
+
+```sql
+
+-- 1. Bảng lưu trữ đồng bộ: public.gift_sync
+
+-- Gồm các cột: user_id (UUID, khóa chính), encrypted_data (TEXT), updated_at (TIMESTAMPTZ), user_email (TEXT), public_key (TEXT)
+
+-- 2. Chính sách ĐỌC dữ liệu (SELECT): Cho phép mọi tài khoản đã đăng nhập đọc dòng của nhau để lấy khóa công khai ghép đôi
+
+drop policy if exists "Allow select for everyone" on public.gift_sync;
+
+create policy "Allow select for everyone" on public.gift_sync
+
+for select using (true);
+
+-- 3. Chính sách CẬP NHẬT dữ liệu (UPDATE): Cho phép chủ sở hữu hoặc đối tác (Vợ/Chồng) được phân quyền cập nhật dòng Quỹ gia đình E2EE chung
+
+drop policy if exists "Allow update if owner or spouse" on public.gift_sync;
+
+create policy "Allow update if owner or spouse" on public.gift_sync
+
+for update using (
+
+auth.uid() = user_id 
+
+or lower(encrypted_data::jsonb->>'spouse_email') = lower(auth.jwt()->>'email')
+
+);
+
+-- 4. Chính sách CHÈN dữ liệu (INSERT / UPSERT): Đảm bảo người dùng hoặc đối tác (Vợ/Chồng) có quyền ghi khi thực hiện Upsert giao dịch
+
+drop policy if exists "Allow insert if owner or spouse" on public.gift_sync;
+
+create policy "Allow insert if owner or spouse" on public.gift_sync
+
+for insert with check (
+
+auth.uid() = user_id 
+
+or lower(encrypted_data::jsonb->>'spouse_email') = lower(auth.jwt()->>'email')
+
+);
+
+```
+
+---
+
+## 🚀 Git & Triển khai
+
+> [!CAUTION]
+
+> **KHÔNG tự động đẩy lên GitHub.** AI tuyệt đối không chạy lệnh `git push`. Người dùng tự đẩy code sau. Chỉ dùng `git add` và `git commit` khi được yêu cầu.
