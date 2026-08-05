@@ -2,11 +2,12 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.122';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.122';
-import * as sync from '../../core/sync.js?v=4.3.122';
+} from '../../core/app.js?v=4.3.123';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.123';
+import * as sync from '../../core/sync.js?v=4.3.123';
 
 let _pairingInterval = null;
+let _pairingRealtimeChannel = null;
 
 // --- CORE LOGIC: CHECK FOR SHARED FAMILY FUND (CASE A, B, C, D, E) ---
 export async function checkForSharedFamilyFund() {
@@ -678,10 +679,16 @@ export function renderFamilyPairingSettings() {
             showLoadingOverlay("Đang xử lý hủy kết nối gia đình...");
 
             try {
-                // Bước 1: Báo hiệu đối phương bằng cách đẩy trạng thái 'left' lên Supabase trước
-                console.log(`[BUG DETECTOR] Unlink Step 1: Setting spouseStatus = 'left' and performing sync.`);
+                // Bước 1: Báo hiệu đối phương bằng cách phát Realtime WebSocket Broadcast & đẩy trạng thái 'left' lên Supabase
+                const oldSpouse = state.spouseEmail;
+                console.log(`[BUG DETECTOR] Unlink Step 1: Setting spouseStatus = 'left' and broadcasting PAIR_UNLINKED.`);
                 state.spouseStatus = 'left';
                 await saveLocalState();
+                
+                if (oldSpouse) {
+                    broadcastPairUnlinked(state.user?.email || '', oldSpouse);
+                }
+
                 if (sync.isConfigured() && state.user) {
                     try { 
                         await performSync(true); 
@@ -907,6 +914,7 @@ export function renderFamilyPairingSettings() {
                 await saveLocalState();
                 showToast("Kết nối gia đình thành công! ❤️");
                 await performSync(true);
+                broadcastPairAccepted(husbandEmail, state.user.email, code);
                 renderFamilyPairingSettings();
                 if (typeof window.renderWeLoveDashboard === 'function') window.renderWeLoveDashboard();
                 if (typeof window.updateHomeLayoutUI === 'function') window.updateHomeLayoutUI();
@@ -945,14 +953,102 @@ function _startFPTimer() {
     _pairingInterval = setInterval(update, 1000);
 }
 
+// Realtime WebSockets Broadcast Channels
+export function initRealtimePairingChannel() {
+    const supabaseClient = sync.getSupabase();
+    if (!supabaseClient) return;
+
+    if (_pairingRealtimeChannel) {
+        try { supabaseClient.removeChannel(_pairingRealtimeChannel); } catch (e) {}
+    }
+
+    _pairingRealtimeChannel = supabaseClient.channel('familife_pairing_room')
+        .on('broadcast', { event: 'PAIR_ACCEPTED' }, async (payload) => {
+            console.log("[Realtime] Received PAIR_ACCEPTED broadcast:", payload);
+            const dataPayload = payload.payload || {};
+            const myEmail = (state.user?.email || '').toLowerCase().trim();
+            const targetHusband = (dataPayload.husbandEmail || '').toLowerCase().trim();
+
+            if (myEmail && targetHusband && myEmail === targetHusband) {
+                console.log("[Realtime] I am husband! Instant pairing triggered by wife:", dataPayload.wifeEmail);
+                if (typeof window.checkForSharedFamilyFund === 'function') {
+                    await window.checkForSharedFamilyFund();
+                }
+            }
+        })
+        .on('broadcast', { event: 'PAIR_UNLINKED' }, async (payload) => {
+            console.log("[Realtime] Received PAIR_UNLINKED broadcast:", payload);
+            const dataPayload = payload.payload || {};
+            const myEmail = (state.user?.email || '').toLowerCase().trim();
+            const targetSpouse = (dataPayload.targetSpouse || '').toLowerCase().trim();
+
+            if (myEmail && targetSpouse && myEmail === targetSpouse) {
+                console.log("[Realtime] Spouse unlinked me via Realtime WebSocket! Unlinking locally now...");
+                const hadSpouse = !!state.spouseEmail;
+                state.spouseEmail = '';
+                state.spouseStatus = '';
+                state.spouseRole = 'wife';
+                state.pairingCode = '';
+                state.pairingCodeExpired = '';
+                state.pairingFundKeyEncrypted = '';
+                state.pairingCodeAccepted = '';
+                state.familyFundInviteStatus = '';
+                state.viewingSharedFund = false;
+                state.sharedFundOwnerEmail = '';
+                state.sharedFundSourceRow = null;
+
+                await saveLocalState();
+
+                if (hadSpouse) {
+                    showToast("Đối tác đã hủy kết nối gia đình.", "warning");
+                }
+
+                if (typeof window.updateHomeLayoutUI === 'function') window.updateHomeLayoutUI();
+                if (typeof window.renderWeLoveDashboard === 'function') window.renderWeLoveDashboard();
+                if (typeof window.renderFamilyPairingSettings === 'function') window.renderFamilyPairingSettings();
+
+                if (typeof performSync === 'function') {
+                    await performSync(true);
+                }
+            }
+        })
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                console.log("[Realtime] Successfully connected to FamiLife Realtime WebSocket Channel!");
+            }
+        });
+}
+
+export function broadcastPairAccepted(husbandEmail, wifeEmail, pairingCode) {
+    if (_pairingRealtimeChannel) {
+        _pairingRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'PAIR_ACCEPTED',
+            payload: { husbandEmail, wifeEmail, pairingCode }
+        }).catch(err => console.error("[Realtime] Broadcast PAIR_ACCEPTED error:", err));
+    }
+}
+
+export function broadcastPairUnlinked(unlinkedBy, targetSpouse) {
+    if (_pairingRealtimeChannel) {
+        _pairingRealtimeChannel.send({
+            type: 'broadcast',
+            event: 'PAIR_UNLINKED',
+            payload: { unlinkedBy, targetSpouse }
+        }).catch(err => console.error("[Realtime] Broadcast PAIR_UNLINKED error:", err));
+    }
+}
+
 // Expose globally for app.js and other files to call
 window.checkForSharedFamilyFund = checkForSharedFamilyFund;
 window.renderFamilyPairingSettings = renderFamilyPairingSettings;
+window.initRealtimePairingChannel = initRealtimePairingChannel;
 
-// Tự động chạy kiểm tra liên kết khi module vừa được nạp
+// Tự động chạy kiểm tra liên kết & kết nối Realtime WebSocket khi module nạp xong
 setTimeout(() => {
     if (state.user) {
         checkForSharedFamilyFund();
+        initRealtimePairingChannel();
     }
 }, 500);
 

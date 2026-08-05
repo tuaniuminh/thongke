@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.122';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.122';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.122';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.122';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.123';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.123';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.123';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.123';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.122';
-import * as sync from './sync.js?v=4.3.122';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.122';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.122';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.123';
+import * as sync from './sync.js?v=4.3.123';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.123';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.123';
 
-const APP_VERSION = '4.3.122';
+const APP_VERSION = '4.3.123';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2850,6 +2850,9 @@ async function checkLoginStatus() {
         if (user) {
             if (typeof window.checkForSharedFamilyFund === 'function') {
                 await window.checkForSharedFamilyFund();
+            }
+            if (typeof window.initRealtimePairingChannel === 'function') {
+                window.initRealtimePairingChannel();
             }
             // Auto sync in background on load
             performSync(true);
