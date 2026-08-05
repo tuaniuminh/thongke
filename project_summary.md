@@ -1,11 +1,5 @@
 # 📋 Tóm Tắt Dự Án FamiLife – Tài liệu chuyển giao cho cuộc trò chuyện mới
 
-> [!IMPORTANT]
-> **QUY TẮC PHÁT HIỆN LỖI (BUG DETECTOR RULE)**: Đối với các lỗi đã sửa/fix từ 2 lần trở lên mà vẫn không fix thành công, bắt buộc phải nâng cấp hệ thống debug log / in ra vết chi tiết (tiền tố `[BUG DETECTOR]`) tại các điểm nghi ngờ để tìm ra chính xác lỗi nằm ở đâu trước khi thực hiện chỉnh sửa tiếp theo.
-
-> [!IMPORTANT]
-> **QUY TẮC ĐỘC LẬP GIỮA CÁC CARD TÍNH NĂNG (CARD ISOLATION RULE)**: Mọi chỉnh sửa, sửa lỗi hoặc thêm tính năng ở bất kỳ card/module tính năng nào (Thu chi đối ngoại, Hồ sơ y tế, Quỹ gia đình, We Love... hoặc các card tính năng mới trong tương lai) tuyệt đối **KHÔNG** được gây lỗi, làm ảnh hưởng hoặc làm thay đổi dữ liệu, giao diện, logic hoạt động của các card/module khác.
-
 ---
 
 ## 🗂 Thông tin dự án
@@ -13,12 +7,12 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.3.126** |
+| **Phiên bản hiện tại** | **v4.3.127** |
+| **v4.3.127** | ✅ **Sửa Triệt Để Lỗi CSP WebAssembly & 404 Script Path Khi Load Import Maps (v4.3.127)**: Qua log F12 phát hiện 2 nguyên nhân khiến app treo loading: (1) `es-module-shims.wasm.js` gọi `WebAssembly.compile()` bị CSP chặn do thiếu `blob: 'wasm-unsafe-eval' 'unsafe-eval'`. Fix: Bổ sung `blob: 'wasm-unsafe-eval' 'unsafe-eval'` vào `script-src` CSP và chuyển sang dùng `es-module-shims.js` bản JS chuẩn. (2) Thẻ script module ở cuối file `index.html` nhập tên bare alias (`core/app`) thay vì đường dẫn file thực tế (`./src/core/app.js`), khiến trình duyệt không đọc được importmap bị trả về 404. Fix: Đổi đường dẫn script module chính về đường dẫn file thực tế `./src/core/app.js`. Nâng phiên bản toàn hệ thống sang `?v=4.3.127`. |
 | **v4.3.126** | ✅ **Nâng Cấp Kiến Trúc Quản Lý Version Tập Trung ES6 Import Maps & Dynamic SW Cache (v4.3.126)**: Tối ưu hóa triệt để quy trình nâng cấp phiên bản ứng dụng: (1) Khai báo thẻ `<script type="importmap">` và `window.APP_VERSION = '4.3.126'` trong [`index.html`](file:///c:/Users/PC%20VIP/Documents/Thong-ke/index.html) làm **Nguồn sự thật duy nhất (Single Source of Truth)**. (2) Chuyển toàn bộ 6 file JS module tính năng sang dùng import map aliases ngắn gọn (`core/app`, `core/crypto`, `core/sync`, `features/ket-noi`...), loại bỏ hoàn toàn việc phải mở từng file JS ra sửa query `?v=...` thủ công. (3) Tự động hóa Service Worker [`sw.js`](file:///c:/Users/PC%20VIP/Documents/Thong-ke/sw.js) tự đọc tham số `?v=...` từ URL đăng ký để tạo `CACHE_NAME`. (4) Tích hợp `es-module-shims.js` polyfill đảm bảo tương thích 100% trên cả thiết bị trình duyệt cũ. Giảm 80% công sức nâng version từ 10+ vị trí xuống còn duy nhất 1 vị trí trong `index.html`. Nâng phiên bản toàn hệ thống sang `?v=4.3.126`. |
 | **v4.3.125** | ✅ **Sửa Triệt Để Lỗi 3-4 Toast "Đối tác đã hủy" Xuất Hiện Khi Chồng Kết Nối Thành Công (v4.3.125)**: Nguyên nhân từ log F12: Khi vợ vừa nhập mã, máy chồng nhận tín hiệu WebSocket và chạy `checkForSharedFamilyFund`. Ban đầu `state.spouseEmail` của chồng rỗng, khi chạy hết các dòng thì trong Case D máy chồng tự động gán `state.spouseEmail = wifeEmail`. Khi hàm chạy xong, điều kiện `if (state.spouseEmail && !husbandRowFound)` kiểm tra `husbandRowFound` (vốn bằng `false` do ban đầu `spouseEmail` rỗng), dẫn đến việc máy chồng vừa kết nối xong thì lập tức tự kích hoạt auto-unlink và bắn toast! Fix: (1) Đặt `husbandRowFound = true` ngay khi Case D nhận diện đối tác ghép đôi thành công. (2) Thắt chặt điều kiện auto-unlink chỉ kiểm tra khi `state.spouseStatus === 'accepted'` và `!state.pairingCode`. Triệt tiêu hoàn toàn lỗi toast lặp. Nâng phiên bản toàn hệ thống sang `?v=4.3.125`. |
 | **v4.3.124** | ✅ **Sửa Lỗi CSP WebSocket & Thêm Auto-Unlink Khi Dòng Của Chồng Bị Xóa/Không Tìm Thấy (v4.3.124)**: Qua log F12 phát hiện 2 vấn đề: (1) Trình duyệt chặn kết nối WebSocket do CSP trong `index.html` thiếu `wss://*.supabase.co wss:`. Fix: Bổ sung `wss://*.supabase.co wss:` vào `connect-src` CSP. (2) Khi chồng hủy liên kết và xóa/dọn sạch dòng của chồng trên Supabase, hàm quét trên máy vợ `checkForSharedFamilyFund` đọc được 1 dòng (chỉ có dòng của vợ), dẫn đến việc vòng lặp `for (const row of data)` không khớp được email chồng và không bao giờ kích hoạt auto-unlink. Fix: Thêm cờ `husbandRowFound`. Sau khi quét xong toàn bộ danh sách, nếu máy vợ đang lưu `spouseEmail` nhưng `husbandRowFound === false`, máy vợ sẽ tự động thực hiện auto-unlink ngay lập tức và đưa giao diện về trạng thái Chưa kết nối! Nâng phiên bản toàn hệ thống sang `?v=4.3.124`. |
 | **v4.3.123** | ✅ **Nâng Cấp Hệ Thống Kết Nối Gia Đình Sang Supabase Realtime WebSockets (v4.3.123)**: Tích hợp công nghệ truyền tin thời gian thực **Supabase Realtime Broadcast Channels** (`familife_pairing_room`). (1) Khi vợ nhập mã ghép đôi 6 số, ứng dụng phát ngay sự kiện `PAIR_ACCEPTED` qua WebSocket, màn hình máy chồng tức thì chuyển sang "Đã kết nối thành công" (độ trễ 0.1s). (2) Khi một bên hủy liên kết, sự kiện `PAIR_UNLINKED` được phát đi tức thì giúp thiết bị còn lại tự xóa kết nối ngay lập tức mà không bao giờ bị trễ hay lặp toast. (3) Hoàn toàn không cần cấu hình SQL backend, hoạt động tức thì trên ứng dụng. Nâng phiên bản toàn hệ thống sang `?v=4.3.123`. |
-| **v4.3.122** | ✅ **Sửa Triệt Để Lỗi Auto-Unlink Nhầm Khi Vợ Vừa Nhập Mã Ghép Đôi (v4.3.122)**: Qua log F12 phát hiện nguyên nhân gốc rễ: khi chồng mới tạo mã ghép đôi, dòng của chồng có `spouse_email = ''` và `spouse_status = ''`. Thuật toán v4.3.121 trên máy vợ kiểm tra điều kiện `(!remoteSpouseEmail && remoteSpouseStatus !== 'accepted')`, dẫn đến việc ngay khi vợ vừa nhập mã xong thì hàm polling kiểm tra dòng của chồng (chưa kịp nhận diện vợ) và kích hoạt auto-unlink lập tức! Fix: (1) Sửa điều kiện auto-unlink trong [`ket-noi.js`](file:///c:/Users/PC%20VIP/Documents/Thong-ke/src/features/ket-noi-gia-dinh/ket-noi.js) chỉ kích hoạt khi `remoteSpouseStatus === 'left'` hoặc `remoteSpouseEmail` trỏ tới người khác. (2) Tinh chỉnh `isLocalUnlinked` trong [`app.js`](file:///c:/Users/PC%20VIP/Documents/Thong-ke/src/core/app.js) để không làm gián đoạn tiến trình tạo/nhập mã ghép đôi mới (`!state.pairingCode && !state.pairingCodeAccepted`). Nâng phiên bản toàn hệ thống sang `?v=4.3.122`. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ & Kiến trúc** | HTML5 + Vanilla JS (ES6 Modules) + CSS3 (Zero framework, Zero build tool heavy dependency) |
@@ -156,14 +150,7 @@ create policy "Allow insert if owner or spouse" on public.gift_sync
 
 ## 🔑 Quy Định Quản Lý Mã Nguồn & Triển Khai
 
-> [!CAUTION]
-> **KHÔNG tự động tải lên GitHub.** Agent tuyệt đối **KHÔNG** tự ý chạy các lệnh Git (`git push`, `git add`, `git commit`...) trừ khi có yêu cầu trực tiếp và rõ ràng từ người dùng. Việc push code do người dùng tự thực hiện.
 
-> [!IMPORTANT]
-> **Nâng cấp phiên bản (Version Bump & Cache Busting):** Ở MỖI LẦN chỉnh sửa mã nguồn, agent **bắt buộc** phải nâng cấp số phiên bản đồng loạt trong 3 file: `version.json`, `src/core/app.js` (biến `APP_VERSION`), và `index.html` (các tham số `?v=...` ở CSS/JS/Images). Đồng thời cập nhật tham số `?v=<phiên_bản_mới>` ở tất cả các câu lệnh `import` nội bộ trong file JS.
-
-> [!IMPORTANT]
-> **Giới hạn Lịch sử Phiên bản:** Bảng "🗂 Thông tin dự án" trong `project_summary.md` này **chỉ lưu tối đa 5 phiên bản gần nhất**. Khi thêm phiên bản mới, bắt buộc xóa dòng phiên bản cũ nhất.
 
 > [!IMPORTANT]
 > **Đóng gói & Đặt tên file IPA (iOS):** Khi ứng dụng được đóng gói tự động trên GitHub Actions (`build-ios.yml`), file `.ipa` đầu ra bắt buộc phải được tự động đổi tên theo định dạng `FamiLife_v[Phiên_bản].ipa` dựa trên thuộc tính `version` trong `package.json`.

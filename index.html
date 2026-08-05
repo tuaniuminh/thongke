@@ -7,7 +7,7 @@
          Bảo vệ chính đến từ: connect-src (chặn exfiltration), object-src 'none' (chặn plugin exploit) -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' 'unsafe-inline'
+        script-src 'self' 'unsafe-inline' blob: 'wasm-unsafe-eval' 'unsafe-eval'
             https://cdn.jsdelivr.net
             https://unpkg.com
             https://cdnjs.cloudflare.com;
@@ -69,34 +69,34 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.126">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.127">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.126">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.126">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.126">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.126">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.127">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.127">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.127">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.127">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Central Version & Module Import Maps (Single Source of Truth v4.3.126) -->
-    <script>window.APP_VERSION = '4.3.126';</script>
-    <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.wasm.js"></script>
+    <!-- Central Version & Module Import Maps (Single Source of Truth v4.3.127) -->
+    <script>window.APP_VERSION = '4.3.127';</script>
+    <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
     <script type="importmap">
     {
       "imports": {
-        "core/app": "./src/core/app.js?v=4.3.126",
-        "core/crypto": "./src/core/crypto.js?v=4.3.126",
-        "core/sync": "./src/core/sync.js?v=4.3.126",
-        "features/thu-chi": "./src/features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.126",
-        "features/ho-so-y-te": "./src/features/ho-so-y-te/ho-so-y-te.js?v=4.3.126",
-        "features/quy-gia-dinh": "./src/features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.126",
-        "features/bao-cao-thang": "./src/features/quy-gia-dinh/bao-cao-thang.js?v=4.3.126",
-        "features/thoi-tiet": "./src/features/thoi-tiet/thoi-tiet.js?v=4.3.126",
-        "features/we-love": "./src/features/we-love/we-love.js?v=4.3.126",
-        "features/ket-noi": "./src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.126"
+        "core/app": "./src/core/app.js?v=4.3.127",
+        "core/crypto": "./src/core/crypto.js?v=4.3.127",
+        "core/sync": "./src/core/sync.js?v=4.3.127",
+        "features/thu-chi": "./src/features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.127",
+        "features/ho-so-y-te": "./src/features/ho-so-y-te/ho-so-y-te.js?v=4.3.127",
+        "features/quy-gia-dinh": "./src/features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.127",
+        "features/bao-cao-thang": "./src/features/quy-gia-dinh/bao-cao-thang.js?v=4.3.127",
+        "features/thoi-tiet": "./src/features/thoi-tiet/thoi-tiet.js?v=4.3.127",
+        "features/we-love": "./src/features/we-love/we-love.js?v=4.3.127",
+        "features/ket-noi": "./src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.127"
       }
     }
     </script>
@@ -3500,16 +3500,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports mapped via importmap) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.126"></script>
-    <script type="module" src="core/app"></script>
-    <script type="module" src="features/ket-noi"></script>
-    <script type="module" src="features/we-love"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.127"></script>
+    <script type="module" src="./src/core/app.js"></script>
+    <script type="module" src="./src/features/ket-noi-gia-dinh/ket-noi.js"></script>
+    <script type="module" src="./src/features/we-love/we-love.js"></script>
 
     <!-- Service Worker Registration (PWA Offline Support with Dynamic Version Cache) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(window.APP_VERSION || '4.3.126'))
+                navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(window.APP_VERSION || '4.3.127'))
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
