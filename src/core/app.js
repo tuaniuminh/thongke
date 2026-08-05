@@ -2045,7 +2045,9 @@ function renderAll() {
     renderSentTable();
     renderSettings();
     renderHealthDashboard();
-    renderFundDashboard();
+    if (['fund', 'fund-history', 'fund-management'].includes(state.activeTab)) {
+        renderFundDashboard();
+    }
     renderManagementTab();
     checkNewMonthNotification();
     updateThemeUI();
@@ -2053,7 +2055,7 @@ function renderAll() {
     updateFamilyFundCardUI();
     initWeLoveBindings();
     updateHomeLoveWidget();
-    if (state.activeTab === 'welove' || state.activeTab === 'welove-admin' || state.activeTab === 'welove-settings') {
+    if (['welove', 'welove-admin', 'welove-settings'].includes(state.activeTab)) {
         renderWeLoveDashboard();
     }
     handleHashRoute();
@@ -2703,6 +2705,8 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (appLayout) appLayout.style.display = 'flex';
         if (homeLayout) homeLayout.style.display = 'none';
     }
+    
+    updateHomeLayoutUI();
     
     // Toggle sticky class on sidebar for desktop when in health tab
     const sidebar = document.querySelector('.sidebar');

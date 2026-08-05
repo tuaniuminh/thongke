@@ -773,6 +773,10 @@ function escapeHTML(str) {
 
 // Render WeLove main dashboard
 export async function renderWeLoveDashboard() {
+    if (!['welove', 'welove-admin', 'welove-settings'].includes(state.activeTab)) {
+        console.log("[BUG DETECTOR] renderWeLoveDashboard SKIPPED because activeTab is:", state.activeTab);
+        return;
+    }
     console.log("[BUG DETECTOR] renderWeLoveDashboard STARTING, activeTab:", state.activeTab);
     const tabContainer = document.getElementById('tab-welove');
     if (!tabContainer) return;

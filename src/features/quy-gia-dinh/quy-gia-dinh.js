@@ -283,6 +283,10 @@ export function calculateFundBalances() {
 
 // Main Render Function called when switching to 'fund' tab
 export async function renderFundDashboard() {
+    if (!['fund', 'fund-history', 'fund-management'].includes(state.activeTab)) {
+        console.log("[BUG DETECTOR] renderFundDashboard SKIPPED because activeTab is:", state.activeTab);
+        return;
+    }
     console.log("[BUG DETECTOR] renderFundDashboard STARTING, activeTab:", state.activeTab);
     // 1. Calculate balances dynamically
     calculateFundBalances();
