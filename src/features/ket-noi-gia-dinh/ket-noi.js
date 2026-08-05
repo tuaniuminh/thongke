@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.120';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.120';
-import * as sync from '../../core/sync.js?v=4.3.120';
+} from '../../core/app.js?v=4.3.121';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.121';
+import * as sync from '../../core/sync.js?v=4.3.121';
 
 let _pairingInterval = null;
 
@@ -64,6 +64,9 @@ export async function checkForSharedFamilyFund() {
                             (remoteSpouseEmail && remoteSpouseEmail !== myEmail) ||
                             (!remoteSpouseEmail && remoteSpouseStatus !== 'accepted')) {
                             console.log("[E2EE Debug] Spouse has left or cleared connection. Performing auto-unlink locally and updating cloud.");
+                            
+                            const hadSpouse = !!state.spouseEmail;
+                            
                             state.spouseEmail = '';
                             state.spouseStatus = '';
                             state.spouseRole = 'wife';
@@ -78,7 +81,9 @@ export async function checkForSharedFamilyFund() {
                             
                             await saveLocalState();
                             
-                            showToast("Đối tác đã hủy kết nối gia đình.", "warning");
+                            if (hadSpouse) {
+                                showToast("Đối tác đã hủy kết nối gia đình.", "warning");
+                            }
                             
                             if (typeof window.updateHomeLayoutUI === 'function') {
                                 window.updateHomeLayoutUI();
@@ -90,11 +95,9 @@ export async function checkForSharedFamilyFund() {
                                 window.renderFamilyPairingSettings();
                             }
                             
-                            setTimeout(() => {
-                                if (typeof performSync === 'function') {
-                                    performSync(true);
-                                }
-                            }, 300);
+                            if (typeof performSync === 'function') {
+                                await performSync(true);
+                            }
                             
                             continue;
                         }
@@ -947,6 +950,13 @@ function _startFPTimer() {
 // Expose globally for app.js and other files to call
 window.checkForSharedFamilyFund = checkForSharedFamilyFund;
 window.renderFamilyPairingSettings = renderFamilyPairingSettings;
+
+// Tự động chạy kiểm tra liên kết khi module vừa được nạp
+setTimeout(() => {
+    if (state.user) {
+        checkForSharedFamilyFund();
+    }
+}, 500);
 
 // --- HELPERS: LOADING OVERLAY ---
 function showLoadingOverlay(message = "Đang xử lý...") {
