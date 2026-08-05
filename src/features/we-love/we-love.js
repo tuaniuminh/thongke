@@ -773,6 +773,7 @@ function escapeHTML(str) {
 
 // Render WeLove main dashboard
 export async function renderWeLoveDashboard() {
+    console.log("[BUG DETECTOR] renderWeLoveDashboard STARTING, activeTab:", state.activeTab);
     const tabContainer = document.getElementById('tab-welove');
     if (!tabContainer) return;
 

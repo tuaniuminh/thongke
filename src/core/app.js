@@ -12,7 +12,7 @@ import * as sync from 'core/sync';
 import { updateHomeWeather } from 'features/thoi-tiet';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from 'features/we-love';
 
-const APP_VERSION = window.APP_VERSION || '4.3.130';
+const APP_VERSION = window.APP_VERSION || '4.3.131';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2548,12 +2548,19 @@ function enterApp() {
 }
 
 window.navigateToTab = function(tabId) {
+    console.log(`[BUG DETECTOR] navigateToTab target: ${tabId}, current activeTab: ${state.activeTab}`);
     if (state.viewingSharedFund && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
         tabId = 'welove';
     }
 
     const currentTab = state.activeTab || 'home';
-    if (currentTab === tabId) return;
+    const appLayoutCheck = document.getElementById('appLayout');
+    const isAppLayoutHidden = appLayoutCheck && (getComputedStyle(appLayoutCheck).display === 'none');
+    
+    if (currentTab === tabId && !isAppLayoutHidden && tabId !== 'home' && tabId !== 'trangchu') {
+        console.log(`[BUG DETECTOR] navigateToTab ALREADY ON ${tabId} and appLayout visible. Skip.`);
+        return;
+    }
 
     const hash = tabIdToHash[tabId] || tabId;
     const finalHash = hash.startsWith('#') ? hash : '#' + hash;
@@ -2601,6 +2608,7 @@ function handleHashRoute() {
     if (!appLayout || (appLayout.style.display === 'none' && (!homeLayout || homeLayout.style.display === 'none'))) return;
     
     const hash = window.location.hash.replace('#', '').replace('/', '').trim();
+    console.log(`[BUG DETECTOR] handleHashRoute fired, hash: #${hash}, current activeTab: ${state.activeTab}`);
     if (hash === 'trangchu') {
         switchTab('home', false, false);
         return;
@@ -2610,11 +2618,7 @@ function handleHashRoute() {
         const tabId = tabHashMapping[hash];
         if (homeLayout) homeLayout.style.display = 'none';
         if (appLayout) appLayout.style.display = 'flex';
-        if (state.activeTab !== tabId) {
-            switchTab(tabId, false);
-        } else {
-            updateSidebarNavVisibility(tabId);
-        }
+        switchTab(tabId, false);
     } else {
         const defaultHash = tabIdToHash[state.activeTab || 'home'] || 'trangchu';
         if (window.location.hash !== '#' + defaultHash) {
@@ -2625,6 +2629,7 @@ function handleHashRoute() {
 
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
+    console.log(`[BUG DETECTOR] switchTab START target: ${tabId}, current activeTab: ${state.activeTab}, updateHash: ${updateHash}`);
     // Tự động đóng Lightbox nếu đang mở và mở khóa cuộn nền khi chuyển tab
     if (typeof window.closeWeLoveLightbox === 'function') {
         window.closeWeLoveLightbox();
@@ -2644,7 +2649,11 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         tabId = 'welove';
     }
     
-    if (state.activeTab === tabId) {
+    const appLayoutCheck = document.getElementById('appLayout');
+    const isAppLayoutHidden = appLayoutCheck && (getComputedStyle(appLayoutCheck).display === 'none');
+    
+    if (state.activeTab === tabId && !isAppLayoutHidden && tabId !== 'home' && tabId !== 'trangchu') {
+        console.log(`[BUG DETECTOR] switchTab ALREADY ACTIVE & VISIBLE (${tabId}). Skipping re-render.`);
         return; // Guard against sluggish double rendering / loops
     }
     
