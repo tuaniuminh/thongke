@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.121';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.121';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.121';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.121';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.122';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.122';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.122';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.122';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.121';
-import * as sync from './sync.js?v=4.3.121';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.121';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.121';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.122';
+import * as sync from './sync.js?v=4.3.122';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.122';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.122';
 
-const APP_VERSION = '4.3.121';
+const APP_VERSION = '4.3.122';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1449,7 +1449,7 @@ async function performSync(silent = false) {
                     state.fundTransactions = remoteData.fundTransactions || [];
                     state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                     // [BUG DETECTOR] Kiểm tra cờ hủy liên kết và trạng thái spouse
-                    const isLocalUnlinked = !state.spouseEmail && state.spouseStatus !== 'accepted';
+                    const isLocalUnlinked = !state.spouseEmail && state.spouseStatus !== 'accepted' && !state.pairingCode && !state.pairingCodeAccepted;
                     if (isUnlinkingActive || state.spouseStatus === 'left' || remoteData.spouseStatus === 'left' || isLocalUnlinked) {
                         console.log(`[BUG DETECTOR] Unlink active or local state unlinked. Clearing spouse fields from remote record and local state.`);
                         if (remoteData) {
@@ -1713,7 +1713,7 @@ async function performSync(silent = false) {
                     }
                     
                     // [BUG DETECTOR] Bỏ qua ghi đè thông tin spouse từ máy chủ nếu đang trong quá trình hủy liên kết
-                    const isLocalUnlinkedMerge = !state.spouseEmail && state.spouseStatus !== 'accepted';
+                    const isLocalUnlinkedMerge = !state.spouseEmail && state.spouseStatus !== 'accepted' && !state.pairingCode && !state.pairingCodeAccepted;
                     if (isUnlinkingActive || state.spouseStatus === 'left' || remoteData.spouseStatus === 'left' || isLocalUnlinkedMerge) {
                         console.log(`[BUG DETECTOR] Skip merging spouse fields from remote record in local merge. spouseEmail=${state.spouseEmail}, spouseStatus=${state.spouseStatus}`);
                         state.spouseEmail = '';

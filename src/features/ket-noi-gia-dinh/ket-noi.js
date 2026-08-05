@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.121';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.121';
-import * as sync from '../../core/sync.js?v=4.3.121';
+} from '../../core/app.js?v=4.3.122';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.122';
+import * as sync from '../../core/sync.js?v=4.3.122';
 
 let _pairingInterval = null;
 
@@ -57,12 +57,10 @@ export async function checkForSharedFamilyFund() {
                         const remoteSpouseStatus = parsed.spouse_status || '';
                         const remoteSpouseEmail = (parsed.spouse_email || '').toLowerCase().trim();
                         // Phát hiện hủy kết nối nếu:
-                        // 1. remoteSpouseStatus === 'left'
-                        // 2. remoteSpouseEmail trỏ tới email khác mình
-                        // 3. remoteSpouseEmail rỗng và remoteSpouseStatus không phải 'accepted' (đối phương đã xóa thông tin liên kết)
+                        // 1. remoteSpouseStatus === 'left' (đối phương chủ động bấm hủy)
+                        // 2. remoteSpouseEmail trỏ tới email khác mình (đối phương đã ghép đôi với người khác)
                         if (remoteSpouseStatus === 'left' || 
-                            (remoteSpouseEmail && remoteSpouseEmail !== myEmail) ||
-                            (!remoteSpouseEmail && remoteSpouseStatus !== 'accepted')) {
+                            (remoteSpouseEmail && remoteSpouseEmail !== myEmail)) {
                             console.log("[E2EE Debug] Spouse has left or cleared connection. Performing auto-unlink locally and updating cloud.");
                             
                             const hadSpouse = !!state.spouseEmail;
