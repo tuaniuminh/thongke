@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.124';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.124';
-import * as sync from '../../core/sync.js?v=4.3.124';
+} from '../../core/app.js?v=4.3.125';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.125';
+import * as sync from '../../core/sync.js?v=4.3.125';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
@@ -312,6 +312,7 @@ export async function checkForSharedFamilyFund() {
                                 state.spouseRole = 'husband'; // Current user is Husband (Admin)
                                 state.familyFundInviteStatus = 'accepted';
                                 state.spouseStatusUpdated = new Date().toISOString();
+                                husbandRowFound = true;
                                 
                                 // [BẢO MẬT v4.3.117] Ngay khi ghép đôi thành công, dọn sạch mã ghép đôi 6 số
                                 // để triệt tiêu thời gian tồn tại của mã trên đám mây Supabase (chống brute-force)
@@ -376,6 +377,7 @@ export async function checkForSharedFamilyFund() {
                             }
                         }
                         console.log("[E2EE Debug] Match found for spouse_email!");
+                        husbandRowFound = true;
                         state.spouseRole = 'wife'; // Guest's role is always 'wife' (Partner is Husband/Admin)
                         state.ownerNickname = parsed.owner_nickname || '';
                         let fundKey = '';
@@ -635,8 +637,8 @@ export async function checkForSharedFamilyFund() {
             }
         }
         
-        // Nếu local state đang có thông tin spouse nhưng không còn tìm thấy dòng của spouse trên Supabase (chồng đã hủy/xóa dòng)
-        if (state.spouseEmail && !husbandRowFound) {
+        // Nếu local state đang ở trạng thái đã kết nối, nhưng quét toàn bộ cơ sở dữ liệu không còn thấy dòng của spouse trên Supabase (đối phương đã hủy/xóa dòng)
+        if (state.spouseEmail && state.spouseStatus === 'accepted' && !husbandRowFound && !state.pairingCode) {
             console.log("[E2EE Debug] Spouse row not found on Supabase. Performing auto-unlink locally and updating cloud.");
             const hadSpouse = !!state.spouseEmail;
             
