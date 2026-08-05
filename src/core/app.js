@@ -12,7 +12,7 @@ import * as sync from 'core/sync';
 import { updateHomeWeather } from 'features/thoi-tiet';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from 'features/we-love';
 
-const APP_VERSION = window.APP_VERSION || '4.3.128';
+const APP_VERSION = window.APP_VERSION || '4.3.129';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5043,15 +5043,17 @@ function updateMobileNavbar(tabId) {
                     </button>
                 </div>
                 <div class="mobile-navbar-right" id="mobileNavbarNav">
-                    <button class="nav-icon-btn text-only ${curSubView === 'memory' ? 'active' : ''}" onclick="window.switchWeLoveSubView('memory')" title="Kỷ niệm" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
+                    <button class="nav-icon-btn text-only ${curSubView === 'memory' ? 'active' : ''}" onclick="window.switchWeLoveSubView('memory')" title="Kỷ niệm">
                         Kỷ niệm
                     </button>
-                    <button class="nav-icon-btn text-only ${curSubView === 'admin' ? 'active' : ''}" onclick="window.switchWeLoveSubView('admin')" title="Lịch nhắc" ${!state.weLoveStartDate ? 'disabled style="opacity: 0.5;"' : ''}>
-                        Lịch nhắc
-                    </button>
-                    <button class="nav-icon-btn text-only ${curSubView === 'settings' ? 'active' : ''}" onclick="window.switchWeLoveSubView('settings')" title="Quản lý">
-                        Quản lý
-                    </button>
+                    ${!state.viewingSharedFund ? `
+                        <button class="nav-icon-btn text-only ${curSubView === 'admin' ? 'active' : ''}" onclick="window.switchWeLoveSubView('admin')" title="Lịch nhắc">
+                            Lịch nhắc
+                        </button>
+                        <button class="nav-icon-btn text-only ${curSubView === 'settings' ? 'active' : ''}" onclick="window.switchWeLoveSubView('settings')" title="Quản lý">
+                            Quản lý
+                        </button>
+                    ` : ''}
                 </div>
             `;
         }

@@ -1672,6 +1672,9 @@ window.switchWeLoveSubView = function(subView) {
     }
     if (!state.weLoveStartDate && subView !== 'settings') {
         showToast("Vui lòng cấu hình ngày bắt đầu yêu trước nhé! ❤️", "warning");
+        if (typeof window.switchTab === 'function') {
+            window.switchTab('welove-settings');
+        }
         return;
     }
     const tabMap = {
