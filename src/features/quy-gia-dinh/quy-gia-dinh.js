@@ -283,10 +283,6 @@ export function calculateFundBalances() {
 
 // Main Render Function called when switching to 'fund' tab
 export async function renderFundDashboard() {
-    if (typeof window.checkForSharedFamilyFund === 'function') {
-        await window.checkForSharedFamilyFund();
-    }
-
     // 1. Calculate balances dynamically
     calculateFundBalances();
 

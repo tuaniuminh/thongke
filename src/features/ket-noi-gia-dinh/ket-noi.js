@@ -8,9 +8,16 @@ import * as sync from 'core/sync';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
+let _isCheckingSharedFund = false;
+let _lastCheckSharedFundTime = 0;
 
 // --- CORE LOGIC: CHECK FOR SHARED FAMILY FUND (CASE A, B, C, D, E) ---
-export async function checkForSharedFamilyFund() {
+export async function checkForSharedFamilyFund(force = false) {
+    const now = Date.now();
+    if (_isCheckingSharedFund || (!force && now - _lastCheckSharedFundTime < 3000)) {
+        return;
+    }
+
     const supabaseClient = sync.getSupabase();
     if (!state.user || !supabaseClient) {
         return;
@@ -22,6 +29,9 @@ export async function checkForSharedFamilyFund() {
         console.log('[BUG DETECTOR] checkForSharedFamilyFund: Skipping due to active unlink process.');
         return;
     }
+
+    _isCheckingSharedFund = true;
+    _lastCheckSharedFundTime = now;
 
     try {
         console.log("[E2EE Debug] Starting checkForSharedFamilyFund for user:", state.user.email);
@@ -671,6 +681,8 @@ export async function checkForSharedFamilyFund() {
         
     } catch (e) {
         console.error("Error checking shared family fund:", e);
+    } finally {
+        _isCheckingSharedFund = false;
     }
 }
 

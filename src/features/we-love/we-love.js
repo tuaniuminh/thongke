@@ -502,11 +502,6 @@ function checkScheduledReminders() {
 
 // Fetch WeLove data
 export async function fetchWeLoveData() {
-    // Tự động đồng bộ từ quỹ chung nếu có kết nối
-    if (typeof window.checkForSharedFamilyFund === 'function') {
-        await window.checkForSharedFamilyFund();
-    }
-
     // Tự động gán ownerEmail nếu trống
     if (!state.ownerEmail && state.user && state.user.email) {
         state.ownerEmail = state.user.email.toLowerCase().trim();

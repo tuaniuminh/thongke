@@ -12,7 +12,7 @@ import * as sync from 'core/sync';
 import { updateHomeWeather } from 'features/thoi-tiet';
 import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from 'features/we-love';
 
-const APP_VERSION = window.APP_VERSION || '4.3.129';
+const APP_VERSION = window.APP_VERSION || '4.3.130';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
