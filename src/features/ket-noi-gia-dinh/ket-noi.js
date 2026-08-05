@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.119';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.119';
-import * as sync from '../../core/sync.js?v=4.3.119';
+} from '../../core/app.js?v=4.3.120';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.120';
+import * as sync from '../../core/sync.js?v=4.3.120';
 
 let _pairingInterval = null;
 
@@ -49,15 +49,21 @@ export async function checkForSharedFamilyFund() {
 
             const rowEmail = (row.user_email || '').toLowerCase().trim();
 
-            // SỰ KIỆN HỦY LIÊN KẾT: Nếu đối phương đã chọn hủy liên kết
+            // SỰ KIỆN HỦY LIÊN KẾT: Nếu đối phương đã chọn hủy liên kết hoặc không còn kết nối với mình
             if (state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim()) {
                 try {
                     const parsed = JSON.parse(row.encrypted_data);
                     if (parsed) {
                         const remoteSpouseStatus = parsed.spouse_status || '';
                         const remoteSpouseEmail = (parsed.spouse_email || '').toLowerCase().trim();
-                        if (remoteSpouseStatus === 'left' || (remoteSpouseEmail && remoteSpouseEmail !== myEmail)) {
-                            console.log("[E2EE Debug] Spouse has left or connected to someone else. Performing auto-unlink.");
+                        // Phát hiện hủy kết nối nếu:
+                        // 1. remoteSpouseStatus === 'left'
+                        // 2. remoteSpouseEmail trỏ tới email khác mình
+                        // 3. remoteSpouseEmail rỗng và remoteSpouseStatus không phải 'accepted' (đối phương đã xóa thông tin liên kết)
+                        if (remoteSpouseStatus === 'left' || 
+                            (remoteSpouseEmail && remoteSpouseEmail !== myEmail) ||
+                            (!remoteSpouseEmail && remoteSpouseStatus !== 'accepted')) {
+                            console.log("[E2EE Debug] Spouse has left or cleared connection. Performing auto-unlink locally and updating cloud.");
                             state.spouseEmail = '';
                             state.spouseStatus = '';
                             state.spouseRole = 'wife';
@@ -88,7 +94,7 @@ export async function checkForSharedFamilyFund() {
                                 if (typeof performSync === 'function') {
                                     performSync(true);
                                 }
-                            }, 500);
+                            }, 300);
                             
                             continue;
                         }
