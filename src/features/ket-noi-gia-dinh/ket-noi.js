@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.123';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.123';
-import * as sync from '../../core/sync.js?v=4.3.123';
+} from '../../core/app.js?v=4.3.124';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.124';
+import * as sync from '../../core/sync.js?v=4.3.124';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
@@ -40,6 +40,8 @@ export async function checkForSharedFamilyFund() {
 
         console.log("[E2EE Debug] Fetched rows count:", data.length);
         const myEmail = state.user.email.toLowerCase().trim();
+        let husbandRowFound = false;
+
         for (const row of data) {
             if (row.user_id === state.user.id) {
                 console.log("[E2EE Debug] Skipping own row:", row.user_email || row.user_id);
@@ -52,6 +54,7 @@ export async function checkForSharedFamilyFund() {
 
             // SỰ KIỆN HỦY LIÊN KẾT: Nếu đối phương đã chọn hủy liên kết hoặc không còn kết nối với mình
             if (state.spouseEmail && rowEmail === state.spouseEmail.toLowerCase().trim()) {
+                husbandRowFound = true;
                 try {
                     const parsed = JSON.parse(row.encrypted_data);
                     if (parsed) {
@@ -629,6 +632,38 @@ export async function checkForSharedFamilyFund() {
                 }
             } catch (decErr) {
                 // Ignore decryption/parsing failures for other users' rows
+            }
+        }
+        
+        // Nếu local state đang có thông tin spouse nhưng không còn tìm thấy dòng của spouse trên Supabase (chồng đã hủy/xóa dòng)
+        if (state.spouseEmail && !husbandRowFound) {
+            console.log("[E2EE Debug] Spouse row not found on Supabase. Performing auto-unlink locally and updating cloud.");
+            const hadSpouse = !!state.spouseEmail;
+            
+            state.spouseEmail = '';
+            state.spouseStatus = '';
+            state.spouseRole = 'wife';
+            state.pairingCode = '';
+            state.pairingCodeExpired = '';
+            state.pairingFundKeyEncrypted = '';
+            state.pairingCodeAccepted = '';
+            state.familyFundInviteStatus = '';
+            state.viewingSharedFund = false;
+            state.sharedFundOwnerEmail = '';
+            state.sharedFundSourceRow = null;
+            
+            await saveLocalState();
+            
+            if (hadSpouse) {
+                showToast("Đối tác đã hủy kết nối gia đình.", "warning");
+            }
+            
+            if (typeof window.updateHomeLayoutUI === 'function') window.updateHomeLayoutUI();
+            if (typeof window.renderWeLoveDashboard === 'function') window.renderWeLoveDashboard();
+            if (typeof window.renderFamilyPairingSettings === 'function') window.renderFamilyPairingSettings();
+            
+            if (typeof performSync === 'function') {
+                await performSync(true);
             }
         }
         
