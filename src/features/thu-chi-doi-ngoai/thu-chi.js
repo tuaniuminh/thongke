@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.130';
-import * as sync from '../../core/sync.js?v=4.3.130';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.130';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.130';
+} from '../../core/app.js?v=4.3.131';
+import * as sync from '../../core/sync.js?v=4.3.131';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.131';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.131';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;

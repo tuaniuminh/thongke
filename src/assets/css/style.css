@@ -4482,8 +4482,20 @@ body.light-mode .home-card.card-fund h3 {
     -webkit-text-fill-color: transparent !important;
 }
 
-/* Card Title Theme Gradients (Header & Navbar for Desktop and Mobile) */
-#currentTabTitle.theme-thuchi,
+/* Tiêu đề trang bên dưới Navbar (#currentTabTitle) giữ màu chữ mặc định (màu đen trong Light Mode, không phủ màu) */
+#currentTabTitle {
+    color: var(--text-primary) !important;
+    background: none !important;
+    background-clip: border-box !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+body.light-mode #currentTabTitle {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+
+/* Card Title Theme Gradients (Dành riêng cho Navbar Desktop & Mobile) */
 .mobile-navbar-title.theme-thuchi,
 .logo-text.theme-thuchi {
     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
@@ -4494,7 +4506,6 @@ body.light-mode .home-card.card-fund h3 {
     font-weight: 800 !important;
     display: inline-block !important;
 }
-body.light-mode #currentTabTitle.theme-thuchi,
 body.light-mode .mobile-navbar-title.theme-thuchi,
 body.light-mode .logo-text.theme-thuchi {
     background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
@@ -4504,7 +4515,6 @@ body.light-mode .logo-text.theme-thuchi {
     color: transparent !important;
 }
 
-#currentTabTitle.theme-health,
 .mobile-navbar-title.theme-health,
 .logo-text.theme-health {
     background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
@@ -4515,7 +4525,6 @@ body.light-mode .logo-text.theme-thuchi {
     font-weight: 800 !important;
     display: inline-block !important;
 }
-body.light-mode #currentTabTitle.theme-health,
 body.light-mode .mobile-navbar-title.theme-health,
 body.light-mode .logo-text.theme-health {
     background: linear-gradient(135deg, #0d9488 0%, #115e59 100%) !important;
@@ -4525,7 +4534,6 @@ body.light-mode .logo-text.theme-health {
     color: transparent !important;
 }
 
-#currentTabTitle.theme-fund,
 .mobile-navbar-title.theme-fund,
 .logo-text.theme-fund {
     background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
@@ -4536,7 +4544,6 @@ body.light-mode .logo-text.theme-health {
     font-weight: 800 !important;
     display: inline-block !important;
 }
-body.light-mode #currentTabTitle.theme-fund,
 body.light-mode .mobile-navbar-title.theme-fund,
 body.light-mode .logo-text.theme-fund {
     background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
@@ -4546,7 +4553,6 @@ body.light-mode .logo-text.theme-fund {
     color: transparent !important;
 }
 
-#currentTabTitle.theme-welove,
 .mobile-navbar-title.theme-welove,
 .logo-text.theme-welove {
     background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%) !important;
@@ -4558,7 +4564,6 @@ body.light-mode .logo-text.theme-fund {
     display: inline-block !important;
 }
 
-#currentTabTitle.theme-settings,
 .mobile-navbar-title.theme-settings,
 .logo-text.theme-settings {
     background: none !important;
@@ -4569,7 +4574,6 @@ body.light-mode .logo-text.theme-fund {
     font-weight: 800 !important;
     display: inline-block !important;
 }
-body.light-mode #currentTabTitle.theme-settings,
 body.light-mode .mobile-navbar-title.theme-settings,
 body.light-mode .logo-text.theme-settings {
     color: #000000 !important;
