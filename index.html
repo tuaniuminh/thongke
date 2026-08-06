@@ -71,14 +71,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.131">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.132">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.131">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.131">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.131">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.131">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.132">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.132">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.132">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.132">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -902,6 +902,32 @@
                                 <div style="display: flex; align-items: center;">
                                     <input type="checkbox" id="lowPerfModeCheckbox" class="status-checkbox">
                                     <span class="status-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    <!-- Desktop Home Layout Setting Card -->
+                    <div class="settings-card" id="desktopHomeLayoutCard">
+                        <h2>
+                            <i data-lucide="layout-grid" style="color: var(--accent-amber);"></i>
+                            <span>Bố cục Trang chủ (Máy tính) 🍱</span>
+                        </h2>
+                        <p class="settings-info">
+                            Tùy chỉnh phong cách hiển thị danh sách các card chức năng ngoài trang chủ khi sử dụng trên màn hình máy tính (màn hình rộng).
+                        </p>
+                        <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+                            <label style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                <input type="radio" name="desktopHomeLayout" value="list" id="layoutModeList" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                                <div>
+                                    <strong style="display: block; font-size: 0.9rem; color: var(--text-primary);">📄 Xếp hàng dọc 1 cột (Mặc định)</strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Giao diện truyền thống tối giản 1 cột ở giữa</span>
+                                </div>
+                            </label>
+
+                            <label style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                <input type="radio" name="desktopHomeLayout" value="bento" id="layoutModeBento" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                                <div>
+                                    <strong style="display: block; font-size: 0.9rem; color: var(--text-primary);">🍱 Bento Grid 3 cột (Thử nghiệm 🚀)</strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Các card dàn ngang 3 cột hiện đại, tận dụng tối đa không gian máy tính</span>
                                 </div>
                             </label>
                         </div>
@@ -3484,16 +3510,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.131"></script>
-    <script type="module" src="src/core/app.js?v=4.3.131"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.131"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.131"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.132"></script>
+    <script type="module" src="src/core/app.js?v=4.3.132"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.132"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.132"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.131')
+                navigator.serviceWorker.register('./sw.js?v=4.3.132')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

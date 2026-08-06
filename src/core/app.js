@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.131';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.131';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.131';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.131';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.132';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.132';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.132';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.132';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.131';
-import * as sync from './sync.js?v=4.3.131';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.131';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.131';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.132';
+import * as sync from './sync.js?v=4.3.132';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.132';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.132';
 
-const APP_VERSION = '4.3.131';
+const APP_VERSION = '4.3.132';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2760,6 +2760,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (typeof initNotificationSettingsUI === 'function') {
             initNotificationSettingsUI();
         }
+        initDesktopHomeLayoutSettingsUI();
     } else if (tabId === 'health' || tabId === 'health-reminders') {
         title.innerText = tabId === 'health' ? 'Hồ sơ y tế' : 'Lịch nhắc y tế';
         subtitle.innerText = tabId === 'health' 
@@ -3280,6 +3281,13 @@ async function initializeApp() {
         }
     }
 
+    // Load Desktop Home Layout Mode (list vs bento)
+    state.desktopHomeLayout = localStorage.getItem('familife_home_layout_desktop') || 'list';
+    if (state.desktopHomeLayout === 'bento') {
+        document.documentElement.classList.add('home-layout-bento');
+        document.body.classList.add('home-layout-bento');
+    }
+
     // Detect iOS/Capacitor native environment vs. web PWA
     const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
                         window.location.protocol === 'capacitor:';
@@ -3662,7 +3670,42 @@ async function initializeApp() {
     // Bind change password button
     document.getElementById('changePasswordBtn').addEventListener('click', handleChangePassword);
 
-    // Bind Low Performance Mode checkbox
+    function initDesktopHomeLayoutSettingsUI() {
+    const radioList = document.getElementById('layoutModeList');
+    const radioBento = document.getElementById('layoutModeBento');
+    if (!radioList || !radioBento) return;
+
+    const currentLayout = state.desktopHomeLayout || 'list';
+    if (currentLayout === 'bento') {
+        radioBento.checked = true;
+    } else {
+        radioList.checked = true;
+    }
+
+    radioList.onchange = () => setDesktopHomeLayoutMode('list');
+    radioBento.onchange = () => setDesktopHomeLayoutMode('bento');
+}
+
+function setDesktopHomeLayoutMode(mode) {
+    state.desktopHomeLayout = mode;
+    localStorage.setItem('familife_home_layout_desktop', mode);
+    if (mode === 'bento') {
+        document.documentElement.classList.add('home-layout-bento');
+        document.body.classList.add('home-layout-bento');
+        if (typeof showToast === 'function') {
+            showToast('🍱 Đã chuyển sang giao diện Bento Grid 3 cột trên máy tính!');
+        }
+    } else {
+        document.documentElement.classList.remove('home-layout-bento');
+        document.body.classList.remove('home-layout-bento');
+        if (typeof showToast === 'function') {
+            showToast('📄 Đã chuyển sang giao diện 1 cột truyền thống!');
+        }
+    }
+}
+window.setDesktopHomeLayoutMode = setDesktopHomeLayoutMode;
+
+// Bind Low Performance Mode checkbox
     const lowPerfCheckbox = document.getElementById('lowPerfModeCheckbox');
     if (lowPerfCheckbox) {
         lowPerfCheckbox.checked = !!state.lowPerfMode;
