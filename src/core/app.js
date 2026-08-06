@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.129';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.129';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.129';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.129';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.130';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.130';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.130';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.130';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.129';
-import * as sync from './sync.js?v=4.3.129';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.129';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.129';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.130';
+import * as sync from './sync.js?v=4.3.130';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.130';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.130';
 
-const APP_VERSION = '4.3.129';
+const APP_VERSION = '4.3.130';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4748,16 +4748,22 @@ function updateSidebarNavVisibility(tabId) {
     if (sidebarLogoText) {
         if (tabId === 'health' || tabId === 'health-reminders') {
             sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
+            sidebarLogoText.className = 'logo-text theme-health';
         } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
             sidebarLogoText.innerText = 'Kỷ Niệm Tình Yêu';
+            sidebarLogoText.className = 'logo-text theme-welove';
         } else if (tabId === 'settings') {
             sidebarLogoText.innerText = 'Cài Đặt';
+            sidebarLogoText.className = 'logo-text theme-settings';
         } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'tc-management') {
             sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
+            sidebarLogoText.className = 'logo-text theme-thuchi';
         } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
             sidebarLogoText.innerText = 'Quỹ Gia Đình';
+            sidebarLogoText.className = 'logo-text theme-fund';
         } else {
             sidebarLogoText.innerText = 'FamiLife';
+            sidebarLogoText.className = 'logo-text';
         }
     }
 
