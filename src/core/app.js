@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.133';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.133';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.133';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.133';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.134';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.134';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.134';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.134';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.133';
-import * as sync from './sync.js?v=4.3.133';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.133';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.133';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.134';
+import * as sync from './sync.js?v=4.3.134';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.134';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.134';
 
-const APP_VERSION = '4.3.133';
+const APP_VERSION = '4.3.134';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2762,7 +2762,9 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (typeof initNotificationSettingsUI === 'function') {
             initNotificationSettingsUI();
         }
-        initDesktopHomeLayoutSettingsUI();
+        if (typeof initDesktopHomeLayoutSettingsUI === 'function') {
+            initDesktopHomeLayoutSettingsUI();
+        }
     } else if (tabId === 'health' || tabId === 'health-reminders') {
         title.innerText = tabId === 'health' ? 'Hồ sơ y tế' : 'Lịch nhắc y tế';
         subtitle.innerText = tabId === 'health' 
@@ -3672,42 +3674,7 @@ async function initializeApp() {
     // Bind change password button
     document.getElementById('changePasswordBtn').addEventListener('click', handleChangePassword);
 
-    function initDesktopHomeLayoutSettingsUI() {
-    const radioList = document.getElementById('layoutModeList');
-    const radioBento = document.getElementById('layoutModeBento');
-    if (!radioList || !radioBento) return;
-
-    const currentLayout = state.desktopHomeLayout || 'list';
-    if (currentLayout === 'bento') {
-        radioBento.checked = true;
-    } else {
-        radioList.checked = true;
-    }
-
-    radioList.onchange = () => setDesktopHomeLayoutMode('list');
-    radioBento.onchange = () => setDesktopHomeLayoutMode('bento');
-}
-
-function setDesktopHomeLayoutMode(mode) {
-    state.desktopHomeLayout = mode;
-    localStorage.setItem('familife_home_layout_desktop', mode);
-    if (mode === 'bento') {
-        document.documentElement.classList.add('home-layout-bento');
-        document.body.classList.add('home-layout-bento');
-        if (typeof showToast === 'function') {
-            showToast('🍱 Đã chuyển sang giao diện Bento Grid 3 cột trên máy tính!');
-        }
-    } else {
-        document.documentElement.classList.remove('home-layout-bento');
-        document.body.classList.remove('home-layout-bento');
-        if (typeof showToast === 'function') {
-            showToast('📄 Đã chuyển sang giao diện 1 cột truyền thống!');
-        }
-    }
-}
-window.setDesktopHomeLayoutMode = setDesktopHomeLayoutMode;
-
-// Bind Low Performance Mode checkbox
+    // Bind Low Performance Mode checkbox
     const lowPerfCheckbox = document.getElementById('lowPerfModeCheckbox');
     if (lowPerfCheckbox) {
         lowPerfCheckbox.checked = !!state.lowPerfMode;
@@ -4779,6 +4746,44 @@ export {
 // ============================================================
 // UI NAVIGATION / LAYOUT CONTROLLER (Moved from thu-chi.js)
 // ============================================================
+// --- DYNAMIC CARD NAVBAR REGISTRY (PROPOSAL #1) ---
+const CARD_NAV_REGISTRY = {
+    'thuchi': {
+        logoText: 'Thu Chi Đối Ngoại',
+        logoThemeClass: 'theme-thuchi',
+        allowedNavs: ['home', 'dashboard', 'received', 'sent', 'tc-management', 'settings']
+    },
+    'health': {
+        logoText: 'Hồ Sơ Y Tế',
+        logoThemeClass: 'theme-health',
+        allowedNavs: ['home', 'health', 'health-reminders', 'settings']
+    },
+    'welove': {
+        logoText: 'Kỷ Niệm Tình Yêu',
+        logoThemeClass: 'theme-welove',
+        allowedNavs: ['home', 'welove', 'welove-admin', 'welove-settings', 'settings']
+    },
+    'fund': {
+        logoText: 'Quỹ Gia Đình',
+        logoThemeClass: 'theme-fund',
+        allowedNavs: ['home', 'fund', 'fund-history', 'fund-management', 'settings']
+    },
+    'settings': {
+        logoText: 'Cài Đặt',
+        logoThemeClass: 'theme-settings',
+        allowedNavs: ['home', 'settings']
+    }
+};
+
+function getCardKeyForTab(tabId) {
+    if (['health', 'health-reminders'].includes(tabId)) return 'health';
+    if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) return 'welove';
+    if (['fund', 'fund-history', 'fund-management'].includes(tabId)) return 'fund';
+    if (tabId === 'settings') return 'settings';
+    if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) return 'thuchi';
+    return 'default';
+}
+
 function updateSidebarNavVisibility(tabId) {
     const sidebarLogoText = document.getElementById('sidebarLogoText');
     const sidebarLogoImg = document.getElementById('sidebarLogoImg');
@@ -4789,184 +4794,37 @@ function updateSidebarNavVisibility(tabId) {
             : `src/assets/images/icon.png?v=${APP_VERSION}`;
         sidebarLogoImg.src = currentLogoSrc;
     }
-    
+
+    const cardKey = getCardKeyForTab(tabId);
+    const cardConfig = CARD_NAV_REGISTRY[cardKey];
+
     if (sidebarLogoText) {
-        if (tabId === 'health' || tabId === 'health-reminders') {
-            sidebarLogoText.innerText = 'Hồ Sơ Y Tế';
-            sidebarLogoText.className = 'logo-text theme-health';
-        } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
-            sidebarLogoText.innerText = 'Kỷ Niệm Tình Yêu';
-            sidebarLogoText.className = 'logo-text theme-welove';
-        } else if (tabId === 'settings') {
-            sidebarLogoText.innerText = 'Cài Đặt';
-            sidebarLogoText.className = 'logo-text theme-settings';
-        } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent' || tabId === 'tc-management') {
-            sidebarLogoText.innerText = 'Thu Chi Đối Ngoại';
-            sidebarLogoText.className = 'logo-text theme-thuchi';
-        } else if (tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management') {
-            sidebarLogoText.innerText = 'Quỹ Gia Đình';
-            sidebarLogoText.className = 'logo-text theme-fund';
+        if (cardConfig) {
+            sidebarLogoText.innerText = cardConfig.logoText;
+            sidebarLogoText.className = `logo-text ${cardConfig.logoThemeClass}`;
         } else {
             sidebarLogoText.innerText = 'FamiLife';
             sidebarLogoText.className = 'logo-text';
         }
     }
 
-    const navItems = {
-        home: document.querySelector('[data-nav="home"]'),
-        welove: document.querySelector('[data-nav="welove"]'),
-        weloveAdmin: document.querySelector('[data-nav="welove-admin"]'),
-        weloveSettings: document.querySelector('[data-nav="welove-settings"]'),
-        dashboard: document.querySelector('[data-nav="dashboard"]'),
-        received: document.querySelector('[data-nav="received"]'),
-        sent: document.querySelector('[data-nav="sent"]'),
-        settings: document.querySelector('[data-nav="settings"]'),
-        financePortal: document.querySelector('[data-nav="finance-portal"]'),
-        health: document.querySelector('[data-nav="health"]'),
-        healthReminders: document.querySelector('[data-nav="health-reminders"]'),
-        fund: document.querySelector('[data-nav="fund"]'),
-        fundHistory: document.querySelector('[data-nav="fund-history"]'),
-        fundManagement: document.querySelector('[data-nav="fund-management"]'),
-        tcManagement: document.querySelector('[data-nav="tc-management"]')
-    };
+    // Dynamic nav item visibility controller (Tối ưu biệt lập 100%)
+    const allNavElements = document.querySelectorAll('[data-nav]');
+    const allowed = cardConfig ? cardConfig.allowedNavs : ['home', 'settings'];
 
-    if (!navItems.health) return;
-
-    if (tabId === 'health' || tabId === 'health-reminders') {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.welove) navItems.welove.style.display = 'none';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        
-        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
-        if (navItems.received) navItems.received.style.display = 'none';
-        if (navItems.sent) navItems.sent.style.display = 'none';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.health) navItems.health.style.display = 'block';
-        if (navItems.healthReminders) navItems.healthReminders.style.display = 'block';
-        if (navItems.fund) navItems.fund.style.display = 'none';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
-    } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.welove) navItems.welove.style.display = 'block';
-        
-        // Ẩn tab Lịch nhắc (welove-admin) và Quản lý (welove-settings) cho tài khoản Vợ (Spouse)
-        if (state.viewingSharedFund) {
-            if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-            if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
+    allNavElements.forEach(el => {
+        const navKey = el.getAttribute('data-nav');
+        // Quyền riêng tư đối với tài khoản Vợ (Spouse) trong WeLove
+        if (state.viewingSharedFund && (navKey === 'welove-admin' || navKey === 'welove-settings')) {
+            el.style.display = 'none';
+            return;
+        }
+        if (allowed.includes(navKey)) {
+            el.style.display = 'block';
         } else {
-            if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'block';
-            if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'block';
-        }
-        
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        
-        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
-        if (navItems.received) navItems.received.style.display = 'none';
-        if (navItems.sent) navItems.sent.style.display = 'none';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.health) navItems.health.style.display = 'none';
-        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
-        if (navItems.fund) navItems.fund.style.display = 'none';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
-    } else if (tabId === 'settings') {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        if (navItems.welove) navItems.welove.style.display = 'none';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
-        
-        if (navItems.health) navItems.health.style.display = 'none';
-        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
-        if (navItems.fund) navItems.fund.style.display = 'none';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
-        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
-        if (navItems.received) navItems.received.style.display = 'none';
-        if (navItems.sent) navItems.sent.style.display = 'none';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
-    } else if (tabId === 'dashboard' || tabId === 'received' || tabId === 'sent') {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
-        if (navItems.received) navItems.received.style.display = 'block';
-        if (navItems.sent) navItems.sent.style.display = 'block';
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
-        if (navItems.welove) navItems.welove.style.display = 'none';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
-        
-        if (navItems.health) navItems.health.style.display = 'none';
-        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.fund) navItems.fund.style.display = 'none';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
-    } else if (tabId === 'fund' || tabId === 'fund-management' || tabId === 'fund-history') {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.fund) navItems.fund.style.display = 'block';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        if (navItems.welove) navItems.welove.style.display = 'none';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
-
-        if (navItems.dashboard) navItems.dashboard.style.display = 'none';
-        if (navItems.received) navItems.received.style.display = 'none';
-        if (navItems.sent) navItems.sent.style.display = 'none';
-        if (navItems.health) navItems.health.style.display = 'none';
-        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'none';
-    } else if (tabId === 'tc-management') {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
-        if (navItems.received) navItems.received.style.display = 'block';
-        if (navItems.sent) navItems.sent.style.display = 'block';
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
-        if (navItems.welove) navItems.welove.style.display = 'none';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
-
-        if (navItems.health) navItems.health.style.display = 'none';
-        if (navItems.healthReminders) navItems.healthReminders.style.display = 'none';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.fund) navItems.fund.style.display = 'none';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'none';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'none';
-    } else {
-        if (navItems.home) navItems.home.style.display = 'block';
-        if (navItems.dashboard) navItems.dashboard.style.display = 'block';
-        if (navItems.received) navItems.received.style.display = 'block';
-        if (navItems.sent) navItems.sent.style.display = 'block';
-        if (navItems.settings) navItems.settings.style.display = 'block';
-        if (navItems.health) navItems.health.style.display = 'block';
-        if (navItems.fund) navItems.fund.style.display = 'block';
-        if (navItems.fundHistory) navItems.fundHistory.style.display = 'block';
-        if (navItems.fundManagement) navItems.fundManagement.style.display = 'block';
-        if (navItems.tcManagement) navItems.tcManagement.style.display = 'block';
-        if (navItems.financePortal) navItems.financePortal.style.display = 'none';
-        if (navItems.welove) navItems.welove.style.display = 'none';
-        if (navItems.weloveAdmin) navItems.weloveAdmin.style.display = 'none';
-        if (navItems.weloveSettings) navItems.weloveSettings.style.display = 'none';
-    }
-    
-    const lockableNavKeys = ['dashboard', 'received', 'sent', 'financePortal', 'health', 'fund', 'fundHistory', 'fundManagement', 'tcManagement'];
-    lockableNavKeys.forEach(key => {
-        const item = navItems[key];
-        if (item) {
-            item.classList.remove('nav-locked');
-        }
+            el.style.display = 'none';
     });
-    
+
     updateMobileNavbar(tabId);
 }
 
@@ -5446,7 +5304,43 @@ export async function clearAllStateData() {
     await saveLocalState();
 }
 
-export { logScrollDiagnostics, triggerHapticFeedback, initNotificationSettingsUI, saveNotificationSettings, testNotificationWebhook };
+function initDesktopHomeLayoutSettingsUI() {
+    const radioList = document.getElementById('layoutModeList');
+    const radioBento = document.getElementById('layoutModeBento');
+    if (!radioList || !radioBento) return;
+
+    const currentLayout = state.desktopHomeLayout || 'list';
+    if (currentLayout === 'bento') {
+        radioBento.checked = true;
+    } else {
+        radioList.checked = true;
+    }
+
+    radioList.onchange = () => setDesktopHomeLayoutMode('list');
+    radioBento.onchange = () => setDesktopHomeLayoutMode('bento');
+}
+
+function setDesktopHomeLayoutMode(mode) {
+    state.desktopHomeLayout = mode;
+    localStorage.setItem('familife_home_layout_desktop', mode);
+    if (mode === 'bento') {
+        document.documentElement.classList.add('home-layout-bento');
+        document.body.classList.add('home-layout-bento');
+        if (typeof showToast === 'function') {
+            showToast('🍱 Đã chuyển sang giao diện Bento Grid 3 cột trên máy tính!');
+        }
+    } else {
+        document.documentElement.classList.remove('home-layout-bento');
+        document.body.classList.remove('home-layout-bento');
+        if (typeof showToast === 'function') {
+            showToast('📄 Đã chuyển sang giao diện 1 cột truyền thống!');
+        }
+    }
+}
+window.initDesktopHomeLayoutSettingsUI = initDesktopHomeLayoutSettingsUI;
+window.setDesktopHomeLayoutMode = setDesktopHomeLayoutMode;
+
+export { logScrollDiagnostics, triggerHapticFeedback, initNotificationSettingsUI, saveNotificationSettings, testNotificationWebhook, initDesktopHomeLayoutSettingsUI, setDesktopHomeLayoutMode };
 
 
 
