@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.125';
-import * as sync from '../../core/sync.js?v=4.3.125';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.125';
+} from '../../core/app.js?v=4.3.126';
+import * as sync from '../../core/sync.js?v=4.3.126';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.126';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.125');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.126');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.125';
+        const logoPath = './logo_pwa_small.png?v=4.3.126';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.125';
+    const logoPath = './logo_pwa_small.png?v=4.3.126';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1135,8 +1135,9 @@ export async function renderWeLoveDashboard() {
 
         <!-- ALBUM MANAGER MODAL -->
         <div class="welove-modal-overlay" id="weLoveAlbumManagerModal" style="display: none; z-index: 1000;">
-            <div class="welove-modal-content" style="max-width: 500px; width: 90%;">
-                <h4 class="welove-modal-title">
+            <div class="welove-modal-content" style="max-width: 500px; width: 90%; position: relative;">
+                <button type="button" class="welove-modal-close-btn" id="btnWeLoveCloseAlbumManager" title="Đóng cửa sổ" style="position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; line-height: 1; transition: all 0.2s ease;">✕</button>
+                <h4 class="welove-modal-title" style="padding-right: 36px;">
                     <span>📸 Quản Lý Album Ảnh Kỷ Niệm</span>
                 </h4>
                 
@@ -1162,12 +1163,6 @@ export async function renderWeLoveDashboard() {
                     <div id="weLoveAlbumManagerList" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
                         <!-- Populate dynamically -->
                     </div>
-                </div>
-
-                <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
-                    <button type="button" class="welove-btn" id="btnWeLoveCloseAlbumManager" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 20px; border-radius: 12px; font-weight: 600; cursor: pointer;">
-                        Đóng cửa sổ ❌
-                    </button>
                 </div>
             </div>
         </div>
@@ -1495,6 +1490,18 @@ function bindMemoryEvents() {
     if (btnCloseAlbum && modalAlbum) {
         btnCloseAlbum.addEventListener('click', () => {
             modalAlbum.style.display = 'none';
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        });
+    }
+
+    if (modalAlbum) {
+        modalAlbum.addEventListener('click', (e) => {
+            if (e.target === modalAlbum) {
+                modalAlbum.style.display = 'none';
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+            }
         });
     }
 
@@ -2140,6 +2147,8 @@ export function openWeLoveAlbumManager() {
     if (!modalAlbum) return;
     
     modalAlbum.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     updateWeLoveAlbumManagerList();
 }
 

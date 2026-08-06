@@ -4484,3 +4484,49 @@ body.low-perf-mode {
     }
 }
 
+/* Card Title Theme Gradients (Header & Navbar for Desktop and Mobile) */
+#currentTabTitle.theme-thuchi,
+.mobile-navbar-title.theme-thuchi {
+    background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+    display: inline-block;
+}
+
+#currentTabTitle.theme-health,
+.mobile-navbar-title.theme-health {
+    background: linear-gradient(135deg, #34d399 0%, #06b6d4 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+    display: inline-block;
+}
+
+#currentTabTitle.theme-fund,
+.mobile-navbar-title.theme-fund {
+    background: linear-gradient(135deg, #c084fc 0%, #f472b6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+    display: inline-block;
+}
+
+#currentTabTitle.theme-welove,
+.mobile-navbar-title.theme-welove {
+    background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+    display: inline-block;
+}
+
+#currentTabTitle.theme-settings,
+.mobile-navbar-title.theme-settings {
+    background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+    display: inline-block;
+}
+

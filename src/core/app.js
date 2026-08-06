@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.125';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.125';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.125';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.125';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.126';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.126';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.126';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.126';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.125';
-import * as sync from './sync.js?v=4.3.125';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.125';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.125';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.126';
+import * as sync from './sync.js?v=4.3.126';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.126';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.126';
 
-const APP_VERSION = '4.3.125';
+const APP_VERSION = '4.3.126';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2722,6 +2722,20 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     const title = document.getElementById('currentTabTitle');
     const subtitle = document.getElementById('currentTabSubtitle');
     
+    if (title) {
+        if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) {
+            title.className = 'theme-thuchi';
+        } else if (['health', 'health-reminders'].includes(tabId)) {
+            title.className = 'theme-health';
+        } else if (['fund', 'fund-history', 'fund-management'].includes(tabId)) {
+            title.className = 'theme-fund';
+        } else if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) {
+            title.className = 'theme-welove';
+        } else if (tabId === 'settings') {
+            title.className = 'theme-settings';
+        }
+    }
+    
     if (tabId === 'dashboard') {
         title.innerText = 'Tổng quan';
         subtitle.innerText = 'Thống kê hoạt động hiếu hỷ của bạn';
@@ -4935,7 +4949,7 @@ function updateMobileNavbar(tabId) {
                 <div class="mobile-navbar-logo">
                     <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                 </div>
-                <span class="mobile-navbar-title" id="mobileNavbarTitle">Cài Đặt</span>
+                <span class="mobile-navbar-title theme-settings" id="mobileNavbarTitle">Cài Đặt</span>
             </div>
             <div class="mobile-navbar-right" id="mobileNavbarNav">
                 <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
@@ -4960,7 +4974,7 @@ function updateMobileNavbar(tabId) {
                     <div class="mobile-navbar-logo">
                         <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
-                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
+                    <span class="mobile-navbar-title theme-health" id="mobileNavbarTitle">Hồ Sơ Y Tế</span>
                 </div>
                 <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
@@ -4992,7 +5006,7 @@ function updateMobileNavbar(tabId) {
                     <div class="mobile-navbar-logo">
                         <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
-                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Quỹ Gia Đình</span>
+                    <span class="mobile-navbar-title theme-fund" id="mobileNavbarTitle">Quỹ Gia Đình</span>
                 </div>
                 <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
@@ -5032,7 +5046,7 @@ function updateMobileNavbar(tabId) {
                     <div class="mobile-navbar-logo">
                         <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
-                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
+                    <span class="mobile-navbar-title theme-welove" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
                 </div>
                 <div class="mobile-navbar-right" id="mobileNavbarNav">
                     <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
@@ -5048,7 +5062,7 @@ function updateMobileNavbar(tabId) {
                         <div class="mobile-navbar-logo">
                             <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                         </div>
-                        <span class="mobile-navbar-title" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
+                        <span class="mobile-navbar-title theme-welove" id="mobileNavbarTitle">Kỷ Niệm Tình Yêu</span>
                     </div>
                     <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                         <i data-lucide="home"></i>
@@ -5083,7 +5097,7 @@ function updateMobileNavbar(tabId) {
                     <div class="mobile-navbar-logo">
                         <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
-                    <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
+                    <span class="mobile-navbar-title theme-thuchi" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
                 <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
                     <i data-lucide="home"></i>
