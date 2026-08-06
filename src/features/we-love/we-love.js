@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.126';
-import * as sync from '../../core/sync.js?v=4.3.126';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.126';
+} from '../../core/app.js?v=4.3.127';
+import * as sync from '../../core/sync.js?v=4.3.127';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.127';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.126');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.127');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.126';
+        const logoPath = './logo_pwa_small.png?v=4.3.127';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.126';
+    const logoPath = './logo_pwa_small.png?v=4.3.127';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1489,20 +1489,23 @@ function bindMemoryEvents() {
     
     if (btnCloseAlbum && modalAlbum) {
         btnCloseAlbum.addEventListener('click', () => {
-            modalAlbum.style.display = 'none';
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
+            closeWeLoveAlbumManagerModal();
         });
     }
 
     if (modalAlbum) {
         modalAlbum.addEventListener('click', (e) => {
             if (e.target === modalAlbum) {
-                modalAlbum.style.display = 'none';
-                document.body.style.overflow = '';
-                document.documentElement.style.overflow = '';
+                closeWeLoveAlbumManagerModal();
             }
         });
+        modalAlbum.addEventListener('touchmove', (e) => {
+            const list = document.getElementById('weLoveAlbumManagerList');
+            if (list && list.contains(e.target)) {
+                return;
+            }
+            e.preventDefault();
+        }, { passive: false });
     }
 
     if (formAddPhoto) {
@@ -2142,11 +2145,32 @@ export function updateWeLoveAlbum() {
     });
 }
 
+let _savedIosScrollY = 0;
+
+export function closeWeLoveAlbumManagerModal() {
+    const modalAlbum = document.getElementById('weLoveAlbumManagerModal');
+    if (modalAlbum) {
+        modalAlbum.style.display = 'none';
+    }
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    if (_savedIosScrollY) {
+        window.scrollTo(0, _savedIosScrollY);
+    }
+}
+
 export function openWeLoveAlbumManager() {
     const modalAlbum = document.getElementById('weLoveAlbumManagerModal');
     if (!modalAlbum) return;
     
+    _savedIosScrollY = window.scrollY || window.pageYOffset || 0;
     modalAlbum.style.display = 'flex';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${_savedIosScrollY}px`;
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     updateWeLoveAlbumManagerList();

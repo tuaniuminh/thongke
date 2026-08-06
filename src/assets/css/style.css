@@ -4431,85 +4431,101 @@ body.low-perf-mode {
     background-color: var(--bg-primary) !important;
 }
 
-/* Phủ màu viền và màu chữ tiêu đề các card trên điện thoại giống máy tính */
-@media (max-width: 768px) {
-    .home-card.card-finance {
-        border-color: rgba(245, 158, 11, 0.35) !important;
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08) !important;
-    }
-    .home-card.card-finance h3 {
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        display: inline-block;
-    }
-    
-    .home-card.card-health {
-        border-color: rgba(13, 148, 136, 0.35) !important;
-        box-shadow: 0 4px 15px rgba(13, 148, 136, 0.08) !important;
-    }
-    .home-card.card-health h3 {
-        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        display: inline-block;
-    }
-    
-    .home-card.card-fund {
-        border-color: rgba(2, 132, 199, 0.35) !important;
-        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08) !important;
-    }
-    .home-card.card-fund h3 {
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        display: inline-block;
-    }
-    
-    /* Giao diện sáng điều chỉnh độ tương phản tốt hơn */
-    body.light-mode .home-card.card-finance h3 {
-        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-    }
-    body.light-mode .home-card.card-health h3 {
-        background: linear-gradient(135deg, #0d9488 0%, #115e59 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-    }
-    body.light-mode .home-card.card-fund h3 {
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-    }
+/* Phủ màu viền và màu chữ tiêu đề các card trên cả máy tính và điện thoại */
+.home-card.card-finance {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08) !important;
+}
+.home-card.card-finance h3 {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+}
+
+.home-card.card-health {
+    border-color: rgba(13, 148, 136, 0.35) !important;
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.08) !important;
+}
+.home-card.card-health h3 {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+}
+
+.home-card.card-fund {
+    border-color: rgba(2, 132, 199, 0.35) !important;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08) !important;
+}
+.home-card.card-fund h3 {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+}
+
+/* Giao diện sáng điều chỉnh độ tương phản tốt hơn cho các home-card */
+body.light-mode .home-card.card-finance h3 {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+body.light-mode .home-card.card-health h3 {
+    background: linear-gradient(135deg, #0d9488 0%, #115e59 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+body.light-mode .home-card.card-fund h3 {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
 }
 
 /* Card Title Theme Gradients (Header & Navbar for Desktop and Mobile) */
 #currentTabTitle.theme-thuchi,
 .mobile-navbar-title.theme-thuchi {
-    background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%) !important;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     font-weight: 800 !important;
     display: inline-block;
+}
+body.light-mode #currentTabTitle.theme-thuchi,
+body.light-mode .mobile-navbar-title.theme-thuchi {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
 }
 
 #currentTabTitle.theme-health,
 .mobile-navbar-title.theme-health {
-    background: linear-gradient(135deg, #34d399 0%, #06b6d4 100%) !important;
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     font-weight: 800 !important;
     display: inline-block;
 }
+body.light-mode #currentTabTitle.theme-health,
+body.light-mode .mobile-navbar-title.theme-health {
+    background: linear-gradient(135deg, #0d9488 0%, #115e59 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
 
 #currentTabTitle.theme-fund,
 .mobile-navbar-title.theme-fund {
-    background: linear-gradient(135deg, #c084fc 0%, #f472b6 100%) !important;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     font-weight: 800 !important;
     display: inline-block;
+}
+body.light-mode #currentTabTitle.theme-fund,
+body.light-mode .mobile-navbar-title.theme-fund {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
 }
 
 #currentTabTitle.theme-welove,
@@ -4523,10 +4539,16 @@ body.low-perf-mode {
 
 #currentTabTitle.theme-settings,
 .mobile-navbar-title.theme-settings {
-    background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--text-primary) !important;
     font-weight: 800 !important;
     display: inline-block;
+}
+body.light-mode #currentTabTitle.theme-settings,
+body.light-mode .mobile-navbar-title.theme-settings {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
 }
 
