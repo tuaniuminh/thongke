@@ -18,12 +18,12 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 foreach ($f in $files) {
     if (Test-Path $f) {
         $content = [System.IO.File]::ReadAllText($f, [System.Text.Encoding]::UTF8)
-        if ($content.Contains('4.3.136')) {
-            $newContent = $content.Replace('4.3.136', '4.3.137')
+        if ($content.Contains('4.3.137')) {
+            $newContent = $content.Replace('4.3.137', '4.3.138')
             [System.IO.File]::WriteAllText($f, $newContent, $utf8NoBom)
             Write-Host "Updated: $f"
         } else {
-            Write-Host "No 4.3.136 found in: $f"
+            Write-Host "No 4.3.137 found in: $f"
         }
     }
 }
