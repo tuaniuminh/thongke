@@ -1,10 +1,10 @@
-// src/features/ket-noi-gia-dinh/ket-noi.js - Family Connection Module
+﻿// src/features/ket-noi-gia-dinh/ket-noi.js - Family Connection Module
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.135';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.135';
-import * as sync from '../../core/sync.js?v=4.3.135';
+} from '../../core/app.js?v=4.3.136';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.136';
+import * as sync from '../../core/sync.js?v=4.3.136';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;

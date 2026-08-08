@@ -1,10 +1,10 @@
-// src/features/quy-gia-dinh/bao-cao-thang.js - Monthly Financial Report Logic
+﻿// src/features/quy-gia-dinh/bao-cao-thang.js - Monthly Financial Report Logic
 
 import { 
     state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML
-} from '../../core/app.js?v=4.3.135';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.3.135';
+} from '../../core/app.js?v=4.3.136';
+import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.3.136';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;

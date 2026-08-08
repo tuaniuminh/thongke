@@ -1,12 +1,12 @@
-// src/features/quy-gia-dinh/quy-gia-dinh.js - Family Fund Management Logic
+﻿// src/features/quy-gia-dinh/quy-gia-dinh.js - Family Fund Management Logic
 
 import { 
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.135';
-import { decrypt } from '../../core/crypto.js?v=4.3.135';
-import * as sync from '../../core/sync.js?v=4.3.135';
+} from '../../core/app.js?v=4.3.136';
+import { decrypt } from '../../core/crypto.js?v=4.3.136';
+import * as sync from '../../core/sync.js?v=4.3.136';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
@@ -1034,7 +1034,6 @@ async function handleTransferSubmit(e) {
 
     showToast("Đã trích chuyển quỹ thành công!");
     performSync(true);
-    performSync(true);
 }
 
 // Handler: Ghi nhận chi tiêu từ quỹ chi tiêu
@@ -1053,6 +1052,15 @@ async function handleSpendingSubmit(e) {
     if (amount <= 0) {
         showToast("Vui lòng nhập số tiền chi tiêu hợp lệ!", "warning");
         return;
+    }
+
+    // BUG-03 FIX: Kiểm tra số dư quỹ trước khi chi tiêu
+    calculateFundBalances();
+    const targetFund = (state.familyFunds || []).find(f => f.id === fundId);
+    if (targetFund && targetFund.balance < amount) {
+        if (!await window.showConfirm(`⚠️ Quỹ "${targetFund.name}" không đủ số dư!\nHiện có: ${formatVND(targetFund.balance)}\nChi tiêu: ${formatVND(amount)}\n\nBạn vẫn muốn ghi nhận khoản chi này?`)) {
+            return;
+        }
     }
 
     let memberId = 'p-husband';
@@ -1091,6 +1099,7 @@ async function handleSpendingSubmit(e) {
         if (extName && extEventType !== 'none') {
             const externalRecord = {
                 id: 'sent-' + generateId(),
+                linked_fund_tx_id: tx.id, // BUG-01 FIX: Liên kết với giao dịch quỹ để cascade delete/edit
                 name: extName,
                 event_type: extEventType,
                 relationship: extRelationship,
@@ -1222,6 +1231,19 @@ window.deleteFundTransaction = async function(id) {
         updated_at: new Date().toISOString()
     };
     state.fundTransactionsUpdated = new Date().toISOString();
+
+    // BUG-01 FIX: Cascade soft-delete bản ghi Thu chi đối ngoại được liên kết
+    if (deletedTx.type === 'spending' && state.sentGifts) {
+        const linkedExtIdx = state.sentGifts.findIndex(g => g.linked_fund_tx_id === id);
+        if (linkedExtIdx !== -1) {
+            state.sentGifts[linkedExtIdx] = {
+                ...state.sentGifts[linkedExtIdx],
+                deleted_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            console.log('[FIX BUG-01] Cascade soft-delete bản ghi sentGifts linked_fund_tx_id:', id);
+        }
+    }
 
     await saveLocalState();
     

@@ -1,18 +1,18 @@
-import { 
+﻿import { 
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.135';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.135';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.135';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.135';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.136';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.136';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.136';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.136';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.135';
-import * as sync from './sync.js?v=4.3.135';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.135';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.135';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.136';
+import * as sync from './sync.js?v=4.3.136';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.136';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.136';
 
-const APP_VERSION = '4.3.135';
+const APP_VERSION = '4.3.136';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -866,7 +866,33 @@ async function saveLocalState() {
         localStorage.setItem('gift_ledger_db', encrypted);
     } catch (e) {
         console.error("Local save failed:", e);
-        showToast("Lưu dữ liệu cục bộ thất bại!", "error");
+        // BUG-02 FIX: Phân biệt lỗi QuotaExceededError (bộ nhớ đầy) với các lỗi khác
+        if (e && (e.name === 'QuotaExceededError' || e.code === 22 || (e.message && e.message.toLowerCase().includes('quota')))) {
+            // Lỗi nghiêm trọng: bộ nhớ localStorage đầy → hiển thị cảnh báo cố định, không tự tắt
+            console.error('[BUG-02 CRITICAL] localStorage QuotaExceededError! Dữ liệu KHÔNG được lưu.');
+            const existingAlert = document.getElementById('quota-exceeded-alert');
+            if (!existingAlert) {
+                const alertDiv = document.createElement('div');
+                alertDiv.id = 'quota-exceeded-alert';
+                alertDiv.style.cssText = `
+                    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+                    background: #dc2626; color: white; padding: 14px 20px;
+                    font-size: 14px; font-weight: 600; text-align: center;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.5); line-height: 1.5;
+                `;
+                alertDiv.innerHTML = `
+                    ⚠️ <strong>CẢNH BÁO: Bộ nhớ thiết bị đầy!</strong> Dữ liệu vừa thao tác CHƯA được lưu.<br>
+                    Hãy <strong>xóa bớt ảnh trong Album</strong> hoặc <strong>xuất backup dữ liệu</strong> ngay để tránh mất dữ liệu.
+                    <button onclick="document.getElementById('quota-exceeded-alert').remove()"
+                        style="margin-left:16px;padding:4px 12px;background:white;color:#dc2626;border:none;border-radius:4px;cursor:pointer;font-weight:700;">
+                        Đã hiểu
+                    </button>
+                `;
+                document.body.prepend(alertDiv);
+            }
+        } else {
+            showToast("Lưu dữ liệu cục bộ thất bại!", "error");
+        }
     }
 }
 
