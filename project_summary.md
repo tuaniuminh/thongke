@@ -12,7 +12,8 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.136** |
+| **Phiên bản hiện tại** | **v4.3.137** |
+| **v4.3.137** | ✅ **Khắc Phục Triệt Để Lỗi Hiển Thị Font Chữ Tiếng Việt (Mojibake Encoding) (v4.3.137)**: Khôi phục toàn bộ văn bản tiếng Việt bị biến dạng ký tự trong `index.html` và `sw.js` do đọc sai bảng mã mã hóa. Loại bỏ UTF-8 BOM khỏi toàn bộ các file JS module (`app.js`, `quy-gia-dinh.js`, `we-love.js`...) đảm bảo chuẩn nạp mã nguồn web sạch. Nâng phiên bản toàn hệ thống sang `?v=4.3.137`. |
 | **v4.3.136** | ✅ **Fix 5 Lỗi Nghiêm Trọng Theo Báo Cáo Code Review (v4.3.136)**: (1) **BUG-01**: Thêm trường `linked_fund_tx_id` vào `sentGifts` khi đồng bộ chi tiêu quỹ ra đối ngoại; thêm cascade soft-delete trong `deleteFundTransaction` để xóa đồng thời bản ghi liên kết bên `sentGifts`, tránh orphaned transaction gây sai lệch báo cáo. (2) **BUG-02**: Nâng cấp xử lý `QuotaExceededError` trong `saveLocalState` – thay toast 3 giây bằng banner cố định đỏ toàn màn hình yêu cầu người dùng xóa ảnh/xuất backup ngay để tránh mất dữ liệu. (3) **BUG-03**: Bổ sung kiểm tra số dư quỹ (`calculateFundBalances`) trong `handleSpendingSubmit` tương tự `handleTransferSubmit`; popup xác nhận khi chi tiêu vượt số dư. (4) **BUG-04**: Xóa lệnh `performSync(true)` trùng lặp trong `handleTransferSubmit` (tránh race condition Supabase). (5) **INFRA-01**: Đồng bộ phiên bản toàn hệ thống – cập nhật `package.json` từ `4.1.85` và `manifest.json` icon URL từ `4.1.31` về `4.3.136`. |
 | **v4.3.135** | ✅ **Sửa Triệt Để Lỗi Cú Pháp ERR-101 SyntaxError Trong app.js (v4.3.135)**: Bổ sung ngoặc nhọn `}` đóng khối `else` tại dòng 4825 trong hàm `updateSidebarNavVisibility` thuộc [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js). Triệt tiêu hoàn toàn lỗi `Uncaught SyntaxError: Unexpected token ')'`. Nâng phiên bản toàn hệ thống sang `?v=4.3.135`. |
 | **v4.3.134** | ✅ **Sửa Triệt Để Lỗi ReferenceError Khi Vào Cài Đặt & Triển Khai Đề Xuất 1 & 2 (v4.3.134)**: (1) **Fix Lỗi ERR-102 Cài Đặt**: Khắc phục triệt để lỗi `initDesktopHomeLayoutSettingsUI is not defined` bằng cách đưa hàm ra top-level scope và bọc kiểm tra `typeof` an toàn trước khi gọi. (2) **Triển Khai Đề Xuất 1 (Dynamic Navbar Builder)**: Chuyển đổi toàn bộ logic ẩn/hiện Navbar rườm rà thành `CARD_NAV_REGISTRY` linh hoạt. (3) **Triển Khai Đề Xuất 2 (Lazy Module Loader)**: Khởi tạo bộ tải module linh hoạt `ensureModuleLoaded`. Nâng phiên bản toàn hệ thống sang `?v=4.3.134`. |
@@ -137,7 +138,7 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 
 > [!IMPORTANT]
 
-> **Nâng cấp phiên bản (Version Bump):** Ở MỖI LẦN chỉnh sửa mã nguồn (dù là nhỏ nhất), agent **bắt buộc** phải nâng cấp số phiên bản (ví dụ từ `v4.0.18` lên `v4.0.23`) đồng loạt trong 3 file: `version.json`, `src/core/app.js` (biến `APP_VERSION`), và `index.html` (các tham số `?v=...` ở CSS/JS/Images). Việc này là cực kỳ quan trọng để đảm bảo trình duyệt tự động xóa bộ đệm (cache) và nạp code mới nhất.
+> **Nâng cấp phiên bản (Version Bump):** Ở MỖI LẦN chỉnh sửa mã nguồn (dù là nhỏ nhất), agent **bắt buộc** phải nâng cấp số phiên bản đồng loạt trong **6 file** (không được bỏ sót): `version.json`, `src/core/app.js` (biến `APP_VERSION`), `index.html` (các `?v=...`), `sw.js`, **`package.json`** (ảnh hưởng tên file `.ipa` iOS), **`manifest.json`** (icon URL cache PWA), và tất cả `import ... ?v=` trong các file JS module. Xem **Checklist đầy đủ** trong `.agents/AGENTS.md` Quy tắc 2.
 
 > [!IMPORTANT]
 
@@ -150,6 +151,10 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 > [!IMPORTANT]
 
 > **Đóng gói & Đặt tên file IPA (iOS):** Khi ứng dụng được đóng gói tự động trên GitHub Actions (file `build-ios.yml`), file `.ipa` đầu ra bắt buộc phải được tự động đổi tên theo định dạng `FamiLife_v[Phiên_bản].ipa` (ví dụ: `FamiLife_v4.1.41.ipa`) dựa trên thuộc tính `version` trong `package.json`.
+
+> [!IMPORTANT]
+
+> **Bảo vệ mã hóa UTF-8 (No-BOM):** Toàn bộ file nguồn (`index.html`, JS, CSS, JSON) phải luôn lưu dưới dạng **UTF-8 không BOM**. Tuyệt đối không dùng các câu lệnh PowerShell `Get-Content | Set-Content` đơn thuần trên hệ điều hành Windows vì sẽ gây ra lỗi **Mojibake** (hỏng ký tự Tiếng Việt) và tự thêm dấu UTF-8 BOM byte header làm lỗi nạp module JS. Xem **Quy tắc 5** trong `.agents/AGENTS.md`.
 
 ---
 
