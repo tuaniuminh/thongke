@@ -2,7 +2,7 @@
 <html lang="vi" class="light-mode">
 <head>
     <meta charset="UTF-8">
-    <!-- Content Security Policy (CVE-8 Fix v4.5.9) -->
+    <!-- Content Security Policy (CVE-8 Fix v4.6.0) -->
     <!-- script-src: 'unsafe-inline' cần thiết vì app dùng nhiều inline <script>.
          Bảo vệ chính đến từ: connect-src (chặn exfiltration), object-src 'none' (chặn plugin exploit) -->
     <meta http-equiv="Content-Security-Policy" content="
@@ -71,14 +71,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.5.9">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.6.0">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.5.9">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.5.9">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.5.9">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.5.9">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.6.0">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.6.0">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.6.0">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.6.0">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -346,7 +346,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.5.9" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.6.0" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -468,7 +468,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.5.9" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.6.0" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1869,7 +1869,7 @@
             <section class="tab-panel" id="tab-vehicle" style="display: none; position: relative;">
 
                 <!-- Empty state when no vehicles exist -->
-                <div class="card-panel" id="vehicleEmptyNotice" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: 16px;">
+                <div id="vehicleEmptyNotice" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px;">
                     <i data-lucide="bike" style="width: 56px; height: 56px; color: #f59e0b; margin-bottom: 12px; opacity: 0.8;"></i>
                     <h3 style="margin: 0 0 8px 0; color: var(--text-primary);">Chưa có chiếc xe nào được thêm</h3>
                     <p style="color: var(--text-secondary); max-width: 460px; font-size: 0.9rem; margin-bottom: 20px;">
@@ -1881,7 +1881,7 @@
                 </div>
 
                 <!-- Main content box when vehicle selected -->
-                <div id="vehicleMainContentBox" style="display: none;">
+                <div id="vehicleMainContentBox" style="display: none; margin: 0; padding: 0;">
                     <!-- Vehicle Selector & Top Info Banner -->
                     <div class="card-panel" style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
@@ -2282,7 +2282,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.5.9" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.6.0" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2391,11 +2391,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.5.9';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.6.0';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.5.9';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.6.0';
                         }
                     })();
                 </script>
@@ -3900,16 +3900,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.5.9"></script>
-    <script type="module" src="src/core/app.js?v=4.5.9"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.5.9"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.5.9"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.6.0"></script>
+    <script type="module" src="src/core/app.js?v=4.6.0"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.6.0"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.6.0"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.5.9')
+                navigator.serviceWorker.register('./sw.js?v=4.6.0')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

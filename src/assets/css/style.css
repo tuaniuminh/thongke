@@ -323,6 +323,11 @@ body.light-mode .nav-link:hover {
     width: 100%;
 }
 
+#tab-vehicle, #vehicleMainContentBox {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 /* Top Header */
 .top-header {
     display: flex;

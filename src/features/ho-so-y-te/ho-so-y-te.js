@@ -1,8 +1,8 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString
-} from '../../core/app.js?v=4.5.9';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.5.9';
+} from '../../core/app.js?v=4.6.0';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.0';
 
 let healthTrendChartInstance = null;
 
@@ -4886,7 +4886,7 @@ function updateIndicatorProgress() {
 
 
 // ============================================================
-// HEALTH REMINDERS MODULE (v4.5.9)
+// HEALTH REMINDERS MODULE (v4.6.0)
 // ============================================================
 window.healthCurrentSubView = 'records';
 
