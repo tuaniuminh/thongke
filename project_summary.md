@@ -91,8 +91,8 @@ Dự án đã được tái cấu trúc từ một file `app.js` khổng lồ sa
 
 ## 🔑 Lưu ý kỹ thuật quan trọng
 
-> [!CAUTION]
-> **KHÔNG tự động tải lên GitHub.** Sau khi hoàn thành tính năng hoặc sửa lỗi, agent **chỉ được phép** `git add` + `git commit` (nếu người dùng yêu cầu rõ ràng). Việc `git push` lên GitHub **do người dùng tự thực hiện** trên cuộc trò chuyện riêng. Không được tự ý push code.
+> [!TIP]
+> **TỰ ĐỘNG ĐẨY CODE LÊN GITHUB (push.bat):** Sau khi hoàn thành bất kỳ tính năng, sửa lỗi hay cập nhật mã nguồn và hoàn tất nâng cấp phiên bản (Version Bump), agent **bắt buộc phải tự động thực thi file batch `push.bat`** (hoặc chạy các lệnh git push tương đương) để đẩy toàn bộ mã nguồn mới nhất lên GitHub cho người dùng mà không cần chờ nhắc nhở.
 
 > [!IMPORTANT]
 > **Nâng cấp phiên bản (Version Bump):** Ở MỖI LẦN chỉnh sửa mã nguồn (dù là nhỏ nhất), agent **bắt buộc** phải nâng cấp số phiên bản đồng loạt trong **6 file** (không được bỏ sót): `version.json`, `src/core/app.js` (biến `APP_VERSION`), `index.html` (các `?v=...`), `sw.js`, **`package.json`** (ảnh hưởng tên file `.ipa` iOS), **`manifest.json`** (icon URL cache PWA), và tất cả `import ... ?v=` trong các file JS module. Xem **Checklist đầy đủ** trong `.agents/AGENTS.md` Quy tắc 2.
