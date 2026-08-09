@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.6.7';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.7';
-import * as sync from '../../core/sync.js?v=4.6.7';
+} from '../../core/app.js?v=4.6.8';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.8';
+import * as sync from '../../core/sync.js?v=4.6.8';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
@@ -320,6 +320,7 @@ export async function checkForSharedFamilyFund(force = false) {
                                 state.spouseEmail = spouseEmailVal;
                                 state.spouseStatus = 'accepted';
                                 state.spouseRole = 'husband'; // Current user is Husband (Admin)
+                                state.viewingSharedFund = false; // Husband is always Admin
                                 state.familyFundInviteStatus = 'accepted';
                                 state.spouseStatusUpdated = new Date().toISOString();
                                 husbandRowFound = true;
