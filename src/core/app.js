@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.5.6';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.5.6';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.5.6';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.5.6';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.5.7';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.5.7';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.5.7';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.5.7';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.5.6';
-import * as sync from './sync.js?v=4.5.6';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.5.6';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.5.6';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.5.6';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.5.7';
+import * as sync from './sync.js?v=4.5.7';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.5.7';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.5.7';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.5.7';
 
-const APP_VERSION = '4.5.6';
+const APP_VERSION = '4.5.7';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -24,7 +24,7 @@ const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
 
 // Helper to check and retrieve Supabase connection credentials
-// v4.5.6: Xóa localStorage fallback (supabase_url/supabase_key).
+// v4.5.7: Xóa localStorage fallback (supabase_url/supabase_key).
 // Chỉ dùng build-time injection. Dọn sạch key cũ nếu còn tồn tại.
 function getSupabaseConfig() {
     if (localStorage.getItem('supabase_disabled') === 'true') {
@@ -185,13 +185,13 @@ let customEventsEditMode = false;
 // --- Helper Functions ---
 
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.5.6)
+// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.5.7)
 // Thay thế plain-text PIN trong localStorage bằng cơ chế 2 lớp:
 //   - localStorage: chỉ lưu encrypted PIN (ciphertext vô dụng nếu không có wrap key)
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.5.6)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.5.7)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -2949,6 +2949,12 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         renderVehicleDashboard();
     }
     
+    // Toggle header action button for vehicle care
+    const btnAddVehicle = document.getElementById('btnAddVehicle');
+    if (btnAddVehicle) {
+        btnAddVehicle.style.display = (tabId === 'vehicle') ? 'inline-flex' : 'none';
+    }
+    
     if (updateHash) {
         const hash = tabIdToHash[tabId] || tabId;
         const finalHash = hash.startsWith('#') ? hash : '#' + hash;
@@ -5254,7 +5260,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.5.6)
+// NOTIFICATION SETTINGS CONTROLLER (v4.5.7)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
