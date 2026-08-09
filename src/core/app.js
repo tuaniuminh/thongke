@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.0';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.0';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.0';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.0';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.1';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.1';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.1';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.1';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.0';
-import * as sync from './sync.js?v=4.4.0';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.0';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.0';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.0';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.1';
+import * as sync from './sync.js?v=4.4.1';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.1';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.1';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.1';
 
-const APP_VERSION = '4.4.0';
+const APP_VERSION = '4.4.1';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -191,7 +191,7 @@ let customEventsEditMode = false;
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.0)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.1)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -2567,7 +2567,9 @@ const tabHashMapping = {
     'welove-admin': 'welove-admin',
     'gockyniem-admin': 'welove-admin',
     'welove-settings': 'welove-settings',
-    'gockyniem-settings': 'welove-settings'
+    'gockyniem-settings': 'welove-settings',
+    'chamsocxe': 'vehicle',
+    'vehicle': 'vehicle'
 };
 
 const tabIdToHash = {
@@ -2584,7 +2586,8 @@ const tabIdToHash = {
     'tc-management': 'quan-ly-thu-chi',
     'welove': 'gockyniem',
     'welove-admin': 'gockyniem-admin',
-    'welove-settings': 'gockyniem-settings'
+    'welove-settings': 'gockyniem-settings',
+    'vehicle': 'chamsocxe'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -2663,6 +2666,9 @@ window.navigateToTab = function(tabId) {
         }
         if (['welove', 'welove-admin', 'welove-settings'].includes(tId)) {
             return 'we-love';
+        }
+        if (['vehicle'].includes(tId)) {
+            return 'cham-soc-xe';
         }
         return 'other';
     }
@@ -5182,7 +5188,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.4.0)
+// NOTIFICATION SETTINGS CONTROLLER (v4.4.1)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
