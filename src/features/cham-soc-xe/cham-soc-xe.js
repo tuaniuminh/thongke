@@ -1,7 +1,7 @@
 // src/features/cham-soc-xe/cham-soc-xe.js - Vehicle Care & Motorcycle Maintenance Module
 import { 
     state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, formatVND, generateId, getLocalDateString
-} from '../../core/app.js?v=4.4.1';
+} from '../../core/app.js?v=4.4.2';
 
 // Current subview state
 let currentVehicleSubView = 'overview'; // 'overview' | 'services' | 'fuel' | 'matrix' | 'ai-doctor'
@@ -142,7 +142,7 @@ function renderVehicleProfileSelector() {
 
     selector.innerHTML = state.vehicles.map(v => `
         <option value="${v.id}" ${v.id === activeVehicleId ? 'selected' : ''}>
-            ${escapeHTML(v.name)} (${escapeHTML(v.plateNumber || 'Chưa có biển số')}) - ${v.currentOdo.toLocaleString('vi-VN')} km
+            ${escapeHTML(v.name)} (${escapeHTML(v.plateNumber || 'Chưa có biển số')}) - ${(Number(v.currentOdo) || 0).toLocaleString('vi-VN')} km
         </option>
     `).join('');
 }
