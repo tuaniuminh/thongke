@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.6.4';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.6.4';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.6.4';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.6.4';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.6.5';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.6.5';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.6.5';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.6.5';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.6.4';
-import * as sync from './sync.js?v=4.6.4';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.6.4';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.6.4';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.6.4';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.6.5';
+import * as sync from './sync.js?v=4.6.5';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.6.5';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.6.5';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.6.5';
 
-const APP_VERSION = '4.6.4';
+const APP_VERSION = '4.6.5';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4538,9 +4538,66 @@ document.addEventListener('touchmove', (e) => {
             console.log(`[ScrollDiag] Prevented touchmove: Scrollable ${scrollable.id || scrollable.className} is at bottom, swiping up`);
             e.preventDefault();
             return;
-        }
-    }
 }, { passive: false });
+
+// Auto-lock body scrolling whenever any modal/overlay is open across all cards
+export function updateBodyScrollLock() {
+    if (typeof document === 'undefined') return;
+    const activeModal = document.querySelector(
+        '.modal-overlay.active, .modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"], .welove-modal-overlay.active, .welove-modal-overlay[style*="display: flex"], .welove-modal-overlay[style*="display: block"], .setup-overlay[style*="display: flex"], .setup-overlay[style*="display: block"]'
+    );
+    if (activeModal) {
+        document.body.classList.add('modal-open');
+        document.documentElement.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+    } else {
+        document.body.classList.remove('modal-open');
+        document.documentElement.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    }
+}
+
+// Global modal helpers
+window.openModal = function(modalId) {
+    const el = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (el) {
+        el.classList.add('active');
+        el.style.display = 'flex';
+        updateBodyScrollLock();
+    }
+};
+
+window.closeModal = function(modalId) {
+    const el = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (el) {
+        el.classList.remove('active');
+        el.style.display = 'none';
+        updateBodyScrollLock();
+    }
+};
+
+// MutationObserver listening for DOM attribute changes on overlays to automatically lock/unlock scroll
+if (typeof document !== 'undefined') {
+    const initModalScrollLockObserver = () => {
+        updateBodyScrollLock();
+        const observer = new MutationObserver(() => {
+            updateBodyScrollLock();
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initModalScrollLockObserver);
+    } else {
+        initModalScrollLockObserver();
+    }
+}
 
 
 

@@ -110,6 +110,22 @@ body {
     transition: color var(--transition-normal);
 }
 
+/* Lock background scrolling when any modal or overlay is active */
+html.modal-open,
+body.modal-open {
+    overflow: hidden !important;
+    height: 100vh !important;
+    touch-action: none;
+}
+
+.modal-overlay,
+.welove-modal-overlay,
+.health-theme-overlay,
+.modal-container,
+.modal-body {
+    overscroll-behavior: contain;
+}
+
 /* Scrollbar Style */
 ::-webkit-scrollbar {
     width: 8px;
