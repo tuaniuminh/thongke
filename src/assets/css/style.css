@@ -4695,11 +4695,15 @@ body.light-mode .logo-text.theme-settings {
     border-radius: 50% !important;
     background: #f43f5e !important;
     color: white !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
     box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4) !important;
+}
+
+.debug-console-toggle-btn[style*="display: none"] {
+    display: none !important;
 }
 /* Global Modal Overlay Rules - Fixes DOM height inflation from unhidden modals */
 .modal-overlay {

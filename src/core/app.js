@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.6.3';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.6.3';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.6.3';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.6.3';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.6.4';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.6.4';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.6.4';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.6.4';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.6.3';
-import * as sync from './sync.js?v=4.6.3';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.6.3';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.6.3';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.6.3';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.6.4';
+import * as sync from './sync.js?v=4.6.4';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.6.4';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.6.4';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.6.4';
 
-const APP_VERSION = '4.6.3';
+const APP_VERSION = '4.6.4';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -24,7 +24,7 @@ const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
 
 // Helper to check and retrieve Supabase connection credentials
-// v4.6.3: Xóa localStorage fallback (supabase_url/supabase_key).
+// v4.6.4: Xóa localStorage fallback (supabase_url/supabase_key).
 // Chỉ dùng build-time injection. Dọn sạch key cũ nếu còn tồn tại.
 function getSupabaseConfig() {
     if (localStorage.getItem('supabase_disabled') === 'true') {
@@ -185,13 +185,13 @@ let customEventsEditMode = false;
 // --- Helper Functions ---
 
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.6.3)
+// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.6.4)
 // Thay thế plain-text PIN trong localStorage bằng cơ chế 2 lớp:
 //   - localStorage: chỉ lưu encrypted PIN (ciphertext vô dụng nếu không có wrap key)
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.6.3)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.6.4)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -5241,7 +5241,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.6.3)
+// NOTIFICATION SETTINGS CONTROLLER (v4.6.4)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');

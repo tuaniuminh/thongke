@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.6.3';
-import * as sync from '../../core/sync.js?v=4.6.3';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.3';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.6.3';
+} from '../../core/app.js?v=4.6.4';
+import * as sync from '../../core/sync.js?v=4.6.4';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.4';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.6.4';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1059,7 +1059,7 @@ function updateHomeLayoutUI() {
         }
     }
 
-    // --- Lời mời tham gia Quỹ gia đình --- (Đã tắt ở v4.6.3 vì đã có Mã ghép đôi WeLove ghép nối trực tiếp)
+    // --- Lời mời tham gia Quỹ gia đình --- (Đã tắt ở v4.6.4 vì đã có Mã ghép đôi WeLove ghép nối trực tiếp)
     const inviteCard = document.getElementById('spouseFundInviteCard');
     if (inviteCard) {
         inviteCard.style.display = 'none';
