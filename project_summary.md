@@ -8,7 +8,7 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.5.1** |
+| **Phiên bản hiện tại** | **v4.5.2** |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -17,6 +17,7 @@
 
 | Version | Chi tiết thay đổi |
 |---------|-------------------|
+| **v4.5.2** | ✅ **Sửa Triệt Để Nguyên Nhân Gốc Rễ Phình Chiều Cao DOM 320px `debugConsolePanel` (v4.5.2)**: Phát hiện thủ phạm chính làm phình `html.scrollHeight` lên `1198px` (tạo ra khoảng trống 458px ở cuối body) là phần tử `DIV#debugConsolePanel` thiếu thuộc tính CSS `position: fixed` làm nó bị xếp ở dạng `position: static` với chiều cao 320px dưới chân trang. Bổ sung `position: fixed; bottom: 0; left: 0; right: 0; display: none;` cho `debugConsolePanel` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) và [`src/assets/css/style.css`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/assets/css/style.css), đưa chiều cao trang về đúng `740px` (triệt tiêu 100% khoảng cuộn dư thừa). Nâng phiên bản toàn hệ thống sang `?v=4.5.2`. |
 | **v4.5.1** | ✅ **Nâng Cấp Hệ Thống Debug Log `[BUG DETECTOR]` Quét Sâu Vị Trí Cuộn & DOM Tall Elements (v4.5.1)**: Áp dụng Quy tắc 4 (Bug Detector Rule) bổ sung log theo dõi từng mốc `STEP 0..3` của `forceScrollToTop()`, quét tất cả các phần tử phình chiều cao `>200px` trong DOM và lắng nghe sự kiện `scroll` toàn cục trong [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js) để tìm nguyên nhân gốc rễ. Nâng phiên bản toàn hệ thống sang `?v=4.5.1`. |
 | **v4.5.0** | ✅ **Bổ Sung Thẻ Anchor Nguồn Định Vị Native `id="chamsocxe"` & Ép Reflow Khung Hình DOM Trước Khi Cuộn (v4.5.0)**: (1) Bổ sung thẻ neo định vị `<a id="chamsocxe"></a>` vào ngay đầu phần tử `section#tab-vehicle` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) cho phép công cụ định vị trình duyệt tìm thấy đích đến `0px` lập tức khi nhấp thẻ card. (2) Bổ sung lệnh ép reflow `void document.body.offsetHeight;` trước `forceScrollToTop()` trong `switchTab` tại [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js) giúp tính toán lại kích thước hiển thị DOM chính xác trước khi đưa màn hình về mốc 0px. Nâng phiên bản toàn hệ thống sang `?v=4.5.0`. |
 | **v4.4.9** | ✅ **Kích Hoạt `history.scrollRestoration = 'manual'` & Hàm Cuộn Ép Đỉnh Đa Tần Tố `forceScrollToTop()` (v4.4.9)**: (1) Bổ sung `history.scrollRestoration = 'manual'` khi ứng dụng khởi chạy trong [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js) triệt tiêu hoàn toàn tính năng khôi phục cuộn cũ `458.4px` tự động của trình duyệt engine SPA. (2) Định nghĩa hàm `forceScrollToTop()` cuộn cuộn đa tầng (`requestAnimationFrame` + `setTimeout 50ms/150ms`) ép `window`, `html` và `body` về vị trí `0px` mỗi khi chuyển tab. Nâng phiên bản toàn hệ thống sang `?v=4.4.9`. |
