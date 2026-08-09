@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.4.4';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.4';
-import * as sync from '../../core/sync.js?v=4.4.4';
+} from '../../core/app.js?v=4.4.5';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.5';
+import * as sync from '../../core/sync.js?v=4.4.5';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
@@ -324,7 +324,7 @@ export async function checkForSharedFamilyFund(force = false) {
                                 state.spouseStatusUpdated = new Date().toISOString();
                                 husbandRowFound = true;
                                 
-                                // [BẢO MẬT v4.4.4] Ngay khi ghép đôi thành công, dọn sạch mã ghép đôi 6 số
+                                // [BẢO MẬT v4.4.5] Ngay khi ghép đôi thành công, dọn sạch mã ghép đôi 6 số
                                 // để triệt tiêu thời gian tồn tại của mã trên đám mây Supabase (chống brute-force)
                                 state.pairingCode = '';
                                 state.pairingCodeExpired = '';

@@ -1,7 +1,7 @@
 // src/features/cham-soc-xe/cham-soc-xe.js - Vehicle Care & Motorcycle Maintenance Module
 import { 
     state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, formatVND, generateId, getLocalDateString
-} from '../../core/app.js?v=4.4.4';
+} from '../../core/app.js?v=4.4.5';
 
 // Current subview state
 let currentVehicleSubView = 'overview'; // 'overview' | 'services' | 'fuel' | 'matrix' | 'ai-doctor'
@@ -110,6 +110,9 @@ function renderVehicleDashboard() {
     if (!vehicle) {
         if (emptyNotice) emptyNotice.style.display = 'flex';
         if (contentBox) contentBox.style.display = 'none';
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
         return;
     }
 

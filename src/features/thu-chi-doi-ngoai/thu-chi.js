@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.4.4';
-import * as sync from '../../core/sync.js?v=4.4.4';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.4';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.4';
+} from '../../core/app.js?v=4.4.5';
+import * as sync from '../../core/sync.js?v=4.4.5';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.5';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.5';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -959,6 +959,10 @@ function renderSettings() {
     const toggleShowLoveWidget = document.getElementById('toggleShowLoveWidget');
     if (toggleShowLoveWidget) {
         toggleShowLoveWidget.checked = state.showLoveWidget !== false;
+    }
+    const toggleVehicleCard = document.getElementById('toggleShowVehicleCareCard');
+    if (toggleVehicleCard) {
+        toggleVehicleCard.checked = !!state.showVehicleCareCard;
     }
     const toggleDebugConsoleCheck = document.getElementById('toggleDebugConsole');
     if (toggleDebugConsoleCheck) {

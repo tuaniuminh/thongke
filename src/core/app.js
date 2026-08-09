@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.4';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.4';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.4';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.4';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.5';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.5';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.5';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.5';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.4';
-import * as sync from './sync.js?v=4.4.4';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.4';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.4';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.4';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.5';
+import * as sync from './sync.js?v=4.4.5';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.5';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.5';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.5';
 
-const APP_VERSION = '4.4.4';
+const APP_VERSION = '4.4.5';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -191,7 +191,7 @@ let customEventsEditMode = false;
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.4)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.5)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -3372,12 +3372,7 @@ async function initializeApp() {
         }
     }
 
-    // Load Desktop Home Layout Mode (list vs bento)
-    state.desktopHomeLayout = localStorage.getItem('familife_home_layout_desktop') || 'list';
-    if (state.desktopHomeLayout === 'bento') {
-        document.documentElement.classList.add('home-layout-bento');
-        document.body.classList.add('home-layout-bento');
-    }
+
 
     // Detect iOS/Capacitor native environment vs. web PWA
     const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
@@ -5180,7 +5175,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.4.4)
+// NOTIFICATION SETTINGS CONTROLLER (v4.4.5)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
@@ -5456,39 +5451,8 @@ export async function clearAllStateData() {
     await saveLocalState();
 }
 
-function initDesktopHomeLayoutSettingsUI() {
-    const radioList = document.getElementById('layoutModeList');
-    const radioBento = document.getElementById('layoutModeBento');
-    if (!radioList || !radioBento) return;
-
-    const currentLayout = state.desktopHomeLayout || 'list';
-    if (currentLayout === 'bento') {
-        radioBento.checked = true;
-    } else {
-        radioList.checked = true;
-    }
-
-    radioList.onchange = () => setDesktopHomeLayoutMode('list');
-    radioBento.onchange = () => setDesktopHomeLayoutMode('bento');
-}
-
-function setDesktopHomeLayoutMode(mode) {
-    state.desktopHomeLayout = mode;
-    localStorage.setItem('familife_home_layout_desktop', mode);
-    if (mode === 'bento') {
-        document.documentElement.classList.add('home-layout-bento');
-        document.body.classList.add('home-layout-bento');
-        if (typeof showToast === 'function') {
-            showToast('🍱 Đã chuyển sang giao diện Bento Grid 3 cột trên máy tính!');
-        }
-    } else {
-        document.documentElement.classList.remove('home-layout-bento');
-        document.body.classList.remove('home-layout-bento');
-        if (typeof showToast === 'function') {
-            showToast('📄 Đã chuyển sang giao diện 1 cột truyền thống!');
-        }
-    }
-}
+function initDesktopHomeLayoutSettingsUI() {}
+function setDesktopHomeLayoutMode(mode) {}
 window.initDesktopHomeLayoutSettingsUI = initDesktopHomeLayoutSettingsUI;
 window.setDesktopHomeLayoutMode = setDesktopHomeLayoutMode;
 
