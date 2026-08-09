@@ -2801,6 +2801,11 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     window.scrollTo(0, 0);
     if (document.documentElement) document.documentElement.scrollTop = 0;
     if (document.body) document.body.scrollTop = 0;
+    setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+    }, 50);
     
     // Toggle sticky class on sidebar for desktop when in health tab
     const sidebar = document.querySelector('.sidebar');
