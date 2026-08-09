@@ -4674,6 +4674,22 @@ body.light-mode .logo-text.theme-settings {
     border-top: 1px solid var(--border-color) !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
 }
+.debug-console-toggle-btn {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    z-index: 999998 !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: #f43f5e !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4) !important;
+}
 /* Global Modal Overlay Rules - Fixes DOM height inflation from unhidden modals */
 .modal-overlay {
     position: fixed !important;

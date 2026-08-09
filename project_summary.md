@@ -8,7 +8,7 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.5.3** |
+| **Phiên bản hiện tại** | **v4.5.4** |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -17,6 +17,7 @@
 
 | Version | Chi tiết thay đổi |
 |---------|-------------------|
+| **v4.5.4** | ✅ **Sửa Nút Con Bọ Luôn Hiển Thị & Bật Mở Bảng Debug Log Tức Thì (v4.5.4)**: (1) Sửa thuộc tính `style="display: flex !important;"` cho nút `debugConsoleToggleBtn` và quy tắc CSS `.debug-console-toggle-btn` trong [`src/assets/css/style.css`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/assets/css/style.css) giúp nút con bọ màu hồng nổi bật 100% ở góc dưới bên trái màn hình. (2) Sửa hàm chuyển đổi `panel.style.display` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) trực tiếp đổi giữa `'flex'` và `'none'` khi nhấp nút con bọ hoặc nút đóng, giúp mở bảng log debug tức thì. Nâng phiên bản toàn hệ thống sang `?v=4.5.4`. |
 | **v4.5.3** | ✅ **Sửa Triệt Để Thuộc Tính Ẩn 10 Modal-Overlay & Chuẩn Hóa min-height cho main-content (v4.5.3)**: (1) Khắc phục tận gốc nguyên nhân 10 tệp modal overlay (`fundContributionModal`, `receivedModal`, `sentModal`, `quickAddModal`, v.v.) bị thiếu thuộc tính `style="display: none;"` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) và thiếu quy tắc CSS `.modal-overlay { display: none; position: fixed; }` trong [`src/assets/css/style.css`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/assets/css/style.css) làm xếp ngầm ở dạng `position: static` làm phình chiều cao body lên `1166px`. (2) Đổi `min-height: 100vh;` của `.main-content` thành `min-height: calc(100vh - 72px);` trừ đúng 72px chiều cao sidebar top. Đưa `html.scrollHeight` về vừa khít `740px` (triệt tiêu vĩnh viễn 100% dung lượng cuộn thừa). Nâng phiên bản toàn hệ thống sang `?v=4.5.3`. |
 | **v4.5.2** | ✅ **Sửa Triệt Để Nguyên Nhân Gốc Rễ Phình Chiều Cao DOM 320px `debugConsolePanel` (v4.5.2)**: Phát hiện thủ phạm chính làm phình `html.scrollHeight` lên `1198px` (tạo ra khoảng trống 458px ở cuối body) là phần tử `DIV#debugConsolePanel` thiếu thuộc tính CSS `position: fixed` làm nó bị xếp ở dạng `position: static` với chiều cao 320px dưới chân trang. Bổ sung `position: fixed; bottom: 0; left: 0; right: 0; display: none;` cho `debugConsolePanel` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) và [`src/assets/css/style.css`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/assets/css/style.css), đưa chiều cao trang về đúng `740px` (triệt tiêu 100% khoảng cuộn dư thừa). Nâng phiên bản toàn hệ thống sang `?v=4.5.2`. |
 | **v4.5.1** | ✅ **Nâng Cấp Hệ Thống Debug Log `[BUG DETECTOR]` Quét Sâu Vị Trí Cuộn & DOM Tall Elements (v4.5.1)**: Áp dụng Quy tắc 4 (Bug Detector Rule) bổ sung log theo dõi từng mốc `STEP 0..3` của `forceScrollToTop()`, quét tất cả các phần tử phình chiều cao `>200px` trong DOM và lắng nghe sự kiện `scroll` toàn cục trong [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js) để tìm nguyên nhân gốc rễ. Nâng phiên bản toàn hệ thống sang `?v=4.5.1`. |
