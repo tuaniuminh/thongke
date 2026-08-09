@@ -94,7 +94,7 @@ export async function decrypt(cipherText, password) {
     // Thử lần lượt 4 kết hợp thuật toán, ưu tiên SHA-512/600k (mặc định hiện tại) trước
     const candidates = [
         { hash: 'SHA-512', iterations: 600000 },  // Mặc định hiện tại (tử v4.2.x+)
-        { hash: 'SHA-256', iterations: 100000 },  // Lừa lõi: dữ liệu lỡ mã hóa bằng v4.4.5
+        { hash: 'SHA-256', iterations: 100000 },  // Lừa lõi: dữ liệu lỡ mã hóa bằng v4.4.6
         { hash: 'SHA-256', iterations: 600000 },  // Phòng ngừa kết hợp hiếm gặp
         { hash: 'SHA-512', iterations: 100000 },  // Phòng ngừa kết hợp hiếm gặp
     ];
