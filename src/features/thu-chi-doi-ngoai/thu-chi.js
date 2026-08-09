@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.4.5';
-import * as sync from '../../core/sync.js?v=4.4.5';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.5';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.5';
+} from '../../core/app.js?v=4.4.6';
+import * as sync from '../../core/sync.js?v=4.4.6';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.6';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.6';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1943,7 +1943,11 @@ function updateSentTypeCustomVisibility() {
 }
 
 window.closeModal = function(modalId) {
-    document.getElementById(modalId).classList.remove('active');
+    const el = document.getElementById(modalId);
+    if (el) {
+        el.classList.remove('active');
+        el.style.display = 'none';
+    }
 };
 
 function setupModalListeners() {
