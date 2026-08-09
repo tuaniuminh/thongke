@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.6.8';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.6.8';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.6.8';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.6.8';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.6.9';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.6.9';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.6.9';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.6.9';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.6.8';
-import * as sync from './sync.js?v=4.6.8';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.6.8';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.6.8';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.6.8';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.6.9';
+import * as sync from './sync.js?v=4.6.9';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.6.9';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.6.9';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.6.9';
 
-const APP_VERSION = '4.6.8';
+const APP_VERSION = '4.6.9';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -139,7 +139,7 @@ let state = {
     theme: 'light',
     familyFundInviteStatus: '',
     familyFundInviteStatusUpdated: '',
-    spouseRole: 'wife',
+    spouseRole: 'husband',
     ownerNickname: '',
     spouseStatus: '',
     mobileViewMode: 'cards',
@@ -864,7 +864,7 @@ async function saveLocalState() {
         googleSheetsWebhook: state.googleSheetsWebhook || '',
         familyFundInviteStatus: state.familyFundInviteStatus || '',
         familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
-        spouseRole: state.spouseRole || 'wife',
+        spouseRole: state.spouseRole || 'husband',
         ownerNickname: state.ownerNickname || '',
         spouseStatus: state.spouseStatus || '',
         viewingSharedFund: !!state.viewingSharedFund,
@@ -990,7 +990,7 @@ export async function loadLocalState(password) {
         state.healthRemindersUpdated = '';
         state.familyFundInviteStatus = '';
         state.familyFundInviteStatusUpdated = '';
-        state.spouseRole = 'wife';
+        state.spouseRole = 'husband';
         state.ownerNickname = '';
         state.spouseStatus = '';
         state.viewingSharedFund = false;
@@ -1080,10 +1080,14 @@ export async function loadLocalState(password) {
         state.healthRemindersUpdated = data.healthRemindersUpdated || '';
         state.familyFundInviteStatus = data.familyFundInviteStatus || '';
         state.familyFundInviteStatusUpdated = data.familyFundInviteStatusUpdated || '';
-        state.spouseRole = data.spouseRole || 'wife';
+        state.spouseRole = data.spouseRole || 'husband';
         state.ownerNickname = data.ownerNickname || '';
         state.spouseStatus = data.spouseStatus || '';
         state.viewingSharedFund = data.viewingSharedFund || false;
+        if (!state.viewingSharedFund || !state.sharedFundSourceRow) {
+            state.spouseRole = 'husband';
+            state.viewingSharedFund = false;
+        }
         state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
         state.lastFullBackupDate = data.lastFullBackupDate || '';
         state.activeChartFundIds = data.activeChartFundIds || ['fund-main'];

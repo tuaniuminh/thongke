@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.6.8';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.8';
-import * as sync from '../../core/sync.js?v=4.6.8';
+} from '../../core/app.js?v=4.6.9';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.6.9';
+import * as sync from '../../core/sync.js?v=4.6.9';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
@@ -655,7 +655,7 @@ export async function checkForSharedFamilyFund(force = false) {
             
             state.spouseEmail = '';
             state.spouseStatus = '';
-            state.spouseRole = 'wife';
+            state.spouseRole = 'husband';
             state.pairingCode = '';
             state.pairingCodeExpired = '';
             state.pairingFundKeyEncrypted = '';
