@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.5.0';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.5.0';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.5.0';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.5.0';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.5.1';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.5.1';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.5.1';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.5.1';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.5.0';
-import * as sync from './sync.js?v=4.5.0';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.5.0';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.5.0';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.5.0';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.5.1';
+import * as sync from './sync.js?v=4.5.1';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.5.1';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.5.1';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.5.1';
 
-const APP_VERSION = '4.5.0';
+const APP_VERSION = '4.5.1';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -24,7 +24,7 @@ const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
 
 // Helper to check and retrieve Supabase connection credentials
-// v4.5.0: Xóa localStorage fallback (supabase_url/supabase_key).
+// v4.5.1: Xóa localStorage fallback (supabase_url/supabase_key).
 // Chỉ dùng build-time injection. Dọn sạch key cũ nếu còn tồn tại.
 function getSupabaseConfig() {
     if (localStorage.getItem('supabase_disabled') === 'true') {
@@ -185,13 +185,13 @@ let customEventsEditMode = false;
 // --- Helper Functions ---
 
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.5.0)
+// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.5.1)
 // Thay thế plain-text PIN trong localStorage bằng cơ chế 2 lớp:
 //   - localStorage: chỉ lưu encrypted PIN (ciphertext vô dụng nếu không có wrap key)
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.5.0)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.5.1)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -2723,23 +2723,47 @@ function forceScrollToTop() {
     if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'manual';
     }
+    const getPos = () => `window=${window.scrollY}, doc=${document.documentElement ? document.documentElement.scrollTop : -1}, body=${document.body ? document.body.scrollTop : -1}`;
+    console.log(`[BUG DETECTOR] forceScrollToTop STEP 0 (instant): ${getPos()}`);
+
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (document.documentElement) document.documentElement.scrollTop = 0;
     if (document.body) document.body.scrollTop = 0;
+
     requestAnimationFrame(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         if (document.documentElement) document.documentElement.scrollTop = 0;
         if (document.body) document.body.scrollTop = 0;
+        console.log(`[BUG DETECTOR] forceScrollToTop STEP 1 (rAF): ${getPos()}`);
     });
+
     setTimeout(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         if (document.documentElement) document.documentElement.scrollTop = 0;
         if (document.body) document.body.scrollTop = 0;
+        console.log(`[BUG DETECTOR] forceScrollToTop STEP 2 (50ms): ${getPos()}`);
     }, 50);
+
     setTimeout(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         if (document.documentElement) document.documentElement.scrollTop = 0;
         if (document.body) document.body.scrollTop = 0;
+        console.log(`[BUG DETECTOR] forceScrollToTop STEP 3 (150ms): ${getPos()}`);
+        
+        // Scan for elements taking up vertical space in DOM
+        const tallElements = [];
+        document.querySelectorAll('body *').forEach(el => {
+            const style = window.getComputedStyle(el);
+            if (style.display !== 'none' && style.visibility !== 'hidden') {
+                const rect = el.getBoundingClientRect();
+                if (rect.height > 200 && el.id !== 'appLayout' && el.id !== 'tab-vehicle') {
+                    tallElements.push(`${el.tagName}#${el.id || el.className} (h=${rect.height}px, top=${rect.top}px, pos=${style.position})`);
+                }
+            }
+        });
+        if (tallElements.length > 0) {
+            console.log(`[BUG DETECTOR] Visible tall elements in DOM (>200px):`, tallElements);
+        }
     }, 150);
 }
 
@@ -3814,6 +3838,14 @@ async function initializeApp() {
             }
         });
     }
+    
+    // [BUG DETECTOR] Scroll event tracker
+    window.addEventListener('scroll', (e) => {
+        const top = document.documentElement ? document.documentElement.scrollTop : window.scrollY;
+        if (top > 50) {
+            console.log(`[BUG DETECTOR] Scroll Event Detected! Target: ${e.target.tagName || 'window'}, scrollTop=${top}px`);
+        }
+    }, { passive: true });
     
     // Gemini AI Settings listeners
     const saveGeminiBtn = document.getElementById('saveGeminiKeyBtn');
@@ -5208,7 +5240,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.5.0)
+// NOTIFICATION SETTINGS CONTROLLER (v4.5.1)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
