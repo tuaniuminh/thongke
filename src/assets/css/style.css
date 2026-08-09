@@ -4650,3 +4650,14 @@ body.light-mode .logo-text.theme-settings {
     }
 }
 
+/* --- Vehicle Care Module Theme Colors --- */
+.theme-vehicle {
+    color: #f59e0b !important;
+}
+
+.home-card.card-vehicle:hover {
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.2) !important;
+}
+
+

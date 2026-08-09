@@ -2,17 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.138';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.138';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.138';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.138';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.0';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.0';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.0';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.0';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.138';
-import * as sync from './sync.js?v=4.3.138';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.138';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.138';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.0';
+import * as sync from './sync.js?v=4.4.0';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.0';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.0';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.0';
 
-const APP_VERSION = '4.3.138';
+const APP_VERSION = '4.4.0';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -83,6 +84,14 @@ let state = {
     showImportNotesOptionUpdated: '',
     showFamilyFundCard: false,
     showFamilyFundCardUpdated: '',
+    showVehicleCareCard: false,
+    showVehicleCareCardUpdated: '',
+    vehicles: [],
+    vehiclesUpdated: '',
+    vehicleServices: [],
+    vehicleServicesUpdated: '',
+    vehicleFuelLogs: [],
+    vehicleFuelLogsUpdated: '',
     showLoveWidget: true,
     showLoveWidgetUpdated: '',
     weLoveStartDate: '',
@@ -182,7 +191,7 @@ let customEventsEditMode = false;
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.22)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.0)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -809,6 +818,14 @@ async function saveLocalState() {
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
         showFamilyFundCard: !!state.showFamilyFundCard,
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
+        showVehicleCareCard: !!state.showVehicleCareCard,
+        showVehicleCareCardUpdated: state.showVehicleCareCardUpdated || '',
+        vehicles: state.vehicles || [],
+        vehiclesUpdated: state.vehiclesUpdated || '',
+        vehicleServices: state.vehicleServices || [],
+        vehicleServicesUpdated: state.vehicleServicesUpdated || '',
+        vehicleFuelLogs: state.vehicleFuelLogs || [],
+        vehicleFuelLogsUpdated: state.vehicleFuelLogsUpdated || '',
         showLoveWidget: state.showLoveWidget !== false,
         showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
         weLoveStartDate: state.weLoveStartDate || '',
@@ -922,6 +939,14 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = '';
         state.showFamilyFundCard = false;
         state.showFamilyFundCardUpdated = '';
+        state.showVehicleCareCard = false;
+        state.showVehicleCareCardUpdated = '';
+        state.vehicles = [];
+        state.vehiclesUpdated = '';
+        state.vehicleServices = [];
+        state.vehicleServicesUpdated = '';
+        state.vehicleFuelLogs = [];
+        state.vehicleFuelLogsUpdated = '';
         state.showLoveWidget = true;
         state.showLoveWidgetUpdated = '';
         state.weLoveStartDate = '';
@@ -1004,6 +1029,14 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
         state.showFamilyFundCard = !!data.showFamilyFundCard;
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
+        state.showVehicleCareCard = !!data.showVehicleCareCard;
+        state.showVehicleCareCardUpdated = data.showVehicleCareCardUpdated || '';
+        state.vehicles = data.vehicles || [];
+        state.vehiclesUpdated = data.vehiclesUpdated || '';
+        state.vehicleServices = data.vehicleServices || [];
+        state.vehicleServicesUpdated = data.vehicleServicesUpdated || '';
+        state.vehicleFuelLogs = data.vehicleFuelLogs || [];
+        state.vehicleFuelLogsUpdated = data.vehicleFuelLogsUpdated || '';
         state.showLoveWidget = data.showLoveWidget !== false;
         state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
         state.weLoveStartDate = data.weLoveStartDate || '';
@@ -1381,6 +1414,14 @@ async function performSync(silent = false) {
                     if (!isWifeViewingShared) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                        state.showVehicleCareCard = !!remoteData.showVehicleCareCard;
+                        state.showVehicleCareCardUpdated = remoteData.showVehicleCareCardUpdated || '';
+                        state.vehicles = remoteData.vehicles || [];
+                        state.vehiclesUpdated = remoteData.vehiclesUpdated || '';
+                        state.vehicleServices = remoteData.vehicleServices || [];
+                        state.vehicleServicesUpdated = remoteData.vehicleServicesUpdated || '';
+                        state.vehicleFuelLogs = remoteData.vehicleFuelLogs || [];
+                        state.vehicleFuelLogsUpdated = remoteData.vehicleFuelLogsUpdated || '';
                         state.showLoveWidget = remoteData.showLoveWidget !== false;
                         state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
                         state.weLoveStartDate = remoteData.weLoveStartDate || '';
@@ -1537,6 +1578,14 @@ async function performSync(silent = false) {
                     if (remoteFundCardTime > localFundCardTime) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
+                    }
+
+                    // Merge showVehicleCareCard using LWW
+                    const localVehicleCardTime = state.showVehicleCareCardUpdated ? new Date(state.showVehicleCareCardUpdated).getTime() : 0;
+                    const remoteVehicleCardTime = remoteData.showVehicleCareCardUpdated ? new Date(remoteData.showVehicleCareCardUpdated).getTime() : 0;
+                    if (remoteVehicleCardTime > localVehicleCardTime) {
+                        state.showVehicleCareCard = !!remoteData.showVehicleCareCard;
+                        state.showVehicleCareCardUpdated = remoteData.showVehicleCareCardUpdated || '';
                     }
 
                     // Merge showLoveWidget using LWW (Last Write Wins)
@@ -1874,6 +1923,14 @@ async function performSync(silent = false) {
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
             showFamilyFundCard: !!state.showFamilyFundCard,
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
+            showVehicleCareCard: !!state.showVehicleCareCard,
+            showVehicleCareCardUpdated: state.showVehicleCareCardUpdated || '',
+            vehicles: state.vehicles || [],
+            vehiclesUpdated: state.vehiclesUpdated || '',
+            vehicleServices: state.vehicleServices || [],
+            vehicleServicesUpdated: state.vehicleServicesUpdated || '',
+            vehicleFuelLogs: state.vehicleFuelLogs || [],
+            vehicleFuelLogsUpdated: state.vehicleFuelLogsUpdated || '',
             showLoveWidget: state.showLoveWidget !== false,
             showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
             weLoveStartDate: state.weLoveStartDate || '',
@@ -2759,6 +2816,8 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
             title.className = 'theme-fund';
         } else if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) {
             title.className = 'theme-welove';
+        } else if (tabId === 'vehicle') {
+            title.className = 'theme-vehicle';
         } else if (tabId === 'settings') {
             title.className = 'theme-settings';
         }
@@ -2823,6 +2882,10 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = 'Quản lý';
         subtitle.innerText = 'Tùy chỉnh chức năng, quản lý sự kiện và xuất nhập dữ liệu';
         renderTcManagement();
+    } else if (tabId === 'vehicle') {
+        title.innerText = 'Chăm sóc xe';
+        subtitle.innerText = 'Theo dõi lịch bảo dưỡng, nhắc nhở thay dầu và chẩn đoán AI';
+        renderVehicleDashboard();
     }
     
     if (updateHash) {
@@ -3871,6 +3934,22 @@ async function initializeApp() {
         });
     }
 
+    const toggleShowVehicleCareCard = document.getElementById('toggleShowVehicleCareCard');
+    if (toggleShowVehicleCareCard) {
+        toggleShowVehicleCareCard.addEventListener('change', async (e) => {
+            state.showVehicleCareCard = e.target.checked;
+            state.showVehicleCareCardUpdated = new Date().toISOString();
+            await saveLocalState();
+            if (typeof updateHomeLayoutUI === 'function') {
+                updateHomeLayoutUI();
+            }
+            
+            if (sync.isConfigured() && await sync.getCurrentUser()) {
+                performSync(true);
+            }
+        });
+    }
+
     const toggleDebugConsole = document.getElementById('toggleDebugConsole');
     if (toggleDebugConsole) {
         toggleDebugConsole.addEventListener('change', (e) => {
@@ -3988,6 +4067,9 @@ async function initializeApp() {
 
     // Initialize Fund Bindings
     initFundBindings();
+
+    // Initialize Vehicle Care Bindings
+    initVehicleBindings();
 
     // Initialize Lucide Icons
     if (window.lucide) window.lucide.createIcons();
@@ -4542,6 +4624,10 @@ async function handleFullBackup() {
             geminiApiKey: state.geminiApiKey,
             showImportNotesOption: state.showImportNotesOption,
             showFamilyFundCard: state.showFamilyFundCard,
+            showVehicleCareCard: state.showVehicleCareCard,
+            vehicles: state.vehicles,
+            vehicleServices: state.vehicleServices,
+            vehicleFuelLogs: state.vehicleFuelLogs,
             mobileViewMode: state.mobileViewMode,
             selectedHealthProfileId: state.selectedHealthProfileId,
             activeChartFundIds: state.activeChartFundIds,
@@ -4667,6 +4753,10 @@ async function handleFullRestore(file) {
         if (data.geminiApiKey) state.geminiApiKey = data.geminiApiKey;
         if (data.showImportNotesOption !== undefined) state.showImportNotesOption = data.showImportNotesOption;
         if (data.showFamilyFundCard !== undefined) state.showFamilyFundCard = data.showFamilyFundCard;
+        if (data.showVehicleCareCard !== undefined) state.showVehicleCareCard = data.showVehicleCareCard;
+        if (data.vehicles) state.vehicles = data.vehicles;
+        if (data.vehicleServices) state.vehicleServices = data.vehicleServices;
+        if (data.vehicleFuelLogs) state.vehicleFuelLogs = data.vehicleFuelLogs;
         if (data.mobileViewMode) state.mobileViewMode = data.mobileViewMode;
         if (data.selectedHealthProfileId) state.selectedHealthProfileId = data.selectedHealthProfileId;
         if (data.activeChartFundIds) state.activeChartFundIds = data.activeChartFundIds;
@@ -4794,6 +4884,11 @@ const CARD_NAV_REGISTRY = {
         logoThemeClass: 'theme-fund',
         allowedNavs: ['home', 'fund', 'fund-history', 'fund-management', 'settings']
     },
+    'vehicle': {
+        logoText: 'Chăm Sóc Xe',
+        logoThemeClass: 'theme-vehicle',
+        allowedNavs: ['home', 'vehicle', 'settings']
+    },
     'settings': {
         logoText: 'Cài Đặt',
         logoThemeClass: 'theme-settings',
@@ -4805,6 +4900,7 @@ function getCardKeyForTab(tabId) {
     if (['health', 'health-reminders'].includes(tabId)) return 'health';
     if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) return 'welove';
     if (['fund', 'fund-history', 'fund-management'].includes(tabId)) return 'fund';
+    if (tabId === 'vehicle') return 'vehicle';
     if (tabId === 'settings') return 'settings';
     if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) return 'thuchi';
     return 'default';
@@ -5020,6 +5116,29 @@ function updateMobileNavbar(tabId) {
                 </div>
             `;
         }
+    } else if (tabId === 'vehicle') {
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
+                <div class="mobile-navbar-logo">
+                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                </div>
+                <span class="mobile-navbar-title theme-vehicle" id="mobileNavbarTitle">Chăm Sóc Xe</span>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+        `;
     } else {
         mobileNavbar.classList.add('two-line');
         
@@ -5063,7 +5182,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.3.24)
+// NOTIFICATION SETTINGS CONTROLLER (v4.4.0)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
@@ -5277,6 +5396,14 @@ export async function clearAllStateData() {
     state.showImportNotesOptionUpdated = '';
     state.showFamilyFundCard = false;
     state.showFamilyFundCardUpdated = '';
+    state.showVehicleCareCard = false;
+    state.showVehicleCareCardUpdated = '';
+    state.vehicles = [];
+    state.vehiclesUpdated = '';
+    state.vehicleServices = [];
+    state.vehicleServicesUpdated = '';
+    state.vehicleFuelLogs = [];
+    state.vehicleFuelLogsUpdated = '';
     state.showLoveWidget = true;
     state.showLoveWidgetUpdated = '';
     state.weLoveStartDate = '';
