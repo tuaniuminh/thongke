@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.8';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.8';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.8';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.8';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.4.9';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.4.9';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.4.9';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.4.9';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.8';
-import * as sync from './sync.js?v=4.4.8';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.8';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.8';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.8';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.4.9';
+import * as sync from './sync.js?v=4.4.9';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.4.9';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.4.9';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.4.9';
 
-const APP_VERSION = '4.4.8';
+const APP_VERSION = '4.4.9';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -191,7 +191,7 @@ let customEventsEditMode = false;
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.8)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.4.9)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -2719,9 +2719,35 @@ function handleHashRoute() {
     }
 }
 
+function forceScrollToTop() {
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+    });
+    setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+    }, 50);
+    setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+    }, 150);
+}
+
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
     console.log(`[BUG DETECTOR] switchTab START target: ${tabId}, current activeTab: ${state.activeTab}, updateHash: ${updateHash}`);
+    forceScrollToTop();
+    
     // Tự động đóng Lightbox nếu đang mở và mở khóa cuộn nền khi chuyển tab
     if (typeof window.closeWeLoveLightbox === 'function') {
         window.closeWeLoveLightbox();
@@ -2747,14 +2773,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     if (state.activeTab === tabId && !isAppLayoutHidden && tabId !== 'home' && tabId !== 'trangchu') {
         console.log(`[BUG DETECTOR] switchTab ALREADY ACTIVE & VISIBLE (${tabId}). Ensuring navbar visibility and scroll reset.`);
         updateSidebarNavVisibility(tabId);
-        window.scrollTo(0, 0);
-        if (document.documentElement) document.documentElement.scrollTop = 0;
-        if (document.body) document.body.scrollTop = 0;
-        setTimeout(() => {
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-            if (document.documentElement) document.documentElement.scrollTop = 0;
-            if (document.body) document.body.scrollTop = 0;
-        }, 50);
+        forceScrollToTop();
         return; // Guard against sluggish double rendering / loops
     }
     
@@ -2806,14 +2825,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     }
     
     updateHomeLayoutUI();
-    window.scrollTo(0, 0);
-    if (document.documentElement) document.documentElement.scrollTop = 0;
-    if (document.body) document.body.scrollTop = 0;
-    setTimeout(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        if (document.documentElement) document.documentElement.scrollTop = 0;
-        if (document.body) document.body.scrollTop = 0;
-    }, 50);
+    forceScrollToTop();
     
     // Toggle sticky class on sidebar for desktop when in health tab
     const sidebar = document.querySelector('.sidebar');
@@ -3377,6 +3389,10 @@ function handleUnlockClear() {
 async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
+
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
 
     // Load lowPerfMode state and disable animations if active
     state.lowPerfMode = localStorage.getItem('fami_low_perf_mode') === 'true';
@@ -5191,7 +5207,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.4.8)
+// NOTIFICATION SETTINGS CONTROLLER (v4.4.9)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
