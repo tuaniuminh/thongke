@@ -8,7 +8,7 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.5.5** |
+| **Phiên bản hiện tại** | **v4.5.6** |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -17,6 +17,7 @@
 
 | Version | Chi tiết thay đổi |
 |---------|-------------------|
+| **v4.5.6** | ✅ **Di Chuyển Thẻ Neo Định Vị Lên Đầu Trang & Triệt Tiêu Lỗi Tự Cuộn 386px Của Browser Native Engine (v4.5.6)**: (1) Phát hiện nguyên nhân tận gốc làm trình duyệt tự cuộn `window.scrollTop` xuống `386.4px` (đẩy tiêu đề `top-header` lên `-282px`) là do thẻ neo `<a id="chamsocxe">` nằm bên dưới `content-header` khiến cơ chế hash router native của trình duyệt tự nhảy cuộn tới vị trí mốc anchor này. Di chuyển 2 thẻ neo `<a id="chamsocxe">` và `<a id="vehicle">` lên vị trí `top: 0` của `<main class="main-content">` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html). (2) Bổ sung `style="display: none;"` cho `tab-dashboard` và gỡ bỏ `content-header` bị lặp lại trong `tab-vehicle`. Đưa màn hình tab Chăm Sóc Xe về vị trí `0px` chuẩn 100%. Nâng phiên bản toàn hệ thống sang `?v=4.5.6`. |
 | **v4.5.5** | ✅ **Nâng Cấp Log Chẩn Đoán Cây Con main-content & Chuẩn Hóa Class Active Tab-Panel (v4.5.5)**: (1) Thêm tính năng in chi tiết thông số `display`, `top`, `height` của từng phần tử con trực thuộc `main-content` trong `runLayoutDiagnostics()` thuộc [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js). (2) Bổ sung tự động thêm/gỡ class `.active` chuẩn cho các `tab-panel` khi chuyển tab trong `switchTab`. Nâng phiên bản toàn hệ thống sang `?v=4.5.5`. |
 | **v4.5.4** | ✅ **Sửa Nút Con Bọ Luôn Hiển Thị & Bật Mở Bảng Debug Log Tức Thì (v4.5.4)**: (1) Sửa thuộc tính `style="display: flex !important;"` cho nút `debugConsoleToggleBtn` và quy tắc CSS `.debug-console-toggle-btn` trong [`src/assets/css/style.css`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/assets/css/style.css) giúp nút con bọ màu hồng nổi bật 100% ở góc dưới bên trái màn hình. (2) Sửa hàm chuyển đổi `panel.style.display` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) trực tiếp đổi giữa `'flex'` và `'none'` khi nhấp nút con bọ hoặc nút đóng, giúp mở bảng log debug tức thì. Nâng phiên bản toàn hệ thống sang `?v=4.5.4`. |
 | **v4.5.3** | ✅ **Sửa Triệt Để Thuộc Tính Ẩn 10 Modal-Overlay & Chuẩn Hóa min-height cho main-content (v4.5.3)**: (1) Khắc phục tận gốc nguyên nhân 10 tệp modal overlay (`fundContributionModal`, `receivedModal`, `sentModal`, `quickAddModal`, v.v.) bị thiếu thuộc tính `style="display: none;"` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html) và thiếu quy tắc CSS `.modal-overlay { display: none; position: fixed; }` trong [`src/assets/css/style.css`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/assets/css/style.css) làm xếp ngầm ở dạng `position: static` làm phình chiều cao body lên `1166px`. (2) Đổi `min-height: 100vh;` của `.main-content` thành `min-height: calc(100vh - 72px);` trừ đúng 72px chiều cao sidebar top. Đưa `html.scrollHeight` về vừa khít `740px` (triệt tiêu vĩnh viễn 100% dung lượng cuộn thừa). Nâng phiên bản toàn hệ thống sang `?v=4.5.3`. |

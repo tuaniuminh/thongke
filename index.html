@@ -2,7 +2,7 @@
 <html lang="vi" class="light-mode">
 <head>
     <meta charset="UTF-8">
-    <!-- Content Security Policy (CVE-8 Fix v4.5.5) -->
+    <!-- Content Security Policy (CVE-8 Fix v4.5.6) -->
     <!-- script-src: 'unsafe-inline' cần thiết vì app dùng nhiều inline <script>.
          Bảo vệ chính đến từ: connect-src (chặn exfiltration), object-src 'none' (chặn plugin exploit) -->
     <meta http-equiv="Content-Security-Policy" content="
@@ -71,14 +71,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.5.5">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.5.6">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.5.5">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.5.5">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.5.5">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.5.5">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.5.6">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.5.6">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.5.6">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.5.6">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -346,7 +346,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.5.5" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.5.6" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -463,12 +463,14 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" style="position: relative;">
+            <a id="chamsocxe" style="position: absolute; top: 0; left: 0; width: 0; height: 0; opacity: 0; pointer-events: none;"></a>
+            <a id="vehicle" style="position: absolute; top: 0; left: 0; width: 0; height: 0; opacity: 0; pointer-events: none;"></a>
             <!-- Mobile Top Navbar -->
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.5.5" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.5.6" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -504,7 +506,7 @@
             </header>
 
             <!-- Dashboard Tab -->
-            <section class="tab-panel active" id="tab-dashboard">
+            <section class="tab-panel active" id="tab-dashboard" style="display: none;">
                 <!-- Sync Status Dashboard Banner -->
                 <div class="sync-banner" id="dashboardSyncBanner" style="display: none;"></div>
                 
@@ -1864,25 +1866,6 @@
             <!-- CARD FEATURE: CHĂM SÓC XE (VEHICLE CARE) -->
             <!-- ============================================================ -->
             <section class="tab-panel" id="tab-vehicle" style="display: none; position: relative;">
-                <a id="chamsocxe" style="position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none;"></a>
-                <a id="vehicle" style="position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none;"></a>
-                <div class="content-header" style="margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                        <div>
-                            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="wrench"></i> Chăm Sóc & Bảo Dưỡng Xe Máy
-                            </h2>
-                            <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.88rem;">
-                                Nhật ký bảo dưỡng, nhắc nhở thay dầu máy, theo dõi tiêu thụ nhiên liệu và chẩn đoán hư hỏng AI
-                            </p>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn btn-primary" id="btnAddVehicle" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white;">
-                                <i data-lucide="plus-circle"></i> Thêm xe mới
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Empty state when no vehicles exist -->
                 <div class="card-panel" id="vehicleEmptyNotice" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: 16px;">
@@ -2298,7 +2281,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.5.5" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.5.6" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2407,11 +2390,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.5.5';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.5.6';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.5.5';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.5.6';
                         }
                     })();
                 </script>
@@ -3916,16 +3899,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.5.5"></script>
-    <script type="module" src="src/core/app.js?v=4.5.5"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.5.5"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.5.5"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.5.6"></script>
+    <script type="module" src="src/core/app.js?v=4.5.6"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.5.6"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.5.6"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.5.5')
+                navigator.serviceWorker.register('./sw.js?v=4.5.6')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
