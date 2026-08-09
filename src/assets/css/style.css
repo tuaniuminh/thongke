@@ -896,10 +896,6 @@ body.light-mode .data-table tbody tr:hover {
     display: flex;
 }
 
-body.modal-open {
-    overflow: hidden !important;
-}
-
 .modal-container {
     position: relative;
     background: var(--bg-secondary);

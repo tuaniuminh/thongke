@@ -1,7 +1,7 @@
 // src/features/cham-soc-xe/cham-soc-xe.js - Vehicle Care & Motorcycle Maintenance Module
 import { 
     state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, formatVND, generateId, getLocalDateString
-} from '../../core/app.js?v=4.4.7';
+} from '../../core/app.js?v=4.4.5';
 
 // Current subview state
 let currentVehicleSubView = 'overview'; // 'overview' | 'services' | 'fuel' | 'matrix' | 'ai-doctor'
@@ -518,7 +518,6 @@ function openVehicleFormModal(vehicle = null) {
     document.getElementById('vLastEngineOilOdoInput').value = vehicle ? vehicle.lastEngineOilOdo || 0 : 0;
     document.getElementById('vLastGearOilOdoInput').value = vehicle ? vehicle.lastGearOilOdo || 0 : 0;
 
-    modal.classList.add('active');
     modal.style.display = 'flex';
 }
 
@@ -566,7 +565,7 @@ function handleVehicleSubmit(e) {
     saveLocalState();
     performSync();
 
-    window.closeModal('vehicleFormModal');
+    document.getElementById('vehicleFormModal').style.display = 'none';
     showToast('✅ Đã lưu thông tin xe thành công!');
     renderVehicleDashboard();
 }
@@ -611,7 +610,6 @@ function openServiceFormModal(service = null) {
         cb.checked = selectedItems.includes(cb.value);
     });
 
-    modal.classList.add('active');
     modal.style.display = 'flex';
 }
 
@@ -673,7 +671,7 @@ function handleServiceSubmit(e) {
     saveLocalState();
     performSync();
 
-    window.closeModal('vehicleServiceModal');
+    document.getElementById('vehicleServiceModal').style.display = 'none';
     showToast('✅ Đã lưu nhật ký bảo dưỡng thành công!');
     renderVehicleDashboard();
 }
@@ -694,7 +692,6 @@ function openFuelFormModal() {
     document.getElementById('fCostInput').value = '';
     document.getElementById('fFullTankCheck').checked = true;
 
-    modal.classList.add('active');
     modal.style.display = 'flex';
 }
 
@@ -731,7 +728,7 @@ function handleFuelSubmit(e) {
     saveLocalState();
     performSync();
 
-    window.closeModal('vehicleFuelModal');
+    document.getElementById('vehicleFuelModal').style.display = 'none';
     showToast('⛽ Đã ghi nhận lịch sử đổ xăng!');
     renderVehicleDashboard();
 }

@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.4.7';
-import * as sync from '../../core/sync.js?v=4.4.7';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.7';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.7';
+} from '../../core/app.js?v=4.4.5';
+import * as sync from '../../core/sync.js?v=4.4.5';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.5';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.5';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1943,23 +1943,10 @@ function updateSentTypeCustomVisibility() {
 }
 
 window.closeModal = function(modalId) {
-    const el = document.getElementById(modalId);
-    if (el) {
-        el.classList.remove('active');
-        el.style.display = 'none';
-    }
+    document.getElementById(modalId).classList.remove('active');
 };
 
 function setupModalListeners() {
-    // Backdrop click to close modals
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay && overlay.id && overlay.id !== 'customDialogModal' && overlay.id !== 'healthScannerLoadingOverlay') {
-                window.closeModal(overlay.id);
-            }
-        });
-    });
-
     // Quick add buttons
     document.querySelectorAll('.btn-quick-add, #quickAddBtn').forEach(btn => {
         btn.addEventListener('click', () => {
