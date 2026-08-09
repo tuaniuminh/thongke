@@ -3,7 +3,7 @@
 //             Cache-first cho ảnh và CDN static libraries (Supabase, Chart.js, Lucide...) để tải cực nhanh & offline
 //             Bỏ qua hoàn toàn các API calls động bên ngoài (Supabase API, Gemini API, Weather API)
 
-const SW_VERSION = new URL(location).searchParams.get('v') || 'v4.5.7';
+const SW_VERSION = new URL(location).searchParams.get('v') || 'v4.5.8';
 const CACHE_NAME = 'familife-cache-' + (SW_VERSION.startsWith('v') ? SW_VERSION : 'v' + SW_VERSION);
 
 // App shell — danh sách tài nguyên cần cache ngay khi install
