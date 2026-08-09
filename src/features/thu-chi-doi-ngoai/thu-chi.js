@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.4.3';
-import * as sync from '../../core/sync.js?v=4.4.3';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.3';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.3';
+} from '../../core/app.js?v=4.4.4';
+import * as sync from '../../core/sync.js?v=4.4.4';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.4.4';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.4.4';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1943,13 +1943,15 @@ window.closeModal = function(modalId) {
 };
 
 function setupModalListeners() {
-    // Quick add button
-    document.getElementById('quickAddBtn').addEventListener('click', () => {
-        if (!state.user) {
-            showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
-            return;
-        }
-        document.getElementById('quickAddModal').classList.add('active');
+    // Quick add buttons
+    document.querySelectorAll('.btn-quick-add, #quickAddBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!state.user) {
+                showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+                return;
+            }
+            document.getElementById('quickAddModal').classList.add('active');
+        });
     });
     
     document.getElementById('chooseAddReceivedBtn').addEventListener('click', () => {

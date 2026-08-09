@@ -8,7 +8,7 @@
 | Mục | Chi tiết |
 |-----|----------|
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
-| **Phiên bản hiện tại** | **v4.4.3** |
+| **Phiên bản hiện tại** | **v4.4.4** |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
 | **Ngôn ngữ** | HTML + Vanilla JS + CSS (không dùng framework) |
@@ -17,11 +17,11 @@
 
 | Version | Chi tiết thay đổi |
 |---------|-------------------|
+| **v4.4.4** | ✅ **Di Chuyển Nút "Thêm Ghi Chép" Về Đúng Nội Bộ Module Thu Chi Đối Ngoại (v4.4.4)**: Loại bỏ hoàn toàn nút `quickAddBtn` khỏi thanh Header chung `.top-header` trong [`index.html`](file:///c:/Users/PC VIP/Documents/Thong-ke/index.html), di chuyển nút về trực tiếp các bảng công cụ của 3 tab Thu chi (`dashboard`, `received`, `sent`). Xóa triệt để toàn bộ đoạn mã ẩn/hiện nút này khỏi hàm `switchTab` trong [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js). Giúp thanh Header chung sạch 100% và đạt chuẩn kiến trúc biệt lập độc lập hoàn toàn giữa các card. Nâng phiên bản toàn hệ thống sang `?v=4.4.4`. |
 | **v4.4.3** | ✅ **Tái Cấu Trúc Khung Điều Hướng Shell: Chuyển quickAddBtn Sang Chuẩn Whitelist (v4.4.3)**: Thay thế điều kiện ẩn thủ công từng card bằng Whitelist `['dashboard', 'received', 'sent'].includes(tabId)` tại `switchTab` trong [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js). Đảm bảo tất cả các card hiện tại và card tương lai không bao giờ bị ảnh hưởng bởi nút Thêm ghi chép của Thu Chi. Nâng phiên bản toàn hệ thống sang `?v=4.4.3`. |
 | **v4.4.2** | ✅ **Fix Lỗi Nút "Thêm Ghi Chép" Xuất Hiện Sai Trong Tab Chăm Sóc Xe (v4.4.2)**: Bổ sung `|| tabId === 'vehicle'` vào điều kiện ẩn `quickAddBtn` tại `switchTab` trong [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js). Bổ sung ép kiểu số an toàn cho `v.currentOdo` chống lỗi TypeError dừng script khi render. Nâng phiên bản toàn hệ thống sang `?v=4.4.2`. |
 | **v4.4.1** | ✅ **Sửa Triệt Để Lỗi Hash Routing `#chamsocxe` Bị Văng Về `#trangchu` (v4.4.1)**: Đăng ký đầy đủ `chamsocxe` và `vehicle` vào `tabHashMapping`, `tabIdToHash` và `getTabGroup` thuộc [`src/core/app.js`](file:///c:/Users/PC VIP/Documents/Thong-ke/src/core/app.js). Giải quyết tận gốc hiện tượng nhấp thẻ card Chăm sóc xe trên trang chủ bị văng lặp lại trang chủ. Nâng phiên bản toàn hệ thống sang `?v=4.4.1`. |
 | **v4.4.0** | ✅ **Bổ Sung Card Chức Năng Mới "Chăm Sóc Xe" (v4.4.0)**: Thêm phân hệ theo dõi bảo dưỡng xe máy chuyên nghiệp với cơ chế bật/tắt trong Cài đặt (mặc định TẮT). Tính năng gồm: Quản lý thông tin xe, Nhắc nhở thay dầu máy & dầu láp thông minh theo mốc km, Nhật ký sửa chữa & thay phụ tùng, Ma trận bảo dưỡng định kỳ khuyên dùng, Nhật ký đổ xăng & tiêu thụ nhiên liệu (L/100km), cùng Trợ lý Gemini AI chẩn đoán hư hỏng xe. Nâng phiên bản toàn hệ thống sang `?v=4.4.0`. |
-| **v4.3.138** | ✅ **Xóa Ký Tự Rác `?` Dư Thừa Ở Góc Trái Trên Cùng Giao Diện (v4.3.138)**: Loại bỏ ký tự `?` xuất hiện do byte BOM sót lại ở đầu dòng 1 thuộc `index.html` và `sw.js`. Nâng phiên bản toàn hệ thống sang `?v=4.3.138`. |
 
 ---
 
