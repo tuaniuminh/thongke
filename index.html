@@ -2,7 +2,7 @@
 <html lang="vi" class="light-mode">
 <head>
     <meta charset="UTF-8">
-    <!-- Content Security Policy (CVE-8 Fix v4.5.2) -->
+    <!-- Content Security Policy (CVE-8 Fix v4.5.3) -->
     <!-- script-src: 'unsafe-inline' cần thiết vì app dùng nhiều inline <script>.
          Bảo vệ chính đến từ: connect-src (chặn exfiltration), object-src 'none' (chặn plugin exploit) -->
     <meta http-equiv="Content-Security-Policy" content="
@@ -71,14 +71,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.5.2">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.5.3">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.5.2">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.5.2">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.5.2">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.5.2">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.5.3">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.5.3">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.5.3">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.5.3">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -352,7 +352,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.5.2" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.5.3" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -474,7 +474,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.5.2" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.5.3" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1551,7 +1551,7 @@
             </section>
 
             <!-- 1. Modal: Đóng góp lương -->
-            <div class="modal-overlay health-theme-overlay" id="fundContributionModal">
+            <div class="modal-overlay health-theme-overlay" id="fundContributionModal" style="display: none;">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="health-modal-title">
@@ -1595,7 +1595,7 @@
             </div>
 
             <!-- 2. Modal: Trích chuyển quỹ -->
-            <div class="modal-overlay health-theme-overlay" id="fundTransferModal">
+            <div class="modal-overlay health-theme-overlay" id="fundTransferModal" style="display: none;">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1640,7 +1640,7 @@
             </div>
 
             <!-- 3. Modal: Ghi nhận chi tiêu -->
-            <div class="modal-overlay health-theme-overlay" id="fundSpendingModal">
+            <div class="modal-overlay health-theme-overlay" id="fundSpendingModal" style="display: none;">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1717,7 +1717,7 @@
             </div>
 
             <!-- Modal: Báo cáo tháng -->
-            <div class="modal-overlay health-theme-overlay" id="fundMonthlyReportModal">
+            <div class="modal-overlay health-theme-overlay" id="fundMonthlyReportModal" style="display: none;">
                 <div class="modal-container health-modal-container" style="width: 650px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1770,7 +1770,7 @@
             </div>
 
             <!-- 4. Modal: Chốt đầu tư lãi/lỗ -->
-            <div class="modal-overlay health-theme-overlay" id="fundInvestModal">
+            <div class="modal-overlay health-theme-overlay" id="fundInvestModal" style="display: none;">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1818,7 +1818,7 @@
             </div>
 
             <!-- 5. Modal: Chỉnh sửa quỹ -->
-            <div class="modal-overlay health-theme-overlay" id="fundEditModal">
+            <div class="modal-overlay health-theme-overlay" id="fundEditModal" style="display: none;">
                 <div class="modal-container health-modal-container" style="width: 420px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -2304,7 +2304,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.5.2" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.5.3" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2413,11 +2413,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.5.2';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.5.3';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.5.2';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.5.3';
                         }
                     })();
                 </script>
@@ -2616,7 +2616,7 @@
 
 
     <!-- Add/Edit Received Gift Modal -->
-    <div class="modal-overlay" id="receivedModal">
+    <div class="modal-overlay" id="receivedModal" style="display: none;">
         <div class="modal-container">
             <div class="modal-header">
                 <h2 id="receivedModalTitle">Thêm khoản tiền tôi nhận</h2>
@@ -2723,7 +2723,7 @@
     </div>
 
     <!-- Add/Edit Sent Gift Modal -->
-    <div class="modal-overlay" id="sentModal">
+    <div class="modal-overlay" id="sentModal" style="display: none;">
         <div class="modal-container">
             <div class="modal-header">
                 <h2 id="sentModalTitle">Thêm khoản tiền tôi mừng</h2>
@@ -2819,7 +2819,7 @@
     </div>
 
     <!-- Quick Add Chooser Modal -->
-    <div class="modal-overlay" id="quickAddModal">
+    <div class="modal-overlay" id="quickAddModal" style="display: none;">
         <div class="modal-container" style="width: 360px;">
             <div class="modal-header">
                 <h2>Thêm ghi chép mới</h2>
@@ -2843,7 +2843,7 @@
     </div>
 
     <!-- Quick Import from Notes Modal -->
-    <div class="modal-overlay" id="importNotesModal">
+    <div class="modal-overlay" id="importNotesModal" style="display: none;">
         <div class="modal-container" style="width: 600px; max-width: 95%;">
             <div class="modal-header">
                 <h2>Nhập nhanh từ Ghi chú (v2.7.2)</h2>
@@ -3922,16 +3922,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.5.2"></script>
-    <script type="module" src="src/core/app.js?v=4.5.2"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.5.2"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.5.2"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.5.3"></script>
+    <script type="module" src="src/core/app.js?v=4.5.3"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.5.3"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.5.3"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.5.2')
+                navigator.serviceWorker.register('./sw.js?v=4.5.3')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
