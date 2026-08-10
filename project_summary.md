@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.141** |
+| **Phiên bản hiện tại** | **v4.3.142** |
+| **v4.3.142** | ✅ **Căn Chỉnh Dọc Theo Dòng Đầu Tiên (First Baseline) Cho Tiêu Đề Cặp Đôi (v4.3.142)**: Đổi `align-items` từ `center` sang `first baseline` trong `.couple-names-header` để dòng đầu tiên của hai tên và trái tim ở giữa luôn thẳng hàng tắp, dòng thứ hai rủ xuống dưới cân đối và tự nhiên ở mục We Love. Nâng phiên bản toàn hệ thống sang `?v=4.3.142`. |
 | **v4.3.141** | ✅ **Khôi Phục Cỡ Chữ Lớn & Áp Dụng Căn Giữa Cho Tên Cặp Đôi Trên Mobile (v4.3.141)**: Trả kích thước chữ của tên cặp đôi về `1.3rem` và trái tim đỏ về `2.2rem` như cũ trên mobile, đồng thời đặt căn lề giữa (`text-align: center;`) để chữ xuống dòng trông cân đối, hài hòa và tự nhiên ở mục We Love. Nâng phiên bản toàn hệ thống sang `?v=4.3.141`. |
 | **v4.3.140** | ✅ **Tinh Chỉnh Cỡ Chữ & Trái Tim Trên Mobile Nhằm Đạt Độ Đối Xứng Hoàn Hảo (v4.3.140)**: Giảm nhẹ font-size của tên cặp đôi xuống `1.15rem` và trái tim xuống `1.8rem` trên di động để đảm bảo tên 3 chữ (như "Nguyễn Linh Tuấn") không bao giờ bị ngắt dòng, giúp toàn bộ tiêu đề luôn đối xứng tuyệt đối qua tâm màn hình ở mục We Love. Nâng phiên bản toàn hệ thống sang `?v=4.3.140`. |
 | **v4.3.139** | ✅ **Tối Ưu Hiển Thị Tên Cặp Đôi Trên Mobile & Bump Version (v4.3.139)**: Thiết lập cấu trúc Flexbox đối xứng, căn phải tên bên trái và căn trái tên bên phải, đồng thời giảm kích thước font chữ và gap trên di động để tránh ngắt dòng thô kệch và lệch lạc khi tên có đầy đủ 3 chữ ở mục We Love. Nâng phiên bản toàn hệ thống sang `?v=4.3.139`. |
 | **v4.3.138** | ✅ **Xóa Ký Tự Rác `?` Dư Thừa Ở Góc Trái Trên Cùng Giao Diện (v4.3.138)**: Loại bỏ ký tự `?` xuất hiện do byte BOM sót lại ở đầu dòng 1 thuộc `index.html` và `sw.js`. Nâng phiên bản toàn hệ thống sang `?v=4.3.138`. |
-| **v4.3.137** | ✅ **Khắc Phục Triệt Để Lỗi Hiển Thị Font Chữ Tiếng Việt (Mojibake Encoding) (v4.3.137)**: Khôi phục toàn bộ văn bản tiếng Việt bị biến dạng ký tự trong `index.html` và `sw.js` do đọc sai bảng mã mã hóa. Loại bỏ UTF-8 BOM khỏi toàn bộ các file JS module (`app.js`, `quy-gia-dinh.js`, `we-love.js`...) đảm bảo chuẩn nạp mã nguồn web sạch. Nâng phiên bản toàn hệ thống sang `?v=4.3.137`. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |

@@ -71,14 +71,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.141">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.142">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.141">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.141">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.141">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.141">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.142">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.142">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.142">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.142">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -3510,16 +3510,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.141"></script>
-    <script type="module" src="src/core/app.js?v=4.3.141"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.141"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.141"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.142"></script>
+    <script type="module" src="src/core/app.js?v=4.3.142"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.142"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.142"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.141')
+                navigator.serviceWorker.register('./sw.js?v=4.3.142')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

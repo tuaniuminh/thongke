@@ -1311,7 +1311,7 @@ body.dark-mode .home-love-left-widget {
 .couple-names-header {
   perspective: 1000px;
   display: flex;
-  align-items: center;
+  align-items: first baseline;
   justify-content: center;
   gap: 14px;
   margin-bottom: 1.5rem;
