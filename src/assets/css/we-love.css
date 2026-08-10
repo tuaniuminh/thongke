@@ -1657,11 +1657,11 @@ body:not(.light-mode) .memory-page.layout-modern .welove-card:hover {
   font-size: 7rem !important;
   font-weight: 900 !important;
   line-height: 1 !important;
-  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #64748b 100%) !important;
+  background: linear-gradient(135deg, #e11d48 0%, #ec4899 50%, #f472b6 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  filter: drop-shadow(0 2px 8px rgba(30, 41, 59, 0.15)) !important;
+  filter: drop-shadow(0 4px 15px rgba(236, 72, 153, 0.35)) !important;
   letter-spacing: -0.04em !important;
   margin-bottom: 0.5rem !important;
 }
@@ -1720,7 +1720,7 @@ body:not(.light-mode) .memory-page.layout-modern .quote-container {
 }
 
 .memory-page.layout-modern .quote-vietnamese {
-  font-family: "Georgia", "Times New Roman", serif !important; /* Chuyển sang Georgia nghiêng để khắc phục lỗi vỡ dấu tiếng Việt của Great Vibes */
+  font-family: "Lora", "Georgia", "Times New Roman", serif !important; /* Dùng Lora kết hợp Georgia để hiển thị chữ Việt có dấu đẹp nhất và không lỗi dấu */
   font-size: 1.25rem !important;
   font-style: italic !important;
   font-weight: 500 !important;

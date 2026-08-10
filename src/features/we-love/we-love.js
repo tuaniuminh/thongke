@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.151';
-import * as sync from '../../core/sync.js?v=4.3.151';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.151';
+} from '../../core/app.js?v=4.3.152';
+import * as sync from '../../core/sync.js?v=4.3.152';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.152';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -19,7 +19,7 @@ const LOVE_QUOTES = [
     vi: "Gặp được em là điều may mắn lớn nhất cuộc đời anh."
   },
   {
-    cn: "只要有nước陪伴，每天 đều là晴天。",
+    cn: "只要有你陪伴，每天都是晴天。",
     vi: "Chỉ cần có em bên cạnh, ngày nào cũng là ngày nắng ấm."
   },
   {
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.151');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.152');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.151';
+        const logoPath = './logo_pwa_small.png?v=4.3.152';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -399,7 +399,7 @@ function nextLoveQuote() {
         const cnEl = wrapper.querySelector('.quote-chinese');
         const viEl = wrapper.querySelector('.quote-vietnamese');
         if (cnEl) cnEl.innerText = LOVE_QUOTES[currentQuoteIdx].cn;
-        if (viEl) viEl.innerText = LOVE_QUOTES[currentQuoteIdx].vi;
+        if (viEl) viEl.innerText = LOVE_QUOTES[currentQuoteIdx].vi.normalize('NFC');
         
         wrapper.classList.remove('flip-out-next');
         wrapper.classList.add('flip-in-next');
@@ -424,7 +424,7 @@ function prevLoveQuote() {
         const cnEl = wrapper.querySelector('.quote-chinese');
         const viEl = wrapper.querySelector('.quote-vietnamese');
         if (cnEl) cnEl.innerText = LOVE_QUOTES[currentQuoteIdx].cn;
-        if (viEl) viEl.innerText = LOVE_QUOTES[currentQuoteIdx].vi;
+        if (viEl) viEl.innerText = LOVE_QUOTES[currentQuoteIdx].vi.normalize('NFC');
         
         wrapper.classList.remove('flip-out-prev');
         wrapper.classList.add('flip-in-prev');
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.151';
+    const logoPath = './logo_pwa_small.png?v=4.3.152';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1088,23 +1088,23 @@ export async function renderWeLoveDashboard() {
                         <button class="quote-nav-btn prev" id="btnWeLovePrevQuote">‹</button>
                         <div class="quote-text-wrapper">
                             <div class="quote-chinese">${LOVE_QUOTES[currentQuoteIdx].cn}</div>
-                            <div class="quote-vietnamese">${LOVE_QUOTES[currentQuoteIdx].vi}</div>
+                            <div class="quote-vietnamese">${LOVE_QUOTES[currentQuoteIdx].vi.normalize('NFC')}</div>
                         </div>
                         <button class="quote-nav-btn next" id="btnWeLoveNextQuote">›</button>
                     </div>
                 </div>
 
-                <!-- Cá»™t pháº£i (Sá»• tay sá»©c khá»e) -->
+                <!-- Cột phải (Sổ tay sức khỏe) -->
                 <div class="welove-right-column">
                     ${sicknessCardHtml}
                 </div>
 
-                <!-- HÃ ng dÆ°á»›i (Album áº£nh trÃ n rá»™ng) -->
+                <!-- Hàng dưới (Album ảnh tràn rộng) -->
                 <div class="welove-card welove-album-card" style="margin-top: 2rem;">
                     <div class="welove-title-box" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; width: 100%;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 1.8rem;">ðŸ“¸</span>
-                            <h3 class="welove-title">Album áº¢nh TÃ¬nh YÃªu</h3>
+                            <span style="font-size: 1.8rem;">📸</span>
+                            <h3 class="welove-title">Album Ảnh Tình Yêu</h3>
                         </div>
                         ${canEdit ? `
                             <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quản lý Album ảnh">
