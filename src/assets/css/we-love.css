@@ -1303,6 +1303,8 @@ body.dark-mode .home-love-left-widget {
 .pulsing-heart-red {
   animation: heartBeatRed 1.2s infinite;
   display: inline-block;
+  font-size: 2.2rem;
+  flex-shrink: 0;
 }
 
 /* Style cho Header tên cặp đôi */
@@ -1340,10 +1342,6 @@ body.dark-mode .home-love-left-widget {
   text-align: left;
 }
 
-.pulsing-heart-red {
-  flex-shrink: 0;
-}
-
 body.dark-mode .partner-name {
   background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #fda4af 100%);
   -webkit-background-clip: text;
@@ -1359,10 +1357,13 @@ body.dark-mode .partner-name {
 /* Tối ưu hóa hiển thị trên di động */
 @media (max-width: 768px) {
   .partner-name {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
   }
   .couple-names-header {
     gap: 8px;
+  }
+  .pulsing-heart-red {
+    font-size: 1.8rem;
   }
 }
 
