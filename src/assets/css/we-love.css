@@ -1332,14 +1332,7 @@ body.dark-mode .home-love-left-widget {
   display: inline-block;
   cursor: default;
   flex: 1;
-}
-
-.partner-name.name-left {
-  text-align: right;
-}
-
-.partner-name.name-right {
-  text-align: left;
+  text-align: center;
 }
 
 body.dark-mode .partner-name {
@@ -1357,13 +1350,10 @@ body.dark-mode .partner-name {
 /* Tối ưu hóa hiển thị trên di động */
 @media (max-width: 768px) {
   .partner-name {
-    font-size: 1.15rem;
+    font-size: 1.3rem;
   }
   .couple-names-header {
     gap: 8px;
-  }
-  .pulsing-heart-red {
-    font-size: 1.8rem;
   }
 }
 
