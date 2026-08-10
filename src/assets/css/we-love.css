@@ -1347,6 +1347,62 @@ body.dark-mode .partner-name {
   filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.4));
 }
 
+/* Mặc định ẩn tiêu đề cặp đôi trên desktop trong card (ở mobile view) */
+.memory-title .desktop-couple-title {
+  display: none !important;
+}
+.memory-title .default-title {
+  display: inline !important;
+}
+
+/* Trên desktop (màn hình rộng > 768px) */
+@media (min-width: 769px) {
+  /* Ẩn hoàn toàn khung tên độc lập ở trên đầu trang trên desktop */
+  .couple-names-header {
+    display: none !important;
+  }
+  
+  /* Trong memory card: ẩn chữ "Kỷ Niệm Tình Yêu" và hiện tên cặp đôi */
+  .memory-title .default-title {
+    display: none !important;
+  }
+  .memory-title .desktop-couple-title {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto;
+    width: fit-content;
+  }
+  
+  /* Style cho tên cặp đôi trên desktop bên trong card */
+  .partner-name-desktop {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #e11d48 0%, #ec4899 50%, #f43f5e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(244, 63, 94, 0.15));
+  }
+  body.dark-mode .partner-name-desktop {
+    background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #fda4af 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Trái tim đang đập nhỏ ở giữa tên */
+  .pulsing-heart-red-mini {
+    animation: heartBeatRed 1.2s infinite;
+    font-size: 2.2rem;
+    flex-shrink: 0;
+    display: inline-block;
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
+    line-height: 1;
+    margin: 0 4px;
+  }
+}
+
 /* Giảm khoảng cách dưới Navbar trên di động khi ở mục WeLove */
 body.active-tab-welove .mobile-navbar,
 body.active-tab-welove-admin .mobile-navbar,

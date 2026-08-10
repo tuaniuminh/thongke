@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.145';
-import * as sync from '../../core/sync.js?v=4.3.145';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.145';
+} from '../../core/app.js?v=4.3.146';
+import * as sync from '../../core/sync.js?v=4.3.146';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.146';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.145');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.146');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.145';
+        const logoPath = './logo_pwa_small.png?v=4.3.146';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.145';
+    const logoPath = './logo_pwa_small.png?v=4.3.146';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1014,7 +1014,14 @@ export async function renderWeLoveDashboard() {
                     `}
 
                     <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
-                    <h2 class="memory-title">Kỷ Niệm Tình Yêu</h2>
+                    <h2 class="memory-title">
+                        <span class="default-title">Kỷ Niệm Tình Yêu</span>
+                        <span class="desktop-couple-title" style="display: none;">
+                            <span class="partner-name-desktop">${escapeHTML(state.weLoveName1 || 'Anh')}</span>
+                            <span class="pulsing-heart-red-mini">❤️</span>
+                            <span class="partner-name-desktop">${escapeHTML(state.weLoveName2 || 'Em')}</span>
+                        </span>
+                    </h2>
                     <p class="memory-subtitle">Hành trình gieo bình yên, hái hạnh phúc</p>
                     
                     <div class="days-counter-box">
