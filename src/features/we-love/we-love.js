@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.149';
-import * as sync from '../../core/sync.js?v=4.3.149';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.149';
+} from '../../core/app.js?v=4.3.150';
+import * as sync from '../../core/sync.js?v=4.3.150';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.150';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.149');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.150');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.149';
+        const logoPath = './logo_pwa_small.png?v=4.3.150';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.149';
+    const logoPath = './logo_pwa_small.png?v=4.3.150';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -978,13 +978,7 @@ export async function renderWeLoveDashboard() {
                                      </div>
                                      <div style="display: flex; align-items: center;">
                                          <input type="checkbox" id="weLoveAutoplayInput" class="status-checkbox" ${state.weLoveAutoplay === true ? 'checked' : ''}>
-                                         <span class="status-slider"></span>
-                                     </div>
-                                 </label>
-                             </div>
-
-                            <!-- 3. Bật tắt theo dõi lượt ốm -->
-                            <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+<div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
                                 <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
                                     <div>
                                         <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🩺 Theo dõi Sổ tay sức khỏe em yêu</span>
@@ -1049,21 +1043,16 @@ export async function renderWeLoveDashboard() {
                     ${(function() {
                         if (!state.weLoveStartDate) return '';
                         
-                        const parts = state.weLoveStartDate.split('-');
-                        if (parts.length !== 3) return '';
-                        const sYear = parseInt(parts[0]);
-                        const sMonth = parseInt(parts[1]) - 1;
-                        const sDay = parseInt(parts[2]);
+                        const start = new Date(state.weLoveStartDate);
+                        const end = new Date();
+                        const sYear = start.getFullYear();
+                        const sMonth = start.getMonth();
+                        const sDay = start.getDate();
                         
-                        const start = new Date(sYear, sMonth, sDay);
-                        const today = new Date();
-                        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        let yearsElapsed = end.getFullYear() - sYear;
+                        let monthsElapsed = end.getMonth() - sMonth;
+                        let daysElapsed = end.getDate() - sDay;
                         
-                        if (end < start) return '';
-                        
-                        let yearsElapsed = end.getFullYear() - start.getFullYear();
-                        let monthsElapsed = end.getMonth() - start.getMonth();
-                        let daysElapsed = end.getDate() - start.getDate();
                         if (daysElapsed < 0) {
                             monthsElapsed--;
                         }
@@ -1105,50 +1094,28 @@ export async function renderWeLoveDashboard() {
                     </div>
                 </div>
 
-                <!-- Right Column wrapper (if modern) or direct cards -->
-                ${window.innerWidth > 768 ? `
-                    <div class="welove-right-column" style="display: flex; flex-direction: column; gap: 2.5rem; width: 100%;">
-                        ${sicknessCardHtml}
-                        
-                        <!-- Love Photo Album Card -->
-                        <div class="welove-card welove-album-card" style="margin-top: 0;">
-                            <div class="welove-title-box" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; width: 100%;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 1.8rem;">📸</span>
-                                    <h3 class="welove-title">Album Ảnh Tình Yêu</h3>
-                                </div>
-                                ${canEdit ? `
-                                    <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quản lý Album ảnh">
-                                        <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
-                                    </button>
-                                ` : ''}
-                            </div>
-                            <div id="weLoveAlbumContainer" style="width: 100%; position: relative;">
-                                <!-- populated by JS -->
-                            </div>
-                        </div>
-                    </div>
-                ` : `
+                <!-- Cá»™t pháº£i (Sá»• tay sá»©c khá»e) -->
+                <div class="welove-right-column">
                     ${sicknessCardHtml}
-                    
-                    <!-- Love Photo Album Card -->
-                    <div class="welove-card welove-album-card" style="margin-top: 2rem;">
-                        <div class="welove-title-box" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; width: 100%;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 1.8rem;">📸</span>
-                                <h3 class="welove-title">Album Ảnh Tình Yêu</h3>
-                            </div>
-                            ${canEdit ? `
-                                <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quản lý Album ảnh">
-                                    <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
-                                </button>
-                            ` : ''}
+                </div>
+
+                <!-- HÃ ng dÆ°á»›i (Album áº£nh trÃ n rá»™ng) -->
+                <div class="welove-card welove-album-card" style="margin-top: 2rem;">
+                    <div class="welove-title-box" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.8rem;">ðŸ“¸</span>
+                            <h3 class="welove-title">Album áº¢nh TÃ¬nh YÃªu</h3>
                         </div>
-                        <div id="weLoveAlbumContainer" style="width: 100%; position: relative;">
-                            <!-- populated by JS -->
-                        </div>
+                        ${canEdit ? `
+                            <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quáº£n lÃ½ Album áº£nh">
+                                <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        ` : '}
                     </div>
-                `}
+                    <div id="weLoveAlbumContainer" style="width: 100%; position: relative;">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
             `}
         </div>
 

@@ -1514,9 +1514,9 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
 @media (min-width: 1024px) {
   .memory-page.layout-modern {
     display: grid !important;
-    grid-template-columns: 0.9fr 1.1fr; /* Tối ưu tỷ lệ 4:6 cho Desktop, tạo không gian lớn cho Album */
+    grid-template-columns: 1fr 1fr; /* 2 cột bằng nhau hoàn hảo trên Desktop */
     gap: 2.5rem;
-    align-items: start;
+    align-items: stretch !important; /* Hai cột trái phải có độ cao bằng nhau */
     max-width: 1200px;
     margin: 0 auto;
     padding: 3rem 2rem;
@@ -1527,7 +1527,29 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
     margin-bottom: 1rem !important;
   }
   
-  .memory-page.layout-modern .memory-card,
+  .memory-page.layout-modern .memory-card {
+    grid-column: 1;
+    height: 100%;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 32px !important;
+    padding: 3.5rem 2.5rem !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Giãn cách các phần tử con đều đặn */
+  }
+  
+  .memory-page.layout-modern .welove-right-column {
+    grid-column: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
   .memory-page.layout-modern .welove-card {
     margin: 0 !important;
     max-width: 100% !important;
@@ -1537,6 +1559,21 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Album ảnh tình yêu hiển thị rộng hết bằng cả 2 cột cộng lại ở hàng dưới */
+  .memory-page.layout-modern .welove-album-card {
+    grid-column: span 2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Hỗ trợ tự động căn tràn cột trái chiếm hết chiều ngang nếu cột phải rỗng */
+  .memory-page.layout-modern:has(.welove-right-column:empty) {
+    grid-template-columns: 1fr !important;
+  }
+  .memory-page.layout-modern:has(.welove-right-column:empty) .memory-card {
+    grid-column: span 2 !important;
   }
 }
 
@@ -1615,16 +1652,16 @@ body:not(.light-mode) .memory-page.layout-modern .welove-card:hover {
   margin-bottom: 0.5rem !important;
 }
 
-/* Days Counter text styled with elegant Champagne Gold (Light) or Platinum Silver (Dark) */
+/* Days Counter text styled with elegant Slate/Charcoal Slate (Light) or Platinum Silver (Dark) */
 .memory-page.layout-modern .days-number {
   font-size: 7rem !important;
   font-weight: 900 !important;
   line-height: 1 !important;
-  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%) !important;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #64748b 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  filter: drop-shadow(0 2px 8px rgba(180, 83, 9, 0.25)) !important;
+  filter: drop-shadow(0 2px 8px rgba(30, 41, 59, 0.15)) !important;
   letter-spacing: -0.04em !important;
   margin-bottom: 0.5rem !important;
 }
@@ -1683,42 +1720,51 @@ body:not(.light-mode) .memory-page.layout-modern .quote-container {
 }
 
 .memory-page.layout-modern .quote-vietnamese {
-  font-family: "Great Vibes", "Georgia", "Brush Script MT", cursive, serif !important;
-  font-size: 1.45rem !important;
+  font-family: "Georgia", "Times New Roman", serif !important; /* Chuyển sang Georgia nghiêng để khắc phục lỗi vỡ dấu tiếng Việt của Great Vibes */
+  font-size: 1.25rem !important;
   font-style: italic !important;
+  font-weight: 500 !important;
   color: #7c2d12 !important; /* màu nâu cam gỗ ấm áp */
-  line-height: 1.5 !important;
+  line-height: 1.6 !important;
   margin-top: 4px;
 }
 body:not(.light-mode) .memory-page.layout-modern .quote-vietnamese {
   color: #e9d5ff !important; /* oải hương nhạt lãng mạn */
 }
 
-/* Premium Sickness stats circle */
+/* Premium Sickness stats circle - styled with luxury Frosted Quartz */
 .memory-page.layout-modern .welove-heart-circle {
   width: 120px !important;
   height: 120px !important;
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-  border: 4px solid #fff !important;
-  box-shadow: 0 12px 35px rgba(180, 83, 9, 0.22) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 2px solid rgba(71, 85, 105, 0.15) !important;
+  box-shadow: 0 8px 24px rgba(71, 85, 105, 0.06) !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle {
-  background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%) !important;
-  border: 4px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 12px 35px rgba(168, 85, 247, 0.35) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 2px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
 }
 
 .memory-page.layout-modern .welove-heart-circle .welove-count-num {
-  color: #fff !important;
+  color: #1e293b !important;
   font-size: 3.2rem !important;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  text-shadow: none !important;
+  font-weight: 800 !important;
 }
+body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle .welove-count-num {
+  color: #f1f5f9 !important;
+}
+
 .memory-page.layout-modern .welove-heart-circle .welove-count-lbl {
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: #64748b !important;
   font-weight: 700 !important;
   font-size: 0.72rem !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
+}
+body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle .welove-count-lbl {
+  color: #94a3b8 !important;
 }
 
 /* Modern Round Buttons styles */
@@ -1727,6 +1773,11 @@ body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle {
   border-color: rgba(217, 119, 6, 0.3) !important;
   color: #b45309 !important;
   transform: scale(1.08);
+}
+body:not(.light-mode) .modern-round-btn:hover {
+  background: rgba(168, 85, 247, 0.15) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #c084fc !important;
 }
 body:not(.light-mode) .modern-round-btn:hover {
   background: rgba(168, 85, 247, 0.15) !important;
