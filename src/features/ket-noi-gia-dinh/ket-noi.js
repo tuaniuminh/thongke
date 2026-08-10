@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.7.1';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.7.1';
-import * as sync from '../../core/sync.js?v=4.7.1';
+} from '../../core/app.js?v=4.3.138';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.138';
+import * as sync from '../../core/sync.js?v=4.3.138';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;
@@ -320,12 +320,11 @@ export async function checkForSharedFamilyFund(force = false) {
                                 state.spouseEmail = spouseEmailVal;
                                 state.spouseStatus = 'accepted';
                                 state.spouseRole = 'husband'; // Current user is Husband (Admin)
-                                state.viewingSharedFund = false; // Husband is always Admin
                                 state.familyFundInviteStatus = 'accepted';
                                 state.spouseStatusUpdated = new Date().toISOString();
                                 husbandRowFound = true;
                                 
-                                // [BẢO MẬT v4.6.4] Ngay khi ghép đôi thành công, dọn sạch mã ghép đôi 6 số
+                                // [BẢO MẬT v4.3.117] Ngay khi ghép đôi thành công, dọn sạch mã ghép đôi 6 số
                                 // để triệt tiêu thời gian tồn tại của mã trên đám mây Supabase (chống brute-force)
                                 state.pairingCode = '';
                                 state.pairingCodeExpired = '';
@@ -655,7 +654,7 @@ export async function checkForSharedFamilyFund(force = false) {
             
             state.spouseEmail = '';
             state.spouseStatus = '';
-            state.spouseRole = 'husband';
+            state.spouseRole = 'wife';
             state.pairingCode = '';
             state.pairingCodeExpired = '';
             state.pairingFundKeyEncrypted = '';

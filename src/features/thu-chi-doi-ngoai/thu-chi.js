@@ -5,10 +5,10 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility
-} from '../../core/app.js?v=4.7.1';
-import * as sync from '../../core/sync.js?v=4.7.1';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.7.1';
-import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.7.1';
+} from '../../core/app.js?v=4.3.138';
+import * as sync from '../../core/sync.js?v=4.3.138';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.138';
+import { updateLoveWidgetUI } from '../we-love/we-love.js?v=4.3.138';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -960,10 +960,6 @@ function renderSettings() {
     if (toggleShowLoveWidget) {
         toggleShowLoveWidget.checked = state.showLoveWidget !== false;
     }
-    const toggleVehicleCard = document.getElementById('toggleShowVehicleCareCard');
-    if (toggleVehicleCard) {
-        toggleVehicleCard.checked = !!state.showVehicleCareCard;
-    }
     const toggleDebugConsoleCheck = document.getElementById('toggleDebugConsole');
     if (toggleDebugConsoleCheck) {
         toggleDebugConsoleCheck.checked = localStorage.getItem('gift_ledger_debug_console_enabled') !== 'false';
@@ -1017,16 +1013,6 @@ function updateHomeLayoutUI() {
         }
     }
 
-    // --- Card "Chăm sóc xe" ---
-    const cardVehicle = document.getElementById('homeCardVehicle');
-    if (cardVehicle) {
-        if (state.showVehicleCareCard) {
-            cardVehicle.style.display = 'flex';
-        } else {
-            cardVehicle.style.display = 'none';
-        }
-    }
-
     // --- Khóa / Mở khóa tất cả các card một cách tổng quát ---
     document.querySelectorAll('.home-card').forEach(card => {
         // Lưu giữ href ban đầu nếu chưa có
@@ -1059,7 +1045,7 @@ function updateHomeLayoutUI() {
         }
     }
 
-    // --- Lời mời tham gia Quỹ gia đình --- (Đã tắt ở v4.6.4 vì đã có Mã ghép đôi WeLove ghép nối trực tiếp)
+    // --- Lời mời tham gia Quỹ gia đình --- (Đã tắt ở v4.2.79 vì đã có Mã ghép đôi WeLove ghép nối trực tiếp)
     const inviteCard = document.getElementById('spouseFundInviteCard');
     if (inviteCard) {
         inviteCard.style.display = 'none';
@@ -1943,23 +1929,17 @@ function updateSentTypeCustomVisibility() {
 }
 
 window.closeModal = function(modalId) {
-    const el = document.getElementById(modalId);
-    if (el) {
-        el.classList.remove('active');
-        el.style.display = 'none';
-    }
+    document.getElementById(modalId).classList.remove('active');
 };
 
 function setupModalListeners() {
-    // Quick add buttons
-    document.querySelectorAll('.btn-quick-add, #quickAddBtn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (!state.user) {
-                showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
-                return;
-            }
-            document.getElementById('quickAddModal').classList.add('active');
-        });
+    // Quick add button
+    document.getElementById('quickAddBtn').addEventListener('click', () => {
+        if (!state.user) {
+            showToast("Vui lòng đăng nhập tài khoản để thêm thông tin", "warning");
+            return;
+        }
+        document.getElementById('quickAddModal').classList.add('active');
     });
     
     document.getElementById('chooseAddReceivedBtn').addEventListener('click', () => {

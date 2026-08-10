@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.7.1';
-import * as sync from '../../core/sync.js?v=4.7.1';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.7.1';
+} from '../../core/app.js?v=4.3.138';
+import * as sync from '../../core/sync.js?v=4.3.138';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.138';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,8 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3');
-        weLoveAudio.preload = 'none';
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.138');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -124,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.7.1';
+        const logoPath = './logo_pwa_small.png?v=4.3.138';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -445,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.7.1';
+    const logoPath = './logo_pwa_small.png?v=4.3.138';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -811,7 +810,7 @@ export async function renderWeLoveDashboard() {
 
     const isLocal = !sync.isConfigured() || !state.user;
     // isSpouseRole: Vợ (người nhập mã) chỉ được xem WeLove, không chỉnh sửa cấu hình
-    const isSpouseRole = state.viewingSharedFund && state.spouseRole === 'wife' && state.sharedFundSourceRow !== null;
+    const isSpouseRole = state.viewingSharedFund && state.sharedFundSourceRow !== null;
     const canEdit = !isSpouseRole && (isLocal || state.user !== null);
     const showSickness = state.weLoveShowSickness !== false;
     const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
@@ -1677,7 +1676,7 @@ function bindSettingsEvents() {
 
 // Global hook for mobile/desktop subview switching mapped to routing tabs
 window.switchWeLoveSubView = function(subView) {
-    if (state.viewingSharedFund && state.spouseRole === 'wife' && (subView === 'admin' || subView === 'settings')) {
+    if (state.viewingSharedFund && (subView === 'admin' || subView === 'settings')) {
         showToast("Bạn không có quyền truy cập vào mục này. 🔐", "warning");
         return;
     }

@@ -94,7 +94,7 @@ export async function decrypt(cipherText, password) {
     // Thử lần lượt 4 kết hợp thuật toán, ưu tiên SHA-512/600k (mặc định hiện tại) trước
     const candidates = [
         { hash: 'SHA-512', iterations: 600000 },  // Mặc định hiện tại (tử v4.2.x+)
-        { hash: 'SHA-256', iterations: 100000 },  // Lừa lõi: dữ liệu lỡ mã hóa bằng v4.6.4
+        { hash: 'SHA-256', iterations: 100000 },  // Lừa lõi: dữ liệu lỡ mã hóa bằng v4.3.87
         { hash: 'SHA-256', iterations: 600000 },  // Phòng ngừa kết hợp hiếm gặp
         { hash: 'SHA-512', iterations: 100000 },  // Phòng ngừa kết hợp hiếm gặp
     ];
@@ -122,7 +122,7 @@ export async function decrypt(cipherText, password) {
 
 
 // Generate Asymmetric RSA-OAEP Keypair
-// v4.6.4: Nâng lên 4096-bit + SHA-512 cho keypair mới.
+// v4.2.87: Nâng lên 4096-bit + SHA-512 cho keypair mới.
 // Keypair cũ (2048-bit/SHA-256) vẫn hoạt động hoàn toàn — xem _detectRsaHash().
 export async function generateAsymmetricKeypair() {
     try {

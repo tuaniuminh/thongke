@@ -2,7 +2,7 @@
 <html lang="vi" class="light-mode">
 <head>
     <meta charset="UTF-8">
-    <!-- Content Security Policy (CVE-8 Fix v4.6.4) -->
+    <!-- Content Security Policy (CVE-8 Fix v4.2.88) -->
     <!-- script-src: 'unsafe-inline' cần thiết vì app dùng nhiều inline <script>.
          Bảo vệ chính đến từ: connect-src (chặn exfiltration), object-src 'none' (chặn plugin exploit) -->
     <meta http-equiv="Content-Security-Policy" content="
@@ -71,14 +71,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.7.1">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.138">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.7.1">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.7.1">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.7.1">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.7.1">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.138">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.138">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.138">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.138">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -242,18 +242,14 @@
             const badge = document.getElementById('debugConsoleBadge');
             const toggleBtn = document.getElementById('debugConsoleToggleBtn');
             const panel = document.getElementById('debugConsolePanel');
-            const isEnabled = localStorage.getItem('gift_ledger_debug_console_enabled') !== 'false';
             
-            if (toggleBtn) {
-                if (isEnabled) {
-                    toggleBtn.style.setProperty('display', 'flex', 'important');
-                } else {
-                    toggleBtn.style.setProperty('display', 'none', 'important');
-                }
+            if (!getDebugConsoleEnabled()) {
+                if (toggleBtn) toggleBtn.style.display = 'none';
+                if (panel) panel.classList.remove('active');
+                return;
             }
-            if (!isEnabled && panel) {
-                panel.style.display = 'none';
-            }
+            
+            if (toggleBtn) toggleBtn.style.display = 'flex';
             if (badge) {
                 if (window.__famiLifeErrorCount > 0) {
                     badge.textContent = window.__famiLifeErrorCount;
@@ -356,7 +352,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.7.1" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.126" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -449,12 +445,6 @@
                         <span>Quản lý</span>
                     </a>
                 </li>
-                <li class="nav-item" data-nav="vehicle" style="display: none;">
-                    <a class="nav-link" data-tab="vehicle">
-                        <i data-lucide="wrench"></i>
-                        <span>Chăm sóc xe</span>
-                    </a>
-                </li>
             </nav>
 
             <div class="sidebar-footer">
@@ -473,12 +463,12 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content" style="position: relative;">
+        <main class="main-content">
             <!-- Mobile Top Navbar -->
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.7.1" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.126" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -507,28 +497,21 @@
                             <span id="sharedFundHeaderCardTitleText">Bạn đang tham gia quỹ chung gia đình</span>
                         </div>
                     </div>
+                    <button class="btn btn-primary" id="quickAddBtn">
+                        <i data-lucide="plus"></i>
+                        <span class="btn-text">Thêm ghi chép</span>
+                    </button>
                     <button class="btn btn-secondary mobile-home-btn" id="mobileHomeBtn" onclick="window.location.hash = 'trangchu'" style="display: none;" title="Trang chủ">
                         <i data-lucide="home"></i>
-                    </button>
-                    <button type="button" class="btn btn-primary" id="btnAddVehicle" style="display: none; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white; gap: 6px;">
-                        <i data-lucide="plus-circle"></i> <span>Thêm xe mới</span>
                     </button>
                 </div>
             </header>
 
             <!-- Dashboard Tab -->
-            <section class="tab-panel active" id="tab-dashboard" style="display: none;">
+            <section class="tab-panel active" id="tab-dashboard">
                 <!-- Sync Status Dashboard Banner -->
                 <div class="sync-banner" id="dashboardSyncBanner" style="display: none;"></div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-primary);">Tổng Quan Dòng Tiền Hiếu Hỷ</div>
-                    <button class="btn btn-primary btn-quick-add" id="quickAddBtn">
-                        <i data-lucide="plus"></i>
-                        <span class="btn-text">Thêm ghi chép</span>
-                    </button>
-                </div>
-
                 <!-- Summary Cards Grid -->
 
                 <div class="summary-grid">
@@ -635,10 +618,6 @@
                             <input type="text" class="form-control" id="searchReceived" placeholder="Tìm tên người mừng...">
                         </div>
                         <div class="filter-group">
-                            <button class="btn btn-primary btn-quick-add">
-                                <i data-lucide="plus"></i>
-                                <span>Thêm ghi chép</span>
-                            </button>
                             <select class="form-control filter-select" id="filterReceivedEvent">
                                 <option value="">Tất cả sự kiện nhận</option>
                             </select>
@@ -705,10 +684,6 @@
                             <input type="text" class="form-control" id="searchSent" placeholder="Tìm tên người nhận...">
                         </div>
                         <div class="filter-group">
-                            <button class="btn btn-primary btn-quick-add">
-                                <i data-lucide="plus"></i>
-                                <span>Thêm ghi chép</span>
-                            </button>
                             <select class="form-control filter-select" id="filterSentType">
                                 <option value="">Tất cả sự kiện</option>
                             </select>
@@ -930,6 +905,33 @@
                                 </div>
                             </label>
                         </div>
+                    <!-- Desktop Home Layout Setting Card -->
+                    <div class="settings-card" id="desktopHomeLayoutCard">
+                        <h2>
+                            <i data-lucide="layout-grid" style="color: var(--accent-amber);"></i>
+                            <span>Bố cục Trang chủ (Máy tính) 🍱</span>
+                        </h2>
+                        <p class="settings-info">
+                            Tùy chỉnh phong cách hiển thị danh sách các card chức năng ngoài trang chủ khi sử dụng trên màn hình máy tính (màn hình rộng).
+                        </p>
+                        <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+                            <label style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                <input type="radio" name="desktopHomeLayout" value="list" id="layoutModeList" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                                <div>
+                                    <strong style="display: block; font-size: 0.9rem; color: var(--text-primary);">📄 Xếp hàng dọc 1 cột (Mặc định)</strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Giao diện truyền thống tối giản 1 cột ở giữa</span>
+                                </div>
+                            </label>
+
+                            <label style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                <input type="radio" name="desktopHomeLayout" value="bento" id="layoutModeBento" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                                <div>
+                                    <strong style="display: block; font-size: 0.9rem; color: var(--text-primary);">🍱 Bento Grid 3 cột (Thử nghiệm 🚀)</strong>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Các card dàn ngang 3 cột hiện đại, tận dụng tối đa không gian máy tính</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
 
                     <!-- Family Pairing Card -->
                     <div class="settings-card" id="familyPairingCard">
@@ -1061,13 +1063,6 @@
                                 <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị Widget Tình yêu (WeLove) ở trang chủ chính</span>
                                 <div style="display: flex; align-items: center;">
                                     <input type="checkbox" id="toggleShowLoveWidget" class="status-checkbox">
-                                    <span class="status-slider"></span>
-                                </div>
-                            </label>
-                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị thẻ "Chăm sóc xe" ở trang chủ chính</span>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" id="toggleShowVehicleCareCard" class="status-checkbox">
                                     <span class="status-slider"></span>
                                 </div>
                             </label>
@@ -1553,11 +1548,12 @@
 
 
                     </div>
+                    </div>
                 </div>
             </section>
 
             <!-- 1. Modal: Đóng góp lương -->
-            <div class="modal-overlay health-theme-overlay" id="fundContributionModal" style="display: none;">
+            <div class="modal-overlay health-theme-overlay" id="fundContributionModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="health-modal-title">
@@ -1601,7 +1597,7 @@
             </div>
 
             <!-- 2. Modal: Trích chuyển quỹ -->
-            <div class="modal-overlay health-theme-overlay" id="fundTransferModal" style="display: none;">
+            <div class="modal-overlay health-theme-overlay" id="fundTransferModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1646,7 +1642,7 @@
             </div>
 
             <!-- 3. Modal: Ghi nhận chi tiêu -->
-            <div class="modal-overlay health-theme-overlay" id="fundSpendingModal" style="display: none;">
+            <div class="modal-overlay health-theme-overlay" id="fundSpendingModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1723,7 +1719,7 @@
             </div>
 
             <!-- Modal: Báo cáo tháng -->
-            <div class="modal-overlay health-theme-overlay" id="fundMonthlyReportModal" style="display: none;">
+            <div class="modal-overlay health-theme-overlay" id="fundMonthlyReportModal">
                 <div class="modal-container health-modal-container" style="width: 650px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1776,7 +1772,7 @@
             </div>
 
             <!-- 4. Modal: Chốt đầu tư lãi/lỗ -->
-            <div class="modal-overlay health-theme-overlay" id="fundInvestModal" style="display: none;">
+            <div class="modal-overlay health-theme-overlay" id="fundInvestModal">
                 <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1824,7 +1820,7 @@
             </div>
 
             <!-- 5. Modal: Chỉnh sửa quỹ -->
-            <div class="modal-overlay health-theme-overlay" id="fundEditModal" style="display: none;">
+            <div class="modal-overlay health-theme-overlay" id="fundEditModal">
                 <div class="modal-container health-modal-container" style="width: 420px; max-width: 95%;">
                     <div class="modal-header health-modal-header">
                         <h3 class="modal-title">
@@ -1871,387 +1867,6 @@
                     </form>
                 </div>
             </div>
-
-            <!-- ============================================================ -->
-            <!-- CARD FEATURE: CHĂM SÓC XE (VEHICLE CARE) -->
-            <!-- ============================================================ -->
-            <section class="tab-panel" id="tab-vehicle" style="display: none; position: relative;">
-
-                <!-- Empty state when no vehicles exist -->
-                <div id="vehicleEmptyNotice" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px;">
-                    <i data-lucide="bike" style="width: 56px; height: 56px; color: #f59e0b; margin-bottom: 12px; opacity: 0.8;"></i>
-                    <h3 style="margin: 0 0 8px 0; color: var(--text-primary);">Chưa có chiếc xe nào được thêm</h3>
-                    <p style="color: var(--text-secondary); max-width: 460px; font-size: 0.9rem; margin-bottom: 20px;">
-                        Hãy thêm chiếc xe máy của bạn để bắt đầu theo dõi Odometer, đặt lịch nhắc nhở thay dầu và ghi lại lịch sử sửa chữa!
-                    </p>
-                    <button type="button" class="btn btn-primary" onclick="window.openVehicleFormModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; cursor: pointer;">
-                        <i data-lucide="plus"></i> Thêm xe đầu tiên ngay
-                    </button>
-                </div>
-
-                <!-- Main content box when vehicle selected -->
-                <div id="vehicleMainContentBox" style="display: none; margin: 0; padding: 0;">
-                    <!-- Vehicle Selector & Top Info Banner -->
-                    <div class="card-panel" style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-                            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 260px;">
-                                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; color: #f59e0b;">
-                                    <i data-lucide="bike" style="width: 24px; height: 24px;"></i>
-                                </div>
-                                <div style="flex: 1;">
-                                    <label style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Đang chọn xe:</label>
-                                    <select id="vehicleProfileSelect" class="form-control" style="font-size: 1rem; font-weight: bold; padding: 4px 8px; height: 36px; border-color: rgba(245,158,11,0.3); background: var(--bg-card); cursor: pointer;">
-                                    </select>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                                <div style="text-align: right;">
-                                    <span id="vOverviewPlate" style="font-size: 0.8rem; color: var(--text-secondary); display: block;">Biển số: --</span>
-                                    <span id="vOverviewOdo" style="font-size: 1.2rem; font-weight: 800; color: #f59e0b;">0 km</span>
-                                </div>
-                                <div style="display: flex; gap: 8px;">
-                                    <button type="button" class="btn btn-outline btn-sm" id="btnEditActiveVehicle" title="Chỉnh sửa xe">
-                                        <i data-lucide="edit-3"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline btn-sm btn-danger" id="btnDeleteActiveVehicle" title="Xóa xe này">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Oil Change Reminders Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px;">
-                        <div class="card-panel" id="vEngineOilCard" style="margin: 0; padding: 16px; border-top: 4px solid #3b82f6;">
-                            <!-- Dynamic Content -->
-                        </div>
-                        <div class="card-panel" id="vGearOilCard" style="margin: 0; padding: 16px; border-top: 4px solid #8b5cf6;">
-                            <!-- Dynamic Content -->
-                        </div>
-                    </div>
-
-                    <!-- Subview Navigation Tabs -->
-                    <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;">
-                        <button type="button" class="btn btn-ghost active" data-vehicle-subview="overview" style="white-space: nowrap; font-weight: 600;">
-                            <i data-lucide="layout-grid"></i> Tổng quan & Ma trận bảo dưỡng
-                        </button>
-                        <button type="button" class="btn btn-ghost" data-vehicle-subview="services" style="white-space: nowrap; font-weight: 600;">
-                            <i data-lucide="wrench"></i> Lịch sử sửa chữa & Phụ tùng
-                        </button>
-                        <button type="button" class="btn btn-ghost" data-vehicle-subview="fuel" style="white-space: nowrap; font-weight: 600;">
-                            <i data-lucide="fuel"></i> Nhật ký đổ xăng
-                        </button>
-                        <button type="button" class="btn btn-ghost" data-vehicle-subview="ai-doctor" style="white-space: nowrap; font-weight: 600; color: #8b5cf6;">
-                            <i data-lucide="sparkles"></i> Trợ lý AI Chẩn đoán
-                        </button>
-                    </div>
-
-                    <!-- Subview Panel 1: Overview & Maintenance Matrix Checklist -->
-                    <div class="vehicle-subview-panel" id="vehicle-subview-overview">
-                        <div class="card-panel">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <div>
-                                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                        <i data-lucide="clipboard-check" style="color: #f59e0b;"></i> Ma Trận Bảo Dưỡng Định Kỳ Chuyên Gia
-                                    </h3>
-                                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                                        Tra cứu chu kỳ và đánh giá tình trạng phụ tùng hao mòn dựa trên số Km Odo hiện tại
-                                    </p>
-                                </div>
-                            </div>
-                            <div id="vMatrixGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
-                                <!-- Dynamic Matrix Items -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Subview Panel 2: Service & Repair History -->
-                    <div class="vehicle-subview-panel" id="vehicle-subview-services" style="display: none;">
-                        <div class="card-panel">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-                                <div>
-                                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                        <i data-lucide="history"></i> Lịch Sử Sửa Chữa & Thay Thế Phụ Tùng
-                                    </h3>
-                                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                                        Tổng tiền đã sửa chữa/thay đồ: <b id="vServicesTotalCost" style="color: #ef4444;">0 đ</b>
-                                    </p>
-                                </div>
-                                <button type="button" class="btn btn-primary btn-sm" id="btnAddVehicleService" style="background: #f59e0b; border: none; color: white;">
-                                    <i data-lucide="plus"></i> Thêm sửa chữa / bảo dưỡng
-                                </button>
-                            </div>
-                            <div id="vServicesContainer">
-                                <!-- Dynamic Table -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Subview Panel 3: Fuel Logs & Consumption -->
-                    <div class="vehicle-subview-panel" id="vehicle-subview-fuel" style="display: none;">
-                        <div class="card-panel">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-                                <div>
-                                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                        <i data-lucide="fuel" style="color: #f59e0b;"></i> Nhật Ký Đổ Xăng & Mức Tiêu Thụ
-                                    </h3>
-                                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                                        Theo dõi dung tích xăng và tính toán chỉ số tiêu thụ Lít/100km
-                                    </p>
-                                </div>
-                                <button type="button" class="btn btn-primary btn-sm" id="btnAddVehicleFuel" style="background: #f59e0b; border: none; color: white;">
-                                    <i data-lucide="plus"></i> Thêm lần đổ xăng
-                                </button>
-                            </div>
-                            <div id="vFuelStatsBox"></div>
-                            <div id="vFuelLogsContainer">
-                                <!-- Dynamic Fuel Table -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Subview Panel 4: AI Doctor Mechanic Assistant -->
-                    <div class="vehicle-subview-panel" id="vehicle-subview-ai-doctor" style="display: none;">
-                        <div class="card-panel" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.02) 100%); border: 1px solid rgba(139, 92, 246, 0.3);">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
-                                    <i data-lucide="sparkles" style="width: 22px; height: 22px;"></i>
-                                </div>
-                                <div>
-                                    <h3 style="margin: 0; font-size: 1.1rem; color: #8b5cf6;">Trợ Lý AI Chẩn Đoán Lỗi Xe Máy</h3>
-                                    <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                                        Nhập tiếng kêu lạ, triệu chứng giật ga, khó nổ... để Gemini AI đưa ra gợi ý nguyên nhân & chi phí sửa chữa!
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 12px;">
-                                <textarea id="vAiPromptInput" class="form-control" rows="3" placeholder="Ví dụ: Xe SH 150i của mình khi tăng ga nhẹ ở tốc độ 20km/h bị rung rần đầu xe và kêu xè xè ở nồi sau là bị bệnh gì vậy?"></textarea>
-                            </div>
-                            <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-                                <button type="button" class="btn btn-primary" id="btnAskVehicleAi" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none;">
-                                    <i data-lucide="send"></i> Chẩn đoán với Gemini AI
-                                </button>
-                            </div>
-                            <div id="vAiLoadingStatus" style="display: none; text-align: center; padding: 12px; color: #8b5cf6;">
-                                <i data-lucide="loader" class="spin" style="width: 20px; height: 20px; vertical-align: middle;"></i> Đang phân tích kỹ thuật...
-                            </div>
-                            <div id="vAiResultContent" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; min-height: 100px;">
-                                <p style="margin: 0; color: var(--text-secondary); font-size: 0.88rem; font-style: italic; text-align: center;">
-                                    Kết quả chẩn đoán và lời khuyên của chuyên gia AI sẽ xuất hiện tại đây...
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Modal 1: Thêm/Sửa Thông Tin Xe -->
-            <div class="modal-overlay health-theme-overlay" id="vehicleFormModal" style="display: none;">
-                <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
-                    <div class="modal-header health-modal-header">
-                        <h3 class="modal-title">
-                            <i data-lucide="bike" style="color: #f59e0b;"></i>
-                            <span id="vehicleFormTitle">Thêm Xe Máy Mới</span>
-                        </h3>
-                        <button type="button" class="close-btn" onclick="closeModal('vehicleFormModal')">&times;</button>
-                    </div>
-                    <form id="vehicleForm">
-                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
-                            <input type="hidden" id="vehicleIdInput">
-                            
-                            <div class="form-group">
-                                <label class="form-label">Tên xe / Dòng xe (*)</label>
-                                <input type="text" id="vNameInput" class="form-control" placeholder="VD: Honda SH 150i, Exciter 155..." required>
-                            </div>
-                            
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div class="form-group">
-                                    <label class="form-label">Biển số xe</label>
-                                    <input type="text" id="vPlateInput" class="form-control" placeholder="VD: 29A1-123.45">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Loại xe</label>
-                                    <select id="vTypeSelect" class="form-control">
-                                        <option value="scooter">Xe tay ga (Scooter)</option>
-                                        <option value="cub">Xe số (Underbone)</option>
-                                        <option value="clutch">Xe côn tay (Manual)</option>
-                                        <option value="electric">Xe điện (EV)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Odometer hiện tại (Km đi được)</label>
-                                <input type="number" id="vOdoInput" class="form-control" placeholder="VD: 12500" required>
-                            </div>
-
-                            <div style="border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 4px;">
-                                <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #f59e0b;">Mốc Bảo Dưỡng Dầu Khuyến Nghị</h4>
-                                
-                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
-                                    <div class="form-group">
-                                        <label class="form-label">Chu kỳ dầu máy (Km)</label>
-                                        <input type="number" id="vEngineOilIntervalInput" class="form-control" value="2000" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Odo thay dầu máy trước</label>
-                                        <input type="number" id="vLastEngineOilOdoInput" class="form-control" value="0">
-                                    </div>
-                                </div>
-
-                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                    <div class="form-group">
-                                        <label class="form-label">Chu kỳ dầu láp (Km)</label>
-                                        <input type="number" id="vGearOilIntervalInput" class="form-control" value="6000">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Odo thay dầu láp trước</label>
-                                        <input type="number" id="vLastGearOilOdoInput" class="form-control" value="0">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
-                            <button type="button" class="btn btn-outline" onclick="closeModal('vehicleFormModal')">Hủy</button>
-                            <button type="submit" class="btn btn-primary" style="background-color: #f59e0b; border: none;">Lưu thông tin xe</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Modal 2: Thêm/Sửa Bản Ghi Bảo Dưỡng -->
-            <div class="modal-overlay health-theme-overlay" id="vehicleServiceModal" style="display: none;">
-                <div class="modal-container health-modal-container" style="width: 520px; max-width: 95%;">
-                    <div class="modal-header health-modal-header">
-                        <h3 class="modal-title">
-                            <i data-lucide="wrench" style="color: #f59e0b;"></i>
-                            <span id="serviceFormTitle">Thêm Bản Ghi Bảo Dưỡng / Sửa Chữa</span>
-                        </h3>
-                        <button type="button" class="close-btn" onclick="closeModal('vehicleServiceModal')">&times;</button>
-                    </div>
-                    <form id="vehicleServiceForm">
-                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
-                            <input type="hidden" id="serviceIdInput">
-                            
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div class="form-group">
-                                    <label class="form-label">Ngày thực hiện</label>
-                                    <input type="date" id="sDateInput" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Odometer (Km)</label>
-                                    <input type="number" id="sOdoInput" class="form-control" placeholder="Số Km hiện tại" required>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Tên dịch vụ / Sửa chữa (*)</label>
-                                <input type="text" id="sTitleInput" class="form-control" placeholder="VD: Thay dầu máy & lọc gió, thay má phanh...">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Chọn nhanh các hạng mục thực hiện:</label>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="engine_oil"> Dầu máy (Engine Oil)
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="gear_oil"> Dầu láp (Gear Oil)
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="air_filter"> Lọc gió
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="spark_plug"> Bugi
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="brake_pads"> Má phanh / Đĩa
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="coolant"> Nước làm mát
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="belt_chain"> Dây curoa / Nhông xích
-                                    </label>
-                                    <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="checkbox" class="s-item-checkbox" value="cvt_injector"> Vệ sinh nồi / Kim phun
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div class="form-group">
-                                    <label class="form-label">Tổng chi phí (VNĐ)</label>
-                                    <input type="number" id="sCostInput" class="form-control" placeholder="0">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Gara / Tiệm sửa</label>
-                                    <input type="text" id="sGarageInput" class="form-control" placeholder="VD: Head Honda, Tiệm quen...">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Ghi chú chi tiết</label>
-                                <textarea id="sNotesInput" class="form-control" rows="2" placeholder="Ghi chú thêm về thương hiệu phụ tùng, khuyến mãi..."></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
-                            <button type="button" class="btn btn-outline" onclick="closeModal('vehicleServiceModal')">Hủy</button>
-                            <button type="submit" class="btn btn-primary" style="background-color: #f59e0b; border: none;">Lưu nhật ký bảo dưỡng</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Modal 3: Thêm Nhật Ký Đổ Xăng -->
-            <div class="modal-overlay health-theme-overlay" id="vehicleFuelModal" style="display: none;">
-                <div class="modal-container health-modal-container" style="width: 420px; max-width: 95%;">
-                    <div class="modal-header health-modal-header">
-                        <h3 class="modal-title">
-                            <i data-lucide="fuel" style="color: #f59e0b;"></i>
-                            <span>Ghi Nhận Lần Đổ Xăng</span>
-                        </h3>
-                        <button type="button" class="close-btn" onclick="closeModal('vehicleFuelModal')">&times;</button>
-                    </div>
-                    <form id="vehicleFuelForm">
-                        <div class="modal-body" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div class="form-group">
-                                    <label class="form-label">Ngày đổ xăng</label>
-                                    <input type="date" id="fDateInput" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Odometer (Km)</label>
-                                    <input type="number" id="fOdoInput" class="form-control" placeholder="Km hiện tại" required>
-                                </div>
-                            </div>
-
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div class="form-group">
-                                    <label class="form-label">Số lít đổ (L)</label>
-                                    <input type="number" step="0.01" id="fLitersInput" class="form-control" placeholder="VD: 4.5" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Số tiền (VNĐ)</label>
-                                    <input type="number" id="fCostInput" class="form-control" placeholder="VD: 100000" required>
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                <input type="checkbox" id="fFullTankCheck" style="width: 18px; height: 18px;" checked>
-                                <label for="fFullTankCheck" style="margin: 0; cursor: pointer; font-size: 0.9rem;">
-                                    Đổ đầy bình (Cần thiết để tính chỉ số Lít/100km chính xác)
-                                </label>
-                            </div>
-                        </div>
-                        <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px;">
-                            <button type="button" class="btn btn-outline" onclick="closeModal('vehicleFuelModal')">Hủy</button>
-                            <button type="submit" class="btn btn-primary" style="background-color: #f59e0b; border: none;">Lưu lần đổ xăng</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
         </main>
     </div>
 
@@ -2291,7 +1906,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.7.1" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.126" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2359,20 +1974,6 @@
                         <i data-lucide="chevron-right"></i>
                     </div>
                 </a>
-
-                <!-- Card 5: Chăm sóc xe -->
-                <a href="#chamsocxe" class="home-card card-vehicle" id="homeCardVehicle" style="display: none;">
-                    <div class="home-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25);">
-                        <i data-lucide="wrench"></i>
-                    </div>
-                    <div class="home-card-content">
-                        <h3>Chăm sóc xe</h3>
-                        <p>Theo dõi lịch bảo dưỡng, nhắc nhở thay dầu máy, nhật ký sửa chữa & đổ xăng theo chuyên gia</p>
-                    </div>
-                    <div class="home-card-arrow">
-                        <i data-lucide="chevron-right"></i>
-                    </div>
-                </a>
             </div>
         </div>
     </div>
@@ -2400,11 +2001,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.7.1';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.116';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.7.1';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.116';
                         }
                     })();
                 </script>
@@ -2603,7 +2204,7 @@
 
 
     <!-- Add/Edit Received Gift Modal -->
-    <div class="modal-overlay" id="receivedModal" style="display: none;">
+    <div class="modal-overlay" id="receivedModal">
         <div class="modal-container">
             <div class="modal-header">
                 <h2 id="receivedModalTitle">Thêm khoản tiền tôi nhận</h2>
@@ -2710,7 +2311,7 @@
     </div>
 
     <!-- Add/Edit Sent Gift Modal -->
-    <div class="modal-overlay" id="sentModal" style="display: none;">
+    <div class="modal-overlay" id="sentModal">
         <div class="modal-container">
             <div class="modal-header">
                 <h2 id="sentModalTitle">Thêm khoản tiền tôi mừng</h2>
@@ -2806,7 +2407,7 @@
     </div>
 
     <!-- Quick Add Chooser Modal -->
-    <div class="modal-overlay" id="quickAddModal" style="display: none;">
+    <div class="modal-overlay" id="quickAddModal">
         <div class="modal-container" style="width: 360px;">
             <div class="modal-header">
                 <h2>Thêm ghi chép mới</h2>
@@ -2830,7 +2431,7 @@
     </div>
 
     <!-- Quick Import from Notes Modal -->
-    <div class="modal-overlay" id="importNotesModal" style="display: none;">
+    <div class="modal-overlay" id="importNotesModal">
         <div class="modal-container" style="width: 600px; max-width: 95%;">
             <div class="modal-header">
                 <h2>Nhập nhanh từ Ghi chú (v2.7.2)</h2>
@@ -3113,7 +2714,7 @@
     <div class="modal-overlay health-theme-overlay" id="healthProfilesModal" style="display: none;">
         <div class="modal-container health-modal-container" style="width: 500px; max-width: 95%;">
             <div class="modal-header health-modal-header">
-                <h3 class="modal-title">
+                <h3 class="health-modal-title">
                     <i data-lucide="users"></i>
                     <span>Quản lý Thành viên Gia đình</span>
                 </h3>
@@ -3230,7 +2831,7 @@
     <div class="modal-overlay health-theme-overlay" id="healthBpAnalysisChoiceModal" style="display: none; z-index: 1050;">
         <div class="modal-container health-modal-container" style="width: 480px; max-width: 95%;">
             <div class="modal-header health-modal-header">
-                <h3 class="modal-title">
+                <h3 class="health-modal-title">
                     <i data-lucide="sparkles"></i>
                     <span>Tùy chọn Phân tích Sức khỏe</span>
                 </h3>
@@ -3873,12 +3474,12 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- On-Screen Debug Console -->
-    <div id="debugConsoleToggleBtn" class="debug-console-toggle-btn" style="display: none; position: fixed; bottom: 20px; left: 20px; z-index: 999998; cursor: pointer;">
+    <div id="debugConsoleToggleBtn" class="debug-console-toggle-btn" style="display: none;">
         <i data-lucide="bug"></i>
         <span id="debugConsoleBadge" class="badge" style="display: none;">0</span>
     </div>
     
-    <div id="debugConsolePanel" class="debug-console-panel" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 320px; z-index: 999999; flex-direction: column; background: var(--bg-secondary, #0f1626); border-top: 1px solid var(--border-color); box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);">
+    <div id="debugConsolePanel" class="debug-console-panel">
         <div class="debug-console-header">
             <div class="debug-console-title">
                 <i data-lucide="bug" style="width: 16px; height: 16px; color: #f43f5e;"></i>
@@ -3909,16 +3510,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.6.4"></script>
-    <script type="module" src="src/core/app.js?v=4.6.4"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.6.4"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.6.4"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.138"></script>
+    <script type="module" src="src/core/app.js?v=4.3.138"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.138"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.138"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.6.4')
+                navigator.serviceWorker.register('./sw.js?v=4.3.138')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
@@ -3970,10 +3571,8 @@
             
             if (toggleBtn && panel) {
                 toggleBtn.addEventListener('click', () => {
-                    const isOpening = (panel.style.display === 'none' || getComputedStyle(panel).display === 'none');
-                    if (isOpening) {
-                        panel.style.display = 'flex';
-                        panel.classList.add('active');
+                    panel.classList.toggle('active');
+                    if (panel.classList.contains('active')) {
                         // Call layout diagnostics to log them to console before rendering
                         if (typeof window.runLayoutDiagnostics === 'function') {
                             window.runLayoutDiagnostics();
@@ -3989,16 +3588,12 @@
                         // Reset error badge count when opened
                         window.__famiLifeErrorCount = 0;
                         updateDebugBadge();
-                    } else {
-                        panel.style.display = 'none';
-                        panel.classList.remove('active');
                     }
                 });
             }
             
             if (closeBtn && panel) {
                 closeBtn.addEventListener('click', () => {
-                    panel.style.display = 'none';
                     panel.classList.remove('active');
                 });
             }

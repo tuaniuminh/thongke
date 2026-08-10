@@ -2,18 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.7.1';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.7.1';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.7.1';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.7.1';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.138';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.138';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.138';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.138';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.7.1';
-import * as sync from './sync.js?v=4.7.1';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.7.1';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.7.1';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.7.1';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.138';
+import * as sync from './sync.js?v=4.3.138';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.138';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.138';
 
-const APP_VERSION = '4.7.1';
+const APP_VERSION = '4.3.138';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -24,7 +23,7 @@ const BUILD_SUPABASE_URL = 'VITE_SUPABASE_URL_PLACEHOLDER';
 const BUILD_SUPABASE_ANON_KEY = 'VITE_SUPABASE_ANON_KEY_PLACEHOLDER';
 
 // Helper to check and retrieve Supabase connection credentials
-// v4.6.4: Xóa localStorage fallback (supabase_url/supabase_key).
+// v4.2.88: Xóa localStorage fallback (supabase_url/supabase_key).
 // Chỉ dùng build-time injection. Dọn sạch key cũ nếu còn tồn tại.
 function getSupabaseConfig() {
     if (localStorage.getItem('supabase_disabled') === 'true') {
@@ -84,14 +83,6 @@ let state = {
     showImportNotesOptionUpdated: '',
     showFamilyFundCard: false,
     showFamilyFundCardUpdated: '',
-    showVehicleCareCard: false,
-    showVehicleCareCardUpdated: '',
-    vehicles: [],
-    vehiclesUpdated: '',
-    vehicleServices: [],
-    vehicleServicesUpdated: '',
-    vehicleFuelLogs: [],
-    vehicleFuelLogsUpdated: '',
     showLoveWidget: true,
     showLoveWidgetUpdated: '',
     weLoveStartDate: '',
@@ -139,7 +130,7 @@ let state = {
     theme: 'light',
     familyFundInviteStatus: '',
     familyFundInviteStatusUpdated: '',
-    spouseRole: 'husband',
+    spouseRole: 'wife',
     ownerNickname: '',
     spouseStatus: '',
     mobileViewMode: 'cards',
@@ -185,13 +176,13 @@ let customEventsEditMode = false;
 // --- Helper Functions ---
 
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.6.4)
+// 🔐 SECURE PIN STORAGE — Wrap Key + IndexedDB (v4.2.85)
 // Thay thế plain-text PIN trong localStorage bằng cơ chế 2 lớp:
 //   - localStorage: chỉ lưu encrypted PIN (ciphertext vô dụng nếu không có wrap key)
 //   - IndexedDB:    lưu wrap key dạng CryptoKey {extractable: false} — JS không thể đọc giá trị thực
 // ============================================================
 // ============================================================
-// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.6.4)
+// 🔐 SECURE PIN STORAGE — Multi-layer (IndexedDB WrapKey + Device-Salt Fallback) (v4.3.22)
 //   - Lớp 1: IndexedDB (lưu WrapKey CryptoKey non-extractable) + localStorage (encrypted PIN)
 //   - Lớp 2: Device-Salt AES-GCM Fallback trong localStorage (đảm bảo 100% hoạt động trên iOS WKWebView/Capacitor khi IDB bị chậm/fail)
 // ============================================================
@@ -818,14 +809,6 @@ async function saveLocalState() {
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
         showFamilyFundCard: !!state.showFamilyFundCard,
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
-        showVehicleCareCard: !!state.showVehicleCareCard,
-        showVehicleCareCardUpdated: state.showVehicleCareCardUpdated || '',
-        vehicles: state.vehicles || [],
-        vehiclesUpdated: state.vehiclesUpdated || '',
-        vehicleServices: state.vehicleServices || [],
-        vehicleServicesUpdated: state.vehicleServicesUpdated || '',
-        vehicleFuelLogs: state.vehicleFuelLogs || [],
-        vehicleFuelLogsUpdated: state.vehicleFuelLogsUpdated || '',
         showLoveWidget: state.showLoveWidget !== false,
         showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
         weLoveStartDate: state.weLoveStartDate || '',
@@ -864,7 +847,7 @@ async function saveLocalState() {
         googleSheetsWebhook: state.googleSheetsWebhook || '',
         familyFundInviteStatus: state.familyFundInviteStatus || '',
         familyFundInviteStatusUpdated: state.familyFundInviteStatusUpdated || '',
-        spouseRole: state.spouseRole || 'husband',
+        spouseRole: state.spouseRole || 'wife',
         ownerNickname: state.ownerNickname || '',
         spouseStatus: state.spouseStatus || '',
         viewingSharedFund: !!state.viewingSharedFund,
@@ -939,14 +922,6 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = '';
         state.showFamilyFundCard = false;
         state.showFamilyFundCardUpdated = '';
-        state.showVehicleCareCard = false;
-        state.showVehicleCareCardUpdated = '';
-        state.vehicles = [];
-        state.vehiclesUpdated = '';
-        state.vehicleServices = [];
-        state.vehicleServicesUpdated = '';
-        state.vehicleFuelLogs = [];
-        state.vehicleFuelLogsUpdated = '';
         state.showLoveWidget = true;
         state.showLoveWidgetUpdated = '';
         state.weLoveStartDate = '';
@@ -990,7 +965,7 @@ export async function loadLocalState(password) {
         state.healthRemindersUpdated = '';
         state.familyFundInviteStatus = '';
         state.familyFundInviteStatusUpdated = '';
-        state.spouseRole = 'husband';
+        state.spouseRole = 'wife';
         state.ownerNickname = '';
         state.spouseStatus = '';
         state.viewingSharedFund = false;
@@ -1029,14 +1004,6 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
         state.showFamilyFundCard = !!data.showFamilyFundCard;
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
-        state.showVehicleCareCard = !!data.showVehicleCareCard;
-        state.showVehicleCareCardUpdated = data.showVehicleCareCardUpdated || '';
-        state.vehicles = data.vehicles || [];
-        state.vehiclesUpdated = data.vehiclesUpdated || '';
-        state.vehicleServices = data.vehicleServices || [];
-        state.vehicleServicesUpdated = data.vehicleServicesUpdated || '';
-        state.vehicleFuelLogs = data.vehicleFuelLogs || [];
-        state.vehicleFuelLogsUpdated = data.vehicleFuelLogsUpdated || '';
         state.showLoveWidget = data.showLoveWidget !== false;
         state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
         state.weLoveStartDate = data.weLoveStartDate || '';
@@ -1080,14 +1047,10 @@ export async function loadLocalState(password) {
         state.healthRemindersUpdated = data.healthRemindersUpdated || '';
         state.familyFundInviteStatus = data.familyFundInviteStatus || '';
         state.familyFundInviteStatusUpdated = data.familyFundInviteStatusUpdated || '';
-        state.spouseRole = data.spouseRole || 'husband';
+        state.spouseRole = data.spouseRole || 'wife';
         state.ownerNickname = data.ownerNickname || '';
         state.spouseStatus = data.spouseStatus || '';
         state.viewingSharedFund = data.viewingSharedFund || false;
-        if (!state.viewingSharedFund || !state.sharedFundSourceRow) {
-            state.spouseRole = 'husband';
-            state.viewingSharedFund = false;
-        }
         state.sharedFundOwnerEmail = data.sharedFundOwnerEmail || '';
         state.lastFullBackupDate = data.lastFullBackupDate || '';
         state.activeChartFundIds = data.activeChartFundIds || ['fund-main'];
@@ -1418,14 +1381,6 @@ async function performSync(silent = false) {
                     if (!isWifeViewingShared) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
-                        state.showVehicleCareCard = !!remoteData.showVehicleCareCard;
-                        state.showVehicleCareCardUpdated = remoteData.showVehicleCareCardUpdated || '';
-                        state.vehicles = remoteData.vehicles || [];
-                        state.vehiclesUpdated = remoteData.vehiclesUpdated || '';
-                        state.vehicleServices = remoteData.vehicleServices || [];
-                        state.vehicleServicesUpdated = remoteData.vehicleServicesUpdated || '';
-                        state.vehicleFuelLogs = remoteData.vehicleFuelLogs || [];
-                        state.vehicleFuelLogsUpdated = remoteData.vehicleFuelLogsUpdated || '';
                         state.showLoveWidget = remoteData.showLoveWidget !== false;
                         state.showLoveWidgetUpdated = remoteData.showLoveWidgetUpdated || '';
                         state.weLoveStartDate = remoteData.weLoveStartDate || '';
@@ -1582,14 +1537,6 @@ async function performSync(silent = false) {
                     if (remoteFundCardTime > localFundCardTime) {
                         state.showFamilyFundCard = !!remoteData.showFamilyFundCard;
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
-                    }
-
-                    // Merge showVehicleCareCard using LWW
-                    const localVehicleCardTime = state.showVehicleCareCardUpdated ? new Date(state.showVehicleCareCardUpdated).getTime() : 0;
-                    const remoteVehicleCardTime = remoteData.showVehicleCareCardUpdated ? new Date(remoteData.showVehicleCareCardUpdated).getTime() : 0;
-                    if (remoteVehicleCardTime > localVehicleCardTime) {
-                        state.showVehicleCareCard = !!remoteData.showVehicleCareCard;
-                        state.showVehicleCareCardUpdated = remoteData.showVehicleCareCardUpdated || '';
                     }
 
                     // Merge showLoveWidget using LWW (Last Write Wins)
@@ -1927,14 +1874,6 @@ async function performSync(silent = false) {
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
             showFamilyFundCard: !!state.showFamilyFundCard,
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
-            showVehicleCareCard: !!state.showVehicleCareCard,
-            showVehicleCareCardUpdated: state.showVehicleCareCardUpdated || '',
-            vehicles: state.vehicles || [],
-            vehiclesUpdated: state.vehiclesUpdated || '',
-            vehicleServices: state.vehicleServices || [],
-            vehicleServicesUpdated: state.vehicleServicesUpdated || '',
-            vehicleFuelLogs: state.vehicleFuelLogs || [],
-            vehicleFuelLogsUpdated: state.vehicleFuelLogsUpdated || '',
             showLoveWidget: state.showLoveWidget !== false,
             showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
             weLoveStartDate: state.weLoveStartDate || '',
@@ -2571,9 +2510,7 @@ const tabHashMapping = {
     'welove-admin': 'welove-admin',
     'gockyniem-admin': 'welove-admin',
     'welove-settings': 'welove-settings',
-    'gockyniem-settings': 'welove-settings',
-    'chamsocxe': 'vehicle',
-    'vehicle': 'vehicle'
+    'gockyniem-settings': 'welove-settings'
 };
 
 const tabIdToHash = {
@@ -2590,8 +2527,7 @@ const tabIdToHash = {
     'tc-management': 'quan-ly-thu-chi',
     'welove': 'gockyniem',
     'welove-admin': 'gockyniem-admin',
-    'welove-settings': 'gockyniem-settings',
-    'vehicle': 'chamsocxe'
+    'welove-settings': 'gockyniem-settings'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -2642,7 +2578,7 @@ function enterApp() {
 
 window.navigateToTab = function(tabId) {
     console.log(`[BUG DETECTOR] navigateToTab target: ${tabId}, current activeTab: ${state.activeTab}`);
-    if (state.viewingSharedFund && state.spouseRole === 'wife' && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
+    if (state.viewingSharedFund && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
         tabId = 'welove';
     }
 
@@ -2670,9 +2606,6 @@ window.navigateToTab = function(tabId) {
         }
         if (['welove', 'welove-admin', 'welove-settings'].includes(tId)) {
             return 'we-love';
-        }
-        if (['vehicle'].includes(tId)) {
-            return 'cham-soc-xe';
         }
         return 'other';
     }
@@ -2723,26 +2656,9 @@ function handleHashRoute() {
     }
 }
 
-function forceScrollToTop() {
-    if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-    }
-    const resetPos = () => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        if (document.documentElement) document.documentElement.scrollTop = 0;
-        if (document.body) document.body.scrollTop = 0;
-    };
-
-    resetPos();
-    requestAnimationFrame(resetPos);
-    [10, 30, 50, 100, 200, 350, 500].forEach(delay => setTimeout(resetPos, delay));
-}
-
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
     console.log(`[BUG DETECTOR] switchTab START target: ${tabId}, current activeTab: ${state.activeTab}, updateHash: ${updateHash}`);
-    forceScrollToTop();
-    
     // Tự động đóng Lightbox nếu đang mở và mở khóa cuộn nền khi chuyển tab
     if (typeof window.closeWeLoveLightbox === 'function') {
         window.closeWeLoveLightbox();
@@ -2758,7 +2674,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     }
 
     // Ngăn chặn thành viên (Vợ/Spouse) truy cập các tab cấu hình và lịch nhắc của WeLove
-    if (state.viewingSharedFund && state.spouseRole === 'wife' && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
+    if (state.viewingSharedFund && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
         tabId = 'welove';
     }
     
@@ -2766,9 +2682,8 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     const isAppLayoutHidden = appLayoutCheck && (getComputedStyle(appLayoutCheck).display === 'none');
     
     if (state.activeTab === tabId && !isAppLayoutHidden && tabId !== 'home' && tabId !== 'trangchu') {
-        console.log(`[BUG DETECTOR] switchTab ALREADY ACTIVE & VISIBLE (${tabId}). Ensuring navbar visibility and scroll reset.`);
+        console.log(`[BUG DETECTOR] switchTab ALREADY ACTIVE & VISIBLE (${tabId}). Ensuring navbar visibility.`);
         updateSidebarNavVisibility(tabId);
-        forceScrollToTop();
         return; // Guard against sluggish double rendering / loops
     }
     
@@ -2803,10 +2718,8 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
             || (panel.id === 'tab-health' && (tabId === 'health' || tabId === 'health-reminders'))
         ) {
             panel.style.display = 'block';
-            panel.classList.add('active');
         } else {
             panel.style.display = 'none';
-            panel.classList.remove('active');
         }
     });
 
@@ -2822,8 +2735,6 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     }
     
     updateHomeLayoutUI();
-    void document.body.offsetHeight;
-    forceScrollToTop();
     
     // Toggle sticky class on sidebar for desktop when in health tab
     const sidebar = document.querySelector('.sidebar');
@@ -2848,8 +2759,6 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
             title.className = 'theme-fund';
         } else if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) {
             title.className = 'theme-welove';
-        } else if (tabId === 'vehicle') {
-            title.className = 'theme-vehicle';
         } else if (tabId === 'settings') {
             title.className = 'theme-settings';
         }
@@ -2914,16 +2823,6 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = 'Quản lý';
         subtitle.innerText = 'Tùy chỉnh chức năng, quản lý sự kiện và xuất nhập dữ liệu';
         renderTcManagement();
-    } else if (tabId === 'vehicle') {
-        title.innerText = 'Chăm sóc xe';
-        subtitle.innerText = 'Theo dõi lịch bảo dưỡng, nhắc nhở thay dầu và chẩn đoán AI';
-        renderVehicleDashboard();
-    }
-    
-    // Toggle header action button for vehicle care
-    const btnAddVehicle = document.getElementById('btnAddVehicle');
-    if (btnAddVehicle) {
-        btnAddVehicle.style.display = (tabId === 'vehicle') ? 'inline-flex' : 'none';
     }
     
     if (updateHash) {
@@ -2953,7 +2852,15 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     
 
     
-
+    // Toggle Quick Add button based on active tab
+    const quickAddBtn = document.getElementById('quickAddBtn');
+    if (quickAddBtn) {
+        if (tabId === 'health' || tabId === 'health-reminders' || tabId === 'settings' || tabId === 'fund' || tabId === 'fund-history' || tabId === 'fund-management' || tabId === 'tc-management' || tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
+            quickAddBtn.style.display = 'none';
+        } else {
+            quickAddBtn.style.display = '';
+        }
+    }
     
     // Update mobile status bar theme color dynamically to match immersive pages
     if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
@@ -3394,10 +3301,6 @@ async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
 
-    if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-    }
-
     // Load lowPerfMode state and disable animations if active
     state.lowPerfMode = localStorage.getItem('fami_low_perf_mode') === 'true';
     if (state.lowPerfMode) {
@@ -3408,7 +3311,12 @@ async function initializeApp() {
         }
     }
 
-
+    // Load Desktop Home Layout Mode (list vs bento)
+    state.desktopHomeLayout = localStorage.getItem('familife_home_layout_desktop') || 'list';
+    if (state.desktopHomeLayout === 'bento') {
+        document.documentElement.classList.add('home-layout-bento');
+        document.body.classList.add('home-layout-bento');
+    }
 
     // Detect iOS/Capacitor native environment vs. web PWA
     const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
@@ -3818,14 +3726,6 @@ async function initializeApp() {
         });
     }
     
-    // [BUG DETECTOR] Scroll event tracker
-    window.addEventListener('scroll', (e) => {
-        const top = document.documentElement ? document.documentElement.scrollTop : window.scrollY;
-        if (top > 50) {
-            console.log(`[BUG DETECTOR] Scroll Event Detected! Target: ${e.target.tagName || 'window'}, scrollTop=${top}px`);
-        }
-    }, { passive: true });
-    
     // Gemini AI Settings listeners
     const saveGeminiBtn = document.getElementById('saveGeminiKeyBtn');
     if (saveGeminiBtn) {
@@ -3971,22 +3871,6 @@ async function initializeApp() {
         });
     }
 
-    const toggleShowVehicleCareCard = document.getElementById('toggleShowVehicleCareCard');
-    if (toggleShowVehicleCareCard) {
-        toggleShowVehicleCareCard.addEventListener('change', async (e) => {
-            state.showVehicleCareCard = e.target.checked;
-            state.showVehicleCareCardUpdated = new Date().toISOString();
-            await saveLocalState();
-            if (typeof updateHomeLayoutUI === 'function') {
-                updateHomeLayoutUI();
-            }
-            
-            if (sync.isConfigured() && await sync.getCurrentUser()) {
-                performSync(true);
-            }
-        });
-    }
-
     const toggleDebugConsole = document.getElementById('toggleDebugConsole');
     if (toggleDebugConsole) {
         toggleDebugConsole.addEventListener('change', (e) => {
@@ -4104,9 +3988,6 @@ async function initializeApp() {
 
     // Initialize Fund Bindings
     initFundBindings();
-
-    // Initialize Vehicle Care Bindings
-    initVehicleBindings();
 
     // Initialize Lucide Icons
     if (window.lucide) window.lucide.createIcons();
@@ -4546,78 +4427,6 @@ document.addEventListener('touchmove', (e) => {
     }
 }, { passive: false });
 
-// Auto-lock body scrolling whenever any modal/overlay is open across all cards
-let isLockingScroll = false;
-export function updateBodyScrollLock() {
-    if (typeof document === 'undefined' || isLockingScroll) return;
-    isLockingScroll = true;
-    try {
-        const activeModal = document.querySelector(
-            '.modal-overlay.active, .modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"], .welove-modal-overlay.active, .welove-modal-overlay[style*="display: flex"], .welove-modal-overlay[style*="display: block"], .setup-overlay[style*="display: flex"], .setup-overlay[style*="display: block"]'
-        );
-        const isBodyLocked = document.body.classList.contains('modal-open');
-        if (activeModal && !isBodyLocked) {
-            document.body.classList.add('modal-open');
-            document.documentElement.classList.add('modal-open');
-            document.body.style.overflow = 'hidden';
-            document.documentElement.style.overflow = 'hidden';
-        } else if (!activeModal && isBodyLocked) {
-            document.body.classList.remove('modal-open');
-            document.documentElement.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-        }
-    } finally {
-        isLockingScroll = false;
-    }
-}
-
-// Global modal helpers
-window.openModal = function(modalId) {
-    const el = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
-    if (el) {
-        el.classList.add('active');
-        el.style.display = 'flex';
-        updateBodyScrollLock();
-    }
-};
-
-window.closeModal = function(modalId) {
-    const el = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
-    if (el) {
-        el.classList.remove('active');
-        el.style.display = 'none';
-        updateBodyScrollLock();
-    }
-};
-
-// MutationObserver listening for DOM attribute changes on overlays to automatically lock/unlock scroll
-if (typeof document !== 'undefined') {
-    const initModalScrollLockObserver = () => {
-        updateBodyScrollLock();
-        let scrollLockRaf = null;
-        const observer = new MutationObserver(() => {
-            if (scrollLockRaf) cancelAnimationFrame(scrollLockRaf);
-            scrollLockRaf = requestAnimationFrame(() => {
-                if (!isLockingScroll) {
-                    updateBodyScrollLock();
-                }
-            });
-        });
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'class']
-        });
-    };
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initModalScrollLockObserver);
-    } else {
-        initModalScrollLockObserver();
-    }
-}
-
 
 
 
@@ -4693,33 +4502,7 @@ window.runLayoutDiagnostics = function() {
             `height=${el.offsetHeight || el.clientHeight}px, ` +
             `scrollTop=${el.scrollTop}px`);
     }
-
-    console.log("[BUG DETECTOR] --- MAIN CONTENT CHILDREN & TREE DIAGNOSTICS ---");
-    const mainContent = document.querySelector('.main-content');
-    if (mainContent) {
-        Array.from(mainContent.children).forEach(child => {
-            const style = window.getComputedStyle(child);
-            const rect = child.getBoundingClientRect();
-            console.log(`[BUG DETECTOR] MainChild [${child.tagName}#${child.id || child.className}]: ` +
-                `display=${style.display}, h=${rect.height.toFixed(1)}px, top=${rect.top.toFixed(1)}px, marginTop=${style.marginTop}, paddingTop=${style.paddingTop}, pos=${style.position}`);
-        });
-
-        const tabVehicle = document.getElementById('tab-vehicle');
-        if (tabVehicle) {
-            const vStyle = window.getComputedStyle(tabVehicle);
-            const vRect = tabVehicle.getBoundingClientRect();
-            console.log(`[BUG DETECTOR] #tab-vehicle: display=${vStyle.display}, h=${vRect.height.toFixed(1)}px, top=${vRect.top.toFixed(1)}px, marginTop=${vStyle.marginTop}, paddingTop=${vStyle.paddingTop}`);
-
-            Array.from(tabVehicle.children).forEach(vChild => {
-                const vcStyle = window.getComputedStyle(vChild);
-                const vcRect = vChild.getBoundingClientRect();
-                console.log(`[BUG DETECTOR] #tab-vehicle SubChild [${vChild.tagName}#${vChild.id || vChild.className}]: ` +
-                    `display=${vcStyle.display}, h=${vcRect.height.toFixed(1)}px, top=${vcRect.top.toFixed(1)}px, marginTop=${vcStyle.marginTop}, paddingTop=${vcStyle.paddingTop}`);
-            });
-        }
-    }
-
-    console.log("[BUG DETECTOR] --- DIAGNOSTICS COMPLETED ---");
+    console.log("[LayoutDiag] --- DIAGNOSTICS COMPLETED ---");
 };
 
 // Render TC Management tab (sync checkboxes)
@@ -4759,10 +4542,6 @@ async function handleFullBackup() {
             geminiApiKey: state.geminiApiKey,
             showImportNotesOption: state.showImportNotesOption,
             showFamilyFundCard: state.showFamilyFundCard,
-            showVehicleCareCard: state.showVehicleCareCard,
-            vehicles: state.vehicles,
-            vehicleServices: state.vehicleServices,
-            vehicleFuelLogs: state.vehicleFuelLogs,
             mobileViewMode: state.mobileViewMode,
             selectedHealthProfileId: state.selectedHealthProfileId,
             activeChartFundIds: state.activeChartFundIds,
@@ -4888,10 +4667,6 @@ async function handleFullRestore(file) {
         if (data.geminiApiKey) state.geminiApiKey = data.geminiApiKey;
         if (data.showImportNotesOption !== undefined) state.showImportNotesOption = data.showImportNotesOption;
         if (data.showFamilyFundCard !== undefined) state.showFamilyFundCard = data.showFamilyFundCard;
-        if (data.showVehicleCareCard !== undefined) state.showVehicleCareCard = data.showVehicleCareCard;
-        if (data.vehicles) state.vehicles = data.vehicles;
-        if (data.vehicleServices) state.vehicleServices = data.vehicleServices;
-        if (data.vehicleFuelLogs) state.vehicleFuelLogs = data.vehicleFuelLogs;
         if (data.mobileViewMode) state.mobileViewMode = data.mobileViewMode;
         if (data.selectedHealthProfileId) state.selectedHealthProfileId = data.selectedHealthProfileId;
         if (data.activeChartFundIds) state.activeChartFundIds = data.activeChartFundIds;
@@ -5019,11 +4794,6 @@ const CARD_NAV_REGISTRY = {
         logoThemeClass: 'theme-fund',
         allowedNavs: ['home', 'fund', 'fund-history', 'fund-management', 'settings']
     },
-    'vehicle': {
-        logoText: 'Chăm Sóc Xe',
-        logoThemeClass: 'theme-vehicle',
-        allowedNavs: ['home', 'vehicle', 'settings']
-    },
     'settings': {
         logoText: 'Cài Đặt',
         logoThemeClass: 'theme-settings',
@@ -5035,7 +4805,6 @@ function getCardKeyForTab(tabId) {
     if (['health', 'health-reminders'].includes(tabId)) return 'health';
     if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) return 'welove';
     if (['fund', 'fund-history', 'fund-management'].includes(tabId)) return 'fund';
-    if (tabId === 'vehicle') return 'vehicle';
     if (tabId === 'settings') return 'settings';
     if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) return 'thuchi';
     return 'default';
@@ -5193,7 +4962,7 @@ function updateMobileNavbar(tabId) {
             </div>
         `;
     } else if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
-        const isSpouse = !!(state.viewingSharedFund && state.spouseRole === 'wife');
+        const isSpouse = !!state.viewingSharedFund;
         if (!isSpouse) {
             mobileNavbar.classList.add('two-line');
         }
@@ -5251,29 +5020,6 @@ function updateMobileNavbar(tabId) {
                 </div>
             `;
         }
-    } else if (tabId === 'vehicle') {
-        if (pageTitleBlock) {
-            pageTitleBlock.classList.add('mobile-hide-title');
-        }
-        
-        const currentLogoSrc = state.theme === 'light' 
-            ? 'src/assets/images/icon-light.png' 
-            : 'src/assets/images/icon.png';
-
-        mobileNavbar.innerHTML = `
-            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
-                <div class="mobile-navbar-logo">
-                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
-                </div>
-                <span class="mobile-navbar-title theme-vehicle" id="mobileNavbarTitle">Chăm Sóc Xe</span>
-            </div>
-            <div class="mobile-navbar-right" id="mobileNavbarNav">
-                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
-                    <i data-lucide="home"></i>
-                    <span class="btn-label">Trang chủ</span>
-                </button>
-            </div>
-        `;
     } else {
         mobileNavbar.classList.add('two-line');
         
@@ -5317,7 +5063,7 @@ function updateMobileNavbar(tabId) {
 }
 
 // ============================================================
-// NOTIFICATION SETTINGS CONTROLLER (v4.6.4)
+// NOTIFICATION SETTINGS CONTROLLER (v4.3.24)
 // ============================================================
 function initNotificationSettingsUI() {
     const webhookInput = document.getElementById('notificationWebhookInput');
@@ -5531,14 +5277,6 @@ export async function clearAllStateData() {
     state.showImportNotesOptionUpdated = '';
     state.showFamilyFundCard = false;
     state.showFamilyFundCardUpdated = '';
-    state.showVehicleCareCard = false;
-    state.showVehicleCareCardUpdated = '';
-    state.vehicles = [];
-    state.vehiclesUpdated = '';
-    state.vehicleServices = [];
-    state.vehicleServicesUpdated = '';
-    state.vehicleFuelLogs = [];
-    state.vehicleFuelLogsUpdated = '';
     state.showLoveWidget = true;
     state.showLoveWidgetUpdated = '';
     state.weLoveStartDate = '';
@@ -5593,8 +5331,39 @@ export async function clearAllStateData() {
     await saveLocalState();
 }
 
-function initDesktopHomeLayoutSettingsUI() {}
-function setDesktopHomeLayoutMode(mode) {}
+function initDesktopHomeLayoutSettingsUI() {
+    const radioList = document.getElementById('layoutModeList');
+    const radioBento = document.getElementById('layoutModeBento');
+    if (!radioList || !radioBento) return;
+
+    const currentLayout = state.desktopHomeLayout || 'list';
+    if (currentLayout === 'bento') {
+        radioBento.checked = true;
+    } else {
+        radioList.checked = true;
+    }
+
+    radioList.onchange = () => setDesktopHomeLayoutMode('list');
+    radioBento.onchange = () => setDesktopHomeLayoutMode('bento');
+}
+
+function setDesktopHomeLayoutMode(mode) {
+    state.desktopHomeLayout = mode;
+    localStorage.setItem('familife_home_layout_desktop', mode);
+    if (mode === 'bento') {
+        document.documentElement.classList.add('home-layout-bento');
+        document.body.classList.add('home-layout-bento');
+        if (typeof showToast === 'function') {
+            showToast('🍱 Đã chuyển sang giao diện Bento Grid 3 cột trên máy tính!');
+        }
+    } else {
+        document.documentElement.classList.remove('home-layout-bento');
+        document.body.classList.remove('home-layout-bento');
+        if (typeof showToast === 'function') {
+            showToast('📄 Đã chuyển sang giao diện 1 cột truyền thống!');
+        }
+    }
+}
 window.initDesktopHomeLayoutSettingsUI = initDesktopHomeLayoutSettingsUI;
 window.setDesktopHomeLayoutMode = setDesktopHomeLayoutMode;
 
