@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.7.0';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.7.0';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.7.0';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.7.0';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.7.1';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.7.1';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.7.1';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.7.1';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.7.0';
-import * as sync from './sync.js?v=4.7.0';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.7.0';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.7.0';
-import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.7.0';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.7.1';
+import * as sync from './sync.js?v=4.7.1';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.7.1';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.7.1';
+import { initVehicleBindings, renderVehicleDashboard } from '../features/cham-soc-xe/cham-soc-xe.js?v=4.7.1';
 
-const APP_VERSION = '4.7.0';
+const APP_VERSION = '4.7.1';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4595,10 +4595,14 @@ window.closeModal = function(modalId) {
 if (typeof document !== 'undefined') {
     const initModalScrollLockObserver = () => {
         updateBodyScrollLock();
+        let scrollLockRaf = null;
         const observer = new MutationObserver(() => {
-            if (!isLockingScroll) {
-                updateBodyScrollLock();
-            }
+            if (scrollLockRaf) cancelAnimationFrame(scrollLockRaf);
+            scrollLockRaf = requestAnimationFrame(() => {
+                if (!isLockingScroll) {
+                    updateBodyScrollLock();
+                }
+            });
         });
         observer.observe(document.body, {
             childList: true,
