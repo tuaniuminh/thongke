@@ -1347,13 +1347,29 @@ body.dark-mode .partner-name {
   filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.4));
 }
 
+/* Giảm khoảng cách dưới Navbar trên di động khi ở mục WeLove */
+body.active-tab-welove .mobile-navbar,
+body.active-tab-welove-admin .mobile-navbar,
+body.active-tab-welove-settings .mobile-navbar {
+  margin-bottom: 0.5rem !important;
+}
+
 /* Tối ưu hóa hiển thị trên di động */
 @media (max-width: 768px) {
   .memory-page {
     padding-top: 0.8rem;
   }
   .partner-name {
-    font-size: 1.3rem;
+    font-size: 1.3rem; /* Fallback */
+  }
+  .partner-name.name-short {
+    font-size: 1.6rem; /* Tên ngắn (<= 2 chữ) */
+  }
+  .partner-name.name-medium {
+    font-size: 1.3rem; /* Tên vừa (3 chữ) */
+  }
+  .partner-name.name-long {
+    font-size: 1.1rem; /* Tên dài (>= 4 chữ) */
   }
   .couple-names-header {
     margin-top: 0;

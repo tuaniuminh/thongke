@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.143';
-import * as sync from '../../core/sync.js?v=4.3.143';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.143';
+} from '../../core/app.js?v=4.3.144';
+import * as sync from '../../core/sync.js?v=4.3.144';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.144';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.143');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.144');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.143';
+        const logoPath = './logo_pwa_small.png?v=4.3.144';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.143';
+    const logoPath = './logo_pwa_small.png?v=4.3.144';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -864,11 +864,28 @@ export async function renderWeLoveDashboard() {
         <div class="memory-page ${isModern ? 'layout-modern' : ''}" id="weLovePage">
 
             <!-- Couple Names Header under Navbar -->
-            <div class="couple-names-header">
-                <span class="partner-name name-left">${escapeHTML(state.weLoveName1 || 'Anh')}</span>
-                <span class="pulsing-heart-red" style="display: inline-block; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6)); line-height: 1;">❤️</span>
-                <span class="partner-name name-right">${escapeHTML(state.weLoveName2 || 'Em')}</span>
-            </div>
+            <!-- Tự động nhận diện độ dài tên để áp dụng kích thước chữ phù hợp trên Mobile -->
+            ${(() => {
+                const name1 = state.weLoveName1 || 'Anh';
+                const name2 = state.weLoveName2 || 'Em';
+                const wordCount1 = name1.trim().split(/\s+/).length;
+                const wordCount2 = name2.trim().split(/\s+/).length;
+                const maxWords = Math.max(wordCount1, wordCount2);
+                const maxLen = Math.max(name1.length, name2.length);
+                let sizeClass = 'name-short';
+                if (maxWords >= 4 || maxLen > 15) {
+                    sizeClass = 'name-long';
+                } else if (maxWords === 3 || maxLen > 10) {
+                    sizeClass = 'name-medium';
+                }
+                return `
+                    <div class="couple-names-header">
+                        <span class="partner-name name-left ${sizeClass}">${escapeHTML(name1)}</span>
+                        <span class="pulsing-heart-red" style="display: inline-block; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6)); line-height: 1;">❤️</span>
+                        <span class="partner-name name-right ${sizeClass}">${escapeHTML(name2)}</span>
+                    </div>
+                `;
+            })()}
 
             ${weLoveCurrentSubView === 'admin' && canEdit ? `
                 <!-- ADMIN SUBVIEW -->

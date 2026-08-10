@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.143';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.143';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.143';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.143';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.144';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.144';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.144';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.144';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.143';
-import * as sync from './sync.js?v=4.3.143';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.143';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.143';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.144';
+import * as sync from './sync.js?v=4.3.144';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.144';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.144';
 
-const APP_VERSION = '4.3.143';
+const APP_VERSION = '4.3.144';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -712,7 +712,7 @@ function isVersionNewer(latest, current) {
 }
 
 // Check for App Version Updates from version.json
-async function checkAppVersion(isManual = false) {
+async function checkAppVersion(isManual = false, noToast = false) {
     const isTauri = !!(window && window.__TAURI__);
     
     // Tải thông tin phiên bản mới nhất từ version.json online trên GitHub
@@ -750,8 +750,8 @@ async function checkAppVersion(isManual = false) {
     }
     
     if (!latestVersion) {
-        if (isManual) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật.", "error");
-        return false;
+        if (isManual && !noToast) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật.", "error");
+        return 'error';
     }
     
     const hasUpdate = isVersionNewer(latestVersion, APP_VERSION);
@@ -763,7 +763,7 @@ async function checkAppVersion(isManual = false) {
         } else {
             // Chạy tiến trình reload có param cho PWA Web
             if (isManual) {
-                showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
+                if (!noToast) showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
                 setTimeout(async () => {
                     await forceReloadApp(latestVersion);
                 }, 1000);
@@ -771,15 +771,15 @@ async function checkAppVersion(isManual = false) {
                 showUpdateNotification(latestVersion);
             }
         }
-        return true;
+        return 'has_update';
     } else {
-        if (isManual) {
+        if (isManual && !noToast) {
             showToast(isTauri 
                 ? `Ứng dụng Desktop đang ở phiên bản mới nhất (v${APP_VERSION}).`
                 : `Ứng dụng đang ở phiên bản mới nhất (v${APP_VERSION}).`
             );
         }
-        return false;
+        return 'no_update';
     }
 }
 
@@ -3997,16 +3997,49 @@ async function initializeApp() {
         btn.addEventListener('click', async (e) => {
             e.preventDefault();
             
-            const icon = btn.querySelector('i');
-            if (icon) icon.classList.add('spin-anim');
-            btn.disabled = true;
-            
-            await checkAppVersion(true);
-            
-            setTimeout(() => {
-                if (icon) icon.classList.remove('spin-anim');
-                btn.disabled = false;
-            }, 600);
+            const badgeSpan = btn.querySelector('.wizard-version-badge');
+            if (badgeSpan) {
+                const originalText = badgeSpan.textContent;
+                btn.disabled = true;
+                btn.classList.add('checking');
+                badgeSpan.innerHTML = `<span class="spin-icon">🔄</span> Đang kiểm tra...`;
+                
+                const result = await checkAppVersion(true, true);
+                
+                btn.classList.remove('checking');
+                
+                if (result === 'has_update') {
+                    btn.classList.add('latest');
+                    badgeSpan.innerHTML = `🎉 Đang tải bản mới...`;
+                } else if (result === 'error') {
+                    btn.classList.add('error');
+                    badgeSpan.innerHTML = `❌ Lỗi kết nối!`;
+                    setTimeout(() => {
+                        btn.classList.remove('error');
+                        badgeSpan.textContent = originalText;
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
+                    btn.classList.add('latest');
+                    badgeSpan.innerHTML = `✅ Đã mới nhất`;
+                    setTimeout(() => {
+                        btn.classList.remove('latest');
+                        badgeSpan.textContent = originalText;
+                        btn.disabled = false;
+                    }, 3000);
+                }
+            } else {
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.add('spin-anim');
+                btn.disabled = true;
+                
+                await checkAppVersion(true);
+                
+                setTimeout(() => {
+                    if (icon) icon.classList.remove('spin-anim');
+                    btn.disabled = false;
+                }, 600);
+            }
         });
     });
 

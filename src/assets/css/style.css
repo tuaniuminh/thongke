@@ -3447,6 +3447,41 @@ body.light-mode .version-badge-btn {
     transform: translateY(0);
 }
 
+/* Biểu tượng xoay khi check update */
+@keyframes badgeSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.version-badge-btn .spin-icon {
+    display: inline-block;
+    animation: badgeSpin 1.2s linear infinite;
+}
+
+/* Trạng thái Checking */
+.version-badge-btn.checking {
+    border-color: #f59e0b !important;
+    color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.08) !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Trạng thái Mới nhất (Latest) */
+.version-badge-btn.latest {
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Trạng thái Lỗi (Error) */
+.version-badge-btn.error {
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.08) !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.25) !important;
+}
+
+
 
 @media (max-width: 576px) {
     .version-badge-btn {
