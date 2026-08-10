@@ -1355,8 +1355,37 @@ body.dark-mode .partner-name {
   display: inline !important;
 }
 
+/* Mặc định ẩn trái tim desktop, hiện trái tim mobile */
+.desktop-only-heart {
+  display: none !important;
+}
+.mobile-only-heart {
+  display: inline-block !important;
+}
+
+/* Nổi bật mốc năm kỷ niệm */
+.milestone-highlight {
+  color: var(--accent-rose) !important;
+  font-weight: 800 !important;
+  font-size: 0.95rem;
+  margin: 0 2px;
+}
+
 /* Trên desktop (màn hình rộng > 768px) */
 @media (min-width: 769px) {
+  /* Ẩn trái tim mobile độc lập trên desktop */
+  .mobile-only-heart {
+    display: none !important;
+  }
+  
+  /* Hiện trái tim desktop lồng giữa tên */
+  .desktop-only-heart {
+    display: inline-block !important;
+    font-size: 5rem !important;
+    vertical-align: middle;
+    margin: 0 12px !important;
+  }
+  
   /* Ẩn hoàn toàn khung tên độc lập ở trên đầu trang trên desktop */
   .couple-names-header {
     display: none !important;
@@ -1371,13 +1400,13 @@ body.dark-mode .partner-name {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin: 0 auto;
+    margin: 0 auto 1.5rem auto;
     width: fit-content;
   }
   
   /* Style cho tên cặp đôi trên desktop bên trong card */
   .partner-name-desktop {
-    font-size: 2.2rem;
+    font-size: 2.8rem; /* To đẹp cân đối với trái tim to */
     font-weight: 800;
     letter-spacing: -0.03em;
     background: linear-gradient(135deg, #e11d48 0%, #ec4899 50%, #f43f5e 100%);
@@ -1389,17 +1418,6 @@ body.dark-mode .partner-name {
     background: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #fda4af 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-  }
-  
-  /* Trái tim đang đập nhỏ ở giữa tên */
-  .pulsing-heart-red-mini {
-    animation: heartBeatRed 1.2s infinite;
-    font-size: 2.2rem;
-    flex-shrink: 0;
-    display: inline-block;
-    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
-    line-height: 1;
-    margin: 0 4px;
   }
 }
 

@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.146';
-import * as sync from '../../core/sync.js?v=4.3.146';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.146';
+} from '../../core/app.js?v=4.3.147';
+import * as sync from '../../core/sync.js?v=4.3.147';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.147';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.146');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.147');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.146';
+        const logoPath = './logo_pwa_small.png?v=4.3.147';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.146';
+    const logoPath = './logo_pwa_small.png?v=4.3.147';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1013,12 +1013,12 @@ export async function renderWeLoveDashboard() {
                          <button class="notification-test-btn" id="weLoveNotificationTest" title="Thử nghiệm thông báo yêu thương">🔔</button>
                     `}
 
-                    <div class="heart-pulsing" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
+                    <div class="heart-pulsing mobile-only-heart" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
                     <h2 class="memory-title">
                         <span class="default-title">Kỷ Niệm Tình Yêu</span>
                         <span class="desktop-couple-title" style="display: none;">
                             <span class="partner-name-desktop">${escapeHTML(state.weLoveName1 || 'Anh')}</span>
-                            <span class="pulsing-heart-red-mini">❤️</span>
+                            <span class="heart-pulsing desktop-only-heart" id="weLovePulsingHeartDesktop" title="Nhấn vào màn hình để thả tim!">💝</span>
                             <span class="partner-name-desktop">${escapeHTML(state.weLoveName2 || 'Em')}</span>
                         </span>
                     </h2>
@@ -1072,7 +1072,7 @@ export async function renderWeLoveDashboard() {
                         return `
                             <div class="milestone-progress-container" style="margin-top: 1.25rem; margin-bottom: 0.5rem; text-align: left; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column;">
                                 <div class="milestone-header" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; width: 100%;">
-                                    <span class="milestone-title">🎯 Dấu mốc tiếp theo: ${nextMilestoneYears} năm</span>
+                                    <span class="milestone-title">🎯 Dấu mốc tiếp theo: <span class="milestone-highlight">${nextMilestoneYears} năm</span></span>
                                     <span class="milestone-remaining" style="color: var(--accent-rose);">Còn ${daysRemaining} ngày</span>
                                 </div>
                                 <div class="milestone-bar" style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; overflow: hidden; position: relative;">
@@ -1413,13 +1413,13 @@ function bindMemoryEvents() {
         });
     }
 
-    const heartPulse = document.getElementById('weLovePulsingHeart');
-    if (heartPulse) {
-        heartPulse.addEventListener('pointerdown', (e) => {
+    // Gán click listener cho cả hai trái tim (Mobile và Desktop)
+    document.querySelectorAll('.heart-pulsing').forEach(heart => {
+        heart.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
             showToast(`Gửi ngàn trái tim yêu thương gửi đến ${state.weLoveName2 || 'nửa kia'} xinh đẹp! 💕`);
         });
-    }
+    });
 
     const weLovePage = document.getElementById('weLovePage');
     if (weLovePage) {
