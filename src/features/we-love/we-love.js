@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.144';
-import * as sync from '../../core/sync.js?v=4.3.144';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.144';
+} from '../../core/app.js?v=4.3.145';
+import * as sync from '../../core/sync.js?v=4.3.145';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.145';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.144');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.145');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.144';
+        const logoPath = './logo_pwa_small.png?v=4.3.145';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.144';
+    const logoPath = './logo_pwa_small.png?v=4.3.145';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1029,19 +1029,46 @@ export async function renderWeLoveDashboard() {
 
                     ${(function() {
                         if (!state.weLoveStartDate) return '';
-                        const milestones = [100, 200, 365, 500, 730, 1000, 1500, 2000, 2500, 3000, 3650, 4000, 5000];
-                        const nextMilestone = milestones.find(m => m > loveDaysCount) || (Math.ceil(loveDaysCount / 1000) * 1000);
-                        const prevMilestone = [...milestones].reverse().find(m => m < loveDaysCount) || 0;
-                        const progressPercent = Math.min(100, Math.max(0, ((loveDaysCount - prevMilestone) / (nextMilestone - prevMilestone)) * 100));
-                        const daysRemaining = nextMilestone - loveDaysCount;
+                        
+                        const parts = state.weLoveStartDate.split('-');
+                        if (parts.length !== 3) return '';
+                        const sYear = parseInt(parts[0]);
+                        const sMonth = parseInt(parts[1]) - 1;
+                        const sDay = parseInt(parts[2]);
+                        
+                        const start = new Date(sYear, sMonth, sDay);
+                        const today = new Date();
+                        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        
+                        if (end < start) return '';
+                        
+                        let yearsElapsed = end.getFullYear() - start.getFullYear();
+                        let monthsElapsed = end.getMonth() - start.getMonth();
+                        let daysElapsed = end.getDate() - start.getDate();
+                        if (daysElapsed < 0) {
+                            monthsElapsed--;
+                        }
+                        if (monthsElapsed < 0) {
+                            yearsElapsed--;
+                        }
+                        
+                        const nextMilestoneYears = yearsElapsed + 1;
+                        const prevMilestoneDate = new Date(sYear + yearsElapsed, sMonth, sDay);
+                        const nextMilestoneDate = new Date(sYear + nextMilestoneYears, sMonth, sDay);
+                        
+                        const totalDaysInYear = Math.round((nextMilestoneDate.getTime() - prevMilestoneDate.getTime()) / (1000 * 60 * 60 * 24));
+                        const daysPassedSincePrev = Math.round((end.getTime() - prevMilestoneDate.getTime()) / (1000 * 60 * 60 * 24));
+                        const daysRemaining = Math.max(0, Math.round((nextMilestoneDate.getTime() - end.getTime()) / (1000 * 60 * 60 * 24)));
+                        
+                        const progressPercent = Math.min(100, Math.max(0, (daysPassedSincePrev / totalDaysInYear) * 100));
                         
                         return `
-                            <div class="milestone-progress-container" style="margin-top: 1.25rem; margin-bottom: 0.5rem; text-align: left; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600;">
-                                    <span>🎯 Dấu mốc tiếp theo: ${nextMilestone} ngày</span>
-                                    <span style="color: var(--accent-rose);">Còn ${daysRemaining} ngày</span>
+                            <div class="milestone-progress-container" style="margin-top: 1.25rem; margin-bottom: 0.5rem; text-align: left; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column;">
+                                <div class="milestone-header" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; width: 100%;">
+                                    <span class="milestone-title">🎯 Dấu mốc tiếp theo: ${nextMilestoneYears} năm</span>
+                                    <span class="milestone-remaining" style="color: var(--accent-rose);">Còn ${daysRemaining} ngày</span>
                                 </div>
-                                <div style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="milestone-bar" style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; overflow: hidden; position: relative;">
                                     <div style="width: ${progressPercent}%; height: 100%; background: linear-gradient(90deg, #f43f5e, #ec4899); border-radius: 4px; transition: width 1s ease-out;"></div>
                                 </div>
                             </div>

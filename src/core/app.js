@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.144';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.144';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.144';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.144';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.145';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.145';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.145';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.145';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.144';
-import * as sync from './sync.js?v=4.3.144';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.144';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.144';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.145';
+import * as sync from './sync.js?v=4.3.145';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.145';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.145';
 
-const APP_VERSION = '4.3.144';
+const APP_VERSION = '4.3.145';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4018,7 +4018,7 @@ async function initializeApp() {
                         btn.classList.remove('error');
                         badgeSpan.textContent = originalText;
                         btn.disabled = false;
-                    }, 3000);
+                    }, 1000);
                 } else {
                     btn.classList.add('latest');
                     badgeSpan.innerHTML = `✅ Đã mới nhất`;
@@ -4026,7 +4026,7 @@ async function initializeApp() {
                         btn.classList.remove('latest');
                         badgeSpan.textContent = originalText;
                         btn.disabled = false;
-                    }, 3000);
+                    }, 1000);
                 }
             } else {
                 const icon = btn.querySelector('i');

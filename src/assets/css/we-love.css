@@ -1375,6 +1375,29 @@ body.active-tab-welove-settings .mobile-navbar {
     margin-top: 0;
     gap: 8px;
   }
+  .milestone-progress-container .milestone-header {
+    display: contents !important;
+  }
+  .milestone-progress-container .milestone-title {
+    order: 1;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .milestone-progress-container .milestone-bar {
+    order: 2;
+    margin-bottom: 6px;
+  }
+  .milestone-progress-container .milestone-remaining {
+    order: 3;
+    display: block !important;
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--accent-rose);
+    font-weight: 600;
+    margin-top: 2px;
+  }
 }
 
 /* Custom active states for sidebar nav-links inside WeLove context on Desktop (overriding default green) */
