@@ -1514,7 +1514,7 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
 @media (min-width: 1024px) {
   .memory-page.layout-modern {
     display: grid !important;
-    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-columns: 0.9fr 1.1fr; /* Tối ưu tỷ lệ 4:6 cho Desktop, tạo không gian lớn cho Album */
     gap: 2.5rem;
     align-items: start;
     max-width: 1200px;
@@ -1540,15 +1540,14 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
   }
 }
 
-/* Page Background Enhancement: Apply to the WHOLE PAGE when WeLove tab is active */
-/* switchTab() already adds class active-tab-welove to both <html> and <body> */
+/* Page Background Enhancement: Pearlescent White, Warm Gray & Gold Champagne for Light Mode; Midnight Obsidian & Mystic Amethyst for Dark Mode */
 html.active-tab-welove.light-mode,
 html.active-tab-welove-admin.light-mode,
 html.active-tab-welove-settings.light-mode,
 html.active-tab-welove body.light-mode,
 html.active-tab-welove-admin body.light-mode,
 html.active-tab-welove-settings body.light-mode {
-  background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef3c7 100%) !important;
 }
 html.active-tab-welove:not(.light-mode),
 html.active-tab-welove-admin:not(.light-mode),
@@ -1556,18 +1555,18 @@ html.active-tab-welove-settings:not(.light-mode),
 html.active-tab-welove body:not(.light-mode),
 html.active-tab-welove-admin body:not(.light-mode),
 html.active-tab-welove-settings body:not(.light-mode) {
-  background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
+  background: linear-gradient(135deg, #020617 0%, #0f172a 35%, #1e1b4b 70%, #3b0764 100%) !important;
 }
 /* Also apply to body so it actually renders */
 body.active-tab-welove.light-mode,
 body.active-tab-welove-admin.light-mode,
 body.active-tab-welove-settings.light-mode {
-  background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef3c7 100%) !important;
 }
 body.active-tab-welove:not(.light-mode),
 body.active-tab-welove-admin:not(.light-mode),
 body.active-tab-welove-settings:not(.light-mode) {
-  background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
+  background: linear-gradient(135deg, #020617 0%, #0f172a 35%, #1e1b4b 70%, #3b0764 100%) !important;
 }
 /* Tab panel and memory-page are transparent so body gradient shows through */
 #tab-welove {
@@ -1580,55 +1579,61 @@ body.active-tab-welove-settings:not(.light-mode) {
   background: transparent !important;
 }
 
-/* Glassmorphic Frosted Card Styling */
+/* Glassmorphic Obsidian & Pearl Card Styling on Desktop */
 .memory-page.layout-modern .memory-card,
 .memory-page.layout-modern .welove-card {
-  background: rgba(255, 255, 255, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 20px 50px rgba(244, 63, 94, 0.08) !important;
+  background: rgba(255, 255, 255, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 20px 50px rgba(71, 85, 105, 0.05) !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .memory-card,
 body:not(.light-mode) .memory-page.layout-modern .welove-card {
-  background: rgba(17, 24, 39, 0.55) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35) !important;
 }
 
-/* Romantic Neon Rose Glow Hover Effects */
+/* Elegant Champagne Gold & Amethyst Purple Hover Effects */
 .memory-page.layout-modern .memory-card:hover,
 .memory-page.layout-modern .welove-card:hover {
-  border-color: rgba(244, 63, 94, 0.45) !important;
-  box-shadow: 0 20px 55px -10px rgba(244, 63, 94, 0.22), 
-              0 0 25px 0 rgba(244, 63, 94, 0.1) !important;
+  border-color: rgba(217, 119, 6, 0.35) !important;
+  box-shadow: 0 20px 55px -10px rgba(217, 119, 6, 0.15), 
+              0 0 25px 0 rgba(217, 119, 6, 0.05) !important;
   transform: translateY(-4px);
+}
+body:not(.light-mode) .memory-page.layout-modern .memory-card:hover,
+body:not(.light-mode) .memory-page.layout-modern .welove-card:hover {
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  box-shadow: 0 20px 55px -10px rgba(168, 85, 247, 0.2), 
+              0 0 25px 0 rgba(168, 85, 247, 0.08) !important;
 }
 
 /* Glow Heart Pulsing */
 .memory-page.layout-modern .heart-pulsing {
   font-size: 5.5rem !important;
-  filter: drop-shadow(0 0 20px rgba(244, 63, 94, 0.75)) !important;
+  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.5)) !important;
   margin-bottom: 0.5rem !important;
 }
 
-/* Premium Days Counter Text with glowing pink/rose gradient */
+/* Days Counter text styled with elegant Champagne Gold (Light) or Platinum Silver (Dark) */
 .memory-page.layout-modern .days-number {
   font-size: 7rem !important;
   font-weight: 900 !important;
   line-height: 1 !important;
-  background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%) !important;
+  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  filter: drop-shadow(0 4px 15px rgba(244, 63, 94, 0.35)) !important;
+  filter: drop-shadow(0 2px 8px rgba(180, 83, 9, 0.25)) !important;
   letter-spacing: -0.04em !important;
   margin-bottom: 0.5rem !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .days-number {
-  background: linear-gradient(135deg, #f43f5e 0%, #f472b6 50%, #d946ef 100%) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  filter: drop-shadow(0 4px 20px rgba(244, 63, 94, 0.65)) !important;
+  filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.15)) !important;
 }
 
 .memory-page.layout-modern .days-label {
@@ -1641,28 +1646,28 @@ body:not(.light-mode) .memory-page.layout-modern .days-number {
 
 .memory-page.layout-modern .detailed-duration {
   font-size: 0.9rem !important;
-  color: #e11d48 !important;
+  color: #b45309 !important;
   font-weight: 700 !important;
-  background: rgba(244, 63, 94, 0.06) !important;
+  background: rgba(217, 119, 6, 0.06) !important;
   padding: 6px 16px !important;
   border-radius: 20px !important;
   display: inline-block !important;
   margin-top: 0.5rem !important;
-  border: 1px solid rgba(244, 63, 94, 0.15) !important;
+  border: 1px solid rgba(217, 119, 6, 0.15) !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .detailed-duration {
-  background: rgba(244, 63, 94, 0.18) !important;
-  color: #fda4af !important;
-  border-color: rgba(244, 63, 94, 0.3) !important;
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #c084fc !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
 }
 
-/* Premium styled quote box */
+/* Notebook Styled Handwriting Quote Box */
 .memory-page.layout-modern .quote-container {
-  background: rgba(255, 255, 255, 0.45) !important;
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
   border-radius: 24px !important;
   padding: 1.5rem 2.5rem !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.01) !important;
   margin-top: 1.75rem !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .quote-container {
@@ -1671,18 +1676,36 @@ body:not(.light-mode) .memory-page.layout-modern .quote-container {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
 }
 
+.memory-page.layout-modern .quote-chinese {
+  opacity: 0.45 !important;
+  font-style: italic !important;
+  font-size: 0.82rem !important;
+}
+
+.memory-page.layout-modern .quote-vietnamese {
+  font-family: "Great Vibes", "Georgia", "Brush Script MT", cursive, serif !important;
+  font-size: 1.45rem !important;
+  font-style: italic !important;
+  color: #7c2d12 !important; /* màu nâu cam gỗ ấm áp */
+  line-height: 1.5 !important;
+  margin-top: 4px;
+}
+body:not(.light-mode) .memory-page.layout-modern .quote-vietnamese {
+  color: #e9d5ff !important; /* oải hương nhạt lãng mạn */
+}
+
 /* Premium Sickness stats circle */
 .memory-page.layout-modern .welove-heart-circle {
   width: 120px !important;
   height: 120px !important;
-  background: linear-gradient(135deg, #ff0844 0%, #ff8a9a 100%) !important;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
   border: 4px solid #fff !important;
-  box-shadow: 0 12px 35px rgba(244, 63, 94, 0.28) !important;
+  box-shadow: 0 12px 35px rgba(180, 83, 9, 0.22) !important;
 }
 body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle {
-  background: linear-gradient(135deg, #4c0519 0%, #be123c 100%) !important;
+  background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%) !important;
   border: 4px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 12px 35px rgba(225, 29, 72, 0.45) !important;
+  box-shadow: 0 12px 35px rgba(168, 85, 247, 0.35) !important;
 }
 
 .memory-page.layout-modern .welove-heart-circle .welove-count-num {
@@ -1700,9 +1723,15 @@ body:not(.light-mode) .memory-page.layout-modern .welove-heart-circle {
 
 /* Modern Round Buttons styles */
 .modern-round-btn:hover {
-  background: rgba(244, 63, 94, 0.12) !important;
-  border-color: rgba(244, 63, 94, 0.3) !important;
+  background: rgba(217, 119, 6, 0.12) !important;
+  border-color: rgba(217, 119, 6, 0.3) !important;
+  color: #b45309 !important;
   transform: scale(1.08);
+}
+body:not(.light-mode) .modern-round-btn:hover {
+  background: rgba(168, 85, 247, 0.15) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #c084fc !important;
 }
 
 /* Vô hiệu hóa position absolute của nút nhạc/chuông trong modern actions để tránh bị lệch */
