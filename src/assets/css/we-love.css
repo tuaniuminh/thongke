@@ -1349,10 +1349,14 @@ body.dark-mode .partner-name {
 
 /* Tối ưu hóa hiển thị trên di động */
 @media (max-width: 768px) {
+  .memory-page {
+    padding-top: 0.8rem;
+  }
   .partner-name {
     font-size: 1.3rem;
   }
   .couple-names-header {
+    margin-top: 0;
     gap: 8px;
   }
 }
@@ -1426,18 +1430,30 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
 /* Page Background Enhancement: Apply to the WHOLE PAGE when WeLove tab is active */
 /* switchTab() already adds class active-tab-welove to both <html> and <body> */
 html.active-tab-welove.light-mode,
-html.active-tab-welove body.light-mode {
+html.active-tab-welove-admin.light-mode,
+html.active-tab-welove-settings.light-mode,
+html.active-tab-welove body.light-mode,
+html.active-tab-welove-admin body.light-mode,
+html.active-tab-welove-settings body.light-mode {
   background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
 }
 html.active-tab-welove:not(.light-mode),
-html.active-tab-welove body:not(.light-mode) {
+html.active-tab-welove-admin:not(.light-mode),
+html.active-tab-welove-settings:not(.light-mode),
+html.active-tab-welove body:not(.light-mode),
+html.active-tab-welove-admin body:not(.light-mode),
+html.active-tab-welove-settings body:not(.light-mode) {
   background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
 }
 /* Also apply to body so it actually renders */
-body.active-tab-welove.light-mode {
+body.active-tab-welove.light-mode,
+body.active-tab-welove-admin.light-mode,
+body.active-tab-welove-settings.light-mode {
   background: linear-gradient(135deg, #ffe4e6 0%, #ffcbd1 50%, #fecdd3 100%) !important;
 }
-body.active-tab-welove:not(.light-mode) {
+body.active-tab-welove:not(.light-mode),
+body.active-tab-welove-admin:not(.light-mode),
+body.active-tab-welove-settings:not(.light-mode) {
   background: linear-gradient(135deg, #090d16 0%, #1e1b4b 35%, #31105e 70%, #4c0519 100%) !important;
 }
 /* Tab panel and memory-page are transparent so body gradient shows through */
