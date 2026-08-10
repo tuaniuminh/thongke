@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.150';
-import * as sync from '../../core/sync.js?v=4.3.150';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.150';
+} from '../../core/app.js?v=4.3.151';
+import * as sync from '../../core/sync.js?v=4.3.151';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.151';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.150');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.151');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.150';
+        const logoPath = './logo_pwa_small.png?v=4.3.151';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.150';
+    const logoPath = './logo_pwa_small.png?v=4.3.151';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -1021,7 +1021,7 @@ export async function renderWeLoveDashboard() {
 
                     <div class="heart-pulsing mobile-only-heart" id="weLovePulsingHeart" title="Nhấn vào màn hình để thả tim!">💝</div>
                     <h2 class="memory-title">
-                        <span class="default-title">Kỷ Niệm Tình Yêu</span>
+                        <span class="default-title">Tổng quan</span>
                         <span class="desktop-couple-title" style="display: none;">
                             <span class="partner-name-desktop">${escapeHTML(state.weLoveName1 || 'Anh')}</span>
                             <span class="heart-pulsing desktop-only-heart" id="weLovePulsingHeartDesktop" title="Nhấn vào màn hình để thả tim!">💝</span>
@@ -1107,10 +1107,10 @@ export async function renderWeLoveDashboard() {
                             <h3 class="welove-title">Album áº¢nh TÃ¬nh YÃªu</h3>
                         </div>
                         ${canEdit ? `
-                            <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quáº£n lÃ½ Album áº£nh">
+                            <button class="modern-round-btn album-manage-btn" id="btnWeLoveManageAlbum" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;" title="Quản lý Album ảnh">
                                 <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
                             </button>
-                        ` : '}
+                        ` : ''}
                     </div>
                     <div id="weLoveAlbumContainer" style="width: 100%; position: relative;">
                         <!-- populated by JS -->
