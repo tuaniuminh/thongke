@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.147';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.147';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.147';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.147';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.148';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.148';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.148';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.148';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.147';
-import * as sync from './sync.js?v=4.3.147';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.147';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.147';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.148';
+import * as sync from './sync.js?v=4.3.148';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.148';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.148';
 
-const APP_VERSION = '4.3.147';
+const APP_VERSION = '4.3.148';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -94,7 +94,9 @@ let state = {
     weLoveShowSickness: true,
     weLoveShowSicknessUpdated: '',
     weLoveDesktopLayout: 'traditional',
+    weLoveAlbumLayoutDesktop: 'slider',
     weLoveDesktopLayoutUpdated: '',
+    weLoveAlbumLayoutDesktopUpdated: '',
     weLovePhotoAlbum: [],
     weLovePhotoAlbumUpdated: '',
     weLoveSicknessLogs: [],
@@ -820,7 +822,13 @@ async function saveLocalState() {
         weLoveShowSickness: state.weLoveShowSickness !== false,
         weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
         weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
+        weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
         weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
+            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
+            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
+        weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
         weLovePhotoAlbum: state.weLovePhotoAlbum || [],
         weLovePhotoAlbumUpdated: state.weLovePhotoAlbumUpdated || '',
         weLoveSicknessLogs: state.weLoveSicknessLogs || [],
@@ -933,7 +941,9 @@ export async function loadLocalState(password) {
         state.weLoveShowSickness = true;
         state.weLoveShowSicknessUpdated = '';
         state.weLoveDesktopLayout = 'traditional';
+        state.weLoveAlbumLayoutDesktop = 'slider';
         state.weLoveDesktopLayoutUpdated = '';
+        state.weLoveAlbumLayoutDesktopUpdated = '';
         state.weLovePhotoAlbum = [];
         state.weLovePhotoAlbumUpdated = '';
         state.weLoveSicknessLogs = [];
@@ -1015,7 +1025,9 @@ export async function loadLocalState(password) {
         state.weLoveShowSickness = data.weLoveShowSickness !== false;
         state.weLoveShowSicknessUpdated = data.weLoveShowSicknessUpdated || '';
         state.weLoveDesktopLayout = data.weLoveDesktopLayout || 'traditional';
+        state.weLoveAlbumLayoutDesktop = data.weLoveAlbumLayoutDesktop || 'slider';
         state.weLoveDesktopLayoutUpdated = data.weLoveDesktopLayoutUpdated || '';
+        state.weLoveAlbumLayoutDesktopUpdated = data.weLoveAlbumLayoutDesktopUpdated || '';
         state.weLovePhotoAlbum = data.weLovePhotoAlbum || [];
         state.weLovePhotoAlbumUpdated = data.weLovePhotoAlbumUpdated || '';
         state.weLoveSicknessLogs = data.weLoveSicknessLogs || [];
@@ -1246,7 +1258,9 @@ async function performSync(silent = false) {
                                 remoteData.weLoveShowSickness = fundData.weLoveShowSickness !== false;
                                 remoteData.weLoveShowSicknessUpdated = fundData.weLoveShowSicknessUpdated || '';
                                 remoteData.weLoveDesktopLayout = fundData.weLoveDesktopLayout || 'traditional';
+                                remoteData.weLoveAlbumLayoutDesktop = fundData.weLoveAlbumLayoutDesktop || 'slider';
                                 remoteData.weLoveDesktopLayoutUpdated = fundData.weLoveDesktopLayoutUpdated || '';
+                                remoteData.weLoveAlbumLayoutDesktopUpdated = fundData.weLoveAlbumLayoutDesktopUpdated || '';
                                 remoteData.weLovePhotoAlbum = fundData.weLovePhotoAlbum || [];
                                 remoteData.weLovePhotoAlbumUpdated = fundData.weLovePhotoAlbumUpdated || '';
                                 remoteData.weLoveSicknessLogs = fundData.weLoveSicknessLogs || [];
@@ -1276,7 +1290,11 @@ async function performSync(silent = false) {
                                 remoteData.weLoveShowSickness = state.weLoveShowSickness;
                                 remoteData.weLoveShowSicknessUpdated = state.weLoveShowSicknessUpdated;
                                 remoteData.weLoveDesktopLayout = state.weLoveDesktopLayout;
+                            remoteData.weLoveAlbumLayoutDesktop = state.weLoveAlbumLayoutDesktop;
+                                remoteData.weLoveAlbumLayoutDesktop = state.weLoveAlbumLayoutDesktop;
                                 remoteData.weLoveDesktopLayoutUpdated = state.weLoveDesktopLayoutUpdated;
+                            remoteData.weLoveAlbumLayoutDesktopUpdated = state.weLoveAlbumLayoutDesktopUpdated;
+                                remoteData.weLoveAlbumLayoutDesktopUpdated = state.weLoveAlbumLayoutDesktopUpdated;
                                 remoteData.weLovePhotoAlbum = state.weLovePhotoAlbum;
                                 remoteData.weLovePhotoAlbumUpdated = state.weLovePhotoAlbumUpdated;
                                 remoteData.weLoveSicknessLogs = state.weLoveSicknessLogs;
@@ -1306,7 +1324,11 @@ async function performSync(silent = false) {
                             remoteData.weLoveShowSickness = state.weLoveShowSickness;
                             remoteData.weLoveShowSicknessUpdated = state.weLoveShowSicknessUpdated;
                             remoteData.weLoveDesktopLayout = state.weLoveDesktopLayout;
+                            remoteData.weLoveAlbumLayoutDesktop = state.weLoveAlbumLayoutDesktop;
+                                remoteData.weLoveAlbumLayoutDesktop = state.weLoveAlbumLayoutDesktop;
                             remoteData.weLoveDesktopLayoutUpdated = state.weLoveDesktopLayoutUpdated;
+                            remoteData.weLoveAlbumLayoutDesktopUpdated = state.weLoveAlbumLayoutDesktopUpdated;
+                                remoteData.weLoveAlbumLayoutDesktopUpdated = state.weLoveAlbumLayoutDesktopUpdated;
                             remoteData.weLovePhotoAlbum = state.weLovePhotoAlbum;
                             remoteData.weLovePhotoAlbumUpdated = state.weLovePhotoAlbumUpdated;
                             remoteData.weLoveSicknessLogs = state.weLoveSicknessLogs;
@@ -1392,7 +1414,9 @@ async function performSync(silent = false) {
                         state.weLoveShowSickness = remoteData.weLoveShowSickness !== false;
                         state.weLoveShowSicknessUpdated = remoteData.weLoveShowSicknessUpdated || '';
                         state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
+                        state.weLoveAlbumLayoutDesktop = remoteData.weLoveAlbumLayoutDesktop || 'slider';
                         state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
+                        state.weLoveAlbumLayoutDesktopUpdated = remoteData.weLoveAlbumLayoutDesktopUpdated || '';
                         state.weLovePhotoAlbum = remoteData.weLovePhotoAlbum || [];
                         state.weLovePhotoAlbumUpdated = remoteData.weLovePhotoAlbumUpdated || '';
                         state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs || [];
@@ -1584,10 +1608,20 @@ async function performSync(silent = false) {
                         
                         // Merge WeLove Desktop Layout
                         const localDesktopLayoutTime = state.weLoveDesktopLayoutUpdated ? new Date(state.weLoveDesktopLayoutUpdated).getTime() : 0;
+                        const localAlbumLayoutTime = state.weLoveAlbumLayoutDesktopUpdated ? new Date(state.weLoveAlbumLayoutDesktopUpdated).getTime() : 0;
                         const remoteDesktopLayoutTime = remoteData.weLoveDesktopLayoutUpdated ? new Date(remoteData.weLoveDesktopLayoutUpdated).getTime() : 0;
+                        const remoteAlbumLayoutTime = remoteData.weLoveAlbumLayoutDesktopUpdated ? new Date(remoteData.weLoveAlbumLayoutDesktopUpdated).getTime() : 0;
                         if (remoteDesktopLayoutTime > localDesktopLayoutTime) {
                             state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
                             state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
+                        }
+                        if (remoteAlbumLayoutTime > localAlbumLayoutTime) {
+                            state.weLoveAlbumLayoutDesktop = remoteData.weLoveAlbumLayoutDesktop || 'slider';
+                            state.weLoveAlbumLayoutDesktopUpdated = remoteData.weLoveAlbumLayoutDesktopUpdated || '';
+                            state.weLoveDesktopLayout = remoteData.weLoveDesktopLayout || 'traditional';
+                        state.weLoveAlbumLayoutDesktop = remoteData.weLoveAlbumLayoutDesktop || 'slider';
+                            state.weLoveDesktopLayoutUpdated = remoteData.weLoveDesktopLayoutUpdated || '';
+                        state.weLoveAlbumLayoutDesktopUpdated = remoteData.weLoveAlbumLayoutDesktopUpdated || '';
                         }
                         
                         // Merge WeLove Photo Album
@@ -1885,7 +1919,13 @@ async function performSync(silent = false) {
             weLoveShowSickness: state.weLoveShowSickness !== false,
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
             weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
+        weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
             weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
+            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
+            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
+        weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
             weLovePhotoAlbum: state.weLovePhotoAlbum || [],
             weLovePhotoAlbumUpdated: state.weLovePhotoAlbumUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
@@ -1946,7 +1986,13 @@ async function performSync(silent = false) {
             weLoveShowSickness: state.weLoveShowSickness !== false,
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
             weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
+        weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
             weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
+            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
+            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
+        weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
             weLovePhotoAlbum: state.weLovePhotoAlbum || [],
             weLovePhotoAlbumUpdated: state.weLovePhotoAlbumUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
@@ -4592,6 +4638,7 @@ async function handleFullBackup() {
             weLoveName2: state.weLoveName2,
             weLoveShowSickness: state.weLoveShowSickness,
             weLoveDesktopLayout: state.weLoveDesktopLayout,
+            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop,
             weLovePhotoAlbum: state.weLovePhotoAlbum,
             weLoveSicknessLogs: state.weLoveSicknessLogs,
             weLoveReminders: state.weLoveReminders,
@@ -4719,6 +4766,7 @@ async function handleFullRestore(file) {
         if (data.weLoveName2 !== undefined) state.weLoveName2 = data.weLoveName2;
         if (data.weLoveShowSickness !== undefined) state.weLoveShowSickness = data.weLoveShowSickness;
         if (data.weLoveDesktopLayout !== undefined) state.weLoveDesktopLayout = data.weLoveDesktopLayout;
+        if (data.weLoveAlbumLayoutDesktop !== undefined) state.weLoveAlbumLayoutDesktop = data.weLoveAlbumLayoutDesktop;
         if (data.weLovePhotoAlbum !== undefined) state.weLovePhotoAlbum = data.weLovePhotoAlbum;
         if (data.weLoveSicknessLogs !== undefined) state.weLoveSicknessLogs = data.weLoveSicknessLogs;
         if (data.weLoveReminders !== undefined) state.weLoveReminders = data.weLoveReminders;
@@ -4760,6 +4808,7 @@ async function handleFullRestore(file) {
         state.weLoveName2Updated = now;
         state.weLoveShowSicknessUpdated = now;
         state.weLoveDesktopLayoutUpdated = now;
+        state.weLoveAlbumLayoutDesktopUpdated = now;
         state.weLovePhotoAlbumUpdated = now;
         state.weLoveSicknessLogsUpdated = now;
         state.weLoveRemindersUpdated = now;
@@ -5321,7 +5370,9 @@ export async function clearAllStateData() {
     state.weLoveShowSickness = true;
     state.weLoveShowSicknessUpdated = '';
     state.weLoveDesktopLayout = 'traditional';
+        state.weLoveAlbumLayoutDesktop = 'slider';
     state.weLoveDesktopLayoutUpdated = '';
+        state.weLoveAlbumLayoutDesktopUpdated = '';
     state.weLovePhotoAlbum = [];
     state.weLovePhotoAlbumUpdated = '';
     state.weLoveSicknessLogs = [];

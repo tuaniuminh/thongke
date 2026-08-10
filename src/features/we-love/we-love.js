@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.147';
-import * as sync from '../../core/sync.js?v=4.3.147';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.147';
+} from '../../core/app.js?v=4.3.148';
+import * as sync from '../../core/sync.js?v=4.3.148';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.148';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.147');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.148');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.147';
+        const logoPath = './logo_pwa_small.png?v=4.3.148';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.147';
+    const logoPath = './logo_pwa_small.png?v=4.3.148';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -957,19 +957,31 @@ export async function renderWeLoveDashboard() {
 
 
 
+                            <!-- 2.6. Kiểu hiển thị Album ảnh trên Desktop -->
+                            <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; padding-bottom: 1rem;">
+                                <label class="welove-form-label" style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">🖼️ Bố cục Album ảnh (Desktop):</label>
+                                <select class="welove-input" id="weLoveAlbumLayoutDesktopInput" style="height: 38px; padding: 0 10px; width: 100%; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 0.85rem; font-weight: 600;">
+                                    <option value="slider" ${state.weLoveAlbumLayoutDesktop === 'slider' ? 'selected' : ''}>Trượt ngang tiêu chuẩn ↔️</option>
+                                    <option value="polaroid" ${state.weLoveAlbumLayoutDesktop === 'polaroid' ? 'selected' : ''}>Bảng ghim ảnh Polaroid 📌</option>
+                                    <option value="carousel3d" ${state.weLoveAlbumLayoutDesktop === 'carousel3d' ? 'selected' : ''}>Vòng quay ảnh 3D 🎡</option>
+                                    <option value="theater" ${state.weLoveAlbumLayoutDesktop === 'theater' ? 'selected' : ''}>Rạp chiếu phim & Timeline 🎬</option>
+                                    <option value="grid" ${state.weLoveAlbumLayoutDesktop === 'grid' ? 'selected' : ''}>Lưới nghệ thuật (Collage) 🧩</option>
+                                </select>
+                            </div>
+
                             <!-- 2.5. Tự động phát nhạc nền -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
                                 <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
                                     <div>
                                         <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🎵 Tự động phát nhạc nền</span>
                                         <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; display: block;">Tự động phát nhạc nền khi click/chạm vào màn hình</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="checkbox" id="weLoveAutoplayInput" class="status-checkbox" ${state.weLoveAutoplay === true ? 'checked' : ''}>
-                                        <span class="status-slider"></span>
-                                    </div>
-                                </label>
-                            </div>
+                                     </div>
+                                     <div style="display: flex; align-items: center;">
+                                         <input type="checkbox" id="weLoveAutoplayInput" class="status-checkbox" ${state.weLoveAutoplay === true ? 'checked' : ''}>
+                                         <span class="status-slider"></span>
+                                     </div>
+                                 </label>
+                             </div>
 
                             <!-- 3. Bật tắt theo dõi lượt ốm -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
@@ -1676,6 +1688,7 @@ function bindSettingsEvents() {
     const startDateInput = document.getElementById('weLoveStartDateInput');
     const showSicknessInput = document.getElementById('weLoveShowSicknessInput');
     const autoplayInput = document.getElementById('weLoveAutoplayInput');
+    const albumLayoutInput = document.getElementById('weLoveAlbumLayoutDesktopInput');
     const btnUnlink = document.getElementById('btnWeLoveUnlinkPartner');
 
 
@@ -1688,6 +1701,7 @@ function bindSettingsEvents() {
             const startDate = startDateInput.value;
             const showSickness = showSicknessInput.checked;
             const weLoveAutoplay = autoplayInput ? autoplayInput.checked : false;
+            const weLoveAlbumLayoutDesktop = albumLayoutInput ? albumLayoutInput.value : 'slider';
 
             state.weLoveName1 = name1;
             state.weLoveName1Updated = new Date().toISOString();
@@ -1703,6 +1717,9 @@ function bindSettingsEvents() {
 
             state.weLoveAutoplay = weLoveAutoplay;
             state.weLoveAutoplayUpdated = new Date().toISOString();
+
+            state.weLoveAlbumLayoutDesktop = weLoveAlbumLayoutDesktop;
+            state.weLoveAlbumLayoutDesktopUpdated = new Date().toISOString();
 
 
 
@@ -2019,39 +2036,7 @@ export function getGoogleDriveDirectLink(url) {
 }
 
 
-export function updateWeLoveAlbum() {
-    const container = document.getElementById('weLoveAlbumContainer');
-    if (!container) return;
-
-    const album = state.weLovePhotoAlbum || [];
-    if (album.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 2.5rem 1.5rem; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed var(--border-color);">
-                <span style="font-size: 2.5rem; display: block; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(244,63,94,0.3));">📸</span>
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 1.25rem 0;">Chưa có ảnh nào trong album. Hãy thêm những khoảnh khắc đẹp của hai bạn!</p>
-                ${(!state.viewingSharedFund || state.sharedFundSourceRow === null) ? `
-                    <button class="btn btn-primary" id="btnWeLoveAddPhotoPlaceholder" style="font-size: 0.85rem; padding: 6px 16px; border-radius: 12px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);">
-                        Thêm ảnh đầu tiên ➕
-                    </button>
-                ` : '<p style="font-size: 0.8rem; color: var(--accent-rose); margin:0;">Chỉ tài khoản chính mới có quyền quản lý ảnh</p>'}
-            </div>
-        `;
-        
-        const btnAddPlaceholder = document.getElementById('btnWeLoveAddPhotoPlaceholder');
-        if (btnAddPlaceholder) {
-            btnAddPlaceholder.addEventListener('click', () => {
-                openWeLoveAlbumManager();
-            });
-        }
-        return;
-    }
-
-    // Ensure active index is within bounds
-    if (typeof state.activePhotoIndex !== 'number' || state.activePhotoIndex >= album.length || state.activePhotoIndex < 0) {
-        state.activePhotoIndex = 0;
-    }
-
-    // Render slider html
+function renderWeLoveSlider(container, album) {
     let slidesHtml = '';
     album.forEach((photo, idx) => {
         const directUrl = getGoogleDriveDirectLink(photo.url);
@@ -2110,7 +2095,6 @@ export function updateWeLoveAlbum() {
     if (album.length > 1 && slidesContainer) {
         let isScrollingByClick = false;
 
-        // Auto update active dot index on manual swipe/scroll (optimized avoiding full re-render)
         slidesContainer.addEventListener('scroll', () => {
             if (isScrollingByClick) return;
             const containerWidth = slidesContainer.clientWidth;
@@ -2169,7 +2153,6 @@ export function updateWeLoveAlbum() {
             scrollToSlide(state.activePhotoIndex);
         });
         
-        // Dots clicks
         const dots = container.querySelectorAll('.welove-slider-dot');
         dots.forEach(dot => {
             dot.addEventListener('click', (e) => {
@@ -2181,7 +2164,7 @@ export function updateWeLoveAlbum() {
         });
     }
 
-    // Lightbox click preview for each individual image wrapper
+    // Lightbox click preview
     const slides = container.querySelectorAll('.welove-slide');
     slides.forEach(slide => {
         const imgWrapper = slide.querySelector('.welove-slide-img-wrapper');
@@ -2194,6 +2177,346 @@ export function updateWeLoveAlbum() {
             });
         }
     });
+}
+
+function renderWeLovePolaroid(container, album) {
+    let cardsHtml = '';
+    album.forEach((photo, idx) => {
+        const directUrl = getGoogleDriveDirectLink(photo.url);
+        // Nghiêng ngẫu nhiên từ -5deg đến +5deg
+        const rotate = ((idx % 5) * 2.5) - 5;
+        cardsHtml += `
+            <div class="welove-polaroid-card" style="transform: rotate(${rotate}deg);" data-idx="${idx}">
+                <div class="welove-polaroid-pin">📌</div>
+                <div class="welove-polaroid-tape"></div>
+                <div class="welove-polaroid-img-wrapper">
+                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-polaroid-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 10px; text-align: center;">
+                        <span style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</span>
+                        <p style="font-size: 0.7rem; margin: 0; font-weight: 700;">Lỗi ảnh</p>
+                    </div>
+                </div>
+                <div class="welove-polaroid-caption">${escapeHTML(photo.caption || 'Kỷ niệm ngọt ngào')}</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="welove-polaroid-board">
+            ${cardsHtml}
+        </div>
+    `;
+
+    // Bind click to open lightbox
+    container.querySelectorAll('.welove-polaroid-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(card.getAttribute('data-idx'));
+            const photo = album[idx];
+            openWeLoveLightbox(getGoogleDriveDirectLink(photo.url), photo.caption);
+        });
+    });
+}
+
+function renderWeLoveCarousel3D(container, album) {
+    let itemsHtml = '';
+    album.forEach((photo, idx) => {
+        const directUrl = getGoogleDriveDirectLink(photo.url);
+        itemsHtml += `
+            <div class="welove-carousel-3d-item" data-idx="${idx}">
+                <div class="welove-carousel-3d-img-wrapper">
+                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-carousel-3d-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center; border-radius: 16px;">
+                        <span style="font-size: 2rem; margin-bottom: 6px;">⚠️</span>
+                        <p style="font-size: 0.75rem; margin: 0; font-weight: 700;">Lỗi tải ảnh</p>
+                    </div>
+                </div>
+                ${photo.caption ? `<div class="welove-carousel-3d-caption">${escapeHTML(photo.caption)}</div>` : ''}
+            </div>
+        `;
+    });
+
+    const controlsHtml = album.length > 1 ? `
+        <button class="welove-carousel-3d-btn prev" id="btnCarousel3DPrev">‹</button>
+        <button class="welove-carousel-3d-btn next" id="btnCarousel3DNext">›</button>
+        <div class="welove-carousel-3d-dots">
+            ${album.map((_, idx) => `
+                <span class="welove-carousel-3d-dot ${idx === state.activePhotoIndex ? 'active' : ''}" data-idx="${idx}"></span>
+            `).join('')}
+        </div>
+    ` : '';
+
+    container.innerHTML = `
+        <div class="welove-carousel-3d-wrapper">
+            <div class="welove-carousel-3d-container" id="weloveCarousel3DContainer">
+                ${itemsHtml}
+            </div>
+            ${controlsHtml}
+        </div>
+    `;
+
+    const update3DPositions = () => {
+        const carContainer = document.getElementById('weloveCarousel3DContainer');
+        if (!carContainer) return;
+        const items = carContainer.querySelectorAll('.welove-carousel-3d-item');
+        if (items.length === 0) return;
+
+        const activeIdx = state.activePhotoIndex;
+        const total = items.length;
+
+        items.forEach(item => {
+            const idx = parseInt(item.getAttribute('data-idx'));
+            let diff = idx - activeIdx;
+
+            // Xoay vòng tròn
+            if (diff < -total / 2) diff += total;
+            if (diff > total / 2) diff -= total;
+
+            const absDiff = Math.abs(diff);
+
+            if (diff === 0) {
+                item.style.transform = `translateX(-50%) translateZ(0px) scale(1) rotateY(0deg)`;
+                item.style.opacity = '1';
+                item.style.zIndex = '10';
+                item.style.pointerEvents = 'auto';
+            } else if (diff > 0) {
+                // Phía bên phải
+                item.style.transform = `translateX(calc(-50% + ${diff * 140}px)) translateZ(-200px) scale(0.8) rotateY(-40deg)`;
+                item.style.opacity = absDiff > 2 ? '0' : '0.6';
+                item.style.zIndex = `${10 - absDiff}`;
+                item.style.pointerEvents = 'none';
+            } else {
+                // Phía bên trái
+                item.style.transform = `translateX(calc(-50% + ${diff * 140}px)) translateZ(-200px) scale(0.8) rotateY(40deg)`;
+                item.style.opacity = absDiff > 2 ? '0' : '0.6';
+                item.style.zIndex = `${10 - absDiff}`;
+                item.style.pointerEvents = 'none';
+            }
+        });
+
+        // Cập nhật dots
+        const dots = container.querySelectorAll('.welove-carousel-3d-dot');
+        dots.forEach((dot, idx) => {
+            if (idx === activeIdx) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    };
+
+    update3DPositions();
+
+    // Bind events
+    const items = container.querySelectorAll('.welove-carousel-3d-item');
+    items.forEach(item => {
+        const idx = parseInt(item.getAttribute('data-idx'));
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (idx === state.activePhotoIndex) {
+                // Nhấp vào ảnh trung tâm -> Mở Lightbox
+                const photo = album[idx];
+                openWeLoveLightbox(getGoogleDriveDirectLink(photo.url), photo.caption);
+            } else {
+                state.activePhotoIndex = idx;
+                update3DPositions();
+            }
+        });
+    });
+
+    if (album.length > 1) {
+        document.getElementById('btnCarousel3DPrev').addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.activePhotoIndex = (state.activePhotoIndex - 1 + album.length) % album.length;
+            update3DPositions();
+        });
+
+        document.getElementById('btnCarousel3DNext').addEventListener('click', (e) => {
+            e.stopPropagation();
+            state.activePhotoIndex = (state.activePhotoIndex + 1) % album.length;
+            update3DPositions();
+        });
+
+        container.querySelectorAll('.welove-carousel-3d-dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(dot.getAttribute('data-idx'));
+                state.activePhotoIndex = idx;
+                update3DPositions();
+            });
+        });
+    }
+}
+
+function renderWeLoveTheater(container, album) {
+    const activePhoto = album[state.activePhotoIndex] || album[0];
+    const directUrl = getGoogleDriveDirectLink(activePhoto.url);
+
+    let listHtml = '';
+    album.forEach((photo, idx) => {
+        const thumbUrl = getGoogleDriveDirectLink(photo.url);
+        const isActive = idx === state.activePhotoIndex;
+        listHtml += `
+            <div class="welove-theater-timeline-item ${isActive ? 'active' : ''}" data-idx="${idx}">
+                <div class="welove-theater-thumb-box">
+                    <img src="${thumbUrl}" alt="Kỷ niệm" class="welove-theater-thumb" onerror="this.src='src/assets/images/placeholder.png';">
+                </div>
+                <div class="welove-theater-timeline-details">
+                    <span class="welove-theater-timeline-number">Khoảnh khắc #${idx + 1}</span>
+                    <span class="welove-theater-timeline-desc">${escapeHTML(photo.caption || 'Kỷ niệm ngọt ngào')}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="welove-theater-wrapper">
+            <div class="welove-theater-main">
+                <div class="welove-theater-polaroid" id="weLoveTheaterMainPolaroid">
+                    <div class="welove-theater-img-box">
+                        <img src="${directUrl}" alt="${activePhoto.caption || 'Kỷ niệm'}" class="welove-theater-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center;">
+                            <span style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</span>
+                            <p style="font-size: 0.9rem; margin: 0; font-weight: 700;">Ảnh chưa bật công khai</p>
+                        </div>
+                    </div>
+                    <div class="welove-theater-caption">${escapeHTML(activePhoto.caption || 'Kỷ niệm ngọt ngào')}</div>
+                </div>
+            </div>
+            <div class="welove-theater-timeline">
+                <div class="welove-theater-timeline-track">
+                    ${listHtml}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Bind click timeline
+    const timelineItems = container.querySelectorAll('.welove-theater-timeline-item');
+    timelineItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(item.getAttribute('data-idx'));
+            state.activePhotoIndex = idx;
+            // Re-render
+            renderWeLoveTheater(container, album);
+        });
+    });
+
+    // Bind click ảnh to để phóng to Lightbox
+    const mainPolaroid = document.getElementById('weLoveTheaterMainPolaroid');
+    if (mainPolaroid) {
+        mainPolaroid.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const photo = album[state.activePhotoIndex];
+            openWeLoveLightbox(getGoogleDriveDirectLink(photo.url), photo.caption);
+        });
+    }
+
+    // Scroll active item into view inside track
+    const activeItem = container.querySelector('.welove-theater-timeline-item.active');
+    const track = container.querySelector('.welove-theater-timeline-track');
+    if (activeItem && track) {
+        setTimeout(() => {
+            track.scrollTo({
+                top: activeItem.offsetTop - track.offsetTop - 50,
+                behavior: 'smooth'
+            });
+        }, 50);
+    }
+}
+
+function renderWeLoveGrid(container, album) {
+    let cardsHtml = '';
+    album.forEach((photo, idx) => {
+        const directUrl = getGoogleDriveDirectLink(photo.url);
+        // Tạo size class so le
+        let sizeClass = 'welove-grid-medium';
+        if (idx % 5 === 0) {
+            sizeClass = 'welove-grid-large-vertical';
+        } else if (idx % 6 === 0) {
+            sizeClass = 'welove-grid-large-horizontal';
+        }
+
+        cardsHtml += `
+            <div class="welove-grid-card ${sizeClass}" data-idx="${idx}">
+                <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-grid-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 10px; text-align: center;">
+                    <span style="font-size: 1.5rem;">⚠️</span>
+                </div>
+                <div class="welove-grid-overlay">
+                    <span class="welove-grid-caption">${escapeHTML(photo.caption || 'Kỷ niệm')}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="welove-grid-layout">
+            ${cardsHtml}
+        </div>
+    `;
+
+    // Bind events
+    container.querySelectorAll('.welove-grid-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(card.getAttribute('data-idx'));
+            state.activePhotoIndex = idx;
+            const photo = album[idx];
+            openWeLoveLightbox(getGoogleDriveDirectLink(photo.url), photo.caption);
+        });
+    });
+}
+
+export function updateWeLoveAlbum() {
+    const container = document.getElementById('weLoveAlbumContainer');
+    if (!container) return;
+
+    const album = state.weLovePhotoAlbum || [];
+    if (album.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 2.5rem 1.5rem; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed var(--border-color);">
+                <span style="font-size: 2.5rem; display: block; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(244,63,94,0.3));">📸</span>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 1.25rem 0;">Chưa có ảnh nào trong album. Hãy thêm những khoảnh khắc đẹp của hai bạn!</p>
+                ${(!state.viewingSharedFund || state.sharedFundSourceRow === null) ? `
+                    <button class="btn btn-primary" id="btnWeLoveAddPhotoPlaceholder" style="font-size: 0.85rem; padding: 6px 16px; border-radius: 12px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); border: none; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);">
+                        Thêm ảnh đầu tiên ➕
+                    </button>
+                ` : '<p style="font-size: 0.8rem; color: var(--accent-rose); margin:0;">Chỉ tài khoản chính mới có quyền quản lý ảnh</p>'}
+            </div>
+        `;
+        
+        const btnAddPlaceholder = document.getElementById('btnWeLoveAddPhotoPlaceholder');
+        if (btnAddPlaceholder) {
+            btnAddPlaceholder.addEventListener('click', () => {
+                openWeLoveAlbumManager();
+            });
+        }
+        return;
+    }
+
+    // Đảm bảo active index hợp lệ
+    if (typeof state.activePhotoIndex !== 'number' || state.activePhotoIndex >= album.length || state.activePhotoIndex < 0) {
+        state.activePhotoIndex = 0;
+    }
+
+    // Nhận diện môi trường hiển thị
+    const isMobile = window.innerWidth <= 768;
+    const layout = isMobile ? 'slider' : (state.weLoveAlbumLayoutDesktop || 'slider');
+
+    // Gọi các hàm render tương ứng
+    if (layout === 'polaroid') {
+        renderWeLovePolaroid(container, album);
+    } else if (layout === 'carousel3d') {
+        renderWeLoveCarousel3D(container, album);
+    } else if (layout === 'theater') {
+        renderWeLoveTheater(container, album);
+    } else if (layout === 'grid') {
+        renderWeLoveGrid(container, album);
+    } else {
+        renderWeLoveSlider(container, album);
+    }
 }
 
 let _savedIosScrollY = 0;
