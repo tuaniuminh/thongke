@@ -623,10 +623,51 @@ export function initLunarCalendarBindings() {
         selectMonth.value = state.viewMonth;
         selectYear.value = state.viewYear;
         
+        // Cập nhật input date picker về hôm nay
+        const jumpInput = document.getElementById('lunarJumpDate');
+        if (jumpInput) {
+            const yyyy = today.getFullYear();
+            const mm   = String(today.getMonth() + 1).padStart(2, '0');
+            const dd   = String(today.getDate()).padStart(2, '0');
+            jumpInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+        
         renderCalendarGrid();
         updateDetailPanel(today);
     });
-    
+
+    // Input chọn ngày nhanh
+    const jumpDateInput = document.getElementById('lunarJumpDate');
+    if (jumpDateInput) {
+        // Đặt giá trị ban đầu = ngày hôm nay
+        const todayInit = new Date();
+        const yy = todayInit.getFullYear();
+        const mo = String(todayInit.getMonth() + 1).padStart(2, '0');
+        const dd = String(todayInit.getDate()).padStart(2, '0');
+        jumpDateInput.value = `${yy}-${mo}-${dd}`;
+
+        jumpDateInput.addEventListener('change', (e) => {
+            const val = e.target.value; // "YYYY-MM-DD"
+            if (!val) return;
+            const parts = val.split('-');
+            const pickedYear  = parseInt(parts[0]);
+            const pickedMonth = parseInt(parts[1]);
+            const pickedDay   = parseInt(parts[2]);
+            if (isNaN(pickedYear) || isNaN(pickedMonth) || isNaN(pickedDay)) return;
+
+            const pickedDate = new Date(pickedYear, pickedMonth - 1, pickedDay);
+            state.selectedDate = pickedDate;
+            state.viewYear     = pickedYear;
+            state.viewMonth    = pickedMonth;
+
+            selectMonth.value = pickedMonth;
+            selectYear.value  = pickedYear;
+
+            renderCalendarGrid();
+            updateDetailPanel(pickedDate);
+        });
+    }
+
     // Đóng Modal (Giữ lại guard đề phòng modal vẫn được dùng)
     const closeBtn = document.getElementById('lunarCalendarModalClose');
     if (closeBtn) {

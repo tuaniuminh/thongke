@@ -74,15 +74,15 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.175">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.176">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.175">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.175">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.175">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.175">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.175">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.176">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.176">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.176">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.176">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.176">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -356,7 +356,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.175" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.176" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -472,7 +472,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.175" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.176" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1149,6 +1149,16 @@
                                     <button type="button" class="lunar-nav-btn" id="lunarBtnNextMonth" title="Tháng sau">›</button>
                                     <button type="button" class="lunar-nav-btn" id="lunarBtnNextYear" title="Năm sau">»</button>
                                 </div>
+                            </div>
+                            <!-- Chọn ngày nhanh -->
+                            <div class="lunar-date-jump-row">
+                                <label for="lunarJumpDate" class="lunar-date-jump-label">
+                                    <i data-lucide="calendar-search" style="width:14px;height:14px;"></i>
+                                    Chọn ngày:
+                                </label>
+                                <input type="date" id="lunarJumpDate" class="lunar-date-jump-input"
+                                    min="1900-01-01" max="2199-12-31"
+                                    title="Nhấp vào để chọn ngày bất kỳ">
                             </div>
                             
                             <div class="lunar-week-header-row">
@@ -2043,7 +2053,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.175" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.176" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2070,23 +2080,6 @@
             
             <div class="home-grid">
                 
-                <!-- Card Âm lịch — chỉ hiện trên mobile -->
-                <div class="home-card home-card-lunar-mobile" id="homeCardLunarMobile" onclick="window.openLunarCalendarModal && window.openLunarCalendarModal()" style="cursor: pointer;">
-                    <div class="home-card-icon" style="background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(234,88,12,0.12)); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); flex-shrink:0;">
-                        <i data-lucide="calendar-days"></i>
-                    </div>
-                    <div class="home-card-content" style="flex:1; min-width:0;">
-                        <div id="mobileCardLunarPrimary" style="font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height: 1.3;">Lịch âm: Đang tải...</div>
-                        <div id="mobileCardLunarSub" style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 3px; display:flex; gap:8px; align-items:center;">
-                            <span id="mobileCardLunarCanChi">--</span>
-                            <span id="mobileCardLunarBadge" class="lunar-widget-badge normal" style="font-size: 0.65rem;">--</span>
-                        </div>
-                    </div>
-                    <div class="home-card-arrow">
-                        <i data-lucide="chevron-right"></i>
-                    </div>
-                </div>
-
                 <!-- Card 2: Thu chi đối ngoại -->
                 <a href="#tongquan" class="home-card card-finance" id="homeCardFinance">
                     <div class="home-card-icon">
@@ -2156,11 +2149,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.175';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.176';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.175';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.176';
                         }
                     })();
                 </script>
@@ -3669,17 +3662,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.175"></script>
-    <script type="module" src="src/core/app.js?v=4.3.175"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.175"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.175"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.175"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.176"></script>
+    <script type="module" src="src/core/app.js?v=4.3.176"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.176"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.176"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.176"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.175')
+                navigator.serviceWorker.register('./sw.js?v=4.3.176')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
