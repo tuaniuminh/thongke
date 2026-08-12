@@ -1,12 +1,14 @@
-/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.171) */
+/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.172) */
 
 .lunar-week-header-row {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 8px;
     padding-bottom: 4px;
     border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .lunar-tab-card {
@@ -67,17 +69,22 @@
 /* Cột Trái - Lịch Grid */
 .lunar-calendar-col {
     width: 58%;
-    padding: 20px 24px;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 20px 20px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Cột Phải - Chi Tiết Phong Thủy */
 .lunar-detail-col {
     width: 42%;
-    padding: 20px 24px;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 20px 20px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -155,9 +162,12 @@
 .lunar-calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 4px;
     flex: 1;
     min-height: 380px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
 }
 
 .lunar-week-header {
