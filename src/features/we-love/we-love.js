@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.156';
-import * as sync from '../../core/sync.js?v=4.3.156';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.156';
+} from '../../core/app.js?v=4.3.157';
+import * as sync from '../../core/sync.js?v=4.3.157';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.157';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.156');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.157');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.156';
+        const logoPath = './logo_pwa_small.png?v=4.3.157';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.156';
+    const logoPath = './logo_pwa_small.png?v=4.3.157';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -889,8 +889,53 @@ export async function renderWeLoveDashboard() {
 
             ${weLoveCurrentSubView === 'admin' && canEdit ? `
                 <!-- ADMIN SUBVIEW -->
+                ${isModern ? `
+                <!-- DESKTOP 2-COLUMN LAYOUT -->
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2.5rem; width: 100%; max-width: 1200px; margin: 3.5rem auto 0 auto; z-index: 5; align-items: stretch; padding: 0 1.5rem;">
+                    <!-- Left Column: Scheduler Form -->
+                    <div class="welove-card" style="margin-top: 0; width: 100%; text-align: left; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                        <div>
+                            <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; justify-content: flex-start;">
+                                <span style="font-size: 1.8rem;">⏰</span>
+                                <h3 class="welove-title">Đặt Lịch Lời Nhắc</h3>
+                            </div>
+                            <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.4;">
+                                Lên lịch gửi thông báo nhắc nhở tự động đến thiết bị của nửa kia
+                            </p>
+                            <form id="weLoveAddReminderForm" style="text-align: left; margin-bottom: 0;">
+                                <div class="welove-form-group">
+                                    <label class="welove-form-label">⏰ Thời gian gửi thông báo:</label>
+                                    <input type="datetime-local" class="welove-input" id="remTimeInput" required>
+                                </div>
+                                <div class="welove-form-group">
+                                    <label class="welove-form-label">✍️ Tiêu đề thông báo:</label>
+                                    <input type="text" class="welove-input" id="remTitleInput" placeholder="Ví dụ: Chú ý em iu ơi! 🥤" required>
+                                </div>
+                                <div class="welove-form-group" style="margin-bottom: 1.5rem;">
+                                    <label class="welove-form-label">✍️ Nội dung lời nhắc:</label>
+                                    <textarea class="welove-textarea" id="remMessageInput" rows="4" placeholder="Nhập nội dung lời nhắn..." required style="resize: none;"></textarea>
+                                </div>
+                                <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%; border: none; color: #fff; font-weight: 700; cursor: pointer; border-radius: 12px; padding: 12px 20px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2); font-family: inherit; font-size: 0.9rem; transition: all 0.3s ease;">
+                                    Lên lịch ngay ❤️
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Reminders List Board -->
+                    <div class="welove-card" style="margin-top: 0; width: 100%; text-align: left; display: flex; flex-direction: column; height: 100%;">
+                        <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; justify-content: flex-start;">
+                            <span style="font-size: 1.8rem;">📋</span>
+                            <h3 class="welove-title">Danh Sách Lời Nhắc Đã Lên Lịch</h3>
+                        </div>
+                        <div class="welove-timeline" id="weLoveRemindersTimeline" style="max-height: 480px; overflow-y: auto; flex: 1; padding-right: 6px;">
+                            <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+                ` : `
+                <!-- MOBILE STACKED LAYOUT -->
                 <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 0 auto; z-index: 5;">
-                    
                     <!-- Lên lịch lời nhắc -->
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
@@ -926,10 +971,8 @@ export async function renderWeLoveDashboard() {
                             <p style="text-align: center; color: var(--text-secondary); font-style: italic;">Đang tải...</p>
                         </div>
                     </div>
-
-
-
                 </div>
+                `}
             ` : weLoveCurrentSubView === 'settings' && canEdit ? `
                 <!-- CONFIG / SETTINGS SUBVIEW -->
                 <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 3.5rem auto 0 auto; z-index: 5; padding: 0 15px;">
