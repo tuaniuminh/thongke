@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.165';
-import * as sync from '../../core/sync.js?v=4.3.165';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.165';
+} from '../../core/app.js?v=4.3.166';
+import * as sync from '../../core/sync.js?v=4.3.166';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.166';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.165');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.166');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.165';
+        const logoPath = './logo_pwa_small.png?v=4.3.166';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.165';
+    const logoPath = './logo_pwa_small.png?v=4.3.166';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -815,14 +815,18 @@ export async function renderWeLoveDashboard() {
     const showSickness = state.weLoveShowSickness !== false;
     const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
 
+    const wifeName = state.weLoveName2 ? `${escapeHTML(state.weLoveName2)} em iu` : 'em iu';
+    const wifeNameTitle = state.weLoveName2 ? `${escapeHTML(state.weLoveName2)} Em Iu` : 'Em Iu';
+    const husbandName = state.weLoveName1 ? `anh ${escapeHTML(state.weLoveName1)} đẹp trai` : 'anh đẹp trai';
+
     const sicknessCardHtml = showSickness ? `
                     <div class="welove-card">
                         <div class="welove-title-box">
                             <span style="font-size: 1.8rem;">🩺</span>
-                            <h3 class="welove-title">Sổ Tay Sức Khỏe Của Em Iu</h3>
+                            <h3 class="welove-title">Sổ Tay Sức Khỏe Của ${wifeNameTitle}</h3>
                         </div>
                         <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
-                            Thống kê đợt ốm qua các năm của em iu và lời dặn dỗ yêu thương từ anh đẹp trai
+                            Thống kê đợt ốm qua các năm của ${wifeName} và lời dặn dỗ yêu thương từ ${husbandName}
                         </p>
 
                         <!-- Years selector filter pills -->
@@ -1029,7 +1033,7 @@ export async function renderWeLoveDashboard() {
                              <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
                                  <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
                                      <div>
-                                         <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🩺 Theo dõi Sổ tay sức khỏe em yêu</span>
+                                         <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🩺 Theo dõi Sổ tay sức khỏe của ${wifeName}</span>
                                          <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; display: block;">Ẩn hoặc hiện biểu đồ, lịch sử đợt ốm trong tab Kỷ niệm</span>
                                      </div>
                                      <div style="display: flex; align-items: center;">

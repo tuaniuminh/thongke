@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.165** |
+| **Phiên bản hiện tại** | **v4.3.166** |
+| **v4.3.166** | ✅ **Bổ Sung Tên Vợ Chồng Động Vào Sổ Tay Sức Khỏe WeLove (v4.3.166)**: Tái thiết kế tiêu đề card, mô tả và nhãn checkbox cấu hình của Sổ tay sức khỏe thành các chuỗi hiển thị động dựa trên thông tin tên của người dùng (`state.weLoveName1`) và đối tác (`state.weLoveName2`) đã cấu hình, mang lại trải nghiệm cá nhân hóa sâu sắc thay vì gán cứng text mặc định. Nâng phiên bản toàn hệ thống sang `?v=4.3.166`. |
 | **v4.3.165** | ✅ **Đồng Bộ SVG Icon Cho Trạng Thái Đang Tải Bản Cập Nhật (v4.3.165)**: Thay thế emoji `🎉` cuối cùng trong kết quả kiểm tra phiên bản bằng một SVG Download/Cloud-Download vector mảnh mai, tinh xảo. Sử dụng nét vẽ 3px đồng điệu 100% với bộ icon Spinner, Checkmark và Cross trước đó để hoàn thiện sự đồng bộ nghệ thuật của nút badge. Nâng phiên bản toàn hệ thống sang `?v=4.3.165`. |
 | **v4.3.164** | ✅ **Nâng Cấp Phiên Bản Lên v4.3.164 Để Buộc Trình Duyệt Xóa Cache (v4.3.164)**: Tăng số hiệu phiên bản lên v4.3.164 để ép trình duyệt dọn dẹp bộ nhớ đệm (Cache Busting), đảm bảo các thiết bị tải lại giao diện tab cài đặt mới hoàn toàn sạch sẽ, không lưu cache cũ. Nâng phiên bản toàn hệ thống sang `?v=4.3.164`. |
 | **v4.3.163** | ✅ **Nâng Cấp Giao Diện Cài Đặt Menu Tab Dọc Desktop (v4.3.163)**: Tái cấu trúc phân nhóm card trong `#tab-settings` thành container `.settings-modern-container` với menu sidebar dọc bên trái điều khiển 6 tab nội dung. Bổ sung style CSS kính mờ cao cấp, hiệu ứng chuyển động rê chuột mượt mà cho các nút tab và hoạt ảnh fade-in dịu mắt khi đổi tab. Trên Mobile, menu sidebar tự ẩn và khôi phục layout cuộn dọc để tối ưu hóa thao tác chạm. Nâng phiên bản toàn hệ thống sang `?v=4.3.163`. |
 | **v4.3.162** | ✅ **Nâng Cấp SVG Icons Đồng Bộ Cho Trạng Thái Kiểm Tra Cập Nhật (v4.3.162)**: Thay thế các emoji `✅` (Đã mới nhất) và `❌` (Lỗi kết nối) trong kết quả kiểm tra phiên bản bằng các SVG Checkmark và SVG Cross vector sắc nét, tinh xảo. Sử dụng stroke nét mảnh 3px và thuộc tính kế thừa màu thông minh `stroke="currentColor"` để đồng điệu hoàn hảo với SVG Spinner và màu sắc của thẻ badge. Nâng phiên bản toàn hệ thống sang `?v=4.3.162`. |
-| **v4.3.161** | ✅ **Nâng Cấp Thiết Kế Vòng Xoay Đang Kiểm Tra Cập Nhật Bằng SVG (v4.3.161)**: Thay thế emoji xoay `🔄` thô sơ trong nút check update bằng một Apple-style SVG Spinner tròn mảnh mai, tinh tế. Sử dụng hoạt ảnh vector tự động `<animateTransform>` để tạo hiệu ứng xoay 60Hz/120Hz mượt mà và tự nhận diện màu nền qua `stroke="currentColor"` để hòa quyện hoàn hảo với màu sắc của nút badge. Nâng phiên bản toàn hệ thống sang `?v=4.3.161`. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
