@@ -74,14 +74,15 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.167">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.168">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.167">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.167">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.167">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.167">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.168">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.168">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.168">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.168">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.168">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -355,7 +356,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.126" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.168" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -471,7 +472,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.126" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.168" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1900,9 +1901,18 @@
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
         <!-- Widget Lịch âm Việt Nam & Thời tiết Hà Nội -->
         <div class="home-widgets-container" id="homeWidgetsContainer">
-            <div class="home-widget-box" id="homeLunarWidget">
+            <div class="home-widget-box" id="homeLunarWidget" onclick="window.openLunarCalendarModal && window.openLunarCalendarModal()" style="cursor: pointer;">
                 <div class="widget-row" id="lunarRow">
-                    <span>Lịch âm: --/--/----</span>
+                    <div class="lunar-widget-wrapper">
+                        <div class="lunar-widget-main-row">
+                            <span class="lunar-widget-icon">📅</span>
+                            <span class="lunar-widget-primary-text">Lịch âm: Đang tải...</span>
+                        </div>
+                        <div class="lunar-widget-sub-row">
+                            <span class="lunar-widget-canchi-text">--/--/----</span>
+                            <span class="lunar-widget-badge normal">--</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="home-widget-box" id="homeWeatherWidget">
@@ -1932,7 +1942,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.126" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.168" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2027,11 +2037,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.116';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.168';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.116';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.168';
                         }
                     })();
                 </script>
@@ -3496,6 +3506,115 @@
         </div>
     </div>
 
+    <!-- Modal Lịch Vạn Niên & Phong Thủy -->
+    <div class="lunar-modal-overlay" id="lunarCalendarModal" style="display: none;">
+        <div class="lunar-modal-card">
+            <div class="lunar-modal-header">
+                <h2 class="lunar-modal-title">
+                    <i data-lucide="calendar"></i> Lịch Vạn Niên & Phong Thủy FamiLife
+                </h2>
+                <button type="button" class="lunar-modal-close" id="lunarCalendarModalClose" title="Đóng">
+                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+            <div class="lunar-modal-body">
+                <!-- Cột trái: Lịch lưới -->
+                <div class="lunar-calendar-col">
+                    <div class="lunar-nav-controls">
+                        <div class="lunar-nav-buttons">
+                            <button type="button" class="lunar-nav-btn" id="lunarBtnPrevYear" title="Năm trước">«</button>
+                            <button type="button" class="lunar-nav-btn" id="lunarBtnPrevMonth" title="Tháng trước">‹</button>
+                        </div>
+                        <div class="lunar-select-group">
+                            <select id="lunarSelectMonth" class="lunar-select"></select>
+                            <select id="lunarSelectYear" class="lunar-select"></select>
+                            <button type="button" class="lunar-nav-btn lunar-today-btn" id="lunarBtnToday">Hôm nay</button>
+                        </div>
+                        <div class="lunar-nav-buttons">
+                            <button type="button" class="lunar-nav-btn" id="lunarBtnNextMonth" title="Tháng sau">›</button>
+                            <button type="button" class="lunar-nav-btn" id="lunarBtnNextYear" title="Năm sau">»</button>
+                        </div>
+                    </div>
+                    
+                    <div class="lunar-calendar-grid">
+                        <div class="lunar-week-header">T2</div>
+                        <div class="lunar-week-header">T3</div>
+                        <div class="lunar-week-header">T4</div>
+                        <div class="lunar-week-header">T5</div>
+                        <div class="lunar-week-header">T6</div>
+                        <div class="lunar-week-header">T7</div>
+                        <div class="lunar-week-header sunday">CN</div>
+                    </div>
+                    <div class="lunar-calendar-grid" id="lunarGridBody" style="flex: 1; grid-template-rows: repeat(6, 1fr);">
+                        <!-- Các ô ngày sẽ được thêm bằng JS -->
+                    </div>
+                </div>
+                <!-- Cột phải: Thông tin Phong Thủy -->
+                <div class="lunar-detail-col">
+                    <div class="detail-header">
+                        <div class="detail-solar-date" id="detailSolarDate">Thứ tư, 12/08/2026</div>
+                        <div class="detail-lunar-date" id="detailLunarDate">Ngày 30 tháng Chạp, năm Bính Ngọ</div>
+                        <div class="detail-day-badge-row" id="detailBadges">
+                            <span class="lunar-badge hoangdao">Thanh Long Hoàng Đạo</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i data-lucide="clock"></i> Can Chi Thời Khắc
+                        </div>
+                        <div class="canchi-row">
+                            <div class="canchi-item"><strong>Năm:</strong> <span id="canchiYear">Bính Ngọ</span></div>
+                            <div class="canchi-item"><strong>Tháng:</strong> <span id="canchiMonth">Ất Mùi</span></div>
+                            <div class="canchi-item"><strong>Ngày:</strong> <span id="canchiDay">Giáp Tý</span></div>
+                            <div class="canchi-item"><strong>Giờ:</strong> <span id="canchiHour">Giáp Tý</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i data-lucide="sun"></i> Tiết Khí & Giờ tốt
+                        </div>
+                        <div style="font-size: 0.88rem; margin-bottom: 8px;">
+                            <strong>Tiết Khí:</strong> <span id="tietKhiVal">Lập Thu</span>
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Giờ Hoàng Đạo trong ngày:</div>
+                        <div class="hours-grid" id="goodHoursGrid">
+                            <!-- Các giờ tốt -->
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i data-lucide="compass"></i> Tuổi xung & Hướng đi
+                        </div>
+                        <div style="font-size: 0.88rem; margin-bottom: 6px;">
+                            <strong>Tuổi xung khắc:</strong> <span id="clashAgeVal" style="color: #f87171;">Mậu Ngọ, Nhâm Ngọ</span>
+                        </div>
+                        <div class="direction-row">
+                            <div class="direction-item"><strong>Hướng Hỷ Thần (Niềm vui):</strong> <span id="hyThanVal">Đông Bắc</span></div>
+                            <div class="direction-item"><strong>Hướng Tài Thần (Tài lộc):</strong> <span id="taiThanVal">Chính Nam</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i data-lucide="check-circle"></i> Việc Nên Làm & Kiêng Kỵ
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #34d399; margin-bottom: 6px;">Nên làm:</div>
+                        <div class="recommend-list" id="shouldDoList">
+                            <!-- Các việc nên làm -->
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #f87171; margin-top: 10px; margin-bottom: 6px;">Kiêng kỵ:</div>
+                        <div class="recommend-list" id="shouldAvoidList">
+                            <!-- Các việc kiêng kỵ -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast container for notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -3536,16 +3655,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.167"></script>
-    <script type="module" src="src/core/app.js?v=4.3.167"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.167"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.167"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.168"></script>
+    <script type="module" src="src/core/app.js?v=4.3.168"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.168"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.168"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.168"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.167')
+                navigator.serviceWorker.register('./sw.js?v=4.3.168')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

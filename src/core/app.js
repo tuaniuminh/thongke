@@ -2,17 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.167';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.167';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.167';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.167';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.168';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.168';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.168';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.168';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.167';
-import * as sync from './sync.js?v=4.3.167';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.167';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.167';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.168';
+import * as sync from './sync.js?v=4.3.168';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.168';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.168';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.168';
 
-const APP_VERSION = '4.3.167';
+const APP_VERSION = '4.3.168';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4043,6 +4044,11 @@ async function initializeApp() {
     // Initialize Fund Bindings
     initFundBindings();
 
+    // Initialize Lunar Calendar Bindings
+    if (typeof initLunarCalendarBindings === 'function') {
+        initLunarCalendarBindings();
+    }
+
     // Initialize Lucide Icons
     if (window.lucide) window.lucide.createIcons();
 
@@ -4490,15 +4496,42 @@ function updateHomeLunar() {
     };
     const animalVi = animalMap[lunar.animal] || lunar.animal;
     
-    // Format ngày dạng dd/mm/yyyy
-    const dayStr = lunar.lDay < 10 ? '0' + lunar.lDay : lunar.lDay;
-    const monthStr = lunar.lMonth < 10 ? '0' + lunar.lMonth : lunar.lMonth;
-    const lunarDateText = `${dayStr}/${monthStr}/${lunar.lYear}`;
-    
     const fullTooltip = `Ngày ${lunar.lDay} tháng ${monthName}${leapText}, năm ${lunar.gzYear} (Ngày ${lunar.gzDay}) - Con giáp: ${animalVi}`;
     
+    // Tính trạng thái Hoàng đạo / Hắc đạo / Ngày hung
+    const dayChi = lunar.gzDay.split(" ")[1];
+    let badgeClass = "normal";
+    let badgeText = "Bình thường";
+    
+    if (typeof getDayStatus === 'function' && typeof isSatChuDay === 'function') {
+        const deity = getDayStatus(lunar.lMonth, dayChi);
+        const isBad = [3, 7, 13, 18, 22, 27].includes(lunar.lDay) || 
+                      [5, 14, 23].includes(lunar.lDay) || 
+                      isSatChuDay(lunar.lMonth, dayChi);
+                      
+        if (isBad) {
+            badgeClass = "bad";
+            badgeText = "Ngày Hung";
+        } else if (deity.type === "Hoàng Đạo") {
+            badgeClass = "good";
+            badgeText = "Hoàng Đạo";
+        } else if (deity.type === "Hắc Đạo") {
+            badgeClass = "normal";
+            badgeText = "Hắc Đạo";
+        }
+    }
+    
     lunarContainer.innerHTML = `
-        <span class="lunar-date-text" title="${fullTooltip}">Lịch âm: ${lunarDateText}</span>
+        <div class="lunar-widget-wrapper" title="${fullTooltip}">
+            <div class="lunar-widget-main-row">
+                <span class="lunar-widget-icon">📅</span>
+                <span class="lunar-widget-primary-text">Lịch âm: ${lunar.lDay} ${monthName}${leapText}</span>
+            </div>
+            <div class="lunar-widget-sub-row">
+                <span class="lunar-widget-canchi-text">Ngày ${lunar.gzDay}</span>
+                <span class="lunar-widget-badge ${badgeClass}">${badgeText}</span>
+            </div>
+        </div>
     `;
 }
 
