@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.170';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.170';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.170';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.170';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.171';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.171';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.171';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.171';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.170';
-import * as sync from './sync.js?v=4.3.170';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.170';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.170';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.170';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.171';
+import * as sync from './sync.js?v=4.3.171';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.171';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.171';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.171';
 
-const APP_VERSION = '4.3.170';
+const APP_VERSION = '4.3.171';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4507,6 +4507,10 @@ function updateHomeLunar() {
     };
     const animalVi = animalMap[lunar.animal] || lunar.animal;
     
+    const dayStr = lunar.lDay < 10 ? '0' + lunar.lDay : lunar.lDay;
+    const monthStr = lunar.lMonth < 10 ? '0' + lunar.lMonth : lunar.lMonth;
+    const lunarDateText = `${dayStr}/${monthStr}/${lunar.lYear}${leapText}`;
+    
     const fullTooltip = `Ngày ${lunar.lDay} tháng ${monthName}${leapText}, năm ${lunar.gzYear} (Ngày ${lunar.gzDay}) - Con giáp: ${animalVi}`;
     
     // Tính trạng thái Hoàng đạo / Hắc đạo / Ngày hung
@@ -4536,7 +4540,7 @@ function updateHomeLunar() {
         <div class="lunar-widget-wrapper" title="${fullTooltip}">
             <div class="lunar-widget-main-row">
                 <span class="lunar-widget-icon">📅</span>
-                <span class="lunar-widget-primary-text">Lịch âm: ${lunar.lDay} ${monthName}${leapText}</span>
+                <span class="lunar-widget-primary-text">Lịch âm: ${lunarDateText}</span>
             </div>
             <div class="lunar-widget-sub-row">
                 <span class="lunar-widget-canchi-text">Ngày ${lunar.gzDay}</span>
