@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.158';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.158';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.158';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.158';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.159';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.159';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.159';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.159';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.158';
-import * as sync from './sync.js?v=4.3.158';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.158';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.158';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.159';
+import * as sync from './sync.js?v=4.3.159';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.159';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.159';
 
-const APP_VERSION = '4.3.158';
+const APP_VERSION = '4.3.159';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3357,12 +3357,11 @@ async function initializeApp() {
         }
     }
 
-    // Load Desktop Home Layout Mode (list vs bento)
-    state.desktopHomeLayout = localStorage.getItem('familife_home_layout_desktop') || 'list';
-    if (state.desktopHomeLayout === 'bento') {
-        document.documentElement.classList.add('home-layout-bento');
-        document.body.classList.add('home-layout-bento');
-    }
+    // Load Desktop Home Layout Mode (Force list, Bento is removed)
+    state.desktopHomeLayout = 'list';
+    localStorage.setItem('familife_home_layout_desktop', 'list');
+    document.documentElement.classList.remove('home-layout-bento');
+    document.body.classList.remove('home-layout-bento');
 
     // Detect iOS/Capacitor native environment vs. web PWA
     const isIOSNative = (window.Capacitor && window.Capacitor.getPlatform() === 'ios') ||
@@ -5416,37 +5415,14 @@ export async function clearAllStateData() {
 }
 
 function initDesktopHomeLayoutSettingsUI() {
-    const radioList = document.getElementById('layoutModeList');
-    const radioBento = document.getElementById('layoutModeBento');
-    if (!radioList || !radioBento) return;
-
-    const currentLayout = state.desktopHomeLayout || 'list';
-    if (currentLayout === 'bento') {
-        radioBento.checked = true;
-    } else {
-        radioList.checked = true;
-    }
-
-    radioList.onchange = () => setDesktopHomeLayoutMode('list');
-    radioBento.onchange = () => setDesktopHomeLayoutMode('bento');
+    // Bento layout is deprecated. Handled by default list view.
 }
 
 function setDesktopHomeLayoutMode(mode) {
-    state.desktopHomeLayout = mode;
-    localStorage.setItem('familife_home_layout_desktop', mode);
-    if (mode === 'bento') {
-        document.documentElement.classList.add('home-layout-bento');
-        document.body.classList.add('home-layout-bento');
-        if (typeof showToast === 'function') {
-            showToast('🍱 Đã chuyển sang giao diện Bento Grid 3 cột trên máy tính!');
-        }
-    } else {
-        document.documentElement.classList.remove('home-layout-bento');
-        document.body.classList.remove('home-layout-bento');
-        if (typeof showToast === 'function') {
-            showToast('📄 Đã chuyển sang giao diện 1 cột truyền thống!');
-        }
-    }
+    state.desktopHomeLayout = 'list';
+    localStorage.setItem('familife_home_layout_desktop', 'list');
+    document.documentElement.classList.remove('home-layout-bento');
+    document.body.classList.remove('home-layout-bento');
 }
 window.initDesktopHomeLayoutSettingsUI = initDesktopHomeLayoutSettingsUI;
 window.setDesktopHomeLayoutMode = setDesktopHomeLayoutMode;
