@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.155** |
+| **Phiên bản hiện tại** | **v4.3.156** |
+| **v4.3.156** | ✅ **Khắc Phục Lỗi Dấu Tiếng Việt Bị Che Khuất (Clipping Fix) (v4.3.156)**: Sửa lỗi dấu hỏi của chữ "Ảnh" trong tiêu đề bị cắt đứt phẳng mép trên khi zoom trang hoặc hiển thị trên màn hình lớn. Bổ sung `line-height: 1.45 !important`, `padding-top` và `overflow: visible !important` cho `.welove-title` để đảm bảo trình duyệt hiển thị dấu tiếng Việt nhô cao trọn vẹn 100%. Nâng phiên bản toàn hệ thống sang `?v=4.3.156`. |
 | **v4.3.155** | ✅ **Nâng Cấp Cỡ Chữ & Sửa Phông Chữ Tiêu Đề Chống Lẹm Dấu (v4.3.155)**: Thiết lập font-family của `.welove-title` sang phông chữ "Outfit" và "Be Vietnam Pro" hỗ trợ tiếng Việt cực chuẩn, sửa đổi hiện tượng lẹm dấu hỏi của chữ "Ảnh" trong tiêu đề. Nâng cỡ chữ của tiêu đề, subtitle, timeline item, thống kê ốm, nhãn input và câu trích dẫn tiếng Việt trên Desktop để dễ đọc hơn trên màn hình lớn. Nâng phiên bản toàn hệ thống sang `?v=4.3.155`. |
 | **v4.3.154** | ✅ **Sửa Lỗi HTML Vỡ Nhẹ & Cải Tiến Giao Diện Thiết Lập (v4.3.154)**: Sửa lỗi cú pháp thẻ đóng của switch checkbox trong form thiết lập. Bọc form thiết lập WeLove trong một container wrapper căn giữa `max-width: 580px`, tăng margin-top lên `3.5rem` để tiêu đề không bao giờ bị khuất trên Desktop. Thiết kế lại nút "Lưu Cấu Hình" sang màu gradient Champagne Gold quý phái và bo góc mềm mại. Nâng phiên bản toàn hệ thống sang `?v=4.3.154`. |
 | **v4.3.153** | ✅ **Nâng Cấp Thiết Kế 5 Layout Album Ảnh Kỷ Niệm Cho Desktop (v4.3.153)**: Tái thiết kế toàn bộ 5 giao diện Album ảnh Desktop (Slider, Polaroid, 3D Carousel, Theater, Grid) theo đúng tông màu mới Champagne Gold (Light) & Obsidian (Dark). Nâng cấp thẻ ảnh sang phong cách kính mờ thạch anh (Frosted Glass / Frosted Obsidian) và chuyển đổi các phông mô tả ảnh sang font Lora nghiêng lãng mạn. Nâng phiên bản toàn hệ thống sang `?v=4.3.153`. |
 | **v4.3.152** | ✅ **Khắc Phục Mojibake, Lỗi Font Chữ Việt Bằng Lora NFC & Thay Màu Gradient Rose (v4.3.152)**: Sửa chữa các ký tự hỏng (Mojibake) ở phần Album ảnh kỷ niệm. Chuyển đổi chuỗi trích dẫn tiếng Việt sang NFC (`normalize('NFC')`) để loại bỏ hoàn toàn lỗi dấu bị tách rời. Import và đổi font chữ quote sang Lora lãng mạn. Thay thế gradient Slate xám của đếm ngày bằng gradient Rose ngọt ngào. Nâng phiên bản toàn hệ thống sang `?v=4.3.152`. |
-| **v4.3.151** | ✅ **Sửa Lỗi Cú Pháp SyntaxError & Đổi Tên Tab Thành Tổng Quan (v4.3.151)**: Vá lỗi SyntaxError thiếu dấu backtick ở nút quản lý album trong `we-love.js` làm dừng trang. Thay đổi nhãn tab menu chính trong `index.html` và tiêu đề mặc định của trang kỷ niệm trong `we-love.js` từ "Kỷ Niệm Tình Yêu" thành "Tổng quan". Nâng phiên bản toàn hệ thống sang `?v=4.3.151`. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |

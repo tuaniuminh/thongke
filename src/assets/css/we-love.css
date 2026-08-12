@@ -579,6 +579,10 @@ body:not(.light-mode) .detailed-duration {
   -webkit-text-fill-color: transparent;
   margin: 0;
   display: inline-block;
+  line-height: 1.4 !important; /* Tăng line-height để không bị che khuất dấu tiếng Việt nhô cao (như chữ Ả) */
+  padding-top: 0.1em !important;
+  padding-bottom: 0.15em !important;
+  overflow: visible !important;
 }
 
 body:not(.light-mode) .welove-title {
@@ -2677,6 +2681,10 @@ body:not(.light-mode) .welove-theater-timeline-number {
     font-size: 1.85rem !important;
     font-weight: 900 !important;
     letter-spacing: -0.02em !important;
+    line-height: 1.45 !important; /* Đảm bảo chiều cao dòng lớn để không bị clipping ở Desktop */
+    padding-top: 0.15em !important;
+    padding-bottom: 0.15em !important;
+    overflow: visible !important;
   }
 
   /* 2. Tăng kích thước chữ chung trong WeLove trên Desktop */
