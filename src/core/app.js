@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.159';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.159';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.159';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.159';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.160';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.160';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.160';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.160';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.159';
-import * as sync from './sync.js?v=4.3.159';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.159';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.159';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.160';
+import * as sync from './sync.js?v=4.3.160';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.160';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.160';
 
-const APP_VERSION = '4.3.159';
+const APP_VERSION = '4.3.160';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -715,6 +715,7 @@ function isVersionNewer(latest, current) {
 
 // Check for App Version Updates from version.json
 async function checkAppVersion(isManual = false, noToast = false) {
+    const startTime = Date.now();
     const isTauri = !!(window && window.__TAURI__);
     
     // Tải thông tin phiên bản mới nhất từ version.json online trên GitHub
@@ -748,6 +749,14 @@ async function checkAppVersion(isManual = false, noToast = false) {
             }
         } catch (e) {
             console.error("Fallback version fetch failed:", e);
+        }
+    }
+    
+    // Kéo dài thời gian hiển thị "Đang kiểm tra..." tối thiểu 0.5 giây khi kiểm tra thủ công để tạo cảm giác phản hồi thực tế hơn
+    if (isManual) {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 500) {
+            await new Promise(resolve => setTimeout(resolve, 500 - elapsed));
         }
     }
     
