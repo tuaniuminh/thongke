@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.161';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.161';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.161';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.161';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.162';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.162';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.162';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.162';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.161';
-import * as sync from './sync.js?v=4.3.161';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.161';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.161';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.162';
+import * as sync from './sync.js?v=4.3.162';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.162';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.162';
 
-const APP_VERSION = '4.3.161';
+const APP_VERSION = '4.3.162';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4074,7 +4074,12 @@ async function initializeApp() {
                     badgeSpan.innerHTML = `🎉 Đang tải bản mới...`;
                 } else if (result === 'error') {
                     btn.classList.add('error');
-                    badgeSpan.innerHTML = `❌ Lỗi kết nối!`;
+                    badgeSpan.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>Lỗi kết nối!
+                    `;
                     setTimeout(() => {
                         btn.classList.remove('error');
                         badgeSpan.textContent = originalText;
@@ -4082,7 +4087,11 @@ async function initializeApp() {
                     }, 1000);
                 } else {
                     btn.classList.add('latest');
-                    badgeSpan.innerHTML = `✅ Đã mới nhất`;
+                    badgeSpan.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>Đã mới nhất
+                    `;
                     setTimeout(() => {
                         btn.classList.remove('latest');
                         badgeSpan.textContent = originalText;
