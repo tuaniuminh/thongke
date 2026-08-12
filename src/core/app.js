@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.174';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.174';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.174';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.174';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.175';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.175';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.175';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.175';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.174';
-import * as sync from './sync.js?v=4.3.174';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.174';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.174';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.174';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.175';
+import * as sync from './sync.js?v=4.3.175';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.175';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.175';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.175';
 
-const APP_VERSION = '4.3.174';
+const APP_VERSION = '4.3.175';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2883,7 +2883,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         subtitle.innerText = 'Tùy chỉnh chức năng, quản lý sự kiện và xuất nhập dữ liệu';
         renderTcManagement();
     } else if (tabId === 'am-lich') {
-        title.innerText = 'Lịch Vạn Niên & Phong Thủy';
+        title.innerText = 'Lịch Vạn Niên';
         subtitle.innerText = 'Xem lịch âm dương, Can Chi, Tiết Khí và ngày cát hung gia đình';
         if (typeof window.openLunarCalendarModal === 'function') {
             setTimeout(() => {
@@ -4544,6 +4544,17 @@ function updateHomeLunar() {
             </div>
         </div>
     `;
+
+    // Đồng bộ sang card âm lịch mobile ở trang chủ
+    const mobileCardPrimary = document.getElementById('mobileCardLunarPrimary');
+    const mobileCardCanChi  = document.getElementById('mobileCardLunarCanChi');
+    const mobileCardBadge   = document.getElementById('mobileCardLunarBadge');
+    if (mobileCardPrimary) mobileCardPrimary.textContent = `Lịch âm: ${lunarDateText}`;
+    if (mobileCardCanChi)  mobileCardCanChi.textContent  = `Ngày ${lunar.gzDay}`;
+    if (mobileCardBadge) {
+        mobileCardBadge.textContent  = badgeText;
+        mobileCardBadge.className    = `lunar-widget-badge ${badgeClass}`;
+    }
 }
 
 // Gắn các hàm vào global window để tránh tree-shaking

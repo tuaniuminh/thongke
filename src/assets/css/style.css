@@ -3360,6 +3360,11 @@ select.health-select-sm {
     margin-top: 1rem;
 }
 
+/* Card âm lịch chỉ hiện trên mobile — ẩn mặc định */
+.home-card-lunar-mobile {
+    display: none;
+}
+
 /* Mobile responsive fixes */
 @media (max-width: 576px) {
     .home-layout {
@@ -3388,6 +3393,16 @@ select.health-select-sm {
     
     .home-card-content p {
         display: none !important;
+    }
+
+    /* Hiện card âm lịch chỉ trên mobile */
+    .home-card-lunar-mobile {
+        display: flex;
+        border-color: rgba(245, 158, 11, 0.25);
+    }
+    .home-card-lunar-mobile:hover {
+        border-color: rgba(245, 158, 11, 0.6);
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12);
     }
 }
 
