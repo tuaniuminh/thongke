@@ -2007,8 +2007,12 @@ body:not(.light-mode) .memory-page.layout-modern .milestone-date {
 
 .welove-slide-img-wrapper:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(244, 63, 94, 0.15), inset 0 0 40px rgba(0,0,0,0.6);
-  border-color: rgba(244, 63, 94, 0.2);
+  box-shadow: 0 15px 35px rgba(217, 119, 6, 0.15), inset 0 0 40px rgba(0,0,0,0.6);
+  border-color: rgba(217, 119, 6, 0.35);
+}
+body:not(.light-mode) .welove-slide-img-wrapper:hover {
+  box-shadow: 0 15px 35px rgba(168, 85, 247, 0.15), inset 0 0 40px rgba(0,0,0,0.6);
+  border-color: rgba(168, 85, 247, 0.3);
 }
 
 .welove-slide-img {
@@ -2037,9 +2041,10 @@ body:not(.light-mode) .memory-page.layout-modern .milestone-date {
 }
 
 .welove-slide-caption {
-  font-family: 'Outfit', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-family: "Lora", "Georgia", serif !important;
+  font-style: italic;
+  font-size: 1.15rem;
+  font-weight: 500;
   color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,0.8);
   margin: 0;
@@ -2072,10 +2077,15 @@ body:not(.light-mode) .memory-page.layout-modern .milestone-date {
 }
 
 .welove-nav-btn:hover {
-  background: var(--accent-rose, #e11d48);
-  border-color: var(--accent-rose, #e11d48);
+  background: #b45309 !important;
+  border-color: #d97706 !important;
   transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 0 20px rgba(225, 29, 72, 0.5);
+  box-shadow: 0 0 20px rgba(217, 119, 6, 0.4);
+}
+body:not(.light-mode) .welove-nav-btn:hover {
+  background: #6b21a8 !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
 }
 
 .welove-nav-btn.prev {
@@ -2170,21 +2180,23 @@ body.lightbox-open, html.lightbox-open {
 .welove-polaroid-card {
   position: relative;
   width: 220px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(217, 119, 6, 0.1) !important;
   padding: 12px 12px 24px 12px;
-  border-radius: 4px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(71, 85, 105, 0.05);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
+  backdrop-filter: blur(10px);
 }
 
 body:not(.light-mode) .welove-polaroid-card {
-  background: #1e293b !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.75) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .welove-polaroid-img-wrapper {
@@ -2207,18 +2219,20 @@ body:not(.light-mode) .welove-polaroid-card {
 
 .welove-polaroid-caption {
   margin-top: 12px;
-  font-size: 0.8rem;
-  color: #334155;
+  font-family: "Lora", "Georgia", serif !important;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #7c2d12 !important;
   text-align: center;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 700;
+  font-weight: 500 !important;
 }
 
 body:not(.light-mode) .welove-polaroid-caption {
-  color: #cbd5e1 !important;
+  color: #e9d5ff !important;
 }
 
 .welove-polaroid-pin {
@@ -2248,7 +2262,12 @@ body:not(.light-mode) .welove-polaroid-caption {
 .welove-polaroid-card:hover {
   transform: rotate(0deg) scale(1.08) !important;
   z-index: 20;
-  box-shadow: 0 20px 45px rgba(244, 63, 94, 0.25);
+  border-color: rgba(217, 119, 6, 0.35) !important;
+  box-shadow: 0 20px 45px rgba(217, 119, 6, 0.15) !important;
+}
+body:not(.light-mode) .welove-polaroid-card:hover {
+  border-color: rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 20px 45px rgba(168, 85, 247, 0.2) !important;
 }
 
 .welove-polaroid-card:hover .welove-polaroid-img {
@@ -2282,17 +2301,23 @@ body:not(.light-mode) .welove-polaroid-caption {
   top: 0;
   width: 260px;
   height: 300px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(217, 119, 6, 0.15) !important;
   border-radius: 20px;
   padding: 10px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 10px 30px rgba(71, 85, 105, 0.04) !important;
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, z-index 0.6s;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
   transform-origin: center center;
+  backdrop-filter: blur(10px);
+}
+body:not(.light-mode) .welove-carousel-3d-item {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
 }
 
 .welove-carousel-3d-img-wrapper {
@@ -2314,14 +2339,19 @@ body:not(.light-mode) .welove-polaroid-caption {
 
 .welove-carousel-3d-caption {
   margin-top: 12px;
-  font-size: 0.8rem;
-  color: var(--text-primary);
+  font-family: "Lora", "Georgia", serif !important;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #7c2d12 !important;
   text-align: center;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 700;
+  font-weight: 500 !important;
+}
+body:not(.light-mode) .welove-carousel-3d-caption {
+  color: #e9d5ff !important;
 }
 
 .welove-carousel-3d-btn {
@@ -2346,10 +2376,15 @@ body:not(.light-mode) .welove-polaroid-caption {
 }
 
 .welove-carousel-3d-btn:hover {
-  background: var(--accent-rose);
-  color: #fff;
-  border-color: var(--accent-rose);
-  box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+  background: #b45309 !important;
+  color: #fff !important;
+  border-color: #d97706 !important;
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.4) !important;
+}
+body:not(.light-mode) .welove-carousel-3d-btn:hover {
+  background: #6b21a8 !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4) !important;
 }
 
 .welove-carousel-3d-btn.prev { left: 20px; }
@@ -2373,8 +2408,11 @@ body:not(.light-mode) .welove-polaroid-caption {
 }
 
 .welove-carousel-3d-dot.active {
-  background: var(--accent-rose) !important;
+  background: #d97706 !important;
   transform: scale(1.2);
+}
+body:not(.light-mode) .welove-carousel-3d-dot.active {
+  background: #a855f7 !important;
 }
 
 
@@ -2398,23 +2436,30 @@ body:not(.light-mode) .welove-polaroid-caption {
 }
 
 .welove-theater-polaroid {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(217, 119, 6, 0.1) !important;
   padding: 12px 12px 20px 12px;
-  border-radius: 4px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(71, 85, 105, 0.05);
   width: 320px;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 body:not(.light-mode) .welove-theater-polaroid {
-  background: #1e293b !important;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .welove-theater-polaroid:hover {
   transform: scale(1.03) translateY(-4px);
-  box-shadow: 0 20px 45px rgba(244, 63, 94, 0.2);
+  border-color: rgba(217, 119, 6, 0.3) !important;
+  box-shadow: 0 20px 45px rgba(217, 119, 6, 0.15) !important;
+}
+body:not(.light-mode) .welove-theater-polaroid:hover {
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  box-shadow: 0 20px 45px rgba(168, 85, 247, 0.2) !important;
 }
 
 .welove-theater-img-box {
@@ -2436,14 +2481,16 @@ body:not(.light-mode) .welove-theater-polaroid {
 
 .welove-theater-caption {
   margin-top: 12px;
-  font-size: 0.82rem;
-  color: #334155;
+  font-family: "Lora", "Georgia", serif !important;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #7c2d12 !important;
   text-align: center;
-  font-weight: 700;
+  font-weight: 500 !important;
 }
 
 body:not(.light-mode) .welove-theater-caption {
-  color: #cbd5e1 !important;
+  color: #e9d5ff !important;
 }
 
 .welove-theater-timeline {
@@ -2467,12 +2514,18 @@ body:not(.light-mode) .welove-theater-caption {
 }
 
 .welove-theater-timeline-track::-webkit-scrollbar-thumb {
-  background: rgba(244, 63, 94, 0.15);
+  background: rgba(217, 119, 6, 0.15);
   border-radius: 2px;
 }
 
 .welove-theater-timeline-track::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-rose);
+  background: #d97706;
+}
+body:not(.light-mode) .welove-theater-timeline-track::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.15);
+}
+body:not(.light-mode) .welove-theater-timeline-track::-webkit-scrollbar-thumb:hover {
+  background: #a855f7;
 }
 
 .welove-theater-timeline-item {
@@ -2488,13 +2541,21 @@ body:not(.light-mode) .welove-theater-caption {
 }
 
 .welove-theater-timeline-item:hover {
-  background: rgba(244, 63, 94, 0.05);
-  border-color: rgba(244, 63, 94, 0.2);
+  background: rgba(217, 119, 6, 0.04);
+  border-color: rgba(217, 119, 6, 0.2);
+}
+body:not(.light-mode) .welove-theater-timeline-item:hover {
+  background: rgba(168, 85, 247, 0.04);
+  border-color: rgba(168, 85, 247, 0.2);
 }
 
 .welove-theater-timeline-item.active {
-  background: rgba(244, 63, 94, 0.08) !important;
-  border-color: rgba(244, 63, 94, 0.35) !important;
+  background: rgba(217, 119, 6, 0.08) !important;
+  border-color: rgba(217, 119, 6, 0.35) !important;
+}
+body:not(.light-mode) .welove-theater-timeline-item.active {
+  background: rgba(168, 85, 247, 0.08) !important;
+  border-color: rgba(168, 85, 247, 0.35) !important;
 }
 
 .welove-theater-thumb-box {
@@ -2521,8 +2582,11 @@ body:not(.light-mode) .welove-theater-caption {
 
 .welove-theater-timeline-number {
   font-size: 0.7rem;
-  color: var(--accent-rose);
+  color: #b45309;
   font-weight: 700;
+}
+body:not(.light-mode) .welove-theater-timeline-number {
+  color: #c084fc;
 }
 
 .welove-theater-timeline-desc {
@@ -2586,9 +2650,11 @@ body:not(.light-mode) .welove-theater-caption {
 }
 
 .welove-grid-caption {
-  font-size: 0.75rem;
+  font-family: "Lora", "Georgia", serif !important;
+  font-style: italic;
+  font-size: 0.82rem;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 500 !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
