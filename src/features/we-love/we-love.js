@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.153';
-import * as sync from '../../core/sync.js?v=4.3.153';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.153';
+} from '../../core/app.js?v=4.3.154';
+import * as sync from '../../core/sync.js?v=4.3.154';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.154';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.153');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.154');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.153';
+        const logoPath = './logo_pwa_small.png?v=4.3.154';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.153';
+    const logoPath = './logo_pwa_small.png?v=4.3.154';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -932,6 +932,7 @@ export async function renderWeLoveDashboard() {
                 </div>
             ` : weLoveCurrentSubView === 'settings' && canEdit ? `
                 <!-- CONFIG / SETTINGS SUBVIEW -->
+                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 3.5rem auto 0 auto; z-index: 5; padding: 0 15px;">
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                             <span style="font-size: 1.8rem;">⚙️</span>
@@ -955,8 +956,6 @@ export async function renderWeLoveDashboard() {
                                 <input type="date" class="welove-input" id="weLoveStartDateInput" value="${state.weLoveStartDate || ''}" required>
                             </div>
 
-
-
                             <!-- 2.6. Kiểu hiển thị Album ảnh trên Desktop -->
                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; padding-bottom: 1rem;">
                                 <label class="welove-form-label" style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">🖼️ Bố cục Album ảnh (Desktop):</label>
@@ -978,22 +977,26 @@ export async function renderWeLoveDashboard() {
                                      </div>
                                      <div style="display: flex; align-items: center;">
                                          <input type="checkbox" id="weLoveAutoplayInput" class="status-checkbox" ${state.weLoveAutoplay === true ? 'checked' : ''}>
-<div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
-                                <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
-                                    <div>
-                                        <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🩺 Theo dõi Sổ tay sức khỏe em yêu</span>
-                                        <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; display: block;">Ẩn hoặc hiện biểu đồ, lịch sử đợt ốm trong tab Kỷ niệm</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="checkbox" id="weLoveShowSicknessInput" class="status-checkbox" ${state.weLoveShowSickness !== false ? 'checked' : ''}>
-                                        <span class="status-slider"></span>
-                                    </div>
-                                </label>
-                            </div>
+                                         <span class="status-slider"></span>
+                                     </div>
+                                 </label>
+                             </div>
 
+                             <!-- 2.7. Theo dõi Sổ tay sức khỏe em yêu -->
+                             <div class="welove-form-group" style="border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                                 <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0; cursor: pointer;">
+                                     <div>
+                                         <span style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; display: block; color: var(--text-primary);">🩺 Theo dõi Sổ tay sức khỏe em yêu</span>
+                                         <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; display: block;">Ẩn hoặc hiện biểu đồ, lịch sử đợt ốm trong tab Kỷ niệm</span>
+                                     </div>
+                                     <div style="display: flex; align-items: center;">
+                                         <input type="checkbox" id="weLoveShowSicknessInput" class="status-checkbox" ${state.weLoveShowSickness !== false ? 'checked' : ''}>
+                                         <span class="status-slider"></span>
+                                     </div>
+                                 </label>
+                             </div>
 
-
-                            <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%;">
+                            <button type="submit" class="welove-btn welove-btn-primary" style="width: 100%; border: none; color: #fff; font-weight: 700; cursor: pointer; border-radius: 12px; padding: 12px 20px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25); font-family: inherit; font-size: 0.9rem; transition: all 0.3s ease;">
                                 Lưu Cấu Hình 💾
                             </button>
                         </form>
