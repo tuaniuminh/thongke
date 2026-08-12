@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.162';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.162';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.162';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.162';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.163';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.163';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.163';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.163';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.162';
-import * as sync from './sync.js?v=4.3.162';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.162';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.162';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.163';
+import * as sync from './sync.js?v=4.3.163';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.163';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.163';
 
-const APP_VERSION = '4.3.162';
+const APP_VERSION = '4.3.163';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4112,6 +4112,37 @@ async function initializeApp() {
             }
         });
     });
+
+    // Bind Settings Sidebar Tabs
+    const settingsTabBtns = document.querySelectorAll('.settings-tab-btn');
+    settingsTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.getAttribute('data-settings-tab');
+            
+            // Toggle active class on buttons
+            settingsTabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Toggle active class on tab content panels
+            document.querySelectorAll('.settings-tab-content').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            const targetPanel = document.getElementById(`settings-content-${tabName}`);
+            if (targetPanel) targetPanel.classList.add('active');
+            
+            // Save state
+            sessionStorage.setItem('activeSettingsTab', tabName);
+        });
+    });
+
+    // Restore active Settings tab on startup
+    const savedSettingsTab = sessionStorage.getItem('activeSettingsTab');
+    if (savedSettingsTab) {
+        const targetBtn = document.querySelector(`.settings-tab-btn[data-settings-tab="${savedSettingsTab}"]`);
+        if (targetBtn) {
+            targetBtn.click();
+        }
+    }
 
     // Check app version updates on load
     checkAppVersion();

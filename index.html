@@ -74,14 +74,14 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.162">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.163">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.162">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.162">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.162">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.162">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.163">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.163">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.163">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.163">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -862,218 +862,267 @@
                 </div>
             </section>
 
-            <section class="tab-panel" id="tab-settings" style="display: none;">
-                <div class="settings-grid">
-                    <!-- Supabase Sync Card -->
-                    <div class="settings-card">
-                        <h2>
+                        <section class="tab-panel" id="tab-settings" style="display: none;">
+                <div class="settings-modern-container">
+                    <!-- Sidebar Menu -->
+                    <aside class="settings-sidebar">
+                        <button type="button" class="settings-tab-btn active" data-settings-tab="cloud">
                             <i data-lucide="cloud-lightning"></i>
-                            <span>Cấu hình Đồng bộ Supabase</span>
-                        </h2>
-                        <div id="supabaseConfigView">
-                            <!-- Dynamically showing details -->
-                        </div>
-                    </div>
-
-                    <!-- Theme Settings Card (Mobile only) -->
-                    <div class="settings-card mobile-only-settings-card">
-                        <h2>
-                            <i data-lucide="palette"></i>
-                            <span>Giao diện ứng dụng</span>
-                        </h2>
-                        <p class="settings-info">
-                            Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
-                        </p>
-                        <button class="btn btn-outline w-full theme-toggle-btn-trigger" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
-                            <i data-lucide="sun" class="theme-icon"></i>
-                            <span class="theme-text">Giao diện sáng</span>
+                            <span>Đồng bộ Supabase</span>
                         </button>
-                    </div>
-
-                    <!-- Low Performance Mode Card -->
-                    <div class="settings-card" id="lowPerfSettingsCard">
-                        <h2>
-                            <i data-lucide="cpu" style="color: var(--accent-blue);"></i>
-                            <span>Chế độ máy yếu (Hiệu năng)</span>
-                        </h2>
-                        <p class="settings-info">
-                            Tối ưu hóa giao diện bằng cách tắt hiệu ứng kính mờ (blur), các chuyển động và hoạt họa biểu đồ giúp ứng dụng mượt mà trên máy tính cũ hoặc cấu hình yếu.
-                        </p>
-                        <div style="margin-top: 14px;">
-                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                <span style="font-size: 0.9rem; font-weight: 500;">Kích hoạt Chế độ tối giản (Tăng hiệu năng)</span>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" id="lowPerfModeCheckbox" class="status-checkbox">
-                                    <span class="status-slider"></span>
-                                </div>
-                            </label>
-                        </div>
-
-
-                    <!-- Family Pairing Card -->
-                    <div class="settings-card" id="familyPairingCard">
-                        <h2>
+                        <button type="button" class="settings-tab-btn" data-settings-tab="family">
                             <i data-lucide="heart-handshake"></i>
-                            <span>Kết nối Gia đình (WeLove & Quỹ chung)</span>
-                        </h2>
-                        <div id="familyPairingConfigView">
-                            <!-- Dynamically rendered by renderFamilyPairingSettings() -->
-                        </div>
-                    </div>
-
-                    <!-- Notification Settings Card -->
-                    <div class="settings-card" id="notificationSettingsCard">
-                        <h2>
-                            <i data-lucide="bell-ring" style="color: var(--accent-orange);"></i>
-                            <span>Cấu hình Thông báo (Telegram / Discord)</span>
-                        </h2>
-                        <p class="settings-info">
-                            Tích hợp nhận thông báo tức thời qua Webhook Telegram Bot hoặc Discord khi có biến động quỹ, lời nhắc yêu thương hoặc lịch hẹn y tế.
-                        </p>
-                        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600;">Webhook URL Telegram/Discord</label>
-                                <input type="text" id="notificationWebhookInput" class="form-control" placeholder="https://api.telegram.org/... hoặc https://discord.com/api/webhooks/...">
-                            </div>
-                            <div class="notification-toggles" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                                <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                    <span style="font-size: 0.9rem; font-weight: 500;">Thông báo biến động Quỹ Gia Đình</span>
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="checkbox" id="notifyFundCheckbox" checked class="status-checkbox">
-                                        <span class="status-slider"></span>
-                                    </div>
-                                </label>
-                                <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                    <span style="font-size: 0.9rem; font-weight: 500;">Thông báo Lời nhắc WeLove</span>
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="checkbox" id="notifyWeLoveCheckbox" checked class="status-checkbox">
-                                        <span class="status-slider"></span>
-                                    </div>
-                                </label>
-                                <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                    <span style="font-size: 0.9rem; font-weight: 500;">Thông báo Lịch nhắc Sức Khỏe</span>
-                                    <div style="display: flex; align-items: center;">
-                                        <input type="checkbox" id="notifyHealthCheckbox" checked class="status-checkbox">
-                                        <span class="status-slider"></span>
-                                    </div>
-                                </label>
-                            </div>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <button type="button" class="btn btn-outline" id="testNotificationBtn" style="flex: 1; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                                    <i data-lucide="send" style="width: 16px; height: 16px;"></i> Test Kết Nối
-                                </button>
-                                <button type="button" class="btn btn-primary" id="saveNotificationBtn" style="flex: 1; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                                    <i data-lucide="save" style="width: 16px; height: 16px;"></i> Lưu Thiết Lập
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security / Master Password Card -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="key-round"></i>
-                            <span>Mật khẩu chính (Master Password)</span>
-                        </h2>
-                        <p class="settings-info">
-                            Dùng để mã hóa dữ liệu cục bộ trong trình duyệt của bạn trước khi đưa lên máy chủ. Bạn phải lưu trữ mật khẩu này thật kỹ. Nếu mất, dữ liệu của bạn sẽ không bao giờ được phục hồi.
-                        </p>
-                        <button class="btn btn-primary w-full" id="changePasswordBtn">
-                            <i data-lucide="refresh-cw"></i>
-                            <span>Đổi Master Password</span>
+                            <span>Kết nối Gia đình</span>
                         </button>
-                    </div>
+                        <button type="button" class="settings-tab-btn" data-settings-tab="customize">
+                            <i data-lucide="sliders"></i>
+                            <span>Tùy chỉnh & Giao diện</span>
+                        </button>
+                        <button type="button" class="settings-tab-btn" data-settings-tab="security">
+                            <i data-lucide="key-round"></i>
+                            <span>Bảo mật & AI</span>
+                        </button>
+                        <button type="button" class="settings-tab-btn" data-settings-tab="notifications">
+                            <i data-lucide="bell"></i>
+                            <span>Cấu hình Thông báo</span>
+                        </button>
+                        <button type="button" class="settings-tab-btn" data-settings-tab="backup">
+                            <i data-lucide="hard-drive-download"></i>
+                            <span>Sao lưu dữ liệu</span>
+                        </button>
+                    </aside>
 
-                    <!-- Gemini AI Config Card -->
-                    <div class="settings-card" id="geminiAiCard">
-                        <h2>
-                            <i data-lucide="sparkles"></i>
-                            <span>Trợ lý AI (Google Gemini)</span>
-                        </h2>
-                        <p class="settings-info">
-                            Nhập Google Gemini API Key để tự động quét kết quả xét nghiệm/y tế và phân tích báo cáo xu hướng thu chi tài chính.
-                        </p>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="geminiApiKeyInput" class="form-control" style="padding-right: 40px; width: 100%;" placeholder="Dán Google Gemini API Key tại đây...">
-                                <button type="button" id="toggleGeminiKeyVisibility" style="position: absolute; right: 10px; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Ẩn/Hiện API Key">
-                                    <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                    <!-- Content Panel -->
+                    <main class="settings-content">
+                        <!-- Tab 1: Cloud Sync -->
+                        <div class="settings-tab-content active" id="settings-content-cloud">
+                            <!-- Supabase Sync Card -->
+                            <div class="settings-card">
+                                <h2>
+                                    <i data-lucide="cloud-lightning"></i>
+                                    <span>Cấu hình Đồng bộ Supabase</span>
+                                </h2>
+                                <div id="supabaseConfigView">
+                                    <!-- Dynamically showing details -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Family Pairing -->
+                        <div class="settings-tab-content" id="settings-content-family">
+                            <!-- Family Pairing Card -->
+                            <div class="settings-card" id="familyPairingCard">
+                                <h2>
+                                    <i data-lucide="heart-handshake"></i>
+                                    <span>Kết nối Gia đình (WeLove & Quỹ chung)</span>
+                                </h2>
+                                <div id="familyPairingConfigView">
+                                    <!-- Dynamically rendered by renderFamilyPairingSettings() -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Customize & Theme -->
+                        <div class="settings-tab-content" id="settings-content-customize">
+                            <!-- Theme Settings Card (Mobile only) -->
+                            <div class="settings-card mobile-only-settings-card">
+                                <h2>
+                                    <i data-lucide="palette"></i>
+                                    <span>Giao diện ứng dụng</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Lựa chọn màu sắc hiển thị phù hợp với sở thích của bạn (Giao diện sáng hoặc Giao diện tối).
+                                </p>
+                                <button class="btn btn-outline w-full theme-toggle-btn-trigger" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; font-weight: 600;">
+                                    <i data-lucide="sun" class="theme-icon"></i>
+                                    <span class="theme-text">Giao diện sáng</span>
                                 </button>
                             </div>
-                            <button type="button" id="saveGeminiKeyBtn" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <i data-lucide="save"></i>
-                                <span>Lưu Cấu Hình AI</span>
-                            </button>
-                            <div style="font-size: 0.8rem; text-align: center; margin-top: 2px;">
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
-                                    <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Lấy API Key miễn phí từ Google AI Studio
-                                </a>
+
+                            <!-- Low Performance Mode Card -->
+                            <div class="settings-card" id="lowPerfSettingsCard">
+                                <h2>
+                                    <i data-lucide="cpu" style="color: var(--accent-blue);"></i>
+                                    <span>Chế độ máy yếu (Hiệu năng)</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Tối ưu hóa giao diện bằng cách tắt hiệu ứng kính mờ (blur), các chuyển động và hoạt họa biểu đồ giúp ứng dụng mượt mà trên máy tính cũ hoặc cấu hình yếu.
+                                </p>
+                                <div style="margin-top: 14px;">
+                                    <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                        <span style="font-size: 0.9rem; font-weight: 500;">Kích hoạt Chế độ tối giản (Tăng hiệu năng)</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="checkbox" id="lowPerfModeCheckbox" class="status-checkbox">
+                                            <span class="status-slider"></span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Feature Customization Card (only fund toggle stays) -->
+                            <div class="settings-card">
+                                <h2>
+                                    <i data-lucide="sliders"></i>
+                                    <span>Tùy chỉnh chức năng</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Bật hoặc tắt các tính năng bổ sung theo nhu cầu sử dụng của bạn.
+                                </p>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                        <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị thẻ "Quỹ gia đình" ở trang chủ chính</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="checkbox" id="toggleShowFamilyFundCard" class="status-checkbox">
+                                            <span class="status-slider"></span>
+                                        </div>
+                                    </label>
+                                    <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                        <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị bảng điều khiển gỡ lỗi (Debug Console) trên màn hình</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="checkbox" id="toggleDebugConsole" class="status-checkbox">
+                                            <span class="status-slider"></span>
+                                        </div>
+                                    </label>
+                                    <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                        <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị Widget Tình yêu (WeLove) ở trang chủ chính</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="checkbox" id="toggleShowLoveWidget" class="status-checkbox">
+                                            <span class="status-slider"></span>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Feature Customization Card (only fund toggle stays) -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="sliders"></i>
-                            <span>Tùy chỉnh chức năng</span>
-                        </h2>
-                        <p class="settings-info">
-                            Bật hoặc tắt các tính năng bổ sung theo nhu cầu sử dụng của bạn.
-                        </p>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị thẻ "Quỹ gia đình" ở trang chủ chính</span>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" id="toggleShowFamilyFundCard" class="status-checkbox">
-                                    <span class="status-slider"></span>
-                                </div>
-                            </label>
-                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị bảng điều khiển gỡ lỗi (Debug Console) trên màn hình</span>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" id="toggleDebugConsole" class="status-checkbox">
-                                    <span class="status-slider"></span>
-                                </div>
-                            </label>
-                            <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
-                                <span style="font-size: 0.9rem; font-weight: 500;">Hiển thị Widget Tình yêu (WeLove) ở trang chủ chính</span>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" id="toggleShowLoveWidget" class="status-checkbox">
-                                    <span class="status-slider"></span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
+                        <!-- Tab 4: Security & AI -->
+                        <div class="settings-tab-content" id="settings-content-security">
+                            <!-- Security / Master Password Card -->
+                            <div class="settings-card">
+                                <h2>
+                                    <i data-lucide="key-round"></i>
+                                    <span>Mật khẩu chính (Master Password)</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Dùng để mã hóa dữ liệu cục bộ trong trình duyệt của bạn trước khi đưa lên máy chủ. Bạn phải lưu trữ mật khẩu này thật kỹ. Nếu mất, dữ liệu của bạn sẽ không bao giờ được phục hồi.
+                                </p>
+                                <button class="btn btn-primary w-full" id="changePasswordBtn">
+                                    <i data-lucide="refresh-cw"></i>
+                                    <span>Đổi Master Password</span>
+                                </button>
+                            </div>
 
-                    <!-- Backup/Sync All Data Card -->
-                    <div class="settings-card">
-                        <h2>
-                            <i data-lucide="hard-drive-download"></i>
-                            <span>Sao lưu / Đồng bộ toàn bộ dữ liệu</span>
-                        </h2>
-                        <p class="settings-info">
-                            Tạo bản sao lưu đầy đủ (Thu chi, Quỹ gia đình, Hồ sơ y tế) dưới dạng file mã hóa để cất giữ an toàn hoặc chuyển thiết bị.
-                        </p>
-                        <div id="lastBackupInfo" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px; padding: 8px 12px; background: rgba(16, 185, 129, 0.06); border-radius: 8px; display: flex; align-items: center; gap: 8px;">
-                            <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--accent-emerald);"></i>
-                            <span id="lastBackupText">Chưa có bản sao lưu nào</span>
+                            <!-- Gemini AI Config Card -->
+                            <div class="settings-card" id="geminiAiCard">
+                                <h2>
+                                    <i data-lucide="sparkles"></i>
+                                    <span>Trợ lý AI (Google Gemini)</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Nhập Google Gemini API Key để tự động quét kết quả xét nghiệm/y tế và phân tích báo cáo xu hướng thu chi tài chính.
+                                </p>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div style="position: relative; display: flex; align-items: center;">
+                                        <input type="password" id="geminiApiKeyInput" class="form-control" style="padding-right: 40px; width: 100%;" placeholder="Dán Google Gemini API Key tại đây...">
+                                        <button type="button" id="toggleGeminiKeyVisibility" style="position: absolute; right: 10px; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Ẩn/Hiện API Key">
+                                            <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" id="saveGeminiKeyBtn" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <i data-lucide="save"></i>
+                                        <span>Lưu Cấu Hình AI</span>
+                                    </button>
+                                    <div style="font-size: 0.8rem; text-align: center; margin-top: 2px;">
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Lấy API Key miễn phí từ Google AI Studio
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <button class="btn btn-primary w-full" id="fullBackupBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px;">
-                                <i data-lucide="download-cloud"></i>
-                                <span>Sao lưu toàn bộ dữ liệu</span>
-                            </button>
-                            <input type="file" id="fullRestoreFileInput" accept=".json" style="display:none">
-                            <button class="btn btn-outline w-full" id="fullRestoreBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px;">
-                                <i data-lucide="upload-cloud"></i>
-                                <span>Phục hồi từ bản sao lưu</span>
-                            </button>
-                        </div>
-                    </div>
 
+                        <!-- Tab 5: Notification Settings -->
+                        <div class="settings-tab-content" id="settings-content-notifications">
+                            <!-- Notification Settings Card -->
+                            <div class="settings-card" id="notificationSettingsCard">
+                                <h2>
+                                    <i data-lucide="bell-ring" style="color: var(--accent-orange);"></i>
+                                    <span>Cấu hình Thông báo (Telegram / Discord)</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Tích hợp nhận thông báo tức thời qua Webhook Telegram Bot hoặc Discord khi có biến động quỹ, lời nhắc yêu thương hoặc lịch hẹn y tế.
+                                </p>
+                                <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Webhook URL Telegram/Discord</label>
+                                        <input type="text" id="notificationWebhookInput" class="form-control" placeholder="https://api.telegram.org/... hoặc https://discord.com/api/webhooks/...">
+                                    </div>
+                                    <div class="notification-toggles" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                                        <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                            <span style="font-size: 0.9rem; font-weight: 500;">Thông báo biến động Quỹ Gia Đình</span>
+                                            <div style="display: flex; align-items: center;">
+                                                <input type="checkbox" id="notifyFundCheckbox" checked class="status-checkbox">
+                                                <span class="status-slider"></span>
+                                            </div>
+                                        </label>
+                                        <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                            <span style="font-size: 0.9rem; font-weight: 500;">Thông báo Lời nhắc WeLove</span>
+                                            <div style="display: flex; align-items: center;">
+                                                <input type="checkbox" id="notifyWeLoveCheckbox" checked class="status-checkbox">
+                                                <span class="status-slider"></span>
+                                            </div>
+                                        </label>
+                                        <label class="status-switch" style="justify-content: space-between; width: 100%; padding: 4px 0;">
+                                            <span style="font-size: 0.9rem; font-weight: 500;">Thông báo Lịch nhắc Sức Khỏe</span>
+                                            <div style="display: flex; align-items: center;">
+                                                <input type="checkbox" id="notifyHealthCheckbox" checked class="status-checkbox">
+                                                <span class="status-slider"></span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                                        <button type="button" class="btn btn-outline" id="testNotificationBtn" style="flex: 1; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                            <i data-lucide="send" style="width: 16px; height: 16px;"></i> Test Kết Nối
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="saveNotificationBtn" style="flex: 1; padding: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                            <i data-lucide="save" style="width: 16px; height: 16px;"></i> Lưu Thiết Lập
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: Backup / Restore -->
+                        <div class="settings-tab-content" id="settings-content-backup">
+                            <!-- Backup/Sync All Data Card -->
+                            <div class="settings-card">
+                                <h2>
+                                    <i data-lucide="hard-drive-download"></i>
+                                    <span>Sao lưu / Đồng bộ toàn bộ dữ liệu</span>
+                                </h2>
+                                <p class="settings-info">
+                                    Tạo bản sao lưu đầy đủ (Thu chi, Quỹ gia đình, Hồ sơ y tế) dưới dạng file mã hóa để cất giữ an toàn hoặc chuyển thiết bị.
+                                </p>
+                                <div id="lastBackupInfo" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px; padding: 8px 12px; background: rgba(16, 185, 129, 0.06); border-radius: 8px; display: flex; align-items: center; gap: 8px;">
+                                    <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--accent-emerald);"></i>
+                                    <span id="lastBackupText">Chưa có bản sao lưu nào</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <button class="btn btn-primary w-full" id="fullBackupBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px;">
+                                        <i data-lucide="download-cloud"></i>
+                                        <span>Sao lưu toàn bộ dữ liệu</span>
+                                    </button>
+                                    <input type="file" id="fullRestoreFileInput" accept=".json" style="display:none">
+                                    <button class="btn btn-outline w-full" id="fullRestoreBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px;">
+                                        <i data-lucide="upload-cloud"></i>
+                                        <span>Phục hồi từ bản sao lưu</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
                 </div>
             </section>
+
 
             <section class="tab-panel" id="tab-welove" style="display: none;">
                 <!-- Content will be populated dynamically by JS -->
@@ -3487,16 +3536,16 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.162"></script>
-    <script type="module" src="src/core/app.js?v=4.3.162"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.162"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.162"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.163"></script>
+    <script type="module" src="src/core/app.js?v=4.3.163"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.163"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.163"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.162')
+                navigator.serviceWorker.register('./sw.js?v=4.3.163')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
