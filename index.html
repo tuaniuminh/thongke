@@ -1129,6 +1129,107 @@
                 <!-- Content will be populated dynamically by JS -->
             </section>
 
+            <!-- Section: Lịch Vạn Niên & Phong Thủy -->
+            <section class="tab-panel" id="tab-am-lich" style="display: none;">
+                <div class="lunar-tab-card">
+                    <div class="lunar-modal-body">
+                        <!-- Cột trái: Lịch lưới -->
+                        <div class="lunar-calendar-col">
+                            <div class="lunar-nav-controls">
+                                <div class="lunar-nav-buttons">
+                                    <button type="button" class="lunar-nav-btn" id="lunarBtnPrevYear" title="Năm trước">«</button>
+                                    <button type="button" class="lunar-nav-btn" id="lunarBtnPrevMonth" title="Tháng trước">‹</button>
+                                </div>
+                                <div class="lunar-select-group">
+                                    <select id="lunarSelectMonth" class="lunar-select"></select>
+                                    <select id="lunarSelectYear" class="lunar-select"></select>
+                                    <button type="button" class="lunar-nav-btn lunar-today-btn" id="lunarBtnToday">Hôm nay</button>
+                                </div>
+                                <div class="lunar-nav-buttons">
+                                    <button type="button" class="lunar-nav-btn" id="lunarBtnNextMonth" title="Tháng sau">›</button>
+                                    <button type="button" class="lunar-nav-btn" id="lunarBtnNextYear" title="Năm sau">»</button>
+                                </div>
+                            </div>
+                            
+                            <div class="lunar-week-header-row">
+                                <div class="lunar-week-header">T2</div>
+                                <div class="lunar-week-header">T3</div>
+                                <div class="lunar-week-header">T4</div>
+                                <div class="lunar-week-header">T5</div>
+                                <div class="lunar-week-header">T6</div>
+                                <div class="lunar-week-header">T7</div>
+                                <div class="lunar-week-header sunday">CN</div>
+                            </div>
+                            <div class="lunar-calendar-grid" id="lunarGridBody" style="flex: 1; grid-template-rows: repeat(6, 1fr);">
+                                <!-- Các ô ngày sẽ được thêm bằng JS -->
+                            </div>
+                        </div>
+                        <!-- Cột phải: Thông tin Phong Thủy -->
+                        <div class="lunar-detail-col">
+                            <div class="detail-header">
+                                <div class="detail-solar-date" id="detailSolarDate">Thứ tư, 12/08/2026</div>
+                                <div class="detail-lunar-date" id="detailLunarDate">Ngày 30 tháng Chạp, năm Bính Ngọ</div>
+                                <div class="detail-day-badge-row" id="detailBadges">
+                                    <span class="lunar-badge hoangdao">Thanh Long Hoàng Đạo</span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <div class="detail-section-title">
+                                    <i data-lucide="clock"></i> Can Chi Thời Khắc
+                                </div>
+                                <div class="canchi-row">
+                                    <div class="canchi-item"><strong>Năm:</strong> <span id="canchiYear">Bính Ngọ</span></div>
+                                    <div class="canchi-item"><strong>Tháng:</strong> <span id="canchiMonth">Ất Mùi</span></div>
+                                    <div class="canchi-item"><strong>Ngày:</strong> <span id="canchiDay">Giáp Tý</span></div>
+                                    <div class="canchi-item"><strong>Giờ:</strong> <span id="canchiHour">Giáp Tý</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <div class="detail-section-title">
+                                    <i data-lucide="clock-arrow-up"></i> Tiết Khí & Giờ tốt
+                                </div>
+                                <div style="font-size: 0.88rem; margin-bottom: 8px;">
+                                    <strong>Tiết Khí:</strong> <span id="tietKhiVal">Lập Thu</span>
+                                </div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Giờ Hoàng Đạo trong ngày:</div>
+                                <div class="hours-grid" id="goodHoursGrid">
+                                    <!-- Các giờ tốt -->
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <div class="detail-section-title">
+                                    <i data-lucide="compass"></i> Tuổi xung & Hướng đi
+                                </div>
+                                <div style="font-size: 0.88rem; margin-bottom: 6px;">
+                                    <strong>Tuổi xung khắc:</strong> <span id="clashAgeVal" style="color: #f87171;">Mậu Ngọ, Nhâm Ngọ</span>
+                                </div>
+                                <div class="direction-row">
+                                    <div class="direction-item"><strong>Hướng Hỷ Thần (Niềm vui):</strong> <span id="hyThanVal">Đông Bắc</span></div>
+                                    <div class="direction-item"><strong>Hướng Tài Thần (Tài lộc):</strong> <span id="taiThanVal">Chính Nam</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <div class="detail-section-title">
+                                    <i data-lucide="check-circle-2"></i> Việc Nên Làm & Kiêng Kỵ
+                                </div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: #34d399; margin-bottom: 6px;">Nên làm:</div>
+                                <div class="recommend-list" id="shouldDoList">
+                                    <!-- Các việc nên làm -->
+                                </div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: #f87171; margin-top: 10px; margin-bottom: 6px;">Kiêng kỵ:</div>
+                                <div class="recommend-list" id="shouldAvoidList">
+                                    <!-- Các việc kiêng kỵ -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="tab-panel" id="tab-health" style="display: none;">
                 <div class="health-theme-container">
                     <!-- Member Profile Selector Bar -->
@@ -2005,6 +2106,20 @@
                     <div class="home-card-content">
                         <h3>Quỹ gia đình</h3>
                         <p>Theo dõi số tiền đóng góp hàng tháng của vợ chồng, quản lý các quỹ nhỏ (Chi tiêu, Đầu tư)</p>
+                    </div>
+                    <div class="home-card-arrow">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Card 5: Lịch vạn niên & Phong thủy -->
+                <a href="#lichvannien" class="home-card card-lunar" id="homeCardLunar">
+                    <div class="home-card-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.25);">
+                        <i data-lucide="calendar"></i>
+                    </div>
+                    <div class="home-card-content">
+                        <h3>Lịch âm & Phong thủy</h3>
+                        <p>Xem ngày cát hung, Can Chi, Tiết Khí, Hướng xuất hành cát tường và giờ Hoàng Đạo</p>
                     </div>
                     <div class="home-card-arrow">
                         <i data-lucide="chevron-right"></i>
@@ -3506,112 +3621,7 @@
         </div>
     </div>
 
-    <!-- Modal Lịch Vạn Niên & Phong Thủy -->
-    <div class="lunar-modal-overlay" id="lunarCalendarModal" style="display: none;">
-        <div class="lunar-modal-card">
-            <div class="lunar-modal-header">
-                <h2 class="lunar-modal-title">
-                    <i data-lucide="calendar"></i> Lịch Vạn Niên & Phong Thủy FamiLife
-                </h2>
-                <button type="button" class="lunar-modal-close" id="lunarCalendarModalClose" title="Đóng">
-                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
-                </button>
-            </div>
-            <div class="lunar-modal-body">
-                <!-- Cột trái: Lịch lưới -->
-                <div class="lunar-calendar-col">
-                    <div class="lunar-nav-controls">
-                        <div class="lunar-nav-buttons">
-                            <button type="button" class="lunar-nav-btn" id="lunarBtnPrevYear" title="Năm trước">«</button>
-                            <button type="button" class="lunar-nav-btn" id="lunarBtnPrevMonth" title="Tháng trước">‹</button>
-                        </div>
-                        <div class="lunar-select-group">
-                            <select id="lunarSelectMonth" class="lunar-select"></select>
-                            <select id="lunarSelectYear" class="lunar-select"></select>
-                            <button type="button" class="lunar-nav-btn lunar-today-btn" id="lunarBtnToday">Hôm nay</button>
-                        </div>
-                        <div class="lunar-nav-buttons">
-                            <button type="button" class="lunar-nav-btn" id="lunarBtnNextMonth" title="Tháng sau">›</button>
-                            <button type="button" class="lunar-nav-btn" id="lunarBtnNextYear" title="Năm sau">»</button>
-                        </div>
-                    </div>
-                    
-                    <div class="lunar-calendar-grid">
-                        <div class="lunar-week-header">T2</div>
-                        <div class="lunar-week-header">T3</div>
-                        <div class="lunar-week-header">T4</div>
-                        <div class="lunar-week-header">T5</div>
-                        <div class="lunar-week-header">T6</div>
-                        <div class="lunar-week-header">T7</div>
-                        <div class="lunar-week-header sunday">CN</div>
-                    </div>
-                    <div class="lunar-calendar-grid" id="lunarGridBody" style="flex: 1; grid-template-rows: repeat(6, 1fr);">
-                        <!-- Các ô ngày sẽ được thêm bằng JS -->
-                    </div>
-                </div>
-                <!-- Cột phải: Thông tin Phong Thủy -->
-                <div class="lunar-detail-col">
-                    <div class="detail-header">
-                        <div class="detail-solar-date" id="detailSolarDate">Thứ tư, 12/08/2026</div>
-                        <div class="detail-lunar-date" id="detailLunarDate">Ngày 30 tháng Chạp, năm Bính Ngọ</div>
-                        <div class="detail-day-badge-row" id="detailBadges">
-                            <span class="lunar-badge hoangdao">Thanh Long Hoàng Đạo</span>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <div class="detail-section-title">
-                            <i data-lucide="clock"></i> Can Chi Thời Khắc
-                        </div>
-                        <div class="canchi-row">
-                            <div class="canchi-item"><strong>Năm:</strong> <span id="canchiYear">Bính Ngọ</span></div>
-                            <div class="canchi-item"><strong>Tháng:</strong> <span id="canchiMonth">Ất Mùi</span></div>
-                            <div class="canchi-item"><strong>Ngày:</strong> <span id="canchiDay">Giáp Tý</span></div>
-                            <div class="canchi-item"><strong>Giờ:</strong> <span id="canchiHour">Giáp Tý</span></div>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <div class="detail-section-title">
-                            <i data-lucide="sun"></i> Tiết Khí & Giờ tốt
-                        </div>
-                        <div style="font-size: 0.88rem; margin-bottom: 8px;">
-                            <strong>Tiết Khí:</strong> <span id="tietKhiVal">Lập Thu</span>
-                        </div>
-                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Giờ Hoàng Đạo trong ngày:</div>
-                        <div class="hours-grid" id="goodHoursGrid">
-                            <!-- Các giờ tốt -->
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <div class="detail-section-title">
-                            <i data-lucide="compass"></i> Tuổi xung & Hướng đi
-                        </div>
-                        <div style="font-size: 0.88rem; margin-bottom: 6px;">
-                            <strong>Tuổi xung khắc:</strong> <span id="clashAgeVal" style="color: #f87171;">Mậu Ngọ, Nhâm Ngọ</span>
-                        </div>
-                        <div class="direction-row">
-                            <div class="direction-item"><strong>Hướng Hỷ Thần (Niềm vui):</strong> <span id="hyThanVal">Đông Bắc</span></div>
-                            <div class="direction-item"><strong>Hướng Tài Thần (Tài lộc):</strong> <span id="taiThanVal">Chính Nam</span></div>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-section">
-                        <div class="detail-section-title">
-                            <i data-lucide="check-circle"></i> Việc Nên Làm & Kiêng Kỵ
-                        </div>
-                        <div style="font-size: 0.85rem; font-weight: 600; color: #34d399; margin-bottom: 6px;">Nên làm:</div>
-                        <div class="recommend-list" id="shouldDoList">
-                            <!-- Các việc nên làm -->
-                        </div>
-                        <div style="font-size: 0.85rem; font-weight: 600; color: #f87171; margin-top: 10px; margin-bottom: 6px;">Kiêng kỵ:</div>
-                        <div class="recommend-list" id="shouldAvoidList">
-                            <!-- Các việc kiêng kỵ -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+    
         </div>
     </div>
 

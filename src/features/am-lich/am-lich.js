@@ -627,26 +627,30 @@ export function initLunarCalendarBindings() {
         updateDetailPanel(today);
     });
     
-    // Đóng Modal
-    document.getElementById('lunarCalendarModalClose').addEventListener('click', () => {
-        closeLunarCalendarModal();
-    });
-    
-    // Đóng khi click ra vùng ngoài modal-card
-    const modalOverlay = document.getElementById('lunarCalendarModal');
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) {
+    // Đóng Modal (Giữ lại guard đề phòng modal vẫn được dùng)
+    const closeBtn = document.getElementById('lunarCalendarModalClose');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
             closeLunarCalendarModal();
-        }
-    });
+        });
+    }
+    
+    const modalOverlay = document.getElementById('lunarCalendarModal');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeLunarCalendarModal();
+            }
+        });
+    }
 }
 
-// Mở Modal Lịch vạn niên
+// Mở Lịch vạn niên (chuyển sang dạng Tab Card)
 export function openLunarCalendarModal() {
-    const modalOverlay = document.getElementById('lunarCalendarModal');
-    if (!modalOverlay) return;
+    if (typeof window.switchTab === 'function') {
+        window.switchTab('am-lich');
+    }
     
-    // Thiết lập trạng thái ban đầu là ngày hiện tại hoặc ngày đã chọn trước đó
     const today = state.selectedDate || new Date();
     state.viewYear = today.getFullYear();
     state.viewMonth = today.getMonth() + 1;
@@ -658,9 +662,6 @@ export function openLunarCalendarModal() {
         selectYear.value = state.viewYear;
     }
     
-    modalOverlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Ngăn cuộn trang nền
-    
     renderCalendarGrid();
     updateDetailPanel(today);
     
@@ -669,13 +670,11 @@ export function openLunarCalendarModal() {
     }
 }
 
-// Đóng Modal
+// Đóng Lịch vạn niên (quay lại Trang chủ)
 export function closeLunarCalendarModal() {
-    const modalOverlay = document.getElementById('lunarCalendarModal');
-    if (modalOverlay) {
-        modalOverlay.style.display = 'none';
+    if (typeof window.switchTab === 'function') {
+        window.switchTab('home');
     }
-    document.body.style.overflow = ''; // Phục hồi cuộn trang nền
 }
 
 // Đăng ký toàn cục

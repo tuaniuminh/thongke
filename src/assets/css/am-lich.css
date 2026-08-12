@@ -1,6 +1,29 @@
-/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.168) */
+/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.170) */
 
-/* Modal Lịch âm nâng cao */
+.lunar-week-header-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.lunar-tab-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--card-radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--text-primary);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    margin-bottom: 24px;
+}
+
+/* Modal Lịch âm nâng cao (Giữ nguyên để tương thích, tuy nhiên giờ chuyển sang dạng Tab Card) */
 .lunar-modal-overlay {
     display: none;
     position: fixed;
@@ -8,21 +31,20 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(4, 6, 12, 0.7);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 10000;
     justify-content: center;
     align-items: center;
     padding: 16px;
-    animation: lunarFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .lunar-modal-card {
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    border-radius: 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--card-radius);
     width: 100%;
     max-width: 980px;
     height: 90vh;
@@ -31,50 +53,8 @@
     flex-direction: column;
     overflow: hidden;
     color: var(--text-primary);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Header Modal */
-.lunar-modal-header {
-    padding: 18px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(30, 41, 59, 0.2);
-}
-
-.lunar-modal-title {
-    font-family: var(--font-heading);
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #fbbf24; /* Vàng kim */
-    text-shadow: 0 2px 10px rgba(251, 191, 36, 0.25);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.lunar-modal-close {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-secondary);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.lunar-modal-close:hover {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    transform: rotate(90deg);
-    border-color: rgba(239, 68, 68, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 /* Thân Modal - Chia đôi */
@@ -90,7 +70,7 @@
     padding: 20px 24px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid var(--border-color);
     overflow-y: auto;
 }
 
@@ -101,7 +81,8 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    background: rgba(15, 23, 42, 0.35);
+    background: var(--bg-primary);
+    opacity: 0.95;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -121,11 +102,11 @@
 }
 
 .lunar-nav-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 6px 10px;
-    border-radius: 8px;
+    border-radius: var(--btn-radius);
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
@@ -133,8 +114,8 @@
 }
 
 .lunar-nav-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--border-hover);
+    border-color: var(--text-secondary);
 }
 
 .lunar-select-group {
@@ -144,11 +125,11 @@
 }
 
 .lunar-select {
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 6px 12px;
-    border-radius: 8px;
+    border-radius: var(--btn-radius);
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -156,20 +137,18 @@
 }
 
 .lunar-select:focus {
-    border-color: #fbbf24;
+    border-color: var(--accent-amber);
 }
 
 .lunar-today-btn {
-    background: linear-gradient(135deg, #d4af37, #aa7c11);
-    border: none;
-    color: #ffffff;
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    color: #ffffff !important;
     font-weight: 700;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 .lunar-today-btn:hover {
-    background: linear-gradient(135deg, #e5c158, #c5931d);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 4px 12px var(--primary-glow);
 }
 
 /* Lưới lịch */
@@ -188,18 +167,17 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted);
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 2px 0;
 }
 
 .lunar-week-header.sunday {
-    color: #f87171;
+    color: var(--accent-rose);
 }
 
 /* Ngày cụ thể trong lưới */
 .lunar-day-cell {
-    background: rgba(30, 41, 59, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 8px;
     display: flex;
@@ -207,19 +185,19 @@
     justify-content: space-between;
     aspect-ratio: 1.1;
     cursor: pointer;
-    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     position: relative;
     user-select: none;
 }
 
 .lunar-day-cell:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
     transform: translateY(-1px);
 }
 
 .lunar-day-cell.other-month {
-    opacity: 0.25;
+    opacity: 0.3;
 }
 
 /* Dương lịch */
@@ -240,24 +218,22 @@
 
 /* Highlight hôm nay */
 .lunar-day-cell.today {
-    background: rgba(14, 165, 233, 0.1);
-    border: 2px solid #0ea5e9;
-    box-shadow: 0 0 12px rgba(14, 165, 233, 0.25);
+    background: var(--primary-glow);
+    border: 2px solid var(--primary-color);
 }
 .lunar-day-cell.today .solar-day-num {
-    color: #38bdf8;
+    color: var(--primary-color);
 }
 
 /* Highlight ngày được chọn */
 .lunar-day-cell.active-select {
-    background: rgba(251, 191, 36, 0.08);
-    border: 2px solid #fbbf24;
-    box-shadow: 0 0 14px rgba(251, 191, 36, 0.2);
+    background: rgba(245, 158, 11, 0.06);
+    border: 2px solid var(--accent-amber);
 }
 
 /* Ngày rằm hoặc mùng một */
 .lunar-day-cell.special-lunar-day .lunar-day-num {
-    color: #f43f5e; /* Đỏ son */
+    color: var(--accent-rose); /* Đỏ son */
     font-weight: 800;
 }
 
@@ -271,16 +247,16 @@
     border-radius: 50%;
 }
 .day-cell-status-dot.hoang-dao {
-    background-color: #fbbf24; /* Vàng */
+    background-color: var(--accent-amber); /* Vàng */
 }
 .day-cell-status-dot.bad-day {
-    background-color: #ef4444; /* Đỏ hung */
+    background-color: var(--accent-rose); /* Đỏ hung */
 }
 
 /* Thiết kế Chi Tiết bên phải */
 .detail-header {
     text-align: center;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+    border-bottom: 1px dashed var(--border-color);
     padding-bottom: 14px;
     margin-bottom: 16px;
 }
@@ -294,7 +270,7 @@
 
 .detail-lunar-date {
     font-size: 0.95rem;
-    color: #fbbf24;
+    color: var(--accent-amber);
     font-weight: 700;
     margin-top: 4px;
 }
@@ -304,6 +280,7 @@
     display: flex;
     justify-content: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .lunar-badge {
@@ -315,29 +292,29 @@
 }
 
 .lunar-badge.hoangdao {
-    background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--accent-amber);
+    border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .lunar-badge.hacdao {
-    background: rgba(148, 163, 184, 0.1);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
 }
 
 .lunar-badge.danger-day {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(244, 63, 94, 0.12);
+    color: var(--accent-rose);
+    border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
 /* Từng khối thông tin chi tiết */
 .detail-section {
     margin-bottom: 16px;
-    background: rgba(30, 41, 59, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
     padding: 12px 14px;
 }
 
@@ -357,7 +334,7 @@
 .detail-section-title svg {
     width: 14px;
     height: 14px;
-    color: #fbbf24;
+    color: var(--accent-amber);
 }
 
 /* Danh sách chi tiết phong thủy */
@@ -383,8 +360,8 @@
 }
 
 .hour-badge {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     padding: 4px 8px;
     font-size: 0.78rem;
@@ -394,7 +371,7 @@
 
 .hour-badge.good {
     background: rgba(16, 185, 129, 0.1);
-    color: #34d399;
+    color: var(--accent-emerald);
     border-color: rgba(16, 185, 129, 0.2);
 }
 
@@ -428,40 +405,31 @@
 }
 
 .recommend-item.do {
-    color: #a7f3d0;
+    color: var(--text-primary);
 }
 .recommend-item.do::before {
     content: "✓";
-    color: #10b981;
+    color: var(--accent-emerald);
     font-weight: bold;
     flex-shrink: 0;
 }
 
 .recommend-item.avoid {
-    color: #fca5a5;
+    color: var(--text-secondary);
 }
 .recommend-item.avoid::before {
     content: "✗";
-    color: #ef4444;
+    color: var(--accent-rose);
     font-weight: bold;
     flex-shrink: 0;
 }
 
-/* Animations */
-@keyframes lunarFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
 /* Mobile responsive */
 @media (max-width: 768px) {
-    .lunar-modal-card {
-        height: 95vh;
-        max-height: none;
+    .lunar-tab-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
     }
     
     .lunar-modal-body {
@@ -472,7 +440,7 @@
     .lunar-calendar-col {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: 1px solid var(--border-color);
         padding: 16px;
         overflow-y: visible;
     }
@@ -518,15 +486,15 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.08), transparent 50%);
+    background: radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.06), transparent 50%);
     pointer-events: none;
     z-index: 1;
 }
 
 .home-widget-box#homeLunarWidget:hover {
     transform: translateY(-2px) scale(1.02);
-    border-color: rgba(251, 191, 36, 0.35) !important;
-    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.08) !important;
 }
 
 .home-widget-box#homeLunarWidget:active {
@@ -549,8 +517,8 @@
 
 .lunar-widget-icon {
     font-size: 1.1rem;
-    color: #fbbf24;
-    text-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+    color: var(--accent-amber);
+    text-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
     animation: pulseWidgetIcon 3s infinite ease-in-out;
 }
 
@@ -583,21 +551,21 @@
 }
 
 .lunar-widget-badge.good {
-    background: rgba(251, 191, 36, 0.12);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.25);
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--accent-amber);
+    border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .lunar-widget-badge.bad {
-    background: rgba(239, 68, 68, 0.12);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(244, 63, 94, 0.12);
+    color: var(--accent-rose);
+    border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
 .lunar-widget-badge.normal {
-    background: rgba(148, 163, 184, 0.08);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.15);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
 }
 
 @keyframes pulseWidgetIcon {
@@ -608,139 +576,6 @@
     50% {
         transform: scale(1.1);
         opacity: 1;
-        text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+        text-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
     }
-}
-
-/* Light Mode Overrides cho Lịch Vạn Niên */
-html.light-mode .lunar-modal-card {
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 20px 50px rgba(31, 38, 135, 0.08);
-    color: var(--text-primary);
-}
-
-html.light-mode .lunar-modal-header {
-    border-bottom-color: rgba(0, 0, 0, 0.06);
-    background: rgba(243, 244, 246, 0.5);
-}
-
-html.light-mode .lunar-modal-title {
-    color: #b45309; /* Màu hổ phách tối */
-    text-shadow: none;
-}
-
-html.light-mode .lunar-modal-close {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.06);
-}
-
-html.light-mode .lunar-modal-close:hover {
-    background: rgba(239, 68, 68, 0.1);
-}
-
-html.light-mode .lunar-calendar-col {
-    border-right-color: rgba(0, 0, 0, 0.06);
-}
-
-html.light-mode .lunar-detail-col {
-    background: rgba(243, 244, 246, 0.35);
-}
-
-html.light-mode .lunar-nav-btn {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.06);
-}
-
-html.light-mode .lunar-nav-btn:hover {
-    background: rgba(0, 0, 0, 0.08);
-}
-
-html.light-mode .lunar-select {
-    background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.12);
-}
-
-html.light-mode .lunar-day-cell {
-    background: rgba(243, 244, 246, 0.7);
-    border-color: rgba(0, 0, 0, 0.03);
-}
-
-html.light-mode .lunar-day-cell:hover {
-    background: rgba(243, 244, 246, 0.95);
-    border-color: rgba(0, 0, 0, 0.1);
-}
-
-html.light-mode .lunar-day-cell.today {
-    background: rgba(14, 165, 233, 0.06);
-    border-color: #0284c7;
-    box-shadow: 0 0 10px rgba(2, 132, 199, 0.15);
-}
-
-html.light-mode .lunar-day-cell.today .solar-day-num {
-    color: #0284c7;
-}
-
-html.light-mode .lunar-day-cell.active-select {
-    background: rgba(245, 158, 11, 0.06);
-    border-color: #d97706;
-    box-shadow: 0 0 10px rgba(217, 119, 6, 0.12);
-}
-
-html.light-mode .lunar-badge.hoangdao {
-    background: rgba(245, 158, 11, 0.1);
-    color: #b45309;
-    border-color: rgba(245, 158, 11, 0.2);
-}
-
-html.light-mode .lunar-badge.hacdao {
-    background: rgba(100, 116, 139, 0.08);
-    color: #475569;
-    border-color: rgba(100, 116, 139, 0.15);
-}
-
-html.light-mode .lunar-badge.danger-day {
-    background: rgba(239, 68, 68, 0.08);
-    color: #dc2626;
-    border-color: rgba(239, 68, 68, 0.2);
-}
-
-html.light-mode .detail-section {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(0, 0, 0, 0.04);
-}
-
-html.light-mode .hour-badge {
-    background: rgba(0, 0, 0, 0.03);
-    border-color: rgba(0, 0, 0, 0.04);
-}
-
-html.light-mode .hour-badge.good {
-    background: rgba(16, 185, 129, 0.08);
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.15);
-}
-
-html.light-mode .recommend-item.do {
-    color: #065f46;
-}
-
-html.light-mode .recommend-item.avoid {
-    color: #991b1b;
-}
-
-html.light-mode .home-widget-box#homeLunarWidget:hover {
-    border-color: rgba(217, 119, 6, 0.35) !important;
-    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.08) !important;
-}
-
-html.light-mode .lunar-widget-icon {
-    color: #d97706;
-    text-shadow: none;
-}
-
-html.light-mode .lunar-widget-badge.good {
-    background: rgba(217, 119, 6, 0.08);
-    color: #b45309;
-    border-color: rgba(217, 119, 6, 0.2);
 }

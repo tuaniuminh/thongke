@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.168';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.168';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.168';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.168';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.170';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.170';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.170';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.170';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.168';
-import * as sync from './sync.js?v=4.3.168';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.168';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.168';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.168';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.170';
+import * as sync from './sync.js?v=4.3.170';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.170';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.170';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.170';
 
-const APP_VERSION = '4.3.168';
+const APP_VERSION = '4.3.170';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2562,6 +2562,8 @@ const tabHashMapping = {
     'quan-ly-thu-chi': 'tc-management',
     'tc-management': 'tc-management',
     'gockyniem': 'welove',
+    'lichvannien': 'am-lich',
+    'am-lich': 'am-lich',
     'welove': 'welove',
     'welove-admin': 'welove-admin',
     'gockyniem-admin': 'welove-admin',
@@ -2582,6 +2584,7 @@ const tabIdToHash = {
     'fund-management': 'quan-ly-quy',
     'tc-management': 'quan-ly-thu-chi',
     'welove': 'gockyniem',
+    'am-lich': 'lichvannien',
     'welove-admin': 'gockyniem-admin',
     'welove-settings': 'gockyniem-settings'
 };
@@ -2815,7 +2818,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
             title.className = 'theme-fund';
         } else if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) {
             title.className = 'theme-welove';
-        } else if (tabId === 'settings') {
+        } else if (tabId === 'settings' || tabId === 'am-lich') {
             title.className = 'theme-settings';
         }
     }
@@ -2879,6 +2882,14 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = 'Quản lý';
         subtitle.innerText = 'Tùy chỉnh chức năng, quản lý sự kiện và xuất nhập dữ liệu';
         renderTcManagement();
+    } else if (tabId === 'am-lich') {
+        title.innerText = 'Lịch Vạn Niên & Phong Thủy';
+        subtitle.innerText = 'Xem lịch âm dương, Can Chi, Tiết Khí và ngày cát hung gia đình';
+        if (typeof window.openLunarCalendarModal === 'function') {
+            setTimeout(() => {
+                window.openLunarCalendarModal();
+            }, 50);
+        }
     }
     
     if (updateHash) {
@@ -4974,6 +4985,11 @@ const CARD_NAV_REGISTRY = {
         logoText: 'Cài Đặt',
         logoThemeClass: 'theme-settings',
         allowedNavs: ['home', 'settings']
+    },
+    'am-lich': {
+        logoText: 'Lịch Vạn Niên',
+        logoThemeClass: 'theme-settings',
+        allowedNavs: ['home', 'settings']
     }
 };
 
@@ -4982,6 +4998,7 @@ function getCardKeyForTab(tabId) {
     if (['welove', 'welove-admin', 'welove-settings'].includes(tabId)) return 'welove';
     if (['fund', 'fund-history', 'fund-management'].includes(tabId)) return 'fund';
     if (tabId === 'settings') return 'settings';
+    if (tabId === 'am-lich') return 'am-lich';
     if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) return 'thuchi';
     return 'default';
 }
@@ -5196,6 +5213,29 @@ function updateMobileNavbar(tabId) {
                 </div>
             `;
         }
+    } else if (tabId === 'am-lich') {
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+        
+        const currentLogoSrc = state.theme === 'light' 
+            ? 'src/assets/images/icon-light.png' 
+            : 'src/assets/images/icon.png';
+            
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="display: flex; align-items: center; gap: 8px;">
+                <div class="mobile-navbar-logo">
+                    <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                </div>
+                <span class="mobile-navbar-title theme-settings" style="color: var(--accent-amber);" id="mobileNavbarTitle">Lịch Vạn Niên</span>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+        `;
     } else {
         mobileNavbar.classList.add('two-line');
         

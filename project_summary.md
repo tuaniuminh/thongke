@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.168** |
+| **Phiên bản hiện tại** | **v4.3.170** |
+| **v4.3.170** | ✅ **Chuyển Đổi Phân Hệ Lịch Vạn Niên Sang Tab Card Riêng Biệt & Sửa Lỗi Giao Diện Grid (v4.3.170)**: Loại bỏ hoàn toàn modal hội thoại. Chuyển Lịch Vạn Niên thành tab panel `#tab-am-lich` tích hợp trực tiếp trong khung layout ứng dụng và thêm card khởi chạy tại Trang chủ. Đồng thời sửa triệt để lỗi khoảng trống do week-header dùng chung grid css. Nâng phiên bản toàn hệ thống sang `?v=4.3.170`. |
 | **v4.3.168** | ✅ **Nâng Cấp Phân Hệ Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.168)**: Thiết kế giao diện Lịch Vạn Niên kính mờ cao cấp (Glassmorphism), chia cột responsive. Tích hợp thuật toán phong thủy chuẩn xác tính Can Chi (Tháng/Giờ), xác định Tiết Khí, đánh giá ngày Hoàng/Hắc Đạo, Giờ lành, Tuổi xung khắc, Hướng xuất hành và lời khuyên việc Nên/Không nên làm cát tường. Nâng phiên bản toàn hệ thống sang `?v=4.3.168`. |
 | **v4.3.167** | ✅ **Tinh Chỉnh Trật Tự Từ Tên Vợ Chồng Trong Sổ Tay Sức Khỏe (v4.3.167)**: Điều chỉnh trật tự từ hiển thị tên vợ để có cấu trúc tự nhiên hơn: "em iu [Tên Vợ]" thay vì "[Tên Vợ] em iu", đồng thời cập nhật nhất quán cho cả tiêu đề, mô tả và nhãn checkbox cài đặt. Nâng phiên bản toàn hệ thống sang `?v=4.3.167`. |
 | **v4.3.166** | ✅ **Bổ Sung Tên Vợ Chồng Động Vào Sổ Tay Sức Khỏe WeLove (v4.3.166)**: Tái thiết kế tiêu đề card, mô tả và nhãn checkbox cấu hình của Sổ tay sức khỏe thành các chuỗi hiển thị động dựa trên thông tin tên của người dùng (`state.weLoveName1`) và đối tác (`state.weLoveName2`) đã cấu hình, mang lại trải nghiệm cá nhân hóa sâu sắc thay vì gán cứng text mặc định. Nâng phiên bản toàn hệ thống sang `?v=4.3.166`. |
 | **v4.3.165** | ✅ **Đồng Bộ SVG Icon Cho Trạng Thái Đang Tải Bản Cập Nhật (v4.3.165)**: Thay thế emoji `🎉` cuối cùng trong kết quả kiểm tra phiên bản bằng một SVG Download/Cloud-Download vector mảnh mai, tinh sắc. Sử dụng nét vẽ 3px đồng điệu 100% với bộ icon Spinner, Checkmark và Cross trước đó để hoàn thiện sự đồng bộ nghệ thuật của nút badge. Nâng phiên bản toàn hệ thống sang `?v=4.3.165`. |
-| **v4.3.164** | ✅ **Nâng Cấp Phiên Bản Lên v4.3.164 Để Buộc Trình Duyệt Xóa Cache (v4.3.164)**: Tăng số hiệu phiên bản lên v4.3.164 để ép trình duyệt dọn dẹp bộ nhớ đệm (Cache Busting), đảm bảo các thiết bị tải lại giao diện tab cài đặt mới hoàn toàn sạch sẽ, không lưu cache cũ. Nâng phiên bản toàn hệ thống sang `?v=4.3.164`. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
