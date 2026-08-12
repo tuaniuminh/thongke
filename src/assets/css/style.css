@@ -3913,6 +3913,14 @@ body.light-mode .home-widget-box {
         font-size: 0.82rem;
         font-weight: 700;
     }
+
+    /* Mobile: ẩn icon emoji và hàng Can Chi/Badge — chỉ giữ "Lịch âm: dd/mm/yyyy" */
+    #homeLunarWidget .lunar-widget-icon {
+        display: none !important;
+    }
+    #homeLunarWidget .lunar-widget-sub-row {
+        display: none !important;
+    }
     
     .weather-desktop {
         display: none !important;
