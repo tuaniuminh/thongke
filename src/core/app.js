@@ -2,17 +2,17 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.160';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.160';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.160';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.160';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.161';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.161';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.161';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.161';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.160';
-import * as sync from './sync.js?v=4.3.160';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.160';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.160';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.161';
+import * as sync from './sync.js?v=4.3.161';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.161';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.161';
 
-const APP_VERSION = '4.3.160';
+const APP_VERSION = '4.3.161';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -4056,7 +4056,14 @@ async function initializeApp() {
                 const originalText = badgeSpan.textContent;
                 btn.disabled = true;
                 btn.classList.add('checking');
-                badgeSpan.innerHTML = `<span class="spin-icon">🔄</span> Đang kiểm tra...`;
+                badgeSpan.innerHTML = `
+                    <svg class="modern-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; stroke: currentColor;">
+                        <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.25)" stroke-width="3"></circle>
+                        <path d="M12 2C6.47715 2 2 6.47715 2 12C2 13.5 2.5 15 3.5 16" stroke-width="3" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/>
+                        </path>
+                    </svg>Đang kiểm tra...
+                `;
                 
                 const result = await checkAppVersion(true, true);
                 
