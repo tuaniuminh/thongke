@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.176';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.176';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.176';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.176';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.177';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.177';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.177';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.177';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.176';
-import * as sync from './sync.js?v=4.3.176';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.176';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.176';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.176';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.177';
+import * as sync from './sync.js?v=4.3.177';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.177';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.177';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.177';
 
-const APP_VERSION = '4.3.176';
+const APP_VERSION = '4.3.177';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2924,7 +2924,13 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         const thuChiTabs = ['dashboard', 'received', 'sent', 'home'];
         quickAddBtn.style.display = thuChiTabs.includes(tabId) ? '' : 'none';
     }
-    
+
+    // Date Picker chỉ hiện khi ở tab Lịch Vạn Niên
+    const lunarDatePicker = document.getElementById('lunarHeaderDatePicker');
+    if (lunarDatePicker) {
+        lunarDatePicker.style.display = (tabId === 'am-lich') ? 'flex' : 'none';
+    }
+
     // Update mobile status bar theme color dynamically to match immersive pages
     if (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings') {
         if (state.theme === 'light') {

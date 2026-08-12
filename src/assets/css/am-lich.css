@@ -1,4 +1,11 @@
-/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.176) */
+/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.177) */
+
+/* Date picker header chỉ hiện trên desktop */
+@media (max-width: 768px) {
+    #lunarHeaderDatePicker {
+        display: none !important;
+    }
+}
 
 .lunar-week-header-row {
     display: grid;

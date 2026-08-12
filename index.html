@@ -74,15 +74,15 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.176">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.177">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.176">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.176">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.176">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.176">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.176">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.177">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.177">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.177">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.177">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.177">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -356,7 +356,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.176" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.177" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -472,7 +472,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.176" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.177" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -501,6 +501,22 @@
                             <span id="sharedFundHeaderCardTitleText">Bạn đang tham gia quỹ chung gia đình</span>
                         </div>
                     </div>
+
+                    <!-- Date Picker cho tab Lịch Vạn Niên -->
+                    <div id="lunarHeaderDatePicker" style="display:none; align-items:center; gap:6px;
+                        background: var(--bg-secondary); border: 1px solid var(--border-color);
+                        border-radius: 10px; padding: 6px 12px; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='var(--primary-color)'">
+                        <i data-lucide="calendar-search" style="width:15px;height:15px;color:var(--primary-color);flex-shrink:0;"></i>
+                        <input type="date" id="lunarJumpDate"
+                            min="1900-01-01" max="2199-12-31"
+                            title="Chọn ngày bất kỳ"
+                            style="background:transparent;border:none;outline:none;
+                                color:var(--text-primary);font-size:0.85rem;
+                                font-family:var(--font-heading);font-weight:600;
+                                cursor:pointer;min-width:0;">
+                    </div>
+
                     <button class="btn btn-primary" id="quickAddBtn" style="display:none;">
                         <i data-lucide="plus"></i>
                         <span class="btn-text">Thêm ghi chép</span>
@@ -1150,17 +1166,8 @@
                                     <button type="button" class="lunar-nav-btn" id="lunarBtnNextYear" title="Năm sau">»</button>
                                 </div>
                             </div>
-                            <!-- Chọn ngày nhanh -->
-                            <div class="lunar-date-jump-row">
-                                <label for="lunarJumpDate" class="lunar-date-jump-label">
-                                    <i data-lucide="calendar-search" style="width:14px;height:14px;"></i>
-                                    Chọn ngày:
-                                </label>
-                                <input type="date" id="lunarJumpDate" class="lunar-date-jump-input"
-                                    min="1900-01-01" max="2199-12-31"
-                                    title="Nhấp vào để chọn ngày bất kỳ">
-                            </div>
-                            
+
+
                             <div class="lunar-week-header-row">
                                 <div class="lunar-week-header">T2</div>
                                 <div class="lunar-week-header">T3</div>
@@ -2053,7 +2060,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.176" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.177" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2149,11 +2156,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.176';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.177';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.176';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.177';
                         }
                     })();
                 </script>
@@ -3662,17 +3669,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.176"></script>
-    <script type="module" src="src/core/app.js?v=4.3.176"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.176"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.176"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.176"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.177"></script>
+    <script type="module" src="src/core/app.js?v=4.3.177"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.177"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.177"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.177"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.176')
+                navigator.serviceWorker.register('./sw.js?v=4.3.177')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
