@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.166';
-import * as sync from '../../core/sync.js?v=4.3.166';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.166';
+} from '../../core/app.js?v=4.3.167';
+import * as sync from '../../core/sync.js?v=4.3.167';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.167';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.166');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.167');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.166';
+        const logoPath = './logo_pwa_small.png?v=4.3.167';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.166';
+    const logoPath = './logo_pwa_small.png?v=4.3.167';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -815,8 +815,8 @@ export async function renderWeLoveDashboard() {
     const showSickness = state.weLoveShowSickness !== false;
     const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
 
-    const wifeName = state.weLoveName2 ? `${escapeHTML(state.weLoveName2)} em iu` : 'em iu';
-    const wifeNameTitle = state.weLoveName2 ? `${escapeHTML(state.weLoveName2)} Em Iu` : 'Em Iu';
+    const wifeName = state.weLoveName2 ? `em iu ${escapeHTML(state.weLoveName2)}` : 'em iu';
+    const wifeNameTitle = state.weLoveName2 ? `Em Iu ${escapeHTML(state.weLoveName2)}` : 'Em Iu';
     const husbandName = state.weLoveName1 ? `anh ${escapeHTML(state.weLoveName1)} đẹp trai` : 'anh đẹp trai';
 
     const sicknessCardHtml = showSickness ? `
