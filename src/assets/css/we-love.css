@@ -2669,3 +2669,70 @@ body:not(.light-mode) .welove-theater-timeline-number {
   opacity: 1;
 }
 
+/* Custom Desktop Typography Enhancements (for layout-modern) */
+@media (min-width: 1024px) {
+  /* 1. Sửa phông chữ tiêu đề chống lẹm dấu hỏi & tăng kích thước */
+  .welove-title {
+    font-family: "Outfit", "Be Vietnam Pro", sans-serif !important;
+    font-size: 1.85rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  /* 2. Tăng kích thước chữ chung trong WeLove trên Desktop */
+  .memory-page.layout-modern .memory-title {
+    font-size: 2.3rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.03em !important;
+  }
+  
+  .memory-page.layout-modern .memory-subtitle {
+    font-size: 1.05rem !important;
+    margin-bottom: 2.2rem !important;
+  }
+
+  /* 3. Tăng cỡ chữ timeline và log card */
+  .memory-page.layout-modern .welove-timeline-desc {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+  }
+
+  .memory-page.layout-modern .welove-timeline-number {
+    font-size: 0.85rem !important;
+  }
+
+  /* 4. Tăng cỡ chữ thống kê đợt ốm */
+  .memory-page.layout-modern .welove-count-num {
+    font-size: 3.8rem !important;
+  }
+
+  .memory-page.layout-modern .welove-count-lbl {
+    font-size: 0.85rem !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  /* 5. Tăng cỡ chữ nhãn form cấu hình & input */
+  .memory-page.layout-modern .welove-form-label {
+    font-size: 0.98rem !important;
+    font-weight: 700 !important;
+  }
+
+  .memory-page.layout-modern .welove-input, 
+  .memory-page.layout-modern .welove-textarea,
+  .memory-page.layout-modern select.welove-input {
+    font-size: 0.95rem !important;
+    padding: 10px 14px !important;
+    height: auto !important;
+  }
+
+  /* 6. Tăng kích cỡ câu trích dẫn cho sang trọng hơn */
+  .memory-page.layout-modern .quote-vietnamese {
+    font-size: 1.4rem !important;
+    line-height: 1.7 !important;
+  }
+  
+  .memory-page.layout-modern .quote-chinese {
+    font-size: 0.95rem !important;
+  }
+}
+
