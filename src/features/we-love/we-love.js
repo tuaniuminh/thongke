@@ -1,9 +1,9 @@
 // src/features/we-love/we-love.js - WeLove Couple Memory Corner Module
 import { 
     state, saveLocalState, showToast, performSync, updateSidebarNavVisibility
-} from '../../core/app.js?v=4.3.157';
-import * as sync from '../../core/sync.js?v=4.3.157';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.157';
+} from '../../core/app.js?v=4.3.158';
+import * as sync from '../../core/sync.js?v=4.3.158';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.158';
 
 // Biến lưu tỉ lệ zoom hiện tại của Lightbox để điều khiển UI toggle
 let currentLightboxScale = 1;
@@ -70,7 +70,7 @@ let weLoveCurrentSubView = 'memory'; // 'memory' | 'admin' | 'settings'
 // Audio Instance getter
 function getAudioInstance() {
     if (!weLoveAudio) {
-        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.157');
+        weLoveAudio = new Audio('./mot-doi.mp3?v=4.3.158');
         weLoveAudio.loop = true;
         
         weLoveAudio.addEventListener('play', () => {
@@ -123,7 +123,7 @@ function updateAudioPlaybackState() {
 function initMediaSession() {
     const aud = getAudioInstance();
     if ('mediaSession' in navigator && aud) {
-        const logoPath = './logo_pwa_small.png?v=4.3.157';
+        const logoPath = './logo_pwa_small.png?v=4.3.158';
         const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
         
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -444,7 +444,7 @@ function triggerSystemNotification(title, body) {
         return;
     }
     
-    const logoPath = './logo_pwa_small.png?v=4.3.157';
+    const logoPath = './logo_pwa_small.png?v=4.3.158';
     const absoluteLogoUrl = new URL(logoPath, window.location.href).href;
     const options = {
         body: body,
@@ -891,7 +891,7 @@ export async function renderWeLoveDashboard() {
                 <!-- ADMIN SUBVIEW -->
                 ${isModern ? `
                 <!-- DESKTOP 2-COLUMN LAYOUT -->
-                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2.5rem; width: 100%; max-width: 1200px; margin: 3.5rem auto 0 auto; z-index: 5; align-items: stretch; padding: 0 1.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2.5rem; width: 100%; max-width: 1200px; margin: 3.5rem auto 0 auto; z-index: 5; align-items: stretch; padding: 0 1.5rem; grid-column: span 2 !important;">
                     <!-- Left Column: Scheduler Form -->
                     <div class="welove-card" style="margin-top: 0; width: 100%; text-align: left; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
                         <div>
@@ -975,7 +975,7 @@ export async function renderWeLoveDashboard() {
                 `}
             ` : weLoveCurrentSubView === 'settings' && canEdit ? `
                 <!-- CONFIG / SETTINGS SUBVIEW -->
-                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 3.5rem auto 0 auto; z-index: 5; padding: 0 15px;">
+                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 3.5rem auto 0 auto; z-index: 5; padding: 0 15px; grid-column: span 2 !important;">
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                             <span style="font-size: 1.8rem;">⚙️</span>
