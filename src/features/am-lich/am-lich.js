@@ -668,7 +668,7 @@ export function initLunarCalendarBindings() {
         });
 
         // Trigger showPicker an toàn khi nhấn vào container
-        const pickerContainer = document.getElementById('lunarHeaderDatePicker');
+        const pickerContainer = document.getElementById('lunarQuickPickerTrigger');
         if (pickerContainer) {
             pickerContainer.addEventListener('click', (e) => {
                 if (e.target === jumpDateInput) return;

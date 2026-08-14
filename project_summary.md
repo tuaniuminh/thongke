@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.181** |
+| **Phiên bản hiện tại** | **v4.3.182** |
+| **v4.3.182** | ✅ **Nâng Cấp Giao Diện Điều Hướng & Thêm Chọn Ngày Lịch Vạn Niên Di Động (v4.3.182)**: Khôi phục bo góc bo tròn 16px cho khung trắng `lunar-tab-card` trên điện thoại. Tái cơ cấu bộ điều khiển `lunar-nav-controls`: PC hiển thị 1 hàng ngang, điện thoại hiển thị 2 hàng (Hàng 1: Nút bấm và select chọn Tháng/Năm; Hàng 2: Hai nút bấm to cân xứng cho 'Hôm nay' và 'Chọn ngày' tích hợp date picker ẩn). Loại bỏ date picker ở header cũ. |
 | **v4.3.181** | ✅ **Khôi Phục Giao Diện WeLove Điện Thoại Về Màu Gốc (v4.3.181)**: Bọc toàn bộ các thuộc tính nền Obsidian & Champagne Gold mới của tab WeLove trong media query `@media (min-width: 769px)` tại `we-love.css`. Điều này giúp giữ nguyên bảng màu hồng/đỏ/tím lãng mạn ban đầu của giao diện di động và chỉ áp dụng giao diện mới trên màn hình PC. |
 | **v4.3.180** | ✅ **Nâng cấp Giao diện Chọn Ngày & Sửa Lỗi Hiển Thị Lịch Âm Mobile (v4.3.180)**: Thiết kế bộ chọn ngày (desktop) lớn hơn, nhãn rõ ràng và hiển thị màu nhấn nổi bật. Bind sự kiện click an toàn để tự động mở calendar picker. Trên di động, sử dụng `display: contents !important` để ẩn hoàn toàn icon/sub-row và hiển thị tiện ích 1 hàng đơn giản, đồng bộ hoàn toàn với giao diện cũ v4.3.52. |
 | **v4.3.179** | ✅ **Khôi Phục Cấu Trúc Lịch Âm Màn Hình Chính Desktop (v4.3.179)**: Giữ nguyên cấu trúc HTML đầy đủ của tiện ích lịch âm cho desktop (icon + Can Chi/Badge) và dùng CSS media query ẩn chúng chỉ trên di động. |
 | **v4.3.178** | ✅ **Định Dạng Lại Bộ Chọn Ngày Nhanh (v4.3.178)**: Điều chỉnh kiểu dáng và font chữ cho date picker gọn gàng hơn ở header. |
-| **v4.3.177** | ✅ **Ẩn Date Picker Trên Di Động (v4.3.177)**: Cấu hình CSS ẩn date picker header trên màn hình dưới 768px để giữ giao diện tối giản. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
