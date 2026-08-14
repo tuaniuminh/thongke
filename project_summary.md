@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.175** |
-| **v4.3.175** | ✅ **Thêm Card Âm Lịch Mobile Trang Chủ & Xóa "& Phong Thủy" Khỏi Tiêu Đề (v4.3.175)**: Thêm card âm lịch chỉ hiện trên điện thoại (`display:none` mặc định, hiện trong `@media max-width:576px`) vào đầu `home-grid`. Card tự đồng bộ dữ liệu từ `updateHomeLunar()`. Click mở tab Lịch vạn niên. Xóa "& Phong Thủy" khỏi tiêu đề tab. Nâng phiên bản sang `?v=4.3.175`. |
-| **v4.3.174** | ✅ **Đảo Ngược Logic Hiển Thị Nút Thêm Ghi Chép (v4.3.174)**: Sửa đúng kiến trúc: `#quickAddBtn` mặc định ẩn trong HTML, chỉ hiện khi đang ở tab Thu chi đối ngoại (whitelist: dashboard/received/sent/home). Các module còn lại có nút hành động riêng bên trong tab panel, không cần dùng nút chung này. Nâng phiên bản sang `?v=4.3.174`. |
-| **v4.3.173** | ✅ **Sửa Triệt Để Lỗi Cột CN Bị Cắt & Ẩn Nút Thêm Ghi Chép (v4.3.173)**: Nguyên nhân gốc rễ là `aspect-ratio: 1.1` trên `.lunar-day-cell` khiến 7 ô ngày ép chiều rộng tràn ra ngoài container, bị `overflow:hidden` cắt mất. Xóa aspect-ratio, thay bằng `min-height: 56px`. Ẩn nút "Thêm ghi chép" khi ở tab Lịch Vạn Niên bằng cách thêm `am-lich` vào danh sách điều kiện ẩn `quickAddBtn`. Nâng phiên bản sang `?v=4.3.173`. |
-| **v4.3.172** | ✅ **Sửa Lỗi Cột Chủ Nhật Bị Cắt Trong Lưới Lịch Vạn Niên (v4.3.172)**: Nguyên nhân là `.lunar-calendar-col` thiếu `box-sizing: border-box` và `min-width: 0`, khiến padding 24px làm tràn cột, bị cắt bởi `overflow: hidden` của container cha. Khắc phục bằng cách thêm `box-sizing: border-box`, `min-width: 0`, `overflow-x: hidden` vào cột lịch và giảm `gap` lưới từ 6px → 4px để 7 cột CN hiển thị đầy đủ. Nâng phiên bản toàn hệ thống sang `?v=4.3.172`. |
-| **v4.3.171** | ✅ **Loại Bỏ Card Lịch Âm Ở Trang Chủ & Định Dạng Lại Lịch Âm Góc dd/mm/yyyy (v4.3.171)**: Xóa bỏ card Lịch Vạn Niên khỏi màn hình chính, chỉ giữ lại widget Lịch âm nhỏ ở góc trên để kích hoạt chuyển sang tab Lịch vạn niên. Định dạng lại chuỗi hiển thị lịch âm nhỏ thành dạng chuẩn `dd/mm/yyyy` rõ ràng thay vì `30 6`. Nâng phiên bản toàn hệ thống sang `?v=4.3.171`. |
+| **Phiên bản hiện tại** | **v4.3.180** |
+| **v4.3.180** | ✅ **Nâng cấp Giao diện Chọn Ngày & Sửa Lỗi Hiển Thị Lịch Âm Mobile (v4.3.180)**: Thiết kế bộ chọn ngày (desktop) lớn hơn, nhãn rõ ràng và hiển thị màu nhấn nổi bật. Bind sự kiện click an toàn để tự động mở calendar picker. Trên di động, sử dụng `display: contents !important` để ẩn hoàn toàn icon/sub-row và hiển thị tiện ích 1 hàng đơn giản, đồng bộ hoàn toàn với giao diện cũ v4.3.52. |
+| **v4.3.179** | ✅ **Khôi Phục Cấu Trúc Lịch Âm Màn Hình Chính Desktop (v4.3.179)**: Giữ nguyên cấu trúc HTML đầy đủ của tiện ích lịch âm cho desktop (icon + Can Chi/Badge) và dùng CSS media query ẩn chúng chỉ trên di động. |
+| **v4.3.178** | ✅ **Định Dạng Lại Bộ Chọn Ngày Nhanh (v4.3.178)**: Điều chỉnh kiểu dáng và font chữ cho date picker gọn gàng hơn ở header. |
+| **v4.3.177** | ✅ **Ẩn Date Picker Trên Di Động (v4.3.177)**: Cấu hình CSS ẩn date picker header trên màn hình dưới 768px để giữ giao diện tối giản. |
+| **v4.3.176** | ✅ **Tích Hợp Chọn Ngày Lịch Vạn Niên (v4.3.176)**: Thêm tính năng date input vào thanh điều khiển lịch vạn niên giúp chọn ngày nhanh. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |

@@ -1,8 +1,78 @@
-/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.179) */
+/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.180) */
+
+/* Date Picker Header (Desktop) */
+.lunar-header-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+
+.lunar-header-picker-container:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.lunar-picker-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+.lunar-picker-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.lunar-picker-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--primary-color);
+    font-size: 1.05rem;
+    font-family: var(--font-heading);
+    font-weight: 850;
+    cursor: pointer;
+    min-width: 130px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.lunar-picker-input:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.lunar-picker-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    filter: invert(var(--icon-invert, 0));
+    transition: opacity 0.2s;
+}
+
+.lunar-picker-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
 
 /* Date picker header chỉ hiện trên desktop */
 @media (max-width: 768px) {
-    #lunarHeaderDatePicker {
+    .lunar-header-picker-container {
         display: none !important;
     }
 }

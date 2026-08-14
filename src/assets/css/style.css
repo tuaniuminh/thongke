@@ -3921,6 +3921,10 @@ body.light-mode .home-widget-box {
     #homeLunarWidget .lunar-widget-sub-row {
         display: none !important;
     }
+    #homeLunarWidget .lunar-widget-wrapper,
+    #homeLunarWidget .lunar-widget-main-row {
+        display: contents !important;
+    }
     
     .weather-desktop {
         display: none !important;

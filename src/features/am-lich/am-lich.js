@@ -666,6 +666,21 @@ export function initLunarCalendarBindings() {
             renderCalendarGrid();
             updateDetailPanel(pickedDate);
         });
+
+        // Trigger showPicker an toàn khi nhấn vào container
+        const pickerContainer = document.getElementById('lunarHeaderDatePicker');
+        if (pickerContainer) {
+            pickerContainer.addEventListener('click', (e) => {
+                if (e.target === jumpDateInput) return;
+                try {
+                    if (typeof jumpDateInput.showPicker === 'function') {
+                        jumpDateInput.showPicker();
+                    }
+                } catch (err) {
+                    console.warn('showPicker not supported:', err);
+                }
+            });
+        }
     }
 
     // Đóng Modal (Giữ lại guard đề phòng modal vẫn được dùng)
