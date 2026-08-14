@@ -1,4 +1,4 @@
-/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.184) */
+/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.185) */
 
 /* Date Picker Header (Desktop) */
 .lunar-header-picker-container {
@@ -312,8 +312,8 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 
 .lunar-week-header {
     text-align: center;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.9rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted);
@@ -355,8 +355,8 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 
 /* Dương lịch */
 .solar-day-num {
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 1.15rem;
+    font-weight: 800;
     color: var(--text-primary);
     line-height: 1;
 }
@@ -364,8 +364,8 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 /* Âm lịch */
 .lunar-day-num {
     align-self: flex-end;
-    font-size: 0.72rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
     color: var(--text-secondary);
 }
 
@@ -415,16 +415,16 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 }
 
 .detail-solar-date {
-    font-size: 1.3rem;
-    font-weight: 800;
+    font-size: 1.5rem;
+    font-weight: 900;
     font-family: var(--font-heading);
     color: var(--text-primary);
 }
 
 .detail-lunar-date {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: var(--accent-amber);
-    font-weight: 700;
+    font-weight: 800;
     margin-top: 4px;
 }
 
@@ -438,7 +438,7 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 
 .lunar-badge {
     padding: 4px 10px;
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 700;
     border-radius: 20px;
     text-transform: uppercase;
@@ -472,8 +472,8 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 }
 
 .detail-section-title {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: 800;
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -498,7 +498,7 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 }
 
 .canchi-item {
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     color: var(--text-primary);
 }
 .canchi-item strong {
@@ -535,7 +535,7 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 }
 
 .direction-item {
-    font-size: 0.88rem;
+    font-size: 0.95rem;
 }
 .direction-item strong {
     color: var(--text-secondary);
@@ -550,7 +550,7 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
 }
 
 .recommend-item {
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     display: flex;
     align-items: flex-start;
     gap: 6px;
@@ -668,11 +668,11 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
     }
     
     .solar-day-num {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
     }
     
     .lunar-day-num {
-        font-size: 0.65rem;
+        font-size: 0.72rem;
     }
 }
 

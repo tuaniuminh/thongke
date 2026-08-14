@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.184** |
+| **Phiên bản hiện tại** | **v4.3.185** |
+| **v4.3.185** | ✅ **Nâng Kích Thước Chữ Lịch Vạn Niên (v4.3.185)**: Tăng kích thước font chữ cho các thành phần chính của Lịch Vạn Niên (Week header, Solar/Lunar day numbers, Can Chi, Tiết Khí, Hướng xuất hành, Việc nên làm/kiêng kỵ) giúp hiển thị to rõ ràng, cải thiện tối đa độ dễ đọc và giao diện trông cao cấp hơn trên cả PC và di động. |
 | **v4.3.184** | ✅ **Sửa Nút Chọn Ngày Trên PC & Chú Thích Loại Lịch (v4.3.184)**: Khắc phục lỗi nút Chọn ngày không hoạt động trên máy tính bằng cách loại bỏ kiểm tra click target trùng với input ẩn (do input phủ kín nút nên click target luôn là input). Ở panel chi tiết bên phải, bổ sung thêm hậu tố `(Dương lịch)` và `(Âm lịch)` vào sau các tiêu đề ngày tương ứng để tăng độ trực quan. |
 | **v4.3.183** | ✅ **Tích Hợp Nhắc Nhở Sự Kiện Âm Lịch & 12 Giờ Cát Hung (v4.3.183)**: Tích hợp sự kiện âm lịch (Ý tưởng 1): tự động hiển thị ngày lễ Tết âm lịch cổ truyền (Tết Đoan Ngọ, Vu Lan, Trung Thu, Tết Nguyên Đán, Rằm, Mùng 1...) và cho phép thêm/xóa ngày giỗ, sinh nhật âm lịch gia đình (lưu `localStorage`); hiển thị chấm chỉ báo màu sắc (đỏ cho gia đình, vàng cho ngày lễ) dưới ô ngày. Tích hợp 12 giờ Hoàng đạo/Hắc đạo (Ý tưởng 2): hiển thị danh sách toàn bộ 12 giờ trong ngày gắn nhãn 'Cát' (xanh) / 'Hung' (xám) trực quan, chi tiết thay thế cho danh sách chỉ có giờ hoàng đạo trước đây. |
 | **v4.3.182** | ✅ **Nâng Cấp Giao Diện Điều Hướng & Thêm Chọn Ngày Lịch Vạn Niên Di Động (v4.3.182)**: Khôi phục bo góc bo tròn 16px cho khung trắng `lunar-tab-card` trên điện thoại. Tái cơ cấu bộ điều khiển `lunar-nav-controls`: PC hiển thị 1 hàng ngang, điện thoại hiển thị 2 hàng (Hàng 1: Nút bấm và select chọn Tháng/Năm; Hàng 2: Hai nút bấm to cân xứng cho 'Hôm nay' và 'Chọn ngày' tích hợp date picker ẩn). Loại bỏ date picker ở header cũ. |
 | **v4.3.181** | ✅ **Khôi Phục Giao Diện WeLove Điện Thoại Về Màu Gốc (v4.3.181)**: Bọc toàn bộ các thuộc tính nền Obsidian & Champagne Gold mới của tab WeLove trong media query `@media (min-width: 769px)` tại `we-love.css`. Điều này giúp giữ nguyên bảng màu hồng/đỏ/tím lãng mạn ban đầu của giao diện di động và chỉ áp dụng giao diện mới trên màn hình PC. |
-| **v4.3.180** | ✅ **Nâng cấp Giao diện Chọn Ngày & Sửa Lỗi Hiển Thị Lịch Âm Mobile (v4.3.180)**: Thiết kế bộ chọn ngày (desktop) lớn hơn, nhãn rõ ràng và hiển thị màu nhấn nổi bật. Bind sự kiện click an toàn để tự động mở calendar picker. Trên di động, sử dụng `display: contents !important` để ẩn hoàn toàn icon/sub-row và hiển thị tiện ích 1 hàng đơn giản, đồng bộ hoàn toàn với giao diện cũ v4.3.52. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
