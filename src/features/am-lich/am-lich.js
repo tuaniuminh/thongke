@@ -539,7 +539,7 @@ export function updateDetailPanel(date) {
     const dayOfWeekStr = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"][date.getDay()];
     
     // Hiển thị ngày dương lịch
-    solarTitle.textContent = `${dayOfWeekStr}, ${dd < 10 ? '0' + dd : dd}/${mm < 10 ? '0' + mm : mm}/${yyyy}`;
+    solarTitle.textContent = `${dayOfWeekStr}, ${dd < 10 ? '0' + dd : dd}/${mm < 10 ? '0' + mm : mm}/${yyyy} (Dương lịch)`;
     
     if (!window.lunarVietnam || typeof window.lunarVietnam.convertSolar2Lunar !== 'function') {
         lunarTitle.textContent = 'Lỗi nạp thư viện Lịch âm';
@@ -558,7 +558,7 @@ export function updateDetailPanel(date) {
     else if (lunar.lMonth === 11) monthName = 'Một';
     else if (lunar.lMonth === 12) monthName = 'Chạp';
     const leapText = lunar.isLeap ? ' (nhuận)' : '';
-    lunarTitle.textContent = `Ngày ${lunar.lDay} tháng ${monthName}${leapText}, năm ${lunar.lYear}`;
+    lunarTitle.textContent = `Ngày ${lunar.lDay} tháng ${monthName}${leapText}, năm ${lunar.lYear} (Âm lịch)`;
     
     // Can Chi Ngày, Năm
     const dayCan = lunar.gzDay.split(" ")[0];
@@ -879,7 +879,6 @@ export function initLunarCalendarBindings() {
         const pickerContainer = document.getElementById('lunarQuickPickerTrigger');
         if (pickerContainer) {
             pickerContainer.addEventListener('click', (e) => {
-                if (e.target === jumpDateInput) return;
                 try {
                     if (typeof jumpDateInput.showPicker === 'function') {
                         jumpDateInput.showPicker();
