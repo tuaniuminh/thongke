@@ -1,4 +1,4 @@
-/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.182) */
+/* am-lich.css - Giao diện Lịch Vạn Niên & Phong Thủy FamiLife (v4.3.183) */
 
 /* Date Picker Header (Desktop) */
 .lunar-header-picker-container {
@@ -784,3 +784,173 @@ body.dark-mode .lunar-picker-input::-webkit-calendar-picker-indicator {
         text-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
     }
 }
+
+/* Lưới giờ hoàng đạo/hắc đạo (12 giờ đầy đủ) */
+.hours-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+@media (max-width: 576px) {
+    .hours-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.hour-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 4px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    gap: 2px;
+}
+
+.hour-badge.good {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: var(--accent-emerald);
+}
+
+.hour-badge.bad {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    opacity: 0.65;
+}
+
+body.light-mode .hour-badge.bad {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* Danh sách sự kiện âm lịch */
+.lunar-event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.lunar-event-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    gap: 12px;
+}
+
+.lunar-event-item:hover {
+    border-color: var(--primary-color);
+}
+
+.lunar-event-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.lunar-event-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.lunar-event-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lunar-event-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+body.light-mode .lunar-event-date {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.lunar-event-delete-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent-rose);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.lunar-event-delete-btn:hover {
+    opacity: 1;
+}
+
+/* Nút thêm sự kiện */
+.lunar-add-event-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lunar-add-event-btn:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+/* Dots chỉ báo sự kiện trên ô ngày */
+.lunar-event-dots {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 4px;
+    height: 4px;
+    align-items: center;
+}
+
+.lunar-event-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.lunar-event-dot.family {
+    background-color: var(--accent-rose);
+}
+
+.lunar-event-dot.holiday {
+    background-color: var(--accent-amber);
+}
+

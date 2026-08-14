@@ -13,6 +13,101 @@ let state = {
     selectedDate: new Date()
 };
 
+// Hằng số Sự kiện Âm lịch Mặc định
+const DEFAULT_LUNAR_EVENTS = [
+    { name: "Tết Nguyên Đán", day: 1, month: 1, icon: "🌸" },
+    { name: "Tết Nguyên Tiêu", day: 15, month: 1, icon: "🏮" },
+    { name: "Tết Hàn Thực", day: 3, month: 3, icon: "🍡" },
+    { name: "Giỗ Tổ Hùng Vương", day: 10, month: 3, icon: "👑" },
+    { name: "Lễ Phật Đản", day: 15, month: 4, icon: "🪷" },
+    { name: "Tết Đoan Ngọ", day: 5, month: 5, icon: "🌾" },
+    { name: "Lễ Vu Lan (Rằm tháng 7)", day: 15, month: 7, icon: "🏮" },
+    { name: "Tết Trung Thu", day: 15, month: 8, icon: "🥮" },
+    { name: "Tết Trùng Cửu", day: 9, month: 9, icon: "🍂" },
+    { name: "Tết Song Thập", day: 10, month: 10, icon: "🍂" },
+    { name: "Tết Hạ Nguyên", day: 15, month: 10, icon: "🍚" },
+    { name: "Tết Ông Táo", day: 23, month: 12, icon: "🐟" }
+];
+
+// Danh sách 12 Địa Chi và Giờ tương ứng
+const TWELVE_BRANCHES_TIMES = [
+    { branch: "Tý", range: "23h - 01h" },
+    { branch: "Sửu", range: "01h - 03h" },
+    { branch: "Dần", range: "03h - 05h" },
+    { branch: "Mão", range: "05h - 07h" },
+    { branch: "Thìn", range: "07h - 09h" },
+    { branch: "Tỵ", range: "09h - 11h" },
+    { branch: "Ngọ", range: "11h - 13h" },
+    { branch: "Mùi", range: "13h - 15h" },
+    { branch: "Thân", range: "15h - 17h" },
+    { branch: "Dậu", range: "17h - 19h" },
+    { branch: "Tuất", range: "19h - 21h" },
+    { branch: "Hợi", range: "21h - 23h" }
+];
+
+// Hàm xác định các ngày lễ chu kỳ ngắn (Mùng 1, Rằm, Giao Thừa)
+function getDailyLunarEvent(day, month, totalDaysInMonth) {
+    if (day === 1) return { name: "Mùng Một", icon: "🌑", isDefault: true };
+    if (day === 15) return { name: "Ngày Rằm", icon: "🌕", isDefault: true };
+    if (month === 12 && day === totalDaysInMonth) return { name: "Giao Thừa", icon: "🎇", isDefault: true };
+    return null;
+}
+
+// Lấy danh sách sự kiện gia đình từ localStorage
+function getFamilyEvents() {
+    try {
+        const stored = localStorage.getItem('fami_lunar_events');
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        console.error("Error reading lunar events:", e);
+        return [];
+    }
+}
+
+// Lưu danh sách sự kiện gia đình vào localStorage
+function saveFamilyEvents(events) {
+    try {
+        localStorage.setItem('fami_lunar_events', JSON.stringify(events));
+    } catch (e) {
+        console.error("Error saving lunar events:", e);
+    }
+}
+
+// Xóa sự kiện gia đình
+function deleteFamilyEvent(name, day, month) {
+    let family = getFamilyEvents();
+    family = family.filter(ev => !(ev.name === name && parseInt(ev.day) === parseInt(day) && parseInt(ev.month) === parseInt(month)));
+    saveFamilyEvents(family);
+}
+
+// Tổng hợp tất cả các sự kiện của một ngày âm lịch cụ thể
+function getEventsForDate(day, month, totalDaysInMonth) {
+    let list = [];
+    
+    // 1. Sự kiện âm lịch cố định
+    DEFAULT_LUNAR_EVENTS.forEach(ev => {
+        if (ev.day === day && ev.month === month) {
+            list.push({ ...ev, isDefault: true });
+        }
+    });
+    
+    // 2. Sự kiện ngày lễ chu kỳ ngắn
+    const dynamic = getDailyLunarEvent(day, month, totalDaysInMonth);
+    if (dynamic) {
+        list.push(dynamic);
+    }
+    
+    // 3. Sự kiện gia đình tự định nghĩa
+    const family = getFamilyEvents();
+    family.forEach(ev => {
+        if (parseInt(ev.day) === day && parseInt(ev.month) === month) {
+            list.push({ ...ev, isDefault: false, icon: "❤️" });
+        }
+    });
+    
+    return list;
+}
+
 // 1. Tính toán Can Chi của Tháng âm lịch
 export function getMonthCanChi(yearCan, lMonth) {
     const yearCanToMonth1Can = {
@@ -366,6 +461,37 @@ function renderCalendarGrid() {
                 cellDiv.appendChild(statusDot);
             }
             
+            // Thêm chỉ báo sự kiện Âm lịch (Idea 1)
+            const tomorrow = new Date(cell.year, cell.month - 1, cell.day + 1);
+            let tomLunar = null;
+            if (window.lunarVietnam && typeof window.lunarVietnam.convertSolar2Lunar === 'function') {
+                tomLunar = window.lunarVietnam.convertSolar2Lunar(tomorrow.getDate(), tomorrow.getMonth() + 1, tomorrow.getFullYear());
+            }
+            const isLastDay = tomLunar && tomLunar.lDay === 1;
+            const dayEvents = getEventsForDate(lunar.lDay, lunar.lMonth, isLastDay ? lunar.lDay : 30);
+            
+            if (dayEvents.length > 0) {
+                const dotsDiv = document.createElement('div');
+                dotsDiv.className = 'lunar-event-dots';
+                
+                const hasFamily = dayEvents.some(e => !e.isDefault);
+                const hasHoliday = dayEvents.some(e => e.isDefault);
+                
+                if (hasFamily) {
+                    const dot = document.createElement('span');
+                    dot.className = 'lunar-event-dot family';
+                    dot.title = 'Sự kiện gia đình';
+                    dotsDiv.appendChild(dot);
+                }
+                if (hasHoliday) {
+                    const dot = document.createElement('span');
+                    dot.className = 'lunar-event-dot holiday';
+                    dot.title = 'Lễ tết / Rằm / Mùng 1';
+                    dotsDiv.appendChild(dot);
+                }
+                cellDiv.appendChild(dotsDiv);
+            }
+            
             cellDiv.setAttribute('title', `Dương lịch: ${cell.day}/${cell.month}/${cell.year} - Âm lịch: ${lunar.lDay}/${lunar.lMonth}/${lunar.lYear} (${lunar.gzDay})`);
         }
         
@@ -488,14 +614,96 @@ export function updateDetailPanel(date) {
             badgesRow.appendChild(badBadge);
         });
     }
+    // Sự kiện Âm lịch (Idea 1)
+    const eventListContainer = document.getElementById('lunarEventList');
+    if (eventListContainer) {
+        eventListContainer.innerHTML = '';
+        
+        const tomorrow = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+        let tomLunar = null;
+        if (window.lunarVietnam && typeof window.lunarVietnam.convertSolar2Lunar === 'function') {
+            tomLunar = window.lunarVietnam.convertSolar2Lunar(tomorrow.getDate(), tomorrow.getMonth() + 1, tomorrow.getFullYear());
+        }
+        const isLastDay = tomLunar && tomLunar.lDay === 1;
+        const dayEvents = getEventsForDate(lunar.lDay, lunar.lMonth, isLastDay ? lunar.lDay : 30);
+        
+        if (dayEvents.length === 0) {
+            eventListContainer.innerHTML = `
+                <div style="font-size: 0.82rem; color: var(--text-muted); font-style: italic; padding: 4px 0;">
+                    Hôm nay không có sự kiện đặc biệt.
+                </div>
+            `;
+        } else {
+            dayEvents.forEach(ev => {
+                const item = document.createElement('div');
+                item.className = 'lunar-event-item';
+                
+                const left = document.createElement('div');
+                left.className = 'lunar-event-left';
+                
+                const icon = document.createElement('span');
+                icon.className = 'lunar-event-icon';
+                icon.textContent = ev.icon || '❤️';
+                
+                const name = document.createElement('span');
+                name.className = 'lunar-event-name';
+                name.textContent = ev.name;
+                
+                left.appendChild(icon);
+                left.appendChild(name);
+                item.appendChild(left);
+                
+                if (!ev.isDefault) {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'lunar-event-delete-btn';
+                    delBtn.innerHTML = '<i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>';
+                    delBtn.title = 'Xóa sự kiện này';
+                    delBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const confirmMsg = `Bạn có chắc chắn muốn xóa sự kiện "${ev.name}"?`;
+                        if (window.showCustomConfirm) {
+                            window.showCustomConfirm("Xác nhận xóa sự kiện", confirmMsg, () => {
+                                deleteFamilyEvent(ev.name, ev.day, ev.month);
+                                updateDetailPanel(date);
+                                renderCalendarGrid();
+                            });
+                        } else {
+                            if (confirm(confirmMsg)) {
+                                deleteFamilyEvent(ev.name, ev.day, ev.month);
+                                updateDetailPanel(date);
+                                renderCalendarGrid();
+                            }
+                        }
+                    });
+                    item.appendChild(delBtn);
+                } else {
+                    const tag = document.createElement('span');
+                    tag.className = 'lunar-event-date';
+                    tag.textContent = 'Mặc định';
+                    item.appendChild(tag);
+                }
+                
+                eventListContainer.appendChild(item);
+            });
+            if (window.lucide) window.lucide.createIcons();
+        }
+    }
     
-    // Giờ Hoàng Đạo
+    // Giờ Hoàng Đạo & Hắc Đạo (12 giờ đầy đủ - Idea 2)
     hoursGrid.innerHTML = '';
     const goodHoursList = getAuspiciousHours(dayChi);
-    goodHoursList.forEach(hStr => {
-        const badge = document.createElement('span');
-        badge.className = 'hour-badge good';
-        badge.textContent = hStr;
+    const goodBranches = goodHoursList.map(h => h.split(" ")[0]);
+    
+    TWELVE_BRANCHES_TIMES.forEach(item => {
+        const isGood = goodBranches.includes(item.branch);
+        
+        const badge = document.createElement('div');
+        badge.className = `hour-badge ${isGood ? 'good' : 'bad'}`;
+        badge.innerHTML = `
+            <div style="font-weight: 700;">${item.branch}</div>
+            <div style="font-size: 0.65rem; opacity: 0.85;">${item.range}</div>
+            <div style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em;">${isGood ? 'Cát' : 'Hung'}</div>
+        `;
         hoursGrid.appendChild(badge);
     });
     
@@ -681,6 +889,77 @@ export function initLunarCalendarBindings() {
                 }
             });
         }
+    }
+
+    // Modal Thêm Sự Kiện Âm Lịch (Idea 1)
+    const btnAddEvent = document.getElementById('lunarBtnAddEvent');
+    const modalAddEvent = document.getElementById('lunarAddEventModal');
+    const formAddEvent = document.getElementById('lunarAddEventForm');
+    
+    if (btnAddEvent && modalAddEvent && formAddEvent) {
+        const selDay = document.getElementById('lunarEventDay');
+        const selMonth = document.getElementById('lunarEventMonth');
+        
+        if (selDay && selMonth) {
+            selDay.innerHTML = '';
+            for (let d = 1; d <= 30; d++) {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = `Ngày ${d}`;
+                selDay.appendChild(opt);
+            }
+            
+            selMonth.innerHTML = '';
+            for (let m = 1; m <= 12; m++) {
+                const opt = document.createElement('option');
+                opt.value = m;
+                const mName = m === 1 ? 'Giêng' : (m === 11 ? 'Một' : (m === 12 ? 'Chạp' : m));
+                opt.textContent = `Tháng ${mName}`;
+                selMonth.appendChild(opt);
+            }
+        }
+        
+        btnAddEvent.addEventListener('click', () => {
+            if (state.selectedDate) {
+                const dd = state.selectedDate.getDate();
+                const mm = state.selectedDate.getMonth() + 1;
+                const yyyy = state.selectedDate.getFullYear();
+                if (window.lunarVietnam && typeof window.lunarVietnam.convertSolar2Lunar === 'function') {
+                    const lunar = window.lunarVietnam.convertSolar2Lunar(dd, mm, yyyy);
+                    if (lunar && selDay && selMonth) {
+                        selDay.value = lunar.lDay;
+                        selMonth.value = lunar.lMonth;
+                    }
+                }
+            }
+            document.getElementById('lunarEventName').value = '';
+            modalAddEvent.style.display = 'flex';
+        });
+        
+        formAddEvent.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('lunarEventName');
+            const name = nameInput.value.trim();
+            const day = parseInt(selDay.value);
+            const month = parseInt(selMonth.value);
+            
+            if (!name) return;
+            
+            const family = getFamilyEvents();
+            family.push({ name, day, month });
+            saveFamilyEvents(family);
+            
+            modalAddEvent.style.display = 'none';
+            
+            if (state.selectedDate) {
+                updateDetailPanel(state.selectedDate);
+                renderCalendarGrid();
+            }
+            
+            if (typeof window.showToast === 'function') {
+                window.showToast("Đã lưu sự kiện âm lịch gia đình!", "success");
+            }
+        });
     }
 
     // Đóng Modal (Giữ lại guard đề phòng modal vẫn được dùng)

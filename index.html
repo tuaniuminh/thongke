@@ -74,15 +74,15 @@
     <meta name="apple-mobile-web-app-title" content="FamiLife">
     <!-- Browser Theme Color -->
     <meta name="theme-color" id="themeColorMeta" content="#090d16">
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.182">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.183">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.182">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.182">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.182">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.182">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.182">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.183">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.183">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.183">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.183">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.183">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -356,7 +356,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.182" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.183" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -472,7 +472,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.182" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.183" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1197,6 +1197,21 @@
                                     <div class="canchi-item"><strong>Tháng:</strong> <span id="canchiMonth">Ất Mùi</span></div>
                                     <div class="canchi-item"><strong>Ngày:</strong> <span id="canchiDay">Giáp Tý</span></div>
                                     <div class="canchi-item"><strong>Giờ:</strong> <span id="canchiHour">Giáp Tý</span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sự kiện Âm lịch gia đình -->
+                            <div class="detail-section">
+                                <div class="detail-section-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <span style="display: flex; align-items: center; gap: 6px;">
+                                        <i data-lucide="bell"></i> Sự kiện Âm lịch
+                                    </span>
+                                    <button type="button" class="lunar-add-event-btn" id="lunarBtnAddEvent" title="Thêm ngày giỗ / sự kiện gia đình">
+                                        <i data-lucide="plus" style="width: 12px; height: 12px;"></i> Thêm
+                                    </button>
+                                </div>
+                                <div id="lunarEventList" class="lunar-event-list">
+                                    <!-- Sự kiện ngày được chọn -->
                                 </div>
                             </div>
                             
@@ -2057,7 +2072,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.182" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.183" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2153,11 +2168,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.182';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.183';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.182';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.183';
                         }
                     })();
                 </script>
@@ -3622,6 +3637,38 @@
         </div>
     </div>
 
+    <!-- Modal Thêm Sự Kiện Âm Lịch Gia Đình -->
+    <div class="modal-overlay" id="lunarAddEventModal" style="display: none;">
+        <div class="modal-card" style="max-width: 420px; width: 90%; height: auto; margin: auto; border: 1px solid var(--border-color); background: var(--bg-secondary); border-radius: 16px; box-shadow: var(--glass-shadow); overflow: hidden;">
+            <div class="modal-header" style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-heading);">Thêm sự kiện Âm lịch gia đình</h2>
+                <button type="button" class="close-btn" onclick="closeModal('lunarAddEventModal')" style="background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">×</button>
+            </div>
+            <form id="lunarAddEventForm">
+                <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Tên ngày giỗ / sự kiện:</label>
+                        <input type="text" id="lunarEventName" required placeholder="Ví dụ: Giỗ ông nội, Sinh nhật con..." class="form-input" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); font-size: 0.9rem; outline: none; box-sizing: border-box;">
+                    </div>
+                    <div style="display: flex; gap: 12px; width: 100%;">
+                        <div class="form-group" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                            <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Ngày Âm lịch:</label>
+                            <select id="lunarEventDay" class="form-select" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); font-size: 0.9rem; outline: none; cursor: pointer; box-sizing: border-box;"></select>
+                        </div>
+                        <div class="form-group" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                            <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Tháng Âm lịch:</label>
+                            <select id="lunarEventMonth" class="form-select" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); font-size: 0.9rem; outline: none; cursor: pointer; box-sizing: border-box;"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-tertiary);">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('lunarAddEventModal')" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--btn-radius); cursor: pointer;">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--btn-radius); cursor: pointer; background: var(--primary-gradient); color: #fff; border: none;">Lưu sự kiện</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     
         </div>
     </div>
@@ -3666,17 +3713,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.182"></script>
-    <script type="module" src="src/core/app.js?v=4.3.182"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.182"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.182"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.182"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.183"></script>
+    <script type="module" src="src/core/app.js?v=4.3.183"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.183"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.183"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.183"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.182')
+                navigator.serviceWorker.register('./sw.js?v=4.3.183')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
