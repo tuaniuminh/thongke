@@ -1581,33 +1581,35 @@ body.active-tab-welove-settings .sidebar .nav-link:hover i {
   }
 }
 
-/* Page Background Enhancement: Pearlescent White, Warm Gray & Gold Champagne for Light Mode; Midnight Obsidian & Mystic Amethyst for Dark Mode */
-html.active-tab-welove.light-mode,
-html.active-tab-welove-admin.light-mode,
-html.active-tab-welove-settings.light-mode,
-html.active-tab-welove body.light-mode,
-html.active-tab-welove-admin body.light-mode,
-html.active-tab-welove-settings body.light-mode {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef3c7 100%) !important;
-}
-html.active-tab-welove:not(.light-mode),
-html.active-tab-welove-admin:not(.light-mode),
-html.active-tab-welove-settings:not(.light-mode),
-html.active-tab-welove body:not(.light-mode),
-html.active-tab-welove-admin body:not(.light-mode),
-html.active-tab-welove-settings body:not(.light-mode) {
-  background: linear-gradient(135deg, #020617 0%, #0f172a 35%, #1e1b4b 70%, #3b0764 100%) !important;
-}
-/* Also apply to body so it actually renders */
-body.active-tab-welove.light-mode,
-body.active-tab-welove-admin.light-mode,
-body.active-tab-welove-settings.light-mode {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef3c7 100%) !important;
-}
-body.active-tab-welove:not(.light-mode),
-body.active-tab-welove-admin:not(.light-mode),
-body.active-tab-welove-settings:not(.light-mode) {
-  background: linear-gradient(135deg, #020617 0%, #0f172a 35%, #1e1b4b 70%, #3b0764 100%) !important;
+/* Page Background Enhancement: Pearlescent White, Warm Gray & Gold Champagne for Light Mode; Midnight Obsidian & Mystic Amethyst for Dark Mode (Desktop only) */
+@media (min-width: 769px) {
+  html.active-tab-welove.light-mode,
+  html.active-tab-welove-admin.light-mode,
+  html.active-tab-welove-settings.light-mode,
+  html.active-tab-welove body.light-mode,
+  html.active-tab-welove-admin body.light-mode,
+  html.active-tab-welove-settings body.light-mode {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef3c7 100%) !important;
+  }
+  html.active-tab-welove:not(.light-mode),
+  html.active-tab-welove-admin:not(.light-mode),
+  html.active-tab-welove-settings:not(.light-mode),
+  html.active-tab-welove body:not(.light-mode),
+  html.active-tab-welove-admin body:not(.light-mode),
+  html.active-tab-welove-settings body:not(.light-mode) {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 35%, #1e1b4b 70%, #3b0764 100%) !important;
+  }
+  /* Also apply to body so it actually renders */
+  body.active-tab-welove.light-mode,
+  body.active-tab-welove-admin.light-mode,
+  body.active-tab-welove-settings.light-mode {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef3c7 100%) !important;
+  }
+  body.active-tab-welove:not(.light-mode),
+  body.active-tab-welove-admin:not(.light-mode),
+  body.active-tab-welove-settings:not(.light-mode) {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 35%, #1e1b4b 70%, #3b0764 100%) !important;
+  }
 }
 /* Tab panel and memory-page are transparent so body gradient shows through */
 #tab-welove {
