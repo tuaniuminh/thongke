@@ -106,6 +106,8 @@ let state = {
     weLoveRemindersUpdated: '',
     weLoveVisitLogs: [],
     weLoveVisitLogsUpdated: '',
+    lunarEvents: [],
+    lunarEventsUpdated: '',
     customEventTypes: [],
     customEventTypesUpdated: '',
     familyFunds: [],
@@ -832,12 +834,8 @@ async function saveLocalState() {
         weLoveShowSickness: state.weLoveShowSickness !== false,
         weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
         weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
-            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
-            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
         weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
         weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
-            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
-            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
         weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
         weLovePhotoAlbum: state.weLovePhotoAlbum || [],
         weLovePhotoAlbumUpdated: state.weLovePhotoAlbumUpdated || '',
@@ -847,6 +845,8 @@ async function saveLocalState() {
         weLoveRemindersUpdated: state.weLoveRemindersUpdated || '',
         weLoveVisitLogs: state.weLoveVisitLogs || [],
         weLoveVisitLogsUpdated: state.weLoveVisitLogsUpdated || '',
+        lunarEvents: state.lunarEvents || [],
+        lunarEventsUpdated: state.lunarEventsUpdated || '',
         customEventTypes: state.customEventTypes || [],
         customEventTypesUpdated: state.customEventTypesUpdated || '',
         bloodPressureRecords: state.bloodPressureRecords || [],
@@ -1046,6 +1046,8 @@ export async function loadLocalState(password) {
         state.weLoveRemindersUpdated = data.weLoveRemindersUpdated || '';
         state.weLoveVisitLogs = data.weLoveVisitLogs || [];
         state.weLoveVisitLogsUpdated = data.weLoveVisitLogsUpdated || '';
+        state.lunarEvents = data.lunarEvents || [];
+        state.lunarEventsUpdated = data.lunarEventsUpdated || '';
         state.customEventTypes = data.customEventTypes || [];
         state.customEventTypesUpdated = data.customEventTypesUpdated || '';
         state.bloodPressureRecords = data.bloodPressureRecords || [];
@@ -1700,6 +1702,14 @@ async function performSync(silent = false) {
                         state.customEventTypesUpdated = remoteData.customEventTypesUpdated || '';
                     }
 
+                    // Merge lunarEvents using LWW
+                    const localLunarTime = state.lunarEventsUpdated ? new Date(state.lunarEventsUpdated).getTime() : 0;
+                    const remoteLunarTime = remoteData.lunarEventsUpdated ? new Date(remoteData.lunarEventsUpdated).getTime() : 0;
+                    if (remoteLunarTime > localLunarTime) {
+                        state.lunarEvents = remoteData.lunarEvents || [];
+                        state.lunarEventsUpdated = remoteData.lunarEventsUpdated || '';
+                    }
+
                     // Merge geminiApiKey using LWW
                     const localKeyTime = state.geminiApiKeyUpdated ? new Date(state.geminiApiKeyUpdated).getTime() : 0;
                     const remoteKeyTime = remoteData.geminiApiKeyUpdated ? new Date(remoteData.geminiApiKeyUpdated).getTime() : 0;
@@ -1930,12 +1940,8 @@ async function performSync(silent = false) {
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
             weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
             weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
-            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
-        weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
             weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
             weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
-            weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
-        weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
             weLovePhotoAlbum: state.weLovePhotoAlbum || [],
             weLovePhotoAlbumUpdated: state.weLovePhotoAlbumUpdated || '',
             weLoveSicknessLogs: state.weLoveSicknessLogs || [],
@@ -1944,6 +1950,8 @@ async function performSync(silent = false) {
             weLoveRemindersUpdated: state.weLoveRemindersUpdated || '',
             weLoveVisitLogs: state.weLoveVisitLogs || [],
             weLoveVisitLogsUpdated: state.weLoveVisitLogsUpdated || '',
+            lunarEvents: state.lunarEvents || [],
+            lunarEventsUpdated: state.lunarEventsUpdated || '',
             customEventTypes: state.customEventTypes || [],
             customEventTypesUpdated: state.customEventTypesUpdated || '',
             familyProfiles: state.familyProfiles || [],
@@ -4314,8 +4322,8 @@ function resetViewportZoom() {
 }
 
 function escapeHTML(str) {
-    if (!str) return '';
-    return str.replace(/[&<>'"]/g, 
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>'"]/g, 
         tag => ({
             '&': '&amp;',
             '<': '&lt;',
@@ -4724,6 +4732,7 @@ async function handleFullBackup() {
             familyProfiles: state.familyProfiles,
             familyFunds: state.familyFunds,
             fundTransactions: state.fundTransactions,
+            lunarEvents: state.lunarEvents || [],
             customEventTypes: state.customEventTypes,
             geminiApiKey: state.geminiApiKey,
             showImportNotesOption: state.showImportNotesOption,
@@ -4850,6 +4859,7 @@ async function handleFullRestore(file) {
         if (data.familyProfiles) state.familyProfiles = data.familyProfiles;
         if (data.familyFunds) state.familyFunds = data.familyFunds;
         if (data.fundTransactions) state.fundTransactions = data.fundTransactions;
+        if (data.lunarEvents) state.lunarEvents = data.lunarEvents;
         if (data.customEventTypes) state.customEventTypes = data.customEventTypes;
         if (data.geminiApiKey) state.geminiApiKey = data.geminiApiKey;
         if (data.showImportNotesOption !== undefined) state.showImportNotesOption = data.showImportNotesOption;
@@ -4948,7 +4958,46 @@ function updateLastBackupDisplay() {
 
 window.renderTcManagement = renderTcManagement;
 
-export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility };
+/**
+ * Gọi Google Gemini Text API với danh sách model fallback hợp lệ (tránh lỗi 404 từ model không tồn tại)
+ */
+export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
+    const apiKey = state.geminiApiKey;
+    if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key.");
+    // Danh sách model hợp lệ theo chuẩn Google AI Studio, loại bỏ model không tồn tại (như 3.5)
+    const candidateModels = [defaultModel, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        .filter(m => m && !m.includes('3.5'))
+        .filter((m, idx, arr) => arr.indexOf(m) === idx);
+    let lastError = null;
+    for (const model of candidateModels) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            if (!response.ok) {
+                const errJson = await response.json().catch(() => ({}));
+                throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
+            }
+            const resData = await response.json();
+            const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("Không nhận được phản hồi từ AI.");
+            return text;
+        } catch (err) {
+            console.warn(`[AI Engine] Text model ${model} failed:`, err);
+            lastError = err;
+            if (err.message.includes("demand") || err.message.includes("quota") || err.message.includes("limit") || err.message.includes("429") || err.message.includes("503") || err.message.includes("404") || err.message.includes("not found")) {
+                continue;
+            }
+            continue;
+        }
+    }
+    throw lastError || new Error("Lỗi khi kết nối Gemini API.");
+}
+
+export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility, updateLoveWidgetUI };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 
@@ -5517,6 +5566,8 @@ export async function clearAllStateData() {
     state.weLoveRemindersUpdated = '';
     state.weLoveVisitLogs = [];
     state.weLoveVisitLogsUpdated = '';
+    state.lunarEvents = [];
+    state.lunarEventsUpdated = '';
     state.customEventTypes = [];
     state.customEventTypesUpdated = '';
     state.bloodPressureRecords = [];

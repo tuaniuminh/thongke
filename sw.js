@@ -16,11 +16,23 @@ const SHELL_ASSETS = [
     './src/assets/css/quy-gia-dinh.css',
     './src/assets/css/bao-cao-thang.css',
     './src/assets/css/we-love.css',
+    './src/assets/css/am-lich.css',
     './src/assets/images/icon.png',
     './src/assets/images/icon-light.png',
     './src/assets/images/icon-light-pwa.png',
     './logo_pwa_small.png',
-    './mot-doi.mp3'
+    './src/core/app.js',
+    './src/core/crypto.js',
+    './src/core/sync.js',
+    './src/features/am-lich/am-lich.js',
+    './src/features/am-lich/lunar_vietnam.js',
+    './src/features/ho-so-y-te/ho-so-y-te.js',
+    './src/features/ket-noi-gia-dinh/ket-noi.js',
+    './src/features/quy-gia-dinh/quy-gia-dinh.js',
+    './src/features/quy-gia-dinh/bao-cao-thang.js',
+    './src/features/thu-chi-doi-ngoai/thu-chi.js',
+    './src/features/thoi-tiet/thoi-tiet.js',
+    './src/features/we-love/we-love.js'
 ];
 
 // Các API endpoints động bên ngoài cần bỏ qua (phải gọi mạng thật, không cache)
@@ -76,15 +88,16 @@ self.addEventListener('fetch', (event) => {
     if (!url.protocol.startsWith('http')) return;
 
     const isImage = /\.(png|jpg|jpeg|svg|ico|webp|gif)(\?.*)?$/i.test(url.pathname);
+    const isAudio = /\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(url.pathname);
     const isCDN = ['cdn.jsdelivr.net', 'unpkg.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'].some(domain => url.hostname.includes(domain));
 
-    if (isImage || isCDN) {
-        // ── Cache-first cho ảnh và thư viện CDN (ít thay đổi, tải cực nhanh, offline-first) ──
+    if (isImage || isAudio || isCDN) {
+        // ── Cache-first cho ảnh, audio on-demand và thư viện CDN (ít thay đổi, tải cực nhanh, offline-first) ──
         event.respondWith(
-            caches.match(event.request).then((cached) => {
+            caches.match(event.request, { ignoreSearch: isAudio }).then((cached) => {
                 if (cached) return cached;
                 return fetch(event.request).then((response) => {
-                    if (response && response.status === 200) {
+                    if (response && (response.status === 200 || response.status === 206)) {
                         const clone = response.clone();
                         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
                     }

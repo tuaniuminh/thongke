@@ -1,6 +1,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
-    APP_VERSION, formatDate, escapeHTML, getLocalDateString
+    APP_VERSION, formatDate, escapeHTML, getLocalDateString,
+    callGeminiTextAPI
 } from '../../core/app.js?v=4.3.186';
 import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.186';
 
@@ -1579,7 +1580,7 @@ async function handleHealthFiles(files) {
 
 async function callGeminiAPI(imagesData, legacyMimeType = null) {
     const apiKey = state.geminiApiKey;
-    const models = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
+    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
     let lastError = null;
     
     // Normalize input to array of { base64Data, mimeType }
@@ -2376,37 +2377,7 @@ function cleanLatex(text) {
     return cleaned;
 }
 
-async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
-    const apiKey = state.geminiApiKey;
-    const models = [defaultModel, "gemini-1.5-flash", "gemini-3.5-flash"];
-    let lastError = null;
-    for (const model of models) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            if (!response.ok) {
-                const errJson = await response.json().catch(() => ({}));
-                throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
-            }
-            const resData = await response.json();
-            const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!text) throw new Error("Không nhận được phản hồi.");
-            return text;
-        } catch (err) {
-            console.warn(`Text model ${model} failed:`, err);
-            lastError = err;
-            if (err.message.includes("demand") || err.message.includes("quota") || err.message.includes("limit") || err.message.includes("429") || err.message.includes("503")) {
-                continue;
-            }
-            continue;
-        }
-    }
-    throw lastError || new Error("Lỗi khi kết nối Gemini API.");
-}
+// callGeminiTextAPI is imported from core/app.js for centralized model management
 
 let speechUtterance = null;
 let isSpeaking = false;
@@ -2749,7 +2720,8 @@ function renderHealthAiReport() {
     if (reportContentEl && lastAiAnalysis) {
         const cleanedReport = cleanLatex(lastAiAnalysis);
         if (typeof marked !== 'undefined') {
-            reportContentEl.innerHTML = marked.parse(cleanedReport);
+            const rawHtml = marked.parse(cleanedReport);
+            reportContentEl.innerHTML = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(rawHtml) : rawHtml;
         } else {
             reportContentEl.innerHTML = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: none; border: none; color: inherit;">${escapeHTML(cleanedReport)}</pre>`;
         }
@@ -2867,7 +2839,7 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
 
 *Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Tuyệt đối KHÔNG sử dụng ký tự $ hoặc các ký hiệu toán học LaTeX (như $...$, $$...$$, \text{...}, \times, \mu) để biểu diễn các số liệu hoặc đơn vị đo lường. Thay vào đó, hãy dùng văn bản thường thuần túy (ví dụ: dùng "x" thay cho "\times", dùng "uL" hoặc "µL" thay cho "\mu L", dùng "15.8 g/dL" thay cho "$15.8 \text{ g/dL}$"). Tất cả các số liệu và đơn vị phải hiển thị dưới dạng văn bản thường đọc được trực tiếp. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
-        const textResponse = await callGeminiTextAPI(prompt, 'gemini-3.5-flash');
+        const textResponse = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
         
         const nowIso = new Date().toISOString();
         

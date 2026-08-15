@@ -2,9 +2,8 @@
 
 import { 
     state, saveLocalState, showToast, performSync,
-    formatVND, escapeHTML
+    formatVND, escapeHTML, callGeminiTextAPI
 } from '../../core/app.js?v=4.3.186';
-import { callGeminiTextAPI } from '../ho-so-y-te/ho-so-y-te.js?v=4.3.186';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -349,7 +348,7 @@ Yêu cầu nhận xét:
 Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy trả về văn bản tiếng Việt tự nhiên và trôi chảy.
 `;
 
-        const insight = await callGeminiTextAPI(prompt, 'gemini-3.5-flash');
+        const insight = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
         aiInsightText = insight.trim();
 
         // Lưu nhận xét vào state để đồng bộ Supabase (đa thiết bị)

@@ -1,7 +1,10 @@
 /**
- * Logic Nghiệp Vụ Phong Thủy & Giao Diện Lịch Vạn Niên FamiLife (v4.3.168)
+ * Logic Nghiệp Vụ Phong Thủy & Giao Diện Lịch Vạn Niên FamiLife (v4.3.186)
  * Độc lập hoàn toàn, bám sát Card Isolation Rule.
  */
+import { 
+    state as famiState, saveLocalState, performSync, showToast 
+} from '../../core/app.js?v=4.3.186';
 
 const CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
 const CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
@@ -53,31 +56,49 @@ function getDailyLunarEvent(day, month, totalDaysInMonth) {
     return null;
 }
 
-// Lấy danh sách sự kiện gia đình từ localStorage
+// Lấy danh sách sự kiện gia đình từ state E2EE (hỗ trợ migration từ localStorage cũ)
 function getFamilyEvents() {
-    try {
-        const stored = localStorage.getItem('fami_lunar_events');
-        return stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        console.error("Error reading lunar events:", e);
-        return [];
+    // Migration: nếu chưa có trong state E2EE nhưng có trong localStorage cũ
+    if (!famiState.lunarEvents || famiState.lunarEvents.length === 0) {
+        try {
+            const stored = localStorage.getItem('fami_lunar_events');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    famiState.lunarEvents = parsed;
+                    famiState.lunarEventsUpdated = new Date().toISOString();
+                    if (typeof saveLocalState === 'function') saveLocalState();
+                }
+            }
+        } catch (e) {
+            console.error("[Lunar] Error reading legacy lunar events:", e);
+        }
     }
+    return famiState.lunarEvents || [];
 }
 
-// Lưu danh sách sự kiện gia đình vào localStorage
-function saveFamilyEvents(events) {
+// Lưu danh sách sự kiện gia đình vào state E2EE và đồng bộ lên đám mây
+async function saveFamilyEvents(events) {
+    famiState.lunarEvents = events || [];
+    famiState.lunarEventsUpdated = new Date().toISOString();
     try {
-        localStorage.setItem('fami_lunar_events', JSON.stringify(events));
+        localStorage.setItem('fami_lunar_events', JSON.stringify(events)); // Fallback offline
     } catch (e) {
-        console.error("Error saving lunar events:", e);
+        console.error("[Lunar] Error caching lunar events to localStorage:", e);
+    }
+    if (typeof saveLocalState === 'function') {
+        await saveLocalState();
+    }
+    if (typeof performSync === 'function') {
+        performSync(false);
     }
 }
 
 // Xóa sự kiện gia đình
-function deleteFamilyEvent(name, day, month) {
+async function deleteFamilyEvent(name, day, month) {
     let family = getFamilyEvents();
     family = family.filter(ev => !(ev.name === name && parseInt(ev.day) === parseInt(day) && parseInt(ev.month) === parseInt(month)));
-    saveFamilyEvents(family);
+    await saveFamilyEvents(family);
 }
 
 // Tổng hợp tất cả các sự kiện của một ngày âm lịch cụ thể

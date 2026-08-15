@@ -2014,7 +2014,7 @@ export async function checkAndSendWeLoveAnniversaryTelegram() {
 // ============================================================
 
 export function getGoogleDriveDirectLink(url) {
-    if (!url) return '';
+    if (!url || typeof url !== 'string') return '';
     url = url.trim();
     
     // Extract Google Drive FILE_ID from various share link formats
@@ -2044,12 +2044,18 @@ export function getGoogleDriveDirectLink(url) {
 
     if (fileId) {
         const directLink = `https://lh3.googleusercontent.com/d/${fileId}=s0`;
-        console.log(`[WeLove Album] Parsed Google Drive Link: ${url} -> Direct URL: ${directLink}`);
         return directLink;
     }
     
-    // Not a Google Drive link — return as-is (supports direct image URLs too)
-    return url;
+    // Validate protocol safety: only allow http://, https://, data:image/, blob: or relative paths
+    const lowerUrl = url.toLowerCase();
+    if (lowerUrl.startsWith('https://') || lowerUrl.startsWith('http://') || lowerUrl.startsWith('data:image/') || lowerUrl.startsWith('blob:') || lowerUrl.startsWith('./') || lowerUrl.startsWith('src/')) {
+        return url;
+    }
+    
+    // Reject dangerous protocols like javascript:, vbscript:, file:
+    console.warn('[WeLove] Blocked unsafe URL protocol:', url);
+    return '';
 }
 
 
@@ -2060,7 +2066,7 @@ function renderWeLoveSlider(container, album) {
         slidesHtml += `
             <div class="welove-slide" data-idx="${idx}">
                 <div class="welove-slide-img-wrapper">
-                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-slide-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <img src="${escapeHTML(directUrl)}" alt="${escapeHTML(photo.caption || 'Kỷ niệm')}" class="welove-slide-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center; border-radius: 24px;">
                         <span style="font-size: 2.2rem; margin-bottom: 8px;">⚠️</span>
                         <p style="font-size: 0.82rem; margin: 0 0 4px 0; font-weight: 700;">Ảnh chưa bật công khai</p>
@@ -2207,7 +2213,7 @@ function renderWeLovePolaroid(container, album) {
                 <div class="welove-polaroid-pin">📌</div>
                 <div class="welove-polaroid-tape"></div>
                 <div class="welove-polaroid-img-wrapper">
-                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-polaroid-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <img src="${escapeHTML(directUrl)}" alt="${escapeHTML(photo.caption || 'Kỷ niệm')}" class="welove-polaroid-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 10px; text-align: center;">
                         <span style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</span>
                         <p style="font-size: 0.7rem; margin: 0; font-weight: 700;">Lỗi ảnh</p>
@@ -2242,7 +2248,7 @@ function renderWeLoveCarousel3D(container, album) {
         itemsHtml += `
             <div class="welove-carousel-3d-item" data-idx="${idx}">
                 <div class="welove-carousel-3d-img-wrapper">
-                    <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-carousel-3d-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <img src="${escapeHTML(directUrl)}" alt="${escapeHTML(photo.caption || 'Kỷ niệm')}" class="welove-carousel-3d-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center; border-radius: 16px;">
                         <span style="font-size: 2rem; margin-bottom: 6px;">⚠️</span>
                         <p style="font-size: 0.75rem; margin: 0; font-weight: 700;">Lỗi tải ảnh</p>
@@ -2391,7 +2397,7 @@ function renderWeLoveTheater(container, album) {
             <div class="welove-theater-main">
                 <div class="welove-theater-polaroid" id="weLoveTheaterMainPolaroid">
                     <div class="welove-theater-img-box">
-                        <img src="${directUrl}" alt="${activePhoto.caption || 'Kỷ niệm'}" class="welove-theater-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="${escapeHTML(directUrl)}" alt="${escapeHTML(activePhoto.caption || 'Kỷ niệm')}" class="welove-theater-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 20px; text-align: center;">
                             <span style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</span>
                             <p style="font-size: 0.9rem; margin: 0; font-weight: 700;">Ảnh chưa bật công khai</p>
@@ -2457,7 +2463,7 @@ function renderWeLoveGrid(container, album) {
 
         cardsHtml += `
             <div class="welove-grid-card ${sizeClass}" data-idx="${idx}">
-                <img src="${directUrl}" alt="${photo.caption || 'Kỷ niệm'}" class="welove-grid-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <img src="${escapeHTML(directUrl)}" alt="${escapeHTML(photo.caption || 'Kỷ niệm')}" class="welove-grid-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="welove-img-error-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.02); color: var(--accent-rose); padding: 10px; text-align: center;">
                     <span style="font-size: 1.5rem;">⚠️</span>
                 </div>
@@ -2764,7 +2770,7 @@ export function openWeLoveLightbox(url, caption) {
     const thumbsContainer = document.getElementById('weLoveLightboxThumbnails');
     if (thumbsContainer) {
         thumbsContainer.innerHTML = album.map((photo, index) => `
-            <img class="welove-lightbox-thumb" id="weLoveThumb_${index}" src="${getGoogleDriveDirectLink(photo.url)}" style="width: 42px; height: 42px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; opacity: 0.45;" title="${escapeHTML(photo.caption || '')}">
+            <img class="welove-lightbox-thumb" id="weLoveThumb_${index}" src="${escapeHTML(getGoogleDriveDirectLink(photo.url))}" style="width: 42px; height: 42px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; opacity: 0.45;" title="${escapeHTML(photo.caption || '')}">
         `).join('');
 
         // Thêm click event cho các thumbnail
