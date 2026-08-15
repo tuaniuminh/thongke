@@ -4826,12 +4826,13 @@ body.light-mode .logo-text.theme-settings {
 .tauri-titlebar {
     display: none; /* Mặc định ẩn trên web và mobile */
     height: 32px;
+    width: 100%;
     user-select: none;
     -webkit-user-select: none;
     align-items: center;
     justify-content: space-between;
     padding: 0 0 0 12px;
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
@@ -4848,23 +4849,9 @@ body.is-tauri .tauri-titlebar {
     display: flex !important;
 }
 
-html.is-tauri body,
-body.is-tauri {
-    padding-top: 32px !important;
-}
-
+/* Sidebar dính ngay dưới thanh tiêu đề 32px khi cuộn */
 html.is-tauri #sidebar,
 body.is-tauri #sidebar {
-    top: 32px !important;
-}
-
-html.is-tauri .mobile-header,
-body.is-tauri .mobile-header {
-    top: 32px !important;
-}
-
-html.is-tauri #appSplashOverlay,
-body.is-tauri #appSplashOverlay {
     top: 32px !important;
 }
 
@@ -4872,11 +4859,6 @@ body.is-tauri #appSplashOverlay {
 body.lightbox-open .tauri-titlebar,
 html.lightbox-open .tauri-titlebar {
     display: none !important;
-}
-
-body.lightbox-open,
-html.lightbox-open body {
-    padding-top: 0 !important;
 }
 
 #weLoveLightboxModal {
