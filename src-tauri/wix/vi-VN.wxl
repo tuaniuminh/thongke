@@ -9,50 +9,150 @@
   <String Id="WixUIExit">Thoát</String>
   <String Id="WixUIYes">Có</String>
   <String Id="WixUINo">Không</String>
+  <String Id="WixUIOK">OK</String>
+  <String Id="WixUIRetry">Thử lại</String>
+  <String Id="WixUIIgnore">Bỏ qua</String>
+  <String Id="WixUIPrint">In</String>
+
+  <!-- Window Titles for all Dialogs -->
+  <String Id="WelcomeDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="InstallDirDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="VerifyReadyDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="ProgressDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="ExitDialog_Title">Cài đặt [ProductName]</String>
+  <String Id="MaintenanceWelcomeDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="MaintenanceTypeDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="CancelDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="UserExit_Title">Cài đặt [ProductName]</String>
+  <String Id="FatalError_Title">Cài đặt [ProductName]</String>
+  <String Id="FilesInUse_Title">Cài đặt [ProductName]</String>
+  <String Id="MsiRMFilesInUse_Title">Cài đặt [ProductName]</String>
+  <String Id="DiskCostDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="OutOfDiskDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="OutOfRbDiskDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="BrowseDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="InvalidDirDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="PrepareDlg_Title">Cài đặt [ProductName]</String>
+  <String Id="WaitForCostingDlg_Title">Cài đặt [ProductName]</String>
 
   <!-- Welcome Dialog -->
-  <String Id="WelcomeDlgTitle">{\WixUI_Font_Bigger}Chào mừng đến với trình cài đặt FamiLife</String>
-  <String Id="WelcomeDlgDescription">Trình cài đặt sẽ cài đặt FamiLife trên máy tính của bạn. Bấm Tiếp theo để tiếp tục hoặc Hủy bỏ để thoát.</String>
+  <String Id="WelcomeDlgTitle">{\WixUI_Font_Bigger}Chào mừng đến với trình cài đặt [ProductName]</String>
+  <String Id="WelcomeDlgDescription">Trình cài đặt sẽ hướng dẫn bạn cài đặt [ProductName] trên máy tính của bạn. Bấm Tiếp theo để tiếp tục hoặc Hủy bỏ để thoát.</String>
 
-  <!-- Destination Folder Dialog -->
+  <!-- Destination Folder Dialog & Browse Dialog -->
   <String Id="InstallDirDlgTitle">{\WixUI_Font_Title}Chọn thư mục cài đặt</String>
   <String Id="InstallDirDlgDescription">Chọn thư mục để cài đặt ứng dụng.</String>
-  <String Id="InstallDirDlgFolderLabel">Cài đặt FamiLife vào thư mục:</String>
+  <String Id="InstallDirDlgFolderLabel">Cài đặt [ProductName] vào thư mục:</String>
   <String Id="InstallDirDlgChange">Thay đổi...</String>
+  <String Id="BrowseDlgTitle">{\WixUI_Font_Title}Thay đổi thư mục cài đặt</String>
+  <String Id="BrowseDlgDescription">Duyệt tìm thư mục đích trên máy tính của bạn.</String>
+  <String Id="BrowseDlgComboLabel">Tìm trong:</String>
+  <String Id="BrowseDlgPathLabel">Tên thư mục:</String>
+  <String Id="BrowseDlgNewFolderTooltip">Tạo thư mục mới</String>
+  <String Id="BrowseDlgWixUI_Bmp_UpTooltip">Lên một cấp</String>
+  <String Id="InvalidDirDlgText">Thư mục cài đặt phải nằm trên ổ đĩa cứng cục bộ của máy tính.</String>
 
-  <!-- Disk Cost Dialog -->
+  <!-- Disk Cost & Space Dialogs -->
   <String Id="DiskCostDlgTitle">{\WixUI_Font_Title}Dung lượng đĩa yêu cầu</String>
-  <String Id="DiskCostDlgDescription">Xem dung lượng đĩa trống trên máy tính.</String>
+  <String Id="DiskCostDlgDescription">Xem dung lượng đĩa cần thiết và dung lượng đĩa trống trên máy tính.</String>
+  <String Id="DiskCostDlgText">Các ổ đĩa được đánh dấu không có đủ dung lượng đĩa trống. Bạn có thể xóa bớt tệp trên các ổ đĩa đó hoặc chọn ổ đĩa đích khác.</String>
+  <String Id="OutOfDiskDlgTitle">{\WixUI_Font_Title}Hết dung lượng đĩa</String>
+  <String Id="OutOfDiskDlgDescription">Dung lượng đĩa cần thiết để cài đặt vượt quá dung lượng đĩa trống hiện có.</String>
+  <String Id="OutOfDiskDlgText">Các ổ đĩa được đánh dấu không có đủ dung lượng trống. Vui lòng giải phóng bớt dung lượng hoặc chọn ổ đĩa khác để cài đặt.</String>
+  <String Id="OutOfRbDiskDlgTitle">{\WixUI_Font_Title}Hết dung lượng đĩa</String>
+  <String Id="OutOfRbDiskDlgDescription">Dung lượng đĩa cần thiết để cài đặt vượt quá dung lượng đĩa trống hiện có.</String>
+  <String Id="OutOfRbDiskDlgText">Các ổ đĩa được đánh dấu không có đủ dung lượng trống. Vui lòng giải phóng bớt dung lượng hoặc chọn ổ đĩa khác để cài đặt.</String>
 
-  <!-- Verify Ready Dialog -->
+  <!-- Verify Ready Dialog (Install / Remove / Repair / Change / Update) -->
   <String Id="VerifyReadyDlgInstallTitle">{\WixUI_Font_Title}Sẵn sàng cài đặt</String>
-  <String Id="VerifyReadyDlgInstallText">Nhấn Cài đặt để bắt đầu cài đặt FamiLife trên máy tính của bạn. Nếu bạn muốn kiểm tra hoặc thay đổi bất kỳ thiết lập nào, hãy nhấn Quay lại.</String>
+  <String Id="VerifyReadyDlgInstallText">Nhấn Cài đặt để bắt đầu cài đặt [ProductName] trên máy tính của bạn. Nếu bạn muốn kiểm tra hoặc thay đổi bất kỳ thiết lập nào, hãy nhấn Quay lại.</String>
   <String Id="VerifyReadyDlgInstall">Cài đặt</String>
 
-  <!-- Progress Dialog -->
-  <String Id="ProgressDlgTitle">{\WixUI_Font_Title}Đang cài đặt FamiLife</String>
-  <String Id="ProgressDlgDescription">Vui lòng chờ trong khi trình cài đặt hoàn tất cài đặt FamiLife.</String>
+  <String Id="VerifyReadyDlgRemoveTitle">{\WixUI_Font_Title}Sẵn sàng gỡ bỏ [ProductName]</String>
+  <String Id="VerifyReadyDlgRemoveText">Nhấn Gỡ bỏ để xóa [ProductName] khỏi máy tính của bạn. Nhấn Quay lại nếu bạn muốn xem lại các thiết lập. Nhấn Hủy bỏ để thoát.</String>
+  <String Id="VerifyReadyDlgRemove">Gỡ bỏ</String>
+
+  <String Id="VerifyReadyDlgRepairTitle">{\WixUI_Font_Title}Sẵn sàng sửa chữa [ProductName]</String>
+  <String Id="VerifyReadyDlgRepairText">Nhấn Sửa chữa để khắc phục lỗi cài đặt của [ProductName]. Nhấn Quay lại nếu bạn muốn xem lại các thiết lập. Nhấn Hủy bỏ để thoát.</String>
+  <String Id="VerifyReadyDlgRepair">Sửa chữa</String>
+
+  <String Id="VerifyReadyDlgChangeTitle">{\WixUI_Font_Title}Sẵn sàng thay đổi [ProductName]</String>
+  <String Id="VerifyReadyDlgChangeText">Nhấn Thay đổi để bắt đầu cài đặt. Nhấn Quay lại nếu bạn muốn xem lại thiết lập. Nhấn Hủy bỏ để thoát.</String>
+  <String Id="VerifyReadyDlgChange">Thay đổi</String>
+
+  <String Id="VerifyReadyDlgUpdateTitle">{\WixUI_Font_Title}Sẵn sàng cập nhật [ProductName]</String>
+  <String Id="VerifyReadyDlgUpdateText">Nhấn Cập nhật để nâng cấp [ProductName] trên máy tính của bạn. Nhấn Quay lại nếu bạn muốn xem lại thiết lập. Nhấn Hủy bỏ để thoát.</String>
+  <String Id="VerifyReadyDlgUpdate">Cập nhật</String>
+
+  <!-- Progress Dialog (Installing / Removing / Repairing / Changing / Updating) -->
+  <String Id="ProgressDlgTitle">{\WixUI_Font_Title}Đang xử lý [ProductName]</String>
+  <String Id="ProgressDlgDescription">Vui lòng chờ trong khi trình cài đặt hoàn tất thao tác.</String>
   <String Id="ProgressDlgStatusLabel">Trạng thái:</String>
 
+  <String Id="ProgressDlgTitleInstalling">{\WixUI_Font_Title}Đang cài đặt [ProductName]</String>
+  <String Id="ProgressDlgTextInstalling">Vui lòng chờ trong khi trình cài đặt cài đặt [ProductName] trên máy tính của bạn.</String>
+
+  <String Id="ProgressDlgTitleRemoving">{\WixUI_Font_Title}Đang gỡ bỏ [ProductName]</String>
+  <String Id="ProgressDlgTextRemoving">Vui lòng chờ trong khi trình cài đặt gỡ bỏ [ProductName] khỏi máy tính của bạn.</String>
+
+  <String Id="ProgressDlgTitleRepairing">{\WixUI_Font_Title}Đang sửa chữa [ProductName]</String>
+  <String Id="ProgressDlgTextRepairing">Vui lòng chờ trong khi trình cài đặt sửa chữa [ProductName].</String>
+
+  <String Id="ProgressDlgTitleChanging">{\WixUI_Font_Title}Đang thay đổi [ProductName]</String>
+  <String Id="ProgressDlgTextChanging">Vui lòng chờ trong khi trình cài đặt thay đổi [ProductName].</String>
+
+  <String Id="ProgressDlgTitleUpdating">{\WixUI_Font_Title}Đang cập nhật [ProductName]</String>
+  <String Id="ProgressDlgTextUpdating">Vui lòng chờ trong khi trình cài đặt cập nhật [ProductName].</String>
+
   <!-- Exit Dialog -->
-  <String Id="ExitDialogTitle">{\WixUI_Font_Bigger}Hoàn tất cài đặt FamiLife</String>
-  <String Id="ExitDialogDescription">Ứng dụng FamiLife đã được cài đặt thành công trên máy tính của bạn. Nhấn Hoàn tất để đóng trình cài đặt.</String>
+  <String Id="ExitDialogTitle">{\WixUI_Font_Bigger}Hoàn tất cài đặt [ProductName]</String>
+  <String Id="ExitDialogDescription">Ứng dụng [ProductName] đã được cài đặt thành công trên máy tính của bạn. Nhấn Hoàn tất để đóng trình cài đặt.</String>
 
-  <!-- Maintenance Welcome Dialog -->
-  <String Id="MaintenanceWelcomeDlgTitle">{\WixUI_Font_Bigger}Sửa chữa hoặc gỡ bỏ FamiLife</String>
-  <String Id="MaintenanceWelcomeDlgDescription">Trình cài đặt sẽ cho phép bạn sửa lỗi hoặc gỡ bỏ FamiLife khỏi máy tính của bạn. Nhấn Tiếp theo để tiếp tục.</String>
+  <!-- Maintenance Dialogs (Repair / Uninstall / Change) -->
+  <String Id="MaintenanceWelcomeDlgTitle">{\WixUI_Font_Bigger}Sửa chữa hoặc gỡ bỏ [ProductName]</String>
+  <String Id="MaintenanceWelcomeDlgDescription">Trình cài đặt sẽ cho phép bạn sửa lỗi hoặc gỡ bỏ [ProductName] khỏi máy tính của bạn. Nhấn Tiếp theo để tiếp tục.</String>
 
-  <!-- Maintenance Type Dialog -->
   <String Id="MaintenanceTypeDlgTitle">{\WixUI_Font_Title}Chọn thao tác</String>
   <String Id="MaintenanceTypeDlgDescription">Chọn thao tác bạn muốn thực hiện.</String>
   <String Id="MaintenanceTypeDlgRepairButton">Sửa chữa</String>
   <String Id="MaintenanceTypeDlgRepairText">Sửa các lỗi cài đặt ứng dụng bằng cách cài lại các file bị thiếu hoặc bị lỗi.</String>
   <String Id="MaintenanceTypeDlgRemoveButton">Gỡ bỏ</String>
-  <String Id="MaintenanceTypeDlgRemoveText">Gỡ bỏ ứng dụng FamiLife khỏi máy tính.</String>
+  <String Id="MaintenanceTypeDlgRemoveText">Gỡ bỏ hoàn toàn ứng dụng [ProductName] khỏi máy tính của bạn.</String>
+  <String Id="MaintenanceTypeDlgChangeButton">Thay đổi</String>
+  <String Id="MaintenanceTypeDlgChangeText">Cho phép bạn thay đổi cách các tính năng được cài đặt.</String>
+
+  <!-- Cancel Dialog & User Interrupted Dialog -->
+  <String Id="CancelDlgText">Bạn có chắc chắn muốn hủy quá trình cài đặt [ProductName] không?</String>
+  <String Id="CancelDlgIconTooltip">Biểu tượng thông tin</String>
+  <String Id="UserExitTitle">{\WixUI_Font_Bigger}Quá trình cài đặt [ProductName] đã bị gián đoạn</String>
+  <String Id="UserExitDescription1">Quá trình cài đặt [ProductName] đã bị gián đoạn. Hệ thống của bạn chưa bị thay đổi. Để cài đặt chương trình vào lúc khác, vui lòng chạy lại trình cài đặt.</String>
+  <String Id="UserExitDescription2">Nhấn nút Hoàn tất để thoát khỏi trình cài đặt.</String>
+
+  <!-- Fatal Error Dialog -->
+  <String Id="FatalErrorTitle">{\WixUI_Font_Bigger}Trình cài đặt [ProductName] đã kết thúc sớm do lỗi</String>
+  <String Id="FatalErrorDescription1">Trình cài đặt [ProductName] đã kết thúc sớm do xảy ra lỗi. Hệ thống của bạn chưa bị thay đổi. Để cài đặt chương trình vào lúc khác, vui lòng chạy lại trình cài đặt.</String>
+  <String Id="FatalErrorDescription2">Nhấn nút Hoàn tất để thoát khỏi trình cài đặt.</String>
+  <String Id="ErrorDlgErrorText">Nội dung thông tin lỗi</String>
+
+  <!-- Files In Use Dialogs -->
+  <String Id="FilesInUseTitle">{\WixUI_Font_Title}Tệp đang được sử dụng</String>
+  <String Id="FilesInUseDescription">Một số tệp cần cập nhật hiện đang được sử dụng bởi ứng dụng khác.</String>
+  <String Id="FilesInUseText">Các ứng dụng sau đang sử dụng các tệp cần được cập nhật. Vui lòng đóng các ứng dụng này rồi nhấn Thử lại để tiếp tục, hoặc nhấn Thoát.</String>
+  <String Id="FilesInUseExit">Thoát</String>
+  <String Id="MsiRMFilesInUseTitle">{\WixUI_Font_Title}Tệp đang được sử dụng</String>
+  <String Id="MsiRMFilesInUseDescription">Một số tệp cần cập nhật hiện đang được sử dụng bởi ứng dụng khác.</String>
+  <String Id="MsiRMFilesInUseText">Các ứng dụng sau đang sử dụng các tệp cần được cập nhật. Bạn có thể để trình cài đặt đóng chúng và thử khởi động lại sau, hoặc khởi động lại máy tính sau này.</String>
+  <String Id="MsiRMFilesInUseUseRM">Đóng các ứng dụng và thử khởi động lại chúng.</String>
+  <String Id="MsiRMFilesInUseDontUseRM">Không đóng ứng dụng (sẽ yêu cầu khởi động lại máy tính).</String>
+
+  <!-- Prepare & Wait Dialogs -->
+  <String Id="PrepareDlgTitle">{\WixUI_Font_Bigger}Chào mừng đến với trình cài đặt [ProductName]</String>
+  <String Id="PrepareDlgDescription">Vui lòng chờ trong khi trình cài đặt chuẩn bị các thông tin cần thiết.</String>
+  <String Id="WaitForCostingDlgText">Vui lòng chờ trong khi trình cài đặt đang tính toán dung lượng đĩa yêu cầu.</String>
 
   <!-- Tauri Specific Strings -->
-  <String Id="LaunchApp">Khởi chạy FamiLife</String>
-  <String Id="DowngradeErrorMessage">Một phiên bản mới hơn của FamiLife đã được cài đặt trên máy tính của bạn.</String>
+  <String Id="LaunchApp">Khởi chạy [ProductName]</String>
+  <String Id="DowngradeErrorMessage">Một phiên bản mới hơn của [ProductName] đã được cài đặt trên máy tính của bạn.</String>
   <String Id="PathEnvVarFeature">Thêm đường dẫn cài đặt vào biến môi trường PATH.</String>
-  <String Id="InstallAppFeature">Cài đặt ứng dụng FamiLife.</String>
+  <String Id="InstallAppFeature">Cài đặt ứng dụng [ProductName].</String>
 </WixLocalization>

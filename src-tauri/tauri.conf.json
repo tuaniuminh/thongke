@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.56"
+    "version": "4.3.186"
   },
   "tauri": {
     "allowlist": {
@@ -19,7 +19,9 @@
       "fs": {
         "all": false,
         "writeFile": true,
-        "scope": ["$TEMP/*"]
+        "scope": [
+          "$TEMP/*"
+        ]
       },
       "path": {
         "all": true
