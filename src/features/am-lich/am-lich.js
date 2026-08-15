@@ -1,10 +1,10 @@
 /**
- * Logic Nghiệp Vụ Phong Thủy & Giao Diện Lịch Vạn Niên FamiLife (v4.3.189)
+ * Logic Nghiệp Vụ Phong Thủy & Giao Diện Lịch Vạn Niên FamiLife (v4.3.190)
  * Độc lập hoàn toàn, bám sát Card Isolation Rule.
  */
 import { 
     state as famiState, saveLocalState, performSync, showToast 
-} from '../../core/app.js?v=4.3.189';
+} from '../../core/app.js?v=4.3.190';
 
 const CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
 const CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];

@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.189';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.189';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.189';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.189';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.190';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.190';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.190';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.190';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.189';
-import * as sync from './sync.js?v=4.3.189';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.189';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.189';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.189';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.190';
+import * as sync from './sync.js?v=4.3.190';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.190';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.190';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.190';
 
-const APP_VERSION = '4.3.189';
+const APP_VERSION = '4.3.190';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -704,8 +704,19 @@ async function downloadAndInstallUpdateTauri(newVersion) {
 
 // Khởi tạo thanh tiêu đề tùy biến cho ứng dụng Tauri trên Desktop (Frameless Custom Titlebar)
 function initTauriTitlebar() {
-    if (window.__TAURI__ && window.__TAURI__.window) {
-        document.body.classList.add('is-tauri');
+    const isTauriEnv = !!(window.__TAURI__ || window.__TAURI_IPC__ || window.__TAURI_METADATA__ || window.location.protocol === 'tauri:' || (window.location.protocol === 'https:' && window.location.hostname === 'tauri.localhost'));
+    
+    if (isTauriEnv) {
+        document.documentElement.classList.add('is-tauri');
+        if (document.body) document.body.classList.add('is-tauri');
+    }
+
+    function setupTauriWindowControls() {
+        if (!window.__TAURI__ || !window.__TAURI__.window) return false;
+        
+        document.documentElement.classList.add('is-tauri');
+        if (document.body) document.body.classList.add('is-tauri');
+        
         const { appWindow } = window.__TAURI__.window;
         
         const minBtn = document.getElementById('tauriTbMinimize');
@@ -732,31 +743,37 @@ function initTauriTitlebar() {
         }
 
         if (minBtn) {
-            minBtn.addEventListener('click', () => {
+            minBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 appWindow.minimize();
-            });
+            };
         }
 
         if (maxBtn) {
-            maxBtn.addEventListener('click', async () => {
+            maxBtn.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 await appWindow.toggleMaximize();
                 updateMaxIcon();
-            });
+            };
         }
         
         if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
+            closeBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 appWindow.close();
-            });
+            };
         }
 
         if (titlebar) {
-            titlebar.addEventListener('dblclick', async (e) => {
+            titlebar.ondblclick = async (e) => {
                 if (!e.target.closest('.tauri-titlebar-controls')) {
                     await appWindow.toggleMaximize();
                     updateMaxIcon();
                 }
-            });
+            };
         }
 
         try {
@@ -767,6 +784,13 @@ function initTauriTitlebar() {
         } catch (e) {
             console.warn('[TAURI] onResized listen error:', e);
         }
+        return true;
+    }
+
+    if (!setupTauriWindowControls()) {
+        setTimeout(setupTauriWindowControls, 100);
+        setTimeout(setupTauriWindowControls, 500);
+        setTimeout(setupTauriWindowControls, 1500);
     }
 }
 

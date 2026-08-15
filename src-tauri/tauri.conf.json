@@ -3,11 +3,12 @@
     "distDir": "../www",
     "devPath": "http://localhost:3000",
     "beforeDevCommand": "",
-    "beforeBuildCommand": ""
+    "beforeBuildCommand": "",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.189"
+    "version": "4.3.190"
   },
   "tauri": {
     "allowlist": {

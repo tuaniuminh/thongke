@@ -4843,22 +4843,27 @@ body.light-mode .logo-text.theme-settings {
     transition: background-color var(--transition-normal), color var(--transition-normal), border-color var(--transition-normal);
 }
 
+html.is-tauri .tauri-titlebar,
 body.is-tauri .tauri-titlebar {
     display: flex !important;
 }
 
+html.is-tauri body,
 body.is-tauri {
     padding-top: 32px !important;
 }
 
+html.is-tauri #sidebar,
 body.is-tauri #sidebar {
     top: 32px !important;
 }
 
+html.is-tauri .mobile-header,
 body.is-tauri .mobile-header {
     top: 32px !important;
 }
 
+html.is-tauri #appSplashOverlay,
 body.is-tauri #appSplashOverlay {
     top: 32px !important;
 }
