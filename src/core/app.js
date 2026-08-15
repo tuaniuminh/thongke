@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.191';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.191';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.191';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.191';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.192';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.192';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.192';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.192';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.191';
-import * as sync from './sync.js?v=4.3.191';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.191';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.191';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.191';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.192';
+import * as sync from './sync.js?v=4.3.192';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.192';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.192';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.192';
 
-const APP_VERSION = '4.3.191';
+const APP_VERSION = '4.3.192';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -667,15 +667,22 @@ async function downloadAndInstallUpdateTauri(newVersion) {
         
         // 1. Lấy thư mục tạm của hệ thống
         const tempPath = await tempDir();
-        const filename = `FamiLife_${newVersion}_x64_en-US.msi`;
-        const savePath = `${tempPath}${filename}`;
+        let filename = `FamiLife_${newVersion}_x64_vi-VN.msi`;
+        let savePath = `${tempPath}${filename}`;
         
         // 2. Fetch tệp .msi nhị phân từ GitHub Releases
-        const downloadUrl = `https://github.com/tuaniuminh/thongke/releases/download/v${newVersion}/${filename}`;
+        let downloadUrl = `https://github.com/tuaniuminh/thongke/releases/download/v${newVersion}/${filename}`;
         
-        const response = await fetch(downloadUrl);
+        let response = await fetch(downloadUrl);
         if (!response.ok) {
-            throw new Error(`Không thể tải tệp cập nhật: Status ${response.status}`);
+            // Fallback sang định dạng en-US nếu release cũ đặt tên en-US
+            filename = `FamiLife_${newVersion}_x64_en-US.msi`;
+            savePath = `${tempPath}${filename}`;
+            downloadUrl = `https://github.com/tuaniuminh/thongke/releases/download/v${newVersion}/${filename}`;
+            response = await fetch(downloadUrl);
+            if (!response.ok) {
+                throw new Error(`Không thể tải tệp cập nhật: Status ${response.status}`);
+            }
         }
         
         const arrayBuffer = await response.arrayBuffer();

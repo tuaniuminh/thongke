@@ -4868,6 +4868,21 @@ body.is-tauri #appSplashOverlay {
     top: 32px !important;
 }
 
+/* Khi mở Lightbox xem ảnh toàn màn hình, ẩn thanh tiêu đề desktop để ảnh tràn viền 100% không bị lẹm */
+body.lightbox-open .tauri-titlebar,
+html.lightbox-open .tauri-titlebar {
+    display: none !important;
+}
+
+body.lightbox-open,
+html.lightbox-open body {
+    padding-top: 0 !important;
+}
+
+#weLoveLightboxModal {
+    z-index: 100005 !important;
+}
+
 .tauri-titlebar-left {
     display: flex;
     align-items: center;

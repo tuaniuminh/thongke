@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.191"
+    "version": "4.3.192"
   },
   "tauri": {
     "allowlist": {
@@ -63,7 +63,7 @@
       "windows": {
         "wix": {
           "language": {
-            "en-US": {
+            "vi-VN": {
               "localePath": "./wix/vi-VN.wxl"
             }
           },
