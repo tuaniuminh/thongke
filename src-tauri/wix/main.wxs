@@ -324,10 +324,11 @@
             Id="CleanupUserData"
             Return="ignore"
             Directory="TARGETDIR"
-            Execute="immediate"
-            ExeCommand="powershell.exe -NoProfile -WindowStyle hidden -Command &quot;Remove-Item -Path '$env:LOCALAPPDATA\com.familife.thongke' -Recurse -Force -ErrorAction SilentlyContinue&quot;" />
+            Execute="deferred"
+            Impersonate="no"
+            ExeCommand="powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle hidden -Command &quot;Get-Item 'C:\Users\*\AppData\Local\com.familife.thongke' -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue&quot;" />
         <InstallExecuteSequence>
-            <Custom Action="CleanupUserData" After="InstallInitialize">
+            <Custom Action="CleanupUserData" Before="RemoveFiles">
                 (REMOVE = "ALL") AND NOT UPGRADINGPRODUCTCODE
             </Custom>
         </InstallExecuteSequence>
