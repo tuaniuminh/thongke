@@ -4820,3 +4820,98 @@ body.light-mode .logo-text.theme-settings {
     }
 }
 
+/* =========================================================
+   Tauri Desktop Custom Titlebar (Frameless Window)
+   ========================================================= */
+.tauri-titlebar {
+    display: none; /* Mặc định ẩn trên web và mobile */
+    height: 32px;
+    user-select: none;
+    -webkit-user-select: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 0 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100000;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: background-color var(--transition-normal), color var(--transition-normal), border-color var(--transition-normal);
+}
+
+body.is-tauri .tauri-titlebar {
+    display: flex !important;
+}
+
+body.is-tauri {
+    padding-top: 32px !important;
+}
+
+body.is-tauri #sidebar {
+    top: 32px !important;
+}
+
+body.is-tauri .mobile-header {
+    top: 32px !important;
+}
+
+body.is-tauri #appSplashOverlay {
+    top: 32px !important;
+}
+
+.tauri-titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.tauri-titlebar-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.tauri-titlebar-controls {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.tauri-tb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tauri-tb-btn:hover {
+    background-color: rgba(125, 125, 125, 0.15);
+    color: var(--text-primary);
+}
+
+.tauri-tb-btn.tauri-tb-btn-close:hover {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+.tauri-tb-btn:active {
+    opacity: 0.7;
+}
+
+

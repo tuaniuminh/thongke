@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.188"
+    "version": "4.3.189"
   },
   "tauri": {
     "allowlist": {
@@ -32,6 +32,17 @@
       "http": {
         "all": true,
         "request": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
       }
     },
     "bundle": {
@@ -72,7 +83,7 @@
         "resizable": true,
         "fullscreen": false,
         "maximized": true,
-        "theme": "Light"
+        "decorations": false
       }
     ]
   }
