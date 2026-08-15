@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.186';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.186';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.186';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.186';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.187';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.187';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.187';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.187';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.186';
-import * as sync from './sync.js?v=4.3.186';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.186';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.186';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.186';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.187';
+import * as sync from './sync.js?v=4.3.187';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.187';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.187';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.187';
 
-const APP_VERSION = '4.3.186';
+const APP_VERSION = '4.3.187';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1302,10 +1302,8 @@ async function performSync(silent = false) {
                                 remoteData.weLoveShowSickness = state.weLoveShowSickness;
                                 remoteData.weLoveShowSicknessUpdated = state.weLoveShowSicknessUpdated;
                                 remoteData.weLoveDesktopLayout = state.weLoveDesktopLayout;
-                            remoteData.weLoveAlbumLayoutDesktop = state.weLoveAlbumLayoutDesktop;
                                 remoteData.weLoveAlbumLayoutDesktop = state.weLoveAlbumLayoutDesktop;
                                 remoteData.weLoveDesktopLayoutUpdated = state.weLoveDesktopLayoutUpdated;
-                            remoteData.weLoveAlbumLayoutDesktopUpdated = state.weLoveAlbumLayoutDesktopUpdated;
                                 remoteData.weLoveAlbumLayoutDesktopUpdated = state.weLoveAlbumLayoutDesktopUpdated;
                                 remoteData.weLovePhotoAlbum = state.weLovePhotoAlbum;
                                 remoteData.weLovePhotoAlbumUpdated = state.weLovePhotoAlbumUpdated;
@@ -1465,16 +1463,16 @@ async function performSync(silent = false) {
                             state.weLoveSicknessLogs = remoteData.weLoveSicknessLogs;
                             state.weLoveSicknessLogsUpdated = remoteData.weLoveSicknessLogsUpdated || '';
                         }
-                        if (state.weLoveReminders.length === 0 && remoteData.weLoveReminders && remoteData.weLoveReminders.length > 0) {
+                        if (remoteData.weLoveReminders && remoteData.weLoveReminders.length > 0) {
                             state.weLoveReminders = remoteData.weLoveReminders;
                             state.weLoveRemindersUpdated = remoteData.weLoveRemindersUpdated || '';
                         }
-                        if (state.familyFunds.length === 0 && remoteData.familyFunds && remoteData.familyFunds.length > 0) {
-                            state.familyFunds = remoteData.familyFunds;
+                        if (remoteData.familyFunds && remoteData.familyFunds.length > 0) {
+                            state.familyFunds = mergeLists(state.familyFunds || [], remoteData.familyFunds);
                             state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
                         }
-                        if (state.fundTransactions.length === 0 && remoteData.fundTransactions && remoteData.fundTransactions.length > 0) {
-                            state.fundTransactions = remoteData.fundTransactions;
+                        if (remoteData.fundTransactions && remoteData.fundTransactions.length > 0) {
+                            state.fundTransactions = mergeLists(state.fundTransactions || [], remoteData.fundTransactions);
                             state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
                         }
                     }
@@ -1773,22 +1771,24 @@ async function performSync(silent = false) {
                         state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
                         state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
                     }
-                    // Merge familyFunds & transactions only if not wife viewing shared
+                    // Merge familyFunds & transactions using 3-way Item Merge (mergeLists by ID)
                     if (!isWifeViewingShared) {
-                        // Merge familyFunds using LWW
-                        const localFundsTime = state.familyFundsUpdated ? new Date(state.familyFundsUpdated).getTime() : 0;
-                        const remoteFundsTime = remoteData.familyFundsUpdated ? new Date(remoteData.familyFundsUpdated).getTime() : 0;
-                        if (remoteFundsTime > localFundsTime) {
-                            state.familyFunds = remoteData.familyFunds || [];
-                            state.familyFundsUpdated = remoteData.familyFundsUpdated || '';
-                            state.activeChartFundIds = remoteData.activeChartFundIds || ['fund-main'];
+                        state.familyFunds = mergeLists(state.familyFunds || [], remoteData.familyFunds || []);
+                        state.fundTransactions = mergeLists(state.fundTransactions || [], remoteData.fundTransactions || []);
+                        if (remoteData.familyFundsUpdated) {
+                            const localFundsTime = state.familyFundsUpdated ? new Date(state.familyFundsUpdated).getTime() : 0;
+                            const remoteFundsTime = new Date(remoteData.familyFundsUpdated).getTime();
+                            if (remoteFundsTime > localFundsTime) {
+                                state.familyFundsUpdated = remoteData.familyFundsUpdated;
+                                state.activeChartFundIds = remoteData.activeChartFundIds || state.activeChartFundIds || ['fund-main'];
+                            }
                         }
-                        // Merge fundTransactions using LWW
-                        const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
-                        const remoteTxTime = remoteData.fundTransactionsUpdated ? new Date(remoteData.fundTransactionsUpdated).getTime() : 0;
-                        if (remoteTxTime > localTxTime) {
-                            state.fundTransactions = remoteData.fundTransactions || [];
-                            state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated || '';
+                        if (remoteData.fundTransactionsUpdated) {
+                            const localTxTime = state.fundTransactionsUpdated ? new Date(state.fundTransactionsUpdated).getTime() : 0;
+                            const remoteTxTime = new Date(remoteData.fundTransactionsUpdated).getTime();
+                            if (remoteTxTime > localTxTime) {
+                                state.fundTransactionsUpdated = remoteData.fundTransactionsUpdated;
+                            }
                         }
                     }
                     
@@ -2005,8 +2005,6 @@ async function performSync(silent = false) {
             weLoveShowSicknessUpdated: state.weLoveShowSicknessUpdated || '',
             weLoveDesktopLayout: state.weLoveDesktopLayout || 'traditional',
             weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
-            weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
-        weLoveAlbumLayoutDesktop: state.weLoveAlbumLayoutDesktop || 'slider',
             weLoveDesktopLayoutUpdated: state.weLoveDesktopLayoutUpdated || '',
             weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
             weLoveAlbumLayoutDesktopUpdated: state.weLoveAlbumLayoutDesktopUpdated || '',
@@ -5519,6 +5517,14 @@ document.addEventListener('click', (e) => {
         triggerHapticFeedback('light');
     }
 }, true);
+
+// Tự động kích hoạt đồng bộ khi thiết bị kết nối mạng trở lại
+window.addEventListener('online', () => {
+    console.log('[Network] Network connectivity restored. Triggering auto-sync...');
+    if (state.masterPassword && state.user) {
+        performSync(true); // silent auto-sync
+    }
+});
 
 // Xóa sạch toàn bộ dữ liệu trạng thái (trừ Master Password để giữ trạng thái đã unlock)
 export async function clearAllStateData() {
