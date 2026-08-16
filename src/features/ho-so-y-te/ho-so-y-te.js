@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI
-} from '../../core/app.js?v=4.3.197';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.197';
+} from '../../core/app.js?v=4.3.198';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.198';
 
 let healthTrendChartInstance = null;
 
