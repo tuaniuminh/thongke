@@ -4865,6 +4865,43 @@ html.lightbox-open .tauri-titlebar {
     z-index: 100005 !important;
 }
 
+/* =========================================================
+   Loại bỏ khoảng trống thừa ở WeLove và Hồ Sơ Y Tế trên Desktop
+   ========================================================= */
+/* 1. WeLove: Ẩn hoàn toàn top-header rỗng và giảm padding đỉnh */
+body.active-tab-welove .top-header,
+body.active-tab-welove-admin .top-header,
+body.active-tab-welove-settings .top-header,
+html.active-tab-welove .top-header,
+html.active-tab-welove-admin .top-header,
+html.active-tab-welove-settings .top-header {
+    display: none !important;
+}
+
+body.active-tab-welove .main-content,
+body.active-tab-welove-admin .main-content,
+body.active-tab-welove-settings .main-content,
+html.active-tab-welove .main-content,
+html.active-tab-welove-admin .main-content,
+html.active-tab-welove-settings .main-content {
+    padding-top: 1rem !important;
+}
+
+/* 2. Hồ Sơ Y Tế: Thu gọn khoảng cách top-header để nội dung liền mạch */
+body.active-tab-health .top-header,
+body.active-tab-health-reminders .top-header,
+html.active-tab-health .top-header,
+html.active-tab-health-reminders .top-header {
+    margin-bottom: 1rem !important;
+}
+
+body.active-tab-health .main-content,
+body.active-tab-health-reminders .main-content,
+html.active-tab-health .main-content,
+html.active-tab-health-reminders .main-content {
+    padding-top: 1.25rem !important;
+}
+
 .tauri-titlebar-left {
     display: flex;
     align-items: center;
