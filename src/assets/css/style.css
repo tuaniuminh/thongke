@@ -314,7 +314,6 @@ body.light-mode .nav-link:hover {
     min-width: 0;
     min-height: 100vh;
     padding: 2rem 3rem;
-    transition: padding var(--transition-normal);
 }
 
 /* Top Header */
