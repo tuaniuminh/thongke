@@ -4849,10 +4849,22 @@ body.is-tauri .tauri-titlebar {
     display: flex !important;
 }
 
-/* Sidebar dính ngay dưới thanh tiêu đề 32px khi cuộn */
-html.is-tauri #sidebar,
-body.is-tauri #sidebar {
+/* Sidebar dính ngay dưới thanh tiêu đề 32px khi cuộn (chỉ áp dụng khi ở chế độ sticky) */
+html.is-tauri #sidebar:not(.non-sticky-on-desktop),
+body.is-tauri #sidebar:not(.non-sticky-on-desktop) {
     top: 32px !important;
+}
+
+/* Khi sidebar ở chế độ relative (WeLove, Hồ Sơ Y Tế), top bắt buộc là 0 để không bị đẩy thụt xuống 32px tạo khoảng trống */
+html.is-tauri #sidebar.non-sticky-on-desktop,
+body.is-tauri #sidebar.non-sticky-on-desktop,
+body.active-tab-welove .sidebar,
+body.active-tab-welove-admin .sidebar,
+body.active-tab-welove-settings .sidebar,
+html.active-tab-welove .sidebar,
+html.active-tab-welove-admin .sidebar,
+html.active-tab-welove-settings .sidebar {
+    top: 0 !important;
 }
 
 /* Khi mở Lightbox xem ảnh toàn màn hình, ẩn thanh tiêu đề desktop để ảnh tràn viền 100% không bị lẹm */

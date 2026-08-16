@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.194';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.194';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.194';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.194';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.195';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.195';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.195';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.195';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.194';
-import * as sync from './sync.js?v=4.3.194';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.194';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.194';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.194';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.195';
+import * as sync from './sync.js?v=4.3.195';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.195';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.195';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.195';
 
-const APP_VERSION = '4.3.194';
+const APP_VERSION = '4.3.195';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2908,6 +2908,22 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         } else {
             sidebar.classList.remove('non-sticky-on-desktop');
         }
+        
+        // [BUG DETECTOR] Nâng cấp in vết chi tiết kích thước & vị trí layout
+        requestAnimationFrame(() => {
+            const cs = window.getComputedStyle(sidebar);
+            const tb = document.getElementById('tauriTitlebar');
+            const tbCs = tb ? window.getComputedStyle(tb) : null;
+            console.log(`[BUG DETECTOR] Tab switched to "${tabId}":`, {
+                isTauri: document.documentElement.classList.contains('is-tauri'),
+                sidebarPosition: cs.position,
+                sidebarTop: cs.top,
+                sidebarOffsetTop: sidebar.offsetTop,
+                sidebarHeight: sidebar.offsetHeight,
+                titlebarDisplay: tbCs ? tbCs.display : 'none',
+                titlebarHeight: tb ? tb.offsetHeight : 0
+            });
+        });
     }
     
     // Header text update
