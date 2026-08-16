@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.195"
+    "version": "4.3.196"
   },
   "tauri": {
     "allowlist": {
@@ -29,6 +29,14 @@
       },
       "process": {
         "exit": true
+      },
+      "dialog": {
+        "all": true,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
       },
       "http": {
         "all": true,

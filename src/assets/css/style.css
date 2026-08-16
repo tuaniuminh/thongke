@@ -4858,12 +4858,16 @@ body.is-tauri #sidebar:not(.non-sticky-on-desktop) {
 /* Khi sidebar ở chế độ relative (WeLove, Hồ Sơ Y Tế), top bắt buộc là 0 để không bị đẩy thụt xuống 32px tạo khoảng trống */
 html.is-tauri #sidebar.non-sticky-on-desktop,
 body.is-tauri #sidebar.non-sticky-on-desktop,
-body.active-tab-welove .sidebar,
-body.active-tab-welove-admin .sidebar,
-body.active-tab-welove-settings .sidebar,
-html.active-tab-welove .sidebar,
-html.active-tab-welove-admin .sidebar,
-html.active-tab-welove-settings .sidebar {
+html.active-tab-welove #sidebar,
+html.active-tab-welove-admin #sidebar,
+html.active-tab-welove-settings #sidebar,
+body.active-tab-welove #sidebar,
+body.active-tab-welove-admin #sidebar,
+body.active-tab-welove-settings #sidebar,
+body.active-tab-health #sidebar,
+body.active-tab-health-reminders #sidebar,
+html.active-tab-health #sidebar,
+html.active-tab-health-reminders #sidebar {
     top: 0 !important;
 }
 
