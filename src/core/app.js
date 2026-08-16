@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.198';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.198';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.198';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.198';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.199';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.199';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.199';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.199';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.198';
-import * as sync from './sync.js?v=4.3.198';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.198';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.198';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.198';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.199';
+import * as sync from './sync.js?v=4.3.199';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.199';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.199';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.199';
 
-const APP_VERSION = '4.3.198';
+const APP_VERSION = '4.3.199';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2822,6 +2822,7 @@ function handleHashRoute() {
 
 // Switch main navigation tabs
 function switchTab(tabId, updateHash = true, pushHistory = true) {
+    window.switchTab = switchTab;
     console.log(`[BUG DETECTOR] switchTab START target: ${tabId}, current activeTab: ${state.activeTab}, updateHash: ${updateHash}`);
     // Tự động đóng Lightbox nếu đang mở và mở khóa cuộn nền khi chuyển tab
     if (typeof window.closeWeLoveLightbox === 'function') {
