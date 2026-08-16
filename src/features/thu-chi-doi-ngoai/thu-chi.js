@@ -5,9 +5,9 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility, updateLoveWidgetUI
-} from '../../core/app.js?v=4.3.199';
-import * as sync from '../../core/sync.js?v=4.3.199';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.199';
+} from '../../core/app.js?v=4.3.200';
+import * as sync from '../../core/sync.js?v=4.3.200';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.200';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1014,20 +1014,7 @@ function updateHomeLayoutUI() {
 
     // --- Khóa / Mở khóa tất cả các card một cách tổng quát ---
     document.querySelectorAll('.home-card').forEach(card => {
-        // Lưu giữ href ban đầu nếu chưa có
-        if (!card.hasAttribute('data-original-href')) {
-            const href = card.getAttribute('href');
-            if (href) {
-                card.setAttribute('data-original-href', href);
-            }
-        }
-        
         card.classList.remove('locked');
-        const origHref = card.getAttribute('data-original-href');
-        if (origHref) {
-            card.setAttribute('href', origHref);
-        }
-        card.onclick = null;
     });
 
 
