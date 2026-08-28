@@ -2,19 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.225';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.225';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.225';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.225';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.226';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.226';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.226';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.226';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.225';
-import * as sync from './sync.js?v=4.3.225';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.225';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.225';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.225';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.225';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.226';
+import * as sync from './sync.js?v=4.3.226';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.226';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.226';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.226';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.226';
 
-const APP_VERSION = '4.3.225';
+const APP_VERSION = '4.3.226';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5340,7 +5340,7 @@ window.renderTcManagement = renderTcManagement;
 /**
  * Gọi Google Gemini Text API với danh sách model fallback hợp lệ (tránh lỗi 404 từ model không tồn tại)
  */
-export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
+export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash', options = {}) {
     const apiKey = state.geminiApiKey;
     if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key.");
     // Danh sách model hợp lệ theo chuẩn Google AI Studio, loại bỏ model không tồn tại (như 3.5)
@@ -5350,11 +5350,17 @@ export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash
     let lastError = null;
     for (const model of candidateModels) {
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                body: JSON.stringify({ 
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: options.temperature !== undefined ? options.temperature : 0.1,
+                        topP: 0.95
+                    }
+                })
             });
             if (!response.ok) {
                 const errJson = await response.json().catch(() => ({}));

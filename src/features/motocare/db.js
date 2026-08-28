@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.225';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.225';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.226';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.226';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -566,7 +566,7 @@ export const AI = {
         return true;
     },
 
-    async callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
+    async callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash', options = {}) {
         const apiKey = this.getKey();
         if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
 
@@ -583,7 +583,13 @@ export const AI = {
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            temperature: options.temperature !== undefined ? options.temperature : 0.1,
+                            topP: 0.95
+                        }
+                    })
                 });
 
                 if (!response.ok) {
@@ -672,7 +678,7 @@ Lưu ý: Hãy viết ngắn gọn, xúc tích, tập trung vào số liệu th�
 
         return `Bạn là kỹ sư trưởng kỹ thuật xe máy hàng đầu tại Việt Nam, am hiểu tường tận sổ tay bảo dưỡng chính hãng (Honda, Yamaha, Suzuki, Piaggio Vespa, v.v.).
 
-Hãy phân tích mẫu xe dưới đây và đề xuất ĐỊNH MỨC BẢO DƯỠNG (Số Km và Số Tháng định kỳ) chuẩn xác nhất cho từng phụ tùng, tối ưu riêng cho điều kiện giao thông dừng đỗ nhiều và khí hậu nhiệt đới gió mùa tại Việt Nam:
+Hãy phân tích mẫu xe dưới đây và đề xuất ĐỊNH MỨC BẢO DƯỠNG CHUẨN XÁC, NHẤT QUÁN 100% (Số Km và Số Tháng định kỳ) cho từng phụ tùng dựa trên sổ tay hướng dẫn chính hãng của dòng xe này tại Việt Nam:
 
 THÔNG TIN XE:
 - Tên xe: ${vehicle.name}
@@ -683,6 +689,17 @@ THÔNG TIN XE:
 
 ĐỊNH MỨC HIỆN TẠI TRÊN HỆ THỐNG:
 ${currentPresetsSummary}
+
+BỘ QUY TẮC HIỆU CHUẨN CHUẨN XÁC THEO HÃNG TẠI VIỆT NAM (BẮT BUỘC TUÂN THỦ TÍNH NHẤT QUÁN):
+1. Dầu máy (oil_engine): Xe ga (1.500 - 2.000 Km / 2-3 tháng); Xe số/côn (1.500 - 2.000 Km / 2-3 tháng).
+2. Dầu láp/hộp số (oil_gear): Chỉ dành cho xe ga (5.000 - 6.000 Km / 6 tháng - chu kỳ gấp 3 lần dầu máy).
+3. Lọc gió (air_filter): 10.000 - 12.000 Km / 12 tháng (lọc giấy tẩm dầu không vệ sinh, thay mới).
+4. Bugi (spark_plug): 8.000 - 10.000 Km / 12 tháng.
+5. Nước làm mát (coolant): 20.000 Km / 24 tháng (cho xe có két nước làm mát dung dịch).
+6. Má phanh (brake): 12.000 - 15.000 Km / 12 tháng (kiểm tra mòn và thay thế).
+7. Dây curoa (belt): Dành cho xe ga (20.000 - 24.000 Km / 24 tháng).
+8. Nhông sên dĩa (chain): Dành cho xe số/côn (15.000 - 20.000 Km / 12-18 tháng).
+9. Vỏ lốp (tires): 20.000 - 25.000 Km / 24 tháng.
 
 YÊU CẦU ĐẶC BIỆT:
 Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo bất kỳ lời chào hay văn bản giải thích nào bên ngoài JSON, không bọc trong markdown codeblock nếu có thể, hoặc bọc trong \`\`\`json) theo đúng cấu trúc sau:
