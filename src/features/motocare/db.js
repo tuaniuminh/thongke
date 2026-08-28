@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.222';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.222';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.223';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.223';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -194,9 +194,9 @@ export const Vehicles = {
     updateOdo(id, newOdo) {
         const vehicle = this.getById(id);
         if (vehicle) {
-            newOdo = parseInt(newOdo) || 0;
-            if (newOdo < vehicle.currentOdo) {
-                return { success: false, error: 'Số ODO mới không được nhỏ hơn ODO hiện tại (' + vehicle.currentOdo + ' Km).' };
+            newOdo = parseInt(newOdo);
+            if (isNaN(newOdo) || newOdo < 0) {
+                return { success: false, error: 'Số ODO không hợp lệ. Vui lòng nhập số nguyên dương (≥ 0).' };
             }
             vehicle.currentOdo = newOdo;
             this.update(vehicle);

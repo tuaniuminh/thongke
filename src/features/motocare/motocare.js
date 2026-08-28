@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.222';
-import { UI } from './ui.js?v=4.3.222';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.223';
+import { UI } from './ui.js?v=4.3.223';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -95,14 +95,25 @@ const App = {
         });
 
         // 2. Dashboard - Update Odometer
-        document.getElementById('mc-btn-update-odo')?.addEventListener('click', () => {
+        const btnUpdateOdo = document.getElementById('mc-btn-update-odo');
+        btnUpdateOdo?.addEventListener('click', () => {
             const vId = state.activeVehicleId;
-            if (!vId) { window._motocareShowToast('Vui lòng chọn hoặc thêm xe máy trước!', 'danger'); return; }
+            if (!vId) { window._motocareShowToast('Vui lòng chọn hoặc thêm xe máy trước!', 'warning'); return; }
             const odoInput = document.getElementById('mc-current-odo-input');
-            const newOdo = parseInt(odoInput.value) || 0;
+            const newOdo = parseInt(odoInput.value);
             const res = Vehicles.updateOdo(vId, newOdo);
             if (res.success) {
-                window._motocareShowToast('Cập nhật ODO thành công lên ' + newOdo.toLocaleString() + ' Km!');
+                const originalText = btnUpdateOdo.innerHTML;
+                btnUpdateOdo.innerHTML = '✓ Đã lưu!';
+                btnUpdateOdo.style.backgroundColor = '#10b981';
+                btnUpdateOdo.style.color = '#ffffff';
+                setTimeout(() => {
+                    btnUpdateOdo.innerHTML = originalText;
+                    btnUpdateOdo.style.backgroundColor = '';
+                    btnUpdateOdo.style.color = '';
+                }, 1200);
+
+                window._motocareShowToast('Cập nhật ODO thành công lên ' + newOdo.toLocaleString() + ' Km!', 'success');
                 this.renderAll();
             } else {
                 window._motocareShowToast(res.error, 'danger');
