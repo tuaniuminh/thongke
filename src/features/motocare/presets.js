@@ -85,8 +85,18 @@ export const DEFAULT_PRESETS = {
         name: "Vỏ xe (Lốp trước/sau)",
         icon: "tire",
         desc: "Đảm bảo độ bám đường. Lốp mòn dễ trơn trượt và nhanh thủng xăm.",
-        intervalKm: 15000,
+        intervalKm: 20000,
         intervalMonths: 24,
+        scooter: true,
+        manual: true,
+        clutch: true
+    },
+    full_service: {
+        name: "Bảo dưỡng toàn bộ xe",
+        icon: "tools",
+        desc: "Gói bảo dưỡng tổng thể (vệ sinh nồi, kim phun, buồng đốt, tra mỡ cổ phốt, kiểm tra hệ thống).",
+        intervalKm: 10000,
+        intervalMonths: 12,
         scooter: true,
         manual: true,
         clutch: true
