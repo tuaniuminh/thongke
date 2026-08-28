@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.241';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.241';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.242';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.242';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -787,6 +787,7 @@ BỘ QUY TẮC HIỆU CHUẨN CHUẨN XÁC THEO HÃNG TẠI VIỆT NAM (BẮT BU
 8. Nhông sên dĩa (chain): Dành cho xe số/côn (15.000 - 20.000 Km / 12-18 tháng).
 9. Vỏ lốp (tires): 20.000 - 25.000 Km / 24 tháng.
 10. Bảo dưỡng toàn bộ xe (full_service): 8.000 - 10.000 Km / 12 tháng (gói bảo dưỡng tổng thể xe tại HEAD/trung tâm).
+11. Bình ắc quy (battery): 20.000 - 30.000 Km / 24-36 tháng (kiểm tra dòng sạc và thay ắc quy).
 
 YÊU CẦU ĐẶC BIỆT:
 Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo bất kỳ lời chào hay văn bản giải thích nào bên ngoài JSON, không bọc trong markdown codeblock nếu có thể, hoặc bọc trong \`\`\`json) theo đúng cấu trúc sau:
@@ -803,7 +804,8 @@ Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo b�
     "brake_rear": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" },
     "chain": { "km": 15000, "months": 12, "reason": "Lý do ngắn gọn" },
     "tires": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" },
-    "full_service": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" }
+    "full_service": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" },
+    "battery": { "km": 25000, "months": 24, "reason": "Lý do ngắn gọn" }
   }
 }`;
     },

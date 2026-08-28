@@ -100,6 +100,16 @@ export const DEFAULT_PRESETS = {
         scooter: true,
         manual: true,
         clutch: true
+    },
+    battery: {
+        name: "Bình ắc quy",
+        icon: "battery",
+        desc: "Cung cấp điện đề nổ, còi đèn và hệ thống Smartkey/FI. Thay định kỳ để tránh chết máy giữa đường.",
+        intervalKm: 25000,
+        intervalMonths: 24,
+        scooter: true,
+        manual: true,
+        clutch: true
     }
 };
 

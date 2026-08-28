@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.241** |
+| **Phiên bản hiện tại** | **v4.3.242** |
+| **v4.3.242** | 🔋 **Bổ Sung Hạng Mục "Bình Ắc Quy Xe Máy" (v4.3.242)**: Thêm hạng mục định mức *"Bình ắc quy"* (`battery`) với chu kỳ chuẩn 25.000 Km / 24 tháng; Tích hợp đầy đủ vào thẻ đo hao mòn Dashboard, checklist ghi nhận bảo dưỡng nhanh, bộ lọc lịch sử và thuật toán AI. |
 | **v4.3.241** | ⚡ **Ghi Nhận Bảo Dưỡng Hàng Loạt Bằng Checklist Tick Chọn (v4.3.241)**: Nâng cấp biểu mẫu ghi nhận bảo dưỡng thành dạng Checklist thông minh; Cho phép người dùng tick chọn nhiều hạng mục bảo dưỡng/thay thế phụ tùng cùng một lúc, tự động điền chi phí từng món, tính tổng tiền hóa đơn và lưu toàn bộ chỉ trong 1 lần nhấn duy nhất. |
 | **v4.3.240** | 🔧 **Bổ Sung Hạng Mục "Bảo Dưỡng Toàn Bộ Xe" (v4.3.240)**: Thêm hạng mục định mức *"Bảo dưỡng toàn bộ xe"* (`full_service`) với chu kỳ chuẩn 10.000 Km / 12 tháng (gói bảo dưỡng tổng thể HEAD/hãng); Tích hợp vào thẻ đo hao mòn Dashboard, bảng Thêm/Sửa bảo dưỡng, bộ lọc và thuật toán Gemini AI. |
 | **v4.3.239** | 🏍️ **Tách Hạng Mục Má Phanh Trước & Má Phanh Sau (v4.3.239)**: Phân tách rõ ràng hạng mục má phanh chung thành 2 mục riêng biệt *"Má phanh trước"* (`brake_front`) và *"Má phanh sau"* (`brake_rear`) trong toàn bộ hệ thống định mức bảo dưỡng, bộ lọc lịch sử, bảng thêm/sửa bảo dưỡng và thuật toán tối ưu AI. |
 | **v4.3.238** | ✏️ **Chế Độ Chỉnh Sửa & Nút Sửa/Xóa Cho Lịch Sử Bảo Dưỡng (v4.3.238)**: Bổ sung nút *"Chỉnh sửa"* ở tiêu đề Lịch sử bảo dưỡng; Ẩn các thao tác ở chế độ xem mặc định và chỉ hiển thị nút Sửa/Xóa khi bấm Chỉnh sửa; Hỗ trợ mở modal chỉnh sửa toàn diện thông tin bảo dưỡng và lưu cập nhật thời gian thực. |
-| **v4.3.237** | 🧹 **Dọn Dẹp Cài Đặt MotoCare, Sửa Active Nav "Quản Lý" & Chuẩn Hóa Responsive Bảng Mobile (v4.3.237)**: Xóa 2 thẻ không cần thiết "Đồng bộ & Bảo mật E2EE" và "Khu vực nguy hiểm"; Sửa lỗi nút subnav "Quản lý" không sáng khung active trên mobile; Bổ sung thuộc tính `data-label` cho toàn bộ các cột bảng Đổ xăng và Lịch sử bảo dưỡng để hiển thị dạng thẻ responsive chuẩn đẹp trên điện thoại. |
