@@ -134,6 +134,10 @@ body {
     -webkit-overflow-scrolling: touch !important;
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* Layout Wrapper */
 .app-container {
     display: flex;
