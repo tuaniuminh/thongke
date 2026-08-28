@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.220';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.220';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.221';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.221';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -556,12 +556,9 @@ export const DataPortability = {
 // GEMINI AI INTEGRATION (Uses FamiLife Global Gemini API Key)
 export const AI = {
     getKey() {
-        if (window._famiLifeGeminiKey) return window._famiLifeGeminiKey;
-        try {
-            const savedState = JSON.parse(localStorage.getItem('familife_state_data') || '{}');
-            if (savedState.geminiApiKey) return savedState.geminiApiKey;
-        } catch(e) {}
-        return localStorage.getItem('gemini_api_key') || localStorage.getItem(KEYS.GEMINI_KEY) || '';
+        if (state && state.geminiApiKey) return state.geminiApiKey.trim();
+        if (window._famiLifeGeminiKey) return window._famiLifeGeminiKey.trim();
+        return '';
     },
 
     saveKey(key) {
@@ -571,7 +568,9 @@ export const AI = {
 
     async callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
         const apiKey = this.getKey();
-        if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key trong phần Cài Đặt của FamiLife.");
+        if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
+
+        console.log(`[BUG DETECTOR] [MotoCare AI] Starting AI consultation. Key length: ${apiKey.length}`);
 
         const candidateModels = [defaultModel, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
             .filter(m => m && !m.includes('3.5'))
@@ -580,7 +579,7 @@ export const AI = {
 
         for (const model of candidateModels) {
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -589,12 +588,15 @@ export const AI = {
 
                 if (!response.ok) {
                     const errJson = await response.json().catch(() => ({}));
-                    throw new Error(errJson?.error?.message || `HTTP ${response.status}`);
+                    const errMsg = errJson?.error?.message || `HTTP ${response.status}`;
+                    console.warn(`[BUG DETECTOR] [MotoCare AI] Model ${model} returned error: ${errMsg}`);
+                    throw new Error(errMsg);
                 }
 
                 const resData = await response.json();
                 const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) throw new Error("Không nhận được phản hồi từ AI.");
+                if (!text) throw new Error("Không nhận được nội dung phản hồi từ AI.");
+                console.log(`[BUG DETECTOR] [MotoCare AI] Model ${model} succeeded! Response length: ${text.length}`);
                 return text;
             } catch (err) {
                 console.warn(`[MotoCare AI] Text model ${model} failed:`, err);
@@ -602,7 +604,7 @@ export const AI = {
                 continue;
             }
         }
-        throw lastError || new Error("Lỗi kết nối Gemini API.");
+        throw lastError || new Error("Lỗi kết nối Gemini API. Vui lòng kiểm tra lại Google Gemini API Key trong Cài Đặt.");
     },
 
     generateConsultationPrompt(vehicleId) {
