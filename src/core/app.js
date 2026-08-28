@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.207';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.207';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.207';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.207';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.208';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.208';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.208';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.208';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.207';
-import * as sync from './sync.js?v=4.3.207';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.207';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.207';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.207';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.208';
+import * as sync from './sync.js?v=4.3.208';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.208';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.208';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.208';
 
-const APP_VERSION = '4.3.207';
+const APP_VERSION = '4.3.208';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2780,7 +2780,13 @@ const tabHashMapping = {
     'welove-admin': 'welove-admin',
     'gockyniem-admin': 'welove-admin',
     'welove-settings': 'welove-settings',
-    'gockyniem-settings': 'welove-settings'
+    'gockyniem-settings': 'welove-settings',
+    'chamsocxe': 'motocare',
+    'motocare': 'motocare',
+    'motocare-dashboard': 'motocare-dashboard',
+    'motocare-fuel': 'motocare-fuel',
+    'motocare-history': 'motocare-history',
+    'motocare-settings': 'motocare-settings'
 };
 
 const tabIdToHash = {
@@ -2798,7 +2804,12 @@ const tabIdToHash = {
     'welove': 'gockyniem',
     'am-lich': 'lichvannien',
     'welove-admin': 'gockyniem-admin',
-    'welove-settings': 'gockyniem-settings'
+    'welove-settings': 'gockyniem-settings',
+    'motocare': 'chamsocxe',
+    'motocare-dashboard': 'chamsocxe',
+    'motocare-fuel': 'chamsocxe',
+    'motocare-history': 'chamsocxe',
+    'motocare-settings': 'chamsocxe'
 };
 
 // Central helper to enter the application layout or home landing view
@@ -2877,6 +2888,9 @@ window.navigateToTab = function(tabId) {
         }
         if (['welove', 'welove-admin', 'welove-settings'].includes(tId)) {
             return 'we-love';
+        }
+        if (['motocare', 'motocare-dashboard', 'motocare-fuel', 'motocare-history', 'motocare-settings'].includes(tId)) {
+            return 'motocare';
         }
         return 'other';
     }
