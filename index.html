@@ -90,16 +90,16 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.244">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.245">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.244">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.244">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.244">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.244">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.244">
-    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.244">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.245">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.245">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.245">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.245">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.245">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.245">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -377,7 +377,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon.png?v=4.3.244" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon.png?v=4.3.245" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -399,7 +399,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.244" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.245" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -539,7 +539,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.244" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.245" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -2162,9 +2162,11 @@
 
                     <!-- VIEW: FUEL -->
                     <div id="motocare-view-fuel" class="mc-view" style="display:none;">
-                        <div class="section-header">
-                            <h2>Nhật ký tiêu thụ xăng</h2>
-                            <button class="btn btn-primary" id="mc-btn-add-fuel">+ Nhập đổ xăng</button>
+                        <div class="section-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); line-height: 1.4; width: 100%;">Nhật ký tiêu thụ xăng</h2>
+                            <div style="display: flex; align-items: center; gap: 8px; width: 100%; flex-wrap: wrap;">
+                                <button class="btn btn-primary" id="mc-btn-add-fuel" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;">+ Nhập đổ xăng</button>
+                            </div>
                         </div>
                         <div class="fuel-stats-cards">
                             <div class="card stat-card"><div class="stat-value" id="mc-stat-fuel-efficiency">--</div><div class="stat-label">Lít / 100 Km (Trung bình)</div></div>
@@ -2237,9 +2239,11 @@
 
                     <!-- VIEW: SETTINGS / MANAGEMENT -->
                     <div id="motocare-view-settings" class="mc-view" style="display:none;">
-                        <div class="section-header">
-                            <h2>Quản lý Chăm Sóc Xe</h2>
-                            <button class="btn btn-primary" id="mc-btn-add-vehicle">+ Thêm xe mới</button>
+                        <div class="section-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); line-height: 1.4; width: 100%;">Quản lý Chăm Sóc Xe</h2>
+                            <div style="display: flex; align-items: center; gap: 8px; width: 100%; flex-wrap: wrap;">
+                                <button class="btn btn-primary" id="mc-btn-add-vehicle" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;">+ Thêm xe mới</button>
+                            </div>
                         </div>
                         <div class="card settings-card">
                             <h3>Nhà xe của bạn</h3>
@@ -2247,17 +2251,17 @@
                             <div id="mc-vehicles-list-container" class="vehicles-list" style="margin-top:15px;"></div>
                         </div>
                         <div class="card settings-card">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
-                                <div>
-                                    <h3 style="margin-bottom:4px;">Định mức bảo dưỡng</h3>
-                                    <p class="settings-desc" style="margin-bottom:0;">Tùy chỉnh khoảng cách và thời gian định kỳ cần bảo dưỡng phụ tùng.</p>
+                            <div style="display:flex; flex-direction: column; align-items:flex-start; gap:12px; margin-bottom:14px;">
+                                <div style="width: 100%;">
+                                    <h3 style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">Định mức bảo dưỡng</h3>
+                                    <p class="settings-desc" style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Tùy chỉnh khoảng cách và thời gian định kỳ cần bảo dưỡng phụ tùng.</p>
                                 </div>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <button id="mc-btn-ai-optimize-presets" class="btn btn-primary btn-sm" style="display:none;align-items:center;gap:6px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;box-shadow:0 4px 14px rgba(99,102,241,0.3);padding:7px 14px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;">
+                                <div style="display:flex; align-items:center; gap:8px; width: 100%; flex-wrap: wrap;">
+                                    <button id="mc-btn-ai-optimize-presets" class="btn btn-primary btn-sm" style="display:none;align-items:center;gap:6px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;box-shadow:0 4px 14px rgba(99,102,241,0.3);padding:8px 14px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;">
                                         <i data-lucide="sparkles" style="width:15px;height:15px;"></i>
                                         <span>Tối ưu bằng AI</span>
                                     </button>
-                                    <button id="mc-btn-toggle-presets-edit" class="btn btn-secondary btn-sm" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;">
+                                    <button id="mc-btn-toggle-presets-edit" class="btn btn-secondary btn-sm" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;">
                                         <i data-lucide="edit-3" style="width:15px;height:15px;"></i>
                                         <span id="mc-toggle-presets-text">Thay đổi</span>
                                     </button>
@@ -2320,7 +2324,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.244" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.245" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2430,11 +2434,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.244';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.245';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.244';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.245';
                         }
                     })();
                 </script>
@@ -4220,17 +4224,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.244"></script>
-    <script type="module" src="src/core/app.js?v=4.3.244"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.244"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.244"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.244"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.245"></script>
+    <script type="module" src="src/core/app.js?v=4.3.245"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.245"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.245"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.245"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.244')
+                navigator.serviceWorker.register('./sw.js?v=4.3.245')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
