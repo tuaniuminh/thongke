@@ -12,12 +12,12 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.200** |
+| **Phiên bản hiện tại** | **v4.3.201** |
+| **v4.3.201** | ✅ **Khắc Phục Lỗi Đè Lên Status Bar Trên Điện Thoại (WeLove & Hồ Sơ Y Tế) (v4.3.201)**: Đặt giới hạn `@media (min-width: 769px)` cho các quy tắc điều chỉnh `top-header` và `padding-top` của Desktop. Giúp thanh tiêu đề trên điện thoại (PWA / iOS / Android) tự động thụt vào đúng vị trí an toàn (`env(safe-area-inset-top)`), không còn bị kéo sát mép trên hay đè lên đồng hồ / biểu tượng mạng của hệ thống. |
 | **v4.3.200** | ✅ **Sửa Triệt Để Lỗi Xóa onclick Trên Thẻ Trang Chủ & Nâng Cấp BUG DETECTOR (v4.3.200)**: Phát hiện nguyên nhân gốc rễ: hàm `updateHomeLayoutUI` trong `thu-chi.js` vô tình thực thi `card.onclick = null` đối với các thẻ card trên trang chủ. Đã loại bỏ hoàn toàn đoạn mã này, đồng thời gắn listener trực tiếp từ `app.js` kèm log `[BUG DETECTOR]` khi người dùng bấm vào từng card. |
 | **v4.3.199** | ✅ **Kích Hoạt switchTab Trực Tiếp Cho Thẻ Trang Chủ (v4.3.199)**: Chuyển toàn bộ các thẻ card Thu Chi, Hồ Sơ Y Tế, Quỹ Gia Đình trên trang chủ sang gọi trực tiếp `switchTab('...')` (đồng nhất tuyệt đối với WeLove và Cài Đặt), xuất `window.switchTab` ngay khi hàm được khởi tạo để đảm bảo phản hồi ngay lập tức khi bấm vào bất kỳ card nào từ trang chủ. |
 | **v4.3.198** | ✅ **Đồng Bộ Điều Hướng Trực Tiếp Bằng navigateToTab & Khử Triệt Để Nhấp Nháy Tab Trang Chủ (v4.3.198)**: Chuyển toàn bộ các thẻ card trên trang chủ (Thu chi đối ngoại, Hồ sơ y tế, Quỹ gia đình) từ thẻ liên kết anchor sang cơ chế gọi hàm trực tiếp `window.navigateToTab(...)` tương tự WeLove và Cài Đặt, loại bỏ độ trễ và nhấp nháy chuyển trạng thái hash của trình duyệt. Khóa vĩnh viễn nút "Trang chủ" khỏi việc nhận class `.active` khi điều hướng, giúp giao diện tab hiển thị tức thì, mượt mà và không còn hiện tượng nhảy active sang Trang chủ. |
 | **v4.3.197** | ✅ **Giao Diện Sáng Mặc Định Khi Cài Đặt, Khử Hiệu Ứng Nảy Hồ Sơ Y Tế & Chống Nhấp Nháy Tab Trang Chủ (v4.3.197)**: Thiết lập mặc định giao diện Sáng (`Light mode`) cho toàn bộ ứng dụng khi mới cài đặt hoặc dọn dẹp dữ liệu. Loại bỏ `transition: padding` trên `main-content` giúp triệt tiêu hoàn toàn hiện tượng nảy giao diện khi vào Hồ Sơ Y Tế. Đồng bộ hóa `updateSidebarNavVisibility` ngay đầu hàm `switchTab` để xóa bỏ triệt để hiện tượng nhấp nháy tab Trang chủ khi chuyển card. |
-| **v4.3.196** | ✅ **Đồng Bộ non-sticky-on-desktop & Sửa Triệt Để Khoảng Trống WeLove (v4.3.196)**: Căn cứ log Bug Detector thực tế, bổ sung các tab WeLove vào danh sách `non-sticky-on-desktop` và sử dụng bộ chọn ID `#sidebar` với `top: 0 !important` trong cả `style.css` và `we-love.css` để ngăn chặn hoàn toàn việc ghi đè CSS từ quy tắc sticky desktop. Kích hoạt allowlist `dialog` trong `tauri.conf.json`. |
 | **Thư mục dự án** | `C:\Users\PC VIP\Documents\Thong-ke` |
 
 | **GitHub Repository** | `https://github.com/tuaniuminh/thongke.git` (nhánh `main`) |
