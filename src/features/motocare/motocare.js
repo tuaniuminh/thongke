@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.202';
-import { UI } from './ui.js?v=4.3.202';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.203';
+import { UI } from './ui.js?v=4.3.203';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -285,40 +285,12 @@ const App = {
             }
         });
 
-        // 10. Backup / Restore
-        document.getElementById('mc-btn-export-data')?.addEventListener('click', () => {
-            const dataStr = DataPortability.exportData();
-            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-            const exportFileName = 'motocare_backup_' + new Date().toISOString().split('T')[0] + '.json';
-            const link = document.createElement('a');
-            link.setAttribute('href', dataUri);
-            link.setAttribute('download', exportFileName);
-            link.click();
-            window._motocareShowToast('Đã tải tệp sao lưu dữ liệu.');
-        });
-        document.getElementById('mc-btn-import-trigger')?.addEventListener('click', () => {
-            document.getElementById('mc-file-import-input')?.click();
-        });
-        document.getElementById('mc-file-import-input')?.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                const result = DataPortability.importData(evt.target.result);
-                if (result.success) {
-                    window._motocareShowToast('Khôi phục dữ liệu thành công!', 'success');
-                    setTimeout(() => { state.initialized = false; initMotoCare(); }, 1500);
-                } else {
-                    window._motocareShowToast('Khôi phục thất bại: ' + result.error, 'danger');
-                }
-            };
-            reader.readAsText(file);
-        });
+        // 10. Reset MotoCare data
         document.getElementById('mc-btn-reset-app')?.addEventListener('click', () => {
-            if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu xe máy? Hành động này không thể khôi phục.')) {
+            if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu xe máy? Hành động này sẽ đồng bộ xóa trên toàn bộ thiết bị.')) {
                 if (confirm('Hãy xác nhận lại một lần nữa. Bạn sẽ mất sạch dữ liệu đã ghi nhận.')) {
                     DataPortability.resetAll();
-                    window._motocareShowToast('Đã xóa toàn bộ dữ liệu ứng dụng!');
+                    window._motocareShowToast('Đã xóa toàn bộ dữ liệu xe máy!');
                     setTimeout(() => { state.initialized = false; initMotoCare(); }, 1500);
                 }
             }

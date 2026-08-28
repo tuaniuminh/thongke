@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.202';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.202';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.202';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.202';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.203';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.203';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.203';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.203';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.202';
-import * as sync from './sync.js?v=4.3.202';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.202';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.202';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.202';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.203';
+import * as sync from './sync.js?v=4.3.203';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.203';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.203';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.203';
 
-const APP_VERSION = '4.3.202';
+const APP_VERSION = '4.3.203';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -165,7 +165,18 @@ let state = {
     // Body Composition tracking (Accuniq/InBody)
     bodyCompositionRecords: [],
     bodyCompositionRecordsUpdated: '',
-    lowPerfMode: false
+    lowPerfMode: false,
+
+    // MotoCare (Chăm Sóc Xe) E2EE tracking
+    motocareVehicles: [],
+    motocareVehiclesUpdated: '',
+    motocareActiveId: '',
+    motocareMaintLogs: [],
+    motocareMaintLogsUpdated: '',
+    motocareFuelLogs: [],
+    motocareFuelLogsUpdated: '',
+    motocareCustomPresets: {},
+    motocareCustomPresetsUpdated: ''
 };
 
 // Chart.js instances
@@ -975,7 +986,18 @@ async function saveLocalState() {
         pairingCode: state.pairingCode || '',
         pairingCodeExpired: state.pairingCodeExpired || '',
         pairingFundKeyEncrypted: state.pairingFundKeyEncrypted || '',
-        pairingCodeAccepted: state.pairingCodeAccepted || ''
+        pairingCodeAccepted: state.pairingCodeAccepted || '',
+
+        // MotoCare (Chăm Sóc Xe) E2EE
+        motocareVehicles: state.motocareVehicles || [],
+        motocareVehiclesUpdated: state.motocareVehiclesUpdated || '',
+        motocareActiveId: state.motocareActiveId || '',
+        motocareMaintLogs: state.motocareMaintLogs || [],
+        motocareMaintLogsUpdated: state.motocareMaintLogsUpdated || '',
+        motocareFuelLogs: state.motocareFuelLogs || [],
+        motocareFuelLogsUpdated: state.motocareFuelLogsUpdated || '',
+        motocareCustomPresets: state.motocareCustomPresets || {},
+        motocareCustomPresetsUpdated: state.motocareCustomPresetsUpdated || ''
     });
     
     try {
@@ -1095,6 +1117,15 @@ export async function loadLocalState(password) {
         state.pairingCode = '';
         state.pairingCodeExpired = '';
         state.pairingFundKeyEncrypted = '';
+        state.motocareVehicles = [];
+        state.motocareVehiclesUpdated = '';
+        state.motocareActiveId = '';
+        state.motocareMaintLogs = [];
+        state.motocareMaintLogsUpdated = '';
+        state.motocareFuelLogs = [];
+        state.motocareFuelLogsUpdated = '';
+        state.motocareCustomPresets = {};
+        state.motocareCustomPresetsUpdated = '';
         return true;
     }
     
@@ -1181,6 +1212,34 @@ export async function loadLocalState(password) {
         state.pairingCode = data.pairingCode || '';
         state.pairingCodeExpired = data.pairingCodeExpired || '';
         state.pairingFundKeyEncrypted = data.pairingFundKeyEncrypted || '';
+
+        // MotoCare (Chăm Sóc Xe) E2EE
+        state.motocareVehicles = data.motocareVehicles || [];
+        state.motocareVehiclesUpdated = data.motocareVehiclesUpdated || '';
+        state.motocareActiveId = data.motocareActiveId || '';
+        state.motocareMaintLogs = data.motocareMaintLogs || [];
+        state.motocareMaintLogsUpdated = data.motocareMaintLogsUpdated || '';
+        state.motocareFuelLogs = data.motocareFuelLogs || [];
+        state.motocareFuelLogsUpdated = data.motocareFuelLogsUpdated || '';
+        state.motocareCustomPresets = data.motocareCustomPresets || {};
+        state.motocareCustomPresetsUpdated = data.motocareCustomPresetsUpdated || '';
+
+        // Mirror decrypted MotoCare data to localStorage
+        if (state.motocareVehicles.length > 0) {
+            localStorage.setItem('motocare_vehicles', JSON.stringify(state.motocareVehicles));
+        }
+        if (state.motocareActiveId) {
+            localStorage.setItem('motocare_active_id', state.motocareActiveId);
+        }
+        if (state.motocareMaintLogs.length > 0) {
+            localStorage.setItem('motocare_maint_logs', JSON.stringify(state.motocareMaintLogs));
+        }
+        if (state.motocareFuelLogs.length > 0) {
+            localStorage.setItem('motocare_fuel_logs', JSON.stringify(state.motocareFuelLogs));
+        }
+        if (state.motocareCustomPresets && Object.keys(state.motocareCustomPresets).length > 0) {
+            localStorage.setItem('motocare_custom_presets', JSON.stringify(state.motocareCustomPresets));
+        }
         return true;
     } catch (e) {
         console.error("Local decrypt failed:", e);
@@ -1870,6 +1929,43 @@ async function performSync(silent = false) {
                         state.bodyCompositionRecords = remoteData.bodyCompositionRecords || [];
                         state.bodyCompositionRecordsUpdated = remoteData.bodyCompositionRecordsUpdated || '';
                     }
+
+                    // Merge MotoCare (Chăm Sóc Xe) data
+                    if (remoteData.motocareVehicles && Array.isArray(remoteData.motocareVehicles)) {
+                        state.motocareVehicles = mergeLists(state.motocareVehicles || [], remoteData.motocareVehicles);
+                        const localTime = state.motocareVehiclesUpdated ? new Date(state.motocareVehiclesUpdated).getTime() : 0;
+                        const remoteTime = remoteData.motocareVehiclesUpdated ? new Date(remoteData.motocareVehiclesUpdated).getTime() : 0;
+                        if (remoteTime > localTime) state.motocareVehiclesUpdated = remoteData.motocareVehiclesUpdated;
+                        localStorage.setItem('motocare_vehicles', JSON.stringify(state.motocareVehicles));
+                    }
+                    if (remoteData.motocareMaintLogs && Array.isArray(remoteData.motocareMaintLogs)) {
+                        state.motocareMaintLogs = mergeLists(state.motocareMaintLogs || [], remoteData.motocareMaintLogs);
+                        const localTime = state.motocareMaintLogsUpdated ? new Date(state.motocareMaintLogsUpdated).getTime() : 0;
+                        const remoteTime = remoteData.motocareMaintLogsUpdated ? new Date(remoteData.motocareMaintLogsUpdated).getTime() : 0;
+                        if (remoteTime > localTime) state.motocareMaintLogsUpdated = remoteData.motocareMaintLogsUpdated;
+                        localStorage.setItem('motocare_maint_logs', JSON.stringify(state.motocareMaintLogs));
+                    }
+                    if (remoteData.motocareFuelLogs && Array.isArray(remoteData.motocareFuelLogs)) {
+                        state.motocareFuelLogs = mergeLists(state.motocareFuelLogs || [], remoteData.motocareFuelLogs);
+                        const localTime = state.motocareFuelLogsUpdated ? new Date(state.motocareFuelLogsUpdated).getTime() : 0;
+                        const remoteTime = remoteData.motocareFuelLogsUpdated ? new Date(remoteData.motocareFuelLogsUpdated).getTime() : 0;
+                        if (remoteTime > localTime) state.motocareFuelLogsUpdated = remoteData.motocareFuelLogsUpdated;
+                        localStorage.setItem('motocare_fuel_logs', JSON.stringify(state.motocareFuelLogs));
+                    }
+                    if (remoteData.motocareCustomPresets) {
+                        state.motocareCustomPresets = { ...(state.motocareCustomPresets || {}), ...remoteData.motocareCustomPresets };
+                        const localTime = state.motocareCustomPresetsUpdated ? new Date(state.motocareCustomPresetsUpdated).getTime() : 0;
+                        const remoteTime = remoteData.motocareCustomPresetsUpdated ? new Date(remoteData.motocareCustomPresetsUpdated).getTime() : 0;
+                        if (remoteTime > localTime) state.motocareCustomPresetsUpdated = remoteData.motocareCustomPresetsUpdated;
+                        localStorage.setItem('motocare_custom_presets', JSON.stringify(state.motocareCustomPresets));
+                    }
+                    if (remoteData.motocareActiveId && !state.motocareActiveId) {
+                        state.motocareActiveId = remoteData.motocareActiveId;
+                        localStorage.setItem('motocare_active_id', state.motocareActiveId);
+                    }
+                    if (state.activeTab === 'motocare' && typeof window.initMotoCare === 'function') {
+                        try { window.initMotoCare(); } catch(e) {}
+                    }
                     // Merge familyFunds & transactions using 3-way Item Merge (mergeLists by ID)
                     if (!isWifeViewingShared) {
                         state.familyFunds = mergeLists(state.familyFunds || [], remoteData.familyFunds || []);
@@ -2076,7 +2172,18 @@ async function performSync(silent = false) {
             lastFullBackupDate: state.lastFullBackupDate || '',
             activeChartFundIds: state.activeChartFundIds || ['fund-main'],
             reportAiInsights: state.reportAiInsights || {},
-            pairingCodeAccepted: state.pairingCodeAccepted || ''
+            pairingCodeAccepted: state.pairingCodeAccepted || '',
+
+            // MotoCare (Chăm Sóc Xe) E2EE
+            motocareVehicles: state.motocareVehicles || [],
+            motocareVehiclesUpdated: state.motocareVehiclesUpdated || '',
+            motocareActiveId: state.motocareActiveId || '',
+            motocareMaintLogs: state.motocareMaintLogs || [],
+            motocareMaintLogsUpdated: state.motocareMaintLogsUpdated || '',
+            motocareFuelLogs: state.motocareFuelLogs || [],
+            motocareFuelLogsUpdated: state.motocareFuelLogsUpdated || '',
+            motocareCustomPresets: state.motocareCustomPresets || {},
+            motocareCustomPresetsUpdated: state.motocareCustomPresetsUpdated || ''
         });
         const encryptedPersonal = await encrypt(personalPayload, state.masterPassword);
 
@@ -4932,7 +5039,18 @@ async function handleFullBackup() {
             reportAiInsights: state.reportAiInsights,
             selectedSpeechVoiceName: state.selectedSpeechVoiceName,
             selectedSpeechRate: state.selectedSpeechRate,
-            showLoveWidget: state.showLoveWidget
+            showLoveWidget: state.showLoveWidget,
+
+            // MotoCare (Chăm Sóc Xe) E2EE
+            motocareVehicles: state.motocareVehicles || [],
+            motocareVehiclesUpdated: state.motocareVehiclesUpdated || '',
+            motocareActiveId: state.motocareActiveId || '',
+            motocareMaintLogs: state.motocareMaintLogs || [],
+            motocareMaintLogsUpdated: state.motocareMaintLogsUpdated || '',
+            motocareFuelLogs: state.motocareFuelLogs || [],
+            motocareFuelLogsUpdated: state.motocareFuelLogsUpdated || '',
+            motocareCustomPresets: state.motocareCustomPresets || {},
+            motocareCustomPresetsUpdated: state.motocareCustomPresetsUpdated || ''
         };
         const jsonStr = JSON.stringify(backupData);
         const encrypted = await encrypt(jsonStr, state.masterPassword);
@@ -5061,6 +5179,28 @@ async function handleFullRestore(file) {
         if (data.selectedSpeechRate !== undefined) state.selectedSpeechRate = data.selectedSpeechRate;
         if (data.showLoveWidget !== undefined) state.showLoveWidget = data.showLoveWidget;
         
+        // Restore MotoCare (Chăm Sóc Xe) E2EE
+        if (data.motocareVehicles) {
+            state.motocareVehicles = data.motocareVehicles;
+            localStorage.setItem('motocare_vehicles', JSON.stringify(state.motocareVehicles));
+        }
+        if (data.motocareActiveId !== undefined) {
+            state.motocareActiveId = data.motocareActiveId;
+            localStorage.setItem('motocare_active_id', state.motocareActiveId);
+        }
+        if (data.motocareMaintLogs) {
+            state.motocareMaintLogs = data.motocareMaintLogs;
+            localStorage.setItem('motocare_maint_logs', JSON.stringify(state.motocareMaintLogs));
+        }
+        if (data.motocareFuelLogs) {
+            state.motocareFuelLogs = data.motocareFuelLogs;
+            localStorage.setItem('motocare_fuel_logs', JSON.stringify(state.motocareFuelLogs));
+        }
+        if (data.motocareCustomPresets) {
+            state.motocareCustomPresets = data.motocareCustomPresets;
+            localStorage.setItem('motocare_custom_presets', JSON.stringify(state.motocareCustomPresets));
+        }
+
         // Update timestamps
         const now = new Date().toISOString();
         state.medicalRecordsUpdated = now;
@@ -5080,6 +5220,10 @@ async function handleFullRestore(file) {
         state.weLoveRemindersUpdated = now;
         state.weLoveVisitLogsUpdated = now;
         state.bodyCompositionRecordsUpdated = now;
+        state.motocareVehiclesUpdated = now;
+        state.motocareMaintLogsUpdated = now;
+        state.motocareFuelLogsUpdated = now;
+        state.motocareCustomPresetsUpdated = now;
         
         await saveLocalState();
         performSync(true);
@@ -5790,6 +5934,22 @@ export async function clearAllStateData() {
     state.pairingCode = '';
     state.pairingCodeExpired = '';
     state.pairingFundKeyEncrypted = '';
+    
+    // Reset MotoCare (Chăm Sóc Xe) E2EE
+    state.motocareVehicles = [];
+    state.motocareVehiclesUpdated = '';
+    state.motocareActiveId = '';
+    state.motocareMaintLogs = [];
+    state.motocareMaintLogsUpdated = '';
+    state.motocareFuelLogs = [];
+    state.motocareFuelLogsUpdated = '';
+    state.motocareCustomPresets = {};
+    state.motocareCustomPresetsUpdated = '';
+    localStorage.removeItem('motocare_vehicles');
+    localStorage.removeItem('motocare_active_id');
+    localStorage.removeItem('motocare_maint_logs');
+    localStorage.removeItem('motocare_fuel_logs');
+    localStorage.removeItem('motocare_custom_presets');
     
     await saveLocalState();
 }

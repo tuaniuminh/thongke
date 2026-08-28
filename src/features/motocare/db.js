@@ -1,5 +1,6 @@
-/* MotoCare - Database & Business Logic Layer */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.202';
+/* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.203';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.203';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -7,12 +8,56 @@ const KEYS = {
     ACTIVE_VEHICLE_ID: 'motocare_active_id',
     MAINTENANCE_LOGS: 'motocare_maint_logs',
     FUEL_LOGS: 'motocare_fuel_logs',
-    CUSTOM_PRESETS: 'motocare_custom_presets', // object of { vehicleId: { presetKey: { intervalKm, intervalMonths } } }
+    CUSTOM_PRESETS: 'motocare_custom_presets',
     GEMINI_KEY: 'motocare_gemini_key'
 };
 
-// Helper: Get item from LocalStorage
+// Helper: Sync local modification to FamiLife state and trigger encrypted save + sync
+function syncToFamiLife(key, data) {
+    if (!state) return;
+    const now = new Date().toISOString();
+    if (key === KEYS.VEHICLES) {
+        state.motocareVehicles = data;
+        state.motocareVehiclesUpdated = now;
+    } else if (key === KEYS.ACTIVE_VEHICLE_ID) {
+        state.motocareActiveId = data || '';
+    } else if (key === KEYS.MAINTENANCE_LOGS) {
+        state.motocareMaintLogs = data;
+        state.motocareMaintLogsUpdated = now;
+    } else if (key === KEYS.FUEL_LOGS) {
+        state.motocareFuelLogs = data;
+        state.motocareFuelLogsUpdated = now;
+    } else if (key === KEYS.CUSTOM_PRESETS) {
+        state.motocareCustomPresets = data;
+        state.motocareCustomPresetsUpdated = now;
+    }
+    if (typeof saveLocalState === 'function') {
+        saveLocalState();
+    }
+    if (typeof performSync === 'function') {
+        performSync(true);
+    }
+}
+
+// Helper: Get item from state (with fallback to LocalStorage)
 function getLocal(key, defaultValue = []) {
+    if (state) {
+        if (key === KEYS.VEHICLES && Array.isArray(state.motocareVehicles) && state.motocareVehicles.length > 0) {
+            return state.motocareVehicles;
+        }
+        if (key === KEYS.ACTIVE_VEHICLE_ID && state.motocareActiveId) {
+            return state.motocareActiveId;
+        }
+        if (key === KEYS.MAINTENANCE_LOGS && Array.isArray(state.motocareMaintLogs) && state.motocareMaintLogs.length > 0) {
+            return state.motocareMaintLogs;
+        }
+        if (key === KEYS.FUEL_LOGS && Array.isArray(state.motocareFuelLogs) && state.motocareFuelLogs.length > 0) {
+            return state.motocareFuelLogs;
+        }
+        if (key === KEYS.CUSTOM_PRESETS && state.motocareCustomPresets && Object.keys(state.motocareCustomPresets).length > 0) {
+            return state.motocareCustomPresets;
+        }
+    }
     try {
         const val = localStorage.getItem(key);
         return val ? JSON.parse(val) : defaultValue;
@@ -22,10 +67,11 @@ function getLocal(key, defaultValue = []) {
     }
 }
 
-// Helper: Set item in LocalStorage
+// Helper: Set item in LocalStorage and sync to FamiLife state
 function setLocal(key, data) {
     try {
         localStorage.setItem(key, JSON.stringify(data));
+        syncToFamiLife(key, data);
         return true;
     } catch (e) {
         console.error("Lỗi ghi LocalStorage cho key: " + key, e);
@@ -55,13 +101,15 @@ export const Vehicles = {
 
     add(vehicle) {
         const list = this.getAll();
+        const now = new Date().toISOString();
         const newVehicle = {
             id: generateUUID(),
             name: vehicle.name.trim(),
             plate: (vehicle.plate || '').trim(),
             type: vehicle.type, // 'scooter' | 'manual' | 'clutch'
             currentOdo: parseInt(vehicle.currentOdo) || 0,
-            buyDate: vehicle.buyDate || new Date().toISOString().split('T')[0]
+            buyDate: vehicle.buyDate || now.split('T')[0],
+            updated_at: now
         };
         list.push(newVehicle);
         this.saveAll(list);
@@ -77,7 +125,6 @@ export const Vehicles = {
         const list = this.getAll();
         const idx = list.findIndex(v => v.id === vehicle.id);
         if (idx !== -1) {
-            // Keep existing currentOdo if not provided, or ensure it doesn't decrease unless forced
             const newOdo = parseInt(vehicle.currentOdo) || 0;
             list[idx] = {
                 ...list[idx],
@@ -85,11 +132,10 @@ export const Vehicles = {
                 plate: (vehicle.plate || '').trim(),
                 type: vehicle.type,
                 currentOdo: newOdo,
-                buyDate: vehicle.buyDate || list[idx].buyDate
+                buyDate: vehicle.buyDate || list[idx].buyDate,
+                updated_at: new Date().toISOString()
             };
             this.saveAll(list);
-            
-            // If Odometer increased, update corresponding logs or trigger check
             return list[idx];
         }
         return null;
@@ -119,17 +165,24 @@ export const Vehicles = {
                 this.setActiveId(list[0].id);
             } else {
                 localStorage.removeItem(KEYS.ACTIVE_VEHICLE_ID);
+                if (state) state.motocareActiveId = '';
+                if (typeof saveLocalState === 'function') saveLocalState();
+                if (typeof performSync === 'function') performSync(true);
             }
         }
         return true;
     },
 
     getActiveId() {
+        if (state && state.motocareActiveId) return state.motocareActiveId;
         return localStorage.getItem(KEYS.ACTIVE_VEHICLE_ID) || null;
     },
 
     setActiveId(id) {
-        localStorage.setItem(KEYS.ACTIVE_VEHICLE_ID, id);
+        localStorage.setItem(KEYS.ACTIVE_VEHICLE_ID, id || '');
+        if (state) state.motocareActiveId = id || '';
+        if (typeof saveLocalState === 'function') saveLocalState();
+        if (typeof performSync === 'function') performSync(true);
     },
 
     getActive() {
@@ -143,7 +196,6 @@ export const Vehicles = {
         if (vehicle) {
             newOdo = parseInt(newOdo) || 0;
             if (newOdo < vehicle.currentOdo) {
-                // Return status to warning that ODO is lower than current
                 return { success: false, error: 'Số ODO mới không được nhỏ hơn ODO hiện tại (' + vehicle.currentOdo + ' Km).' };
             }
             vehicle.currentOdo = newOdo;
@@ -166,7 +218,6 @@ export const Presets = {
         // Merge defaults with custom values
         const merged = {};
         for (const [key, preset] of Object.entries(DEFAULT_PRESETS)) {
-            // Check if this preset applies to this vehicle type
             if (preset[vehicle.type] === true) {
                 const custVal = vehicleCustom[key] || {};
                 merged[key] = {
@@ -209,14 +260,16 @@ export const MaintenanceLogs = {
 
     add(log) {
         const list = this.getAll();
+        const now = new Date().toISOString();
         const newLog = {
             id: generateUUID(),
             vehicleId: log.vehicleId,
-            date: log.date || new Date().toISOString().split('T')[0],
+            date: log.date || now.split('T')[0],
             odo: parseInt(log.odo) || 0,
-            category: log.category, // 'oil_engine', 'oil_gear', etc.
+            category: log.category,
             cost: parseInt(log.cost) || 0,
-            notes: (log.notes || '').trim()
+            notes: (log.notes || '').trim(),
+            updated_at: now
         };
         list.push(newLog);
         this.saveAll(list);
@@ -256,14 +309,16 @@ export const FuelLogs = {
 
     add(log) {
         const list = this.getAll();
+        const now = new Date().toISOString();
         const newLog = {
             id: generateUUID(),
             vehicleId: log.vehicleId,
-            date: log.date || new Date().toISOString().split('T')[0],
+            date: log.date || now.split('T')[0],
             odo: parseInt(log.odo) || 0,
             liters: parseFloat(log.liters) || 0,
             cost: parseInt(log.cost) || 0,
-            full: log.full !== undefined ? log.full : true
+            full: log.full !== false,
+            updated_at: now
         };
         list.push(newLog);
         this.saveAll(list);
@@ -288,87 +343,84 @@ export const FuelLogs = {
     }
 };
 
-// METRICS & STATS CALCULATIONS
+// STATISTICS & HEALTH CALCULATION ENGINE
 export const Stats = {
-    // Robust fuel calculation algorithm
     calculateFuelStats(vehicleId) {
-        const logs = FuelLogs.getByVehicle(vehicleId);
+        const logs = FuelLogs.getByVehicle(vehicleId).sort((a, b) => new Date(a.date) - new Date(b.date) || a.odo - b.odo);
+        
         if (logs.length === 0) {
-            return { efficiency: null, costPerKm: null, totalCost: 0, chartData: [] };
+            return {
+                efficiency: null,
+                costPerKm: null,
+                totalCost: 0,
+                totalLiters: 0,
+                chartData: []
+            };
         }
 
-        // Sort ascending by ODO for calculation
-        const sortedLogs = [...logs].sort((a, b) => a.odo - b.odo);
         let totalCost = 0;
-        sortedLogs.forEach(l => totalCost += l.cost);
-
-        // Calculate Fuel Efficiency (L/100km)
-        // Formula: Look for pairs of "Full tank" fills. 
-        // Sum liters of all fills starting after Full Fill A up to and including Full Fill B.
-        // Distance is ODO(B) - ODO(A).
-        let totalDistanceForEfficiency = 0;
-        let totalLitersForEfficiency = 0;
-        let lastFullLog = null;
-        let pendingLiters = 0;
+        let totalLiters = 0;
         const chartData = [];
 
-        for (let i = 0; i < sortedLogs.length; i++) {
-            const current = sortedLogs[i];
-            
-            if (current.full) {
-                if (lastFullLog !== null) {
-                    const dist = current.odo - lastFullLog.odo;
-                    if (dist > 0) {
-                        const litersConsumed = pendingLiters + current.liters;
-                        totalDistanceForEfficiency += dist;
-                        totalLitersForEfficiency += litersConsumed;
+        logs.forEach(l => {
+            totalCost += l.cost;
+            totalLiters += l.liters;
+        });
 
-                        const eff = parseFloat(((litersConsumed / dist) * 100).toFixed(2));
-                        chartData.push({
-                            date: current.date,
-                            odo: current.odo,
-                            efficiency: eff
-                        });
+        // Calculate efficiency only between full-to-full fills
+        let prevFullLog = null;
+        let weightedEfficiencySum = 0;
+        let totalDistanceMeasured = 0;
+        let accLiters = 0;
+        let accCost = 0;
+
+        for (let i = 0; i < logs.length; i++) {
+            const current = logs[i];
+            accLiters += current.liters;
+            accCost += current.cost;
+
+            if (current.full) {
+                if (prevFullLog) {
+                    const distance = current.odo - prevFullLog.odo;
+                    if (distance > 0) {
+                        const eff = (accLiters / distance) * 100;
+                        const costKm = accCost / distance;
+                        
+                        // sanity check for reasonable motorcycle fuel consumption (0.8L - 10L/100km)
+                        if (eff >= 0.5 && eff <= 12) {
+                            chartData.push({
+                                date: current.date,
+                                odo: current.odo,
+                                efficiency: parseFloat(eff.toFixed(2)),
+                                costPerKm: Math.round(costKm),
+                                distance
+                            });
+
+                            weightedEfficiencySum += eff * distance;
+                            totalDistanceMeasured += distance;
+                        }
                     }
                 }
-                lastFullLog = current;
-                pendingLiters = 0; // reset pending since tank is full now
-            } else {
-                // If it is a partial fill, we accumulate the liters
-                if (lastFullLog !== null) {
-                    pendingLiters += current.liters;
-                }
+                prevFullLog = current;
+                accLiters = 0;
+                accCost = 0;
             }
         }
 
-        const avgEfficiency = totalDistanceForEfficiency > 0 
-            ? parseFloat(((totalLitersForEfficiency / totalDistanceForEfficiency) * 100).toFixed(2))
+        const avgEfficiency = totalDistanceMeasured > 0 
+            ? parseFloat((weightedEfficiencySum / totalDistanceMeasured).toFixed(2)) 
             : null;
 
-        // Calculate Cost per Km
-        // Take overall distance from first fuel log ODO to last fuel log ODO, or current ODO of bike
-        const vehicle = Vehicles.getById(vehicleId);
-        let overallDistance = 0;
-        let costPerKm = null;
-        
-        if (sortedLogs.length >= 2) {
-            overallDistance = sortedLogs[sortedLogs.length - 1].odo - sortedLogs[0].odo;
-            if (overallDistance > 0) {
-                // Sum cost of all logs except the first one?
-                // Actually, total cost divided by total overall distance is the standard estimate
-                costPerKm = Math.round(totalCost / overallDistance);
-            }
-        } else if (sortedLogs.length === 1 && vehicle && vehicle.currentOdo > sortedLogs[0].odo) {
-            overallDistance = vehicle.currentOdo - sortedLogs[0].odo;
-            if (overallDistance > 0) {
-                costPerKm = Math.round(totalCost / overallDistance);
-            }
-        }
+        const firstLog = logs[0];
+        const lastLog = logs[logs.length - 1];
+        const overallDistance = lastLog.odo - firstLog.odo;
+        const avgCostPerKm = overallDistance > 0 ? Math.round(totalCost / overallDistance) : null;
 
         return {
             efficiency: avgEfficiency,
-            costPerKm,
+            costPerKm: avgCostPerKm,
             totalCost,
+            totalLiters: parseFloat(totalLiters.toFixed(2)),
             chartData
         };
     },
@@ -381,101 +433,82 @@ export const Stats = {
         const maintLogs = MaintenanceLogs.getByVehicle(vehicleId);
         const fuelStats = this.calculateFuelStats(vehicleId);
         const currentOdo = vehicle.currentOdo;
-        
-        // --- HEURISTIC LOCAL AI: Detect Fuel Consumption Anomaly ---
-        let isFuelAnomaly = false;
-        let fuelAnomalyReason = '';
-        if (fuelStats.efficiency && fuelStats.chartData.length >= 2) {
-            const latestEff = fuelStats.chartData[fuelStats.chartData.length - 1].efficiency;
-            if (latestEff > fuelStats.efficiency * 1.12) {
-                isFuelAnomaly = true;
-                const percentIncrease = (((latestEff - fuelStats.efficiency) / fuelStats.efficiency) * 100).toFixed(0);
-                fuelAnomalyReason = `Hao xăng tăng vọt ${percentIncrease}% so với trung bình (${latestEff} so với ${fuelStats.efficiency} L/100km).`;
-            }
-        }
-
-        // --- HEURISTIC LOCAL AI: Detect Vehicle Age ---
-        let isOlderVehicle = false;
-        if (vehicle.buyDate) {
-            const ageInYears = (new Date() - new Date(vehicle.buyDate)) / (1000 * 60 * 60 * 24 * 365.25);
-            if (ageInYears > 5) {
-                isOlderVehicle = true;
-            }
-        }
+        const buyDate = new Date(vehicle.buyDate || new Date());
 
         const health = [];
 
-        for (const [key, preset] of Object.entries(presets)) {
-            // Find the most recent maintenance log of this category
-            const logsOfCat = maintLogs.filter(log => log.category === key);
-            const lastLog = logsOfCat.length > 0 ? logsOfCat[0] : null;
+        // Check if there is severe fuel spike warning
+        let fuelSpikeWarning = false;
+        let fuelSpikePercent = 0;
+        if (fuelStats.chartData.length >= 2 && fuelStats.efficiency !== null) {
+            const latestEff = fuelStats.chartData[fuelStats.chartData.length - 1].efficiency;
+            if (latestEff > fuelStats.efficiency * 1.15) {
+                fuelSpikeWarning = true;
+                fuelSpikePercent = Math.round(((latestEff - fuelStats.efficiency) / fuelStats.efficiency) * 100);
+            }
+        }
 
-            const lastOdo = lastLog ? lastLog.odo : 0;
-            const lastDateStr = lastLog ? lastLog.date : vehicle.buyDate;
-            const lastDate = new Date(lastDateStr);
-            const today = new Date();
+        for (const [key, item] of Object.entries(presets)) {
+            // Find most recent maintenance for this category
+            const logsForCat = maintLogs.filter(l => l.category === key);
+            let lastOdo = 0;
+            let lastDate = buyDate;
+            let lastDateStr = vehicle.buyDate || 'Lúc mua xe';
 
-            // Local AI Adjustments
-            let adjustedIntervalKm = preset.intervalKm;
-            let adjustedIntervalMonths = preset.intervalMonths;
+            if (logsForCat.length > 0) {
+                lastOdo = logsForCat[0].odo;
+                lastDate = new Date(logsForCat[0].date);
+                lastDateStr = logsForCat[0].date;
+            }
+
+            // Adjust intervals based on dynamic riding conditions
+            let adjustedIntervalKm = item.intervalKm;
+            let adjustedIntervalMonths = item.intervalMonths;
             let hasAdjustment = false;
             let adjustmentReason = '';
 
-            // Apply rule 1: Fuel anomaly affects spark plug and air filter
-            if (isFuelAnomaly && (key === 'air_filter' || key === 'spark_plug')) {
-                adjustedIntervalKm = Math.round(preset.intervalKm * 0.75); // Reduce interval by 25%
+            if (fuelSpikeWarning && (key === 'air_filter' || key === 'spark_plug')) {
+                adjustedIntervalKm = Math.round(adjustedIntervalKm * 0.8);
                 hasAdjustment = true;
-                adjustmentReason = `AI Heuristic: ${fuelAnomalyReason} Đề xuất kiểm tra và thay phụ tùng sớm hơn 25%.`;
+                adjustmentReason = `Hao xăng tăng +${fuelSpikePercent}%, kiến nghị kiểm tra sớm`;
             }
 
-            // Apply rule 2: Older vehicles need closer safety checks
-            if (isOlderVehicle && (key === 'brake' || key === 'coolant' || key === 'tires')) {
-                adjustedIntervalKm = Math.round(preset.intervalKm * 0.85); // Reduce by 15%
-                adjustedIntervalMonths = Math.max(3, Math.round(preset.intervalMonths * 0.8)); // Reduce by 20%
-                hasAdjustment = true;
-                adjustmentReason = `AI Heuristic: Xe đã trên 5 tuổi. Rút ngắn chu kỳ bảo trì phanh/lốp/làm mát thêm 15% để đảm bảo an toàn.`;
-            }
+            // Calculate usage metrics
+            const kmUsed = Math.max(0, currentOdo - lastOdo);
+            const kmRemaining = adjustedIntervalKm - kmUsed;
 
-            // Km-based remaining
-            const elapsedKm = currentOdo - lastOdo;
-            const remainingKm = Math.max(0, adjustedIntervalKm - elapsedKm);
-            const percentKm = Math.max(0, Math.min(100, (remainingKm / adjustedIntervalKm) * 100));
+            const now = new Date();
+            const monthsPassed = Math.max(0, (now.getFullYear() - lastDate.getFullYear()) * 12 + (now.getMonth() - lastDate.getMonth()));
+            const monthsRemaining = adjustedIntervalMonths - monthsPassed;
 
-            // Time-based remaining (in months)
-            const diffTime = Math.abs(today - lastDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const elapsedMonths = diffDays / 30.4375; // average days in a month
-            const remainingMonths = Math.max(0, adjustedIntervalMonths - elapsedMonths);
-            const percentTime = Math.max(0, Math.min(100, (remainingMonths / adjustedIntervalMonths) * 100));
+            const kmPercent = (kmUsed / adjustedIntervalKm) * 100;
+            const timePercent = (monthsPassed / adjustedIntervalMonths) * 100;
 
-            // Take the lower percentage (worst health index)
-            const percentage = Math.round(Math.min(percentKm, percentTime));
+            const maxPercent = Math.max(kmPercent, timePercent);
+            const percentage = Math.min(100, Math.round(maxPercent));
 
-            // Determine status
             let status = 'good';
-            if (percentage <= 10 || remainingKm <= 100 || remainingMonths <= 0.5) {
+            if (percentage >= 100) {
                 status = 'danger';
-            } else if (percentage <= 30 || remainingKm <= 350 || remainingMonths <= 1.5) {
+            } else if (percentage >= 75) {
                 status = 'warning';
             }
 
-            // Calculations for UI labels
-            let daysLeft = Math.round(remainingMonths * 30.4375);
+            const remainingKm = Math.max(0, kmRemaining);
+            const remainingMonths = Math.max(0, monthsRemaining);
+
             let timeLabel = '';
-            if (daysLeft <= 0) {
+            if (remainingMonths <= 0) {
                 timeLabel = 'Hết hạn thời gian';
-            } else if (daysLeft < 30) {
-                timeLabel = `Còn ${daysLeft} ngày`;
             } else {
-                const monthsLeft = Math.round(remainingMonths);
-                timeLabel = `Còn ~${monthsLeft} tháng`;
+                timeLabel = `còn ${remainingMonths} tháng`;
             }
 
             health.push({
                 key,
-                name: preset.name,
-                desc: preset.desc,
-                icon: preset.icon,
+                name: item.name,
+                icon: item.icon,
+                desc: item.desc,
                 intervalKm: adjustedIntervalKm,
                 intervalMonths: adjustedIntervalMonths,
                 lastOdo,
@@ -493,53 +526,8 @@ export const Stats = {
     }
 };
 
-// DATA BACKUP & PORTABILITY
+// DATA RESET
 export const DataPortability = {
-    exportData() {
-        const backup = {
-            version: '1.1.7',
-            timestamp: new Date().toISOString(),
-            vehicles: getLocal(KEYS.VEHICLES, []),
-            activeId: localStorage.getItem(KEYS.ACTIVE_VEHICLE_ID) || null,
-            maintenanceLogs: getLocal(KEYS.MAINTENANCE_LOGS, []),
-            fuelLogs: getLocal(KEYS.FUEL_LOGS, []),
-            customPresets: getLocal(KEYS.CUSTOM_PRESETS, {}),
-            geminiKey: localStorage.getItem(KEYS.GEMINI_KEY) || null
-        };
-        return JSON.stringify(backup, null, 2);
-    },
-
-    importData(jsonString) {
-        try {
-            const data = JSON.parse(jsonString);
-            
-            // basic validation
-            if (!data.vehicles || !Array.isArray(data.vehicles)) {
-                throw new Error("Định dạng dữ liệu không hợp lệ: Thiếu danh sách xe.");
-            }
-
-            setLocal(KEYS.VEHICLES, data.vehicles);
-            if (data.activeId) {
-                localStorage.setItem(KEYS.ACTIVE_VEHICLE_ID, data.activeId);
-            } else if (data.vehicles.length > 0) {
-                localStorage.setItem(KEYS.ACTIVE_VEHICLE_ID, data.vehicles[0].id);
-            }
-            
-            setLocal(KEYS.MAINTENANCE_LOGS, data.maintenanceLogs || []);
-            setLocal(KEYS.FUEL_LOGS, data.fuelLogs || []);
-            setLocal(KEYS.CUSTOM_PRESETS, data.customPresets || {});
-            
-            if (data.geminiKey) {
-                localStorage.setItem(KEYS.GEMINI_KEY, data.geminiKey);
-            }
-            
-            return { success: true };
-        } catch (e) {
-            console.error("Lỗi import dữ liệu", e);
-            return { success: false, error: e.message };
-        }
-    },
-
     resetAll() {
         localStorage.removeItem(KEYS.VEHICLES);
         localStorage.removeItem(KEYS.ACTIVE_VEHICLE_ID);
@@ -547,6 +535,20 @@ export const DataPortability = {
         localStorage.removeItem(KEYS.FUEL_LOGS);
         localStorage.removeItem(KEYS.CUSTOM_PRESETS);
         localStorage.removeItem(KEYS.GEMINI_KEY);
+        if (state) {
+            const now = new Date().toISOString();
+            state.motocareVehicles = [];
+            state.motocareActiveId = '';
+            state.motocareMaintLogs = [];
+            state.motocareFuelLogs = [];
+            state.motocareCustomPresets = {};
+            state.motocareVehiclesUpdated = now;
+            state.motocareMaintLogsUpdated = now;
+            state.motocareFuelLogsUpdated = now;
+            state.motocareCustomPresetsUpdated = now;
+            if (typeof saveLocalState === 'function') saveLocalState();
+            if (typeof performSync === 'function') performSync(true);
+        }
         return true;
     }
 };
@@ -563,7 +565,7 @@ export const AI = {
     },
 
     async callGeminiTextAPI(prompt, defaultModel = 'gemini-3.5-flash') {
-        const apiKey = this.getKey();
+        const apiKey = this.getGeminiKeyWithFallback();
         if (!apiKey) throw new Error("Chưa cấu hình Gemini API Key.");
 
         const models = [defaultModel, "gemini-1.5-flash", "gemini-1.5-pro"];
@@ -591,7 +593,7 @@ export const AI = {
                 console.warn(`Text model ${model} failed:`, err);
                 lastError = err;
                 if (err.message.includes("demand") || err.message.includes("quota") || err.message.includes("limit") || err.message.includes("429") || err.message.includes("503")) {
-                    continue; // try next fallback model
+                    continue;
                 }
                 continue;
             }
@@ -605,7 +607,7 @@ export const AI = {
 
         const healthStatus = Stats.getHealthStatus(vehicleId);
         const fuelStats = Stats.calculateFuelStats(vehicleId);
-        const maintLogs = MaintenanceLogs.getByVehicle(vehicleId).slice(0, 10); // last 10 logs
+        const maintLogs = MaintenanceLogs.getByVehicle(vehicleId).slice(0, 10);
 
         let prompt = `Bạn là một Bác sĩ Xe máy chuyên nghiệp và chuyên gia cơ khí hàng đầu tại Việt Nam. Hãy chẩn đoán sức khỏe chiếc xe máy sau đây và đưa ra lời khuyên bảo dưỡng thông thái, ngắn gọn, thiết thực nhất cho chủ xe.
 
@@ -655,12 +657,12 @@ Lưu ý: Hãy viết ngắn gọn, xúc tích, tập trung vào số liệu th�
 
         return prompt;
     },
-    // Fallback sang FamiLife key neu key rieng rong
+
     getGeminiKeyWithFallback() {
         const ownKey = this.getKey();
         if (ownKey) return ownKey;
-        // Thu doc key tu FamiLife state (neu chay trong FamiLife)
         try {
+            if (state && state.geminiApiKey) return state.geminiApiKey;
             if (window._famiLifeGeminiKey) return window._famiLifeGeminiKey;
         } catch(e) {}
         return '';
