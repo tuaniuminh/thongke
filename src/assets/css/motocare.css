@@ -937,3 +937,107 @@ body:not(.light-mode) #tab-motocare .meta-tag {
     border-color: rgba(2, 132, 199, 0.3) !important;
     background: rgba(2, 132, 199, 0.08) !important;
 }
+
+/* ============================================================
+   3. MOTOCARE DATA TABLE RESPONSIVE OVERRIDE
+   Hiển thị chuẩn bảng dữ liệu (Table view) trên mobile
+   ============================================================ */
+#tab-motocare .history-list-wrapper {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-secondary) !important;
+    margin-top: 10px !important;
+}
+
+#tab-motocare .data-table,
+body:not(.mobile-view-table) #tab-motocare .data-table,
+body.mobile-view-table #tab-motocare .data-table {
+    display: table !important;
+    width: 100% !important;
+    min-width: 520px !important;
+    border-collapse: collapse !important;
+    margin-bottom: 0 !important;
+}
+
+#tab-motocare .data-table thead,
+body:not(.mobile-view-table) #tab-motocare .data-table thead,
+body.mobile-view-table #tab-motocare .data-table thead {
+    display: table-header-group !important;
+    position: static !important;
+}
+
+#tab-motocare .data-table thead tr,
+body:not(.mobile-view-table) #tab-motocare .data-table thead tr,
+body.mobile-view-table #tab-motocare .data-table thead tr {
+    display: table-row !important;
+    position: static !important;
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+html:not(.light-mode) #tab-motocare .data-table thead tr,
+body:not(.light-mode) #tab-motocare .data-table thead tr {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+#tab-motocare .data-table tbody,
+body:not(.mobile-view-table) #tab-motocare .data-table tbody,
+body.mobile-view-table #tab-motocare .data-table tbody {
+    display: table-row-group !important;
+}
+
+#tab-motocare .data-table tbody tr,
+body:not(.mobile-view-table) #tab-motocare .data-table tbody tr,
+body.mobile-view-table #tab-motocare .data-table tbody tr {
+    display: table-row !important;
+    position: static !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: none !important;
+}
+
+#tab-motocare .data-table th,
+body:not(.mobile-view-table) #tab-motocare .data-table th,
+body.mobile-view-table #tab-motocare .data-table th {
+    display: table-cell !important;
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    color: var(--text-secondary) !important;
+    text-align: left !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+#tab-motocare .data-table td,
+body:not(.mobile-view-table) #tab-motocare .data-table td,
+body.mobile-view-table #tab-motocare .data-table td {
+    display: table-cell !important;
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+    font-size: 0.85rem !important;
+    color: var(--text-primary) !important;
+    text-align: left !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+#tab-motocare .data-table td::before,
+body:not(.mobile-view-table) #tab-motocare .data-table td::before,
+body.mobile-view-table #tab-motocare .data-table td::before {
+    display: none !important;
+    content: none !important;
+}
+
+#tab-motocare .data-table td:last-child,
+body:not(.mobile-view-table) #tab-motocare .data-table td:last-child,
+body.mobile-view-table #tab-motocare .data-table td:last-child {
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-top: 0 !important;
+    padding: 10px 12px !important;
+}
