@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.236';
-import { UI } from './ui.js?v=4.3.236';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.237';
+import { UI } from './ui.js?v=4.3.237';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -28,7 +28,7 @@ function switchMotocareView(viewName) {
     const mobileNavButtons = document.querySelectorAll('#mobileNavbar .mobile-navbar-right .nav-icon-btn');
     mobileNavButtons.forEach(btn => {
         const title = btn.getAttribute('title') || btn.innerText.trim();
-        const map = { 'Tổng quan': 'dashboard', 'Đổ xăng': 'fuel', 'Lịch sử': 'history', 'Cài đặt': 'settings' };
+        const map = { 'Tổng quan': 'dashboard', 'Đổ xăng': 'fuel', 'Lịch sử': 'history', 'Cài đặt': 'settings', 'Quản lý': 'settings' };
         if (map[title] === viewName) {
             btn.classList.add('active');
         } else {

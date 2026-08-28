@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.236';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.236';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.237';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.237';
 
 export const UI = {
     // Show toast notification
@@ -234,12 +234,12 @@ export const UI = {
                 const tr = document.createElement('tr');
                 const logDate = new Date(log.date).toLocaleDateString('vi-VN');
                 tr.innerHTML = `
-                    <td>${logDate}</td>
-                    <td>${log.odo.toLocaleString()} Km</td>
-                    <td>${log.liters.toFixed(2)} L ${log.full ? '⛽' : '⚠️'}</td>
-                    <td>${log.cost.toLocaleString()} đ</td>
-                    <td style="font-weight: 500; color: var(--color-primary);">${logEffLabel}</td>
-                    <td>
+                    <td data-label="Ngày">${logDate}</td>
+                    <td data-label="Số ODO">${log.odo.toLocaleString()} Km</td>
+                    <td data-label="Số lít">${log.liters.toFixed(2)} L ${log.full ? '⛽' : '⚠️'}</td>
+                    <td data-label="Chi phí">${log.cost.toLocaleString()} đ</td>
+                    <td data-label="Mức tiêu thụ" style="font-weight: 500; color: var(--color-primary);">${logEffLabel}</td>
+                    <td data-label="Hành động">
                         <button class="action-icon-btn btn-delete-fuel" data-id="${log.id}">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -387,12 +387,12 @@ export const UI = {
             
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${logDate}</td>
-                <td>${log.odo.toLocaleString()} Km</td>
-                <td style="font-weight: 500; color: var(--color-primary-end);">${presetName}</td>
-                <td>${log.cost > 0 ? log.cost.toLocaleString() + ' đ' : 'Miễn phí'}</td>
-                <td title="${log.notes}">${log.notes || '-'}</td>
-                <td>
+                <td data-label="Ngày">${logDate}</td>
+                <td data-label="Số ODO">${log.odo.toLocaleString()} Km</td>
+                <td data-label="Hạng mục" style="font-weight: 600; color: var(--color-primary-end);">${presetName}</td>
+                <td data-label="Chi phí">${log.cost > 0 ? log.cost.toLocaleString() + ' đ' : 'Miễn phí'}</td>
+                <td data-label="Ghi chú" title="${log.notes}">${log.notes || '-'}</td>
+                <td data-label="Hành động">
                     <button class="action-icon-btn btn-delete-maint" data-id="${log.id}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
