@@ -709,3 +709,231 @@ body:not(.light-mode) #tab-motocare .section-header h2 {
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35) !important;
 }
+
+/* ============================================================
+   RADIAL PROGRESS & HEALTH CARDS (PIXEL-PERFECT ORIGINAL STYLES)
+   ============================================================ */
+#tab-motocare .radial-progress-wrapper {
+    position: relative !important;
+    width: 80px !important;
+    height: 80px !important;
+    margin: 0 auto 12px !important;
+}
+
+#tab-motocare .radial-progress {
+    width: 80px !important;
+    height: 80px !important;
+    transform: rotate(-90deg) !important;
+}
+
+#tab-motocare .radial-progress circle {
+    fill: none !important;
+    stroke-width: 7 !important;
+}
+
+#tab-motocare .radial-progress .track {
+    stroke: rgba(0, 0, 0, 0.08) !important;
+}
+
+html:not(.light-mode) #tab-motocare .radial-progress .track,
+body:not(.light-mode) #tab-motocare .radial-progress .track {
+    stroke: rgba(255, 255, 255, 0.12) !important;
+}
+
+#tab-motocare .radial-progress .fill {
+    stroke-linecap: round !important;
+    stroke-dasharray: 219.9 !important;
+    stroke-dashoffset: 219.9;
+    transition: stroke-dashoffset 0.8s ease-out !important;
+}
+
+#tab-motocare .radial-progress-wrapper .percentage {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+
+html:not(.light-mode) #tab-motocare .radial-progress-wrapper .percentage,
+body:not(.light-mode) #tab-motocare .radial-progress-wrapper .percentage {
+    color: #f8fafc !important;
+}
+
+/* Status colors and radial fills */
+#tab-motocare .health-card.status-good .radial-progress .fill {
+    stroke: #10b981 !important;
+    filter: drop-shadow(0 0 3px #10b981) !important;
+}
+
+#tab-motocare .health-card.status-warning .radial-progress .fill {
+    stroke: #f59e0b !important;
+    filter: drop-shadow(0 0 3px #f59e0b) !important;
+}
+
+#tab-motocare .health-card.status-danger .radial-progress .fill {
+    stroke: #ef4444 !important;
+    filter: drop-shadow(0 0 3px #ef4444) !important;
+}
+
+/* Health Card Typography & Badges */
+#tab-motocare .health-card .card-title {
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 4px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+}
+
+html:not(.light-mode) #tab-motocare .health-card .card-title,
+body:not(.light-mode) #tab-motocare .health-card .card-title {
+    color: #f8fafc !important;
+}
+
+#tab-motocare .health-card .card-desc {
+    font-size: 0.75rem !important;
+    color: #6b7280 !important;
+    margin-bottom: 8px !important;
+    line-height: 1.35 !important;
+}
+
+html:not(.light-mode) #tab-motocare .health-card .card-desc,
+body:not(.light-mode) #tab-motocare .health-card .card-desc {
+    color: #94a3b8 !important;
+}
+
+#tab-motocare .health-card .status-badge {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 10px !important;
+    display: inline-block !important;
+}
+
+#tab-motocare .health-card.status-good .status-badge {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #059669 !important;
+}
+
+#tab-motocare .health-card.status-warning .status-badge {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: #d97706 !important;
+}
+
+#tab-motocare .health-card.status-danger .status-badge {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #dc2626 !important;
+}
+
+#tab-motocare .health-card .heuristic-indicator {
+    font-size: 0.7rem !important;
+    color: #d97706 !important;
+    margin-bottom: 8px !important;
+    font-weight: 600 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: center !important;
+}
+
+#tab-motocare .health-card .btn-quick-log {
+    width: 100% !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    padding: 7px 10px !important;
+    border-radius: 8px !important;
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+#tab-motocare .health-card .btn-quick-log:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+html:not(.light-mode) #tab-motocare .health-card .btn-quick-log,
+body:not(.light-mode) #tab-motocare .health-card .btn-quick-log {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.light-mode) #tab-motocare .health-card .btn-quick-log:hover,
+body:not(.light-mode) #tab-motocare .health-card .btn-quick-log:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Vehicle items list in Management */
+#tab-motocare .vehicle-item-card {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: #f9fafb !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    margin-bottom: 12px !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+}
+
+html:not(.light-mode) #tab-motocare .vehicle-item-card,
+body:not(.light-mode) #tab-motocare .vehicle-item-card {
+    background: rgba(15, 22, 38, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+#tab-motocare .vehicle-item-info h4 {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 6px !important;
+    color: #111827 !important;
+}
+
+html:not(.light-mode) #tab-motocare .vehicle-item-info h4,
+body:not(.light-mode) #tab-motocare .vehicle-item-info h4 {
+    color: #f8fafc !important;
+}
+
+#tab-motocare .vehicle-meta-tags {
+    display: flex !important;
+    gap: 8px !important;
+    font-size: 0.78rem !important;
+    flex-wrap: wrap !important;
+}
+
+#tab-motocare .meta-tag {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    padding: 3px 10px !important;
+    border-radius: 6px !important;
+    color: #4b5563 !important;
+    font-weight: 500 !important;
+}
+
+html:not(.light-mode) #tab-motocare .meta-tag,
+body:not(.light-mode) #tab-motocare .meta-tag {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #94a3b8 !important;
+}
+
+#tab-motocare .meta-tag.plate {
+    font-weight: 700 !important;
+    color: #0284c7 !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
+    background: rgba(2, 132, 199, 0.08) !important;
+}
