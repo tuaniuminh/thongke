@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.238** |
+| **Phiên bản hiện tại** | **v4.3.239** |
+| **v4.3.239** | 🏍️ **Tách Hạng Mục Má Phanh Trước & Má Phanh Sau (v4.3.239)**: Phân tách rõ ràng hạng mục má phanh chung thành 2 mục riêng biệt *"Má phanh trước"* (`brake_front`) và *"Má phanh sau"* (`brake_rear`) trong toàn bộ hệ thống định mức bảo dưỡng, bộ lọc lịch sử, bảng thêm/sửa bảo dưỡng và thuật toán tối ưu AI. |
 | **v4.3.238** | ✏️ **Chế Độ Chỉnh Sửa & Nút Sửa/Xóa Cho Lịch Sử Bảo Dưỡng (v4.3.238)**: Bổ sung nút *"Chỉnh sửa"* ở tiêu đề Lịch sử bảo dưỡng; Ẩn các thao tác ở chế độ xem mặc định và chỉ hiển thị nút Sửa/Xóa khi bấm Chỉnh sửa; Hỗ trợ mở modal chỉnh sửa toàn diện thông tin bảo dưỡng và lưu cập nhật thời gian thực. |
 | **v4.3.237** | 🧹 **Dọn Dẹp Cài Đặt MotoCare, Sửa Active Nav "Quản Lý" & Chuẩn Hóa Responsive Bảng Mobile (v4.3.237)**: Xóa 2 thẻ không cần thiết "Đồng bộ & Bảo mật E2EE" và "Khu vực nguy hiểm"; Sửa lỗi nút subnav "Quản lý" không sáng khung active trên mobile; Bổ sung thuộc tính `data-label` cho toàn bộ các cột bảng Đổ xăng và Lịch sử bảo dưỡng để hiển thị dạng thẻ responsive chuẩn đẹp trên điện thoại. |
 | **v4.3.236** | 🎨 **Ẩn/Hiện Chế Độ Sửa Định Mức Bảo Dưỡng Bằng Nút "Thay Đổi" (v4.3.236)**: Ẩn các nút "Thay đổi" từng dòng và nút "Tối ưu bằng AI" ở chế độ xem mặc định của phần Định mức bảo dưỡng xe; Thay bằng 1 nút *"Thay đổi"* ở tiêu đề, khi bấm vào sẽ hiển thị đầy đủ nút "Tối ưu bằng AI" và các nút thay đổi từng phụ tùng để người dùng thao tác. |
 | **v4.3.235** | 🎛️ **Ẩn Mặc Định Thẻ "Chăm Sóc Xe" & Bật/Tắt Linh Hoạt Trong Cài Đặt (v4.3.235)**: Thiết lập ẩn thẻ Chăm sóc xe mặc định ở trang chủ chính. Thêm công tắc *"Hiển thị thẻ 'Chăm sóc xe' ở trang chủ chính"* trong Cài đặt -> Tùy chỉnh chức năng, hỗ trợ lưu trạng thái cục bộ, mã hóa E2EE và tự động đồng bộ thời gian thực đa thiết bị. |
-| **v4.3.234** | 🎯 **Sửa Lỗi Ghi Đè Đồng Bộ Định Mức Bảo Dưỡng AI & Lưu Batch 1 Lần (v4.3.234)**: Bổ sung phương thức `Presets.saveAllForVehicle` lưu hàng loạt định mức AI trong 1 giao dịch duy nhất, đồng thời sửa logic hợp nhất đồng bộ trên đám mây (`performSync`) để ưu tiên giữ lại các định mức mới sửa tại máy cục bộ, ngăn chặn tình trạng định mức vừa áp dụng bị dữ liệu đám mây cũ ghi đè ngược lại. |

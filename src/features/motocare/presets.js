@@ -51,12 +51,22 @@ export const DEFAULT_PRESETS = {
         manual: false,
         clutch: true
     },
-    brake: {
-        name: "Má phanh (Trước/Sau)",
+    brake_front: {
+        name: "Má phanh trước",
         icon: "brake",
-        desc: "Đảm bảo lực phanh an toàn. Cần kiểm tra độ mòn định kỳ.",
-        intervalKm: 5000,
-        intervalMonths: 6,
+        desc: "Đảm bảo lực phanh an toàn bánh trước. Cần kiểm tra độ mòn định kỳ.",
+        intervalKm: 8000,
+        intervalMonths: 12,
+        scooter: true,
+        manual: true,
+        clutch: true
+    },
+    brake_rear: {
+        name: "Má phanh sau",
+        icon: "brake",
+        desc: "Đảm bảo lực phanh an toàn bánh sau. Cần kiểm tra độ mòn định kỳ.",
+        intervalKm: 8000,
+        intervalMonths: 12,
         scooter: true,
         manual: true,
         clutch: true

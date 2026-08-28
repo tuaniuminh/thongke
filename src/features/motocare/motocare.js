@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.238';
-import { UI } from './ui.js?v=4.3.238';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.239';
+import { UI } from './ui.js?v=4.3.239';
 
 // Application State (Độc lập với FamiLife state)
 const state = {

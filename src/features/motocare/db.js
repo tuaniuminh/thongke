@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.238';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.238';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.239';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.239';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -741,8 +741,8 @@ BỘ QUY TẮC HIỆU CHUẨN CHUẨN XÁC THEO HÃNG TẠI VIỆT NAM (BẮT BU
 3. Lọc gió (air_filter): 10.000 - 12.000 Km / 12 tháng (lọc giấy tẩm dầu không vệ sinh, thay mới).
 4. Bugi (spark_plug): 8.000 - 10.000 Km / 12 tháng.
 5. Nước làm mát (coolant): 20.000 Km / 24 tháng (cho xe có két nước làm mát dung dịch).
-6. Má phanh (brake): 12.000 - 15.000 Km / 12 tháng (kiểm tra mòn và thay thế).
-7. Dây curoa (belt): Dành cho xe ga (20.000 - 24.000 Km / 24 tháng).
+6. Má phanh trước (brake_front): 8.000 - 12.000 Km / 12 tháng (kiểm tra độ mòn má phanh đĩa/đùm trước).
+7. Má phanh sau (brake_rear): 8.000 - 12.000 Km / 12 tháng (kiểm tra độ mòn má phanh sau).
 8. Nhông sên dĩa (chain): Dành cho xe số/côn (15.000 - 20.000 Km / 12-18 tháng).
 9. Vỏ lốp (tires): 20.000 - 25.000 Km / 24 tháng.
 
@@ -757,8 +757,8 @@ Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo b�
     "air_filter": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" },
     "spark_plug": { "km": 8000, "months": 12, "reason": "Lý do ngắn gọn" },
     "coolant": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" },
-    "brake": { "km": 12000, "months": 12, "reason": "Lý do ngắn gọn" },
-    "belt": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" },
+    "brake_front": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" },
+    "brake_rear": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" },
     "chain": { "km": 15000, "months": 12, "reason": "Lý do ngắn gọn" },
     "tires": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" }
   }
