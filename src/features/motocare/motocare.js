@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.203';
-import { UI } from './ui.js?v=4.3.203';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.204';
+import { UI } from './ui.js?v=4.3.204';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -14,6 +14,7 @@ function switchMotocareView(viewName) {
     const validViews = ['dashboard', 'fuel', 'history', 'settings'];
     if (!validViews.includes(viewName)) viewName = 'dashboard';
     state.currentView = viewName;
+    window._currentMotocareView = viewName;
 
     // Ẩn/hiện panels nội bộ
     validViews.forEach(v => {
@@ -21,7 +22,7 @@ function switchMotocareView(viewName) {
         if (el) el.style.display = (v === viewName) ? 'block' : 'none';
     });
 
-    // Cập nhật active class trên sub-nav
+    // Cập nhật active class trên sub-nav desktop
     document.querySelectorAll('.motocare-nav-btn').forEach(btn => {
         const btnView = btn.getAttribute('data-motocare-view');
         if (btnView === viewName) {
@@ -31,9 +32,24 @@ function switchMotocareView(viewName) {
         }
     });
 
+    // Cập nhật active class trên mobile navbar
+    const mobileNavButtons = document.querySelectorAll('#mobileNavbar .mobile-navbar-right .nav-icon-btn');
+    mobileNavButtons.forEach(btn => {
+        const title = btn.getAttribute('title') || btn.innerText.trim();
+        const map = { 'Tổng quan': 'dashboard', 'Đổ xăng': 'fuel', 'Lịch sử': 'history', 'Cài đặt': 'settings' };
+        if (map[title] === viewName) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
     // Render lại dữ liệu
     App.renderAll();
 }
+
+// Export ngay lập tức lên window
+window.switchMotocareView = switchMotocareView;
 
 const App = {
     renderAll() {
@@ -349,11 +365,7 @@ const App = {
 
 // Hàm khởi tạo MotoCare - được gọi bởi FamiLife khi switchTab('motocare')
 export function initMotoCare() {
-    if (state.initialized) {
-        // Đã init rồi, chỉ cần render lại
-        App.renderAll();
-        return;
-    }
+    window.switchMotocareView = switchMotocareView;
 
     // Expose toast bridge cho FamiLife
     window._motocareShowToast = function(msg, type = 'success') {
@@ -376,14 +388,20 @@ export function initMotoCare() {
         }
     }
 
+    if (state.initialized) {
+        // Đã init rồi, chỉ cần render lại view hiện tại
+        switchMotocareView(state.currentView || 'dashboard');
+        return;
+    }
+
     // Init events
     App.initEvents();
 
     // Show default view
-    switchMotocareView('dashboard');
+    switchMotocareView(state.currentView || 'dashboard');
 
     state.initialized = true;
-    console.log('[MotoCare] Initialized successfully within FamiLife v4.3.202');
+    console.log('[MotoCare] Initialized successfully within FamiLife');
 }
 
 // Export để FamiLife có thể import

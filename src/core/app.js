@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.203';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.203';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.203';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.203';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.204';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.204';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.204';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.204';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.203';
-import * as sync from './sync.js?v=4.3.203';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.203';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.203';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.203';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.204';
+import * as sync from './sync.js?v=4.3.204';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.204';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.204';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.204';
 
-const APP_VERSION = '4.3.203';
+const APP_VERSION = '4.3.204';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5587,6 +5587,7 @@ function updateMobileNavbar(tabId) {
             </div>
         `;
     } else if (tabId === 'motocare') {
+        mobileNavbar.classList.add('two-line');
         if (pageTitleBlock) {
             pageTitleBlock.classList.add('mobile-hide-title');
         }
@@ -5595,9 +5596,11 @@ function updateMobileNavbar(tabId) {
             ? 'src/assets/images/icon-light.png'
             : 'src/assets/images/icon.png';
 
+        const curSubView = window._currentMotocareView || 'dashboard';
+
         mobileNavbar.innerHTML = `
             <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div onclick="if(window.switchMotocareView) window.switchMotocareView('dashboard')" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <div class="mobile-navbar-logo">
                         <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
                     </div>
@@ -5609,12 +5612,15 @@ function updateMobileNavbar(tabId) {
                 </button>
             </div>
             <div class="mobile-navbar-right" id="mobileNavbarNav">
-                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('dashboard')" title="Tổng quan">Tổng quan</button>
-                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('fuel')" title="Đổ xăng">Đổ xăng</button>
-                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('history')" title="Lịch sử">Lịch sử</button>
-                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('settings')" title="Cài đặt">Cài đặt</button>
+                <button class="nav-icon-btn text-only ${curSubView === 'dashboard' ? 'active' : ''}" onclick="if(window.switchMotocareView) window.switchMotocareView('dashboard')" title="Tổng quan">Tổng quan</button>
+                <button class="nav-icon-btn text-only ${curSubView === 'fuel' ? 'active' : ''}" onclick="if(window.switchMotocareView) window.switchMotocareView('fuel')" title="Đổ xăng">Đổ xăng</button>
+                <button class="nav-icon-btn text-only ${curSubView === 'history' ? 'active' : ''}" onclick="if(window.switchMotocareView) window.switchMotocareView('history')" title="Lịch sử">Lịch sử</button>
+                <button class="nav-icon-btn text-only ${curSubView === 'settings' ? 'active' : ''}" onclick="if(window.switchMotocareView) window.switchMotocareView('settings')" title="Cài đặt">Cài đặt</button>
             </div>
         `;
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
     } else {
         mobileNavbar.classList.add('two-line');
         
