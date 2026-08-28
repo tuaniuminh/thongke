@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.242';
-import { UI } from './ui.js?v=4.3.242';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.243';
+import { UI } from './ui.js?v=4.3.243';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -390,13 +390,22 @@ const App = {
             const date = document.getElementById('mc-maint-date').value;
             const odo = parseInt(document.getElementById('mc-maint-odo').value) || 0;
             const notes = document.getElementById('mc-maint-notes').value;
+            const singleMode = document.getElementById('mc-maint-single-mode');
 
             if (id) {
+                // Sửa 1 bản ghi cũ
                 const category = document.getElementById('mc-maint-category').value;
                 const cost = parseInt(document.getElementById('mc-maint-cost').value) || 0;
                 MaintenanceLogs.update({ id, vehicleId: state.activeVehicleId, date, odo, category, cost, notes });
                 window._motocareShowToast('Cập nhật lịch sử bảo dưỡng thành công!');
+            } else if (singleMode && singleMode.style.display !== 'none') {
+                // Thêm riêng 1 mục phụ tùng đơn lẻ
+                const category = document.getElementById('mc-maint-category').value;
+                const cost = parseInt(document.getElementById('mc-maint-cost').value) || 0;
+                MaintenanceLogs.add({ vehicleId: state.activeVehicleId, date, odo, category, cost, notes });
+                window._motocareShowToast('Đã lưu lịch sử bảo dưỡng!');
             } else {
+                // Lưu hàng loạt các mục đã tick chọn trong checklist
                 const checkedBoxes = document.querySelectorAll('.mc-maint-check-input:checked');
                 if (checkedBoxes.length === 0) {
                     window._motocareShowToast('Vui lòng tick chọn ít nhất 1 hạng mục bảo dưỡng!', 'warning');
@@ -595,8 +604,21 @@ const App = {
                 document.getElementById('mc-maint-cost').value = data.cost !== undefined ? data.cost : '';
                 document.getElementById('mc-maint-notes').value = data.notes || '';
                 if (btnText) btnText.innerText = 'Cập nhật';
+            } else if (data && data.category) {
+                // Bấm riêng 1 hạng mục dưới danh sách (chỉ thêm riêng mục đó, không hiện checklist)
+                if (modalTitle) modalTitle.innerText = 'Ghi nhận bảo dưỡng';
+                if (singleMode) singleMode.style.display = 'flex';
+                if (batchMode) batchMode.style.display = 'none';
+
+                document.getElementById('mc-maint-log-id').value = '';
+                document.getElementById('mc-maint-date').value = todayStr;
+                if (vehicle) document.getElementById('mc-maint-odo').value = vehicle.currentOdo;
+                document.getElementById('mc-maint-category').value = data.category;
+                document.getElementById('mc-maint-cost').value = '';
+                document.getElementById('mc-maint-notes').value = '';
+                if (btnText) btnText.innerText = 'Lưu lịch sử';
             } else {
-                // Thêm mới bảo dưỡng (Tick nhanh đa hạng mục)
+                // Bấm nút bảo dưỡng chung (Mở Checklist tick chọn nhiều mục cùng lúc)
                 if (modalTitle) modalTitle.innerText = 'Ghi nhận bảo dưỡng';
                 if (singleMode) singleMode.style.display = 'none';
                 if (batchMode) batchMode.style.display = 'flex';
@@ -607,8 +629,8 @@ const App = {
                 document.getElementById('mc-maint-notes').value = '';
 
                 // Render checklist hạng mục theo xe đang chọn
-                const preselectedCat = (data && data.category) ? data.category : null;
-                UI.renderMaintenanceChecklist(state.activeVehicleId, preselectedCat);
+                UI.renderMaintenanceChecklist(state.activeVehicleId, null);
+                if (btnText) btnText.innerText = 'Lưu lịch sử';
             }
         } else if (type === 'preset') {
             if (data) {
