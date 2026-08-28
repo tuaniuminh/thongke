@@ -2,19 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.234';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.234';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.234';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.234';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.235';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.235';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.235';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.235';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.234';
-import * as sync from './sync.js?v=4.3.234';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.234';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.234';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.234';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.234';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.235';
+import * as sync from './sync.js?v=4.3.235';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.235';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.235';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.235';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.235';
 
-const APP_VERSION = '4.3.234';
+const APP_VERSION = '4.3.235';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -85,6 +85,8 @@ let state = {
     showImportNotesOptionUpdated: '',
     showFamilyFundCard: false,
     showFamilyFundCardUpdated: '',
+    showMotocareCard: false,
+    showMotocareCardUpdated: '',
     showLoveWidget: true,
     showLoveWidgetUpdated: '',
     weLoveStartDate: '',
@@ -937,6 +939,8 @@ async function saveLocalState() {
         showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
         showFamilyFundCard: !!state.showFamilyFundCard,
         showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
+        showMotocareCard: !!state.showMotocareCard,
+        showMotocareCardUpdated: state.showMotocareCardUpdated || '',
         showLoveWidget: state.showLoveWidget !== false,
         showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
         weLoveStartDate: state.weLoveStartDate || '',
@@ -1065,6 +1069,8 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = '';
         state.showFamilyFundCard = false;
         state.showFamilyFundCardUpdated = '';
+        state.showMotocareCard = false;
+        state.showMotocareCardUpdated = '';
         state.showLoveWidget = true;
         state.showLoveWidgetUpdated = '';
         state.weLoveStartDate = '';
@@ -1159,6 +1165,8 @@ export async function loadLocalState(password) {
         state.showImportNotesOptionUpdated = data.showImportNotesOptionUpdated || '';
         state.showFamilyFundCard = !!data.showFamilyFundCard;
         state.showFamilyFundCardUpdated = data.showFamilyFundCardUpdated || '';
+        state.showMotocareCard = !!data.showMotocareCard;
+        state.showMotocareCardUpdated = data.showMotocareCardUpdated || '';
         state.showLoveWidget = data.showLoveWidget !== false;
         state.showLoveWidgetUpdated = data.showLoveWidgetUpdated || '';
         state.weLoveStartDate = data.weLoveStartDate || '';
@@ -1736,6 +1744,15 @@ async function performSync(silent = false) {
                         state.showFamilyFundCardUpdated = remoteData.showFamilyFundCardUpdated || '';
                     }
 
+                    // Merge showMotocareCard using LWW (Last Write Wins)
+                    const localMotocareCardTime = state.showMotocareCardUpdated ? new Date(state.showMotocareCardUpdated).getTime() : 0;
+                    const remoteMotocareCardTime = remoteData.showMotocareCardUpdated ? new Date(remoteData.showMotocareCardUpdated).getTime() : 0;
+                    
+                    if (remoteMotocareCardTime > localMotocareCardTime) {
+                        state.showMotocareCard = !!remoteData.showMotocareCard;
+                        state.showMotocareCardUpdated = remoteData.showMotocareCardUpdated || '';
+                    }
+
                     // Merge showLoveWidget using LWW (Last Write Wins)
                     const localLoveWidgetTime = state.showLoveWidgetUpdated ? new Date(state.showLoveWidgetUpdated).getTime() : 0;
                     const remoteLoveWidgetTime = remoteData.showLoveWidgetUpdated ? new Date(remoteData.showLoveWidgetUpdated).getTime() : 0;
@@ -2137,6 +2154,8 @@ async function performSync(silent = false) {
             showImportNotesOptionUpdated: state.showImportNotesOptionUpdated || '',
             showFamilyFundCard: !!state.showFamilyFundCard,
             showFamilyFundCardUpdated: state.showFamilyFundCardUpdated || '',
+            showMotocareCard: !!state.showMotocareCard,
+            showMotocareCardUpdated: state.showMotocareCardUpdated || '',
             showLoveWidget: state.showLoveWidget !== false,
             showLoveWidgetUpdated: state.showLoveWidgetUpdated || '',
             weLoveStartDate: state.weLoveStartDate || '',
@@ -2361,6 +2380,7 @@ function renderAll() {
     updateThemeUI();
     updateImportNotesOptionUI();
     updateFamilyFundCardUI();
+    updateMotocareCardUI();
     initWeLoveBindings();
     updateHomeLoveWidget();
     if (['welove', 'welove-admin', 'welove-settings'].includes(state.activeTab)) {
@@ -2608,6 +2628,16 @@ function updateFamilyFundCardUI() {
     const toggle = document.getElementById('toggleShowFamilyFundCard');
     if (toggle) {
         toggle.checked = !!state.showFamilyFundCard;
+    }
+    if (typeof updateHomeLayoutUI === 'function') {
+        updateHomeLayoutUI();
+    }
+}
+
+function updateMotocareCardUI() {
+    const toggle = document.getElementById('toggleShowMotocareCard');
+    if (toggle) {
+        toggle.checked = !!state.showMotocareCard;
     }
     if (typeof updateHomeLayoutUI === 'function') {
         updateHomeLayoutUI();
@@ -4274,6 +4304,21 @@ async function initializeApp() {
         });
     }
 
+    const toggleShowMotocareCard = document.getElementById('toggleShowMotocareCard');
+    if (toggleShowMotocareCard) {
+        toggleShowMotocareCard.addEventListener('change', async (e) => {
+            state.showMotocareCard = e.target.checked;
+            state.showMotocareCardUpdated = new Date().toISOString();
+            await saveLocalState();
+            updateMotocareCardUI();
+            
+            // Sync setting to other devices if configured
+            if (sync.isConfigured() && await sync.getCurrentUser()) {
+                performSync(true);
+            }
+        });
+    }
+
     const toggleShowLoveWidget = document.getElementById('toggleShowLoveWidget');
     if (toggleShowLoveWidget) {
         toggleShowLoveWidget.addEventListener('change', async (e) => {
@@ -5084,6 +5129,7 @@ async function handleFullBackup() {
             geminiApiKey: state.geminiApiKey,
             showImportNotesOption: state.showImportNotesOption,
             showFamilyFundCard: state.showFamilyFundCard,
+            showMotocareCard: state.showMotocareCard,
             mobileViewMode: state.mobileViewMode,
             selectedHealthProfileId: state.selectedHealthProfileId,
             activeChartFundIds: state.activeChartFundIds,
@@ -5225,6 +5271,7 @@ async function handleFullRestore(file) {
         }
         if (data.showImportNotesOption !== undefined) state.showImportNotesOption = data.showImportNotesOption;
         if (data.showFamilyFundCard !== undefined) state.showFamilyFundCard = data.showFamilyFundCard;
+        if (data.showMotocareCard !== undefined) state.showMotocareCard = data.showMotocareCard;
         if (data.mobileViewMode) state.mobileViewMode = data.mobileViewMode;
         if (data.selectedHealthProfileId) state.selectedHealthProfileId = data.selectedHealthProfileId;
         if (data.activeChartFundIds) state.activeChartFundIds = data.activeChartFundIds;
@@ -5985,6 +6032,8 @@ export async function clearAllStateData() {
     state.showImportNotesOptionUpdated = '';
     state.showFamilyFundCard = false;
     state.showFamilyFundCardUpdated = '';
+    state.showMotocareCard = false;
+    state.showMotocareCardUpdated = '';
     state.showLoveWidget = true;
     state.showLoveWidgetUpdated = '';
     state.weLoveStartDate = '';

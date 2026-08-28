@@ -5,9 +5,9 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility, updateLoveWidgetUI
-} from '../../core/app.js?v=4.3.234';
-import * as sync from '../../core/sync.js?v=4.3.234';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.234';
+} from '../../core/app.js?v=4.3.235';
+import * as sync from '../../core/sync.js?v=4.3.235';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.235';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1009,6 +1009,16 @@ function updateHomeLayoutUI() {
             cardFund.style.display = 'flex';
         } else {
             cardFund.style.display = 'none';
+        }
+    }
+
+    // --- Card "Chăm sóc xe" ---
+    const cardMotocare = document.getElementById('homeCardMotocare');
+    if (cardMotocare) {
+        if (state.showMotocareCard) {
+            cardMotocare.style.display = 'flex';
+        } else {
+            cardMotocare.style.display = 'none';
         }
     }
 
