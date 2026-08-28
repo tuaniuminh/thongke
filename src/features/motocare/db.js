@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.237';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.237';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.238';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.238';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -273,6 +273,11 @@ export const MaintenanceLogs = {
             .sort((a, b) => new Date(b.date) - new Date(a.date) || b.odo - a.odo);
     },
 
+    getById(id) {
+        const list = this.getAll();
+        return list.find(log => log.id === id) || null;
+    },
+
     add(log) {
         const list = this.getAll();
         const now = new Date().toISOString();
@@ -296,6 +301,32 @@ export const MaintenanceLogs = {
         }
 
         return newLog;
+    },
+
+    update(log) {
+        const list = this.getAll();
+        const idx = list.findIndex(l => l.id === log.id);
+        if (idx !== -1) {
+            const now = new Date().toISOString();
+            list[idx] = {
+                ...list[idx],
+                date: log.date || list[idx].date,
+                odo: parseInt(log.odo) !== undefined ? parseInt(log.odo) : list[idx].odo,
+                category: log.category || list[idx].category,
+                cost: parseInt(log.cost) !== undefined ? parseInt(log.cost) : list[idx].cost,
+                notes: (log.notes !== undefined ? log.notes : list[idx].notes || '').trim(),
+                updated_at: now
+            };
+            this.saveAll(list);
+
+            // Update vehicle ODO if this log ODO is higher
+            const vehicle = Vehicles.getById(list[idx].vehicleId);
+            if (vehicle && list[idx].odo > vehicle.currentOdo) {
+                Vehicles.updateOdo(vehicle.id, list[idx].odo);
+            }
+            return list[idx];
+        }
+        return null;
     },
 
     saveAll(list) {

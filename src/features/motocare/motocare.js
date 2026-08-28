@@ -1,12 +1,13 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.237';
-import { UI } from './ui.js?v=4.3.237';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.238';
+import { UI } from './ui.js?v=4.3.238';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
     currentView: 'dashboard',
     activeVehicleId: null,
     presetsEditMode: false,
+    maintHistoryEditMode: false,
     initialized: false
 };
 
@@ -67,7 +68,7 @@ const App = {
         UI.renderDashboard(vId);
         UI.renderVehiclesList();
         UI.renderFuelTracker(vId);
-        UI.renderHistory(vId, document.getElementById('mc-filter-maint-category')?.value || 'all');
+        UI.renderHistory(vId, document.getElementById('mc-filter-maint-category')?.value || 'all', state.maintHistoryEditMode);
         UI.renderPresetsSettings(vId, state.presetsEditMode);
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -385,13 +386,19 @@ const App = {
 
         document.getElementById('mc-form-maintenance')?.addEventListener('submit', (e) => {
             e.preventDefault();
+            const id = document.getElementById('mc-maint-log-id').value;
             const date = document.getElementById('mc-maint-date').value;
             const odo = parseInt(document.getElementById('mc-maint-odo').value) || 0;
             const category = document.getElementById('mc-maint-category').value;
             const cost = parseInt(document.getElementById('mc-maint-cost').value) || 0;
             const notes = document.getElementById('mc-maint-notes').value;
-            MaintenanceLogs.add({ vehicleId: state.activeVehicleId, date, odo, category, cost, notes });
-            window._motocareShowToast('Đã lưu lịch sử bảo dưỡng!');
+            if (id) {
+                MaintenanceLogs.update({ id, vehicleId: state.activeVehicleId, date, odo, category, cost, notes });
+                window._motocareShowToast('Cập nhật lịch sử bảo dưỡng thành công!');
+            } else {
+                MaintenanceLogs.add({ vehicleId: state.activeVehicleId, date, odo, category, cost, notes });
+                window._motocareShowToast('Đã lưu lịch sử bảo dưỡng!');
+            }
             this.closeModal('maintenance');
             this.renderAll();
         });
@@ -407,9 +414,18 @@ const App = {
             this.renderAll();
         });
 
-        // 8. Maintenance filter
+        // 8. Maintenance filter & Edit Mode Toggle
         document.getElementById('mc-filter-maint-category')?.addEventListener('change', (e) => {
-            UI.renderHistory(state.activeVehicleId, e.target.value);
+            UI.renderHistory(state.activeVehicleId, e.target.value, state.maintHistoryEditMode);
+        });
+
+        document.getElementById('mc-btn-toggle-maint-edit')?.addEventListener('click', () => {
+            state.maintHistoryEditMode = !state.maintHistoryEditMode;
+            const filterVal = document.getElementById('mc-filter-maint-category')?.value || 'all';
+            UI.renderHistory(state.activeVehicleId, filterVal, state.maintHistoryEditMode);
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
         });
 
         // 9. Click delegation cho dynamic items
@@ -452,6 +468,11 @@ const App = {
                     window._motocareShowToast('Đã xóa nhật ký đổ xăng.');
                     this.renderAll();
                 }
+            }
+            if (e.target.closest('.btn-edit-maint')) {
+                const id = e.target.closest('.btn-edit-maint').getAttribute('data-id');
+                const log = MaintenanceLogs.getById(id);
+                if (log) this.openModal('maintenance', log);
             }
             if (e.target.closest('.btn-delete-maint')) {
                 const id = e.target.closest('.btn-delete-maint').getAttribute('data-id');
@@ -534,10 +555,24 @@ const App = {
             if (vehicle) document.getElementById('mc-fuel-odo').value = vehicle.currentOdo;
         } else if (type === 'maintenance') {
             document.getElementById('mc-form-maintenance').reset();
-            document.getElementById('mc-maint-log-id').value = '';
-            document.getElementById('mc-maint-date').value = todayStr;
-            if (vehicle) document.getElementById('mc-maint-odo').value = vehicle.currentOdo;
-            if (data && data.category) document.getElementById('mc-maint-category').value = data.category;
+            const modalTitle = document.querySelector('#mc-modal-maintenance .modal-header h3');
+            if (data && data.id) {
+                if (modalTitle) modalTitle.innerText = 'Sửa lịch sử bảo dưỡng';
+                document.getElementById('mc-maint-log-id').value = data.id || '';
+                document.getElementById('mc-maint-date').value = data.date || todayStr;
+                document.getElementById('mc-maint-odo').value = data.odo !== undefined ? data.odo : (vehicle ? vehicle.currentOdo : 0);
+                if (data.category) document.getElementById('mc-maint-category').value = data.category;
+                document.getElementById('mc-maint-cost').value = data.cost !== undefined ? data.cost : '';
+                document.getElementById('mc-maint-notes').value = data.notes || '';
+            } else {
+                if (modalTitle) modalTitle.innerText = 'Ghi nhận bảo dưỡng';
+                document.getElementById('mc-maint-log-id').value = '';
+                document.getElementById('mc-maint-date').value = todayStr;
+                if (vehicle) document.getElementById('mc-maint-odo').value = vehicle.currentOdo;
+                if (data && data.category) document.getElementById('mc-maint-category').value = data.category;
+                document.getElementById('mc-maint-cost').value = '';
+                document.getElementById('mc-maint-notes').value = '';
+            }
         } else if (type === 'preset') {
             if (data) {
                 document.getElementById('mc-preset-key').value = data.key;

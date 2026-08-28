@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.237';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.237';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.238';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.238';
 
 export const UI = {
     // Show toast notification
@@ -356,13 +356,31 @@ export const UI = {
     },
 
     // Render Maintenance History View
-    renderHistory(vehicleId, filterCategory = 'all') {
+    renderHistory(vehicleId, filterCategory = 'all', isEditMode = false) {
         const tbody = document.getElementById('mc-maint-logs-tbody');
         if (!tbody) return;
 
+        // Cập nhật trạng thái nút chuyển chế độ Sửa
+        const toggleBtn = document.getElementById('mc-btn-toggle-maint-edit');
+        const toggleText = document.getElementById('mc-toggle-maint-edit-text');
+        if (toggleBtn && toggleText) {
+            if (isEditMode) {
+                toggleText.innerText = 'Hoàn tất';
+                toggleBtn.className = 'btn btn-primary';
+            } else {
+                toggleText.innerText = 'Chỉnh sửa';
+                toggleBtn.className = 'btn btn-secondary';
+            }
+        }
+
+        const thAction = document.getElementById('mc-th-maint-action');
+        if (thAction) {
+            thAction.style.display = isEditMode ? 'table-cell' : 'none';
+        }
+
         const vehicle = Vehicles.getById(vehicleId);
         if (!vehicle) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Vui lòng thêm xe để xem lịch sử bảo dưỡng.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${isEditMode ? 6 : 5}" class="empty-state">Vui lòng thêm xe để xem lịch sử bảo dưỡng.</td></tr>`;
             return;
         }
 
@@ -374,7 +392,7 @@ export const UI = {
 
         tbody.innerHTML = '';
         if (logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Chưa có bản ghi bảo dưỡng nào.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${isEditMode ? 6 : 5}" class="empty-state">Chưa có bản ghi bảo dưỡng nào.</td></tr>`;
             return;
         }
 
@@ -386,19 +404,28 @@ export const UI = {
             const logDate = new Date(log.date).toLocaleDateString('vi-VN');
             
             const tr = document.createElement('tr');
+            const actionTdHtml = isEditMode ? `
+                <td data-label="Hành động" style="white-space: nowrap;">
+                    <div style="display: inline-flex; gap: 6px; align-items: center;">
+                        <button class="btn btn-secondary btn-sm btn-edit-maint" data-id="${log.id}" title="Sửa ghi chép" style="display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: 0.8rem; border-radius: 6px; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <span>Sửa</span>
+                        </button>
+                        <button class="btn btn-danger btn-sm btn-delete-maint" data-id="${log.id}" title="Xóa ghi chép" style="display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; background: var(--color-danger, #ef4444); color: white; border: none;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            <span>Xóa</span>
+                        </button>
+                    </div>
+                </td>
+            ` : '';
+
             tr.innerHTML = `
                 <td data-label="Ngày">${logDate}</td>
                 <td data-label="Số ODO">${log.odo.toLocaleString()} Km</td>
                 <td data-label="Hạng mục" style="font-weight: 600; color: var(--color-primary-end);">${presetName}</td>
                 <td data-label="Chi phí">${log.cost > 0 ? log.cost.toLocaleString() + ' đ' : 'Miễn phí'}</td>
                 <td data-label="Ghi chú" title="${log.notes}">${log.notes || '-'}</td>
-                <td data-label="Hành động">
-                    <button class="action-icon-btn btn-delete-maint" data-id="${log.id}">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                        </svg>
-                    </button>
-                </td>
+                ${actionTdHtml}
             `;
             tbody.appendChild(tr);
         });
