@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.223';
-import { UI } from './ui.js?v=4.3.223';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.224';
+import { UI } from './ui.js?v=4.3.224';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -166,8 +166,11 @@ const App = {
         document.getElementById('mc-btn-close-modal-ai-doctor')?.addEventListener('click', () => this.closeModal('ai-doctor'));
         document.getElementById('mc-btn-close-ai-doctor')?.addEventListener('click', () => this.closeModal('ai-doctor'));
 
+        document.getElementById('mc-btn-close-modal-ai-presets')?.addEventListener('click', () => this.closeModal('ai-presets'));
+        document.getElementById('mc-btn-cancel-ai-presets')?.addEventListener('click', () => this.closeModal('ai-presets'));
+
         // Backdrop click to close modals
-        ['vehicle', 'fuel', 'maintenance', 'preset', 'ai-doctor'].forEach(mType => {
+        ['vehicle', 'fuel', 'maintenance', 'preset', 'ai-doctor', 'ai-presets'].forEach(mType => {
             const overlay = document.getElementById(`mc-modal-${mType}`);
             if (overlay) {
                 overlay.addEventListener('click', (e) => {
@@ -206,6 +209,136 @@ const App = {
                     contentEl.innerHTML = `<div style="color:var(--color-danger);padding:20px;text-align:center;"><h4>⚠️ Lỗi kết nối Gemini AI</h4><p style="margin-top:10px;font-size:0.9rem;">${err.message || 'Không thể lấy phản hồi từ Gemini API.'}</p></div>`;
                 }
             }
+        });
+
+        // 6. AI Presets Optimizer for Current Vehicle
+        let currentAiProposedPresets = null;
+        document.getElementById('mc-btn-ai-optimize-presets')?.addEventListener('click', async () => {
+            const vId = state.activeVehicleId;
+            const vehicle = vId ? Vehicles.getById(vId) : null;
+            if (!vehicle) {
+                window._motocareShowToast('Vui lòng chọn hoặc thêm xe máy trước khi tối ưu định mức!', 'warning');
+                return;
+            }
+            const apiKey = AI.getKey();
+            if (!apiKey) {
+                window._motocareShowToast('Vui lòng nhập Google Gemini API Key trong mục Cài Đặt chung của FamiLife để sử dụng!', 'warning');
+                return;
+            }
+
+            this.openModal('ai-presets');
+            const loadingEl = document.getElementById('mc-ai-presets-loading');
+            const contentEl = document.getElementById('mc-ai-presets-result-content');
+            const applyBtn = document.getElementById('mc-btn-apply-ai-presets');
+            const loadingText = document.getElementById('mc-ai-presets-loading-text');
+
+            if (loadingText) loadingText.innerText = `Gemini AI đang tra cứu sổ tay bảo dưỡng cho xe ${vehicle.name}...`;
+            if (applyBtn) applyBtn.style.display = 'none';
+
+            if (loadingEl && contentEl) {
+                loadingEl.classList.remove('hidden');
+                contentEl.classList.add('hidden');
+                contentEl.innerHTML = '';
+                try {
+                    const prompt = AI.generatePresetOptimizationPrompt(vId);
+                    const rawResponse = await AI.callGeminiTextAPI(prompt);
+
+                    // Parse JSON safely
+                    let jsonStr = rawResponse.trim();
+                    if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
+                    if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
+                    if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
+                    jsonStr = jsonStr.trim();
+
+                    const aiData = JSON.parse(jsonStr);
+                    currentAiProposedPresets = aiData;
+
+                    const currentPresets = Presets.getForVehicle(vId);
+
+                    let html = `
+                        <div style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(99, 102, 241, 0.04)); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+                                <div style="font-weight: 700; font-size: 1rem; color: #7c3aed;">
+                                    🎯 Nhận diện dòng xe: <strong>${aiData.vehicleModel || vehicle.name}</strong>
+                                </div>
+                                <span style="font-size: 0.75rem; background: rgba(124, 58, 237, 0.15); color: #7c3aed; padding: 3px 10px; border-radius: 12px; font-weight: 600;">Chuẩn hóa bởi AI</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">${aiData.advice || 'Định mức bảo dưỡng được tối ưu dựa trên loại truyền động và điều kiện vận hành tại Việt Nam.'}</p>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);">Bảng so sánh định mức chi tiết:</h4>
+                            <div style="overflow-x: auto;">
+                                <table class="data-table" style="width: 100%; font-size: 0.85rem;">
+                                    <thead>
+                                        <tr>
+                                            <th style="padding: 10px 12px;">Hạng mục phụ tùng</th>
+                                            <th style="padding: 10px 12px; text-align: center;">Hiện tại</th>
+                                            <th style="padding: 10px 12px; text-align: center; color: #7c3aed;">AI Đề xuất</th>
+                                            <th style="padding: 10px 12px;">Khuyến nghị từ AI</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+
+                    Object.entries(aiData.items || {}).forEach(([key, item]) => {
+                        const curr = currentPresets[key];
+                        if (!curr) return;
+                        const isKmChanged = curr.intervalKm !== item.km;
+                        const isMonthsChanged = curr.intervalMonths !== item.months;
+
+                        html += `
+                            <tr>
+                                <td style="padding: 10px 12px; font-weight: 600;">${curr.name}</td>
+                                <td style="padding: 10px 12px; text-align: center; color: var(--text-secondary);">
+                                    ${curr.intervalKm.toLocaleString()} Km<br><small>${curr.intervalMonths} tháng</small>
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center; font-weight: 700; color: ${(isKmChanged || isMonthsChanged) ? '#7c3aed' : 'var(--color-success)'};">
+                                    ${item.km.toLocaleString()} Km<br><small>${item.months} tháng</small>
+                                    ${(isKmChanged || isMonthsChanged) ? '<span style="display:inline-block;margin-left:4px;font-size:0.75rem;color:#7c3aed;">★</span>' : ''}
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.35;">
+                                    ${item.reason || 'Định mức khuyến nghị chuẩn theo xe'}
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    loadingEl.classList.add('hidden');
+                    contentEl.classList.remove('hidden');
+                    contentEl.innerHTML = html;
+                    if (applyBtn) applyBtn.style.display = 'inline-block';
+                } catch (err) {
+                    console.error('[MotoCare AI Presets Error]', err);
+                    loadingEl.classList.add('hidden');
+                    contentEl.classList.remove('hidden');
+                    contentEl.innerHTML = `<div style="color:var(--color-danger);padding:20px;text-align:center;"><h4>⚠️ Lỗi phân tích định mức AI</h4><p style="margin-top:10px;font-size:0.9rem;">${err.message || 'Không thể tạo định mức bảo dưỡng từ Gemini API.'}</p></div>`;
+                }
+            }
+        });
+
+        // Apply AI Presets
+        document.getElementById('mc-btn-apply-ai-presets')?.addEventListener('click', () => {
+            const vId = state.activeVehicleId;
+            const vehicle = vId ? Vehicles.getById(vId) : null;
+            if (!vehicle || !currentAiProposedPresets || !currentAiProposedPresets.items) return;
+
+            Object.entries(currentAiProposedPresets.items).forEach(([key, item]) => {
+                if (item.km !== undefined && item.months !== undefined) {
+                    Presets.saveForVehicle(vId, key, item.km, item.months);
+                }
+            });
+
+            window._motocareShowToast(`Đã áp dụng định mức bảo dưỡng AI cho xe ${vehicle.name}!`, 'success');
+            this.closeModal('ai-presets');
+            this.renderAll();
         });
 
         // 7. Form Submissions

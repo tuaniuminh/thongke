@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "src/assets/images/icon-light-pwa.png?v=4.3.223",
+      "src": "src/assets/images/icon-light-pwa.png?v=4.3.224",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "src/assets/images/icon-light-pwa.png?v=4.3.223",
+      "src": "src/assets/images/icon-light-pwa.png?v=4.3.224",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

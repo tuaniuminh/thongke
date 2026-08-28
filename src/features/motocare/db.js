@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.223';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.223';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.224';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.224';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -662,6 +662,45 @@ Hãy phân tích và viết một báo cáo chẩn đoán bằng tiếng Việt,
 Lưu ý: Hãy viết ngắn gọn, xúc tích, tập trung vào số liệu thực tế, tránh các lời sáo rỗng. Hãy định dạng bằng thẻ HTML thô (h3, h4, p, ul, li, strong, blockquote) thay vì Markdown để hiển thị trực tiếp.`;
 
         return prompt;
+    },
+
+    generatePresetOptimizationPrompt(vehicleId) {
+        const vehicle = Vehicles.getById(vehicleId);
+        if (!vehicle) return '';
+        const currentPresets = Presets.getForVehicle(vehicleId);
+        const currentPresetsSummary = Object.entries(currentPresets).map(([k, v]) => `- ${k} (${v.name}): ${v.intervalKm.toLocaleString()} Km / ${v.intervalMonths} tháng`).join('\n');
+
+        return `Bạn là kỹ sư trưởng kỹ thuật xe máy hàng đầu tại Việt Nam, am hiểu tường tận sổ tay bảo dưỡng chính hãng (Honda, Yamaha, Suzuki, Piaggio Vespa, v.v.).
+
+Hãy phân tích mẫu xe dưới đây và đề xuất ĐỊNH MỨC BẢO DƯỠNG (Số Km và Số Tháng định kỳ) chuẩn xác nhất cho từng phụ tùng, tối ưu riêng cho điều kiện giao thông dừng đỗ nhiều và khí hậu nhiệt đới gió mùa tại Việt Nam:
+
+THÔNG TIN XE:
+- Tên xe: ${vehicle.name}
+- Biển số: ${vehicle.plate || 'Chưa cập nhật'}
+- Phân loại: ${VEHICLE_TYPES[vehicle.type] || vehicle.type}
+- Số ODO hiện tại: ${vehicle.currentOdo.toLocaleString()} Km
+- Ngày mua xe: ${vehicle.buyDate || 'Chưa rõ'}
+
+ĐỊNH MỨC HIỆN TẠI TRÊN HỆ THỐNG:
+${currentPresetsSummary}
+
+YÊU CẦU ĐẶC BIỆT:
+Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo bất kỳ lời chào hay văn bản giải thích nào bên ngoài JSON, không bọc trong markdown codeblock nếu có thể, hoặc bọc trong \`\`\`json) theo đúng cấu trúc sau:
+{
+  "vehicleModel": "Tên dòng xe nhận diện được (ví dụ: Honda Air Blade 125i)",
+  "advice": "Nhận định ngắn gọn 2 câu về đặc tính động cơ và lưu ý bảo dưỡng quan trọng nhất cho dòng xe này.",
+  "items": {
+    "oil_engine": { "km": 2000, "months": 3, "reason": "Lý do ngắn gọn" },
+    "oil_gear": { "km": 6000, "months": 6, "reason": "Lý do ngắn gọn" },
+    "air_filter": { "km": 10000, "months": 12, "reason": "Lý do ngắn gọn" },
+    "spark_plug": { "km": 8000, "months": 12, "reason": "Lý do ngắn gọn" },
+    "coolant": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" },
+    "brake": { "km": 12000, "months": 12, "reason": "Lý do ngắn gọn" },
+    "belt": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" },
+    "chain": { "km": 15000, "months": 12, "reason": "Lý do ngắn gọn" },
+    "tires": { "km": 20000, "months": 24, "reason": "Lý do ngắn gọn" }
+  }
+}`;
     },
 
     getGeminiKeyWithFallback() {
