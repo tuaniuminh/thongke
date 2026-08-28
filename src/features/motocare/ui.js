@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.235';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.235';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.236';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.236';
 
 export const UI = {
     // Show toast notification
@@ -405,9 +405,27 @@ export const UI = {
     },
 
     // Render Presets Settings List
-    renderPresetsSettings(vehicleId) {
+    renderPresetsSettings(vehicleId, isEditMode = false) {
         const container = document.getElementById('mc-presets-config-list');
         if (!container) return;
+
+        // Cập nhật trạng thái hiển thị của nút AI và nút chuyển đổi chế độ Sửa
+        const aiBtn = document.getElementById('mc-btn-ai-optimize-presets');
+        const toggleBtn = document.getElementById('mc-btn-toggle-presets-edit');
+        const toggleText = document.getElementById('mc-toggle-presets-text');
+
+        if (aiBtn) {
+            aiBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        }
+        if (toggleBtn && toggleText) {
+            if (isEditMode) {
+                toggleText.innerText = 'Hoàn tất';
+                toggleBtn.className = 'btn btn-primary btn-sm';
+            } else {
+                toggleText.innerText = 'Thay đổi';
+                toggleBtn.className = 'btn btn-secondary btn-sm';
+            }
+        }
 
         const vehicle = Vehicles.getById(vehicleId);
         if (!vehicle) {
@@ -425,14 +443,18 @@ export const UI = {
         for (const [key, p] of Object.entries(presets)) {
             const item = document.createElement('div');
             item.className = 'preset-setting-item';
+            const editBtnHtml = isEditMode ? `
+                <button class="btn btn-secondary btn-sm btn-edit-preset" data-key="${key}" data-name="${p.name}" data-km="${p.intervalKm}" data-months="${p.intervalMonths}">
+                    Thay đổi
+                </button>
+            ` : '';
+
             item.innerHTML = `
                 <div class="preset-setting-details">
                     <h5>${p.name}</h5>
                     <p>Mỗi: <strong>${p.intervalKm.toLocaleString()} Km</strong> hoặc <strong>${p.intervalMonths} Tháng</strong></p>
                 </div>
-                <button class="btn btn-secondary btn-sm btn-edit-preset" data-key="${key}" data-name="${p.name}" data-km="${p.intervalKm}" data-months="${p.intervalMonths}">
-                    Thay đổi
-                </button>
+                ${editBtnHtml}
             `;
             container.appendChild(item);
         }

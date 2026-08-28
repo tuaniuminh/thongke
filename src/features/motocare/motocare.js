@@ -1,11 +1,12 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.235';
-import { UI } from './ui.js?v=4.3.235';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.236';
+import { UI } from './ui.js?v=4.3.236';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
     currentView: 'dashboard',
     activeVehicleId: null,
+    presetsEditMode: false,
     initialized: false
 };
 
@@ -67,7 +68,7 @@ const App = {
         UI.renderVehiclesList();
         UI.renderFuelTracker(vId);
         UI.renderHistory(vId, document.getElementById('mc-filter-maint-category')?.value || 'all');
-        UI.renderPresetsSettings(vId);
+        UI.renderPresetsSettings(vId, state.presetsEditMode);
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
@@ -214,7 +215,15 @@ const App = {
             }
         });
 
-        // 6. AI Presets Optimizer for Current Vehicle
+        // 6. Presets Edit Toggle & AI Optimizer for Current Vehicle
+        document.getElementById('mc-btn-toggle-presets-edit')?.addEventListener('click', () => {
+            state.presetsEditMode = !state.presetsEditMode;
+            UI.renderPresetsSettings(state.activeVehicleId, state.presetsEditMode);
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
+        });
+
         let currentAiProposedPresets = null;
         document.getElementById('mc-btn-ai-optimize-presets')?.addEventListener('click', async () => {
             const vId = state.activeVehicleId;
