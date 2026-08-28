@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.212';
-import { UI } from './ui.js?v=4.3.212';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.213';
+import { UI } from './ui.js?v=4.3.213';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -155,6 +155,18 @@ const App = {
 
         document.getElementById('mc-btn-close-modal-ai-doctor')?.addEventListener('click', () => this.closeModal('ai-doctor'));
         document.getElementById('mc-btn-close-ai-doctor')?.addEventListener('click', () => this.closeModal('ai-doctor'));
+
+        // Backdrop click to close modals
+        ['vehicle', 'fuel', 'maintenance', 'preset', 'ai-doctor'].forEach(mType => {
+            const overlay = document.getElementById(`mc-modal-${mType}`);
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        this.closeModal(mType);
+                    }
+                });
+            }
+        });
 
         // 5. Save Gemini Key
         document.getElementById('mc-btn-save-gemini-key')?.addEventListener('click', () => {
