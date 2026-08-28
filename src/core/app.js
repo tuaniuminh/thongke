@@ -2,18 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.224';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.224';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.224';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.224';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.225';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.225';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.225';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.225';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.224';
-import * as sync from './sync.js?v=4.3.224';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.224';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.224';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.224';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.225';
+import * as sync from './sync.js?v=4.3.225';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.225';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.225';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.225';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.225';
 
-const APP_VERSION = '4.3.224';
+const APP_VERSION = '4.3.225';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3174,12 +3175,12 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = '🏍️ Chăm Sóc Xe';
         subtitle.innerText = 'Theo dõi ODO, đổ xăng, bảo dưỡng và chẩn đoán sức khỏe xe máy bằng AI';
         title.className = 'theme-motocare';
-        // Khởi tạo MotoCare khi vào tab
-        if (typeof window.initMotoCare === 'function') {
-            window.initMotoCare();
-        }
-        if (targetMotocareSubView && typeof window.switchMotocareView === 'function') {
-            window.switchMotocareView(targetMotocareSubView);
+        // Khởi tạo MotoCare tức thì ngay khi chuyển tab
+        try {
+            initMotoCare();
+            switchMotocareView(targetMotocareSubView || 'dashboard');
+        } catch(e) {
+            console.error('[MotoCare Switch Tab Error]', e);
         }
         // [BUG DETECTOR] Kiểm tra computed styles của MotoCare UI
         requestAnimationFrame(() => {
