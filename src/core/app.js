@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.216';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.216';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.216';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.216';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.217';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.217';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.217';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.217';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.216';
-import * as sync from './sync.js?v=4.3.216';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.216';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.216';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.216';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.217';
+import * as sync from './sync.js?v=4.3.217';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.217';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.217';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.217';
 
-const APP_VERSION = '4.3.216';
+const APP_VERSION = '4.3.217';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3176,6 +3176,36 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (targetMotocareSubView && typeof window.switchMotocareView === 'function') {
             window.switchMotocareView(targetMotocareSubView);
         }
+        // [BUG DETECTOR] Kiểm tra computed styles của MotoCare UI
+        requestAnimationFrame(() => {
+            const welcomeCard = document.querySelector('#tab-motocare .welcome-card');
+            const btnCard = document.querySelector('#tab-motocare .btn-card');
+            const aiCard = document.querySelector('#tab-motocare .ai-doctor-card');
+            const mcMain = document.querySelector('#tab-motocare .mc-app-main');
+            console.log('[BUG DETECTOR] MotoCare UI Diagnostic:', {
+                mcMain: mcMain ? { display: getComputedStyle(mcMain).display, width: getComputedStyle(mcMain).width, maxWidth: getComputedStyle(mcMain).maxWidth } : 'NOT FOUND',
+                welcomeCard: welcomeCard ? { 
+                    display: getComputedStyle(welcomeCard).display, 
+                    background: getComputedStyle(welcomeCard).backgroundImage || getComputedStyle(welcomeCard).backgroundColor, 
+                    border: getComputedStyle(welcomeCard).border, 
+                    borderLeft: getComputedStyle(welcomeCard).borderLeft,
+                    boxShadow: getComputedStyle(welcomeCard).boxShadow,
+                    padding: getComputedStyle(welcomeCard).padding
+                } : 'NOT FOUND',
+                btnCard: btnCard ? {
+                    display: getComputedStyle(btnCard).display,
+                    background: getComputedStyle(btnCard).backgroundColor,
+                    border: getComputedStyle(btnCard).border,
+                    boxShadow: getComputedStyle(btnCard).boxShadow
+                } : 'NOT FOUND',
+                aiCard: aiCard ? {
+                    display: getComputedStyle(aiCard).display,
+                    background: getComputedStyle(aiCard).backgroundImage || getComputedStyle(aiCard).backgroundColor,
+                    border: getComputedStyle(aiCard).border,
+                    boxShadow: getComputedStyle(aiCard).boxShadow
+                } : 'NOT FOUND'
+            });
+        });
     }
     
     if (updateHash) {
