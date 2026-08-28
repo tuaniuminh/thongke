@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.219';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.219';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.220';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.220';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -553,10 +553,15 @@ export const DataPortability = {
     }
 };
 
-// GEMINI AI INTEGRATION
+// GEMINI AI INTEGRATION (Uses FamiLife Global Gemini API Key)
 export const AI = {
     getKey() {
-        return localStorage.getItem(KEYS.GEMINI_KEY) || '';
+        if (window._famiLifeGeminiKey) return window._famiLifeGeminiKey;
+        try {
+            const savedState = JSON.parse(localStorage.getItem('familife_state_data') || '{}');
+            if (savedState.geminiApiKey) return savedState.geminiApiKey;
+        } catch(e) {}
+        return localStorage.getItem('gemini_api_key') || localStorage.getItem(KEYS.GEMINI_KEY) || '';
     },
 
     saveKey(key) {
@@ -564,14 +569,16 @@ export const AI = {
         return true;
     },
 
-    async callGeminiTextAPI(prompt, defaultModel = 'gemini-3.5-flash') {
-        const apiKey = this.getGeminiKeyWithFallback();
-        if (!apiKey) throw new Error("Chưa cấu hình Gemini API Key.");
+    async callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash') {
+        const apiKey = this.getKey();
+        if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key trong phần Cài Đặt của FamiLife.");
 
-        const models = [defaultModel, "gemini-1.5-flash", "gemini-1.5-pro"];
+        const candidateModels = [defaultModel, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+            .filter(m => m && !m.includes('3.5'))
+            .filter((m, idx, arr) => arr.indexOf(m) === idx);
         let lastError = null;
 
-        for (const model of models) {
+        for (const model of candidateModels) {
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
                 const response = await fetch(url, {
@@ -587,14 +594,11 @@ export const AI = {
 
                 const resData = await response.json();
                 const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) throw new Error("Không nhận được phản hồi.");
+                if (!text) throw new Error("Không nhận được phản hồi từ AI.");
                 return text;
             } catch (err) {
-                console.warn(`Text model ${model} failed:`, err);
+                console.warn(`[MotoCare AI] Text model ${model} failed:`, err);
                 lastError = err;
-                if (err.message.includes("demand") || err.message.includes("quota") || err.message.includes("limit") || err.message.includes("429") || err.message.includes("503")) {
-                    continue;
-                }
                 continue;
             }
         }

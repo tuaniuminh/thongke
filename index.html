@@ -90,16 +90,16 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.219">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.220">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.219">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.219">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.219">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.219">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.219">
-    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.219">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.220">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.220">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.220">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.220">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.220">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.220">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -377,7 +377,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon.png?v=4.3.219" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon.png?v=4.3.220" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -399,7 +399,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.219" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.220" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -513,7 +513,7 @@
                 <li class="nav-item" data-nav="motocare-settings" style="display: none;">
                     <a class="nav-link" data-tab="motocare-settings" onclick="if(window.switchMotocareView) window.switchMotocareView('settings')">
                         <i data-lucide="settings"></i>
-                        <span>Cài đặt</span>
+                        <span>Quản lý</span>
                     </a>
                 </li>
             </nav>
@@ -539,7 +539,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.219" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.220" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -2102,7 +2102,7 @@
                             <div class="welcome-card-top">
                                 <div class="welcome-info">
                                     <h2 id="mc-active-vehicle-name">Chưa có xe</h2>
-                                    <p id="mc-active-vehicle-plate">Hãy thêm xe mới trong phần Cài đặt</p>
+                                    <p id="mc-active-vehicle-plate">Hãy thêm xe mới trong phần Quản lý</p>
                                 </div>
                                 <div class="vehicle-switcher-wrapper">
                                     <select id="mc-active-vehicle-select" class="vehicle-select">
@@ -2210,10 +2210,10 @@
                         </div>
                     </div>
 
-                    <!-- VIEW: SETTINGS -->
+                    <!-- VIEW: SETTINGS / MANAGEMENT -->
                     <div id="motocare-view-settings" class="mc-view" style="display:none;">
                         <div class="section-header">
-                            <h2>Cài đặt Chăm Sóc Xe</h2>
+                            <h2>Quản lý Chăm Sóc Xe</h2>
                             <button class="btn btn-primary" id="mc-btn-add-vehicle">+ Thêm xe mới</button>
                         </div>
                         <div class="card settings-card">
@@ -2227,23 +2227,11 @@
                             <div class="presets-settings-list" id="mc-presets-config-list"></div>
                         </div>
                         <div class="card settings-card">
-                            <h3>Trí tuệ nhân tạo (Gemini AI)</h3>
-                            <p class="settings-desc">Cấu hình API Key để kích hoạt tính năng Bác sĩ Xe máy AI. Nếu để trống sẽ tự động dùng key Gemini của FamiLife.</p>
-                            <div class="form-group">
-                                <label for="mc-settings-gemini-key">Gemini API Key (riêng cho MotoCare)</label>
-                                <div class="input-group">
-                                    <input type="password" id="mc-settings-gemini-key" placeholder="Để trống = dùng key FamiLife...">
-                                    <button id="mc-btn-save-gemini-key" class="btn btn-primary btn-sm">Lưu</button>
-                                </div>
-                                <small class="form-help">Khoá API sẽ được lưu bảo mật trong bộ nhớ cục bộ thiết bị của bạn.</small>
-                            </div>
-                        </div>
-                        <div class="card settings-card">
                             <h3 style="display:flex;align-items:center;gap:8px;">
                                 <svg viewBox="0 0 24 24" width="20" height="20" style="color:var(--color-primary);"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM10 17l-3.5-3.5 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z"/></svg>
                                 Đồng bộ &amp; Bảo mật E2EE
                             </h3>
-                            <p class="settings-desc">Toàn bộ thông tin xe máy, nhật ký đổ xăng và lịch sử bảo dưỡng được mã hóa đầu cuối (E2EE) chuẩn AES-256 bằng Mã PIN chính và tự động đồng bộ liên tục lên Supabase giống các sổ khác của FamiLife.</p>
+                            <p class="settings-desc">Toàn bộ thông tin xe máy, nhật ký đổ xăng và lịch sử bảo dưỡng được mã hóa đầu cuối (E2EE) chuẩn AES-256 bằng Mã PIN chính và tự động đồng bộ liên tục lên Supabase giống các sổ khác của FamiLife. Tính năng Bác sĩ Xe máy AI tự động sử dụng khóa Google Gemini API Key trong phần Cài Đặt chung của FamiLife.</p>
                         </div>
                         <div class="card settings-card danger-zone">
                             <h3>Khu vực nguy hiểm</h3>
@@ -2305,7 +2293,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.219" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.220" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2415,11 +2403,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.219';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.220';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.219';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.220';
                         }
                     })();
                 </script>
@@ -4153,18 +4141,18 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.219"></script>
-    <script type="module" src="src/core/app.js?v=4.3.219"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.219"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.219"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.219"></script>
-    <script type="module" src="src/features/motocare/motocare.js?v=4.3.219"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.220"></script>
+    <script type="module" src="src/core/app.js?v=4.3.220"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.220"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.220"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.220"></script>
+    <script type="module" src="src/features/motocare/motocare.js?v=4.3.220"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.219')
+                navigator.serviceWorker.register('./sw.js?v=4.3.220')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

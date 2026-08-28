@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.219';
-import { UI } from './ui.js?v=4.3.219';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.220';
+import { UI } from './ui.js?v=4.3.220';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -68,11 +68,6 @@ const App = {
         UI.renderFuelTracker(vId);
         UI.renderHistory(vId, document.getElementById('mc-filter-maint-category')?.value || 'all');
         UI.renderPresetsSettings(vId);
-
-        const geminiInput = document.getElementById('mc-settings-gemini-key');
-        if (geminiInput && !geminiInput.value) {
-            geminiInput.value = AI.getKey();
-        }
 
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
@@ -172,24 +167,13 @@ const App = {
             }
         });
 
-        // 5. Save Gemini Key
-        document.getElementById('mc-btn-save-gemini-key')?.addEventListener('click', () => {
-            const keyInput = document.getElementById('mc-settings-gemini-key');
-            if (keyInput) {
-                AI.saveKey(keyInput.value);
-                window._motocareShowToast('Đã lưu khóa API Gemini thành công!', 'success');
-                this.renderAll();
-            }
-        });
-
-        // 6. AI Doctor consultation
+        // 5. AI Doctor consultation (Uses FamiLife Global Gemini Key)
         document.getElementById('mc-btn-consult-ai')?.addEventListener('click', async () => {
             const vId = state.activeVehicleId;
             if (!vId) { window._motocareShowToast('Vui lòng chọn hoặc thêm xe máy trước!', 'danger'); return; }
-            const apiKey = AI.getKey() || (window._famiLifeGeminiKey || '');
+            const apiKey = AI.getKey();
             if (!apiKey) {
-                window._motocareShowToast('Vui lòng cấu hình Gemini API Key trong mục Cài đặt trước!', 'warning');
-                switchMotocareView('settings');
+                window._motocareShowToast('Vui lòng nhập Google Gemini API Key trong mục Cài Đặt chung của FamiLife để sử dụng!', 'warning');
                 return;
             }
             this.openModal('ai-doctor');
