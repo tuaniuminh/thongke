@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.214';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.214';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.215';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.215';
 
 export const UI = {
     // Show toast notification
@@ -52,13 +52,18 @@ export const UI = {
         const vehicle = Vehicles.getById(vehicleId);
 
         if (!vehicle) {
-            nameEl.innerText = "Chưa có xe";
-            plateEl.innerText = "Hãy thêm xe mới trong phần Cài đặt";
+            nameEl.innerText = "Chưa có xe máy";
+            plateEl.innerText = "Thêm xe để bắt đầu theo dõi ODO & bảo dưỡng";
             odoInput.value = "";
             odoInput.disabled = true;
             healthGrid.innerHTML = `
                 <div class="empty-state">
-                    <p>Vui lòng thêm xe tại tab <strong>Cài đặt</strong> để bắt đầu theo dõi sức khỏe phụ tùng.</p>
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">🏍️</div>
+                    <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 6px;">Chưa có xe nào được kết nối</div>
+                    <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.9rem;">Thêm chiếc xe máy đầu tiên của bạn để theo dõi ODO, nhắc nhở thay dầu và bảo dưỡng phụ tùng định kỳ.</p>
+                    <button class="btn btn-primary" onclick="if(window.switchMotocareView) window.switchMotocareView('settings'); setTimeout(() => document.getElementById('mc-btn-add-vehicle')?.click(), 150);">
+                        + Thêm xe máy mới
+                    </button>
                 </div>
             `;
             return;

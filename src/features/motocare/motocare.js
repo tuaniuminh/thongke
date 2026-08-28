@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.214';
-import { UI } from './ui.js?v=4.3.214';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.215';
+import { UI } from './ui.js?v=4.3.215';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -72,6 +72,10 @@ const App = {
         const geminiInput = document.getElementById('mc-settings-gemini-key');
         if (geminiInput && !geminiInput.value) {
             geminiInput.value = AI.getKey();
+        }
+
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
         }
     },
 
