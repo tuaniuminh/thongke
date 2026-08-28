@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.226';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.226';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.227';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.227';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -566,15 +566,14 @@ export const AI = {
         return true;
     },
 
-    async callGeminiTextAPI(prompt, defaultModel = 'gemini-2.5-flash', options = {}) {
+    async callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash', options = {}) {
         const apiKey = this.getKey();
         if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
 
         console.log(`[BUG DETECTOR] [MotoCare AI] Starting AI consultation. Key length: ${apiKey.length}`);
 
-        const candidateModels = [defaultModel, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
-            .filter(m => m && !m.includes('3.5'))
-            .filter((m, idx, arr) => arr.indexOf(m) === idx);
+        const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+            .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
         let lastError = null;
 
         for (const model of candidateModels) {

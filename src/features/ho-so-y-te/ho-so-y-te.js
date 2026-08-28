@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI
-} from '../../core/app.js?v=4.3.226';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.226';
+} from '../../core/app.js?v=4.3.227';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.227';
 
 let healthTrendChartInstance = null;
 
@@ -2839,7 +2839,7 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
 
 *Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Tuyệt đối KHÔNG sử dụng ký tự $ hoặc các ký hiệu toán học LaTeX (như $...$, $$...$$, \text{...}, \times, \mu) để biểu diễn các số liệu hoặc đơn vị đo lường. Thay vào đó, hãy dùng văn bản thường thuần túy (ví dụ: dùng "x" thay cho "\times", dùng "uL" hoặc "µL" thay cho "\mu L", dùng "15.8 g/dL" thay cho "$15.8 \text{ g/dL}$"). Tất cả các số liệu và đơn vị phải hiển thị dưới dạng văn bản thường đọc được trực tiếp. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
-        const textResponse = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
+        const textResponse = await callGeminiTextAPI(prompt, 'gemini-3.7-flash');
         
         const nowIso = new Date().toISOString();
         
@@ -4546,7 +4546,7 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
         }
 
-        const textResponse = await callGeminiTextAPI(prompt, 'gemini-2.5-flash');
+        const textResponse = await callGeminiTextAPI(prompt, 'gemini-3.7-flash');
 
         const nowIso = new Date().toISOString();
         if (profile) {
