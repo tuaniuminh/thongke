@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.231';
-import { UI } from './ui.js?v=4.3.231';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.232';
+import { UI } from './ui.js?v=4.3.232';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -601,13 +601,5 @@ export function initMotoCare() {
 if (typeof window !== 'undefined') {
     window.initMotoCare = initMotoCare;
     window.switchMotocareView = switchMotocareView;
-    // Tự động khởi tạo ngay lập tức nếu đang ở hash #chamsocxe hoặc tab-motocare
-    if (window.location.hash === '#chamsocxe' || (window.state && window.state.activeTab === 'motocare') || document.getElementById('tab-motocare')?.classList.contains('active')) {
-        try {
-            initMotoCare();
-        } catch(e) {
-            console.error('[MotoCare Auto Init Error]', e);
-        }
-    }
 }
-export { switchMotocareView };
+export { initMotoCare, switchMotocareView };
