@@ -2,19 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.233';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.233';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.233';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.233';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.234';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.234';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.234';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.234';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.233';
-import * as sync from './sync.js?v=4.3.233';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.233';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.233';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.233';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.233';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.234';
+import * as sync from './sync.js?v=4.3.234';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.234';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.234';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.234';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.234';
 
-const APP_VERSION = '4.3.233';
+const APP_VERSION = '4.3.234';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -1959,10 +1959,18 @@ async function performSync(silent = false) {
                         localStorage.setItem('motocare_fuel_logs', JSON.stringify(state.motocareFuelLogs));
                     }
                     if (remoteData.motocareCustomPresets) {
-                        state.motocareCustomPresets = { ...(state.motocareCustomPresets || {}), ...remoteData.motocareCustomPresets };
                         const localTime = state.motocareCustomPresetsUpdated ? new Date(state.motocareCustomPresetsUpdated).getTime() : 0;
                         const remoteTime = remoteData.motocareCustomPresetsUpdated ? new Date(remoteData.motocareCustomPresetsUpdated).getTime() : 0;
-                        if (remoteTime > localTime) state.motocareCustomPresetsUpdated = remoteData.motocareCustomPresetsUpdated;
+                        if (remoteTime > localTime) {
+                            state.motocareCustomPresets = remoteData.motocareCustomPresets;
+                            state.motocareCustomPresetsUpdated = remoteData.motocareCustomPresetsUpdated;
+                        } else {
+                            // Local is newer or equal, keep local custom presets and merge missing vehicles from remote
+                            state.motocareCustomPresets = {
+                                ...remoteData.motocareCustomPresets,
+                                ...(state.motocareCustomPresets || {})
+                            };
+                        }
                         localStorage.setItem('motocare_custom_presets', JSON.stringify(state.motocareCustomPresets));
                     }
                     if (remoteData.motocareActiveId && !state.motocareActiveId) {

@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.233';
-import { UI } from './ui.js?v=4.3.233';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.234';
+import { UI } from './ui.js?v=4.3.234';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -333,11 +333,7 @@ const App = {
             const vehicle = vId ? Vehicles.getById(vId) : null;
             if (!vehicle || !currentAiProposedPresets || !currentAiProposedPresets.items) return;
 
-            Object.entries(currentAiProposedPresets.items).forEach(([key, item]) => {
-                if (item.km !== undefined && item.months !== undefined) {
-                    Presets.saveForVehicle(vId, key, item.km, item.months);
-                }
-            });
+            Presets.saveAllForVehicle(vId, currentAiProposedPresets.items);
 
             window._motocareShowToast(`Đã áp dụng định mức bảo dưỡng AI cho xe ${vehicle.name}!`, 'success');
             this.closeModal('ai-presets');

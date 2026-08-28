@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.233';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.233';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.234';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.234';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -241,6 +241,21 @@ export const Presets = {
             intervalKm: parseInt(intervalKm) || 0,
             intervalMonths: parseInt(intervalMonths) || 0
         };
+        return setLocal(KEYS.CUSTOM_PRESETS, custom);
+    },
+
+    saveAllForVehicle(vehicleId, itemsMap) {
+        const custom = getLocal(KEYS.CUSTOM_PRESETS, {});
+        if (!custom[vehicleId]) custom[vehicleId] = {};
+
+        for (const [key, item] of Object.entries(itemsMap || {})) {
+            if (item && item.km !== undefined && item.months !== undefined) {
+                custom[vehicleId][key] = {
+                    intervalKm: parseInt(item.km) || 0,
+                    intervalMonths: parseInt(item.months) || 0
+                };
+            }
+        }
         return setLocal(KEYS.CUSTOM_PRESETS, custom);
     }
 };
