@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.213';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.213';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.213';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.213';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.214';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.214';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.214';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.214';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.213';
-import * as sync from './sync.js?v=4.3.213';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.213';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.213';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.213';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.214';
+import * as sync from './sync.js?v=4.3.214';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.214';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.214';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.214';
 
-const APP_VERSION = '4.3.213';
+const APP_VERSION = '4.3.214';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2968,13 +2968,16 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     let targetMotocareSubView = null;
     if (['motocare', 'motocare-dashboard', 'motocare-fuel', 'motocare-history', 'motocare-settings'].includes(tabId)) {
         const subViewMap = {
-            'motocare': 'dashboard',
             'motocare-dashboard': 'dashboard',
             'motocare-fuel': 'fuel',
             'motocare-history': 'history',
             'motocare-settings': 'settings'
         };
-        targetMotocareSubView = subViewMap[tabId] || 'dashboard';
+        if (subViewMap[tabId]) {
+            targetMotocareSubView = subViewMap[tabId];
+        } else if (state.activeTab !== 'motocare') {
+            targetMotocareSubView = window._currentMotocareView || 'dashboard';
+        }
         tabId = 'motocare';
     }
     

@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.213';
-import { UI } from './ui.js?v=4.3.213';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.214';
+import { UI } from './ui.js?v=4.3.214';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -431,15 +431,15 @@ export function initMotoCare() {
 
     if (state.initialized) {
         // Đã init rồi, chỉ cần render lại view hiện tại
-        switchMotocareView(state.currentView || 'dashboard');
+        switchMotocareView(state.currentView || window._currentMotocareView || 'dashboard');
         return;
     }
 
     // Init events
     App.initEvents();
 
-    // Show default view
-    switchMotocareView(state.currentView || 'dashboard');
+    // Show default view or current view
+    switchMotocareView(window._currentMotocareView || state.currentView || 'dashboard');
 
     state.initialized = true;
     console.log('[MotoCare] Initialized successfully within FamiLife');
