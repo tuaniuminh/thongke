@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.230';
-import { UI } from './ui.js?v=4.3.230';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.231';
+import { UI } from './ui.js?v=4.3.231';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -409,7 +409,7 @@ const App = {
 
         // 9. Click delegation cho dynamic items
         const tabPanel = document.getElementById('tab-motocare');
-        tabPanel?.addEventListener('click', (e) => {
+        tabPanel?.addEventListener('click', async (e) => {
             if (e.target.classList.contains('btn-set-active')) {
                 const id = e.target.getAttribute('data-id');
                 Vehicles.setActiveId(id);

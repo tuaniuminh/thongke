@@ -4,9 +4,9 @@ import {
     state, saveLocalState, showToast, performSync,
     formatDate, escapeHTML, formatVND, generateId,
     decryptWithPrivateKey, loadLocalState, getLocalDateString
-} from '../../core/app.js?v=4.3.230';
-import { decrypt } from '../../core/crypto.js?v=4.3.230';
-import * as sync from '../../core/sync.js?v=4.3.230';
+} from '../../core/app.js?v=4.3.231';
+import { decrypt } from '../../core/crypto.js?v=4.3.231';
+import * as sync from '../../core/sync.js?v=4.3.231';
 
 let fundContributionChart = null;
 let fundDetailsChartsMap = {};
