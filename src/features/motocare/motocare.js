@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.229';
-import { UI } from './ui.js?v=4.3.229';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.230';
+import { UI } from './ui.js?v=4.3.230';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -125,7 +125,7 @@ const App = {
         // 3. Quick Action Buttons
         document.getElementById('mc-btn-quick-fuel')?.addEventListener('click', () => this.openModal('fuel'));
         document.getElementById('mc-btn-quick-maintenance')?.addEventListener('click', () => this.openModal('maintenance'));
-        document.getElementById('mc-btn-quick-oil-change')?.addEventListener('click', () => {
+        document.getElementById('mc-btn-quick-oil-change')?.addEventListener('click', async () => {
             const vId = state.activeVehicleId;
             const vehicle = vId ? Vehicles.getById(vId) : null;
             if (!vehicle) {
@@ -133,7 +133,10 @@ const App = {
                 this.openModal('vehicle');
                 return;
             }
-            if (confirm(`Bạn muốn ghi nhận THAY DẦU MÁY cho xe ${vehicle.name} ở số Km hiện tại (${vehicle.currentOdo.toLocaleString()} Km) chứ?`)) {
+            const confirmed = window.showConfirm 
+                ? await window.showConfirm(`Bạn muốn ghi nhận THAY DẦU MÁY cho xe ${vehicle.name} ở số Km hiện tại (${vehicle.currentOdo.toLocaleString()} Km) chứ?`, 'Ghi nhận Thay Dầu Máy')
+                : confirm(`Bạn muốn ghi nhận THAY DẦU MÁY cho xe ${vehicle.name} ở số Km hiện tại (${vehicle.currentOdo.toLocaleString()} Km) chứ?`);
+            if (confirmed) {
                 MaintenanceLogs.add({
                     vehicleId: vId,
                     date: new Date().toISOString().split('T')[0],
@@ -421,17 +424,25 @@ const App = {
             if (e.target.classList.contains('btn-delete-vehicle')) {
                 const id = e.target.getAttribute('data-id');
                 const veh = Vehicles.getById(id);
-                if (confirm(`Bạn có chắc chắn muốn xóa xe ${veh.name}? Toàn bộ lịch sử cũng sẽ bị xóa vĩnh viễn.`)) {
-                    Vehicles.delete(id);
-                    window._motocareShowToast('Đã xóa xe khỏi danh sách.');
-                    const list = Vehicles.getAll();
-                    state.activeVehicleId = list.length > 0 ? list[0].id : null;
-                    this.renderAll();
+                if (veh) {
+                    const confirmed = window.showConfirm
+                        ? await window.showConfirm(`Bạn có chắc chắn muốn xóa xe "${veh.name}"? Toàn bộ nhật ký đổ xăng và lịch sử bảo dưỡng của xe này cũng sẽ bị xóa vĩnh viễn.`, 'Xóa Xe Máy')
+                        : confirm(`Bạn có chắc chắn muốn xóa xe ${veh.name}? Toàn bộ lịch sử cũng sẽ bị xóa vĩnh viễn.`);
+                    if (confirmed) {
+                        Vehicles.delete(id);
+                        window._motocareShowToast('Đã xóa xe khỏi danh sách.');
+                        const list = Vehicles.getAll();
+                        state.activeVehicleId = list.length > 0 ? list[0].id : null;
+                        this.renderAll();
+                    }
                 }
             }
             if (e.target.closest('.btn-delete-fuel')) {
                 const id = e.target.closest('.btn-delete-fuel').getAttribute('data-id');
-                if (confirm('Xóa nhật ký đổ xăng này?')) {
+                const confirmed = window.showConfirm
+                    ? await window.showConfirm('Bạn có chắc chắn muốn xóa nhật ký đổ xăng này?', 'Xóa Nhật Ký Đổ Xăng')
+                    : confirm('Xóa nhật ký đổ xăng này?');
+                if (confirmed) {
                     FuelLogs.delete(id);
                     window._motocareShowToast('Đã xóa nhật ký đổ xăng.');
                     this.renderAll();
@@ -439,7 +450,10 @@ const App = {
             }
             if (e.target.closest('.btn-delete-maint')) {
                 const id = e.target.closest('.btn-delete-maint').getAttribute('data-id');
-                if (confirm('Xóa lịch sử bảo dưỡng này?')) {
+                const confirmed = window.showConfirm
+                    ? await window.showConfirm('Bạn có chắc chắn muốn xóa lịch sử bảo dưỡng này?', 'Xóa Lịch Sử Bảo Dưỡng')
+                    : confirm('Xóa lịch sử bảo dưỡng này?');
+                if (confirmed) {
                     MaintenanceLogs.delete(id);
                     window._motocareShowToast('Đã xóa lịch sử bảo dưỡng.');
                     this.renderAll();
@@ -458,9 +472,15 @@ const App = {
         });
 
         // 10. Reset MotoCare data
-        document.getElementById('mc-btn-reset-app')?.addEventListener('click', () => {
-            if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu xe máy? Hành động này sẽ đồng bộ xóa trên toàn bộ thiết bị.')) {
-                if (confirm('Hãy xác nhận lại một lần nữa. Bạn sẽ mất sạch dữ liệu đã ghi nhận.')) {
+        document.getElementById('mc-btn-reset-app')?.addEventListener('click', async () => {
+            const confirmed1 = window.showConfirm
+                ? await window.showConfirm('CẢNH BÁO NGUY HIỂM: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu xe máy? Hành động này sẽ đồng bộ xóa trên toàn bộ thiết bị.', 'Xóa Toàn Bộ Dữ Liệu Xe')
+                : confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu xe máy? Hành động này sẽ đồng bộ xóa trên toàn bộ thiết bị.');
+            if (confirmed1) {
+                const confirmed2 = window.showConfirm
+                    ? await window.showConfirm('XÁC NHẬN LẦN CUỐI: Bạn sẽ mất sạch toàn bộ thông tin xe, nhật ký đổ xăng và lịch sử bảo dưỡng. Tiếp tục?', 'Xác Nhận Lần Cuối')
+                    : confirm('Hãy xác nhận lại một lần nữa. Bạn sẽ mất sạch dữ liệu đã ghi nhận.');
+                if (confirmed2) {
                     DataPortability.resetAll();
                     window._motocareShowToast('Đã xóa toàn bộ dữ liệu xe máy!');
                     setTimeout(() => { state.initialized = false; initMotoCare(); }, 1500);
