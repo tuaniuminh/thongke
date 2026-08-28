@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.206';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.206';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.206';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.206';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.207';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.207';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.207';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.207';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.206';
-import * as sync from './sync.js?v=4.3.206';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.206';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.206';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.206';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.207';
+import * as sync from './sync.js?v=4.3.207';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.207';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.207';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.207';
 
-const APP_VERSION = '4.3.206';
+const APP_VERSION = '4.3.207';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2949,6 +2949,20 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     if (state.viewingSharedFund && (tabId === 'welove-admin' || tabId === 'welove-settings')) {
         tabId = 'welove';
     }
+
+    // Chuyển hướng các sub-tab của MotoCare
+    let targetMotocareSubView = null;
+    if (['motocare', 'motocare-dashboard', 'motocare-fuel', 'motocare-history', 'motocare-settings'].includes(tabId)) {
+        const subViewMap = {
+            'motocare': 'dashboard',
+            'motocare-dashboard': 'dashboard',
+            'motocare-fuel': 'fuel',
+            'motocare-history': 'history',
+            'motocare-settings': 'settings'
+        };
+        targetMotocareSubView = subViewMap[tabId] || 'dashboard';
+        tabId = 'motocare';
+    }
     
     const appLayoutCheck = document.getElementById('appLayout');
     const isAppLayoutHidden = appLayoutCheck && (getComputedStyle(appLayoutCheck).display === 'none');
@@ -2956,6 +2970,9 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     if (state.activeTab === tabId && !isAppLayoutHidden && tabId !== 'home' && tabId !== 'trangchu') {
         console.log(`[BUG DETECTOR] switchTab ALREADY ACTIVE & VISIBLE (${tabId}). Ensuring navbar visibility.`);
         updateSidebarNavVisibility(tabId);
+        if (targetMotocareSubView && typeof window.switchMotocareView === 'function') {
+            window.switchMotocareView(targetMotocareSubView);
+        }
         return; // Guard against sluggish double rendering / loops
     }
     
@@ -2979,7 +2996,15 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
     // Update active class on nav links (Trang chu la nut hanh dong quay ve Home, khong bao gio gan active)
     document.querySelectorAll('.nav-link').forEach(link => {
         const linkTab = link.getAttribute('data-tab');
-        if (linkTab === tabId && tabId !== 'home' && tabId !== 'trangchu') {
+        const activeSubView = window._currentMotocareView || 'dashboard';
+        const isMotocareActive = (tabId === 'motocare') && (
+            (linkTab === 'motocare' && activeSubView === 'dashboard') ||
+            (linkTab === 'motocare-dashboard' && activeSubView === 'dashboard') ||
+            (linkTab === 'motocare-fuel' && activeSubView === 'fuel') ||
+            (linkTab === 'motocare-history' && activeSubView === 'history') ||
+            (linkTab === 'motocare-settings' && activeSubView === 'settings')
+        );
+        if ((linkTab === tabId || isMotocareActive) && tabId !== 'home' && tabId !== 'trangchu') {
             link.classList.add('active');
         } else {
             link.classList.remove('active');
@@ -2991,6 +3016,7 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         if (panel.id === `tab-${tabId}` 
             || (panel.id === 'tab-welove' && (tabId === 'welove' || tabId === 'welove-admin' || tabId === 'welove-settings'))
             || (panel.id === 'tab-health' && (tabId === 'health' || tabId === 'health-reminders'))
+            || (panel.id === 'tab-motocare' && (tabId === 'motocare' || tabId.startsWith('motocare-')))
         ) {
             panel.style.display = 'block';
         } else {
@@ -3126,9 +3152,12 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         title.innerText = '🏍️ Chăm Sóc Xe';
         subtitle.innerText = 'Theo dõi ODO, đổ xăng, bảo dưỡng và chẩn đoán sức khỏe xe máy bằng AI';
         title.className = 'theme-motocare';
-        // Khởi tạo MotoCare khi lần đầu vào tab
+        // Khởi tạo MotoCare khi vào tab
         if (typeof window.initMotoCare === 'function') {
-            setTimeout(() => window.initMotoCare(), 50);
+            window.initMotoCare();
+        }
+        if (targetMotocareSubView && typeof window.switchMotocareView === 'function') {
+            window.switchMotocareView(targetMotocareSubView);
         }
     }
     
@@ -5338,7 +5367,7 @@ const CARD_NAV_REGISTRY = {
     'motocare': {
         logoText: 'Chăm Sóc Xe',
         logoThemeClass: 'theme-motocare',
-        allowedNavs: ['home', 'settings']
+        allowedNavs: ['home', 'motocare-dashboard', 'motocare-fuel', 'motocare-history', 'motocare-settings', 'settings']
     }
 };
 
@@ -5348,7 +5377,7 @@ function getCardKeyForTab(tabId) {
     if (['fund', 'fund-history', 'fund-management'].includes(tabId)) return 'fund';
     if (tabId === 'settings') return 'settings';
     if (tabId === 'am-lich') return 'am-lich';
-    if (tabId === 'motocare') return 'motocare';
+    if (tabId === 'motocare' || tabId.startsWith('motocare-')) return 'motocare';
     if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) return 'thuchi';
     return 'default';
 }

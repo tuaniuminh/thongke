@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.206';
-import { UI } from './ui.js?v=4.3.206';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.207';
+import { UI } from './ui.js?v=4.3.207';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -32,6 +32,22 @@ function switchMotocareView(viewName) {
             btn.classList.add('active');
         } else {
             btn.classList.remove('active');
+        }
+    });
+
+    // Cập nhật active class trên desktop sidebar
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        const linkTab = link.getAttribute('data-tab');
+        const viewTabMap = {
+            'dashboard': 'motocare',
+            'fuel': 'motocare-fuel',
+            'history': 'motocare-history',
+            'settings': 'motocare-settings'
+        };
+        if (linkTab === viewTabMap[viewName] || (viewName === 'dashboard' && linkTab === 'motocare-dashboard')) {
+            link.classList.add('active');
+        } else if (linkTab && (linkTab === 'motocare' || linkTab.startsWith('motocare-'))) {
+            link.classList.remove('active');
         }
     });
 
