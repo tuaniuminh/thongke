@@ -2,18 +2,18 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.201';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.201';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.201';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.201';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.202';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.202';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.202';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.202';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.201';
-import * as sync from './sync.js?v=4.3.201';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.201';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.201';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.201';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.202';
+import * as sync from './sync.js?v=4.3.202';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.202';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.202';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.202';
 
-const APP_VERSION = '4.3.201';
+const APP_VERSION = '4.3.202';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -3015,6 +3015,14 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
                 window.openLunarCalendarModal();
             }, 50);
         }
+    } else if (tabId === 'motocare') {
+        title.innerText = '🏍️ Chăm Sóc Xe';
+        subtitle.innerText = 'Theo dõi ODO, đổ xăng, bảo dưỡng và chẩn đoán sức khỏe xe máy bằng AI';
+        title.className = 'theme-motocare';
+        // Khởi tạo MotoCare khi lần đầu vào tab
+        if (typeof window.initMotoCare === 'function') {
+            setTimeout(() => window.initMotoCare(), 50);
+        }
     }
     
     if (updateHash) {
@@ -5182,6 +5190,11 @@ const CARD_NAV_REGISTRY = {
         logoText: 'Lịch Vạn Niên',
         logoThemeClass: 'theme-settings',
         allowedNavs: ['home', 'settings']
+    },
+    'motocare': {
+        logoText: 'Chăm Sóc Xe',
+        logoThemeClass: 'theme-motocare',
+        allowedNavs: ['home', 'settings']
     }
 };
 
@@ -5191,6 +5204,7 @@ function getCardKeyForTab(tabId) {
     if (['fund', 'fund-history', 'fund-management'].includes(tabId)) return 'fund';
     if (tabId === 'settings') return 'settings';
     if (tabId === 'am-lich') return 'am-lich';
+    if (tabId === 'motocare') return 'motocare';
     if (['dashboard', 'received', 'sent', 'tc-management'].includes(tabId)) return 'thuchi';
     return 'default';
 }
@@ -5426,6 +5440,35 @@ function updateMobileNavbar(tabId) {
                     <i data-lucide="home"></i>
                     <span class="btn-label">Trang chủ</span>
                 </button>
+            </div>
+        `;
+    } else if (tabId === 'motocare') {
+        if (pageTitleBlock) {
+            pageTitleBlock.classList.add('mobile-hide-title');
+        }
+
+        const currentLogoSrc = state.theme === 'light'
+            ? 'src/assets/images/icon-light.png'
+            : 'src/assets/images/icon.png';
+
+        mobileNavbar.innerHTML = `
+            <div class="mobile-navbar-left" style="width: 100%; justify-content: space-between !important; display: flex; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="mobile-navbar-logo">
+                        <img src="${currentLogoSrc}?v=${APP_VERSION}" alt="Logo" id="mobileLogoImg">
+                    </div>
+                    <span class="mobile-navbar-title theme-motocare" id="mobileNavbarTitle">🏍️ Chăm Sóc Xe</span>
+                </div>
+                <button class="nav-icon-btn text-below" onclick="window.navigateToTab('home')" title="Trang chủ">
+                    <i data-lucide="home"></i>
+                    <span class="btn-label">Trang chủ</span>
+                </button>
+            </div>
+            <div class="mobile-navbar-right" id="mobileNavbarNav">
+                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('dashboard')" title="Tổng quan">Tổng quan</button>
+                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('fuel')" title="Đổ xăng">Đổ xăng</button>
+                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('history')" title="Lịch sử">Lịch sử</button>
+                <button class="nav-icon-btn text-only" onclick="if(window.switchMotocareView) window.switchMotocareView('settings')" title="Cài đặt">Cài đặt</button>
             </div>
         `;
     } else {

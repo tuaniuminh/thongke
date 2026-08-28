@@ -90,15 +90,16 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.201">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.202">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.201">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.201">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.201">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.201">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.201">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.202">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.202">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.202">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.202">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.202">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.202">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -376,7 +377,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon.png?v=4.3.201" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon.png?v=4.3.202" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -398,7 +399,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.201" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.202" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -491,6 +492,12 @@
                         <span>Quản lý</span>
                     </a>
                 </li>
+                <li class="nav-item" data-nav="motocare" style="display: none;">
+                    <a class="nav-link" data-tab="motocare">
+                        <i data-lucide="bike"></i>
+                        <span>Ch&#259;m s&oacute;c xe</span>
+                    </a>
+                </li>
             </nav>
 
             <div class="sidebar-footer">
@@ -514,7 +521,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.201" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.202" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -2067,7 +2074,334 @@
                 </div>
             </div>
         </main>
+
+            <!-- MotoCare Tab Panel -->
+            <section class="tab-panel" id="tab-motocare" style="display: none;">
+
+                <!-- Sub Navigation -->
+                <nav class="motocare-subnav">
+                    <button class="motocare-nav-btn active" data-motocare-view="dashboard">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        <span>Tổng quan</span>
+                    </button>
+                    <button class="motocare-nav-btn" data-motocare-view="fuel">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19.77 7.23l-4.5-4.5a1 1 0 00-1.41 0l-11 11a1 1 0 00-.26.46l-1.5 5a1 1 0 001.2 1.2l5-1.5a1 1 0 00.46-.26l11-11a1 1 0 000-1.4zM7.5 18.5l-2.5.75.75-2.5 9-9 1.75 1.75-9 9zm10-10L15.75 6.75l1.5-1.5 1.75 1.75-1.5 1.5z"/></svg>
+                        <span>Đổ xăng</span>
+                    </button>
+                    <button class="motocare-nav-btn" data-motocare-view="history">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                        <span>Lịch sử</span>
+                    </button>
+                    <button class="motocare-nav-btn" data-motocare-view="settings">
+                        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                        <span>Cài đặt</span>
+                    </button>
+                </nav>
+
+                <div class="mc-app-main">
+
+                    <!-- VIEW: DASHBOARD -->
+                    <div id="motocare-view-dashboard" class="mc-view">
+                        <div class="welcome-card card">
+                            <div class="welcome-card-top">
+                                <div class="welcome-info">
+                                    <h2 id="mc-active-vehicle-name">Chưa có xe</h2>
+                                    <p id="mc-active-vehicle-plate">Hãy thêm xe mới trong phần Cài đặt</p>
+                                </div>
+                                <div class="vehicle-switcher-wrapper">
+                                    <select id="mc-active-vehicle-select" class="vehicle-select">
+                                        <option value="">-- Đổi xe khác --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="odo-update-box">
+                                <label for="mc-current-odo-input">Số Km hiện tại (ODO)</label>
+                                <div class="input-group">
+                                    <input type="number" id="mc-current-odo-input" min="0" placeholder="0">
+                                    <span class="unit">Km</span>
+                                    <button id="mc-btn-update-odo" class="btn btn-primary btn-sm">Lưu</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions-row">
+                            <button class="btn btn-card" id="mc-btn-quick-fuel">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M19.77 7.23l-4.5-4.5a1 1 0 00-1.41 0l-11 11a1 1 0 00-.26.46l-1.5 5a1 1 0 001.2 1.2l5-1.5a1 1 0 00.46-.26l11-11a1 1 0 000-1.4zM7.5 18.5l-2.5.75.75-2.5 9-9 1.75 1.75-9 9zm10-10L15.75 6.75l1.5-1.5 1.75 1.75-1.5 1.5z"/></svg>
+                                <span>Đổ xăng</span>
+                            </button>
+                            <button class="btn btn-card" id="mc-btn-quick-maintenance">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.3C.5 6.7.9 9.8 2.9 11.8c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.5z"/></svg>
+                                <span>Bảo dưỡng</span>
+                            </button>
+                            <button class="btn btn-card" id="mc-btn-quick-oil-change">
+                                <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                <span>Thay dầu máy</span>
+                            </button>
+                        </div>
+
+                        <div class="ai-doctor-card card" id="mc-card-ai-advisor">
+                            <div class="ai-doctor-header">
+                                <svg viewBox="0 0 24 24" class="ai-doctor-icon"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2v2h-2v2h-2v-2H9v-2h2V9H9V7h2V5h2v2h2v2z"/></svg>
+                                <h4>Bác sĩ xe máy AI</h4>
+                                <span id="mc-gemini-status-dot" class="status-indicator-dot"></span>
+                            </div>
+                            <p class="ai-doctor-desc">Phân tích ODO, độ hao mòn phụ tùng và lịch sử xăng xe để đưa ra đề xuất bảo dưỡng tối ưu nhất từ AI.</p>
+                            <button id="mc-btn-consult-ai" class="btn btn-ai-action">Hỏi ý kiến Bác sĩ AI</button>
+                        </div>
+
+                        <div class="section-title-wrapper">
+                            <h3 class="section-title">Tình trạng hao mòn phụ tùng</h3>
+                        </div>
+                        <div id="mc-maintenance-health-grid" class="health-grid">
+                            <div class="empty-state"><p>Vui lòng thêm xe để theo dõi sức khỏe phụ tùng.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: FUEL -->
+                    <div id="motocare-view-fuel" class="mc-view" style="display:none;">
+                        <div class="section-header">
+                            <h2>Nhật ký tiêu thụ xăng</h2>
+                            <button class="btn btn-primary" id="mc-btn-add-fuel">+ Nhập đổ xăng</button>
+                        </div>
+                        <div class="fuel-stats-cards">
+                            <div class="card stat-card"><div class="stat-value" id="mc-stat-fuel-efficiency">--</div><div class="stat-label">Lít / 100 Km (Trung bình)</div></div>
+                            <div class="card stat-card"><div class="stat-value" id="mc-stat-fuel-cost-per-km">--</div><div class="stat-label">Đồng / Km</div></div>
+                            <div class="card stat-card"><div class="stat-value" id="mc-stat-total-fuel-cost">--</div><div class="stat-label">Tổng chi phí đổ xăng</div></div>
+                        </div>
+                        <div class="chart-section card">
+                            <div class="card-header"><h3>Biến thiên lượng xăng tiêu thụ (L/100km)</h3></div>
+                            <div class="svg-chart-container" id="mc-fuel-chart-container">
+                                <div class="empty-state">Chưa đủ dữ liệu để vẽ biểu đồ (Cần tối thiểu 2 lần đổ đầy bình)</div>
+                            </div>
+                        </div>
+                        <div class="section-title-wrapper"><h3 class="section-title">Lịch sử đổ xăng</h3></div>
+                        <div class="history-list-wrapper">
+                            <table class="data-table">
+                                <thead><tr><th>Ngày</th><th>ODO (Km)</th><th>Số lít</th><th>Chi phí</th><th>Tiêu hao</th><th>Hành động</th></tr></thead>
+                                <tbody id="mc-fuel-logs-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: HISTORY -->
+                    <div id="motocare-view-history" class="mc-view" style="display:none;">
+                        <div class="section-header">
+                            <h2>Lịch sử bảo dưỡng &amp; sửa chữa</h2>
+                            <button class="btn btn-primary" id="mc-btn-add-maintenance">+ Thêm bảo dưỡng</button>
+                        </div>
+                        <div class="filter-bar card">
+                            <div class="filter-group">
+                                <label for="mc-filter-maint-category">Hạng mục:</label>
+                                <select id="mc-filter-maint-category">
+                                    <option value="all">Tất cả hạng mục</option>
+                                    <option value="oil_engine">Dầu máy</option>
+                                    <option value="oil_gear">Dầu láp (hộp số)</option>
+                                    <option value="air_filter">Lọc gió</option>
+                                    <option value="spark_plug">Bugi</option>
+                                    <option value="coolant">Nước làm mát</option>
+                                    <option value="brake">Má phanh</option>
+                                    <option value="chain">Nhông sên dĩa</option>
+                                    <option value="tires">Lốp xe</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="history-list-wrapper">
+                            <table class="data-table">
+                                <thead><tr><th>Ngày</th><th>ODO (Km)</th><th>Hạng mục</th><th>Chi phí</th><th>Ghi chú</th><th>Hành động</th></tr></thead>
+                                <tbody id="mc-maint-logs-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- VIEW: SETTINGS -->
+                    <div id="motocare-view-settings" class="mc-view" style="display:none;">
+                        <div class="section-header" style="flex-wrap:wrap;gap:10px;">
+                            <h2>Cài đặt Chăm Sóc Xe</h2>
+                            <button class="btn btn-primary" id="mc-btn-add-vehicle">+ Thêm xe mới</button>
+                        </div>
+                        <div class="card settings-card">
+                            <h3>Nhà xe của bạn</h3>
+                            <p class="settings-desc">Danh sách xe máy đang theo dõi. Bạn có thể thêm, sửa đổi hoặc xóa xe máy.</p>
+                            <div id="mc-vehicles-list-container" class="vehicles-list" style="margin-top:15px;"></div>
+                        </div>
+                        <div class="card settings-card">
+                            <h3>Định mức bảo dưỡng</h3>
+                            <p class="settings-desc">Tùy chỉnh khoảng cách và thời gian định kỳ cần bảo dưỡng phụ tùng.</p>
+                            <div class="presets-settings-list" id="mc-presets-config-list"></div>
+                        </div>
+                        <div class="card settings-card">
+                            <h3>Trí tuệ nhân tạo (Gemini AI)</h3>
+                            <p class="settings-desc">Cấu hình API Key để kích hoạt tính năng Bác sĩ Xe máy AI. Nếu để trống sẽ tự động dùng key Gemini của FamiLife.</p>
+                            <div class="form-group">
+                                <label for="mc-settings-gemini-key">Gemini API Key (riêng cho MotoCare)</label>
+                                <div class="input-group">
+                                    <input type="password" id="mc-settings-gemini-key" placeholder="Để trống = dùng key FamiLife...">
+                                    <button id="mc-btn-save-gemini-key" class="btn btn-primary btn-sm">Lưu</button>
+                                </div>
+                                <small class="form-help">Khoá API sẽ được lưu bảo mật trong bộ nhớ cục bộ thiết bị của bạn.</small>
+                            </div>
+                        </div>
+                        <div class="card settings-card">
+                            <h3>Quản lý dữ liệu xe</h3>
+                            <p class="settings-desc">Sao lưu dữ liệu xe máy của bạn để lưu giữ hoặc đồng bộ sang máy khác.</p>
+                            <div class="settings-actions">
+                                <button id="mc-btn-export-data" class="btn btn-secondary">
+                                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                                    Xuất dữ liệu (Backup JSON)
+                                </button>
+                                <button id="mc-btn-import-trigger" class="btn btn-secondary">
+                                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v-4h-4v4H7l5 5 5-5h-3z"/></svg>
+                                    Nhập dữ liệu (Restore JSON)
+                                </button>
+                                <input type="file" id="mc-file-import-input" accept=".json" style="display:none;">
+                            </div>
+                        </div>
+                        <div class="card settings-card danger-zone">
+                            <h3>Khu vực nguy hiểm</h3>
+                            <p class="settings-desc">Xóa toàn bộ dữ liệu xe máy lưu trữ trên thiết bị. Hành động này không thể khôi phục.</p>
+                            <button id="mc-btn-reset-app" class="btn btn-danger">Xóa tất cả dữ liệu xe máy</button>
+                        </div>
+                    </div>
+
+                </div><!-- end mc-app-main -->
+
+                <!-- MODAL: ADD/EDIT VEHICLE -->
+                <div id="mc-modal-vehicle" class="mc-modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="mc-vehicle-modal-title">Thêm xe mới</h3>
+                            <button class="modal-close" id="mc-btn-close-modal-vehicle">&times;</button>
+                        </div>
+                        <form id="mc-form-vehicle">
+                            <input type="hidden" id="mc-vehicle-id">
+                            <div class="form-group"><label>Tên xe <span class="required">*</span></label><input type="text" id="mc-vehicle-name" required placeholder="Ví dụ: Honda Vision 2021"></div>
+                            <div class="form-group"><label>Biển số xe</label><input type="text" id="mc-vehicle-plate" placeholder="Ví dụ: 29D1-123.45"></div>
+                            <div class="form-group"><label>Loại xe <span class="required">*</span></label>
+                                <select id="mc-vehicle-type" required>
+                                    <option value="scooter">Xe tay ga (Scooter)</option>
+                                    <option value="manual">Xe số (Manual)</option>
+                                    <option value="clutch">Xe côn tay (Clutch)</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Số Km hiện tại (ODO) <span class="required">*</span></label><input type="number" id="mc-vehicle-odo" required min="0" value="0"></div>
+                            <div class="form-group"><label>Ngày mua xe</label><input type="date" id="mc-vehicle-buy-date"></div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-vehicle">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Lưu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL: LOG FUEL -->
+                <div id="mc-modal-fuel" class="mc-modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Ghi nhận đổ xăng</h3>
+                            <button class="modal-close" id="mc-btn-close-modal-fuel">&times;</button>
+                        </div>
+                        <form id="mc-form-fuel">
+                            <input type="hidden" id="mc-fuel-log-id">
+                            <div class="form-group"><label>Ngày đổ xăng <span class="required">*</span></label><input type="date" id="mc-fuel-date" required></div>
+                            <div class="form-group"><label>ODO lúc đổ (Km) <span class="required">*</span></label><input type="number" id="mc-fuel-odo" required min="0"><small class="form-help">Số Km hiển thị trên đồng hồ lúc đổ xăng.</small></div>
+                            <div class="form-row">
+                                <div class="form-group col"><label>Số lít (L) <span class="required">*</span></label><input type="number" id="mc-fuel-liters" required step="0.01" min="0.1" placeholder="Ví dụ: 4.2"></div>
+                                <div class="form-group col"><label>Thành tiền (VNĐ) <span class="required">*</span></label><input type="number" id="mc-fuel-cost" required min="1000" step="500" placeholder="Ví dụ: 90000"></div>
+                            </div>
+                            <div class="form-group checkbox-group"><input type="checkbox" id="mc-fuel-full" checked><label for="mc-fuel-full">Đầy bình xăng (Để tính toán mức tiêu hao chính xác)</label></div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-fuel">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Lưu nhật ký</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL: LOG MAINTENANCE -->
+                <div id="mc-modal-maintenance" class="mc-modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Ghi nhận bảo dưỡng</h3>
+                            <button class="modal-close" id="mc-btn-close-modal-maintenance">&times;</button>
+                        </div>
+                        <form id="mc-form-maintenance">
+                            <input type="hidden" id="mc-maint-log-id">
+                            <div class="form-group"><label>Ngày thực hiện <span class="required">*</span></label><input type="date" id="mc-maint-date" required></div>
+                            <div class="form-group"><label>ODO lúc thực hiện (Km) <span class="required">*</span></label><input type="number" id="mc-maint-odo" required min="0"></div>
+                            <div class="form-group"><label>Hạng mục bảo dưỡng <span class="required">*</span></label>
+                                <select id="mc-maint-category" required>
+                                    <option value="oil_engine">Thay dầu máy (Engine Oil)</option>
+                                    <option value="oil_gear">Thay dầu láp / hộp số (Gear Oil)</option>
+                                    <option value="air_filter">Thay lọc gió (Air Filter)</option>
+                                    <option value="spark_plug">Thay bugi (Spark Plug)</option>
+                                    <option value="coolant">Thay/Châm nước làm mát (Coolant)</option>
+                                    <option value="brake">Thay/Bảo dưỡng má phanh (Brakes)</option>
+                                    <option value="chain">Bảo dưỡng/Thay nhông sên dĩa (Chain)</option>
+                                    <option value="tires">Thay vỏ/lốp xe (Tires)</option>
+                                    <option value="other">Bảo dưỡng/Sửa chữa khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Chi phí (VNĐ)</label><input type="number" id="mc-maint-cost" min="0" step="1000" placeholder="0"></div>
+                            <div class="form-group"><label>Ghi chú chi tiết / Địa điểm</label><textarea id="mc-maint-notes" rows="3" placeholder="Ví dụ: Thay dầu nhớt Castrol Power1, tiệm sửa xe đầu ngõ..."></textarea></div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-maintenance">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Lưu lịch sử</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL: EDIT PRESET -->
+                <div id="mc-modal-preset" class="mc-modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Chỉnh sửa định mức bảo dưỡng</h3>
+                            <button class="modal-close" id="mc-btn-close-modal-preset">&times;</button>
+                        </div>
+                        <form id="mc-form-preset">
+                            <input type="hidden" id="mc-preset-key">
+                            <div class="form-group"><label>Tên hạng mục</label><input type="text" id="mc-preset-name-display" disabled class="disabled-input"></div>
+                            <div class="form-row">
+                                <div class="form-group col"><label>Chu kỳ Km <span class="required">*</span></label><input type="number" id="mc-preset-interval-km" required min="100" step="100"></div>
+                                <div class="form-group col"><label>Chu kỳ Tháng <span class="required">*</span></label><input type="number" id="mc-preset-interval-months" required min="1"></div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-preset">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Cập nhật định mức</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MODAL: AI DOCTOR -->
+                <div id="mc-modal-ai-doctor" class="mc-modal-overlay hidden">
+                    <div class="modal-content" style="max-width:700px;">
+                        <div class="modal-header">
+                            <h3 style="display:flex;align-items:center;gap:8px;">
+                                <svg viewBox="0 0 24 24" width="22" height="22" style="color:var(--color-accent);"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2v2h-2v2h-2v-2H9v-2h2V9H9V7h2V5h2v2h2v2z"/></svg>
+                                Kết quả Chẩn đoán Bác sĩ AI
+                            </h3>
+                            <button class="modal-close" id="mc-btn-close-modal-ai-doctor">&times;</button>
+                        </div>
+                        <div class="ai-consultation-body">
+                            <div id="mc-ai-loading" class="ai-loading-box">
+                                <div class="spinner"></div>
+                                <p>Đang tổng hợp dữ liệu xe và tham khảo ý kiến Bác sĩ AI...</p>
+                                <small>Việc này có thể mất từ 5-10 giây...</small>
+                            </div>
+                            <div id="mc-ai-result-content" class="ai-result-content hidden"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="mc-btn-close-ai-doctor">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+
+            </section><!-- end tab-motocare -->
+
     </div>
+
 
     <!-- Home Landing Page Layout -->
     <div class="home-layout" id="homeLayout" style="display: none; position: relative;">
@@ -2114,7 +2448,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.201" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.202" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2183,6 +2517,20 @@
                     </div>
                 </div>
 
+                <!-- Card 5: Chăm sóc xe -->
+                <div class="home-card" id="homeCardMotocare" onclick="window.switchTab ? window.switchTab('motocare') : null" style="cursor: pointer; background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(37,99,235,0.04)); border: 1px solid rgba(14,165,233,0.2);">
+                    <div class="home-card-icon" style="background: rgba(14,165,233,0.1); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.25);">
+                        <i data-lucide="bike"></i>
+                    </div>
+                    <div class="home-card-content">
+                        <h3>Chăm sóc xe</h3>
+                        <p>Theo dõi ODO, nhật ký đổ xăng, lịch bảo dưỡng xe máy và phân tích sức khỏe phụ tùng bằng AI</p>
+                    </div>
+                    <div class="home-card-arrow">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -2210,11 +2558,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.201';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.202';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.201';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.202';
                         }
                     })();
                 </script>
@@ -3755,17 +4103,18 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.201"></script>
-    <script type="module" src="src/core/app.js?v=4.3.201"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.201"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.201"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.201"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.202"></script>
+    <script type="module" src="src/core/app.js?v=4.3.202"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.202"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.202"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.202"></script>
+    <script type="module" src="src/features/motocare/motocare.js?v=4.3.202"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.201')
+                navigator.serviceWorker.register('./sw.js?v=4.3.202')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });
