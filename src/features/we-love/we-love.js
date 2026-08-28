@@ -811,7 +811,7 @@ export async function renderWeLoveDashboard() {
     const isLocal = !sync.isConfigured() || !state.user;
     // isSpouseRole: Vợ (người nhập mã) chỉ được xem WeLove, không chỉnh sửa cấu hình
     const isSpouseRole = state.viewingSharedFund && state.sharedFundSourceRow !== null;
-    const canEdit = !isSpouseRole && (isLocal || state.user !== null);
+    const canEdit = !isSpouseRole;
     const showSickness = state.weLoveShowSickness !== false;
     const isAdmin = !isSpouseRole; // Admin chính là người chồng (hoặc tài khoản độc lập)
 
@@ -895,7 +895,7 @@ export async function renderWeLoveDashboard() {
                 <!-- ADMIN SUBVIEW -->
                 ${isModern ? `
                 <!-- DESKTOP 2-COLUMN LAYOUT -->
-                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2.5rem; width: 100%; max-width: 1200px; margin: 3.5rem auto 0 auto; z-index: 5; align-items: stretch; padding: 0 1.5rem; grid-column: span 2 !important;">
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2.5rem; width: 100%; max-width: 1200px; margin: 2rem auto 0 auto; z-index: 5; align-items: stretch; padding: 0 1.5rem; grid-column: span 2 !important;">
                     <!-- Left Column: Scheduler Form -->
                     <div class="welove-card" style="margin-top: 0; width: 100%; text-align: left; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
                         <div>
@@ -939,7 +939,7 @@ export async function renderWeLoveDashboard() {
                 </div>
                 ` : `
                 <!-- MOBILE STACKED LAYOUT -->
-                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 0 auto; z-index: 5;">
+                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 0.75rem auto 0 auto; z-index: 5;">
                     <!-- Lên lịch lời nhắc -->
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
@@ -979,7 +979,7 @@ export async function renderWeLoveDashboard() {
                 `}
             ` : weLoveCurrentSubView === 'settings' && canEdit ? `
                 <!-- CONFIG / SETTINGS SUBVIEW -->
-                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: 3.5rem auto 0 auto; z-index: 5; padding: 0 15px; grid-column: span 2 !important;">
+                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; align-items: center; max-width: 580px; margin: ${isModern ? '2rem auto 0 auto' : '0.5rem auto 0 auto'}; z-index: 5; padding: 0 15px; grid-column: span 2 !important;">
                     <div class="welove-card" style="margin-top: 0; width: 100%;">
                         <div class="welove-title-box" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                             <span style="font-size: 1.8rem;">⚙️</span>
