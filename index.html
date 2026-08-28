@@ -90,16 +90,16 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.210">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.211">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.210">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.210">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.210">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.210">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.210">
-    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.210">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.211">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.211">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.211">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.211">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.211">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.211">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -377,7 +377,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon.png?v=4.3.210" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon.png?v=4.3.211" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -399,7 +399,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.210" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.211" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -539,7 +539,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.210" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.211" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -2254,138 +2254,6 @@
 
                 </div><!-- end mc-app-main -->
 
-                <!-- MODAL: ADD/EDIT VEHICLE -->
-                <div id="mc-modal-vehicle" class="mc-modal-overlay hidden">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3 id="mc-vehicle-modal-title">Thêm xe mới</h3>
-                            <button class="modal-close" id="mc-btn-close-modal-vehicle">&times;</button>
-                        </div>
-                        <form id="mc-form-vehicle">
-                            <input type="hidden" id="mc-vehicle-id">
-                            <div class="form-group"><label>Tên xe <span class="required">*</span></label><input type="text" id="mc-vehicle-name" required placeholder="Ví dụ: Honda Vision 2021"></div>
-                            <div class="form-group"><label>Biển số xe</label><input type="text" id="mc-vehicle-plate" placeholder="Ví dụ: 29D1-123.45"></div>
-                            <div class="form-group"><label>Loại xe <span class="required">*</span></label>
-                                <select id="mc-vehicle-type" required>
-                                    <option value="scooter">Xe tay ga (Scooter)</option>
-                                    <option value="manual">Xe số (Manual)</option>
-                                    <option value="clutch">Xe côn tay (Clutch)</option>
-                                </select>
-                            </div>
-                            <div class="form-group"><label>Số Km hiện tại (ODO) <span class="required">*</span></label><input type="number" id="mc-vehicle-odo" required min="0" value="0"></div>
-                            <div class="form-group"><label>Ngày mua xe</label><input type="date" id="mc-vehicle-buy-date"></div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-vehicle">Hủy</button>
-                                <button type="submit" class="btn btn-primary">Lưu</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- MODAL: LOG FUEL -->
-                <div id="mc-modal-fuel" class="mc-modal-overlay hidden">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Ghi nhận đổ xăng</h3>
-                            <button class="modal-close" id="mc-btn-close-modal-fuel">&times;</button>
-                        </div>
-                        <form id="mc-form-fuel">
-                            <input type="hidden" id="mc-fuel-log-id">
-                            <div class="form-group"><label>Ngày đổ xăng <span class="required">*</span></label><input type="date" id="mc-fuel-date" required></div>
-                            <div class="form-group"><label>ODO lúc đổ (Km) <span class="required">*</span></label><input type="number" id="mc-fuel-odo" required min="0"><small class="form-help">Số Km hiển thị trên đồng hồ lúc đổ xăng.</small></div>
-                            <div class="form-row">
-                                <div class="form-group col"><label>Số lít (L) <span class="required">*</span></label><input type="number" id="mc-fuel-liters" required step="0.01" min="0.1" placeholder="Ví dụ: 4.2"></div>
-                                <div class="form-group col"><label>Thành tiền (VNĐ) <span class="required">*</span></label><input type="number" id="mc-fuel-cost" required min="1000" step="500" placeholder="Ví dụ: 90000"></div>
-                            </div>
-                            <div class="form-group checkbox-group"><input type="checkbox" id="mc-fuel-full" checked><label for="mc-fuel-full">Đầy bình xăng (Để tính toán mức tiêu hao chính xác)</label></div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-fuel">Hủy</button>
-                                <button type="submit" class="btn btn-primary">Lưu nhật ký</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- MODAL: LOG MAINTENANCE -->
-                <div id="mc-modal-maintenance" class="mc-modal-overlay hidden">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Ghi nhận bảo dưỡng</h3>
-                            <button class="modal-close" id="mc-btn-close-modal-maintenance">&times;</button>
-                        </div>
-                        <form id="mc-form-maintenance">
-                            <input type="hidden" id="mc-maint-log-id">
-                            <div class="form-group"><label>Ngày thực hiện <span class="required">*</span></label><input type="date" id="mc-maint-date" required></div>
-                            <div class="form-group"><label>ODO lúc thực hiện (Km) <span class="required">*</span></label><input type="number" id="mc-maint-odo" required min="0"></div>
-                            <div class="form-group"><label>Hạng mục bảo dưỡng <span class="required">*</span></label>
-                                <select id="mc-maint-category" required>
-                                    <option value="oil_engine">Thay dầu máy (Engine Oil)</option>
-                                    <option value="oil_gear">Thay dầu láp / hộp số (Gear Oil)</option>
-                                    <option value="air_filter">Thay lọc gió (Air Filter)</option>
-                                    <option value="spark_plug">Thay bugi (Spark Plug)</option>
-                                    <option value="coolant">Thay/Châm nước làm mát (Coolant)</option>
-                                    <option value="brake">Thay/Bảo dưỡng má phanh (Brakes)</option>
-                                    <option value="chain">Bảo dưỡng/Thay nhông sên dĩa (Chain)</option>
-                                    <option value="tires">Thay vỏ/lốp xe (Tires)</option>
-                                    <option value="other">Bảo dưỡng/Sửa chữa khác</option>
-                                </select>
-                            </div>
-                            <div class="form-group"><label>Chi phí (VNĐ)</label><input type="number" id="mc-maint-cost" min="0" step="1000" placeholder="0"></div>
-                            <div class="form-group"><label>Ghi chú chi tiết / Địa điểm</label><textarea id="mc-maint-notes" rows="3" placeholder="Ví dụ: Thay dầu nhớt Castrol Power1, tiệm sửa xe đầu ngõ..."></textarea></div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-maintenance">Hủy</button>
-                                <button type="submit" class="btn btn-primary">Lưu lịch sử</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- MODAL: EDIT PRESET -->
-                <div id="mc-modal-preset" class="mc-modal-overlay hidden">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Chỉnh sửa định mức bảo dưỡng</h3>
-                            <button class="modal-close" id="mc-btn-close-modal-preset">&times;</button>
-                        </div>
-                        <form id="mc-form-preset">
-                            <input type="hidden" id="mc-preset-key">
-                            <div class="form-group"><label>Tên hạng mục</label><input type="text" id="mc-preset-name-display" disabled class="disabled-input"></div>
-                            <div class="form-row">
-                                <div class="form-group col"><label>Chu kỳ Km <span class="required">*</span></label><input type="number" id="mc-preset-interval-km" required min="100" step="100"></div>
-                                <div class="form-group col"><label>Chu kỳ Tháng <span class="required">*</span></label><input type="number" id="mc-preset-interval-months" required min="1"></div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" id="mc-btn-cancel-preset">Hủy</button>
-                                <button type="submit" class="btn btn-primary">Cập nhật định mức</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- MODAL: AI DOCTOR -->
-                <div id="mc-modal-ai-doctor" class="mc-modal-overlay hidden">
-                    <div class="modal-content" style="max-width:700px;">
-                        <div class="modal-header">
-                            <h3 style="display:flex;align-items:center;gap:8px;">
-                                <svg viewBox="0 0 24 24" width="22" height="22" style="color:var(--color-accent);"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2v2h-2v2h-2v-2H9v-2h2V9H9V7h2V5h2v2h2v2z"/></svg>
-                                Kết quả Chẩn đoán Bác sĩ AI
-                            </h3>
-                            <button class="modal-close" id="mc-btn-close-modal-ai-doctor">&times;</button>
-                        </div>
-                        <div class="ai-consultation-body">
-                            <div id="mc-ai-loading" class="ai-loading-box">
-                                <div class="spinner"></div>
-                                <p>Đang tổng hợp dữ liệu xe và tham khảo ý kiến Bác sĩ AI...</p>
-                                <small>Việc này có thể mất từ 5-10 giây...</small>
-                            </div>
-                            <div id="mc-ai-result-content" class="ai-result-content hidden"></div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" id="mc-btn-close-ai-doctor">Đóng</button>
-                        </div>
-                    </div>
-                </div>
-
             </section><!-- end tab-motocare -->
         </main>
 
@@ -2437,7 +2305,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.210" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.211" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2547,11 +2415,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.210';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.211';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.210';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.211';
                         }
                     })();
                 </script>
@@ -4048,6 +3916,139 @@
         </div>
     </div>
 
+    <!-- MotoCare Modals (Top-level Fixed Overlays) -->
+    <!-- MODAL: ADD/EDIT VEHICLE -->
+    <div id="mc-modal-vehicle" class="modal-overlay mc-modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="mc-vehicle-modal-title">Thêm xe mới</h3>
+                <button class="modal-close" id="mc-btn-close-modal-vehicle">&times;</button>
+            </div>
+            <form id="mc-form-vehicle">
+                <input type="hidden" id="mc-vehicle-id">
+                <div class="form-group"><label>Tên xe <span class="required">*</span></label><input type="text" id="mc-vehicle-name" required placeholder="Ví dụ: Honda Vision 2021"></div>
+                <div class="form-group"><label>Biển số xe</label><input type="text" id="mc-vehicle-plate" placeholder="Ví dụ: 29D1-123.45"></div>
+                <div class="form-group"><label>Loại xe <span class="required">*</span></label>
+                    <select id="mc-vehicle-type" required>
+                        <option value="scooter">Xe tay ga (Scooter)</option>
+                        <option value="manual">Xe số (Manual)</option>
+                        <option value="clutch">Xe côn tay (Clutch)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Số Km hiện tại (ODO) <span class="required">*</span></label><input type="number" id="mc-vehicle-odo" required min="0" value="0"></div>
+                <div class="form-group"><label>Ngày mua xe</label><input type="date" id="mc-vehicle-buy-date"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="mc-btn-cancel-vehicle">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LOG FUEL -->
+    <div id="mc-modal-fuel" class="modal-overlay mc-modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ghi nhận đổ xăng</h3>
+                <button class="modal-close" id="mc-btn-close-modal-fuel">&times;</button>
+            </div>
+            <form id="mc-form-fuel">
+                <input type="hidden" id="mc-fuel-log-id">
+                <div class="form-group"><label>Ngày đổ xăng <span class="required">*</span></label><input type="date" id="mc-fuel-date" required></div>
+                <div class="form-group"><label>ODO lúc đổ (Km) <span class="required">*</span></label><input type="number" id="mc-fuel-odo" required min="0"><small class="form-help">Số Km hiển thị trên đồng hồ lúc đổ xăng.</small></div>
+                <div class="form-row">
+                    <div class="form-group col"><label>Số lít (L) <span class="required">*</span></label><input type="number" id="mc-fuel-liters" required step="0.01" min="0.1" placeholder="Ví dụ: 4.2"></div>
+                    <div class="form-group col"><label>Thành tiền (VNĐ) <span class="required">*</span></label><input type="number" id="mc-fuel-cost" required min="1000" step="500" placeholder="Ví dụ: 90000"></div>
+                </div>
+                <div class="form-group checkbox-group"><input type="checkbox" id="mc-fuel-full" checked><label for="mc-fuel-full">Đầy bình xăng (Để tính toán mức tiêu hao chính xác)</label></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="mc-btn-cancel-fuel">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu nhật ký</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LOG MAINTENANCE -->
+    <div id="mc-modal-maintenance" class="modal-overlay mc-modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ghi nhận bảo dưỡng</h3>
+                <button class="modal-close" id="mc-btn-close-modal-maintenance">&times;</button>
+            </div>
+            <form id="mc-form-maintenance">
+                <input type="hidden" id="mc-maint-log-id">
+                <div class="form-group"><label>Ngày thực hiện <span class="required">*</span></label><input type="date" id="mc-maint-date" required></div>
+                <div class="form-group"><label>ODO lúc thực hiện (Km) <span class="required">*</span></label><input type="number" id="mc-maint-odo" required min="0"></div>
+                <div class="form-group"><label>Hạng mục bảo dưỡng <span class="required">*</span></label>
+                    <select id="mc-maint-category" required>
+                        <option value="oil_engine">Thay dầu máy (Engine Oil)</option>
+                        <option value="oil_gear">Thay dầu láp / hộp số (Gear Oil)</option>
+                        <option value="air_filter">Thay lọc gió (Air Filter)</option>
+                        <option value="spark_plug">Thay bugi (Spark Plug)</option>
+                        <option value="coolant">Thay/Châm nước làm mát (Coolant)</option>
+                        <option value="brake">Thay/Bảo dưỡng má phanh (Brakes)</option>
+                        <option value="chain">Bảo dưỡng/Thay nhông sên dĩa (Chain)</option>
+                        <option value="tires">Thay vỏ/lốp xe (Tires)</option>
+                        <option value="other">Bảo dưỡng/Sửa chữa khác</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Chi phí (VNĐ)</label><input type="number" id="mc-maint-cost" min="0" step="1000" placeholder="0"></div>
+                <div class="form-group"><label>Ghi chú chi tiết / Địa điểm</label><textarea id="mc-maint-notes" rows="3" placeholder="Ví dụ: Thay dầu nhớt Castrol Power1, tiệm sửa xe đầu ngõ..."></textarea></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="mc-btn-cancel-maintenance">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu lịch sử</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT PRESET -->
+    <div id="mc-modal-preset" class="modal-overlay mc-modal-overlay hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chỉnh sửa định mức bảo dưỡng</h3>
+                <button class="modal-close" id="mc-btn-close-modal-preset">&times;</button>
+            </div>
+            <form id="mc-form-preset">
+                <input type="hidden" id="mc-preset-key">
+                <div class="form-group"><label>Tên hạng mục</label><input type="text" id="mc-preset-name-display" disabled class="disabled-input"></div>
+                <div class="form-row">
+                    <div class="form-group col"><label>Chu kỳ Km <span class="required">*</span></label><input type="number" id="mc-preset-interval-km" required min="100" step="100"></div>
+                    <div class="form-group col"><label>Chu kỳ Tháng <span class="required">*</span></label><input type="number" id="mc-preset-interval-months" required min="1"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="mc-btn-cancel-preset">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật định mức</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AI DOCTOR -->
+    <div id="mc-modal-ai-doctor" class="modal-overlay mc-modal-overlay hidden" style="display: none;">
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header">
+                <h3 style="display:flex;align-items:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" width="22" height="22" style="color:var(--color-accent);"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2v2h-2v2h-2v-2H9v-2h2V9H9V7h2V5h2v2h2v2z"/></svg>
+                    Kết quả Chẩn đoán Bác sĩ AI
+                </h3>
+                <button class="modal-close" id="mc-btn-close-modal-ai-doctor">&times;</button>
+            </div>
+            <div class="ai-consultation-body">
+                <div id="mc-ai-loading" class="ai-loading-box">
+                    <div class="spinner"></div>
+                    <p>Đang tổng hợp dữ liệu xe và tham khảo ý kiến Bác sĩ AI...</p>
+                    <small>Việc này có thể mất từ 5-10 giây...</small>
+                </div>
+                <div id="mc-ai-result-content" class="ai-result-content hidden"></div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="mc-btn-close-ai-doctor">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast container for notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -4088,18 +4089,18 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.210"></script>
-    <script type="module" src="src/core/app.js?v=4.3.210"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.210"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.210"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.210"></script>
-    <script type="module" src="src/features/motocare/motocare.js?v=4.3.210"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.211"></script>
+    <script type="module" src="src/core/app.js?v=4.3.211"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.211"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.211"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.211"></script>
+    <script type="module" src="src/features/motocare/motocare.js?v=4.3.211"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.210')
+                navigator.serviceWorker.register('./sw.js?v=4.3.211')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

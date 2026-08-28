@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.210';
-import { UI } from './ui.js?v=4.3.210';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.211';
+import { UI } from './ui.js?v=4.3.211';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -117,8 +117,12 @@ const App = {
         document.getElementById('mc-btn-quick-maintenance')?.addEventListener('click', () => this.openModal('maintenance'));
         document.getElementById('mc-btn-quick-oil-change')?.addEventListener('click', () => {
             const vId = state.activeVehicleId;
-            if (!vId) { window._motocareShowToast('Chưa chọn xe máy!', 'danger'); return; }
-            const vehicle = Vehicles.getById(vId);
+            const vehicle = vId ? Vehicles.getById(vId) : null;
+            if (!vehicle) {
+                window._motocareShowToast('Vui lòng thêm hoặc chọn xe máy trước khi ghi nhận thay dầu máy!', 'warning');
+                this.openModal('vehicle');
+                return;
+            }
             if (confirm(`Bạn muốn ghi nhận THAY DẦU MÁY cho xe ${vehicle.name} ở số Km hiện tại (${vehicle.currentOdo.toLocaleString()} Km) chứ?`)) {
                 MaintenanceLogs.add({
                     vehicleId: vId,
@@ -324,8 +328,18 @@ const App = {
     openModal(type, data = null) {
         const overlay = document.getElementById(`mc-modal-${type}`);
         if (!overlay) return;
+
+        const vehicle = state.activeVehicleId ? Vehicles.getById(state.activeVehicleId) : null;
+        if ((type === 'fuel' || type === 'maintenance' || type === 'preset') && !vehicle) {
+            window._motocareShowToast('Vui lòng thêm xe máy trước khi thực hiện!', 'warning');
+            this.openModal('vehicle');
+            return;
+        }
+
         overlay.classList.remove('hidden');
-        const vehicle = Vehicles.getById(state.activeVehicleId);
+        overlay.classList.add('active');
+        overlay.style.display = 'flex';
+
         const todayStr = new Date().toISOString().split('T')[0];
         if (type === 'vehicle') {
             const modalTitle = document.getElementById('mc-vehicle-modal-title');
@@ -367,7 +381,11 @@ const App = {
 
     closeModal(type) {
         const overlay = document.getElementById(`mc-modal-${type}`);
-        if (overlay) overlay.classList.add('hidden');
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+        }
     }
 };
 
@@ -386,13 +404,16 @@ export function initMotoCare() {
 
     // Bootstrap active vehicle
     const activeId = Vehicles.getActiveId();
-    if (activeId) {
+    if (activeId && Vehicles.getById(activeId)) {
         state.activeVehicleId = activeId;
     } else {
         const list = Vehicles.getAll();
         if (list.length > 0) {
             Vehicles.setActiveId(list[0].id);
             state.activeVehicleId = list[0].id;
+        } else {
+            Vehicles.setActiveId(null);
+            state.activeVehicleId = null;
         }
     }
 
