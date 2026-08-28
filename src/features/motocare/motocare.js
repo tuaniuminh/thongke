@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.232';
-import { UI } from './ui.js?v=4.3.232';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.233';
+import { UI } from './ui.js?v=4.3.233';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -554,7 +554,7 @@ const App = {
 };
 
 // Hàm khởi tạo MotoCare - được gọi bởi FamiLife khi switchTab('motocare')
-export function initMotoCare() {
+function initMotoCare() {
     window.switchMotocareView = switchMotocareView;
 
     // Expose toast bridge cho FamiLife

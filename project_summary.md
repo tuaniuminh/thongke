@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.232** |
+| **Phiên bản hiện tại** | **v4.3.233** |
+| **v4.3.233** | 🐛 **Khắc Phục Lỗi Duplicate Export Trong Module MotoCare (v4.3.233)**: Chuẩn hóa câu lệnh export cho hàm `initMotoCare` trong file `motocare.js`, triệt tiêu hoàn toàn lỗi cú pháp JavaScript ES Modules `Duplicate export of 'initMotoCare'` khi trình duyệt nạp module. |
 | **v4.3.232** | 🧹 **Tối Ưu Khởi Tạo Module MotoCare & Dọn Dẹp Cảnh Báo Console (v4.3.232)**: Loại bỏ khối code tự động chạy sớm không cần thiết ở cấp độ module `motocare.js`, để router của `app.js` toàn quyền quản lý vòng đời khởi tạo chính xác khi chuyển tab `#chamsocxe`, loại bỏ hoàn toàn thông báo lỗi console `[MotoCare Auto Init Error]`. |
 | **v4.3.231** | 🐛 **Sửa Lỗi Cú Pháp Async SyntaxError [ERR-101] Trong MotoCare (v4.3.231)**: Bổ sung từ khóa `async` cho hàm lắng nghe sự kiện Click Delegation `#tab-motocare`, khắc phục triệt để lỗi "Unexpected reserved word await" khi kích hoạt các hộp thoại xác nhận xóa xe và nhật ký. |
 | **v4.3.230** | 🔔 **Đồng Bộ Hóa Modal Hộp Thoại Xác Nhận Đẹp Mắt Của FamiLife Sang Toàn Bộ MotoCare (v4.3.230)**: Thay thế toàn bộ hộp thoại `confirm()` mặc định thô sơ của trình duyệt bằng `window.showConfirm` chính chủ của FamiLife khi Xóa xe máy, Xóa nhật ký đổ xăng, Xóa lịch sử bảo dưỡng, Xác nhận thay dầu máy và Xóa sạch dữ liệu xe. |
 | **v4.3.229** | 🧹 **Loại Bỏ Model 1.5 Đã Khai Tử & Tối Ưu Hóa Dải Gemini 3.x - 2.x (v4.3.229)**: Chính thức loại bỏ hoàn toàn `gemini-1.5-flash` đã ngừng cung cấp (End of Life), chuẩn hóa chuỗi mô hình hoạt động hiệu quả cao chỉ gồm các thế hệ đang được Google AI Studio hỗ trợ: `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5-flash`, `gemini-2.5-flash`, `gemini-2.0-flash`. |
-| **v4.3.228** | ⚡ **Mở Rộng Dải Model Fallback Với Toàn Bộ Thế Hệ Gemini 3.x & 2.x (v4.3.228)**: Bổ sung đầy đủ các phiên bản `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5-flash`, `gemini-2.5-flash`, `gemini-2.0-flash` vào chuỗi dự phòng thông minh, đảm bảo khả năng tương thích tối đa và độ sẵn sàng 100% khi một số model cũ bị ngừng cung cấp. |
