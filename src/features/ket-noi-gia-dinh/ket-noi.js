@@ -2,9 +2,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     escapeHTML, decryptWithPrivateKey
-} from '../../core/app.js?v=4.3.240';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.240';
-import * as sync from '../../core/sync.js?v=4.3.240';
+} from '../../core/app.js?v=4.3.241';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.241';
+import * as sync from '../../core/sync.js?v=4.3.241';
 
 let _pairingInterval = null;
 let _pairingRealtimeChannel = null;

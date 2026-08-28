@@ -90,16 +90,16 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.240">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.241">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.240">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.240">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.240">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.240">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.240">
-    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.240">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.241">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.241">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.241">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.241">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.241">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.241">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -377,7 +377,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon.png?v=4.3.240" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon.png?v=4.3.241" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -399,7 +399,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.240" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.241" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -539,7 +539,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.240" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.241" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -2319,7 +2319,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.240" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.241" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2429,11 +2429,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.240';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.241';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.240';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.241';
                         }
                     })();
                 </script>
@@ -4021,13 +4021,13 @@
 
     <!-- 3. MODAL: LOG MAINTENANCE -->
     <div id="mc-modal-maintenance" class="modal-overlay" style="display: none;">
-        <div class="modal-container" style="width: 480px; max-width: 95%;">
+        <div class="modal-container" style="width: 520px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
             <div class="modal-header">
-                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">Ghi nhận bảo dưỡng</h3>
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary);" id="mc-maint-modal-title">Ghi nhận bảo dưỡng</h3>
                 <button type="button" class="close-btn" id="mc-btn-close-modal-maintenance" style="background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
             </div>
-            <form id="mc-form-maintenance">
-                <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px;">
+            <form id="mc-form-maintenance" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+                <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1;">
                     <input type="hidden" id="mc-maint-log-id">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="form-group">
@@ -4039,34 +4039,56 @@
                             <input type="number" id="mc-maint-odo" class="form-input" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box;" required min="0">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Hạng mục bảo dưỡng <span style="color: var(--accent-rose);">*</span></label>
-                        <select id="mc-maint-category" class="form-select" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box;" required>
-                            <option value="oil_engine">Thay dầu máy (Engine Oil)</option>
-                            <option value="oil_gear">Thay dầu láp / hộp số (Gear Oil)</option>
-                            <option value="air_filter">Thay lọc gió (Air Filter)</option>
-                            <option value="spark_plug">Thay bugi (Spark Plug)</option>
-                            <option value="coolant">Thay/Châm nước làm mát (Coolant)</option>
-                            <option value="brake_front">Thay má phanh trước (Front Brake)</option>
-                            <option value="brake_rear">Thay má phanh sau (Rear Brake)</option>
-                            <option value="chain">Bảo dưỡng/Thay nhông sên dĩa (Chain)</option>
-                            <option value="tires">Thay vỏ/lốp xe (Tires)</option>
-                            <option value="full_service">Bảo dưỡng toàn bộ xe (Full Service)</option>
-                            <option value="other">Bảo dưỡng/Sửa chữa khác</option>
-                        </select>
+
+                    <!-- Single Edit Mode (Chỉ hiện khi sửa 1 bản ghi cũ) -->
+                    <div id="mc-maint-single-mode" style="display: none; display: flex; flex-direction: column; gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Hạng mục bảo dưỡng <span style="color: var(--accent-rose);">*</span></label>
+                            <select id="mc-maint-category" class="form-select" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box;">
+                                <option value="oil_engine">Thay dầu máy (Engine Oil)</option>
+                                <option value="oil_gear">Thay dầu láp / hộp số (Gear Oil)</option>
+                                <option value="air_filter">Thay lọc gió (Air Filter)</option>
+                                <option value="spark_plug">Thay bugi (Spark Plug)</option>
+                                <option value="coolant">Thay/Châm nước làm mát (Coolant)</option>
+                                <option value="brake_front">Thay má phanh trước (Front Brake)</option>
+                                <option value="brake_rear">Thay má phanh sau (Rear Brake)</option>
+                                <option value="chain">Bảo dưỡng/Thay nhông sên dĩa (Chain)</option>
+                                <option value="tires">Thay vỏ/lốp xe (Tires)</option>
+                                <option value="full_service">Bảo dưỡng toàn bộ xe (Full Service)</option>
+                                <option value="other">Bảo dưỡng/Sửa chữa khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Chi phí (VNĐ)</label>
+                            <input type="number" id="mc-maint-cost" class="form-input" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box;" min="0" step="1000" placeholder="0">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Chi phí (VNĐ)</label>
-                        <input type="number" id="mc-maint-cost" class="form-input" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box;" min="0" step="1000" placeholder="0">
+
+                    <!-- Batch Checklist Mode (Hiện khi ghi nhận bảo dưỡng mới) -->
+                    <div id="mc-maint-batch-mode" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin: 0;">Chọn các hạng mục đã thực hiện <span style="color: var(--accent-rose);">*</span></label>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">(Tick chọn nhiều mục)</span>
+                        </div>
+                        <div id="mc-maint-checklist-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 230px; overflow-y: auto; padding-right: 4px;">
+                            <!-- Dynamic checklist rows rendered via UI.renderMaintenanceChecklist -->
+                        </div>
+                        <div id="mc-maint-batch-summary" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(0, 242, 254, 0.06); border: 1px dashed rgba(0, 242, 254, 0.3); border-radius: 8px; font-size: 0.85rem;">
+                            <span style="color: var(--text-secondary);">Đã chọn: <strong id="mc-maint-selected-count" style="color: var(--text-primary);">0</strong> mục</span>
+                            <span style="color: var(--text-secondary);">Tổng tiền: <strong id="mc-maint-selected-cost" style="color: var(--color-primary, #00f2fe); font-size: 0.95rem;">0 đ</strong></span>
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Ghi chú chi tiết</label>
-                        <textarea id="mc-maint-notes" class="form-input" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box; resize: vertical;" rows="3" placeholder="Ví dụ: Thay dầu nhớt Castrol Power1, tiệm sửa xe đầu ngõ..."></textarea>
+                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Ghi chú chung</label>
+                        <textarea id="mc-maint-notes" class="form-input" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); padding: 10px 12px; color: var(--text-primary); box-sizing: border-box; resize: vertical;" rows="2" placeholder="Ví dụ: Bảo dưỡng 50.000 Km tại HEAD Honda, thay dầu và lọc gió..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-tertiary);">
                     <button type="button" class="btn btn-outline" id="mc-btn-cancel-maintenance" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--btn-radius); cursor: pointer;">Hủy</button>
-                    <button type="submit" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--btn-radius); cursor: pointer; background: var(--primary-gradient); color: #fff; border: none;">Lưu lịch sử</button>
+                    <button type="submit" class="btn btn-primary" id="mc-btn-submit-maint" style="padding: 8px 16px; font-size: 0.85rem; border-radius: var(--btn-radius); cursor: pointer; background: var(--primary-gradient); color: #fff; border: none;">
+                        <span id="mc-btn-save-maintenance-text">Lưu lịch sử</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -4196,17 +4218,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.240"></script>
-    <script type="module" src="src/core/app.js?v=4.3.240"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.240"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.240"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.240"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.241"></script>
+    <script type="module" src="src/core/app.js?v=4.3.241"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.241"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.241"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.241"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.240')
+                navigator.serviceWorker.register('./sw.js?v=4.3.241')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

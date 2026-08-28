@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.240';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.240';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.241';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.241';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -301,6 +301,47 @@ export const MaintenanceLogs = {
         }
 
         return newLog;
+    },
+
+    addAll(logsArray) {
+        if (!Array.isArray(logsArray) || logsArray.length === 0) return [];
+        const list = this.getAll();
+        const now = new Date().toISOString();
+        const added = [];
+        let maxOdo = 0;
+        let vId = null;
+
+        logsArray.forEach(log => {
+            const odoVal = parseInt(log.odo) || 0;
+            const newLog = {
+                id: generateUUID(),
+                vehicleId: log.vehicleId,
+                date: log.date || now.split('T')[0],
+                odo: odoVal,
+                category: log.category,
+                cost: parseInt(log.cost) || 0,
+                notes: (log.notes || '').trim(),
+                updated_at: now
+            };
+            list.push(newLog);
+            added.push(newLog);
+            if (odoVal > maxOdo) {
+                maxOdo = odoVal;
+                vId = log.vehicleId;
+            }
+        });
+
+        this.saveAll(list);
+
+        // Update vehicle ODO if maxOdo is higher
+        if (vId && maxOdo > 0) {
+            const vehicle = Vehicles.getById(vId);
+            if (vehicle && maxOdo > vehicle.currentOdo) {
+                Vehicles.updateOdo(vehicle.id, maxOdo);
+            }
+        }
+
+        return added;
     },
 
     update(log) {

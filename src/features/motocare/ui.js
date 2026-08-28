@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.240';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.240';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.241';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.241';
 
 export const UI = {
     // Show toast notification
@@ -484,6 +484,109 @@ export const UI = {
                 ${editBtnHtml}
             `;
             container.appendChild(item);
+        }
+    },
+
+    // Render Multi-Item Maintenance Checklist for Batch Mode
+    renderMaintenanceChecklist(vehicleId, preselectedCategory = null) {
+        const container = document.getElementById('mc-maint-checklist-container');
+        if (!container) return;
+
+        const presets = Presets.getForVehicle(vehicleId);
+        container.innerHTML = '';
+
+        // Danh sách các hạng mục: các preset của xe + 'other' (Bảo dưỡng khác)
+        const items = Object.entries(presets).map(([k, p]) => ({
+            key: k,
+            name: p.name,
+            desc: p.desc || ''
+        }));
+
+        items.push({
+            key: 'other',
+            name: 'Bảo dưỡng / Sửa chữa khác',
+            desc: 'Các hạng mục sửa chữa, thay thế hoặc công thợ ngoài danh mục'
+        });
+
+        items.forEach(item => {
+            const isChecked = (preselectedCategory && item.key === preselectedCategory);
+            const row = document.createElement('div');
+            row.className = 'maint-checklist-item';
+            row.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px 12px;
+                background: var(--bg-secondary);
+                border: 1px solid ${isChecked ? 'var(--color-primary, #00f2fe)' : 'var(--border-color)'};
+                border-radius: 8px;
+                transition: all 0.2s ease;
+            `;
+
+            row.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" class="mc-checklist-header">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); user-select: none; flex: 1;">
+                        <input type="checkbox" class="mc-maint-check-input" data-category="${item.key}" ${isChecked ? 'checked' : ''} style="width: 17px; height: 17px; cursor: pointer; accent-color: var(--color-primary, #00f2fe);">
+                        <span>${item.name}</span>
+                    </label>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.desc}</span>
+                </div>
+                <div class="mc-checklist-cost-wrap" style="display: ${isChecked ? 'flex' : 'none'}; align-items: center; gap: 8px; padding-left: 27px;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">Chi phí:</span>
+                    <input type="number" class="mc-maint-item-cost form-input" data-category="${item.key}" placeholder="0 đ (hoặc bỏ trống)" min="0" step="1000" style="padding: 5px 10px; font-size: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); width: 140px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">VNĐ</span>
+                </div>
+            `;
+
+            // Checkbox change listener
+            const checkbox = row.querySelector('.mc-maint-check-input');
+            const costWrap = row.querySelector('.mc-checklist-cost-wrap');
+            const costInput = row.querySelector('.mc-maint-item-cost');
+
+            checkbox.addEventListener('change', () => {
+                costWrap.style.display = checkbox.checked ? 'flex' : 'none';
+                row.style.borderColor = checkbox.checked ? 'var(--color-primary, #00f2fe)' : 'var(--border-color)';
+                if (checkbox.checked) {
+                    costInput.focus();
+                } else {
+                    costInput.value = '';
+                }
+                this.updateMaintenanceBatchSummary();
+            });
+
+            costInput?.addEventListener('input', () => {
+                this.updateMaintenanceBatchSummary();
+            });
+
+            container.appendChild(row);
+        });
+
+        this.updateMaintenanceBatchSummary();
+    },
+
+    updateMaintenanceBatchSummary() {
+        const checkboxes = document.querySelectorAll('.mc-maint-check-input:checked');
+        const costInputs = document.querySelectorAll('.mc-maint-item-cost');
+        let totalCost = 0;
+        let count = checkboxes.length;
+
+        costInputs.forEach(input => {
+            const cat = input.getAttribute('data-category');
+            const chk = document.querySelector(`.mc-maint-check-input[data-category="${cat}"]`);
+            if (chk && chk.checked) {
+                const val = parseInt(input.value) || 0;
+                totalCost += val;
+            }
+        });
+
+        const countEl = document.getElementById('mc-maint-selected-count');
+        const costEl = document.getElementById('mc-maint-selected-cost');
+        const btnText = document.getElementById('mc-btn-save-maintenance-text');
+
+        if (countEl) countEl.innerText = count;
+        if (costEl) costEl.innerText = totalCost.toLocaleString() + ' đ';
+        if (btnText) {
+            btnText.innerText = count > 1 ? `Lưu ${count} hạng mục` : (count === 1 ? `Lưu 1 hạng mục` : `Lưu lịch sử`);
         }
     }
 };
