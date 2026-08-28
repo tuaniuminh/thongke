@@ -4881,25 +4881,35 @@ html.lightbox-open .tauri-titlebar {
 }
 
 /* =========================================================
-   Loại bỏ khoảng trống thừa ở WeLove và Hồ Sơ Y Tế trên Desktop (Chỉ áp dụng màn hình lớn >= 769px)
+   Loại bỏ khoảng trống thừa ở WeLove, MotoCare và Hồ Sơ Y Tế
    ========================================================= */
+/* Ẩn top-header khi mở tab motocare trên cả desktop và mobile */
+body.active-tab-motocare .top-header,
+html.active-tab-motocare .top-header {
+    display: none !important;
+}
+
 @media (min-width: 769px) {
-    /* 1. WeLove: Ẩn hoàn toàn top-header rỗng và giảm padding đỉnh trên desktop */
+    /* 1. WeLove & MotoCare: Ẩn hoàn toàn top-header rỗng và giảm padding đỉnh trên desktop */
     body.active-tab-welove .top-header,
     body.active-tab-welove-admin .top-header,
     body.active-tab-welove-settings .top-header,
+    body.active-tab-motocare .top-header,
     html.active-tab-welove .top-header,
     html.active-tab-welove-admin .top-header,
-    html.active-tab-welove-settings .top-header {
+    html.active-tab-welove-settings .top-header,
+    html.active-tab-motocare .top-header {
         display: none !important;
     }
 
     body.active-tab-welove .main-content,
     body.active-tab-welove-admin .main-content,
     body.active-tab-welove-settings .main-content,
+    body.active-tab-motocare .main-content,
     html.active-tab-welove .main-content,
     html.active-tab-welove-admin .main-content,
-    html.active-tab-welove-settings .main-content {
+    html.active-tab-welove-settings .main-content,
+    html.active-tab-motocare .main-content {
         padding-top: 1rem !important;
     }
 

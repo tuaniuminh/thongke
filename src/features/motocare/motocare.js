@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.205';
-import { UI } from './ui.js?v=4.3.205';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.206';
+import { UI } from './ui.js?v=4.3.206';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -11,6 +11,7 @@ const state = {
 
 // Sub-Navigation (thay thế hash routing bằng CSS class switching)
 function switchMotocareView(viewName) {
+    console.log(`[BUG DETECTOR] switchMotocareView called: target view = "${viewName}", activeVehicleId = "${state.activeVehicleId}"`);
     const validViews = ['dashboard', 'fuel', 'history', 'settings'];
     if (!validViews.includes(viewName)) viewName = 'dashboard';
     state.currentView = viewName;
@@ -20,16 +21,6 @@ function switchMotocareView(viewName) {
     validViews.forEach(v => {
         const el = document.getElementById(`motocare-view-${v}`);
         if (el) el.style.display = (v === viewName) ? 'block' : 'none';
-    });
-
-    // Cập nhật active class trên sub-nav desktop
-    document.querySelectorAll('.motocare-nav-btn').forEach(btn => {
-        const btnView = btn.getAttribute('data-motocare-view');
-        if (btnView === viewName) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
     });
 
     // Cập nhật active class trên mobile navbar
@@ -46,6 +37,7 @@ function switchMotocareView(viewName) {
 
     // Render lại dữ liệu
     App.renderAll();
+    console.log(`[BUG DETECTOR] switchMotocareView finished rendering view = "${viewName}"`);
 }
 
 // Export ngay lập tức lên window
