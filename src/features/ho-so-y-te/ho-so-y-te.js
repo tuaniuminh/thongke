@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI
-} from '../../core/app.js?v=4.3.246';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.246';
+} from '../../core/app.js?v=4.3.247';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.247';
 
 let healthTrendChartInstance = null;
 
@@ -1580,7 +1580,7 @@ async function handleHealthFiles(files) {
 
 async function callGeminiAPI(imagesData, legacyMimeType = null) {
     const apiKey = state.geminiApiKey;
-    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
     let lastError = null;
     
     // Normalize input to array of { base64Data, mimeType }

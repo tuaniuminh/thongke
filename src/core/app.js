@@ -2,19 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.246';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.246';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.246';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.246';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.247';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.247';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.247';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.247';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.246';
-import * as sync from './sync.js?v=4.3.246';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.246';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.246';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.246';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.246';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.247';
+import * as sync from './sync.js?v=4.3.247';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.247';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.247';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.247';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.247';
 
-const APP_VERSION = '4.3.246';
+const APP_VERSION = '4.3.247';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5398,8 +5398,8 @@ window.renderTcManagement = renderTcManagement;
 export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash', options = {}) {
     const apiKey = state.geminiApiKey;
     if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key.");
-    // Danh sách model hợp lệ theo chuẩn Google AI Studio (ưu tiên 3.7, 3.6, 3.5, 2.5, 2.0; loại bỏ 1.5 đã hết hạn)
-    const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+    // Danh sách model hợp lệ theo chuẩn Google AI Studio (ưu tiên 3.7, 3.6, 2.5, 2.0; loại bỏ các bản cũ hết hạn)
+    const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
         .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
     let lastError = null;
     for (const model of candidateModels) {

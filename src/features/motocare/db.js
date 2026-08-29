@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.246';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.246';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.247';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.247';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -659,7 +659,7 @@ export const AI = {
 
         console.log(`[BUG DETECTOR] [MotoCare AI] Starting AI consultation. Key length: ${apiKey.length}`);
 
-        const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+        const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
             .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
         let lastError = null;
 
