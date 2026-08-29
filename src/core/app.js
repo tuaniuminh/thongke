@@ -2,19 +2,19 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.247';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.247';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.247';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.247';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.248';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.248';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.248';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.248';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.247';
-import * as sync from './sync.js?v=4.3.247';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.247';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.247';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.247';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.247';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.248';
+import * as sync from './sync.js?v=4.3.248';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.248';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.248';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.248';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.248';
 
-const APP_VERSION = '4.3.247';
+const APP_VERSION = '4.3.248';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5393,6 +5393,19 @@ function updateLastBackupDisplay() {
 window.renderTcManagement = renderTcManagement;
 
 /**
+ * Chuyển đổi mã định danh mô hình Gemini sang tên hiển thị đẹp mắt cho người dùng
+ */
+export function formatGeminiModelName(model) {
+    if (!model) return 'Google Gemini AI';
+    const m = String(model).toLowerCase();
+    if (m.includes('3.7')) return 'Gemini 3.7 Flash';
+    if (m.includes('3.6')) return 'Gemini 3.6 Flash';
+    if (m.includes('2.5')) return 'Gemini 2.5 Flash';
+    if (m.includes('2.0')) return 'Gemini 2.0 Flash';
+    return model;
+}
+
+/**
  * Gọi Google Gemini Text API với danh sách model fallback hợp lệ (tránh lỗi 404 từ model không tồn tại)
  */
 export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash', options = {}) {
@@ -5423,6 +5436,11 @@ export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash
             const resData = await response.json();
             const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) throw new Error("Không nhận được phản hồi từ AI.");
+            const modelName = formatGeminiModelName(model);
+            window._lastGeminiModelUsed = modelName;
+            if (options.returnDetails) {
+                return { text, model, modelName };
+            }
             return text;
         } catch (err) {
             console.warn(`[AI Engine] Text model ${model} failed:`, err);
@@ -5436,7 +5454,7 @@ export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash
     throw lastError || new Error("Lỗi khi kết nối Gemini API.");
 }
 
-export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility, updateLoveWidgetUI };
+export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility, updateLoveWidgetUI, formatGeminiModelName };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 

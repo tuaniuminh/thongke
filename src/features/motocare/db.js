@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.247';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.247';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.248';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.248';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -653,6 +653,16 @@ export const AI = {
         return true;
     },
 
+    formatModelName(model) {
+        if (!model) return 'Google Gemini AI';
+        const m = String(model).toLowerCase();
+        if (m.includes('3.7')) return 'Gemini 3.7 Flash';
+        if (m.includes('3.6')) return 'Gemini 3.6 Flash';
+        if (m.includes('2.5')) return 'Gemini 2.5 Flash';
+        if (m.includes('2.0')) return 'Gemini 2.0 Flash';
+        return model;
+    },
+
     async callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash', options = {}) {
         const apiKey = this.getKey();
         if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
@@ -688,7 +698,11 @@ export const AI = {
                 const resData = await response.json();
                 const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!text) throw new Error("Không nhận được nội dung phản hồi từ AI.");
-                console.log(`[BUG DETECTOR] [MotoCare AI] Model ${model} succeeded! Response length: ${text.length}`);
+                const modelName = this.formatModelName(model);
+                console.log(`[BUG DETECTOR] [MotoCare AI] Model ${model} (${modelName}) succeeded! Response length: ${text.length}`);
+                if (options.returnDetails) {
+                    return { text, model, modelName };
+                }
                 return text;
             } catch (err) {
                 console.warn(`[MotoCare AI] Text model ${model} failed:`, err);

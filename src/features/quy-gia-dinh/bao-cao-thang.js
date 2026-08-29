@@ -2,8 +2,8 @@
 
 import { 
     state, saveLocalState, showToast, performSync,
-    formatVND, escapeHTML, callGeminiTextAPI
-} from '../../core/app.js?v=4.3.247';
+    formatVND, escapeHTML, callGeminiTextAPI, formatGeminiModelName
+} from '../../core/app.js?v=4.3.248';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -233,7 +233,17 @@ function renderReportHtml() {
             </div>
         `;
     } else if (aiInsightText) {
-        aiHtml = `<div style="font-style: italic; white-space: pre-wrap;">${escapeHTML(aiInsightText)}</div>`;
+        const aiCacheKey = `${currentReportYear}_${currentReportMonth}`;
+        const aiModelUsed = state.reportAiInsightsModels?.[aiCacheKey] || localStorage.getItem(`aiInsightModel_${aiCacheKey}`) || 'Gemini 3.7 Flash';
+        aiHtml = `
+            <div style="font-style: italic; white-space: pre-wrap; margin-bottom: 8px;">${escapeHTML(aiInsightText)}</div>
+            <div style="text-align: right;">
+                <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; color:var(--text-muted); background:rgba(168,85,247,0.1); padding:2px 8px; border-radius:12px; border:1px solid rgba(168,85,247,0.2);">
+                    <i data-lucide="cpu" style="width:11px; height:11px; color:#a855f7;"></i>
+                    <span>Mô hình: <strong style="color:#a855f7;">${escapeHTML(aiModelUsed)}</strong></span>
+                </span>
+            </div>
+        `;
     } else {
         aiHtml = `
             <div style="display:flex; justify-content:center;">
@@ -348,21 +358,25 @@ Yêu cầu nhận xét:
 Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy trả về văn bản tiếng Việt tự nhiên và trôi chảy.
 `;
 
-        const insight = await callGeminiTextAPI(prompt, 'gemini-3.7-flash');
-        aiInsightText = insight.trim();
+        const res = await callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+        aiInsightText = (res.text || res).trim();
+        const modelName = res.modelName || 'Gemini 3.7 Flash';
 
         // Lưu nhận xét vào state để đồng bộ Supabase (đa thiết bị)
         const aiCacheKey = `${currentReportYear}_${currentReportMonth}`;
         if (!state.reportAiInsights) state.reportAiInsights = {};
+        if (!state.reportAiInsightsModels) state.reportAiInsightsModels = {};
         state.reportAiInsights[aiCacheKey] = aiInsightText;
+        state.reportAiInsightsModels[aiCacheKey] = modelName;
         // Cũng lưu localStorage làm fallback offline
         localStorage.setItem(`aiInsight_${aiCacheKey}`, aiInsightText);
+        localStorage.setItem(`aiInsightModel_${aiCacheKey}`, modelName);
         // Đồng bộ lên Supabase
         await saveLocalState();
         performSync(false);
 
         renderReportHtml();
-        showToast("Đã phân tích và đồng bộ báo cáo thành công!", "success");
+        showToast(`Đã phân tích tài chính [${modelName}] thành công!`, "success");
     } catch (err) {
         console.error("Gemini API Error for report:", err);
         showToast("Không thể kết nối Gemini API: " + err.message, "danger");

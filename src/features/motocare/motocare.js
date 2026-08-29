@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.247';
-import { UI } from './ui.js?v=4.3.247';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.248';
+import { UI } from './ui.js?v=4.3.248';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -204,10 +204,18 @@ const App = {
                 contentEl.innerHTML = '';
                 try {
                     const prompt = AI.generateConsultationPrompt(vId);
-                    const resultHtml = await AI.callGeminiTextAPI(prompt);
+                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+                    const resultHtml = res.text || res;
+                    const modelName = res.modelName || 'Gemini 3.7 Flash';
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');
-                    contentEl.innerHTML = resultHtml;
+                    contentEl.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding:6px 12px; background:rgba(124, 58, 237, 0.08); border-radius:8px; font-size:0.8rem;">
+                            <span style="font-weight:600; color:#7c3aed;">🩺 Kết quả chẩn đoán Bác sĩ Xe</span>
+                            <span style="font-size:0.75rem; background:rgba(124, 58, 237, 0.15); color:#7c3aed; padding:2px 8px; border-radius:10px; font-weight:600;">⚡ ${escapeHTML(modelName)}</span>
+                        </div>
+                        ${resultHtml}
+                    `;
                 } catch (err) {
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');
@@ -254,7 +262,9 @@ const App = {
                 contentEl.innerHTML = '';
                 try {
                     const prompt = AI.generatePresetOptimizationPrompt(vId);
-                    const rawResponse = await AI.callGeminiTextAPI(prompt);
+                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+                    const rawResponse = res.text || res;
+                    const modelName = res.modelName || 'Gemini 3.7 Flash';
 
                     // Parse JSON safely
                     let jsonStr = rawResponse.trim();
@@ -274,7 +284,7 @@ const App = {
                                 <div style="font-weight: 700; font-size: 1rem; color: #7c3aed;">
                                     🎯 Nhận diện dòng xe: <strong>${aiData.vehicleModel || vehicle.name}</strong>
                                 </div>
-                                <span style="font-size: 0.75rem; background: rgba(124, 58, 237, 0.15); color: #7c3aed; padding: 3px 10px; border-radius: 12px; font-weight: 600;">Chuẩn hóa bởi AI</span>
+                                <span style="font-size: 0.75rem; background: rgba(124, 58, 237, 0.15); color: #7c3aed; padding: 3px 10px; border-radius: 12px; font-weight: 600;">⚡ Chuẩn hóa bởi ${escapeHTML(modelName)}</span>
                             </div>
                             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">${aiData.advice || 'Định mức bảo dưỡng được tối ưu dựa trên loại truyền động và điều kiện vận hành tại Việt Nam.'}</p>
                         </div>

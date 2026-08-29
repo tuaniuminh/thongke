@@ -1,9 +1,9 @@
 import { 
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
-    callGeminiTextAPI
-} from '../../core/app.js?v=4.3.247';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.247';
+    callGeminiTextAPI, formatGeminiModelName
+} from '../../core/app.js?v=4.3.248';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.248';
 
 let healthTrendChartInstance = null;
 
@@ -1486,7 +1486,8 @@ async function processScannedHealthImage(responseJson) {
         renderBloodPressureSection();
         
         const cls = getBpClassification(record.systolic, record.diastolic);
-        showToast(`Đã tự động nhận diện và lưu huyết áp: ${record.systolic}/${record.diastolic} mmHg (${cls.label})`, 'success');
+        const modelName = responseJson._modelName || formatGeminiModelName(responseJson._modelUsed) || 'Gemini 3.7 Flash';
+        showToast(`Đã tự động nhận diện huyết áp [${modelName}]: ${record.systolic}/${record.diastolic} mmHg (${cls.label})`, 'success');
         
         // Auto select the profile in UI and update the dashboard
         state.selectedHealthProfileId = targetProfileId;
@@ -1778,7 +1779,11 @@ Lưu ý quan trọng:
             }
             
             try {
-                return JSON.parse(textResponse.trim());
+                const parsed = JSON.parse(textResponse.trim());
+                parsed._modelUsed = model;
+                parsed._modelName = formatGeminiModelName(model);
+                window._lastGeminiVisionModelUsed = parsed._modelName;
+                return parsed;
             } catch (e) {
                 console.error(`Gemini raw response text parse failure on model ${model}:`, textResponse, e);
                 throw new Error("Dữ liệu phản hồi từ AI không đúng định dạng JSON.");
@@ -1970,9 +1975,11 @@ function openHealthEditModal(recordId = null, initialData = null) {
             });
         }
     } else {
-        modalTitle.innerText = initialData ? "Xác nhận kết quả quét bằng AI" : "Thêm Hồ sơ y tế thủ công";
+        const modelBadge = initialData?._modelName ? ` [${initialData._modelName}]` : '';
+        modalTitle.innerText = initialData ? `Xác nhận kết quả quét AI${modelBadge}` : "Thêm Hồ sơ y tế thủ công";
         
         if (initialData) {
+            showToast(`Đã bóc tách kết quả xét nghiệm [${initialData._modelName || 'Gemini 3.7 Flash'}] thành công!`, 'success');
             document.getElementById('healthEditTitle').value = initialData.title || '';
             document.getElementById('healthEditType').value = initialData.type || 'blood_test';
             document.getElementById('healthEditDate').value = initialData.date || getLocalDateString();
@@ -2705,6 +2712,12 @@ function renderHealthAiReport() {
             ? (profile ? profile.lastBodyCompAnalysisDate : state.lastBodyCompAnalysisDate)
             : (profile ? profile.lastAiAnalysisDate : state.lastAiAnalysisDate));
     
+    const lastAiAnalysisModel = type === 'bp'
+        ? (profile ? profile.lastBpAnalysisModel : state.lastBpAnalysisModel)
+        : (type === 'body_comp'
+            ? (profile ? profile.lastBodyCompAnalysisModel : state.lastBodyCompAnalysisModel)
+            : (profile ? profile.lastAiAnalysisModel : state.lastAiAnalysisModel)) || 'Gemini 3.7 Flash';
+    
     const dateEl = document.getElementById('healthAiAnalysisDate');
     const reportContentEl = document.getElementById('healthAiReportContent');
     const speakBtn = document.getElementById('speakHealthAiAnalysisBtn');
@@ -2712,7 +2725,7 @@ function renderHealthAiReport() {
     if (dateEl && lastAiAnalysisDate) {
         const formattedDate = formatDate(lastAiAnalysisDate);
         const formattedTime = new Date(lastAiAnalysisDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        dateEl.innerText = `${formattedDate} lúc ${formattedTime}`;
+        dateEl.innerHTML = `${formattedDate} lúc ${formattedTime} <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; background:rgba(124,58,237,0.12); color:#a855f7; border:1px solid rgba(124,58,237,0.25); padding:2px 8px; border-radius:12px; font-weight:600; margin-left:6px;"><i data-lucide="cpu" style="width:11px; height:11px;"></i>${escapeHTML(lastAiAnalysisModel)}</span>`;
     } else if (dateEl) {
         dateEl.innerText = 'Chưa phân tích';
     }
@@ -2839,18 +2852,22 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
 
 *Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Tuyệt đối KHÔNG sử dụng ký tự $ hoặc các ký hiệu toán học LaTeX (như $...$, $$...$$, \text{...}, \times, \mu) để biểu diễn các số liệu hoặc đơn vị đo lường. Thay vào đó, hãy dùng văn bản thường thuần túy (ví dụ: dùng "x" thay cho "\times", dùng "uL" hoặc "µL" thay cho "\mu L", dùng "15.8 g/dL" thay cho "$15.8 \text{ g/dL}$"). Tất cả các số liệu và đơn vị phải hiển thị dưới dạng văn bản thường đọc được trực tiếp. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
-        const textResponse = await callGeminiTextAPI(prompt, 'gemini-3.7-flash');
+        const res = await callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+        const textResponse = res.text || res;
+        const modelName = res.modelName || 'Gemini 3.7 Flash';
         
         const nowIso = new Date().toISOString();
         
         if (profile) {
             profile.lastAiAnalysis = textResponse;
             profile.lastAiAnalysisDate = nowIso;
+            profile.lastAiAnalysisModel = modelName;
             profile.lastAiAnalysisUpdated = nowIso;
             
             if (selectedProfileId === 'p-self') {
                 state.lastAiAnalysis = textResponse;
                 state.lastAiAnalysisDate = nowIso;
+                state.lastAiAnalysisModel = modelName;
                 state.lastAiAnalysisUpdated = nowIso;
             }
         }
@@ -2865,7 +2882,7 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
         }
         
         renderHealthAiReport();
-        showToast("Phân tích sức khỏe bằng AI thành công!", "success");
+        showToast(`Phân tích sức khỏe [${modelName}] thành công!`, "success");
         
         performSync(true);
         
@@ -4124,7 +4141,8 @@ function openBodyCompModal(recordId = null, scannedData = null) {
 
         document.getElementById('bodyCompNotes').value = unmappedNotes + (scannedData.notes || 'Tự động quét từ ảnh');
         
-        showToast('Đã tự động nhận dạng và điền chỉ số cơ thể từ ảnh thành công!', 'success');
+        const modelName = scannedData._modelName || 'Gemini 3.7 Flash';
+        showToast(`Đã tự động nhận dạng và điền chỉ số cơ thể [${modelName}] thành công!`, 'success');
     }
 
     switchBodyCompTab('tabMain');
@@ -4546,35 +4564,43 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
         }
 
-        const textResponse = await callGeminiTextAPI(prompt, 'gemini-3.7-flash');
+        const res = await callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+        const textResponse = res.text || res;
+        const modelName = res.modelName || 'Gemini 3.7 Flash';
 
         const nowIso = new Date().toISOString();
         if (profile) {
             if (mode === 'bp_only') {
                 profile.lastBpAnalysis = textResponse;
                 profile.lastBpAnalysisDate = nowIso;
+                profile.lastBpAnalysisModel = modelName;
                 profile.lastBpAnalysisUpdated = nowIso;
                 if (selectedProfileId === 'p-self') {
                     state.lastBpAnalysis = textResponse;
                     state.lastBpAnalysisDate = nowIso;
+                    state.lastBpAnalysisModel = modelName;
                     state.lastBpAnalysisUpdated = nowIso;
                 }
             } else if (mode === 'body_comp_only') {
                 profile.lastBodyCompAnalysis = textResponse;
                 profile.lastBodyCompAnalysisDate = nowIso;
+                profile.lastBodyCompAnalysisModel = modelName;
                 profile.lastBodyCompAnalysisUpdated = nowIso;
                 if (selectedProfileId === 'p-self') {
                     state.lastBodyCompAnalysis = textResponse;
                     state.lastBodyCompAnalysisDate = nowIso;
+                    state.lastBodyCompAnalysisModel = modelName;
                     state.lastBodyCompAnalysisUpdated = nowIso;
                 }
             } else {
                 profile.lastAiAnalysis = textResponse;
                 profile.lastAiAnalysisDate = nowIso;
+                profile.lastAiAnalysisModel = modelName;
                 profile.lastAiAnalysisUpdated = nowIso;
                 if (selectedProfileId === 'p-self') {
                     state.lastAiAnalysis = textResponse;
                     state.lastAiAnalysisDate = nowIso;
+                    state.lastAiAnalysisModel = modelName;
                     state.lastAiAnalysisUpdated = nowIso;
                 }
             }
@@ -4588,9 +4614,9 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
         }
         renderHealthAiReport();
         
-        let successMsg = 'Đã phân tích sức khỏe toàn diện thành công!';
-        if (mode === 'bp_only') successMsg = 'Đã phân tích kết quả huyết áp thành công!';
-        else if (mode === 'body_comp_only') successMsg = 'Đã phân tích thành phần cơ thể thành công!';
+        let successMsg = `Đã phân tích sức khỏe toàn diện [${modelName}] thành công!`;
+        if (mode === 'bp_only') successMsg = `Đã phân tích kết quả huyết áp [${modelName}] thành công!`;
+        else if (mode === 'body_comp_only') successMsg = `Đã phân tích thành phần cơ thể [${modelName}] thành công!`;
         showToast(successMsg, 'success');
         
         performSync(true);
