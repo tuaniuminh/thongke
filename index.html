@@ -90,16 +90,16 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.249">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.250">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.249">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.249">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.249">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.249">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.249">
-    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.249">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.250">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.250">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.250">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.250">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.250">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.250">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -377,7 +377,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon.png?v=4.3.249" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon.png?v=4.3.250" class="tauri-titlebar-icon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -399,7 +399,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.249" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.250" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -539,7 +539,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.249" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.250" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -1514,6 +1514,42 @@
                         </div>
                     </div>
 
+                    <!-- Sổ Tiêm Chủng & Khám Định Kỳ Section -->
+                    <div class="health-card" id="vaccinationSectionCard" style="margin-top: 20px;">
+                        <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="shield-plus" style="color: #a855f7;"></i>
+                                <span>Sổ Tiêm Chủng &amp; Lịch Khám Định Kỳ</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <button type="button" id="addNewVaccineBtn" class="health-btn health-btn-primary" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #a855f7, #6366f1); border: none;">
+                                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                                    <span>+ Mũi tiêm</span>
+                                </button>
+                                <button type="button" id="addNewCheckupBtn" class="health-btn health-btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="calendar-plus" style="width: 14px; height: 14px;"></i>
+                                    <span>+ Lịch khám</span>
+                                </button>
+                            </div>
+                        </h4>
+                        <p class="health-card-desc" style="margin-bottom: 14px;">Theo dõi lịch sử tiêm vaccine, đếm ngược ngày hẹn mũi tiếp theo và nhắc khám sức khỏe định kỳ cho cả gia đình.</p>
+                        
+                        <!-- Mini Filter Pills -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px;">
+                            <button type="button" class="vaccine-filter-btn active" data-filter="all" style="padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-tertiary); color: var(--text-primary);">Tất cả</button>
+                            <button type="button" class="vaccine-filter-btn" data-filter="vaccination" style="padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary);">💉 Tiêm chủng</button>
+                            <button type="button" class="vaccine-filter-btn" data-filter="periodic_checkup" style="padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary);">🩺 Khám định kỳ</button>
+                            <button type="button" class="vaccine-filter-btn" data-filter="upcoming" style="padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary);">⏳ Sắp đến hạn</button>
+                        </div>
+
+                        <div id="vaccinationRecordsList" style="display: flex; flex-direction: column; gap: 10px; min-height: 60px;">
+                            <!-- Dynamically rendered by JS -->
+                        </div>
+                        <div id="vaccinationRecordsMoreContainer" style="display: flex; justify-content: center; margin-top: 12px; width: 100%;">
+                            <!-- Xem thêm button populated dynamically -->
+                        </div>
+                    </div>
+
                     <!-- Bottom Section: Records History -->
                     <div class="health-card list-card" style="margin-top: 20px;">
                         <h4 class="health-card-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -2193,11 +2229,16 @@
                         <div class="section-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
                             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-primary); line-height: 1.4; width: 100%;">Lịch sử bảo dưỡng &amp; sửa chữa</h2>
                             <div style="display: flex; align-items: center; gap: 8px; width: 100%; flex-wrap: wrap;">
+                                <button class="btn btn-secondary" id="mc-btn-scan-receipt" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;background:rgba(124,58,237,0.1);color:#8b5cf6;border:1px solid rgba(124,58,237,0.25);">
+                                    <i data-lucide="scan" style="width:15px;height:15px;"></i>
+                                    <span>Quét hóa đơn AI</span>
+                                </button>
                                 <button class="btn btn-secondary" id="mc-btn-toggle-maint-edit" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;">
                                     <i data-lucide="edit-3" style="width:15px;height:15px;"></i>
                                     <span id="mc-toggle-maint-edit-text">Chỉnh sửa</span>
                                 </button>
                                 <button class="btn btn-primary" id="mc-btn-add-maintenance" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer;font-size:0.85rem;">+ Thêm bảo dưỡng</button>
+                                <input type="file" id="mc-receipt-file-input" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
                             </div>
                         </div>
                         <div class="filter-bar card">
@@ -2324,7 +2365,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.249" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.250" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2434,11 +2475,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.249';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.250';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.249';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.250';
                         }
                     })();
                 </script>
@@ -3059,11 +3100,13 @@
                             <input type="text" id="healthEditTitle" class="form-control health-input" required placeholder="Ví dụ: Xét nghiệm máu tổng quát">
                         </div>
                         <div class="form-group">
-                            <label class="form-label health-form-label" for="healthEditType">Phân loại xét nghiệm</label>
+                            <label class="form-label health-form-label" for="healthEditType">Phân loại xét nghiệm / Hồ sơ</label>
                             <select id="healthEditType" class="form-control health-input" required>
                                 <option value="blood_test">Xét nghiệm máu</option>
                                 <option value="urine_test">Xét nghiệm nước tiểu</option>
                                 <option value="ultrasound">Siêu âm</option>
+                                <option value="vaccination">Tiêm chủng Vaccine</option>
+                                <option value="periodic_checkup">Khám sức khỏe định kỳ</option>
                                 <option value="deworming">Uống thuốc tẩy giun</option>
                                 <option value="dental_scaling">Lấy cao răng</option>
                                 <option value="other">Loại khác</option>
@@ -3078,12 +3121,12 @@
                     </div>
                     <div class="health-form-grid">
                         <div class="form-group">
-                            <label class="form-label health-form-label" for="healthEditDate" id="healthEditDateLabel">Ngày xét nghiệm / Khám</label>
+                            <label class="form-label health-form-label" for="healthEditDate" id="healthEditDateLabel">Ngày xét nghiệm / Khám / Tiêm</label>
                             <input type="date" id="healthEditDate" class="form-control health-input" required>
                         </div>
                         <div class="form-group" id="healthEditFacilityGroup">
-                            <label class="form-label health-form-label" for="healthEditFacility" id="healthEditFacilityLabel">Bệnh viện / Phòng khám</label>
-                            <input type="text" id="healthEditFacility" class="form-control health-input" placeholder="Ví dụ: Bệnh viện Bạch Mai">
+                            <label class="form-label health-form-label" for="healthEditFacility" id="healthEditFacilityLabel">Bệnh viện / Cơ sở tiêm / Phòng khám</label>
+                            <input type="text" id="healthEditFacility" class="form-control health-input" placeholder="Ví dụ: VNVC, BV Bạch Mai, Pasteur...">
                         </div>
                     </div>
 
@@ -3103,6 +3146,81 @@
                         <div class="form-group">
                             <label class="form-label health-form-label" for="healthEditNextDoseDate">Ngày uống tiếp theo</label>
                             <input type="date" id="healthEditNextDoseDate" class="form-control health-input" readonly style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted);">
+                        </div>
+                    </div>
+
+                    <!-- Vaccination Custom Fields -->
+                    <div class="health-form-grid" id="vaccinationFields" style="display: none; grid-template-columns: 1.5fr 1fr 1fr; gap: 14px; margin-top: 12px;">
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditVaccineName">Tên Vaccine / Bệnh phòng ngừa <span style="color: var(--accent-rose);">*</span></label>
+                            <input type="text" id="healthEditVaccineName" class="form-control health-input" placeholder="Ví dụ: 6 trong 1 Hexaxim, Cúm mùa, HPV Gardasil 9...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditDoseNumber">Mũi tiêm thứ</label>
+                            <select id="healthEditDoseNumber" class="form-control health-input">
+                                <option value="Mũi 1">Mũi 1</option>
+                                <option value="Mũi 2">Mũi 2</option>
+                                <option value="Mũi 3">Mũi 3</option>
+                                <option value="Mũi 4">Mũi 4</option>
+                                <option value="Mũi nhắc lại">Mũi nhắc lại</option>
+                                <option value="Mũi duy nhất">Mũi duy nhất</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditLotNumber">Số lô Vaccine</label>
+                            <input type="text" id="healthEditLotNumber" class="form-control health-input" placeholder="Tùy chọn (ví dụ: AB1234)">
+                        </div>
+                    </div>
+                    <div class="health-form-grid" id="vaccinationScheduleFields" style="display: none; grid-template-columns: 1fr 1.5fr 1.5fr; gap: 14px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditNextVaccineMonths">Hẹn mũi tiếp</label>
+                            <select id="healthEditNextVaccineMonths" class="form-control health-input">
+                                <option value="0">Không hẹn mũi sau</option>
+                                <option value="1">Sau 1 tháng</option>
+                                <option value="2">Sau 2 tháng</option>
+                                <option value="3">Sau 3 tháng</option>
+                                <option value="6">Sau 6 tháng</option>
+                                <option value="12">Sau 12 tháng (1 năm)</option>
+                                <option value="custom">Tự chọn ngày...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditNextVaccineDate">Ngày hẹn tiêm tiếp theo</label>
+                            <input type="date" id="healthEditNextVaccineDate" class="form-control health-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditSideEffects">Phản ứng sau tiêm</label>
+                            <input type="text" id="healthEditSideEffects" class="form-control health-input" placeholder="Bình thường / Sốt nhẹ...">
+                        </div>
+                    </div>
+
+                    <!-- Periodic Checkup Custom Fields -->
+                    <div class="health-form-grid" id="periodicCheckupFields" style="display: none; grid-template-columns: 1.5fr 1fr 1.5fr; gap: 14px; margin-top: 12px;">
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditCheckupType">Loại hình khám</label>
+                            <select id="healthEditCheckupType" class="form-control health-input">
+                                <option value="Khám sức khỏe tổng quát">Khám sức khỏe tổng quát</option>
+                                <option value="Khám răng định kỳ">Khám răng định kỳ</option>
+                                <option value="Khám mắt định kỳ">Khám mắt định kỳ</option>
+                                <option value="Khám phụ khoa / nam khoa">Khám phụ khoa / nam khoa</option>
+                                <option value="Khám tim mạch / huyết áp">Khám tim mạch / huyết áp</option>
+                                <option value="Khám nội tiết / tiểu đường">Khám nội tiết / tiểu đường</option>
+                                <option value="Khám chuyên khoa khác">Khám chuyên khoa khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditCheckupCycleMonths">Chu kỳ nhắc khám</label>
+                            <select id="healthEditCheckupCycleMonths" class="form-control health-input">
+                                <option value="3">Mỗi 3 tháng</option>
+                                <option value="6" selected>Mỗi 6 tháng</option>
+                                <option value="12">Mỗi 12 tháng (1 năm)</option>
+                                <option value="24">Mỗi 24 tháng (2 năm)</option>
+                                <option value="custom">Tự chọn ngày...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label health-form-label" for="healthEditNextCheckupDate">Ngày khám tiếp theo</label>
+                            <input type="date" id="healthEditNextCheckupDate" class="form-control health-input">
                         </div>
                     </div>
 
@@ -4033,6 +4151,15 @@
             </div>
             <form id="mc-form-maintenance" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
                 <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1;">
+                    <div style="padding: 10px 14px; background: rgba(124, 58, 237, 0.08); border: 1px dashed rgba(124, 58, 237, 0.3); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="sparkles" style="color: #8b5cf6; width: 18px; height: 18px;"></i>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Tự động điền từ hóa đơn / phiếu HEAD</span>
+                        </div>
+                        <button type="button" id="mc-modal-btn-scan-receipt" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; padding: 5px 12px; display: inline-flex; align-items: center; gap: 6px; background: rgba(124,58,237,0.15); color: #8b5cf6; border: 1px solid rgba(124,58,237,0.3); cursor: pointer; border-radius: 6px; font-weight: 600;">
+                            <i data-lucide="camera" style="width: 14px; height: 14px;"></i> Quét ảnh
+                        </button>
+                    </div>
                     <input type="hidden" id="mc-maint-log-id">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="form-group">
@@ -4224,17 +4351,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.249"></script>
-    <script type="module" src="src/core/app.js?v=4.3.249"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.249"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.249"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.249"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.250"></script>
+    <script type="module" src="src/core/app.js?v=4.3.250"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.250"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.250"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.250"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.249')
+                navigator.serviceWorker.register('./sw.js?v=4.3.250')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

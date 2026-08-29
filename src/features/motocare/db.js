@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.249';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.249';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.250';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.250';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -822,6 +822,101 @@ Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo b�
     "battery": { "km": 25000, "months": 24, "reason": "Lý do ngắn gọn" }
   }
 }`;
+    },
+
+    async scanMaintenanceReceipt(imageData, mimeType = 'image/jpeg') {
+        const apiKey = this.getKey();
+        if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
+
+        const candidateModels = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
+        let lastError = null;
+
+        const promptText = `Hãy đóng vai trò là một chuyên gia nhận diện hóa đơn và chứng từ sửa chữa, bảo dưỡng xe máy tại Việt Nam (như phiếu thu, hóa đơn HEAD Honda, Yamaha Town, trung tâm bảo dưỡng 3M, tiệm sửa xe...).
+Nhiệm vụ của bạn là đọc hình ảnh hóa đơn được cung cấp và bóc tách các thông tin sang định dạng JSON hợp lệ duy nhất:
+
+CÁC TRƯỜNG DỮ LIỆU CẦN TRÍCH XUẤT:
+1. date: Ngày thực hiện định dạng YYYY-MM-DD. Nếu không thấy rõ hãy lấy ngày hôm nay.
+2. shopName: Tên cửa hàng, HEAD hoặc tiệm sửa xe (ví dụ: "HEAD Honda Phát Tiến", "Yamaha Town", "Tiệm Sửa Xe Hoàng").
+3. odo: Số Kilomet (ODO) ghi trên phiếu nếu có (số nguyên, ví dụ: 25000), nếu không tìm thấy hãy để null.
+4. totalCost: Tổng số tiền thanh toán thực tế (số nguyên, ví dụ: 350000).
+5. items: Danh sách các phụ tùng / công dịch vụ trên phiếu gồm:
+   - name: Tên phụ tùng / dịch vụ gốc ghi trên phiếu
+   - cost: Số tiền của mục này (số nguyên hoặc 0)
+   - category: Khóa phân loại khớp chuẩn vào một trong các mục sau:
+     * "oil_engine" (Thay nhớt/dầu động cơ máy)
+     * "oil_gear" (Thay nhớt láp / dầu hộp số)
+     * "air_filter" (Thay lọc gió)
+     * "spark_plug" (Thay bugi)
+     * "coolant" (Thay / châm nước làm mát)
+     * "brake_front" (Thay má phanh / bố thắng trước)
+     * "brake_rear" (Thay má phanh / bố thắng sau)
+     * "chain" (Bảo dưỡng / thay nhông sên dĩa, xích)
+     * "tires" (Thay vỏ, lốp xe trước hoặc sau)
+     * "battery" (Thay bình ắc quy)
+     * "full_service" (Gói bảo dưỡng toàn bộ xe / vệ sinh nồi / bảo dưỡng cổ phốt)
+     * "other" (Các mục sửa chữa khác: vá vỏ, thay bóng đèn, gương, còi, dây ga...)
+6. categories: Mảng chứa các khóa category duy nhất tìm thấy ở trên (ví dụ: ["oil_engine", "air_filter"]).
+7. notes: Tóm tắt ngắn gọn các công việc đã làm trên phiếu (ví dụ: "Bảo dưỡng tại HEAD Honda, thay dầu máy và lọc gió").
+
+BẮT BUỘC TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON THEO CẤU TRÚC:
+{
+  "date": "YYYY-MM-DD",
+  "shopName": "Tên tiệm",
+  "odo": null,
+  "totalCost": 0,
+  "items": [
+    { "name": "Nhớt xe máy Honda 10W-30", "cost": 120000, "category": "oil_engine" }
+  ],
+  "categories": ["oil_engine"],
+  "notes": "..."
+}`;
+
+        const parts = [
+            { text: promptText },
+            {
+                inlineData: {
+                    mimeType: mimeType || 'image/jpeg',
+                    data: imageData
+                }
+            }
+        ];
+
+        for (const model of candidateModels) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: parts }],
+                        generationConfig: {
+                            responseMimeType: "application/json"
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errJson = await response.json().catch(() => ({}));
+                    const errMsg = errJson?.error?.message || `HTTP ${response.status}`;
+                    console.warn(`[MotoCare AI OCR] Model ${model} returned error: ${errMsg}`);
+                    throw new Error(errMsg);
+                }
+
+                const resData = await response.json();
+                const text = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error("Không nhận được nội dung phân tích từ AI.");
+                const parsed = JSON.parse(text.trim());
+                const modelName = this.formatModelName(model);
+                parsed._modelUsed = model;
+                parsed._modelName = modelName;
+                return parsed;
+            } catch (err) {
+                console.warn(`[MotoCare AI OCR] Model ${model} failed:`, err);
+                lastError = err;
+                continue;
+            }
+        }
+        throw lastError || new Error("Lỗi khi quét hóa đơn với Gemini API.");
     },
 
     getGeminiKeyWithFallback() {

@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.249';
-import { UI } from './ui.js?v=4.3.249';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.250';
+import { UI } from './ui.js?v=4.3.250';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -183,6 +183,66 @@ const App = {
                         this.closeModal(mType);
                     }
                 });
+            }
+        });
+
+        // 4.1 AI Maintenance Receipt Scanner
+        const receiptFileInput = document.getElementById('mc-receipt-file-input');
+        const triggerReceiptScan = () => {
+            const vId = state.activeVehicleId;
+            if (!vId) { window._motocareShowToast('Vui lòng thêm hoặc chọn xe máy trước!', 'warning'); return; }
+            const apiKey = AI.getKey();
+            if (!apiKey) {
+                window._motocareShowToast('Vui lòng nhập Google Gemini API Key trong mục Cài Đặt chung của FamiLife để sử dụng!', 'warning');
+                return;
+            }
+            if (receiptFileInput) {
+                receiptFileInput.value = '';
+                receiptFileInput.click();
+            }
+        };
+
+        document.getElementById('mc-btn-scan-receipt')?.addEventListener('click', triggerReceiptScan);
+        document.getElementById('mc-modal-btn-scan-receipt')?.addEventListener('click', triggerReceiptScan);
+
+        receiptFileInput?.addEventListener('change', async (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            window._motocareShowToast('Đang nhận diện hóa đơn bảo dưỡng bằng Gemini AI...', 'info');
+
+            try {
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const result = reader.result;
+                        const base64 = result.split(',')[1];
+                        resolve(base64);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+
+                const mimeType = file.type || 'image/jpeg';
+                const aiResult = await AI.scanMaintenanceReceipt(base64Data, mimeType);
+
+                // Open maintenance modal with extracted details
+                this.openModal('maintenance', {
+                    isReceiptScan: true,
+                    date: aiResult.date,
+                    odo: aiResult.odo,
+                    shopName: aiResult.shopName,
+                    totalCost: aiResult.totalCost,
+                    categories: aiResult.categories || [],
+                    items: aiResult.items || [],
+                    notes: aiResult.notes || (aiResult.shopName ? `Bảo dưỡng tại ${aiResult.shopName}` : ''),
+                    modelName: aiResult._modelName || 'Gemini 3.7 Flash'
+                });
+
+                window._motocareShowToast(`Đã nhận diện hóa đơn sửa xe [${aiResult._modelName || 'Gemini 3.7 Flash'}] thành công!`, 'success');
+            } catch (err) {
+                console.error('[MotoCare Receipt OCR Error]', err);
+                window._motocareShowToast(`Lỗi quét hóa đơn: ${err.message || 'Không thể nhận diện hình ảnh.'}`, 'danger');
             }
         });
 
@@ -614,6 +674,37 @@ const App = {
                 document.getElementById('mc-maint-cost').value = data.cost !== undefined ? data.cost : '';
                 document.getElementById('mc-maint-notes').value = data.notes || '';
                 if (btnText) btnText.innerText = 'Cập nhật';
+            } else if (data && data.isReceiptScan) {
+                // Mở từ kết quả quét AI hóa đơn bảo dưỡng
+                if (modalTitle) modalTitle.innerHTML = `Ghi nhận bảo dưỡng <span style="font-size:0.75rem; background:rgba(124,58,237,0.15); color:#a855f7; padding:2px 8px; border-radius:10px; font-weight:600; vertical-align:middle; margin-left:6px;">⚡ ${escapeHTML(data.modelName || 'Gemini 3.7 Flash')}</span>`;
+                if (singleMode) singleMode.style.display = 'none';
+                if (batchMode) batchMode.style.display = 'flex';
+
+                document.getElementById('mc-maint-log-id').value = '';
+                document.getElementById('mc-maint-date').value = data.date || todayStr;
+                document.getElementById('mc-maint-odo').value = (data.odo !== null && data.odo !== undefined) ? data.odo : (vehicle ? vehicle.currentOdo : 0);
+
+                let notesContent = data.notes || '';
+                if (data.shopName && !notesContent.includes(data.shopName)) {
+                    notesContent = `[${data.shopName}] ${notesContent}`;
+                }
+                document.getElementById('mc-maint-notes').value = notesContent;
+
+                // Build category costs map
+                const categoryCosts = {};
+                if (Array.isArray(data.items)) {
+                    data.items.forEach(it => {
+                        if (it.category && it.cost) {
+                            categoryCosts[it.category] = (categoryCosts[it.category] || 0) + it.cost;
+                        }
+                    });
+                }
+                if (data.categories && data.categories.length === 1 && data.totalCost && !categoryCosts[data.categories[0]]) {
+                    categoryCosts[data.categories[0]] = data.totalCost;
+                }
+
+                UI.renderMaintenanceChecklist(state.activeVehicleId, data.categories || [], categoryCosts);
+                if (btnText) btnText.innerText = 'Lưu lịch sử';
             } else if (data && data.category) {
                 // Bấm riêng 1 hạng mục dưới danh sách (chỉ thêm riêng mục đó, không hiện checklist)
                 if (modalTitle) modalTitle.innerText = 'Ghi nhận bảo dưỡng';

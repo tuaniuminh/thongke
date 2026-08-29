@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.249';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.249';
+} from '../../core/app.js?v=4.3.250';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.250';
 
 let healthTrendChartInstance = null;
 
@@ -771,6 +771,34 @@ function initHealthBindings() {
         openHealthEditModal();
     });
 
+    document.getElementById('addNewVaccineBtn')?.addEventListener('click', () => {
+        openHealthEditModal(null, null, 'vaccination');
+    });
+
+    document.getElementById('addNewCheckupBtn')?.addEventListener('click', () => {
+        openHealthEditModal(null, null, 'periodic_checkup');
+    });
+
+    // Vaccine Section filter buttons delegation
+    document.getElementById('vaccinationSectionCard')?.addEventListener('click', (e) => {
+        const filterBtn = e.target.closest('.vaccine-filter-btn');
+        if (filterBtn) {
+            document.querySelectorAll('.vaccine-filter-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-secondary)';
+            });
+            filterBtn.classList.add('active');
+            filterBtn.style.background = 'var(--bg-tertiary)';
+            filterBtn.style.color = 'var(--text-primary)';
+            currentVaccineFilter = filterBtn.getAttribute('data-filter') || 'all';
+            renderVaccinationSection();
+        }
+    });
+
+    document.getElementById('healthEditNextVaccineMonths')?.addEventListener('change', calculateNextVaccineDate);
+    document.getElementById('healthEditCheckupCycleMonths')?.addEventListener('change', calculateNextCheckupDate);
+
     document.getElementById('addIndicatorRowBtn')?.addEventListener('click', () => {
         addIndicatorEditRow();
     });
@@ -1091,6 +1119,9 @@ function renderHealthDashboard() {
     if (shouldShowBodyComp) {
         renderBodyCompSection();
     }
+
+    // Render vaccination & periodic checkups section
+    renderVaccinationSection();
 }
 
 function getHealthTypeLabel(type) {
@@ -1098,11 +1129,167 @@ function getHealthTypeLabel(type) {
         case 'blood_test': return 'Xét nghiệm máu';
         case 'urine_test': return 'Xét nghiệm nước tiểu';
         case 'ultrasound': return 'Siêu âm';
+        case 'vaccination': return 'Tiêm chủng Vaccine';
+        case 'periodic_checkup': return 'Khám sức khỏe định kỳ';
         case 'deworming': return 'Uống thuốc tẩy giun';
         case 'dental_scaling': return 'Lấy cao răng';
         case 'other':
         default: return 'Khác';
     }
+}
+
+function getHealthTypeBadge(type) {
+    switch (type) {
+        case 'blood_test': return { bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', icon: 'droplet' };
+        case 'urine_test': return { bg: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', icon: 'flask-conical' };
+        case 'ultrasound': return { bg: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', icon: 'activity' };
+        case 'deworming': return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10b981', icon: 'pill' };
+        case 'dental_scaling': return { bg: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4', icon: 'smile' };
+        case 'vaccination': return { bg: 'rgba(168, 85, 247, 0.1)', color: '#a855f7', icon: 'shield-plus' };
+        case 'periodic_checkup': return { bg: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', icon: 'stethoscope' };
+        default: return { bg: 'rgba(107, 114, 128, 0.1)', color: '#6b7280', icon: 'clipboard-list' };
+    }
+}
+
+let currentVaccineFilter = 'all';
+let showAllVaccineRecords = false;
+
+function renderVaccinationSection() {
+    const listContainer = document.getElementById('vaccinationRecordsList');
+    if (!listContainer) return;
+
+    const selectedProfileId = state.selectedHealthProfileId || 'all';
+    
+    // Filter records for vaccination and periodic checkups
+    let records = (state.medicalRecords || []).filter(r => {
+        if (r.deleted_at) return false;
+        const isTargetType = r.type === 'vaccination' || r.type === 'periodic_checkup' || r.type === 'deworming' || r.type === 'dental_scaling';
+        if (!isTargetType) return false;
+        if (selectedProfileId !== 'all') {
+            const rProfileId = r.profileId || 'p-self';
+            if (rProfileId !== selectedProfileId) return false;
+        }
+        return true;
+    });
+
+    const todayStr = getLocalDateString();
+    const todayDate = new Date(todayStr);
+
+    // Apply pill filter
+    if (currentVaccineFilter === 'vaccination') {
+        records = records.filter(r => r.type === 'vaccination');
+    } else if (currentVaccineFilter === 'periodic_checkup') {
+        records = records.filter(r => r.type === 'periodic_checkup' || r.type === 'deworming' || r.type === 'dental_scaling');
+    } else if (currentVaccineFilter === 'upcoming') {
+        records = records.filter(r => r.nextDoseDate && r.nextDoseDate.trim() !== '');
+    }
+
+    // Sort: records with upcoming nextDoseDate first, then recent date
+    records.sort((a, b) => {
+        if (a.nextDoseDate && b.nextDoseDate) {
+            return new Date(a.nextDoseDate) - new Date(b.nextDoseDate);
+        }
+        if (a.nextDoseDate) return -1;
+        if (b.nextDoseDate) return 1;
+        return new Date(b.date) - new Date(a.date);
+    });
+
+    if (records.length === 0) {
+        listContainer.innerHTML = `
+            <div style="text-align: center; padding: 24px 16px; background: var(--bg-secondary); border-radius: 12px; border: 1px dashed var(--border-color); color: var(--text-muted);">
+                <i data-lucide="shield-alert" style="width: 28px; height: 28px; margin-bottom: 8px; color: #a855f7; opacity: 0.6;"></i>
+                <p style="margin: 0; font-size: 0.88rem; font-weight: 500;">Chưa có dữ liệu tiêm chủng hoặc lịch khám định kỳ nào.</p>
+                <p style="margin: 4px 0 0 0; font-size: 0.78rem; opacity: 0.8;">Bấm "+ Mũi tiêm" hoặc "+ Lịch khám" ở trên để ghi nhận và nhận thông báo nhắc nhở tự động.</p>
+            </div>
+        `;
+        const moreContainer = document.getElementById('vaccinationRecordsMoreContainer');
+        if (moreContainer) moreContainer.innerHTML = '';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+    }
+
+    const totalCount = records.length;
+    const displayed = showAllVaccineRecords ? records : records.slice(0, 4);
+
+    listContainer.innerHTML = displayed.map(r => {
+        const isVaccine = r.type === 'vaccination';
+        const iconName = isVaccine ? 'shield-plus' : (r.type === 'deworming' ? 'pill' : (r.type === 'dental_scaling' ? 'smile' : 'stethoscope'));
+        const iconColor = isVaccine ? '#a855f7' : (r.type === 'deworming' ? '#10b981' : (r.type === 'dental_scaling' ? '#06b6d4' : '#0ea5e9'));
+        
+        let scheduleBadge = '';
+        if (r.nextDoseDate) {
+            const nextDate = new Date(r.nextDoseDate);
+            const diffDays = Math.ceil((nextDate - todayDate) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) {
+                scheduleBadge = `<span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">⚠️ Quá hạn ${Math.abs(diffDays)} ngày (${formatDate(r.nextDoseDate)})</span>`;
+            } else if (diffDays === 0) {
+                scheduleBadge = `<span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 700; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;">🔴 Đến hạn hôm nay!</span>`;
+            } else if (diffDays <= 30) {
+                scheduleBadge = `<span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25);">⏳ Còn ${diffDays} ngày (${formatDate(r.nextDoseDate)})</span>`;
+            } else {
+                scheduleBadge = `<span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25);">📅 Hẹn: ${formatDate(r.nextDoseDate)}</span>`;
+            }
+        }
+
+        const profileName = selectedProfileId === 'all' ? getProfileName(r.profileId) : '';
+
+        return `
+            <div class="vaccine-record-card" style="padding: 12px 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; display: flex; flex-direction: column; gap: 8px; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(168, 85, 247, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i data-lucide="${iconName}" style="color: ${iconColor}; width: 18px; height: 18px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); cursor: pointer;" onclick="openHealthDetail('${r.id}')">${escapeHTML(r.title)}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 2px;">
+                                <span><i data-lucide="calendar" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i> ${formatDate(r.date)}</span>
+                                ${r.facility ? `<span><i data-lucide="hospital" style="width: 12px; height: 12px; display: inline; vertical-align: middle;"></i> ${escapeHTML(r.facility)}</span>` : ''}
+                                ${profileName ? `<span style="color: #8b5cf6; font-weight: 600;">• ${escapeHTML(profileName)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        ${scheduleBadge}
+                        <button type="button" class="action-icon-btn btn-edit-vaccine" onclick="openHealthEditModal('${r.id}')" title="Chỉnh sửa" style="padding: 4px 6px; background: transparent; border: none; cursor: pointer; color: var(--text-muted); border-radius: 4px;">
+                            <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button type="button" class="action-icon-btn btn-delete-vaccine" onclick="deleteMedicalRecord('${r.id}')" title="Xóa" style="padding: 4px 6px; background: transparent; border: none; cursor: pointer; color: var(--text-muted); border-radius: 4px;">
+                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                ${(r.lotNumber || r.sideEffects || r.notes) ? `
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); background: var(--bg-tertiary); padding: 6px 10px; border-radius: 6px; display: flex; flex-wrap: wrap; gap: 12px;">
+                        ${r.lotNumber ? `<span><strong>Số lô:</strong> ${escapeHTML(r.lotNumber)}</span>` : ''}
+                        ${r.sideEffects ? `<span><strong>Phản ứng:</strong> ${escapeHTML(r.sideEffects)}</span>` : ''}
+                        ${r.notes ? `<span><strong>Ghi chú:</strong> ${escapeHTML(r.notes)}</span>` : ''}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+
+    const moreContainer = document.getElementById('vaccinationRecordsMoreContainer');
+    if (moreContainer) {
+        if (totalCount > 4) {
+            moreContainer.innerHTML = `
+                <button type="button" id="toggleShowAllVaccineBtn" class="health-btn health-btn-secondary" style="padding: 6px 18px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; border: 1px solid var(--border-color); border-radius: var(--btn-radius); font-weight: 600; cursor: pointer;">
+                    <i data-lucide="${showAllVaccineRecords ? 'chevron-up' : 'chevron-down'}" style="width: 14px; height: 14px;"></i>
+                    <span>${showAllVaccineRecords ? 'Thu gọn' : `Xem tất cả (${totalCount})`}</span>
+                </button>
+            `;
+            document.getElementById('toggleShowAllVaccineBtn')?.addEventListener('click', () => {
+                showAllVaccineRecords = !showAllVaccineRecords;
+                renderVaccinationSection();
+            });
+        } else {
+            moreContainer.innerHTML = '';
+        }
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function getFilteredHealthRecords() {
@@ -1706,14 +1893,19 @@ Bạn bắt buộc phải trả về một đối tượng JSON thuộc một tr
   ]
 }
 
-ĐỊNH DẠNG 3 (Nếu là kết quả xét nghiệm y khoa thông thường):
+ĐỊNH DẠNG 3 (Nếu là kết quả xét nghiệm y khoa, sổ tiêm chủng hoặc phiếu khám sức khỏe):
 {
   "isBloodPressure": false,
   "isBodyComposition": false,
-  "title": "<Tên xét nghiệm hoặc tiêu đề hồ sơ y tế, ví dụ: Xét nghiệm máu tổng quát>",
-  "type": "<Phân loại xét nghiệm, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'deworming', 'dental_scaling', 'other'>",
-  "facility": "<Tên bệnh viện, phòng khám hoặc cơ sở y tế nơi thực hiện. Nếu không tìm thấy, để trống>",
-  "date": "<Ngày xét nghiệm định dạng YYYY-MM-DD. Nếu không tìm thấy, lấy ngày hiện tại: ${getLocalDateString()}>",
+  "title": "<Tên xét nghiệm, vaccine hoặc tiêu đề hồ sơ y tế, ví dụ: Xét nghiệm máu tổng quát, Tiêm Vaccine Cúm Mùa, Khám sức khỏe định kỳ>",
+  "type": "<Phân loại, chọn một trong các giá trị: 'blood_test', 'urine_test', 'ultrasound', 'vaccination', 'periodic_checkup', 'deworming', 'dental_scaling', 'other'>",
+  "facility": "<Tên bệnh viện, cơ sở tiêm chủng (VNVC, Pasteur...), phòng khám nơi thực hiện. Nếu không tìm thấy, để trống>",
+  "date": "<Ngày xét nghiệm / tiêm / khám định dạng YYYY-MM-DD. Nếu không tìm thấy, lấy ngày hiện tại: ${getLocalDateString()}>",
+  "vaccineName": "<Tên vaccine hoặc bệnh phòng ngừa nếu là tiêm chủng, ví dụ: 6 trong 1 Hexaxim, Cúm mùa, HPV Gardasil 9>",
+  "doseNumber": "<Mũi tiêm nếu là tiêm chủng, ví dụ: 'Mũi 1', 'Mũi 2', 'Mũi 3', 'Mũi nhắc lại'>",
+  "lotNumber": "<Số lô vaccine nếu có trên phiếu>",
+  "nextDoseDate": "<Ngày hẹn tiêm mũi kế tiếp hoặc ngày hẹn tái khám định kỳ nếu có ghi trên phiếu định dạng YYYY-MM-DD>",
+  "sideEffects": "<Phản ứng sau tiêm nếu có ghi chú>",
   "indicators": [
     {
       "name": "<Tên chỉ số xét nghiệm, ví dụ: Glucose, Cholesterol, SGOT, SGPT, Bạch cầu...>",
@@ -1827,6 +2019,9 @@ function updateHealthFormFields() {
     const facilityLabel = document.getElementById('healthEditFacilityLabel');
     const indicatorsRowsContainer = document.getElementById('healthIndicatorsEditRows');
     const dewormingFields = document.getElementById('dewormingFields');
+    const vaccinationFields = document.getElementById('vaccinationFields');
+    const vaccinationScheduleFields = document.getElementById('vaccinationScheduleFields');
+    const periodicCheckupFields = document.getElementById('periodicCheckupFields');
     const notesGroup = document.getElementById('healthEditNotesGroup');
     const dateLabel = document.getElementById('healthEditDateLabel');
 
@@ -1836,88 +2031,124 @@ function updateHealthFormFields() {
             dateLabel.textContent = 'Ngày uống thuốc';
         } else if (type === 'dental_scaling') {
             dateLabel.textContent = 'Ngày lấy cao răng';
+        } else if (type === 'vaccination') {
+            dateLabel.textContent = 'Ngày tiêm Vaccine';
+        } else if (type === 'periodic_checkup') {
+            dateLabel.textContent = 'Ngày khám';
         } else {
             dateLabel.textContent = 'Ngày xét nghiệm / Khám';
         }
     }
 
-    // 2. Xử lý ẩn/hiện trường kết luận bác sĩ (Notes)
+    // 2. Xử lý ẩn/hiện trường ghi chú / kết luận
     if (notesGroup) {
         notesGroup.style.display = type === 'deworming' ? 'none' : 'block';
     }
 
-    // 3. Xử lý ẩn/hiện các trường tuỳ chỉnh cho tẩy giun
+    // 3. Xử lý ẩn/hiện các trường tuỳ chỉnh
     if (dewormingFields) {
-        if (type === 'deworming') {
-            dewormingFields.style.display = 'grid';
-            calculateNextDoseDate(); // Tự động tính toán ngày uống tiếp theo
-        } else {
-            dewormingFields.style.display = 'none';
-        }
+        dewormingFields.style.display = (type === 'deworming') ? 'grid' : 'none';
+        if (type === 'deworming') calculateNextDoseDate();
+    }
+    if (vaccinationFields) {
+        vaccinationFields.style.display = (type === 'vaccination') ? 'grid' : 'none';
+    }
+    if (vaccinationScheduleFields) {
+        vaccinationScheduleFields.style.display = (type === 'vaccination') ? 'grid' : 'none';
+        if (type === 'vaccination') calculateNextVaccineDate();
+    }
+    if (periodicCheckupFields) {
+        periodicCheckupFields.style.display = (type === 'periodic_checkup') ? 'grid' : 'none';
+        if (type === 'periodic_checkup') calculateNextCheckupDate();
     }
 
-    if (type === 'deworming' || type === 'dental_scaling') {
-        // Tự động điền tên hồ sơ và ẩn đi
-        titleInput.value = type === 'deworming' ? 'Uống thuốc tẩy giun' : 'Lấy cao răng';
-        titleGroup.style.display = 'none';
+    if (type === 'deworming' || type === 'dental_scaling' || type === 'vaccination' || type === 'periodic_checkup') {
+        if (type === 'deworming') {
+            titleInput.value = 'Uống thuốc tẩy giun';
+        } else if (type === 'dental_scaling') {
+            titleInput.value = 'Lấy cao răng';
+        }
+        titleGroup.style.display = (type === 'vaccination' || type === 'periodic_checkup') ? 'none' : 'none';
         if (titleContainer) {
             titleContainer.style.gridTemplateColumns = '1fr 1fr';
         }
 
-        // Ẩn danh sách chỉ số xét nghiệm và xóa các dòng indicators để tránh lỗi validate HTML5
-        if (indicatorsContainer) {
-            indicatorsContainer.style.display = 'none';
-        }
-        if (indicatorsRowsContainer) {
-            indicatorsRowsContainer.innerHTML = '';
-        }
+        // Ẩn danh sách indicators
+        if (indicatorsContainer) indicatorsContainer.style.display = 'none';
+        if (indicatorsRowsContainer) indicatorsRowsContainer.innerHTML = '';
 
         if (type === 'deworming') {
-            // Uống thuốc tẩy giun: không cần nhập nơi thực hiện
             facilityInput.value = '';
             if (facilityGroup) facilityGroup.style.display = 'none';
-            if (facilityContainer) {
-                facilityContainer.style.gridTemplateColumns = '1fr';
-            }
+            if (facilityContainer) facilityContainer.style.gridTemplateColumns = '1fr';
         } else {
-            // Lấy cao răng: hiển thị nơi thực hiện nhưng đổi nhãn cho thân thiện
             if (facilityGroup) facilityGroup.style.display = 'block';
             if (facilityLabel) {
-                facilityLabel.textContent = 'Phòng khám Nha khoa';
+                facilityLabel.textContent = (type === 'vaccination') ? 'Cơ sở tiêm (VNVC, Pasteur...)' : (type === 'dental_scaling' ? 'Phòng khám Nha khoa' : 'Bệnh viện / Phòng khám');
             }
-            facilityInput.placeholder = 'Ví dụ: Nha khoa Kim';
-            if (facilityContainer) {
-                facilityContainer.style.gridTemplateColumns = '1fr 1fr';
-            }
+            facilityInput.placeholder = (type === 'vaccination') ? 'Ví dụ: Trung tâm tiêm chủng VNVC' : (type === 'dental_scaling' ? 'Ví dụ: Nha khoa Kim' : 'Ví dụ: BV Bạch Mai');
+            if (facilityContainer) facilityContainer.style.gridTemplateColumns = '1fr 1fr';
         }
     } else {
-        // Các xét nghiệm thông thường: hiển thị đầy đủ
+        // Xét nghiệm thông thường
         titleGroup.style.display = 'block';
-        if (titleContainer) {
-            titleContainer.style.gridTemplateColumns = '1.5fr 1fr 1fr';
-        }
+        if (titleContainer) titleContainer.style.gridTemplateColumns = '1.5fr 1fr 1fr';
 
         if (facilityGroup) facilityGroup.style.display = 'block';
-        if (facilityLabel) {
-            facilityLabel.textContent = 'Bệnh viện / Phòng khám';
-        }
+        if (facilityLabel) facilityLabel.textContent = 'Bệnh viện / Phòng khám';
         facilityInput.placeholder = 'Ví dụ: Bệnh viện Bạch Mai';
-        if (facilityContainer) {
-            facilityContainer.style.gridTemplateColumns = '1fr 1fr';
-        }
+        if (facilityContainer) facilityContainer.style.gridTemplateColumns = '1fr 1fr';
 
-        if (indicatorsContainer) {
-            indicatorsContainer.style.display = 'block';
-        }
-        
-        // Nếu chuyển về dạng xét nghiệm thông thường mà chưa có dòng nhập chỉ số nào, chèn 1 dòng trống
+        if (indicatorsContainer) indicatorsContainer.style.display = 'block';
         if (indicatorsRowsContainer && indicatorsRowsContainer.children.length === 0) {
             addIndicatorEditRow();
         }
     }
 }
 
-function openHealthEditModal(recordId = null, initialData = null) {
+function calculateNextVaccineDate() {
+    const dateInput = document.getElementById('healthEditDate');
+    const monthsSelect = document.getElementById('healthEditNextVaccineMonths');
+    const nextDateInput = document.getElementById('healthEditNextVaccineDate');
+    if (!dateInput || !monthsSelect || !nextDateInput) return;
+
+    const monthsVal = monthsSelect.value;
+    if (monthsVal === 'custom' || monthsVal === '0') return;
+
+    const months = parseInt(monthsVal, 10);
+    const currentDateVal = dateInput.value;
+    if (currentDateVal && !isNaN(months) && months > 0) {
+        const parts = currentDateVal.split('-');
+        if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            d.setMonth(d.getMonth() + months);
+            nextDateInput.value = d.toISOString().split('T')[0];
+        }
+    }
+}
+
+function calculateNextCheckupDate() {
+    const dateInput = document.getElementById('healthEditDate');
+    const cycleSelect = document.getElementById('healthEditCheckupCycleMonths');
+    const nextDateInput = document.getElementById('healthEditNextCheckupDate');
+    if (!dateInput || !cycleSelect || !nextDateInput) return;
+
+    const cycleVal = cycleSelect.value;
+    if (cycleVal === 'custom') return;
+
+    const months = parseInt(cycleVal, 10);
+    const currentDateVal = dateInput.value;
+    if (currentDateVal && !isNaN(months) && months > 0) {
+        const parts = currentDateVal.split('-');
+        if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            d.setMonth(d.getMonth() + months);
+            nextDateInput.value = d.toISOString().split('T')[0];
+        }
+    }
+}
+
+function openHealthEditModal(recordId = null, initialData = null, defaultType = null) {
     if (!state.user) {
         showToast("Vui lòng đăng nhập tài khoản để thêm/sửa thông tin", "warning");
         return;
@@ -1939,7 +2170,7 @@ function openHealthEditModal(recordId = null, initialData = null) {
     // Clear form fields
     document.getElementById('healthRecordId').value = recordId || '';
     document.getElementById('healthEditTitle').value = '';
-    document.getElementById('healthEditType').value = 'blood_test';
+    document.getElementById('healthEditType').value = defaultType || 'blood_test';
     document.getElementById('healthEditDate').value = getLocalDateString();
     document.getElementById('healthEditFacility').value = '';
     document.getElementById('healthEditNotes').value = '';
@@ -1947,6 +2178,26 @@ function openHealthEditModal(recordId = null, initialData = null) {
     document.getElementById('healthEditMedicine').value = '';
     document.getElementById('healthEditNextDoseMonths').value = '6';
     document.getElementById('healthEditNextDoseDate').value = '';
+
+    // Clear vaccination & checkup fields
+    const vNameEl = document.getElementById('healthEditVaccineName');
+    if (vNameEl) vNameEl.value = '';
+    const vDoseEl = document.getElementById('healthEditDoseNumber');
+    if (vDoseEl) vDoseEl.value = 'Mũi 1';
+    const vLotEl = document.getElementById('healthEditLotNumber');
+    if (vLotEl) vLotEl.value = '';
+    const vNextMEl = document.getElementById('healthEditNextVaccineMonths');
+    if (vNextMEl) vNextMEl.value = '0';
+    const vNextDEl = document.getElementById('healthEditNextVaccineDate');
+    if (vNextDEl) vNextDEl.value = '';
+    const vSideEl = document.getElementById('healthEditSideEffects');
+    if (vSideEl) vSideEl.value = '';
+    const cTypeEl = document.getElementById('healthEditCheckupType');
+    if (cTypeEl) cTypeEl.value = 'Khám sức khỏe tổng quát';
+    const cCycleEl = document.getElementById('healthEditCheckupCycleMonths');
+    if (cCycleEl) cCycleEl.value = '6';
+    const cNextDEl = document.getElementById('healthEditNextCheckupDate');
+    if (cNextDEl) cNextDEl.value = '';
     
     // Pre-select active family member filter if not 'all'
     if (editProfileSelect) {
@@ -1966,6 +2217,20 @@ function openHealthEditModal(recordId = null, initialData = null) {
             document.getElementById('healthEditMedicine').value = record.medicineName || '';
             document.getElementById('healthEditNextDoseMonths').value = record.nextDoseMonths || '6';
             document.getElementById('healthEditNextDoseDate').value = record.nextDoseDate || '';
+            
+            if (record.type === 'vaccination') {
+                if (vNameEl) vNameEl.value = record.vaccineName || record.title || '';
+                if (vDoseEl) vDoseEl.value = record.doseNumber || 'Mũi 1';
+                if (vLotEl) vLotEl.value = record.lotNumber || '';
+                if (vNextMEl) vNextMEl.value = record.nextDoseMonths || '0';
+                if (vNextDEl) vNextDEl.value = record.nextDoseDate || '';
+                if (vSideEl) vSideEl.value = record.sideEffects || '';
+            } else if (record.type === 'periodic_checkup') {
+                if (cTypeEl) cTypeEl.value = record.checkupType || record.title || 'Khám sức khỏe tổng quát';
+                if (cCycleEl) cCycleEl.value = record.cycleMonths || '6';
+                if (cNextDEl) cNextDEl.value = record.nextDoseDate || '';
+            }
+
             if (editProfileSelect) {
                 editProfileSelect.value = record.profileId || 'p-self';
             }
@@ -1976,7 +2241,7 @@ function openHealthEditModal(recordId = null, initialData = null) {
         }
     } else {
         const modelBadge = initialData?._modelName ? ` [${initialData._modelName}]` : '';
-        modalTitle.innerText = initialData ? `Xác nhận kết quả quét AI${modelBadge}` : "Thêm Hồ sơ y tế thủ công";
+        modalTitle.innerText = initialData ? `Xác nhận kết quả quét AI${modelBadge}` : (defaultType === 'vaccination' ? "Ghi nhận Mũi tiêm Vaccine" : (defaultType === 'periodic_checkup' ? "Đặt Lịch Khám Định Kỳ" : "Thêm Hồ sơ y tế thủ công"));
         
         if (initialData) {
             showToast(`Đã bóc tách kết quả xét nghiệm [${initialData._modelName || 'Gemini 3.7 Flash'}] thành công!`, 'success');
@@ -1986,12 +2251,25 @@ function openHealthEditModal(recordId = null, initialData = null) {
             document.getElementById('healthEditFacility').value = initialData.facility || '';
             document.getElementById('healthEditNotes').value = initialData.notes || '';
             
+            if (initialData.type === 'vaccination') {
+                if (vNameEl) vNameEl.value = initialData.vaccineName || initialData.title || '';
+                if (vDoseEl) vDoseEl.value = initialData.doseNumber || 'Mũi 1';
+                if (vLotEl) vLotEl.value = initialData.lotNumber || '';
+                if (vNextDEl) vNextDEl.value = initialData.nextDoseDate || '';
+                if (vSideEl) vSideEl.value = initialData.sideEffects || '';
+            } else if (initialData.type === 'periodic_checkup') {
+                if (cTypeEl) cTypeEl.value = initialData.title || 'Khám sức khỏe tổng quát';
+                if (cNextDEl) cNextDEl.value = initialData.nextDoseDate || '';
+            }
+
             (initialData.indicators || []).forEach(ind => {
                 addIndicatorEditRow(ind.name, ind.value, ind.unit, ind.refRange, ind.assessment);
             });
         } else {
-            // Add one default empty row
-            addIndicatorEditRow();
+            // Add one default empty row for blood/urine tests
+            if (!defaultType || defaultType === 'blood_test' || defaultType === 'urine_test') {
+                addIndicatorEditRow();
+            }
         }
     }
     
@@ -2068,6 +2346,32 @@ async function saveMedicalRecord(event) {
     const medicineName = document.getElementById('healthEditMedicine').value.trim();
     const nextDoseMonths = parseInt(document.getElementById('healthEditNextDoseMonths').value) || 6;
     const nextDoseDate = document.getElementById('healthEditNextDoseDate').value;
+
+    let finalTitle = title;
+    let vaccineName = undefined;
+    let doseNumber = undefined;
+    let lotNumber = undefined;
+    let sideEffects = undefined;
+    let checkupType = undefined;
+    let cycleMonths = undefined;
+    let finalNextDoseDate = (type === 'deworming') ? nextDoseDate : undefined;
+    let finalNextDoseMonths = (type === 'deworming') ? nextDoseMonths : undefined;
+
+    if (type === 'vaccination') {
+        vaccineName = document.getElementById('healthEditVaccineName')?.value.trim() || '';
+        doseNumber = document.getElementById('healthEditDoseNumber')?.value || 'Mũi 1';
+        lotNumber = document.getElementById('healthEditLotNumber')?.value.trim() || '';
+        sideEffects = document.getElementById('healthEditSideEffects')?.value.trim() || '';
+        finalNextDoseMonths = document.getElementById('healthEditNextVaccineMonths')?.value || '0';
+        finalNextDoseDate = document.getElementById('healthEditNextVaccineDate')?.value || '';
+        finalTitle = vaccineName ? `${vaccineName} (${doseNumber})` : 'Tiêm chủng Vaccine';
+    } else if (type === 'periodic_checkup') {
+        checkupType = document.getElementById('healthEditCheckupType')?.value || 'Khám sức khỏe tổng quát';
+        cycleMonths = document.getElementById('healthEditCheckupCycleMonths')?.value || '6';
+        finalNextDoseDate = document.getElementById('healthEditNextCheckupDate')?.value || '';
+        finalNextDoseMonths = cycleMonths;
+        finalTitle = checkupType || 'Khám sức khỏe định kỳ';
+    }
     
     const indicatorRows = document.querySelectorAll('#healthIndicatorsEditRows .health-indicators-edit-row');
     const indicators = [];
@@ -2091,7 +2395,7 @@ async function saveMedicalRecord(event) {
         if (index !== -1) {
             state.medicalRecords[index] = {
                 ...state.medicalRecords[index],
-                title,
+                title: finalTitle,
                 type,
                 profileId,
                 date,
@@ -2099,15 +2403,21 @@ async function saveMedicalRecord(event) {
                 notes,
                 indicators,
                 medicineName: type === 'deworming' ? medicineName : undefined,
-                nextDoseMonths: type === 'deworming' ? nextDoseMonths : undefined,
-                nextDoseDate: type === 'deworming' ? nextDoseDate : undefined,
+                nextDoseMonths: finalNextDoseMonths,
+                nextDoseDate: finalNextDoseDate,
+                vaccineName,
+                doseNumber,
+                lotNumber,
+                sideEffects,
+                checkupType,
+                cycleMonths,
                 updated_at: nowIso
             };
         }
     } else {
         const newRecord = {
             id: 'med-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-            title,
+            title: finalTitle,
             type,
             profileId,
             date,
@@ -2115,8 +2425,14 @@ async function saveMedicalRecord(event) {
             notes,
             indicators,
             medicineName: type === 'deworming' ? medicineName : undefined,
-            nextDoseMonths: type === 'deworming' ? nextDoseMonths : undefined,
-            nextDoseDate: type === 'deworming' ? nextDoseDate : undefined,
+            nextDoseMonths: finalNextDoseMonths,
+            nextDoseDate: finalNextDoseDate,
+            vaccineName,
+            doseNumber,
+            lotNumber,
+            sideEffects,
+            checkupType,
+            cycleMonths,
             created_at: nowIso,
             updated_at: nowIso
         };
@@ -2199,6 +2515,8 @@ function openHealthDetail(id) {
             dateLabel.innerText = 'Ngày uống thuốc:';
         } else if (record.type === 'dental_scaling') {
             dateLabel.innerText = 'Ngày lấy cao răng:';
+        } else if (record.type === 'vaccination') {
+            dateLabel.innerText = 'Ngày tiêm Vaccine:';
         } else {
             dateLabel.innerText = 'Ngày khám:';
         }
@@ -2212,7 +2530,7 @@ function openHealthDetail(id) {
         } else {
             facilityWrapper.style.display = 'block';
             if (facilityLabel) {
-                facilityLabel.innerText = record.type === 'dental_scaling' ? 'Nha khoa:' : 'Nơi khám:';
+                facilityLabel.innerText = record.type === 'vaccination' ? 'Cơ sở tiêm:' : (record.type === 'dental_scaling' ? 'Nha khoa:' : 'Nơi khám:');
             }
         }
     }
@@ -2229,10 +2547,10 @@ function openHealthDetail(id) {
         }
     }
 
-    // Hide indicators and notes sections for deworming/dental
+    // Hide indicators and notes sections for deworming/dental/vaccination/checkup
     const indicatorsSection = document.getElementById('healthDetailIndicatorsSection');
     if (indicatorsSection) {
-        indicatorsSection.style.display = (record.type === 'deworming' || record.type === 'dental_scaling') ? 'none' : 'block';
+        indicatorsSection.style.display = (record.type === 'deworming' || record.type === 'dental_scaling' || record.type === 'vaccination' || record.type === 'periodic_checkup') ? 'none' : 'block';
     }
     
     const notesSection = document.querySelector('.health-detail-notes-section');

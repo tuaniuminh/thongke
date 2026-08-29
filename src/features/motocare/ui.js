@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.249';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.249';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.250';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.250';
 
 export const UI = {
     // Show toast notification
@@ -488,7 +488,7 @@ export const UI = {
     },
 
     // Render Multi-Item Maintenance Checklist for Batch Mode
-    renderMaintenanceChecklist(vehicleId, preselectedCategory = null) {
+    renderMaintenanceChecklist(vehicleId, preselectedCategories = null, categoryCosts = {}) {
         const container = document.getElementById('mc-maint-checklist-container');
         if (!container) return;
 
@@ -509,7 +509,10 @@ export const UI = {
         });
 
         items.forEach(item => {
-            const isChecked = (preselectedCategory && item.key === preselectedCategory);
+            const isChecked = Array.isArray(preselectedCategories) 
+                ? preselectedCategories.includes(item.key) 
+                : (preselectedCategories && item.key === preselectedCategories);
+            const initialCost = (categoryCosts && categoryCosts[item.key]) ? categoryCosts[item.key] : '';
             const row = document.createElement('div');
             row.className = 'maint-checklist-item';
             row.style.cssText = `
@@ -533,7 +536,7 @@ export const UI = {
                 </div>
                 <div class="mc-checklist-cost-wrap" style="display: ${isChecked ? 'flex' : 'none'}; align-items: center; gap: 8px; padding-left: 27px;">
                     <span style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">Chi phí:</span>
-                    <input type="number" class="mc-maint-item-cost form-input" data-category="${item.key}" placeholder="0 đ (hoặc bỏ trống)" min="0" step="1000" style="padding: 5px 10px; font-size: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); width: 140px;">
+                    <input type="number" class="mc-maint-item-cost form-input" data-category="${item.key}" value="${initialCost}" placeholder="0 đ (hoặc bỏ trống)" min="0" step="1000" style="padding: 5px 10px; font-size: 0.85rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); width: 140px;">
                     <span style="font-size: 0.8rem; color: var(--text-muted);">VNĐ</span>
                 </div>
             `;
