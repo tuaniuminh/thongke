@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
 
       - name: Inject Supabase Secrets
         run: |
@@ -29,15 +29,10 @@ jobs:
           sed -i "s|VITE_SUPABASE_ANON_KEY_PLACEHOLDER|$KEY_VAL|g" src/core/app.js
 
       - name: Setup Java JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@main
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
 
       - name: Install Dependencies
         run: npm install
@@ -76,7 +71,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: FamiLife_android_v${{ steps.get_version.outputs.VERSION }}
           path: ${{ env.APK_NAME }}
