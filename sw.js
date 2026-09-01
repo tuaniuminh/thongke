@@ -3,7 +3,7 @@
 //             Cache-first cho ảnh và CDN static libraries (Supabase, Chart.js, Lucide...) để tải cực nhanh & offline
 //             Bỏ qua hoàn toàn các API calls động bên ngoài (Supabase API, Gemini API, Weather API)
 
-const SW_VERSION = new URL(location).searchParams.get('v') || 'v4.3.265';
+const SW_VERSION = new URL(location).searchParams.get('v') || 'v4.3.266';
 const CACHE_NAME = 'familife-cache-' + (SW_VERSION.startsWith('v') ? SW_VERSION : 'v' + SW_VERSION);
 
 // App shell — danh sách tài nguyên cần cache ngay khi install
@@ -37,7 +37,9 @@ const SHELL_ASSETS = [
     './src/features/motocare/motocare.js',
     './src/features/motocare/db.js',
     './src/features/motocare/ui.js',
-    './src/features/motocare/presets.js'
+    './src/features/motocare/presets.js',
+    './src/assets/css/app-lock.css',
+    './src/features/app-lock/app-lock.js'
 ];
 
 // Các API endpoints động bên ngoài cần bỏ qua (phải gọi mạng thật, không cache)

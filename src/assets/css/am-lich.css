@@ -954,3 +954,54 @@ body.light-mode .lunar-event-date {
     background-color: var(--accent-amber);
 }
 
+/* Thanh chú thích ý nghĩa lịch âm */
+.lunar-calendar-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    background: var(--bg-tertiary, #f8fafc);
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+    border-radius: 12px;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #64748b);
+    flex-wrap: wrap;
+}
+
+.lunar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.lunar-legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.lunar-legend-dot.hoang-dao {
+    background-color: #f59e0b; /* Amber */
+    box-shadow: 0 0 4px rgba(245, 158, 11, 0.4);
+}
+
+.lunar-legend-dot.bad-day {
+    background-color: #ef4444; /* Rose/Red */
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
+}
+
+.lunar-legend-badge-special {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 1px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+

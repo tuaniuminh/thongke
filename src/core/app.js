@@ -2,20 +2,21 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.265';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.265';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.265';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.265';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.266';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.266';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.266';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.266';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.265';
-import * as sync from './sync.js?v=4.3.265';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.265';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.265';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.265';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.265';
-import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.265';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.266';
+import * as sync from './sync.js?v=4.3.266';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.266';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.266';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.266';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.266';
+import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.266';
+import { appLock } from '../features/app-lock/app-lock.js?v=4.3.266';
 
-const APP_VERSION = '4.3.265';
+const APP_VERSION = '4.3.266';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -2675,6 +2676,7 @@ function updateThemeUI() {
     const mobileLogo = document.getElementById('mobileLogoImg');
     const homeLogo = document.querySelector('.home-logo-img');
     const tauriTitlebarLogo = document.getElementById('tauriTitlebarIcon') || document.querySelector('.tauri-titlebar-icon');
+    const appLockLogo = document.getElementById('appLockLogoImg');
     
     const logoSrc = state.theme === 'light' 
         ? `src/assets/images/icon-light.png?v=${APP_VERSION}` 
@@ -2684,6 +2686,7 @@ function updateThemeUI() {
     if (mobileLogo) mobileLogo.src = logoSrc;
     if (homeLogo) homeLogo.src = logoSrc;
     if (tauriTitlebarLogo) tauriTitlebarLogo.src = logoSrc;
+    if (appLockLogo) appLockLogo.src = logoSrc;
 
     if (window.lucide) window.lucide.createIcons();
 }
@@ -3099,6 +3102,9 @@ function switchTab(tabId, updateHash = true, pushHistory = true) {
         }
         if (typeof initDesktopHomeLayoutSettingsUI === 'function') {
             initDesktopHomeLayoutSettingsUI();
+        }
+        if (appLock && typeof appLock.renderSettingsUI === 'function') {
+            appLock.renderSettingsUI();
         }
     } else if (tabId === 'health' || tabId === 'health-reminders') {
         title.innerText = tabId === 'health' ? 'Hồ sơ y tế' : 'Lịch nhắc y tế';
@@ -3655,6 +3661,11 @@ function handleUnlockClear() {
 async function initializeApp() {
     if (window.__famiLifeInitialized) return;
     window.__famiLifeInitialized = true;
+
+    // Kiểm tra và hiển thị Khóa ứng dụng nếu đang bật
+    if (appLock && appLock.isLockEnabled()) {
+        appLock.showLockScreen();
+    }
 
     // Khởi tạo thanh tiêu đề tùy biến trên Desktop nếu chạy qua Tauri
     initTauriTitlebar();
@@ -4476,6 +4487,10 @@ async function initializeApp() {
             });
             const targetPanel = document.getElementById(`settings-content-${tabName}`);
             if (targetPanel) targetPanel.classList.add('active');
+
+            if (tabName === 'security' && appLock && typeof appLock.renderSettingsUI === 'function') {
+                appLock.renderSettingsUI();
+            }
             
             // Save state
             sessionStorage.setItem('activeSettingsTab', tabName);

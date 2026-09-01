@@ -4,7 +4,7 @@
  */
 import { 
     state as famiState, saveLocalState, performSync, showToast 
-} from '../../core/app.js?v=4.3.265';
+} from '../../core/app.js?v=4.3.266';
 
 const CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"];
 const CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"];
@@ -457,7 +457,7 @@ function renderCalendarGrid() {
                 lunarSpan.textContent = `${lunar.lDay}/${lunar.lMonth}`;
                 cellDiv.classList.add('special-lunar-day');
             } else if (lunar.lDay === 15) {
-                lunarSpan.textContent = 'Rằm';
+                lunarSpan.textContent = '15';
                 cellDiv.classList.add('special-lunar-day');
             } else {
                 lunarSpan.textContent = lunar.lDay;
