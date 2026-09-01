@@ -3484,6 +3484,43 @@ body.light-mode .version-badge-btn {
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.25) !important;
 }
 
+/* Trạng thái Có bản cập nhật mới (Has Update) - Dấu chấm đỏ thông báo nhấp nháy */
+.version-badge-btn.has-update {
+    border-color: #0284c7 !important;
+    color: #0284c7 !important;
+    position: relative;
+    background: rgba(2, 132, 199, 0.1) !important;
+    box-shadow: 0 0 15px rgba(2, 132, 199, 0.3) !important;
+}
+
+.version-badge-btn.has-update::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 10px;
+    height: 10px;
+    background: #ef4444;
+    border: 2px solid var(--bg-secondary, #ffffff);
+    border-radius: 50%;
+    animation: updatePulseDot 1.8s infinite;
+}
+
+@keyframes updatePulseDot {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
 
 
 @media (max-width: 576px) {

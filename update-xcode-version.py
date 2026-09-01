@@ -267,7 +267,44 @@ def configure_ios_permissions():
     with open(info_plist_path, 'w', encoding='utf-8') as f:
         f.write(content)
 
+def configure_live_activity_plugin():
+    plugin_path = 'src/native/ios/LiveActivityPlugin.swift'
+    app_delegate_path = None
+    for root, dirs, files in os.walk('ios'):
+        for file in files:
+            if file == 'AppDelegate.swift':
+                app_delegate_path = os.path.join(root, file)
+                break
+        if app_delegate_path:
+            break
+            
+    if not app_delegate_path:
+        print("ERROR: AppDelegate.swift was not found in 'ios' directory for plugin injection!")
+        return
+        
+    if not os.path.exists(plugin_path):
+        print(f"WARNING: {plugin_path} not found!")
+        return
+        
+    with open(plugin_path, 'r', encoding='utf-8') as f:
+        plugin_code = f.read()
+        
+    with open(app_delegate_path, 'r', encoding='utf-8') as f:
+        app_delegate_code = f.read()
+        
+    if 'LiveActivityPlugin' in app_delegate_code:
+        print("AppDelegate.swift already contains LiveActivityPlugin.")
+        return
+        
+    app_delegate_code += "\n\n// MARK: - Injected LiveActivityPlugin & IPADownloadManager\n" + plugin_code
+    
+    with open(app_delegate_path, 'w', encoding='utf-8') as f:
+        f.write(app_delegate_code)
+        
+    print("LiveActivityPlugin successfully injected into AppDelegate.swift.")
+
 if __name__ == '__main__':
     update_version()
     configure_ios_swizzler()
     configure_ios_permissions()
+    configure_live_activity_plugin()

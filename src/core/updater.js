@@ -129,7 +129,10 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
 
     // 1. NỀN TẢNG iOS (Capacitor Swift Plugin -> Share Sheet / TrollStore)
     if (platform === 'ios') {
-        const LiveActivityPlugin = window.Capacitor?.Plugins?.LiveActivityPlugin;
+        const LiveActivityPlugin = (window.Capacitor && typeof window.Capacitor.registerPlugin === 'function')
+            ? window.Capacitor.registerPlugin('LiveActivityPlugin')
+            : (window.Capacitor?.Plugins?.LiveActivityPlugin || null);
+
         if (LiveActivityPlugin && typeof LiveActivityPlugin.downloadAndOpenIPA === 'function') {
             let listener = null;
             if (onProgress && typeof LiveActivityPlugin.addListener === 'function') {
@@ -146,7 +149,7 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
                 }
             }
         } else {
-            // Fallback mở Safari tải trực tiếp
+            // Fallback mở Safari tải trực tiếp nếu không tìm thấy Native Plugin
             window.open(downloadUrl, '_blank');
             return { success: true, fallback: true };
         }
@@ -154,7 +157,10 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
 
     // 2. NỀN TẢNG ANDROID (Capacitor Java Plugin -> Package Installer)
     if (platform === 'android') {
-        const AppUpdatePlugin = window.Capacitor?.Plugins?.AppUpdatePlugin;
+        const AppUpdatePlugin = (window.Capacitor && typeof window.Capacitor.registerPlugin === 'function')
+            ? window.Capacitor.registerPlugin('AppUpdatePlugin')
+            : (window.Capacitor?.Plugins?.AppUpdatePlugin || null);
+
         if (AppUpdatePlugin && typeof AppUpdatePlugin.downloadAndInstallAPK === 'function') {
             let listener = null;
             if (onProgress && typeof AppUpdatePlugin.addListener === 'function') {
@@ -279,7 +285,7 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
 }
 
 /**
- * Hiển thị Modal Cập Nhật Trực Quan Hiện Đại
+ * Hiển thị Modal Cập Nhật Trực Quan Hiện Đại (Tương thích 100% Light Mode & Dark Mode)
  * @param {Object} releaseInfo 
  * @param {Function} showToast 
  */
@@ -299,8 +305,9 @@ export function showUpdateModal(releaseInfo, showToast) {
         position: fixed;
         inset: 0;
         z-index: 100000;
-        background: rgba(0, 0, 0, 0.65);
+        background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -310,13 +317,13 @@ export function showUpdateModal(releaseInfo, showToast) {
 
     modal.innerHTML = `
         <div style="
-            background: var(--bg-card, #1e293b);
-            color: var(--text-primary, #f8fafc);
-            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            background: var(--bg-secondary, #ffffff);
+            color: var(--text-primary, #111827);
+            border: 1px solid var(--border-color, rgba(0,0,0,0.1));
             border-radius: 20px;
             width: 100%;
             max-width: 440px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--glass-shadow, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -324,9 +331,9 @@ export function showUpdateModal(releaseInfo, showToast) {
         ">
             <!-- Header -->
             <div style="
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
+                background: var(--bg-tertiary, #f8fafc);
                 padding: 20px 20px 16px;
-                border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
+                border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.08));
                 position: relative;
             ">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -334,61 +341,61 @@ export function showUpdateModal(releaseInfo, showToast) {
                         width: 44px;
                         height: 44px;
                         border-radius: 12px;
-                        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                        background: linear-gradient(135deg, #0284c7, #2563eb);
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+                        box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3);
                         flex-shrink: 0;
                     ">
                         <i data-lucide="sparkles" style="color: #fff; width: 22px; height: 22px;"></i>
                     </div>
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Bản Cập Nhật Mới!</h3>
-                            <span style="font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${platformBadge}</span>
+                            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-primary, #111827);">Bản Cập Nhật Mới!</h3>
+                            <span style="font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: rgba(2, 132, 199, 0.12); color: var(--primary-color, #0284c7);">${platformBadge}</span>
                         </div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary, #94a3b8); margin-top: 2px;">
-                            v${currentVersion} &rarr; <strong style="color: #38bdf8;">v${latestVersion}</strong>
-                            ${assetSizeMB ? ` &bull; Dung lượng: ~${assetSizeMB} MB` : ''}
+                        <div style="font-size: 0.82rem; color: var(--text-secondary, #6b7280); margin-top: 2px;">
+                            v${currentVersion} &rarr; <strong style="color: var(--primary-color, #0284c7);">v${latestVersion}</strong>
+                            ${assetSizeMB ? ` &bull; ~${assetSizeMB} MB` : ''}
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Body: Changelog -->
-            <div style="padding: 16px 20px; max-height: 220px; overflow-y: auto; font-size: 0.88rem; line-height: 1.5; color: var(--text-secondary, #cbd5e1);">
-                <div style="font-weight: 600; color: var(--text-primary, #f8fafc); margin-bottom: 6px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+            <div style="padding: 16px 20px; max-height: 220px; overflow-y: auto; font-size: 0.88rem; line-height: 1.5; color: var(--text-secondary, #4b5563);">
+                <div style="font-weight: 700; color: var(--text-primary, #111827); margin-bottom: 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">
                     📝 Có gì mới trong bản này:
                 </div>
-                <div style="white-space: pre-line; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; font-size: 0.82rem; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="white-space: pre-line; background: var(--bg-tertiary, #f3f4f6); color: var(--text-secondary, #4b5563); padding: 12px 14px; border-radius: 12px; font-size: 0.84rem; border: 1px solid var(--border-color, rgba(0,0,0,0.06));">
                     ${escapeHtml(body)}
                 </div>
             </div>
 
             <!-- Progress Section (Ẩn ban đầu, hiện khi bắt đầu tải) -->
             <div id="updateProgressContainer" style="display: none; padding: 0 20px 16px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 6px; color: var(--text-secondary, #94a3b8);">
-                    <span id="updateProgressMB">Đang kết nối tải file...</span>
-                    <span id="updateProgressSpeed" style="color: #38bdf8; font-weight: 600;">0 KB/s</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary, #4b5563);">
+                    <span id="updateProgressMB" style="font-weight: 500;">Đang kết nối tải file...</span>
+                    <span id="updateProgressSpeed" style="color: var(--primary-color, #0284c7); font-weight: 700;">0 KB/s</span>
                 </div>
-                <div style="height: 8px; width: 100%; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; position: relative;">
+                <div style="height: 8px; width: 100%; background: var(--border-color, rgba(0,0,0,0.1)); border-radius: 99px; overflow: hidden; position: relative;">
                     <div id="updateProgressBar" style="
                         height: 100%;
                         width: 0%;
-                        background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
+                        background: linear-gradient(90deg, #0284c7, #3b82f6, #10b981);
                         border-radius: 99px;
                         transition: width 0.2s ease-out;
                     "></div>
                 </div>
-                <div style="text-align: right; font-size: 0.72rem; color: var(--text-secondary, #94a3b8); margin-top: 4px;" id="updateProgressPercent">0%</div>
+                <div style="text-align: right; font-size: 0.75rem; color: var(--text-muted, #9ca3af); margin-top: 4px;" id="updateProgressPercent">0%</div>
             </div>
 
             <!-- Actions Footer -->
             <div style="
                 padding: 14px 20px;
-                background: rgba(0,0,0,0.15);
-                border-top: 1px solid var(--border-color, rgba(255,255,255,0.08));
+                background: var(--bg-tertiary, #f8fafc);
+                border-top: 1px solid var(--border-color, rgba(0,0,0,0.08));
                 display: flex;
                 gap: 10px;
                 justify-content: flex-end;
@@ -396,11 +403,11 @@ export function showUpdateModal(releaseInfo, showToast) {
                 <button id="btnDismissUpdate" style="
                     padding: 9px 16px;
                     border-radius: 10px;
-                    border: 1px solid var(--border-color, rgba(255,255,255,0.15));
+                    border: 1px solid var(--border-color, rgba(0,0,0,0.15));
                     background: transparent;
-                    color: var(--text-secondary, #cbd5e1);
+                    color: var(--text-secondary, #4b5563);
                     font-size: 0.85rem;
-                    font-weight: 500;
+                    font-weight: 600;
                     cursor: pointer;
                 ">Để sau</button>
 
@@ -408,7 +415,7 @@ export function showUpdateModal(releaseInfo, showToast) {
                     padding: 9px 20px;
                     border-radius: 10px;
                     border: none;
-                    background: linear-gradient(135deg, #2563eb, #7c3aed);
+                    background: var(--primary-gradient, linear-gradient(135deg, #0284c7, #1d4ed8));
                     color: #fff;
                     font-size: 0.85rem;
                     font-weight: 600;
@@ -416,7 +423,7 @@ export function showUpdateModal(releaseInfo, showToast) {
                     display: flex;
                     align-items: center;
                     gap: 6px;
-                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+                    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
                     transition: transform 0.1s, opacity 0.2s;
                 ">
                     <i data-lucide="download-cloud" style="width: 16px; height: 16px;"></i>

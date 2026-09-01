@@ -2,20 +2,20 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.253';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.253';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.253';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.253';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.254';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.254';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.254';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.254';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.253';
-import * as sync from './sync.js?v=4.3.253';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.253';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.253';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.253';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.253';
-import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.253';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.254';
+import * as sync from './sync.js?v=4.3.254';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.254';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.254';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.254';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.254';
+import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.254';
 
-const APP_VERSION = '4.3.253';
+const APP_VERSION = '4.3.254';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -640,40 +640,6 @@ async function forceReloadApp(newVersion) {
     }, 150);
 }
 
-// Show Update Notification (Persistent Toast with Action)
-function showUpdateNotification(newVersion) {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    
-    // Check if an update toast is already present
-    if (document.getElementById('updateToast')) return;
-    
-    const toast = document.createElement('div');
-    toast.id = 'updateToast';
-    toast.className = 'toast warning';
-    toast.style.cursor = 'pointer';
-    toast.style.pointerEvents = 'auto';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.gap = '12px';
-    
-    toast.innerHTML = `
-        <i data-lucide="refresh-cw" class="spin-anim" style="color: var(--accent-amber); flex-shrink: 0;"></i>
-        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; text-align: left;">
-            <span style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">Đã có bản cập nhật mới (v${newVersion})</span>
-            <span style="font-size: 0.75rem; color: var(--text-secondary);">Bấm vào đây để tải lại ngay.</span>
-        </div>
-    `;
-    
-    // Add click handler to reload
-    toast.addEventListener('click', async () => {
-        await forceReloadApp(newVersion);
-    });
-    
-    container.appendChild(toast);
-    if (window.lucide) window.lucide.createIcons();
-}
-
 // Download and execute Tauri desktop MSI installer
 async function downloadAndInstallUpdateTauri(newVersion) {
     showToast("Đang tải bản cập nhật mới ngầm...", "info");
@@ -853,14 +819,18 @@ async function checkAppVersion(isManual = false, noToast = false) {
         return 'error';
     }
     
+    // Quản lý hiển thị dấu chấm đỏ thông báo trên nút số phiên bản
+    const versionBtns = document.querySelectorAll('.version-badge-btn, .manual-check-update-btn');
     if (updateResult.hasUpdate) {
+        window.cachedUpdateResult = updateResult;
+        versionBtns.forEach(btn => btn.classList.add('has-update'));
+        
         if (isManual) {
             showUpdateModal(updateResult, showToast);
-        } else {
-            showUpdateNotification(updateResult.latestVersion);
         }
         return 'has_update';
     } else {
+        versionBtns.forEach(btn => btn.classList.remove('has-update'));
         if (isManual && !noToast) {
             const platform = detectPlatform();
             const platformName = platform === 'windows' ? 'Desktop' :
@@ -4443,14 +4413,8 @@ async function initializeApp() {
                 btn.classList.remove('checking');
                 
                 if (result === 'has_update') {
-                    btn.classList.add('latest');
-                    badgeSpan.innerHTML = `
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>Đang tải bản mới...
-                    `;
+                    badgeSpan.textContent = originalText;
+                    btn.disabled = false;
                 } else if (result === 'error') {
                     btn.classList.add('error');
                     badgeSpan.innerHTML = `

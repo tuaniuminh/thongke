@@ -42,11 +42,6 @@ jobs:
           npx cap add ios
           npx cap sync ios
 
-      - name: Inject Native Swift Plugins
-        run: |
-          mkdir -p ios/App/App
-          cp src/native/ios/LiveActivityPlugin.swift ios/App/App/
-
       - name: Prepare Assets for Icon Generation
         run: |
           mkdir -p assets
