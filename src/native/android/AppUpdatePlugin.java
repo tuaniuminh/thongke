@@ -42,9 +42,10 @@ public class AppUpdatePlugin extends Plugin {
                 connection.setReadTimeout(30000);
                 connection.connect();
 
-                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                int responseCode = connection.getResponseCode();
+                if (responseCode != HttpURLConnection.HTTP_OK) {
                     new Handler(Looper.getMainLooper()).post(() -> 
-                        call.reject("Lỗi kết nối máy chủ: HTTP " + connection.getResponseCode())
+                        call.reject("Lỗi kết nối máy chủ: HTTP " + responseCode)
                     );
                     return;
                 }

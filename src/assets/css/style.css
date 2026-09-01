@@ -3429,6 +3429,7 @@ select.health-select-sm {
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
     z-index: 100; /* Đảm bảo nổi trên home-container và có thể bấm được */
     pointer-events: auto;
+    white-space: nowrap;
 }
 
 body.light-mode .version-badge-btn {
@@ -3488,7 +3489,6 @@ body.light-mode .version-badge-btn {
 .version-badge-btn.has-update {
     border-color: #0284c7 !important;
     color: #0284c7 !important;
-    position: relative;
     background: rgba(2, 132, 199, 0.1) !important;
     box-shadow: 0 0 15px rgba(2, 132, 199, 0.3) !important;
 }

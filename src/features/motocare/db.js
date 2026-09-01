@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.255';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.255';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.256';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.256';
 
 // Keys for LocalStorage
 const KEYS = {

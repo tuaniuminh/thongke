@@ -292,16 +292,24 @@ def configure_live_activity_plugin():
     with open(app_delegate_path, 'r', encoding='utf-8') as f:
         app_delegate_code = f.read()
         
-    if 'LiveActivityPlugin' in app_delegate_code:
-        print("AppDelegate.swift already contains LiveActivityPlugin.")
-        return
+    # Ensure imports are at the very top of AppDelegate.swift
+    if 'import UIKit' not in app_delegate_code:
+        app_delegate_code = 'import UIKit\n' + app_delegate_code
+    if 'import Capacitor' not in app_delegate_code:
+        app_delegate_code = 'import Capacitor\n' + app_delegate_code
         
-    app_delegate_code += "\n\n// MARK: - Injected LiveActivityPlugin & IPADownloadManager\n" + plugin_code
+    # Remove import lines from plugin_code so they don't cause Swift syntax error at bottom of file
+    clean_plugin_code = '\n'.join([
+        line for line in plugin_code.split('\n') 
+        if not line.strip().startswith('import ')
+    ])
+    
+    app_delegate_code += "\n\n// MARK: - Injected LiveActivityPlugin & IPADownloadManager\n" + clean_plugin_code
     
     with open(app_delegate_path, 'w', encoding='utf-8') as f:
         f.write(app_delegate_code)
         
-    print("LiveActivityPlugin successfully injected into AppDelegate.swift.")
+    print("LiveActivityPlugin successfully and cleanly injected into AppDelegate.swift.")
 
 if __name__ == '__main__':
     update_version()
