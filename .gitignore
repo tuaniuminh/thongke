@@ -4,7 +4,7 @@ fix.py
 .agents/
 node_modules/
 www/
-ios/
+/ios/
 /assets/
 Payload/
 *.ipa
