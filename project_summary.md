@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.269** |
+| **Phiên bản hiện tại** | **v4.3.270** |
+| **v4.3.270** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.270)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và tự động khởi chạy gói cài đặt trên Windows MSI, Android APK và iOS IPA. |
 | **v4.3.269** | 🛠️ **Tích Hợp Cầu Nối Tauri Native HTTP Fallback Cho Bản Windows MSI (v4.3.269)**: Tự động chuyển đổi sang tauri.http.fetch khi browser fetch gặp chặn CORS / 302 cross-origin redirect từ GitHub CDN, đảm bảo tải gói cài đặt MSI ổn định tuyệt đối. |
 | **v4.3.268** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.268)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và tự động khởi chạy gói cài đặt trên Windows MSI, Android APK và iOS IPA. |
 | **v4.3.267** | ⚡ **Khắc Phục Lỗi tempDir & Tối Ưu Lưu/Khởi Chạy Gói Cài Đặt MSI Windows (v4.3.267)**: Tương thích hoàn hảo API tempdir / BaseDirectory.Temp của Tauri v1, đảm bảo tải trực tiếp và mở installer MSI trơn tru 100%. |
-| **v4.3.266** | 🔒 **Tích Hợp Khóa Ứng Dụng Bằng Sinh Trắc Học & Hoàn Thiện Lịch Âm Rằm/Hoàng Đạo (v4.3.266)**: Thêm tính năng khóa app bằng FaceID/TouchID/Windows Hello/PIN; Sửa hiển thị ngày Rằm thành số 15 đỏ son và bổ sung thanh chú thích ý nghĩa ngày Hoàng Đạo/Hắc Đạo. |
-| **v4.3.265** | 🛠️ **Cấp Quyền fs.all & Mở Rộng Scope Cho Tauri Windows MSI Installer (v4.3.265)**: Kích hoạt fs.all và writeBinaryFile trong tauri.conf.json, bổ sung fallback BaseDirectory.Temp giúp tải và ghi file cài đặt MSI an toàn. |
+| **v4.3.266** | 🔒 **Tích Hợp Khóa Ứng Dụng Bằng Sinh Trắc Học & Hoàn Thiện Lịch Âm Rằm/Hoàng Đạo (v4.3.266)**: Thêm tính năng khóa app bằng FaceID/TouchID/Windows Hello/PIN; Sửa hiển thị ngày Rằm thành số 15 đỏ son và bổ sung thanh chú thích ý nghĩa ngày Hoàng Đạo/Hắc Đạo. |
