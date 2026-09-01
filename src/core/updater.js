@@ -358,7 +358,55 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
     }
 
     // 4. NỀN TẢNG WEB / PWA
-    window.open(downloadUrl || releaseInfo.htmlUrl, '_blank');
+    console.log('[BUG DETECTOR] [Updater] Updating Web/PWA app directly via Cache Busting & Service Worker reset...');
+    
+    if (onProgress) {
+        onProgress({
+            progress: 0.3,
+            downloadedMB: '0.5',
+            totalMB: '1.0',
+            speed: 'Đang dọn dẹp bộ nhớ đệm PWA...'
+        });
+    }
+
+    // Xóa cache và unregister Service Worker song song
+    try {
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            for (const key of keys) {
+                await caches.delete(key);
+            }
+        }
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const r of registrations) {
+                await r.unregister();
+            }
+        }
+    } catch (err) {
+        console.error('[Updater] Cache clear failed:', err);
+    }
+
+    if (onProgress) {
+        onProgress({
+            progress: 1.0,
+            downloadedMB: '1.0',
+            totalMB: '1.0',
+            speed: 'Đang tải lại phiên bản mới...'
+        });
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Cập nhật tham số query param phiên bản và reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', latestVersion || Date.now());
+    window.location.href = url.toString();
+    
+    setTimeout(() => {
+        window.location.reload();
+    }, 200);
+
     return { success: true, web: true };
 }
 
