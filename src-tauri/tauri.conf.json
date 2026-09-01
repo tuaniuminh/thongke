@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.268"
+    "version": "4.3.269"
   },
   "tauri": {
     "allowlist": {

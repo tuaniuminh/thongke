@@ -299,58 +299,80 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
             savePath = `${tempPath}${sep}${filename}`;
         }
 
-        // Tải file nhị phân kèm tính toán tiến trình và tốc độ tải
-        const response = await fetch(downloadUrl);
-        if (!response.ok) throw new Error(`Không thể tải tệp cập nhật: HTTP ${response.status}`);
-
-        const contentLength = response.headers.get('content-length');
-        const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-        const reader = response.body.getReader();
+        let allChunks = null;
         let receivedBytes = 0;
-        let chunks = [];
-        let lastTime = Date.now();
-        let lastBytes = 0;
-        let speedStr = '0 KB/s';
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+        // Thử tải qua browser fetch trước (hỗ trợ stream progress), nếu gặp lỗi CORS / Failed to fetch thì chuyển sang Tauri Native HTTP Client
+        try {
+            const response = await fetch(downloadUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-            chunks.push(value);
-            receivedBytes += value.length;
+            const contentLength = response.headers.get('content-length');
+            const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+            const reader = response.body.getReader();
+            let chunks = [];
+            let lastTime = Date.now();
+            let lastBytes = 0;
+            let speedStr = '0 KB/s';
 
-            const now = Date.now();
-            if (now - lastTime >= 300) {
-                const diffBytes = receivedBytes - lastBytes;
-                const intervalSec = (now - lastTime) / 1000.0;
-                const bytesPerSec = intervalSec > 0 ? (diffBytes / intervalSec) : 0;
-                if (bytesPerSec >= 1024 * 1024) {
-                    speedStr = `${(bytesPerSec / (1024 * 1024)).toFixed(1)} MB/s`;
-                } else {
-                    speedStr = `${Math.round(bytesPerSec / 1024)} KB/s`;
-                }
-                lastTime = now;
-                lastBytes = receivedBytes;
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-                if (onProgress) {
-                    onProgress({
-                        progress: totalBytes > 0 ? (receivedBytes / totalBytes) : 0,
-                        downloadedBytes: receivedBytes,
-                        totalBytes: totalBytes,
-                        downloadedMB: (receivedBytes / (1024 * 1024)).toFixed(1),
-                        totalMB: (totalBytes / (1024 * 1024)).toFixed(1),
-                        speed: speedStr
-                    });
+                chunks.push(value);
+                receivedBytes += value.length;
+
+                const now = Date.now();
+                if (now - lastTime >= 250) {
+                    const diffBytes = receivedBytes - lastBytes;
+                    const intervalSec = (now - lastTime) / 1000.0;
+                    const bytesPerSec = intervalSec > 0 ? (diffBytes / intervalSec) : 0;
+                    if (bytesPerSec >= 1024 * 1024) {
+                        speedStr = `${(bytesPerSec / (1024 * 1024)).toFixed(1)} MB/s`;
+                    } else {
+                        speedStr = `${Math.round(bytesPerSec / 1024)} KB/s`;
+                    }
+                    lastTime = now;
+                    lastBytes = receivedBytes;
+
+                    if (onProgress) {
+                        onProgress({
+                            progress: totalBytes > 0 ? (receivedBytes / totalBytes) : 0,
+                            downloadedBytes: receivedBytes,
+                            totalBytes: totalBytes,
+                            downloadedMB: (receivedBytes / (1024 * 1024)).toFixed(1),
+                            totalMB: (totalBytes / (1024 * 1024)).toFixed(1),
+                            speed: speedStr
+                        });
+                    }
                 }
             }
-        }
 
-        // Gom các chunk thành Uint8Array
-        const allChunks = new Uint8Array(receivedBytes);
-        let position = 0;
-        for (const chunk of chunks) {
-            allChunks.set(chunk, position);
-            position += chunk.length;
+            allChunks = new Uint8Array(receivedBytes);
+            let position = 0;
+            for (const chunk of chunks) {
+                allChunks.set(chunk, position);
+                position += chunk.length;
+            }
+        } catch (fetchErr) {
+            console.warn('[BUG DETECTOR] [Updater] Browser fetch failed with CORS/Origin redirect. Falling back to Tauri Native HTTP Client:', fetchErr);
+            
+            if (onProgress) {
+                onProgress({ progress: 0.2, speed: 'Đang kết nối Native HTTP...' });
+            }
+
+            if (tauri.http && typeof tauri.http.fetch === 'function') {
+                const res = await tauri.http.fetch(downloadUrl, {
+                    method: 'GET',
+                    responseType: 3 // ResponseType.Binary
+                });
+                if (res.status !== 200) throw new Error(`Tauri HTTP error: Status ${res.status}`);
+                const data = res.data;
+                allChunks = data instanceof Uint8Array ? data : new Uint8Array(data);
+                receivedBytes = allChunks.length;
+            } else {
+                throw fetchErr;
+            }
         }
 
         // Ghi xuống file Temp
