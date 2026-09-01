@@ -24,14 +24,16 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
 
         self.activeDownloader = IPADownloadManager()
         self.activeDownloader?.onProgress = { [weak self] progress, downloaded, total, speed in
-            self?.notifyListeners("ipaDownloadProgress", data: [
-                "progress": progress,
-                "downloadedBytes": downloaded,
-                "totalBytes": total,
-                "downloadedMB": String(format: "%.1f", Double(downloaded) / 1024.0 / 1024.0),
-                "totalMB": String(format: "%.1f", Double(total) / 1024.0 / 1024.0),
-                "speed": speed
-            ])
+            DispatchQueue.main.async {
+                self?.notifyListeners("ipaDownloadProgress", data: [
+                    "progress": progress,
+                    "downloadedBytes": downloaded,
+                    "totalBytes": total,
+                    "downloadedMB": String(format: "%.1f", Double(downloaded) / 1024.0 / 1024.0),
+                    "totalMB": String(format: "%.1f", Double(total) / 1024.0 / 1024.0),
+                    "speed": speed
+                ])
+            }
         }
 
         self.activeDownloader?.onCompletion = { [weak self] localUrl, error in
@@ -74,7 +76,7 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 }
 
-// MARK: - IPADownloadManager (Tính toán tiến trình % và tốc độ MB/s)
+// MARK: - IPADownloadManager (Tính toán tiến trình % và tốc độ MB/s trên Main Queue)
 class IPADownloadManager: NSObject, URLSessionDownloadDelegate {
     var onProgress: ((Double, Int64, Int64, String) -> Void)?
     var onCompletion: ((URL?, Error?) -> Void)?
@@ -85,7 +87,8 @@ class IPADownloadManager: NSObject, URLSessionDownloadDelegate {
 
     func startDownload(from url: URL) {
         let config = URLSessionConfiguration.default
-        downloadSession = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+        let queue = OperationQueue.main
+        downloadSession = URLSession(configuration: config, delegate: self, delegateQueue: queue)
         lastSpeedCalculationTime = Date()
         lastBytesCount = 0
         currentSpeedStr = "0 KB/s"
@@ -100,9 +103,9 @@ class IPADownloadManager: NSObject, URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         let now = Date()
         let timeInterval = now.timeIntervalSince(lastSpeedCalculationTime)
-        if timeInterval >= 0.4 {
+        if timeInterval >= 0.3 {
             let bytesDiff = totalBytesWritten - lastBytesCount
-            let bytesPerSec = Double(bytesDiff) / timeInterval
+            let bytesPerSec = Double(bytesDiff) / (timeInterval > 0 ? timeInterval : 1.0)
             if bytesPerSec >= 1024.0 * 1024.0 {
                 currentSpeedStr = String(format: "%.1f MB/s", bytesPerSec / 1024.0 / 1024.0)
             } else {

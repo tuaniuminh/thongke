@@ -149,17 +149,38 @@ async function callNativeCapacitorPlugin(pluginName, methodName, options = {}, o
     }
 
     if (eventName && onEventListener) {
+        const wrapListener = (data) => {
+            console.log(`[BUG DETECTOR] [CapacitorBridge] Event received ${eventName}:`, data);
+            onEventListener(data);
+        };
+        
+        let attached = false;
         if (pluginInstance && typeof pluginInstance.addListener === 'function') {
-            const handle = await pluginInstance.addListener(eventName, onEventListener);
-            if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
-        } else if (typeof cap.addListener === 'function') {
-            const handle = cap.addListener(eventName, onEventListener);
-            if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
-        } else {
-            const rawHandler = (e) => onEventListener(e.detail || e);
-            window.addEventListener(eventName, rawHandler);
-            removeListenerFn = () => window.removeEventListener(eventName, rawHandler);
+            try {
+                const handle = await pluginInstance.addListener(eventName, wrapListener);
+                if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
+                attached = true;
+            } catch (e) {
+                console.warn('[BUG DETECTOR] [CapacitorBridge] pluginInstance.addListener error:', e);
+            }
         }
+        if (!attached && typeof cap.addListener === 'function') {
+            try {
+                const handle = cap.addListener(eventName, wrapListener);
+                if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
+                attached = true;
+            } catch (e) {
+                console.warn('[BUG DETECTOR] [CapacitorBridge] cap.addListener error:', e);
+            }
+        }
+        // Đồng thời gắn window event listener để không bỏ sót bất kỳ dispatch nào
+        const rawHandler = (e) => wrapListener(e.detail || e);
+        window.addEventListener(eventName, rawHandler);
+        const prevRemove = removeListenerFn;
+        removeListenerFn = () => {
+            if (prevRemove) prevRemove();
+            window.removeEventListener(eventName, rawHandler);
+        };
     }
 
     try {
@@ -514,17 +535,20 @@ export function showUpdateModal(releaseInfo, showToast) {
 
         try {
             await downloadAndInstallUpdate(releaseInfo, (data) => {
-                const percent = Math.round((data.progress || 0) * 100);
-                progressBar.style.width = `${Math.min(percent, 100)}%`;
-                progressPercent.textContent = `${percent}%`;
+                console.log('[BUG DETECTOR] [UI] Progress update:', data);
+                const percent = Math.min(Math.max(Math.round((data.progress || 0) * 100), 0), 100);
+                if (progressBar) progressBar.style.width = `${percent}%`;
+                if (progressPercent) progressPercent.textContent = `${percent}%`;
                 
-                if (data.downloadedMB && data.totalMB) {
-                    progressMB.textContent = `Đã tải: ${data.downloadedMB} / ${data.totalMB} MB`;
-                } else if (data.downloadedMB) {
-                    progressMB.textContent = `Đã tải: ${data.downloadedMB} MB`;
+                if (progressMB) {
+                    if (data.downloadedMB && data.totalMB && parseFloat(data.totalMB) > 0) {
+                        progressMB.textContent = `Đã tải: ${data.downloadedMB} / ${data.totalMB} MB`;
+                    } else if (data.downloadedMB) {
+                        progressMB.textContent = `Đã tải: ${data.downloadedMB} MB`;
+                    }
                 }
 
-                if (data.speed) {
+                if (progressSpeed && data.speed) {
                     progressSpeed.textContent = data.speed;
                 }
             });
