@@ -276,13 +276,28 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
             return { success: true, fallback: true };
         }
 
-        const { writeBinaryFile } = window.__TAURI__.fs;
-        const { tempDir } = window.__TAURI__.path;
-        const { open } = window.__TAURI__.shell;
+        const tauri = window.__TAURI__;
+        const fs = tauri.fs;
+        const pathApi = tauri.path || {};
+        const shell = tauri.shell || {};
 
-        const tempPath = await tempDir();
+        let tempPath = '';
+        try {
+            if (typeof pathApi.tempdir === 'function') {
+                tempPath = await pathApi.tempdir();
+            } else if (typeof pathApi.tempDir === 'function') {
+                tempPath = await pathApi.tempDir();
+            }
+        } catch (e) {
+            console.warn('[BUG DETECTOR] [Updater] pathApi tempDir query failed:', e);
+        }
+
         const filename = asset?.name || `FamiLife_${latestVersion}_x64_vi-VN.msi`;
-        const savePath = `${tempPath}${filename}`;
+        let savePath = '';
+        if (tempPath) {
+            const sep = tempPath.endsWith('\\') || tempPath.endsWith('/') ? '' : '\\';
+            savePath = `${tempPath}${sep}${filename}`;
+        }
 
         // Tải file nhị phân kèm tính toán tiến trình và tốc độ tải
         const response = await fetch(downloadUrl);
@@ -339,15 +354,27 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
         }
 
         // Ghi xuống file Temp
+        let writeSuccess = false;
         try {
-            await writeBinaryFile(savePath, allChunks);
-        } catch (writeErr) {
-            console.warn('[BUG DETECTOR] [Updater] Direct writeBinaryFile failed, trying BaseDirectory.Temp:', writeErr);
-            if (window.__TAURI__.fs.BaseDirectory) {
-                await writeBinaryFile(filename, allChunks, { dir: window.__TAURI__.fs.BaseDirectory.Temp });
-            } else {
-                throw writeErr;
+            if (fs.BaseDirectory && fs.BaseDirectory.Temp) {
+                await fs.writeBinaryFile(filename, allChunks, { dir: fs.BaseDirectory.Temp });
+                writeSuccess = true;
             }
+        } catch (writeErr) {
+            console.warn('[BUG DETECTOR] [Updater] write with BaseDirectory.Temp failed:', writeErr);
+        }
+
+        if (!writeSuccess && savePath) {
+            try {
+                await fs.writeBinaryFile(savePath, allChunks);
+                writeSuccess = true;
+            } catch (writeErr2) {
+                console.warn('[BUG DETECTOR] [Updater] Direct writeBinaryFile failed:', writeErr2);
+            }
+        }
+
+        if (!writeSuccess) {
+            await fs.writeBinaryFile(filename, allChunks);
         }
 
         if (onProgress) {
@@ -362,10 +389,36 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
         }
 
         // Mở trình cài đặt MSI
-        try {
-            await open(savePath);
-        } catch (openErr) {
-            console.warn('[BUG DETECTOR] [Updater] shell.open failed:', openErr);
+        let openSuccess = false;
+        if (savePath && shell.open) {
+            try {
+                await shell.open(savePath);
+                openSuccess = true;
+            } catch (openErr) {
+                console.warn('[BUG DETECTOR] [Updater] shell.open(savePath) failed:', openErr);
+            }
+        }
+
+        if (!openSuccess && pathApi.resolve && tempPath && shell.open) {
+            try {
+                const resolved = await pathApi.resolve(tempPath, filename);
+                await shell.open(resolved);
+                openSuccess = true;
+            } catch (rErr) {
+                console.warn('[BUG DETECTOR] [Updater] resolve open failed:', rErr);
+            }
+        }
+
+        if (!openSuccess && shell.open) {
+            try {
+                await shell.open(filename);
+                openSuccess = true;
+            } catch (fErr) {
+                console.warn('[BUG DETECTOR] [Updater] shell.open(filename) failed:', fErr);
+            }
+        }
+
+        if (!openSuccess) {
             window.open(downloadUrl, '_blank');
         }
 
@@ -376,7 +429,7 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
             }
         }, 3000);
 
-        return { success: true, path: savePath };
+        return { success: true, path: savePath || filename };
     }
 
     // 4. NỀN TẢNG WEB / PWA

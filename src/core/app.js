@@ -2,21 +2,21 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.266';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.266';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.266';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.266';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.267';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.267';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.267';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.267';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.266';
-import * as sync from './sync.js?v=4.3.266';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.266';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.266';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.266';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.266';
-import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.266';
-import { appLock } from '../features/app-lock/app-lock.js?v=4.3.266';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.267';
+import * as sync from './sync.js?v=4.3.267';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.267';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.267';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.267';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.267';
+import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.267';
+import { appLock } from '../features/app-lock/app-lock.js?v=4.3.267';
 
-const APP_VERSION = '4.3.266';
+const APP_VERSION = '4.3.267';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -646,23 +646,32 @@ async function downloadAndInstallUpdateTauri(newVersion) {
     showToast("Đang tải bản cập nhật mới ngầm...", "info");
     
     try {
-        const { writeBinaryFile } = window.__TAURI__.fs;
-        const { tempDir } = window.__TAURI__.path;
-        const { open } = window.__TAURI__.shell;
+        const tauri = window.__TAURI__;
+        if (!tauri || !tauri.fs) return;
+        const fs = tauri.fs;
+        const pathApi = tauri.path || {};
+        const shell = tauri.shell || {};
         
         // 1. Lấy thư mục tạm của hệ thống
-        const tempPath = await tempDir();
+        let tempPath = '';
+        try {
+            if (typeof pathApi.tempdir === 'function') {
+                tempPath = await pathApi.tempdir();
+            } else if (typeof pathApi.tempDir === 'function') {
+                tempPath = await pathApi.tempDir();
+            }
+        } catch (e) {}
+
         let filename = `FamiLife_${newVersion}_x64_vi-VN.msi`;
-        let savePath = `${tempPath}${filename}`;
+        let savePath = tempPath ? `${tempPath}${tempPath.endsWith('\\') ? '' : '\\'}${filename}` : '';
         
         // 2. Fetch tệp .msi nhị phân từ GitHub Releases
         let downloadUrl = `https://github.com/tuaniuminh/thongke/releases/download/v${newVersion}/${filename}`;
         
         let response = await fetch(downloadUrl);
         if (!response.ok) {
-            // Fallback sang định dạng en-US nếu release cũ đặt tên en-US
             filename = `FamiLife_${newVersion}_x64_en-US.msi`;
-            savePath = `${tempPath}${filename}`;
+            savePath = tempPath ? `${tempPath}${tempPath.endsWith('\\') ? '' : '\\'}${filename}` : '';
             downloadUrl = `https://github.com/tuaniuminh/thongke/releases/download/v${newVersion}/${filename}`;
             response = await fetch(downloadUrl);
             if (!response.ok) {
@@ -674,12 +683,33 @@ async function downloadAndInstallUpdateTauri(newVersion) {
         const uint8Array = new Uint8Array(arrayBuffer);
         
         // 3. Ghi file xuống ổ đĩa cục bộ Temp
-        await writeBinaryFile(savePath, uint8Array);
+        let written = false;
+        if (fs.BaseDirectory && fs.BaseDirectory.Temp) {
+            try {
+                await fs.writeBinaryFile(filename, uint8Array, { dir: fs.BaseDirectory.Temp });
+                written = true;
+            } catch (e) {}
+        }
+        if (!written && savePath) {
+            try {
+                await fs.writeBinaryFile(savePath, uint8Array);
+                written = true;
+            } catch (e) {}
+        }
+        if (!written) {
+            await fs.writeBinaryFile(filename, uint8Array);
+        }
         
         showToast("Tải về hoàn tất! Đang khởi chạy trình cài đặt tiếng Việt...", "success");
         
-        // 4. Kích hoạt mở file MSI (Windows Installer sẽ tự động hiện lên)
-        await open(savePath);
+        // 4. Kích hoạt mở file MSI
+        let opened = false;
+        if (savePath && shell.open) {
+            try { await shell.open(savePath); opened = true; } catch (e) {}
+        }
+        if (!opened && shell.open) {
+            try { await shell.open(filename); opened = true; } catch (e) {}
+        }
         
         // 5. Tự động thoát ứng dụng sau 3 giây để tránh lỗi file đang bận khi cài đè
         setTimeout(() => {
