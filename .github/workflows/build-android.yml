@@ -48,10 +48,8 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Inject Native Android Plugins
-        run: |
-          mkdir -p android/app/src/main/java/com/familife/thongke/
-          cp src/native/android/AppUpdatePlugin.java android/app/src/main/java/com/familife/thongke/
+      - name: Configure Android Version & FileProvider
+        run: python3 update-android-config.py
 
       - name: Prepare Assets for Icon Generation
         run: |

@@ -1,4 +1,4 @@
-package com.familife.thongke;
+package vn.familife.thongke;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StrictMode;
 import androidx.core.content.FileProvider;
 
 import com.getcapacitor.JSObject;
@@ -53,7 +54,7 @@ public class AppUpdatePlugin extends Plugin {
                 if (outputDir == null) {
                     outputDir = context.getCacheDir();
                 }
-                File outputFile = new File(outputDir, "update.apk");
+                File outputFile = new File(outputDir, "FamiLife_update.apk");
                 if (outputFile.exists()) {
                     outputFile.delete();
                 }
@@ -105,20 +106,28 @@ public class AppUpdatePlugin extends Plugin {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri apkUri;
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            apkUri = FileProvider.getUriForFile(
-                                context,
-                                context.getPackageName() + ".fileprovider",
-                                outputFile
-                            );
-                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            try {
+                                Uri apkUri = FileProvider.getUriForFile(
+                                    context,
+                                    context.getPackageName() + ".fileprovider",
+                                    outputFile
+                                );
+                                intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            } catch (Exception e) {
+                                StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                                StrictMode.setVmPolicy(builder.build());
+                                Uri apkUri = Uri.fromFile(outputFile);
+                                intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                            }
                         } else {
-                            apkUri = Uri.fromFile(outputFile);
+                            Uri apkUri = Uri.fromFile(outputFile);
+                            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
                         }
 
-                        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
 
                         JSObject ret = new JSObject();
