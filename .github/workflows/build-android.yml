@@ -5,6 +5,9 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
@@ -45,6 +48,11 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Inject Native Android Plugins
+        run: |
+          mkdir -p android/app/src/main/java/com/familife/thongke/
+          cp src/native/android/AppUpdatePlugin.java android/app/src/main/java/com/familife/thongke/
+
       - name: Prepare Assets for Icon Generation
         run: |
           mkdir -p assets
@@ -76,3 +84,15 @@ jobs:
           name: FamiLife_android_v${{ steps.get_version.outputs.VERSION }}
           path: ${{ env.APK_NAME }}
           if-no-files-found: error
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ env.VERSION }}"
+          name: "FamiLife v${{ env.VERSION }}"
+          body: "Bản phát hành tự động FamiLife v${{ env.VERSION }}"
+          files: ${{ env.APK_NAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

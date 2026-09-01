@@ -5,6 +5,9 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-ios:
     runs-on: macos-14
@@ -38,6 +41,11 @@ jobs:
         run: |
           npx cap add ios
           npx cap sync ios
+
+      - name: Inject Native Swift Plugins
+        run: |
+          mkdir -p ios/App/App
+          cp src/native/ios/LiveActivityPlugin.swift ios/App/App/
 
       - name: Prepare Assets for Icon Generation
         run: |
@@ -84,3 +92,15 @@ jobs:
           name: FamiLife-iOS_v${{ env.VERSION }}
           path: ${{ env.IPA_NAME }}
           if-no-files-found: error
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ env.VERSION }}"
+          name: "FamiLife v${{ env.VERSION }}"
+          body: "Bản phát hành tự động FamiLife v${{ env.VERSION }}"
+          files: ${{ env.IPA_NAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

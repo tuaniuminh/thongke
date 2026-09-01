@@ -2,19 +2,20 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.251';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.251';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.251';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.251';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.252';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.252';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.252';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.252';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.251';
-import * as sync from './sync.js?v=4.3.251';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.251';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.251';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.251';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.251';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.252';
+import * as sync from './sync.js?v=4.3.252';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.252';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.252';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.252';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.252';
+import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.252';
 
-const APP_VERSION = '4.3.251';
+const APP_VERSION = '4.3.252';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -832,46 +833,14 @@ function isVersionNewer(latest, current) {
     return false;
 }
 
-// Check for App Version Updates from version.json
+// Check for App Version Updates from GitHub Releases / version.json
 async function checkAppVersion(isManual = false, noToast = false) {
     const startTime = Date.now();
-    const isTauri = !!(window && window.__TAURI__);
     
-    // Tải thông tin phiên bản mới nhất từ version.json online trên GitHub
-    let latestVersion = null;
-    try {
-        if (isTauri && window.__TAURI__ && window.__TAURI__.http) {
-            // Dùng Tauri HTTP Client để bypass CORS của WebView
-            const { getClient } = window.__TAURI__.http;
-            const client = await getClient();
-            const response = await client.get(`https://tuaniuminh.github.io/thongke/version.json?t=${Date.now()}`);
-            if (response.status === 200) {
-                const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-                latestVersion = data.version;
-            }
-        } else {
-            // Dùng window.fetch thông thường cho PWA Web / Mobile APK
-            const response = await fetch(`https://tuaniuminh.github.io/thongke/version.json?t=${Date.now()}`);
-            if (response.ok) {
-                const data = await response.json();
-                latestVersion = data.version;
-            }
-        }
-    } catch (err) {
-        console.warn("Could not fetch online version.json via primary method:", err);
-        // Fallback local fetch nếu offline hoặc lỗi mạng
-        try {
-            const response = await fetch(`version.json?t=${Date.now()}`);
-            if (response.ok) {
-                const data = await response.json();
-                latestVersion = data.version;
-            }
-        } catch (e) {
-            console.error("Fallback version fetch failed:", e);
-        }
-    }
+    // Gọi OTA updater kiểm tra từ GitHub Releases API
+    const updateResult = await checkForUpdates(APP_VERSION);
     
-    // Kéo dài thời gian hiển thị "Đang kiểm tra..." tối thiểu 0.5 giây khi kiểm tra thủ công để tạo cảm giác phản hồi thực tế hơn
+    // Kéo dài thời gian hiển thị "Đang kiểm tra..." tối thiểu 0.5 giây khi kiểm tra thủ công để tạo phản hồi mượt mà
     if (isManual) {
         const elapsed = Date.now() - startTime;
         if (elapsed < 500) {
@@ -879,35 +848,25 @@ async function checkAppVersion(isManual = false, noToast = false) {
         }
     }
     
-    if (!latestVersion) {
-        if (isManual && !noToast) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật.", "error");
+    if (updateResult.error && !updateResult.hasUpdate) {
+        if (isManual && !noToast) showToast("Không thể kết nối máy chủ để kiểm tra cập nhật: " + updateResult.error, "error");
         return 'error';
     }
     
-    const hasUpdate = isVersionNewer(latestVersion, APP_VERSION);
-    
-    if (hasUpdate) {
-        if (isTauri) {
-            // Chạy tiến trình tải và kích hoạt installer tự động cho Desktop
-            await downloadAndInstallUpdateTauri(latestVersion);
+    if (updateResult.hasUpdate) {
+        if (isManual) {
+            showUpdateModal(updateResult, showToast);
         } else {
-            // Chạy tiến trình reload có param cho PWA Web
-            if (isManual) {
-                if (!noToast) showToast("Đang cập nhật lên phiên bản mới nhất...", "success");
-                setTimeout(async () => {
-                    await forceReloadApp(latestVersion);
-                }, 1000);
-            } else {
-                showUpdateNotification(latestVersion);
-            }
+            showUpdateNotification(updateResult.latestVersion);
         }
         return 'has_update';
     } else {
         if (isManual && !noToast) {
-            showToast(isTauri 
-                ? `Ứng dụng Desktop đang ở phiên bản mới nhất (v${APP_VERSION}).`
-                : `Ứng dụng đang ở phiên bản mới nhất (v${APP_VERSION}).`
-            );
+            const platform = detectPlatform();
+            const platformName = platform === 'windows' ? 'Desktop' :
+                                 platform === 'ios' ? 'iOS' :
+                                 platform === 'android' ? 'Android' : 'Web';
+            showToast(`Ứng dụng ${platformName} đang ở phiên bản mới nhất (v${APP_VERSION}).`);
         }
         return 'no_update';
     }

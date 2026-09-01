@@ -5,9 +5,9 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility, updateLoveWidgetUI
-} from '../../core/app.js?v=4.3.251';
-import * as sync from '../../core/sync.js?v=4.3.251';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.251';
+} from '../../core/app.js?v=4.3.252';
+import * as sync from '../../core/sync.js?v=4.3.252';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.252';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
