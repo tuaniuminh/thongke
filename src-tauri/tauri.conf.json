@@ -8,20 +8,24 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.264"
+    "version": "4.3.265"
   },
   "tauri": {
     "allowlist": {
       "all": false,
       "shell": {
-        "all": false,
+        "all": true,
         "open": true
       },
       "fs": {
-        "all": false,
-        "writeFile": true,
+        "all": true,
         "scope": [
-          "$TEMP/*"
+          "$TEMP/*",
+          "$TEMP/**",
+          "$DOWNLOAD/*",
+          "$DOWNLOAD/**",
+          "$APPDATA/*",
+          "$APPDATA/**"
         ]
       },
       "path": {

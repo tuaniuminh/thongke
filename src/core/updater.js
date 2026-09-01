@@ -339,7 +339,16 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
         }
 
         // Ghi xuống file Temp
-        await writeBinaryFile(savePath, allChunks);
+        try {
+            await writeBinaryFile(savePath, allChunks);
+        } catch (writeErr) {
+            console.warn('[BUG DETECTOR] [Updater] Direct writeBinaryFile failed, trying BaseDirectory.Temp:', writeErr);
+            if (window.__TAURI__.fs.BaseDirectory) {
+                await writeBinaryFile(filename, allChunks, { dir: window.__TAURI__.fs.BaseDirectory.Temp });
+            } else {
+                throw writeErr;
+            }
+        }
 
         if (onProgress) {
             onProgress({
@@ -353,7 +362,12 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
         }
 
         // Mở trình cài đặt MSI
-        await open(savePath);
+        try {
+            await open(savePath);
+        } catch (openErr) {
+            console.warn('[BUG DETECTOR] [Updater] shell.open failed:', openErr);
+            window.open(downloadUrl, '_blank');
+        }
 
         // Tự động đóng ứng dụng sau 3 giây để cài đè an toàn
         setTimeout(() => {
@@ -615,8 +629,9 @@ export function showUpdateModal(releaseInfo, showToast) {
             }, 1200);
 
         } catch (err) {
-            console.error('[BUG DETECTOR] [Updater] Download error:', err);
-            if (showToast) showToast(`Lỗi cập nhật: ${err.message || err}`, 'error');
+            const errDetail = (err && err.message) ? err.message : (typeof err === 'string' ? err : JSON.stringify(err));
+            console.error('[BUG DETECTOR] [Updater] Download error:', err, 'Detail:', errDetail);
+            if (showToast) showToast(`Lỗi cập nhật: ${errDetail}`, 'error');
             btnStart.disabled = false;
             btnStart.style.opacity = '1';
             btnStart.innerHTML = `<i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> <span>Thử lại</span>`;
