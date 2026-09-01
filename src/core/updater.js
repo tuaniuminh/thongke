@@ -15,7 +15,7 @@ export function detectPlatform() {
         return 'windows';
     }
     if (typeof window !== 'undefined' && window.Capacitor) {
-        const platform = window.Capacitor.getPlatform();
+        const platform = typeof window.Capacitor.getPlatform === 'function' ? window.Capacitor.getPlatform() : '';
         if (platform === 'ios') return 'ios';
         if (platform === 'android') return 'android';
     }
@@ -120,6 +120,80 @@ export async function checkForUpdates(currentVersion) {
 }
 
 /**
+ * Gọi Capacitor Plugin Method đa cơ chế tương thích 100% môi trường Capacitor 5 & 6
+ */
+async function callNativeCapacitorPlugin(pluginName, methodName, options = {}, onEventListener = null, eventName = null) {
+    console.log(`[BUG DETECTOR] [CapacitorBridge] Invoking ${pluginName}.${methodName}`, options);
+    
+    if (typeof window === 'undefined' || !window.Capacitor) {
+        console.error('[BUG DETECTOR] [CapacitorBridge] window.Capacitor is not available');
+        throw new Error('Môi trường Capacitor Native không tồn tại trên thiết bị.');
+    }
+
+    const cap = window.Capacitor;
+    console.log('[BUG DETECTOR] [CapacitorBridge] Capacitor platform:', typeof cap.getPlatform === 'function' ? cap.getPlatform() : 'unknown');
+
+    let removeListenerFn = null;
+    let pluginInstance = null;
+
+    if (typeof cap.registerPlugin === 'function') {
+        try {
+            pluginInstance = cap.registerPlugin(pluginName);
+        } catch (e) {
+            console.warn('[BUG DETECTOR] [CapacitorBridge] cap.registerPlugin failed:', e);
+        }
+    }
+    
+    if (!pluginInstance && cap.Plugins && cap.Plugins[pluginName]) {
+        pluginInstance = cap.Plugins[pluginName];
+    }
+
+    if (eventName && onEventListener) {
+        if (pluginInstance && typeof pluginInstance.addListener === 'function') {
+            const handle = await pluginInstance.addListener(eventName, onEventListener);
+            if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
+        } else if (typeof cap.addListener === 'function') {
+            const handle = cap.addListener(eventName, onEventListener);
+            if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
+        } else {
+            const rawHandler = (e) => onEventListener(e.detail || e);
+            window.addEventListener(eventName, rawHandler);
+            removeListenerFn = () => window.removeEventListener(eventName, rawHandler);
+        }
+    }
+
+    try {
+        if (pluginInstance && typeof pluginInstance[methodName] === 'function') {
+            console.log(`[BUG DETECTOR] [CapacitorBridge] Calling via pluginInstance.${methodName}`);
+            const result = await pluginInstance[methodName](options);
+            console.log(`[BUG DETECTOR] [CapacitorBridge] Result:`, result);
+            return result;
+        }
+
+        if (typeof cap.nativePromise === 'function') {
+            console.log(`[BUG DETECTOR] [CapacitorBridge] Calling via cap.nativePromise`);
+            const result = await cap.nativePromise(pluginName, methodName, options);
+            console.log(`[BUG DETECTOR] [CapacitorBridge] Result:`, result);
+            return result;
+        }
+
+        if (typeof cap.toNative === 'function') {
+            console.log(`[BUG DETECTOR] [CapacitorBridge] Calling via cap.toNative`);
+            return await new Promise((resolve, reject) => {
+                cap.toNative(pluginName, methodName, options, {
+                    resolve: (res) => resolve(res),
+                    reject: (err) => reject(err)
+                });
+            });
+        }
+
+        throw new Error(`Không thể tìm thấy hoặc kết nối tới ${pluginName}.${methodName} trên thiết bị.`);
+    } finally {
+        if (removeListenerFn) removeListenerFn();
+    }
+}
+
+/**
  * Tải file cập nhật và kích hoạt cài đặt trên từng nền tảng
  * @param {Object} releaseInfo Thông tin release nhận từ checkForUpdates
  * @param {Function} onProgress Callback cập nhật tiến trình { progress, downloadedMB, totalMB, speed }
@@ -129,57 +203,40 @@ export async function downloadAndInstallUpdate(releaseInfo, onProgress) {
 
     // 1. NỀN TẢNG iOS (Capacitor Swift Plugin -> Share Sheet / TrollStore)
     if (platform === 'ios') {
-        const LiveActivityPlugin = (window.Capacitor && typeof window.Capacitor.registerPlugin === 'function')
-            ? window.Capacitor.registerPlugin('LiveActivityPlugin')
-            : (window.Capacitor?.Plugins?.LiveActivityPlugin || null);
-
-        if (LiveActivityPlugin && typeof LiveActivityPlugin.downloadAndOpenIPA === 'function') {
-            let listener = null;
-            if (onProgress && typeof LiveActivityPlugin.addListener === 'function') {
-                listener = await LiveActivityPlugin.addListener('ipaDownloadProgress', (data) => {
-                    onProgress(data);
-                });
-            }
-            try {
-                const res = await LiveActivityPlugin.downloadAndOpenIPA({ url: downloadUrl });
-                return res;
-            } finally {
-                if (listener && typeof listener.remove === 'function') {
-                    listener.remove();
-                }
-            }
-        } else {
-            // Fallback mở Safari tải trực tiếp nếu không tìm thấy Native Plugin
+        console.log('[BUG DETECTOR] [Updater] Starting iOS in-app update download for:', downloadUrl);
+        try {
+            const res = await callNativeCapacitorPlugin(
+                'LiveActivityPlugin',
+                'downloadAndOpenIPA',
+                { url: downloadUrl },
+                onProgress,
+                'ipaDownloadProgress'
+            );
+            return res;
+        } catch (err) {
+            console.error('[BUG DETECTOR] [Updater] iOS Native Plugin failed:', err);
+            // Fallback mở Safari chỉ khi Native Plugin báo lỗi
             window.open(downloadUrl, '_blank');
-            return { success: true, fallback: true };
+            return { success: true, fallback: true, error: err.message };
         }
     }
 
     // 2. NỀN TẢNG ANDROID (Capacitor Java Plugin -> Package Installer)
     if (platform === 'android') {
-        const AppUpdatePlugin = (window.Capacitor && typeof window.Capacitor.registerPlugin === 'function')
-            ? window.Capacitor.registerPlugin('AppUpdatePlugin')
-            : (window.Capacitor?.Plugins?.AppUpdatePlugin || null);
-
-        if (AppUpdatePlugin && typeof AppUpdatePlugin.downloadAndInstallAPK === 'function') {
-            let listener = null;
-            if (onProgress && typeof AppUpdatePlugin.addListener === 'function') {
-                listener = await AppUpdatePlugin.addListener('apkDownloadProgress', (data) => {
-                    onProgress(data);
-                });
-            }
-            try {
-                const res = await AppUpdatePlugin.downloadAndInstallAPK({ url: downloadUrl });
-                return res;
-            } finally {
-                if (listener && typeof listener.remove === 'function') {
-                    listener.remove();
-                }
-            }
-        } else {
-            // Fallback tải qua trình duyệt di động
+        console.log('[BUG DETECTOR] [Updater] Starting Android in-app update download for:', downloadUrl);
+        try {
+            const res = await callNativeCapacitorPlugin(
+                'AppUpdatePlugin',
+                'downloadAndInstallAPK',
+                { url: downloadUrl },
+                onProgress,
+                'apkDownloadProgress'
+            );
+            return res;
+        } catch (err) {
+            console.error('[BUG DETECTOR] [Updater] Android Native Plugin failed:', err);
             window.open(downloadUrl, '_blank');
-            return { success: true, fallback: true };
+            return { success: true, fallback: true, error: err.message };
         }
     }
 
@@ -478,7 +535,7 @@ export function showUpdateModal(releaseInfo, showToast) {
             }, 1200);
 
         } catch (err) {
-            console.error('[Updater] Download error:', err);
+            console.error('[BUG DETECTOR] [Updater] Download error:', err);
             if (showToast) showToast(`Lỗi cập nhật: ${err.message || err}`, 'error');
             btnStart.disabled = false;
             btnStart.style.opacity = '1';
