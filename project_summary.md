@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.263** |
+| **Phiên bản hiện tại** | **v4.3.264** |
+| **v4.3.264** | 🎨 **Đồng Bộ Logo Thanh Tiêu Đề Desktop Windows Theo Theme Sáng/Tối (v4.3.264)**: Tự động hoán đổi icon-light.png và icon.png trên thanh tiêu đề tùy biến Desktop Tauri, đảm bảo tính thẩm mỹ hoàn hảo khi ở giao diện sáng. |
 | **v4.3.263** | 🪟 **Mở Rộng Phạm Vi HTTP Scope Cho Tauri Windows MSI Installer (v4.3.263)**: Khai báo đầy đủ HTTP scope trong tauri.conf.json và ưu tiên fetch chuẩn để kiểm tra GitHub Releases API mượt mà trên bản cài đặt Windows MSI. |
 | **v4.3.262** | 🛠️ **Khắc Phục Triệt Để Lỗi DataCloneError & Đồng Bộ Trực Tiếp CustomEvent Tiến Trình Tải File (v4.3.262)**: Dispatch CustomEvent trực tiếp từ WKWebView/WebView của iOS/Android lên window; Loại bỏ cap.addListener gây DataCloneError giúp thanh tiến trình % và tốc độ cập nhật mượt mà. |
 | **v4.3.261** | 🚀 **Tự Động Cập Nhật Trực Tiếp Cho Bản PWA / Web (In-App PWA Cache Busting v4.3.261)**: Thay vì chuyển hướng ra GitHub, bản PWA khi bấm Cập nhật ngay sẽ tự động dọn dẹp Cache Storage, unregister Service Worker cũ và nạp lại trang với phiên bản mới nhất ngay lập tức. |
-| **v4.3.260** | ⚡ **Tối Ưu Đồng Bộ Sự Kiện Tiến Trình Tải File Trên Main Queue & WebKit UI (v4.3.260)**: Chuyển toàn bộ delegate URLSession và notifyListeners sang Main Queue giúp WebKit nhận % tiến trình và tốc độ MB/s mượt mà theo thời gian thực. |
-| **v4.3.259** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.259)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và gỡ lỗi log Capacitor Native Bridge. |
+| **v4.3.260** | ⚡ **Tối Ưu Đồng Bộ Sự Kiện Tiến Trình Tải File Trên Main Queue & WebKit UI (v4.3.260)**: Chuyển toàn bộ delegate URLSession và notifyListeners sang Main Queue giúp WebKit nhận % tiến trình và tốc độ MB/s mượt mà theo thời gian thực. |
