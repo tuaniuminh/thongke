@@ -24,15 +24,23 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
 
         self.activeDownloader = IPADownloadManager()
         self.activeDownloader?.onProgress = { [weak self] progress, downloaded, total, speed in
+            let dataDict: [String: Any] = [
+                "progress": progress,
+                "downloadedBytes": downloaded,
+                "totalBytes": total,
+                "downloadedMB": String(format: "%.1f", Double(downloaded) / 1024.0 / 1024.0),
+                "totalMB": String(format: "%.1f", Double(total) / 1024.0 / 1024.0),
+                "speed": speed
+            ]
             DispatchQueue.main.async {
-                self?.notifyListeners("ipaDownloadProgress", data: [
-                    "progress": progress,
-                    "downloadedBytes": downloaded,
-                    "totalBytes": total,
-                    "downloadedMB": String(format: "%.1f", Double(downloaded) / 1024.0 / 1024.0),
-                    "totalMB": String(format: "%.1f", Double(total) / 1024.0 / 1024.0),
-                    "speed": speed
-                ])
+                self?.notifyListeners("ipaDownloadProgress", data: dataDict)
+                
+                // Dispatch trực tiếp CustomEvent vào WKWebView window để đảm bảo 100% UI nhận được nhịp tiến trình
+                if let jsonData = try? JSONSerialization.data(withJSONObject: dataDict, options: []),
+                   let jsonString = String(data: jsonData, encoding: .utf8) {
+                    let js = "window.dispatchEvent(new CustomEvent('ipaDownloadProgress', { detail: \(jsonString) }));"
+                    self?.bridge?.webView?.evaluateJavaScript(js, completionHandler: nil)
+                }
             }
         }
 
@@ -103,7 +111,7 @@ class IPADownloadManager: NSObject, URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         let now = Date()
         let timeInterval = now.timeIntervalSince(lastSpeedCalculationTime)
-        if timeInterval >= 0.3 {
+        if timeInterval >= 0.25 {
             let bytesDiff = totalBytesWritten - lastBytesCount
             let bytesPerSec = Double(bytesDiff) / (timeInterval > 0 ? timeInterval : 1.0)
             if bytesPerSec >= 1024.0 * 1024.0 {

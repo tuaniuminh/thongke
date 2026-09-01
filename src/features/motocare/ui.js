@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.261';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.261';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.262';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.262';
 
 export const UI = {
     // Show toast notification

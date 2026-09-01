@@ -154,32 +154,32 @@ async function callNativeCapacitorPlugin(pluginName, methodName, options = {}, o
             onEventListener(data);
         };
         
-        let attached = false;
+        // 1. Lắng nghe qua DOM CustomEvent (được Native Swift/Java dispatch trực tiếp)
+        const domHandler = (e) => {
+            const detail = e.detail || e;
+            wrapListener(detail);
+        };
+        window.addEventListener(eventName, domHandler);
+
+        // 2. Lắng nghe qua Plugin Instance nếu có hỗ trợ
+        let pluginListenerHandle = null;
         if (pluginInstance && typeof pluginInstance.addListener === 'function') {
             try {
-                const handle = await pluginInstance.addListener(eventName, wrapListener);
-                if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
-                attached = true;
+                pluginInstance.addListener(eventName, wrapListener).then(handle => {
+                    pluginListenerHandle = handle;
+                }).catch(err => {
+                    console.warn('[BUG DETECTOR] [CapacitorBridge] pluginInstance.addListener error:', err);
+                });
             } catch (e) {
-                console.warn('[BUG DETECTOR] [CapacitorBridge] pluginInstance.addListener error:', e);
+                console.warn('[BUG DETECTOR] [CapacitorBridge] pluginInstance.addListener sync error:', e);
             }
         }
-        if (!attached && typeof cap.addListener === 'function') {
-            try {
-                const handle = cap.addListener(eventName, wrapListener);
-                if (handle && typeof handle.remove === 'function') removeListenerFn = () => handle.remove();
-                attached = true;
-            } catch (e) {
-                console.warn('[BUG DETECTOR] [CapacitorBridge] cap.addListener error:', e);
-            }
-        }
-        // Đồng thời gắn window event listener để không bỏ sót bất kỳ dispatch nào
-        const rawHandler = (e) => wrapListener(e.detail || e);
-        window.addEventListener(eventName, rawHandler);
-        const prevRemove = removeListenerFn;
+
         removeListenerFn = () => {
-            if (prevRemove) prevRemove();
-            window.removeEventListener(eventName, rawHandler);
+            window.removeEventListener(eventName, domHandler);
+            if (pluginListenerHandle && typeof pluginListenerHandle.remove === 'function') {
+                try { pluginListenerHandle.remove(); } catch (ignored) {}
+            }
         };
     }
 

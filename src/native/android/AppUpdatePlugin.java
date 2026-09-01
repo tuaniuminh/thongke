@@ -95,7 +95,15 @@ public class AppUpdatePlugin extends Plugin {
                         progressData.put("downloadedMB", String.format("%.1f", total / 1024.0 / 1024.0));
                         progressData.put("totalMB", String.format("%.1f", fileLength / 1024.0 / 1024.0));
                         progressData.put("speed", speedStr);
-                        notifyListeners("apkDownloadProgress", progressData);
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            notifyListeners("apkDownloadProgress", progressData);
+                            try {
+                                if (getBridge() != null && getBridge().getWebView() != null) {
+                                    String js = "window.dispatchEvent(new CustomEvent('apkDownloadProgress', { detail: " + progressData.toString() + " }));";
+                                    getBridge().getWebView().evaluateJavascript(js, null);
+                                }
+                            } catch (Exception ignored) {}
+                        });
                     }
                 }
 
