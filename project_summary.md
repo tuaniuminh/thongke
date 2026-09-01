@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.267** |
+| **Phiên bản hiện tại** | **v4.3.268** |
+| **v4.3.268** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.268)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và tự động khởi chạy gói cài đặt trên Windows MSI, Android APK và iOS IPA. |
 | **v4.3.267** | ⚡ **Khắc Phục Lỗi tempDir & Tối Ưu Lưu/Khởi Chạy Gói Cài Đặt MSI Windows (v4.3.267)**: Tương thích hoàn hảo API tempdir / BaseDirectory.Temp của Tauri v1, đảm bảo tải trực tiếp và mở installer MSI trơn tru 100%. |
 | **v4.3.266** | 🔒 **Tích Hợp Khóa Ứng Dụng Bằng Sinh Trắc Học & Hoàn Thiện Lịch Âm Rằm/Hoàng Đạo (v4.3.266)**: Thêm tính năng khóa app bằng FaceID/TouchID/Windows Hello/PIN; Sửa hiển thị ngày Rằm thành số 15 đỏ son và bổ sung thanh chú thích ý nghĩa ngày Hoàng Đạo/Hắc Đạo. |
 | **v4.3.265** | 🛠️ **Cấp Quyền fs.all & Mở Rộng Scope Cho Tauri Windows MSI Installer (v4.3.265)**: Kích hoạt fs.all và writeBinaryFile trong tauri.conf.json, bổ sung fallback BaseDirectory.Temp giúp tải và ghi file cài đặt MSI an toàn. |
-| **v4.3.264** | 🎨 **Đồng Bộ Logo Thanh Tiêu Đề Desktop Windows Theo Theme Sáng/Tối (v4.3.264)**: Tự động hoán đổi icon-light.png và icon.png trên thanh tiêu đề tùy biến Desktop Tauri, đảm bảo tính thẩm mỹ hoàn hảo khi ở giao diện sáng. |
-| **v4.3.263** | 🪟 **Mở Rộng Phạm Vi HTTP Scope Cho Tauri Windows MSI Installer (v4.3.263)**: Khai báo đầy đủ HTTP scope trong tauri.conf.json và ưu tiên fetch chuẩn để kiểm tra GitHub Releases API mượt mà trên bản cài đặt Windows MSI. |
+| **v4.3.264** | 🎨 **Đồng Bộ Logo Thanh Tiêu Đề Desktop Windows Theo Theme Sáng/Tối (v4.3.264)**: Tự động hoán đổi icon-light.png và icon.png trên thanh tiêu đề tùy biến Desktop Tauri, đảm bảo tính thẩm mỹ hoàn hảo khi ở giao diện sáng. |
