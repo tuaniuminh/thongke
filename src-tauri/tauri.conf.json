@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "FamiLife",
-    "version": "4.3.262"
+    "version": "4.3.263"
   },
   "tauri": {
     "allowlist": {
@@ -40,7 +40,14 @@
       },
       "http": {
         "all": true,
-        "request": true
+        "request": true,
+        "scope": [
+          "https://api.github.com/*",
+          "https://github.com/*",
+          "https://objects.githubusercontent.com/*",
+          "https://*/*",
+          "http://*/*"
+        ]
       },
       "window": {
         "all": false,

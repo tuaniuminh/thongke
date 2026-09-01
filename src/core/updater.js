@@ -73,21 +73,29 @@ export async function checkForUpdates(currentVersion) {
         const url = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest?t=${Date.now()}`;
         
         let releaseData = null;
-        if (platform === 'windows' && window.__TAURI__ && window.__TAURI__.http) {
-            const { getClient } = window.__TAURI__.http;
-            const client = await getClient();
-            const res = await client.get(url, {
-                headers: { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'FamiLife-App' }
-            });
-            if (res.status === 200) {
-                releaseData = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-            }
-        } else {
+        try {
             const res = await fetch(url, {
                 headers: { 'Accept': 'application/vnd.github.v3+json' }
             });
             if (res.ok) {
                 releaseData = await res.json();
+            }
+        } catch (fetchErr) {
+            console.warn('[Updater] Standard fetch failed, trying Tauri HTTP client:', fetchErr);
+        }
+
+        if (!releaseData && platform === 'windows' && window.__TAURI__ && window.__TAURI__.http) {
+            try {
+                const { getClient } = window.__TAURI__.http;
+                const client = await getClient();
+                const res = await client.get(url, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'FamiLife-App' }
+                });
+                if (res.status === 200) {
+                    releaseData = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+                }
+            } catch (tauriHttpErr) {
+                console.error('[Updater] Tauri HTTP client failed:', tauriHttpErr);
             }
         }
 
