@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.271';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.271';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.272';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.272';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -507,7 +507,7 @@ export const Stats = {
             efficiency: avgEfficiency,
             costPerKm: avgCostPerKm,
             totalCost,
-            totalLiters: parseFloat(totalLiters.toFixed(2)),
+            totalLiters: parseFloat(totalLiters.toFixed(3)),
             chartData
         };
     },

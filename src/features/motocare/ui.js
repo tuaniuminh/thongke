@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.271';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.271';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.272';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.272';
 
 export const UI = {
     // Show toast notification
@@ -236,7 +236,7 @@ export const UI = {
                 tr.innerHTML = `
                     <td data-label="Ngày">${logDate}</td>
                     <td data-label="Số ODO">${log.odo.toLocaleString()} Km</td>
-                    <td data-label="Số lít">${log.liters.toFixed(2)} L ${log.full ? '⛽' : '⚠️'}</td>
+                    <td data-label="Số lít">${Number(log.liters.toFixed(3))} L ${log.full ? '⛽' : '⚠️'}</td>
                     <td data-label="Chi phí">${log.cost.toLocaleString()} đ</td>
                     <td data-label="Mức tiêu thụ" style="font-weight: 500; color: var(--color-primary);">${logEffLabel}</td>
                     <td data-label="Hành động">

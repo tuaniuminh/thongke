@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.271';
-import { UI } from './ui.js?v=4.3.271';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.272';
+import { UI } from './ui.js?v=4.3.272';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -445,8 +445,10 @@ const App = {
             e.preventDefault();
             const date = document.getElementById('mc-fuel-date').value;
             const odo = parseInt(document.getElementById('mc-fuel-odo').value) || 0;
-            const liters = parseFloat(document.getElementById('mc-fuel-liters').value) || 0;
-            const cost = parseInt(document.getElementById('mc-fuel-cost').value) || 0;
+            const rawLiters = document.getElementById('mc-fuel-liters').value;
+            const liters = parseFloat(String(rawLiters).replace(',', '.')) || 0;
+            const rawCost = document.getElementById('mc-fuel-cost').value;
+            const cost = parseFloat(String(rawCost).replace(/[^\d.]/g, '')) || 0;
             const full = document.getElementById('mc-fuel-full').checked;
             FuelLogs.add({ vehicleId: state.activeVehicleId, date, odo, liters, cost, full });
             window._motocareShowToast('Ghi nhận đổ xăng thành công!');
