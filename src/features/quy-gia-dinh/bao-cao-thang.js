@@ -3,7 +3,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML, callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.272';
+} from '../../core/app.js?v=4.3.273';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -748,6 +748,19 @@ window.downloadReportAsImage = async function() {
     // Export report image
     const dataUrl = canvas.toDataURL('image/png');
     const filename = `FamiLife_BaoCao_Thang${currentReportMonth}_${currentReportYear}.png`;
+
+    if (typeof window.exportAndShareFile === 'function') {
+        const base64Data = dataUrl.split(',')[1];
+        const shareRes = await window.exportAndShareFile({
+            fileName: filename,
+            base64Data: base64Data,
+            mimeType: 'image/png'
+        });
+        if (shareRes && shareRes.cancelled) return;
+        showToast('Đã lưu ảnh báo cáo thành công!', 'success');
+        return;
+    }
+
     let shared = false;
 
     if (navigator.canShare) {

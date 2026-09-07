@@ -7,7 +7,8 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "LiveActivityPlugin"
     public let jsName = "LiveActivityPlugin"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "downloadAndOpenIPA", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "downloadAndOpenIPA", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "shareFile", returnType: CAPPluginReturnPromise)
     ]
 
     private var activeDownloader: IPADownloadManager?
@@ -81,6 +82,52 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         self.activeDownloader?.startDownload(from: url)
+    }
+
+    @objc public func shareFile(_ call: CAPPluginCall) {
+        guard let fileName = call.getString("fileName"), !fileName.isEmpty else {
+            call.reject("Thiếu tên file (fileName)")
+            return
+        }
+
+        let destinationUrl = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        try? FileManager.default.removeItem(at: destinationUrl)
+
+        do {
+            if let base64Data = call.getString("base64Data"), let data = Data(base64Encoded: base64Data) {
+                try data.write(to: destinationUrl)
+            } else if let content = call.getString("content") {
+                try content.write(to: destinationUrl, atomically: true, encoding: .utf8)
+            } else {
+                call.reject("Thiếu nội dung file (content hoặc base64Data)")
+                return
+            }
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, let viewController = self.bridge?.viewController else {
+                    call.resolve(["success": true, "path": destinationUrl.path])
+                    return
+                }
+
+                let activityVC = UIActivityViewController(activityItems: [destinationUrl], applicationActivities: nil)
+                if let popover = activityVC.popoverPresentationController {
+                    popover.sourceView = viewController.view
+                    popover.sourceRect = CGRect(x: viewController.view.bounds.midX, y: viewController.view.bounds.midY, width: 0, height: 0)
+                    popover.permittedArrowDirections = []
+                }
+
+                activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
+                    if let err = activityError {
+                        print("[LiveActivityPlugin] Share error: \(err.localizedDescription)")
+                    }
+                }
+
+                viewController.present(activityVC, animated: true)
+                call.resolve(["success": true, "path": destinationUrl.path])
+            }
+        } catch {
+            DispatchQueue.main.async { call.reject("Lỗi ghi file chia sẻ: \(error.localizedDescription)") }
+        }
     }
 }
 

@@ -2,21 +2,21 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.272';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.272';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.272';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.272';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.273';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.273';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.273';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.273';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.272';
-import * as sync from './sync.js?v=4.3.272';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.272';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.272';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.272';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.272';
-import { checkForUpdates, showUpdateModal, detectPlatform } from './updater.js?v=4.3.272';
-import { appLock } from '../features/app-lock/app-lock.js?v=4.3.272';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.273';
+import * as sync from './sync.js?v=4.3.273';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.273';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.273';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.273';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.273';
+import { checkForUpdates, showUpdateModal, detectPlatform, exportAndShareFile } from './updater.js?v=4.3.273';
+import { appLock } from '../features/app-lock/app-lock.js?v=4.3.273';
 
-const APP_VERSION = '4.3.272';
+const APP_VERSION = '4.3.273';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5167,33 +5167,15 @@ async function handleFullBackup() {
         const dateStr = new Date().toISOString().slice(0, 10);
         const fileName = `FamiLife_FullBackup_${dateStr}.json`;
 
-        // Try using Web Share API for iOS (IPA & PWA) to let the user save to Files or share via other apps
-        const file = new File([backupContent], fileName, { type: 'application/json' });
-        let shared = false;
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({
-                    files: [file]
-                });
-                shared = true;
-            } catch (err) {
-                console.warn('[Share] Full backup sharing cancelled or failed:', err);
-                if (err.name === 'AbortError') {
-                    // User cancelled, abort without falling back
-                    return;
-                }
-            }
-        }
+        // Try using multi-platform share (Native iOS LiveActivityPlugin.shareFile / Android / Web Share API)
+        const shareRes = await exportAndShareFile({
+            fileName,
+            content: backupContent,
+            mimeType: 'application/json'
+        });
 
-        // Fallback to traditional download on desktop/non-compatible environments
-        if (!shared) {
-            const blob = new Blob([backupContent], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
+        if (shareRes && shareRes.cancelled) {
+            return; // Người dùng chủ động hủy chia sẻ
         }
         
         state.lastFullBackupDate = new Date().toISOString();

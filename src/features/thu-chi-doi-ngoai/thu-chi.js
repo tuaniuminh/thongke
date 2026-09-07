@@ -5,9 +5,9 @@ import {
     renderDashboardSyncBanner, updateHomeWeather, updateHomeLunar,
     compareRecordsByRecent, renderAll, getLocalDateString, clearAllStateData,
     updateSidebarNavVisibility, updateLoveWidgetUI
-} from '../../core/app.js?v=4.3.272';
-import * as sync from '../../core/sync.js?v=4.3.272';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.272';
+} from '../../core/app.js?v=4.3.273';
+import * as sync from '../../core/sync.js?v=4.3.273';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.273';
 
 let lastDeletedRecord = null;
 let relationshipChart = null;
@@ -1213,6 +1213,17 @@ async function handleExportEncrypted(type = 'all') {
             filename = `hieu_hy_backup_tien_mung_${new Date().toISOString().slice(0, 10)}.json`;
         }
 
+        if (typeof window.exportAndShareFile === 'function') {
+            const shareRes = await window.exportAndShareFile({
+                fileName: filename,
+                content: fileContent,
+                mimeType: 'application/json'
+            });
+            if (shareRes && shareRes.cancelled) return;
+            showToast("Đã xuất file Backup đã mã hóa!");
+            return;
+        }
+
         // Try using Web Share API for iOS (IPA & PWA)
         const file = new File([fileContent], filename, { type: 'application/json' });
         let shared = false;
@@ -1397,6 +1408,18 @@ async function handleExportExcel(type = 'all') {
     
     try {
         const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        if (typeof window.exportAndShareFile === 'function') {
+            const base64Data = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+            const shareRes = await window.exportAndShareFile({
+                fileName: filename,
+                base64Data: base64Data,
+                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            if (shareRes && shareRes.cancelled) return;
+            showToast("Đã xuất file Excel (.xlsx) thành công!");
+            return;
+        }
+
         const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const file = new File([blob], filename, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         

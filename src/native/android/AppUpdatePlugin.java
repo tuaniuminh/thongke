@@ -155,4 +155,68 @@ public class AppUpdatePlugin extends Plugin {
             }
         }).start();
     }
+
+    @PluginMethod
+    public void shareFile(PluginCall call) {
+        String fileName = call.getString("fileName");
+        if (fileName == null || fileName.isEmpty()) {
+            call.reject("Thiếu tên file");
+            return;
+        }
+
+        String content = call.getString("content");
+        String base64Data = call.getString("base64Data");
+        String mimeType = call.getString("mimeType", "application/octet-stream");
+
+        try {
+            Context context = getContext();
+            File cacheDir = context.getExternalCacheDir();
+            if (cacheDir == null) cacheDir = context.getCacheDir();
+            File file = new File(cacheDir, fileName);
+            if (file.exists()) file.delete();
+
+            FileOutputStream fos = new FileOutputStream(file);
+            if (base64Data != null && !base64Data.isEmpty()) {
+                byte[] decoded = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT);
+                fos.write(decoded);
+            } else if (content != null) {
+                fos.write(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            } else {
+                fos.close();
+                call.reject("Thiếu nội dung file");
+                return;
+            }
+            fos.flush();
+            fos.close();
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                try {
+                    Uri fileUri;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        fileUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+                    } else {
+                        fileUri = Uri.fromFile(file);
+                    }
+
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType(mimeType);
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                    Intent chooser = Intent.createChooser(shareIntent, "Chia sẻ file FamiLife");
+                    chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(chooser);
+
+                    JSObject ret = new JSObject();
+                    ret.put("success", true);
+                    call.resolve(ret);
+                } catch (Exception e) {
+                    call.reject("Lỗi mở bảng chia sẻ Android: " + e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            call.reject("Lỗi tạo file chia sẻ: " + e.getMessage());
+        }
+    }
 }

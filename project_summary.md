@@ -12,9 +12,9 @@
 
 | **Tên ứng dụng** | FamiLife – Thu Chi & Sức Khỏe Gia Đình |
 
-| **Phiên bản hiện tại** | **v4.3.272** |
+| **Phiên bản hiện tại** | **v4.3.273** |
+| **v4.3.273** | 📤 **Kích Hoạt Bảng Chia Sẻ Gốc Native Share Sheet Cho iOS (.ipa) & Android (.apk) Khi Sao Lưu & Xuất Dữ Liệu (v4.3.273)**: Khắc phục triệt để lỗi WKWebView chặn `navigator.share({ files })` và phớt lờ `<a download>` khiến sao lưu chỉ hiện toast mà không lưu file; bổ sung phương thức native `shareFile` vào `LiveActivityPlugin.swift` (UIActivityViewController) và `AppUpdatePlugin.java`, tạo cầu nối `exportAndShareFile` mở ngay bảng chia sẻ của hệ thống để người dùng lưu vào Tệp (Files), AirDrop, Drive, Zalo... |
 | **v4.3.272** | ⛽ **Tối Ưu Nhập Liệu Đổ Xăng & Chi Phí Xe Máy Trong MotoCare (v4.3.272)**: Cho phép nhập số lít lẻ chính xác đến 3 chữ số thập phân (3,248 L), hỗ trợ nhập số tiền lẻ bất kỳ (77.952 đ) và chuẩn hóa dấu phẩy/chấm linh hoạt. |
 | **v4.3.271** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.271)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và tự động khởi chạy gói cài đặt trên Windows MSI, Android APK và iOS IPA. |
 | **v4.3.270** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.270)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và tự động khởi chạy gói cài đặt trên Windows MSI, Android APK và iOS IPA. |
-| **v4.3.269** | 🛠️ **Tích Hợp Cầu Nối Tauri Native HTTP Fallback Cho Bản Windows MSI (v4.3.269)**: Tự động chuyển đổi sang tauri.http.fetch khi browser fetch gặp chặn CORS / 302 cross-origin redirect từ GitHub CDN, đảm bảo tải gói cài đặt MSI ổn định tuyệt đối. |
-| **v4.3.268** | 🚀 **Bản Phát Hành Kiểm Thử OTA In-App Cập Nhật Đa Nền Tảng (v4.3.268)**: Phát hành bản thử nghiệm kiểm tra tính năng tải trực tiếp và tự động khởi chạy gói cài đặt trên Windows MSI, Android APK và iOS IPA. |
+| **v4.3.269** | 🛠️ **Tích Hợp Cầu Nối Tauri Native HTTP Fallback Cho Bản Windows MSI (v4.3.269)**: Tự động chuyển đổi sang tauri.http.fetch khi browser fetch gặp chặn CORS / 302 cross-origin redirect từ GitHub CDN, đảm bảo tải gói cài đặt MSI ổn định tuyệt đối. |

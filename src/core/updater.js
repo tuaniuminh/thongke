@@ -724,3 +724,115 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+
+/**
+ * Xuất và chia sẻ file đa nền tảng (iOS Native IPA, Android Native APK, Web PWA, Desktop Tauri)
+ * Đảm bảo 100% mở bảng chia sẻ (Share Sheet) trên thiết bị di động, và tải file trên PC.
+ */
+export async function exportAndShareFile({ fileName, content, base64Data = null, mimeType = 'application/json' }) {
+    const isCapacitor = typeof window !== 'undefined' && window.Capacitor;
+    const platform = isCapacitor && typeof window.Capacitor.getPlatform === 'function' ? window.Capacitor.getPlatform() : '';
+
+    // 1. NỀN TẢNG iOS NATIVE (Bản IPA - LiveActivityPlugin)
+    if (platform === 'ios') {
+        try {
+            console.log('[BUG DETECTOR] [Share] Invoking iOS Native LiveActivityPlugin.shareFile for:', fileName);
+            const res = await callNativeCapacitorPlugin('LiveActivityPlugin', 'shareFile', {
+                fileName,
+                content: content || undefined,
+                base64Data: base64Data || undefined,
+                mimeType
+            });
+            return { success: true, method: 'ios_native', ...res };
+        } catch (err) {
+            console.warn('[BUG DETECTOR] [Share] iOS Native share failed, attempting fallback:', err);
+        }
+    }
+
+    // 2. NỀN TẢNG ANDROID NATIVE (Bản APK - AppUpdatePlugin)
+    if (platform === 'android') {
+        try {
+            console.log('[BUG DETECTOR] [Share] Invoking Android Native AppUpdatePlugin.shareFile for:', fileName);
+            const res = await callNativeCapacitorPlugin('AppUpdatePlugin', 'shareFile', {
+                fileName,
+                content: content || undefined,
+                base64Data: base64Data || undefined,
+                mimeType
+            });
+            return { success: true, method: 'android_native', ...res };
+        } catch (err) {
+            console.warn('[BUG DETECTOR] [Share] Android Native share failed, attempting fallback:', err);
+        }
+    }
+
+    // 3. TRÌNH DUYỆT WEB / PWA (Web Share API Level 2)
+    let fileObj = null;
+    try {
+        if (content) {
+            fileObj = new File([content], fileName, { type: mimeType });
+        } else if (base64Data) {
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            fileObj = new File([byteArray], fileName, { type: mimeType });
+        }
+    } catch (e) {
+        console.warn('[Share] Creating File object failed:', e);
+    }
+
+    if (fileObj && navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+        try {
+            await navigator.share({
+                files: [fileObj],
+                title: fileName
+            });
+            return { success: true, method: 'web_share' };
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('[Share] User cancelled web share');
+                return { success: false, cancelled: true };
+            }
+            console.warn('[Share] Web Share API failed, falling back:', err);
+        }
+    }
+
+    // 4. DESKTOP / PC BROWSER FALLBACK (Tải file truyền thống qua blob)
+    try {
+        let blob;
+        if (content) {
+            blob = new Blob([content], { type: mimeType });
+        } else if (base64Data) {
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            blob = new Blob([byteArray], { type: mimeType });
+        }
+        if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return { success: true, method: 'download_fallback' };
+        }
+    } catch (err) {
+        console.error('[Share] Download fallback failed:', err);
+        throw err;
+    }
+
+    return { success: false };
+}
+
+if (typeof window !== 'undefined') {
+    window.exportAndShareFile = exportAndShareFile;
+}
+

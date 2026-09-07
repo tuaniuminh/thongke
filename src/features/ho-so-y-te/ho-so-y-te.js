@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.272';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.272';
+} from '../../core/app.js?v=4.3.273';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.273';
 
 let healthTrendChartInstance = null;
 
@@ -3878,6 +3878,20 @@ async function exportHealthPDF() {
     }
 
     const fileName = `FamiLife_SucKhoe_${memberName.replace(/\s/g, '_')}_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.pdf`;
+
+    if (typeof window.exportAndShareFile === 'function') {
+        const pdfDataUri = doc.output('datauristring');
+        const base64Data = pdfDataUri.split(',')[1];
+        const shareRes = await window.exportAndShareFile({
+            fileName: fileName,
+            base64Data: base64Data,
+            mimeType: 'application/pdf'
+        });
+        if (shareRes && shareRes.cancelled) return;
+        showToast('Đã xuất báo cáo PDF thành công!', 'success');
+        return;
+    }
+
     const pdfBlob = doc.output('blob');
     const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
     
