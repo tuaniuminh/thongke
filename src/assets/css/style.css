@@ -102,7 +102,7 @@ html {
 }
 
 body {
-    background-color: transparent !important;
+    background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-body);
     min-height: calc(100vh + 1px);
@@ -4412,20 +4412,34 @@ html.active-tab-received,
 html.active-tab-sent,
 html.active-tab-settings,
 html.active-tab-health,
+html.active-tab-health-reminders,
 html.active-tab-fund,
 html.active-tab-fund-history,
 html.active-tab-fund-management,
 html.active-tab-tc-management,
+html.active-tab-motocare,
+html.active-tab-motocare-dashboard,
+html.active-tab-motocare-fuel,
+html.active-tab-motocare-history,
+html.active-tab-motocare-settings,
+html.active-tab-am-lich,
 body.active-tab-home,
 body.active-tab-dashboard,
 body.active-tab-received,
 body.active-tab-sent,
 body.active-tab-settings,
 body.active-tab-health,
+body.active-tab-health-reminders,
 body.active-tab-fund,
 body.active-tab-fund-history,
 body.active-tab-fund-management,
-body.active-tab-tc-management {
+body.active-tab-tc-management,
+body.active-tab-motocare,
+body.active-tab-motocare-dashboard,
+body.active-tab-motocare-fuel,
+body.active-tab-motocare-history,
+body.active-tab-motocare-settings,
+body.active-tab-am-lich {
     background-color: #090d16 !important; /* Fallback / Dark mode background */
     background-image: none !important;
 }
@@ -4435,20 +4449,34 @@ html.light-mode.active-tab-received,
 html.light-mode.active-tab-sent,
 html.light-mode.active-tab-settings,
 html.light-mode.active-tab-health,
+html.light-mode.active-tab-health-reminders,
 html.light-mode.active-tab-fund,
 html.light-mode.active-tab-fund-history,
 html.light-mode.active-tab-fund-management,
 html.light-mode.active-tab-tc-management,
+html.light-mode.active-tab-motocare,
+html.light-mode.active-tab-motocare-dashboard,
+html.light-mode.active-tab-motocare-fuel,
+html.light-mode.active-tab-motocare-history,
+html.light-mode.active-tab-motocare-settings,
+html.light-mode.active-tab-am-lich,
 body.light-mode.active-tab-home,
 body.light-mode.active-tab-dashboard,
 body.light-mode.active-tab-received,
 body.light-mode.active-tab-sent,
 body.light-mode.active-tab-settings,
 body.light-mode.active-tab-health,
+body.light-mode.active-tab-health-reminders,
 body.light-mode.active-tab-fund,
 body.light-mode.active-tab-fund-history,
 body.light-mode.active-tab-fund-management,
-body.light-mode.active-tab-tc-management {
+body.light-mode.active-tab-tc-management,
+body.light-mode.active-tab-motocare,
+body.light-mode.active-tab-motocare-dashboard,
+body.light-mode.active-tab-motocare-fuel,
+body.light-mode.active-tab-motocare-history,
+body.light-mode.active-tab-motocare-settings,
+body.light-mode.active-tab-am-lich {
     background-color: #f3f4f6 !important; /* Light mode background */
     background-image: none !important;
 }

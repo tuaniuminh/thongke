@@ -4,6 +4,17 @@
    ============================================================ */
 
 /* --- Container & Sub-Views --- */
+html.active-tab-motocare,
+body.active-tab-motocare {
+    background-color: #090d16 !important;
+    background-image: none !important;
+}
+html.light-mode.active-tab-motocare,
+body.light-mode.active-tab-motocare {
+    background-color: #f3f4f6 !important;
+    background-image: none !important;
+}
+
 #tab-motocare {
     display: block;
     width: 100%;
