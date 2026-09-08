@@ -5049,4 +5049,300 @@ html.active-tab-motocare .top-header {
     opacity: 0.7;
 }
 
+/* =========================================================
+   GLOBAL AI PROGRESS OVERLAY (Smart Stepper & Timer)
+   ========================================================= */
+.ai-progress-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(8, 12, 22, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10005;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    padding: 16px;
+}
+
+.ai-progress-overlay.active {
+    display: flex;
+}
+
+.ai-progress-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    width: 440px;
+    max-width: 95%;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideInUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-progress-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    opacity: 0.8;
+}
+
+.ai-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ai-progress-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-progress-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.2));
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.ai-progress-title-box h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ai-progress-title-box .ai-progress-model-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: #a855f7;
+    font-weight: 600;
+    background: rgba(168, 85, 247, 0.1);
+    padding: 1px 7px;
+    border-radius: 8px;
+    margin-top: 3px;
+}
+
+.ai-progress-timer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-family: monospace, monospace;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+/* Progress bar */
+.ai-progress-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ai-progress-bar-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+}
+
+.ai-progress-current-text {
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80%;
+}
+
+.ai-progress-percent-val {
+    font-weight: 700;
+    color: #a855f7;
+    font-variant-numeric: tabular-nums;
+}
+
+.ai-progress-track {
+    height: 7px;
+    width: 100%;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.ai-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    border-radius: 4px;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    position: relative;
+}
+
+.ai-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: aiProgressShimmer 1.5s infinite;
+}
+
+@keyframes aiProgressShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Steps list */
+.ai-progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 6px 0;
+}
+
+.ai-progress-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.25s ease;
+}
+
+.ai-progress-step-indicator {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.25s ease;
+}
+
+.ai-progress-step-item.pending .ai-progress-step-indicator {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+
+.ai-progress-step-item.pending .ai-progress-step-label {
+    color: var(--text-muted);
+}
+
+.ai-progress-step-item.active .ai-progress-step-indicator {
+    background: #a855f7;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+    animation: aiPulse 1.5s infinite;
+}
+
+.ai-progress-step-item.active .ai-progress-step-label {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.ai-progress-step-item.completed .ai-progress-step-indicator {
+    background: #10b981;
+    color: #ffffff;
+}
+
+.ai-progress-step-item.completed .ai-progress-step-label {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.ai-progress-step-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ai-progress-step-label {
+    font-size: 0.86rem;
+    line-height: 1.35;
+    transition: color 0.2s ease;
+}
+
+.ai-progress-step-sub {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+@keyframes aiPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.85; }
+}
+
+.ai-progress-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 2px;
+}
+
+.ai-progress-footer-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-progress-btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-progress-btn-cancel:hover {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+
 

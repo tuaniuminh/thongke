@@ -3,7 +3,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML, callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.277';
+} from '../../core/app.js?v=4.3.278';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -340,7 +340,26 @@ window.requestAiReportInsight = async function(btn) {
         btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1s linear infinite; width:14px; height:14px; display:inline-block; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;"></i> Đang phân tích...`;
     }
 
+    const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+        title: `Phân Tích Tài Chính Tháng ${currentReportMonth}/${currentReportYear}`,
+        model: 'Gemini 3.8 Flash',
+        icon: 'finance',
+        steps: [
+            'Tổng hợp số liệu thu nạp, chi tiêu & thặng dư quỹ',
+            'Tham vấn Chuyên gia Tài chính (Gemini 3.8 Flash)',
+            'Đánh giá cán cân thu chi & đóng góp hai vợ chồng',
+            'Đưa ra lời khuyên thực tế & lưu báo cáo'
+        ]
+    }) : null;
+
     try {
+        if (progress) {
+            progress.setStep(0, 20, 'Đang tổng hợp dữ liệu tài chính gia đình...');
+            await new Promise(r => setTimeout(r, 250));
+            progress.setStep(1, 40, 'Đang kết nối Gemini 3.8 Flash...');
+            progress.smoothSimulate(88, 4000);
+        }
+
         const data = currentReportData;
         const prompt = `
 Hãy đóng vai là một Chuyên gia hoạch định tài chính gia đình thông thái và thấu hiểu tâm lý. Hãy viết 1 đoạn nhận xét ngắn gọn (khoảng 3-4 câu, không quá dài) để phân tích bức tranh tài chính Quỹ chung gia đình trong Tháng ${currentReportMonth}/${currentReportYear} với các số liệu thực tế sau:
@@ -362,6 +381,11 @@ Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy tr
         aiInsightText = (res.text || res).trim();
         const modelName = res.modelName || 'Gemini 3.8 Flash';
 
+        if (progress) {
+            progress.setStep(3, 95, 'Đang hoàn tất nhận xét tài chính...');
+            await progress.complete('Đã phân tích tài chính gia đình!');
+        }
+
         // Lưu nhận xét vào state để đồng bộ Supabase (đa thiết bị)
         const aiCacheKey = `${currentReportYear}_${currentReportMonth}`;
         if (!state.reportAiInsights) state.reportAiInsights = {};
@@ -378,6 +402,7 @@ Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy tr
         renderReportHtml();
         showToast(`Đã phân tích tài chính [${modelName}] thành công!`, "success");
     } catch (err) {
+        if (progress) progress.close();
         console.error("Gemini API Error for report:", err);
         showToast("Không thể kết nối Gemini API: " + err.message, "danger");
         if (btn) {

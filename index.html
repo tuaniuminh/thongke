@@ -93,17 +93,17 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.277">
+    <link rel="apple-touch-icon" href="src/assets/images/icon-light.png?v=4.3.278">
     <link rel="icon" type="image/png" href="src/assets/images/icon.png">
     <link rel="manifest" href="manifest.json">
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.277">
-    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.277">
-    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.277">
-    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.277">
-    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.277">
-    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.277">
-    <link rel="stylesheet" href="src/assets/css/app-lock.css?v=4.3.277">
+    <link rel="stylesheet" href="src/assets/css/style.css?v=4.3.278">
+    <link rel="stylesheet" href="src/assets/css/quy-gia-dinh.css?v=4.3.278">
+    <link rel="stylesheet" href="src/assets/css/bao-cao-thang.css?v=4.3.278">
+    <link rel="stylesheet" href="src/assets/css/we-love.css?v=4.3.278">
+    <link rel="stylesheet" href="src/assets/css/am-lich.css?v=4.3.278">
+    <link rel="stylesheet" href="src/assets/css/motocare.css?v=4.3.278">
+    <link rel="stylesheet" href="src/assets/css/app-lock.css?v=4.3.278">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase CDN -->
@@ -381,7 +381,7 @@
     <!-- Tauri Desktop Custom Titlebar (Chỉ hiển thị khi chạy app trên PC) -->
     <div id="tauriTitlebar" class="tauri-titlebar" data-tauri-drag-region>
         <div class="tauri-titlebar-left" data-tauri-drag-region>
-            <img src="src/assets/images/icon-light.png?v=4.3.277" class="tauri-titlebar-icon" id="tauriTitlebarIcon" alt="FamiLife" data-tauri-drag-region>
+            <img src="src/assets/images/icon-light.png?v=4.3.278" class="tauri-titlebar-icon" id="tauriTitlebarIcon" alt="FamiLife" data-tauri-drag-region>
             <span class="tauri-titlebar-title" data-tauri-drag-region>FamiLife - Thu Chi &amp; Sức Khỏe Gia Đình</span>
         </div>
         <div class="tauri-titlebar-controls">
@@ -403,7 +403,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon" style="overflow: hidden; padding: 0;">
-                    <img src="src/assets/images/icon.png?v=4.3.277" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="src/assets/images/icon.png?v=4.3.278" alt="FamiLife Logo" id="sidebarLogoImg" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <div class="logo-text" id="sidebarLogoText">FamiLife</div>
@@ -543,7 +543,7 @@
             <div class="mobile-navbar" id="mobileNavbar">
                 <div class="mobile-navbar-left" id="mobileNavbarLeft">
                     <div class="mobile-navbar-logo" id="mobileNavbarLogo">
-                        <img src="src/assets/images/icon.png?v=4.3.277" alt="Logo" id="mobileLogoImg">
+                        <img src="src/assets/images/icon.png?v=4.3.278" alt="Logo" id="mobileLogoImg">
                     </div>
                     <span class="mobile-navbar-title" id="mobileNavbarTitle">Thu Chi Đối Ngoại</span>
                 </div>
@@ -2396,7 +2396,7 @@
         <div class="home-container">
             <header class="home-header">
                 <div class="home-logo">
-                    <img src="src/assets/images/icon.png?v=4.3.277" alt="FamiLife Logo" class="home-logo-img">
+                    <img src="src/assets/images/icon.png?v=4.3.278" alt="FamiLife Logo" class="home-logo-img">
                 </div>
                 <h1 class="home-title">FamiLife</h1>
                 <p class="home-subtitle">Hệ thống quản lý tài chính & chăm sóc sức khỏe gia đình</p>
@@ -2506,11 +2506,11 @@
                         if (theme === 'light') {
                             document.documentElement.classList.add('light-mode');
                             document.documentElement.style.colorScheme = 'light';
-                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.277';
+                            if (img) img.src = 'src/assets/images/icon-light.png?v=4.3.278';
                         } else {
                             document.documentElement.classList.remove('light-mode');
                             document.documentElement.style.colorScheme = 'dark';
-                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.277';
+                            if (img) img.src = 'src/assets/images/icon.png?v=4.3.278';
                         }
                     })();
                 </script>
@@ -4019,7 +4019,53 @@
             </div>
         </div>
 
-    <!-- Health Scanner Loading Overlay -->
+    <!-- Global Smart AI Progress Overlay -->
+    <div class="ai-progress-overlay" id="globalAiProgressOverlay">
+        <div class="ai-progress-card">
+            <div class="ai-progress-header">
+                <div class="ai-progress-header-left">
+                    <div class="ai-progress-icon-badge" id="aiProgressIcon">
+                        <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+                    </div>
+                    <div class="ai-progress-title-box">
+                        <h4 id="aiProgressTitle">Đang xử lý AI...</h4>
+                        <div class="ai-progress-model-badge" id="aiProgressModelBadge">
+                            <i data-lucide="cpu" style="width: 11px; height: 11px;"></i>
+                            <span id="aiProgressModelText">Gemini 3.8 Flash</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-progress-timer-badge">
+                    <i data-lucide="clock" style="width: 12px; height: 12px; color: var(--text-muted);"></i>
+                    <span id="aiProgressTimerText">00:00s</span>
+                </div>
+            </div>
+
+            <div class="ai-progress-bar-container">
+                <div class="ai-progress-bar-meta">
+                    <span class="ai-progress-current-text" id="aiProgressStatusText">Đang khởi tạo kết nối...</span>
+                    <span class="ai-progress-percent-val" id="aiProgressPercentText">0%</span>
+                </div>
+                <div class="ai-progress-track">
+                    <div class="ai-progress-fill" id="aiProgressFill"></div>
+                </div>
+            </div>
+
+            <div class="ai-progress-steps" id="aiProgressStepsList">
+                <!-- Steps rendered dynamically -->
+            </div>
+
+            <div class="ai-progress-footer">
+                <div class="ai-progress-footer-note">
+                    <i data-lucide="shield-check" style="width: 12px; height: 12px; color: #10b981;"></i>
+                    <span>Bảo mật & xử lý an toàn</span>
+                </div>
+                <button type="button" class="ai-progress-btn-cancel" id="aiProgressBtnCancel">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Scanner Loading Overlay (Fallback) -->
     <div class="modal-overlay health-theme-overlay" id="healthScannerLoadingOverlay" style="display: none; z-index: 9999;">
         <div style="text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
             <div class="health-spinner"></div>
@@ -4383,17 +4429,17 @@
     </div>
 
     <!-- JS Application Logic (Using ES Module Imports) -->
-    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.277"></script>
-    <script type="module" src="src/core/app.js?v=4.3.277"></script>
-    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.277"></script>
-    <script type="module" src="src/features/we-love/we-love.js?v=4.3.277"></script>
-    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.277"></script>
+    <script src="src/features/am-lich/lunar_vietnam.js?v=4.3.278"></script>
+    <script type="module" src="src/core/app.js?v=4.3.278"></script>
+    <script type="module" src="src/features/ket-noi-gia-dinh/ket-noi.js?v=4.3.278"></script>
+    <script type="module" src="src/features/we-love/we-love.js?v=4.3.278"></script>
+    <script type="module" src="src/features/am-lich/am-lich.js?v=4.3.278"></script>
 
     <!-- Service Worker Registration (PWA Offline Support) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=4.3.277')
+                navigator.serviceWorker.register('./sw.js?v=4.3.278')
                     .then((reg) => console.log('[SW] Registered, scope:', reg.scope))
                     .catch((err) => console.warn('[SW] Registration failed:', err));
             });

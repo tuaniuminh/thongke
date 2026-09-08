@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.277';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.277';
+} from '../../core/app.js?v=4.3.278';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.278';
 
 let healthTrendChartInstance = null;
 
@@ -1718,17 +1718,25 @@ async function handleHealthFiles(files) {
     const overlay = document.getElementById('healthScannerLoadingOverlay');
     const statusText = document.getElementById('healthScannerStatusText');
     if (overlay) {
-        overlay.style.display = 'flex';
-        overlay.classList.add('active');
+        overlay.style.display = 'none';
+        overlay.classList.remove('active');
     }
-    
-    if (statusText) {
-        statusText.innerText = validFiles.length > 1
-            ? `Đang đọc ${validFiles.length} ảnh kết quả...`
-            : 'Đang đọc file ảnh xét nghiệm...';
-    }
-    
+
+    const isMulti = validFiles.length > 1;
+    const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+        title: isMulti ? `Bóc tách ${validFiles.length} Ảnh Xét Nghiệm Y Tế` : 'Bóc tách Kết Quả Xét Nghiệm Y Tế',
+        model: 'Gemini 3.8 Flash',
+        icon: 'stethoscope',
+        steps: [
+            isMulti ? `Đọc & tiền xử lý ${validFiles.length} file ảnh xét nghiệm` : 'Đọc & tiền xử lý file ảnh xét nghiệm',
+            'Kết nối máy chủ Google Gemini 3.8 Flash',
+            'Quét thị giác OCR & bóc tách chỉ số xét nghiệm',
+            'Chuẩn hóa khoảng tham chiếu & hoàn tất'
+        ]
+    }) : null;
+
     try {
+        if (progress) progress.setStep(0, 15, isMulti ? `Đang đọc ${validFiles.length} ảnh kết quả...` : 'Đang đọc file ảnh xét nghiệm...');
         const imagesData = [];
         for (const file of validFiles) {
             const base64Data = await fileToBase64(file);
@@ -1738,13 +1746,17 @@ async function handleHealthFiles(files) {
             });
         }
         
-        if (statusText) {
-            statusText.innerText = validFiles.length > 1
-                ? `Đang gửi ${validFiles.length} ảnh lên Gemini AI để phân tích gộp...`
-                : 'Đang phân tích ảnh y tế bằng Gemini AI...';
+        if (progress) {
+            progress.setStep(1, 35, isMulti ? `Đang gửi ${validFiles.length} ảnh lên Gemini 3.8 Flash...` : 'Đang kết nối Gemini 3.8 Flash để quét ảnh y tế...');
+            progress.smoothSimulate(88, 5500);
         }
         
         const responseJson = await callGeminiAPI(imagesData);
+        
+        if (progress) {
+            progress.setStep(3, 95, 'Bóc tách thành công! Đang hoàn tất dữ liệu...');
+            await progress.complete('Đã phân tích hồ sơ y tế thành công!');
+        }
         
         if (overlay) {
             overlay.style.display = 'none';
@@ -1754,6 +1766,7 @@ async function handleHealthFiles(files) {
         // Process results (BP vs Lab tests)
         await processScannedHealthImage(responseJson);
     } catch (err) {
+        if (progress) progress.close();
         console.error("Gemini scanning error:", err);
         if (overlay) {
             overlay.style.display = 'none';
@@ -3948,26 +3961,50 @@ async function handleNativeCameraCapture(file) {
     }
 
     const overlay = document.getElementById('healthScannerLoadingOverlay');
-    const statusText = document.getElementById('healthScannerStatusText');
-    if (overlay) overlay.style.display = 'flex';
-    if (statusText) statusText.innerText = 'Đang phân tích ảnh chụp bằng Gemini AI...';
+    if (overlay) {
+        overlay.style.display = 'none';
+        overlay.classList.remove('active');
+    }
+
+    const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+        title: 'Bóc tách Ảnh Chụp Y Tế',
+        model: 'Gemini 3.8 Flash',
+        icon: 'camera',
+        steps: [
+            'Đọc & xử lý ảnh chụp camera',
+            'Kết nối máy chủ Google Gemini 3.8 Flash',
+            'Quét thị giác OCR & phân loại y khoa',
+            'Chuẩn hóa dữ liệu & hoàn tất'
+        ]
+    }) : null;
 
     try {
+        if (progress) progress.setStep(0, 20, 'Đang đọc và tiền xử lý ảnh chụp...');
         const reader = new FileReader();
         reader.onload = async (e) => {
             const base64Data = e.target.result.split(',')[1];
             const mimeType = file.type || 'image/jpeg';
             try {
+                if (progress) {
+                    progress.setStep(1, 40, 'Đang kết nối Gemini 3.8 Flash để quét ảnh...');
+                    progress.smoothSimulate(88, 5000);
+                }
                 const responseJson = await callGeminiAPI(base64Data, mimeType);
+                if (progress) {
+                    progress.setStep(3, 95, 'Bóc tách thành công! Đang hoàn tất dữ liệu...');
+                    await progress.complete('Đã nhận diện thành công ảnh chụp!');
+                }
                 if (overlay) overlay.style.display = 'none';
                 await processScannedHealthImage(responseJson);
             } catch (err) {
+                if (progress) progress.close();
                 if (overlay) overlay.style.display = 'none';
                 showToast('Phân tích ảnh thất bại: ' + err.message, 'error');
             }
         };
         reader.readAsDataURL(file);
     } catch (err) {
+        if (progress) progress.close();
         if (overlay) overlay.style.display = 'none';
         showToast('Không thể đọc file ảnh: ' + err.message, 'error');
     }
@@ -4706,16 +4743,29 @@ async function generateHealthAiAnalysisWithBP(forceFresh = false, mode = 'full')
     }
 
     const overlay = document.getElementById('healthScannerLoadingOverlay');
-    const statusText = document.getElementById('healthScannerStatusText');
     if (overlay) {
-        overlay.style.display = 'flex';
-        overlay.classList.add('active');
+        overlay.style.display = 'none';
+        overlay.classList.remove('active');
     }
-    if (statusText) {
-        statusText.innerText = mode === 'bp_only' 
-            ? 'AI đang phân tích kết quả đo huyết áp...' 
-            : (mode === 'body_comp_only' ? 'AI đang phân tích chỉ số cơ thể...' : 'AI đang tổng hợp sức khỏe toàn diện...');
-    }
+
+    const modeTitle = mode === 'bp_only' 
+        ? 'Phân Tích Huyết Áp Chuyên Sâu AI' 
+        : (mode === 'body_comp_only' ? 'Phân Tích Thành Phần Cơ Thể AI' : 'Bác Sĩ Gia Đình AI Phân Tích');
+    const step3Desc = mode === 'bp_only'
+        ? 'Đánh giá nguy cơ tim mạch & phân độ huyết áp'
+        : (mode === 'body_comp_only' ? 'Phân tích tỉ lệ cơ mỡ, BMI & trao đổi chất' : 'Đánh giá xu hướng xét nghiệm & nguy cơ bệnh lý');
+
+    const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+        title: modeTitle,
+        model: 'Gemini 3.8 Flash',
+        icon: 'health',
+        steps: [
+            'Tổng hợp lịch sử y tế của thành viên',
+            'Tham vấn Bác sĩ AI (Gemini 3.8 Flash)',
+            step3Desc,
+            'Lập phác đồ dinh dưỡng & hoàn tất báo cáo'
+        ]
+    }) : null;
 
     try {
         const profile = (state.familyProfiles || []).find(p => p.id === selectedProfileId);
@@ -4896,6 +4946,11 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
         }
 
+        if (progress) {
+            progress.setStep(1, 35, 'Đang kết nối Bác sĩ AI (Gemini 3.8 Flash)...');
+            progress.smoothSimulate(88, 5000);
+        }
+
         const res = await callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
         const textResponse = res.text || res;
         const modelName = res.modelName || 'Gemini 3.8 Flash';
@@ -4940,6 +4995,11 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
         state.familyProfilesUpdated = nowIso;
         await saveLocalState();
 
+        if (progress) {
+            progress.setStep(3, 95, 'Đang hoàn tất báo cáo y tế...');
+            await progress.complete('Đã lập báo cáo y tế thành công!');
+        }
+
         if (overlay) {
             overlay.style.display = 'none';
             overlay.classList.remove('active');
@@ -4954,6 +5014,7 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
         performSync(true);
 
     } catch (err) {
+        if (progress) progress.close();
         if (overlay) {
             overlay.style.display = 'none';
             overlay.classList.remove('active');

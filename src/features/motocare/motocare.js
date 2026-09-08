@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.277';
-import { UI } from './ui.js?v=4.3.277';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.278';
+import { UI } from './ui.js?v=4.3.278';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -209,9 +209,20 @@ const App = {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
 
-            window._motocareShowToast('Đang nhận diện hóa đơn bảo dưỡng bằng Gemini AI...', 'info');
+            const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+                title: 'Bóc tách Hóa đơn Bảo dưỡng',
+                model: 'Gemini 3.8 Flash',
+                icon: 'bike',
+                steps: [
+                    'Đọc & nén file ảnh chụp hóa đơn',
+                    'Kết nối máy chủ Gemini 3.8 Flash',
+                    'Quét thị giác OCR & bóc tách phụ tùng, chi phí',
+                    'Chuẩn hóa số ODO & lưu thông tin'
+                ]
+            }) : null;
 
             try {
+                if (progress) progress.setStep(0, 15, 'Đang đọc và nén file ảnh...');
                 const base64Data = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => {
@@ -223,8 +234,18 @@ const App = {
                     reader.readAsDataURL(file);
                 });
 
+                if (progress) {
+                    progress.setStep(1, 35, 'Đang kết nối Gemini 3.8 Flash...');
+                    progress.smoothSimulate(85, 4500);
+                }
+
                 const mimeType = file.type || 'image/jpeg';
                 const aiResult = await AI.scanMaintenanceReceipt(base64Data, mimeType);
+
+                if (progress) {
+                    progress.setStep(3, 95, 'Bóc tách thành công! Đang hoàn tất dữ liệu...');
+                    await progress.complete('Đã nhận diện hóa đơn thành công!');
+                }
 
                 // Open maintenance modal with extracted details
                 this.openModal('maintenance', {
@@ -241,6 +262,7 @@ const App = {
 
                 window._motocareShowToast(`Đã nhận diện hóa đơn sửa xe [${aiResult._modelName || 'Gemini 3.8 Flash'}] thành công!`, 'success');
             } catch (err) {
+                if (progress) progress.close();
                 console.error('[MotoCare Receipt OCR Error]', err);
                 window._motocareShowToast(`Lỗi quét hóa đơn: ${err.message || 'Không thể nhận diện hình ảnh.'}`, 'danger');
             }
@@ -255,19 +277,42 @@ const App = {
                 window._motocareShowToast('Vui lòng nhập Google Gemini API Key trong mục Cài Đặt chung của FamiLife để sử dụng!', 'warning');
                 return;
             }
-            this.openModal('ai-doctor');
-            const loadingEl = document.getElementById('mc-ai-loading');
-            const contentEl = document.getElementById('mc-ai-result-content');
-            if (loadingEl && contentEl) {
-                loadingEl.classList.remove('hidden');
-                contentEl.classList.add('hidden');
-                contentEl.innerHTML = '';
-                try {
-                    const prompt = AI.generateConsultationPrompt(vId);
-                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
-                    const resultHtml = res.text || res;
-                    const modelName = res.modelName || 'Gemini 3.8 Flash';
-                    loadingEl.classList.add('hidden');
+            
+            const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+                title: 'Bác sĩ Xe máy AI Chẩn đoán',
+                model: 'Gemini 3.8 Flash',
+                icon: 'bike',
+                steps: [
+                    'Tổng hợp số ODO, ngày sử dụng & lịch sử sửa xe',
+                    'Kết nối Bác sĩ AI (Gemini 3.8 Flash)',
+                    'Phân tích hao mòn phụ tùng & nguy cơ an toàn',
+                    'Lập phác đồ bảo dưỡng & lời khuyên chuyên gia'
+                ]
+            }) : null;
+
+            try {
+                if (progress) {
+                    progress.setStep(0, 20, 'Đang tổng hợp dữ liệu lịch sử xe...');
+                    await new Promise(r => setTimeout(r, 300));
+                    progress.setStep(1, 40, 'Đang kết nối Gemini 3.8 Flash...');
+                    progress.smoothSimulate(88, 4000);
+                }
+
+                const prompt = AI.generateConsultationPrompt(vId);
+                const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
+                const resultHtml = res.text || res;
+                const modelName = res.modelName || 'Gemini 3.8 Flash';
+
+                if (progress) {
+                    progress.setStep(3, 95, 'Đang hoàn tất kết quả chẩn đoán...');
+                    await progress.complete('Đã hoàn tất chẩn đoán!');
+                }
+
+                this.openModal('ai-doctor');
+                const loadingEl = document.getElementById('mc-ai-loading');
+                const contentEl = document.getElementById('mc-ai-result-content');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (contentEl) {
                     contentEl.classList.remove('hidden');
                     contentEl.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding:6px 12px; background:rgba(124, 58, 237, 0.08); border-radius:8px; font-size:0.8rem;">
@@ -276,8 +321,15 @@ const App = {
                         </div>
                         ${resultHtml}
                     `;
-                } catch (err) {
-                    loadingEl.classList.add('hidden');
+                }
+            } catch (err) {
+                if (progress) progress.close();
+                console.error('[MotoCare AI Doctor Error]', err);
+                this.openModal('ai-doctor');
+                const loadingEl = document.getElementById('mc-ai-loading');
+                const contentEl = document.getElementById('mc-ai-result-content');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (contentEl) {
                     contentEl.classList.remove('hidden');
                     contentEl.innerHTML = `<div style="color:var(--color-danger);padding:20px;text-align:center;"><h4>⚠️ Lỗi kết nối Gemini AI</h4><p style="margin-top:10px;font-size:0.9rem;">${err.message || 'Không thể lấy phản hồi từ Gemini API.'}</p></div>`;
                 }
@@ -307,6 +359,18 @@ const App = {
                 return;
             }
 
+            const progress = (typeof window.showAiProgress === 'function') ? window.showAiProgress({
+                title: 'Tối ưu Định mức Bảo dưỡng AI',
+                model: 'Gemini 3.8 Flash',
+                icon: 'bike',
+                steps: [
+                    `Tra cứu catalog dòng xe ${vehicle.name}`,
+                    'Kết nối chuyên gia kỹ thuật xe (Gemini 3.8)',
+                    'Phân tích điều kiện vận hành tại Việt Nam',
+                    'Chuẩn hóa chu kỳ bảo dưỡng & hoàn tất'
+                ]
+            }) : null;
+
             this.openModal('ai-presets');
             const loadingEl = document.getElementById('mc-ai-presets-loading');
             const contentEl = document.getElementById('mc-ai-presets-result-content');
@@ -321,6 +385,13 @@ const App = {
                 contentEl.classList.add('hidden');
                 contentEl.innerHTML = '';
                 try {
+                    if (progress) {
+                        progress.setStep(0, 20, `Đang tra cứu dữ liệu xe ${vehicle.name}...`);
+                        await new Promise(r => setTimeout(r, 250));
+                        progress.setStep(1, 40, 'Đang kết nối Gemini 3.8 Flash...');
+                        progress.smoothSimulate(88, 4000);
+                    }
+
                     const prompt = AI.generatePresetOptimizationPrompt(vId);
                     const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
                     const rawResponse = res.text || res;
@@ -394,11 +465,17 @@ const App = {
                         </div>
                     `;
 
+                    if (progress) {
+                        progress.setStep(3, 95, 'Đang hoàn tất bảng so sánh định mức...');
+                        await progress.complete('Đã tối ưu hóa định mức!');
+                    }
+
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');
                     contentEl.innerHTML = html;
                     if (applyBtn) applyBtn.style.display = 'inline-block';
                 } catch (err) {
+                    if (progress) progress.close();
                     console.error('[MotoCare AI Presets Error]', err);
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');

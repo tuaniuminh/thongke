@@ -2,21 +2,21 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.277';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.277';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.277';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.277';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.278';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.278';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.278';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.278';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.277';
-import * as sync from './sync.js?v=4.3.277';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.277';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.277';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.277';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.277';
-import { checkForUpdates, showUpdateModal, detectPlatform, exportAndShareFile } from './updater.js?v=4.3.277';
-import { appLock } from '../features/app-lock/app-lock.js?v=4.3.277';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.278';
+import * as sync from './sync.js?v=4.3.278';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.278';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.278';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.278';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.278';
+import { checkForUpdates, showUpdateModal, detectPlatform, exportAndShareFile } from './updater.js?v=4.3.278';
+import { appLock } from '../features/app-lock/app-lock.js?v=4.3.278';
 
-const APP_VERSION = '4.3.277';
+const APP_VERSION = '4.3.278';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5409,7 +5409,197 @@ export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.8-flash
     throw lastError || new Error("Lỗi khi kết nối Gemini API.");
 }
 
-export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility, updateLoveWidgetUI };
+/**
+ * Global Smart AI Progress Overlay Controller
+ * Hiển thị tiến trình AI thông minh đa giai đoạn, thanh %, bộ đếm thời gian và model tag
+ */
+export function showAiProgress(options = {}) {
+    const {
+        title = 'Đang xử lý AI...',
+        model = 'Gemini 3.8 Flash',
+        icon = 'sparkles',
+        steps = [
+            'Chuẩn bị dữ liệu',
+            'Kết nối Google Gemini 3.8 Flash',
+            'Phân tích thị giác & xử lý AI',
+            'Hoàn tất và lưu trữ kết quả'
+        ],
+        onCancel = null
+    } = options;
+
+    const overlay = document.getElementById('globalAiProgressOverlay');
+    if (!overlay) return null;
+
+    const titleEl = document.getElementById('aiProgressTitle');
+    const modelEl = document.getElementById('aiProgressModelText');
+    const timerEl = document.getElementById('aiProgressTimerText');
+    const statusEl = document.getElementById('aiProgressStatusText');
+    const percentEl = document.getElementById('aiProgressPercentText');
+    const fillEl = document.getElementById('aiProgressFill');
+    const stepsEl = document.getElementById('aiProgressStepsList');
+    const iconEl = document.getElementById('aiProgressIcon');
+    const cancelBtn = document.getElementById('aiProgressBtnCancel');
+
+    if (titleEl) titleEl.innerText = title;
+    if (modelEl) modelEl.innerText = model;
+    
+    // Icon badge
+    if (iconEl) {
+        let iconSvg = '<i data-lucide="sparkles" style="width:20px; height:20px;"></i>';
+        if (icon === 'camera' || icon === 'scan') {
+            iconSvg = '<i data-lucide="scan" style="width:20px; height:20px;"></i>';
+        } else if (icon === 'stethoscope' || icon === 'health') {
+            iconSvg = '<i data-lucide="stethoscope" style="width:20px; height:20px;"></i>';
+        } else if (icon === 'bike' || icon === 'wrench') {
+            iconSvg = '<i data-lucide="wrench" style="width:20px; height:20px;"></i>';
+        } else if (icon === 'finance' || icon === 'chart') {
+            iconSvg = '<i data-lucide="trending-up" style="width:20px; height:20px;"></i>';
+        }
+        iconEl.innerHTML = iconSvg;
+    }
+
+    // Render steps
+    let currentStepIdx = 0;
+    let currentPercent = 0;
+    
+    function renderSteps() {
+        if (!stepsEl) return;
+        stepsEl.innerHTML = steps.map((s, idx) => {
+            const stepLabel = typeof s === 'string' ? s : s.label;
+            const stepSub = typeof s === 'object' && s.sub ? `<span class="ai-progress-step-sub">${escapeHTML(s.sub)}</span>` : '';
+            let stateClass = 'pending';
+            let indicatorContent = `${idx + 1}`;
+            
+            if (idx < currentStepIdx) {
+                stateClass = 'completed';
+                indicatorContent = '✓';
+            } else if (idx === currentStepIdx) {
+                stateClass = 'active';
+                indicatorContent = `<span style="display:inline-block; animation: spin 1s linear infinite; width:10px; height:10px; border:2px solid #fff; border-top-color:transparent; border-radius:50%;"></span>`;
+            }
+            
+            return `
+                <div class="ai-progress-step-item ${stateClass}" id="ai-step-${idx}">
+                    <div class="ai-progress-step-indicator">${indicatorContent}</div>
+                    <div class="ai-progress-step-content">
+                        <span class="ai-progress-step-label">${escapeHTML(stepLabel)}</span>
+                        ${stepSub}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+    }
+
+    renderSteps();
+
+    // Start elapsed timer
+    const startTime = Date.now();
+    let timerInterval = setInterval(() => {
+        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+        const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+        const secs = String(elapsedSec % 60).padStart(2, '0');
+        if (timerEl) timerEl.innerText = `${mins}:${secs}s`;
+    }, 250);
+
+    function updateProgress(percent, statusText) {
+        currentPercent = Math.min(100, Math.max(0, Math.round(percent)));
+        if (fillEl) fillEl.style.width = `${currentPercent}%`;
+        if (percentEl) percentEl.innerText = `${currentPercent}%`;
+        if (statusText && statusEl) statusEl.innerText = statusText;
+    }
+
+    updateProgress(8, typeof steps[0] === 'string' ? steps[0] : steps[0]?.label || 'Đang khởi động...');
+
+    let crawlInterval = null;
+    function smoothSimulate(targetPercent, durationMs = 3000) {
+        if (crawlInterval) clearInterval(crawlInterval);
+        const startP = currentPercent;
+        const diff = targetPercent - startP;
+        if (diff <= 0) return;
+        const stepsCount = 20;
+        const intervalTime = durationMs / stepsCount;
+        const stepInc = diff / stepsCount;
+        let c = 0;
+        crawlInterval = setInterval(() => {
+            c++;
+            if (c >= stepsCount) {
+                clearInterval(crawlInterval);
+                crawlInterval = null;
+                updateProgress(targetPercent);
+            } else {
+                updateProgress(startP + (stepInc * c));
+            }
+        }, intervalTime);
+    }
+
+    let isCancelled = false;
+    if (cancelBtn) {
+        cancelBtn.onclick = () => {
+            isCancelled = true;
+            controller.close();
+            if (typeof onCancel === 'function') onCancel();
+            showToast('Đã hủy tiến trình AI', 'info');
+        };
+    }
+
+    overlay.classList.add('active');
+    overlay.style.display = 'flex';
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+    }
+
+    const controller = {
+        isCancelled: () => isCancelled,
+        setStep(idx, percent = null, customText = null) {
+            if (isCancelled) return;
+            currentStepIdx = idx;
+            renderSteps();
+            const stepObj = steps[idx];
+            const text = customText || (typeof stepObj === 'string' ? stepObj : stepObj?.label);
+            const calculatedPercent = percent !== null ? percent : Math.min(95, Math.round(((idx + 1) / (steps.length + 1)) * 100));
+            updateProgress(calculatedPercent, text);
+        },
+        smoothSimulate,
+        updateProgress,
+        async complete(finalMessage = 'Xử lý thành công!') {
+            if (isCancelled) return;
+            if (crawlInterval) clearInterval(crawlInterval);
+            currentStepIdx = steps.length;
+            renderSteps();
+            updateProgress(100, finalMessage);
+            await new Promise(r => setTimeout(r, 450));
+            controller.close();
+        },
+        close() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (crawlInterval) clearInterval(crawlInterval);
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+        }
+    };
+
+    window._activeAiProgress = controller;
+    return controller;
+}
+
+export function hideAiProgress() {
+    if (window._activeAiProgress && typeof window._activeAiProgress.close === 'function') {
+        window._activeAiProgress.close();
+    } else {
+        const overlay = document.getElementById('globalAiProgressOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+        }
+    }
+}
+window.showAiProgress = showAiProgress;
+window.hideAiProgress = hideAiProgress;
+
+export { state, saveLocalState, showToast, performSync, APP_VERSION, formatDate, escapeHTML, getLocalDateString, updateSidebarNavVisibility, updateLoveWidgetUI, showAiProgress, hideAiProgress };
 
 export { 
     formatVND, generateId, parseAmountInput, switchTab, getSupabaseConfig, 
