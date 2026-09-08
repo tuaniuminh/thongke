@@ -3,7 +3,7 @@
 import { 
     state, saveLocalState, showToast, performSync,
     formatVND, escapeHTML, callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.276';
+} from '../../core/app.js?v=4.3.277';
 
 // Global variables to store calculated monthly report state
 let currentReportMonth = null;
@@ -234,7 +234,7 @@ function renderReportHtml() {
         `;
     } else if (aiInsightText) {
         const aiCacheKey = `${currentReportYear}_${currentReportMonth}`;
-        const aiModelUsed = state.reportAiInsightsModels?.[aiCacheKey] || localStorage.getItem(`aiInsightModel_${aiCacheKey}`) || 'Gemini 3.7 Flash';
+        const aiModelUsed = state.reportAiInsightsModels?.[aiCacheKey] || localStorage.getItem(`aiInsightModel_${aiCacheKey}`) || 'Gemini 3.8 Flash';
         aiHtml = `
             <div style="font-style: italic; white-space: pre-wrap; margin-bottom: 8px;">${escapeHTML(aiInsightText)}</div>
             <div style="text-align: right;">
@@ -358,9 +358,9 @@ Yêu cầu nhận xét:
 Không sử dụng định dạng markdown hay ký hiệu đặc biệt. Hãy trả về văn bản tiếng Việt tự nhiên và trôi chảy.
 `;
 
-        const res = await callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+        const res = await callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
         aiInsightText = (res.text || res).trim();
-        const modelName = res.modelName || 'Gemini 3.7 Flash';
+        const modelName = res.modelName || 'Gemini 3.8 Flash';
 
         // Lưu nhận xét vào state để đồng bộ Supabase (đa thiết bị)
         const aiCacheKey = `${currentReportYear}_${currentReportMonth}`;

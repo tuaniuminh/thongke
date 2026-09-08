@@ -1,6 +1,6 @@
 /* MotoCare - Tích hợp vào FamiLife (v4.3.202) */
-import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.276';
-import { UI } from './ui.js?v=4.3.276';
+import { Vehicles, MaintenanceLogs, FuelLogs, Presets, Stats, DataPortability, AI } from './db.js?v=4.3.277';
+import { UI } from './ui.js?v=4.3.277';
 
 // Application State (Độc lập với FamiLife state)
 const state = {
@@ -236,10 +236,10 @@ const App = {
                     categories: aiResult.categories || [],
                     items: aiResult.items || [],
                     notes: aiResult.notes || (aiResult.shopName ? `Bảo dưỡng tại ${aiResult.shopName}` : ''),
-                    modelName: aiResult._modelName || 'Gemini 3.7 Flash'
+                    modelName: aiResult._modelName || 'Gemini 3.8 Flash'
                 });
 
-                window._motocareShowToast(`Đã nhận diện hóa đơn sửa xe [${aiResult._modelName || 'Gemini 3.7 Flash'}] thành công!`, 'success');
+                window._motocareShowToast(`Đã nhận diện hóa đơn sửa xe [${aiResult._modelName || 'Gemini 3.8 Flash'}] thành công!`, 'success');
             } catch (err) {
                 console.error('[MotoCare Receipt OCR Error]', err);
                 window._motocareShowToast(`Lỗi quét hóa đơn: ${err.message || 'Không thể nhận diện hình ảnh.'}`, 'danger');
@@ -264,9 +264,9 @@ const App = {
                 contentEl.innerHTML = '';
                 try {
                     const prompt = AI.generateConsultationPrompt(vId);
-                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
                     const resultHtml = res.text || res;
-                    const modelName = res.modelName || 'Gemini 3.7 Flash';
+                    const modelName = res.modelName || 'Gemini 3.8 Flash';
                     loadingEl.classList.add('hidden');
                     contentEl.classList.remove('hidden');
                     contentEl.innerHTML = `
@@ -322,9 +322,9 @@ const App = {
                 contentEl.innerHTML = '';
                 try {
                     const prompt = AI.generatePresetOptimizationPrompt(vId);
-                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+                    const res = await AI.callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
                     const rawResponse = res.text || res;
-                    const modelName = res.modelName || 'Gemini 3.7 Flash';
+                    const modelName = res.modelName || 'Gemini 3.8 Flash';
 
                     // Parse JSON safely
                     let jsonStr = rawResponse.trim();
@@ -678,7 +678,7 @@ const App = {
                 if (btnText) btnText.innerText = 'Cập nhật';
             } else if (data && data.isReceiptScan) {
                 // Mở từ kết quả quét AI hóa đơn bảo dưỡng
-                if (modalTitle) modalTitle.innerHTML = `Ghi nhận bảo dưỡng <span style="font-size:0.75rem; background:rgba(124,58,237,0.15); color:#a855f7; padding:2px 8px; border-radius:10px; font-weight:600; vertical-align:middle; margin-left:6px;">⚡ ${escapeHTML(data.modelName || 'Gemini 3.7 Flash')}</span>`;
+                if (modalTitle) modalTitle.innerHTML = `Ghi nhận bảo dưỡng <span style="font-size:0.75rem; background:rgba(124,58,237,0.15); color:#a855f7; padding:2px 8px; border-radius:10px; font-weight:600; vertical-align:middle; margin-left:6px;">⚡ ${escapeHTML(data.modelName || 'Gemini 3.8 Flash')}</span>`;
                 if (singleMode) singleMode.style.display = 'none';
                 if (batchMode) batchMode.style.display = 'flex';
 

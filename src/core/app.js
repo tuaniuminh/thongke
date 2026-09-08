@@ -2,21 +2,21 @@ import {
     renderDashboard, renderSettings, renderReceivedTable, renderSentTable,
     updateUserBadge, updateHomeLayoutUI,
     setupModalListeners, handleExportEncrypted, handleExportExcel, handleImportFile 
-} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.276';
-import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.276';
-import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.276';
-import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.276';
+} from '../features/thu-chi-doi-ngoai/thu-chi.js?v=4.3.277';
+import { initHealthBindings, renderHealthDashboard, updateProfileDropdowns } from '../features/ho-so-y-te/ho-so-y-te.js?v=4.3.277';
+import { initFundBindings, renderFundDashboard, renderManagementTab } from '../features/quy-gia-dinh/quy-gia-dinh.js?v=4.3.277';
+import { checkNewMonthNotification } from '../features/quy-gia-dinh/bao-cao-thang.js?v=4.3.277';
 // app.js - Main Application Logic & UI Control 
-import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.276';
-import * as sync from './sync.js?v=4.3.276';
-import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.276';
-import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.276';
-import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.276';
-import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.276';
-import { checkForUpdates, showUpdateModal, detectPlatform, exportAndShareFile } from './updater.js?v=4.3.276';
-import { appLock } from '../features/app-lock/app-lock.js?v=4.3.276';
+import { encrypt, decrypt, generateAsymmetricKeypair, encryptWithPublicKey, decryptWithPrivateKey } from './crypto.js?v=4.3.277';
+import * as sync from './sync.js?v=4.3.277';
+import { updateHomeWeather } from '../features/thoi-tiet/thoi-tiet.js?v=4.3.277';
+import { initWeLoveBindings, renderWeLoveDashboard, updateHomeLoveWidget, updateLoveWidgetUI } from '../features/we-love/we-love.js?v=4.3.277';
+import { initLunarCalendarBindings, getDayStatus, isSatChuDay } from '../features/am-lich/am-lich.js?v=4.3.277';
+import { initMotoCare, switchMotocareView } from '../features/motocare/motocare.js?v=4.3.277';
+import { checkForUpdates, showUpdateModal, detectPlatform, exportAndShareFile } from './updater.js?v=4.3.277';
+import { appLock } from '../features/app-lock/app-lock.js?v=4.3.277';
 
-const APP_VERSION = '4.3.276';
+const APP_VERSION = '4.3.277';
 
 
 // Flag bật/tắt log debug E2EE (false trong production, bật true khi cần debug)
@@ -5352,6 +5352,7 @@ window.renderTcManagement = renderTcManagement;
 export function formatGeminiModelName(model) {
     if (!model) return 'Google Gemini AI';
     const m = String(model).toLowerCase();
+    if (m.includes('3.8')) return 'Gemini 3.8 Flash';
     if (m.includes('3.7')) return 'Gemini 3.7 Flash';
     if (m.includes('3.6')) return 'Gemini 3.6 Flash';
     if (m.includes('2.5')) return 'Gemini 2.5 Flash';
@@ -5362,11 +5363,11 @@ export function formatGeminiModelName(model) {
 /**
  * Gọi Google Gemini Text API với danh sách model fallback hợp lệ (tránh lỗi 404 từ model không tồn tại)
  */
-export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash', options = {}) {
+export async function callGeminiTextAPI(prompt, defaultModel = 'gemini-3.8-flash', options = {}) {
     const apiKey = state.geminiApiKey;
     if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key.");
-    // Danh sách model hợp lệ theo chuẩn Google AI Studio (ưu tiên 3.7, 3.6, 2.5, 2.0; loại bỏ các bản cũ hết hạn)
-    const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+    // Danh sách model hợp lệ theo chuẩn Google AI Studio (ưu tiên 3.8, 3.7, 3.6, 2.5, 2.0; loại bỏ các bản cũ hết hạn)
+    const candidateModels = [defaultModel, "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
         .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
     let lastError = null;
     for (const model of candidateModels) {

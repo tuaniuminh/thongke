@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.276';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.276';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.277';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.277';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -656,6 +656,7 @@ export const AI = {
     formatModelName(model) {
         if (!model) return 'Google Gemini AI';
         const m = String(model).toLowerCase();
+        if (m.includes('3.8')) return 'Gemini 3.8 Flash';
         if (m.includes('3.7')) return 'Gemini 3.7 Flash';
         if (m.includes('3.6')) return 'Gemini 3.6 Flash';
         if (m.includes('2.5')) return 'Gemini 2.5 Flash';
@@ -663,13 +664,13 @@ export const AI = {
         return model;
     },
 
-    async callGeminiTextAPI(prompt, defaultModel = 'gemini-3.7-flash', options = {}) {
+    async callGeminiTextAPI(prompt, defaultModel = 'gemini-3.8-flash', options = {}) {
         const apiKey = this.getKey();
         if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
 
         console.log(`[BUG DETECTOR] [MotoCare AI] Starting AI consultation. Key length: ${apiKey.length}`);
 
-        const candidateModels = [defaultModel, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+        const candidateModels = [defaultModel, "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
             .filter((m, idx, arr) => m && arr.indexOf(m) === idx);
         let lastError = null;
 
@@ -830,7 +831,7 @@ Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo b�
         const apiKey = this.getKey();
         if (!apiKey) throw new Error("Chưa cấu hình Google Gemini API Key. Vui lòng nhập API Key trong mục Cài Đặt của FamiLife!");
 
-        const candidateModels = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
+        const candidateModels = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
         let lastError = null;
 
         const promptText = `Hãy đóng vai trò là một chuyên gia nhận diện hóa đơn và chứng từ sửa chữa, bảo dưỡng xe máy tại Việt Nam (như phiếu thu, hóa đơn HEAD Honda, Yamaha Town, trung tâm bảo dưỡng 3M, tiệm sửa xe...).

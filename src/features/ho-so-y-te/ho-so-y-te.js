@@ -2,8 +2,8 @@ import {
     state, saveLocalState, showToast, performSync,
     APP_VERSION, formatDate, escapeHTML, getLocalDateString,
     callGeminiTextAPI, formatGeminiModelName
-} from '../../core/app.js?v=4.3.276';
-import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.276';
+} from '../../core/app.js?v=4.3.277';
+import { encrypt, decrypt } from '../../core/crypto.js?v=4.3.277';
 
 let healthTrendChartInstance = null;
 
@@ -1673,7 +1673,7 @@ async function processScannedHealthImage(responseJson) {
         renderBloodPressureSection();
         
         const cls = getBpClassification(record.systolic, record.diastolic);
-        const modelName = responseJson._modelName || formatGeminiModelName(responseJson._modelUsed) || 'Gemini 3.7 Flash';
+        const modelName = responseJson._modelName || formatGeminiModelName(responseJson._modelUsed) || 'Gemini 3.8 Flash';
         showToast(`Đã tự động nhận diện huyết áp [${modelName}]: ${record.systolic}/${record.diastolic} mmHg (${cls.label})`, 'success');
         
         // Auto select the profile in UI and update the dashboard
@@ -1768,7 +1768,7 @@ async function handleHealthFiles(files) {
 
 async function callGeminiAPI(imagesData, legacyMimeType = null) {
     const apiKey = state.geminiApiKey;
-    const models = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
+    const models = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
     let lastError = null;
     
     // Normalize input to array of { base64Data, mimeType }
@@ -2244,7 +2244,7 @@ function openHealthEditModal(recordId = null, initialData = null, defaultType = 
         modalTitle.innerText = initialData ? `Xác nhận kết quả quét AI${modelBadge}` : (defaultType === 'vaccination' ? "Ghi nhận Mũi tiêm Vaccine" : (defaultType === 'periodic_checkup' ? "Đặt Lịch Khám Định Kỳ" : "Thêm Hồ sơ y tế thủ công"));
         
         if (initialData) {
-            showToast(`Đã bóc tách kết quả xét nghiệm [${initialData._modelName || 'Gemini 3.7 Flash'}] thành công!`, 'success');
+            showToast(`Đã bóc tách kết quả xét nghiệm [${initialData._modelName || 'Gemini 3.8 Flash'}] thành công!`, 'success');
             document.getElementById('healthEditTitle').value = initialData.title || '';
             document.getElementById('healthEditType').value = initialData.type || 'blood_test';
             document.getElementById('healthEditDate').value = initialData.date || getLocalDateString();
@@ -3034,7 +3034,7 @@ function renderHealthAiReport() {
         ? (profile ? profile.lastBpAnalysisModel : state.lastBpAnalysisModel)
         : (type === 'body_comp'
             ? (profile ? profile.lastBodyCompAnalysisModel : state.lastBodyCompAnalysisModel)
-            : (profile ? profile.lastAiAnalysisModel : state.lastAiAnalysisModel)) || 'Gemini 3.7 Flash';
+            : (profile ? profile.lastAiAnalysisModel : state.lastAiAnalysisModel)) || 'Gemini 3.8 Flash';
     
     const dateEl = document.getElementById('healthAiAnalysisDate');
     const reportContentEl = document.getElementById('healthAiReportContent');
@@ -3170,9 +3170,9 @@ Hãy đọc và phân tích toàn bộ lịch sử xét nghiệm trên, sau đó
 
 *Lưu ý quan trọng*: Trả về kết quả trực tiếp bằng định dạng Markdown sạch đẹp, trình bày chuyên nghiệp như một báo cáo y khoa thực thụ. Tuyệt đối KHÔNG sử dụng ký tự $ hoặc các ký hiệu toán học LaTeX (như $...$, $$...$$, \text{...}, \times, \mu) để biểu diễn các số liệu hoặc đơn vị đo lường. Thay vào đó, hãy dùng văn bản thường thuần túy (ví dụ: dùng "x" thay cho "\times", dùng "uL" hoặc "µL" thay cho "\mu L", dùng "15.8 g/dL" thay cho "$15.8 \text{ g/dL}$"). Tất cả các số liệu và đơn vị phải hiển thị dưới dạng văn bản thường đọc được trực tiếp. Ở cuối báo cáo hãy thêm một câu nhắc nhở nhẹ nhàng rằng đây là phân tích từ AI và khuyên người dùng nên tham vấn ý kiến trực tiếp từ bác sĩ chuyên môn.`;
 
-        const res = await callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+        const res = await callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
         const textResponse = res.text || res;
-        const modelName = res.modelName || 'Gemini 3.7 Flash';
+        const modelName = res.modelName || 'Gemini 3.8 Flash';
         
         const nowIso = new Date().toISOString();
         
@@ -4473,7 +4473,7 @@ function openBodyCompModal(recordId = null, scannedData = null) {
 
         document.getElementById('bodyCompNotes').value = unmappedNotes + (scannedData.notes || 'Tự động quét từ ảnh');
         
-        const modelName = scannedData._modelName || 'Gemini 3.7 Flash';
+        const modelName = scannedData._modelName || 'Gemini 3.8 Flash';
         showToast(`Đã tự động nhận dạng và điền chỉ số cơ thể [${modelName}] thành công!`, 'success');
     }
 
@@ -4896,9 +4896,9 @@ Hãy lập một báo cáo phân tích sức khỏe TOÀN DIỆN bằng tiếng 
 *Lưu ý: Không dùng ký hiệu LaTeX hay toán học. Cuối báo cáo nhắc đây là phân tích AI, cần tham vấn bác sĩ chuyên môn.*`;
         }
 
-        const res = await callGeminiTextAPI(prompt, 'gemini-3.7-flash', { returnDetails: true });
+        const res = await callGeminiTextAPI(prompt, 'gemini-3.8-flash', { returnDetails: true });
         const textResponse = res.text || res;
-        const modelName = res.modelName || 'Gemini 3.7 Flash';
+        const modelName = res.modelName || 'Gemini 3.8 Flash';
 
         const nowIso = new Date().toISOString();
         if (profile) {
