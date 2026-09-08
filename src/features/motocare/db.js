@@ -1,6 +1,6 @@
 /* MotoCare - Database & Business Logic Layer (FamiLife E2EE Integrated) */
-import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.275';
-import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.275';
+import { DEFAULT_PRESETS, VEHICLE_TYPES } from './presets.js?v=4.3.276';
+import { state, saveLocalState, performSync } from '../../core/app.js?v=4.3.276';
 
 // Keys for LocalStorage
 const KEYS = {
@@ -805,7 +805,7 @@ BỘ QUY TẮC HIỆU CHUẨN CHUẨN XÁC THEO HÃNG TẠI VIỆT NAM (BẮT BU
 12. Bình ắc quy (battery): 20.000 - 30.000 Km / 24-36 tháng (kiểm tra dòng sạc và thay ắc quy).
 
 YÊU CẦU ĐẶC BIỆT:
-Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo bất kỳ lời chào hay văn bản giải thích nào bên ngoài JSON, không bọc trong markdown codeblock nếu có thể, hoặc bọc trong ```json) theo đúng cấu trúc sau:
+Hãy trả về DUY NHẤT một chuỗi JSON thuần túy (không kèm theo bất kỳ lời chào hay văn bản giải thích nào bên ngoài JSON, không bọc trong markdown codeblock nếu có thể, hoặc bọc trong \`\`\`json) theo đúng cấu trúc sau:
 {
   "vehicleModel": "Tên dòng xe nhận diện được (ví dụ: Honda Air Blade 125i)",
   "advice": "Nhận định ngắn gọn 2 câu về đặc tính động cơ và lưu ý bảo dưỡng quan trọng nhất cho dòng xe này.",
