@@ -1,6 +1,6 @@
 /* MotoCare - UI Rendering Engine */
-import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.273';
-import { VEHICLE_TYPES } from './presets.js?v=4.3.273';
+import { Vehicles, MaintenanceLogs, FuelLogs, Stats, Presets, AI } from './db.js?v=4.3.274';
+import { VEHICLE_TYPES } from './presets.js?v=4.3.274';
 
 export const UI = {
     // Show toast notification
@@ -400,7 +400,7 @@ export const UI = {
         const presets = Presets.getForVehicle(vehicleId);
         
         logs.forEach(log => {
-            const presetName = presets[log.category] ? presets[log.category].name : (log.category === 'brake' ? 'Má phanh (Trước/Sau)' : 'Bảo dưỡng khác');
+            const presetName = presets[log.category] ? presets[log.category].name : (log.category === 'brake' ? 'Má phanh (Trước/Sau)' : (log.category === 'fork_oil' ? 'Dầu giảm xóc (Phuộc nhún)' : 'Bảo dưỡng khác'));
             const logDate = new Date(log.date).toLocaleDateString('vi-VN');
             
             const tr = document.createElement('tr');

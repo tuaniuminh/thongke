@@ -71,6 +71,16 @@ export const DEFAULT_PRESETS = {
         manual: true,
         clutch: true
     },
+    fork_oil: {
+        name: "Dầu giảm xóc (Phuộc nhún)",
+        icon: "fork",
+        desc: "Thay dầu phuộc và phốt chắn bụi/dầu định kỳ để giữ xe nhún êm ái, tránh xì dầu và đảo tay lái.",
+        intervalKm: 20000,
+        intervalMonths: 24,
+        scooter: true,
+        manual: true,
+        clutch: true
+    },
     chain: {
         name: "Xích / Nhông sên dĩa",
         icon: "chain",
